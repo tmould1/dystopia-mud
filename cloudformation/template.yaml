@@ -391,7 +391,7 @@ Resources:
       InstanceType: 
         Ref: InstanceType
       SecurityGroups:
-        - Ref: WebappSecurityGroup
+        - Ref: ServiceappSecurityGroup
       IamInstanceProfile:
         Ref: ServiceappInstanceProfile
       UserData:
