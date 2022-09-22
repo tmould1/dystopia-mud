@@ -58,7 +58,7 @@ Parameters:
     Description: The Amazon EC2 Linux instance Amazon Machine Image (AMI), which designates the configuration of the new instance.
   InstanceType:
     Type: String
-    Default: t2.medium
+    Default: t2.micro
     Description: The type of Amazon EC2 Linux instances that will be launched for this project.
   AutoScalingGroupMinSize:
     Type: Number
@@ -428,6 +428,8 @@ Resources:
               systemctl start mudder.service
               systemctl enable mudder.service
               systemctl status mudder.service
+
+              yum install gcc gcc-c++ kernel-devel make
               yum install ruby -y
               wget https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
               chmod +x ./install
