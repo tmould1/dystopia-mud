@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  applicationfolder: dystopia-mud
+  applicationfolder: src
   packagepath: dystopia
   AWS_REGION: us-east-2
   S3BUCKET: dystopiadeploystack-webappdeploymentbucket-1cb8cgtryq6p9	
