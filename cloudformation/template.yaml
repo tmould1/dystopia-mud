@@ -102,6 +102,52 @@ Resources:
       SecurityGroups: [!Ref 'InstanceSecurityGroup']
       KeyName: !Ref 'KeyName'
       ImageId: !Ref 'LatestAmiId'
+      UserData:
+        "Fn::Base64":
+          !Sub |
+              #!/bin/bash
+
+              ls -la mudder/
+              useradd -r mudder
+              chown -R mudder:mudder /usr/local/mudder
+              ls -l /usr/local/mudder
+              cd /usr/local/mudder
+              mkdir bin
+
+              echo "[Unit]
+              Description=Dystopia Mud Server
+              After=syslog.target network.target
+
+              [Service]
+              Type=forking
+              User=mudder
+              Group=mudder
+
+
+              ExecStart=/usr/local/mudder/bin/dystopia start
+              ExecStop=/usr/local/mudder/bin/dystopia stop
+
+              RestartSec=10
+              Restart=always
+              [Install]
+
+              # firewall-cmd --zone=public --permanent --add-port=8888/tcp
+              # firewall-cmd --reload
+              cd /usr/local/mudder/bin && chmod +x dystopia
+              systemctl daemon-reload
+              systemctl start mudder.service
+              systemctl enable mudder.service
+              systemctl status mudder.service
+              
+              yum install ruby -y
+              wget https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
+              chmod +x ./install
+              ./install auto
+              cd /tmp
+              yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+              systemctl enable amazon-ssm-agent
+              systemctl start amazon-ssm-agent
+
   
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
