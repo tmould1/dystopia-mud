@@ -58,19 +58,19 @@ Parameters:
     Description: The Amazon EC2 Linux instance Amazon Machine Image (AMI), which designates the configuration of the new instance.
   InstanceType:
     Type: String
-    Default: t2.micro
+    Default: t2.medium
     Description: The type of Amazon EC2 Linux instances that will be launched for this project.
   AutoScalingGroupMinSize:
     Type: Number
-    Default: 1
+    Default: 2
     Description: Enter the Min Size for the ASG
   AutoScalingGroupMaxSize:
     Type: Number
-    Default: 1
+    Default: 2
     Description: Enter the Max Size for the ASG
   AutoScalingGroupDesiredCapacity:
     Type: Number
-    Default: 1
+    Default: 2
     Description: Enter the Max Size for the ASG
   ThumbprintList:
     Type: String 
@@ -215,11 +215,11 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
-  ServiceappRole:
+  WebappRole:
     Type: AWS::IAM::Role
     Properties:
       Path: "/"
-      RoleName: ServiceappRole
+      RoleName: WebappRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -235,7 +235,7 @@ Resources:
         - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
       Policies:
         -
-          PolicyName: "allow-serviceapp-deployment-bucket-policy"
+          PolicyName: "allow-webapp-deployment-bucket-policy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -243,7 +243,7 @@ Resources:
                 Effect: "Allow"
                 Action: 
                 - "s3:getObject"
-                Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceappdeploymentBucket}/*
+                Resource: !Sub arn:${AWS::Partition}:s3:::${WebappDeploymentBucket}/*
   IDCProvider:
       Type: AWS::IAM::OIDCProvider
       Properties:
@@ -286,16 +286,16 @@ Resources:
               - Effect: Allow
                 Action:
                 - 's3:putObject'
-                Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceappdeploymentBucket}/*                  
+                Resource: !Sub arn:${AWS::Partition}:s3:::${WebappDeploymentBucket}/*                  
 
-  ServiceappApplication:
+  WebappApplication:
     Type: AWS::CodeDeploy::Application
     Properties:
       ApplicationName: CodeDeployAppNameWithASG
-  ServiceappDeploymentGroup:
+  WebappDeploymentGroup:
     Type: AWS::CodeDeploy::DeploymentGroup
     Properties:
-      ApplicationName: !Ref ServiceappApplication
+      ApplicationName: !Ref WebappApplication
       ServiceRoleArn: !GetAtt CodeDeployRole.Arn
       DeploymentConfigName: CodeDeployDefault.OneAtATime
       DeploymentGroupName: CodeDeployGroupName
@@ -320,10 +320,10 @@ Resources:
       SecurityGroupEgress:
       - IpProtocol: '-1'
         CidrIp: 0.0.0.0/0  
-  ServiceappSecurityGroup:
+  WebappSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: allow access to Serviceapp from ALB
+      GroupDescription: allow access to Webapp from ALB
       VpcId: !Ref VPC
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -334,7 +334,7 @@ Resources:
       SecurityGroupEgress:
       - IpProtocol: '-1'
         CidrIp: 0.0.0.0/0      
-  ServiceappDeploymentBucket:
+  WebappDeploymentBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketEncryption:
@@ -377,12 +377,12 @@ Resources:
                 Resource:
                   - !Sub 'arn:${AWS::Partition}:codedeploy:*:${AWS::AccountId}:*'
 
-  ServiceappInstanceProfile:
+  WebappInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - Ref: ServiceappRole
-  ServiceappLaunchConfig:
+        - Ref: WebappRole
+  WebappLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: true
@@ -391,37 +391,39 @@ Resources:
       InstanceType: 
         Ref: InstanceType
       SecurityGroups:
-        - Ref: ServiceappSecurityGroup
+        - Ref: WebappSecurityGroup
       IamInstanceProfile:
-        Ref: ServiceappInstanceProfile
+        Ref: WebappInstanceProfile
       UserData:
         "Fn::Base64":
           !Sub |
               #!/bin/bash
 
+
               useradd -r mudder
+              mkdir /usr/local/mudder
               chown -R mudder:mudder /usr/local/mudder
               ls -l /usr/local/mudder
 
               echo "[Unit]
-              Description=Dystopia Mud Service
+              Description=Dystopia Mud Server
               After=syslog.target network.target
 
               [Service]
               Type=forking
               User=mudder
               Group=mudder
-              
+
               ExecStart=/usr/local/mudder/bin/dystopia start
               ExecStop=/usr/local/mudder/bin/dystopia stop
 
               RestartSec=10
               Restart=always
               [Install]
-
               # firewall-cmd --zone=public --permanent --add-port=8888/tcp
               # firewall-cmd --reload
 
+              cd /usr/local/mudder/bin && chmod +x dystopia
               systemctl daemon-reload
               systemctl start mudder.service
               systemctl enable mudder.service
@@ -444,7 +446,7 @@ Resources:
       MinSize: !Ref AutoScalingGroupMinSize
       MaxSize: !Ref AutoScalingGroupMaxSize
       LaunchConfigurationName:
-        Ref: ServiceappLaunchConfig
+        Ref: WebappLaunchConfig
       VPCZoneIdentifier:
         - Ref: PrivateSubnet1 
         - Ref: PrivateSubnet2 
@@ -452,7 +454,7 @@ Resources:
         - Ref: ALBTargetGroup
       Tags:
         - Key: Name
-          Value: serviceapp-mudder
+          Value: webapp-example
           PropagateAtLaunch: true
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -464,8 +466,8 @@ Resources:
             Ref: ALBTargetGroup
       LoadBalancerArn:
         Ref: ApplicationLoadBalancer
-      Port: 8080
-      Protocol: HTTP
+      Port: 8888
+      Protocol: TCP
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn: InternetGateway
@@ -483,20 +485,28 @@ Resources:
       UnhealthyThresholdCount: 2
       HealthyThresholdCount: 2
       HealthCheckPath: "/"
-      Port: 8080
-      Protocol: HTTP
+      Port: 8888
+      Protocol: TCP
       VpcId: !Ref VPC
 Outputs:
 
+  WebappUrl:
+    Description: Webapp URL
+    Value: 
+      Fn::Join: 
+      - ''
+      - - http://
+        - !GetAtt ApplicationLoadBalancer.DNSName
+        - ':8888' 
   DeploymentGroup:
-    Description: Serviceapp Deployment Group
-    Value: !Ref ServiceappdeploymentGroup
+    Description: Webapp Deployment Group
+    Value: !Ref WebappDeploymentGroup
   DeploymentBucket:
     Description: Deployment bucket
-    Value: !Ref ServiceappdeploymentBucket
+    Value: !Ref WebappDeploymentBucket
   ApplicationName:
     Description: CodeDeploy Application name
-    Value: !Ref ServiceappApplication
+    Value: !Ref WebappApplication
   GithubIAMRoleArn:
     Description: IAM role for GitHub
     Value: !GetAtt GitHubIAMRole.Arn
