@@ -7,4 +7,4 @@ aws s3 cp s3://dystopiadeploystack-webappdeploymentbucket-1cb8cgtryq6p9/dystopia
 
 
 # Ensure the ownership permissions are correct.
-chown -R tomcat:tomcat /usr/local/mudder/bin
+chown -R mudder:mudder /usr/local/mudder/bin
