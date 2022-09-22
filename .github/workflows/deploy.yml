@@ -36,7 +36,7 @@ jobs:
         run: make merc
 
       - name: Upload Artifact to s3
-        working-directory: ${{ env.applicationfolder }}/src
+        working-directory: ${{ env.applicationfolder }}
         run: aws s3 cp ${{ env.packagepath }} s3://${{ env.S3BUCKET }}/
         
   deploy:
