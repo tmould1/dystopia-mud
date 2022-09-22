@@ -7,7 +7,7 @@ env:
   applicationfolder: dystopia-mud
   packagepath: dystopia
   AWS_REGION: us-east-2
-  S3BUCKET: codedeploystack-webappdeploymentbucket-1queegksp9hba	
+  S3BUCKET: dystopiadeploystack-webappdeploymentbucket-1cb8cgtryq6p9	
 
 
 jobs:

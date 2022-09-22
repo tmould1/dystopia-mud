@@ -99,10 +99,25 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: !Ref 'InstanceType'
-      SecurityGroups: [!Ref 'ServerSecurityGroup']
+      SecurityGroups: [!Ref 'InstanceSecurityGroup']
       KeyName: !Ref 'KeyName'
       ImageId: !Ref 'LatestAmiId'
   
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: allow access to Server from internet
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8888
+        ToPort: 8888
+        CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref 'SSHLocation'
+
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -327,23 +342,6 @@ Resources:
             - DEPLOYMENT_FAILURE
             - DEPLOYMENT_STOP_ON_REQUEST
 
-  ServerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: allow access to Server from internet
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: !Ref 'SSHLocation'
-      - IpProtocol: tcp
-        FromPort: 8888
-        ToPort: 8888
-        CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-      - IpProtocol: '-1'
-        CidrIp: 0.0.0.0/0 
   WebappDeploymentBucket:
     Type: AWS::S3::Bucket
     Properties:
