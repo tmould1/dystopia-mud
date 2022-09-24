@@ -5,7 +5,7 @@ on:
 
 env:
   applicationfolder: src
-  packagepath: dystopia
+  packagepath: dystopia.tar
   AWS_REGION: us-east-2
   S3BUCKET: dystopiadeploystack-webappdeploymentbucket-1cb8cgtryq6p9	
 
@@ -19,6 +19,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v2
+        id: checkout
         name: Checkout Repository
 
       - uses: aws-actions/configure-aws-credentials@v1
@@ -31,11 +32,17 @@ jobs:
         run: chmod -R +x ./.github
 
       - name: Build Dystopia
-        id: package
+        id: build
         working-directory: ${{ env.applicationfolder }}
         run: make merc
 
+      - name: Tar Dystopia
+        id: package
+        working-directory: ${{ env.applicationfolder }}
+        run: tar cvf dystopia.tar dystopia
+
       - name: Upload Artifact to s3
+        id: upload
         working-directory: ${{ env.applicationfolder }}
         run: aws s3 cp ${{ env.packagepath }} s3://${{ env.S3BUCKET }}/
         
