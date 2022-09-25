@@ -39,7 +39,7 @@ jobs:
       - name: Tar Dystopia
         id: package
         working-directory: ${{ env.applicationfolder }}
-        run: tar cvf dystopia.tar .
+        run: tar cvf dystopia.tar ../
 
       - name: Upload Artifact to s3
         id: upload
