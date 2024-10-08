@@ -27,6 +27,7 @@
 #include <time.h>
 #include "merc.h"
 
+extern KINGDOM_DATA kingdom_table[MAX_KINGDOM+1];
 
 char *	const	where_name	[] =
 {

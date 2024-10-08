@@ -6615,7 +6615,7 @@ void do_copyover (CHAR_DATA *ch, char * argument)
 	if (!fp)
 	{
 		send_to_char ("Copyover file not writeable, aborted.\n\r",ch);
-		logf ("Could not write to copyover file: %s", COPYOVER_FILE);
+		merc_logf ("Could not write to copyover file: %s", COPYOVER_FILE);
 		perror ("do_copyover:fopen");
 		return;
 	}
@@ -6718,14 +6718,14 @@ void copyover_recover ()
 	int desc;
 	bool fOld;
 	
-	logf ("Copyover recovery initiated");
+	merc_logf ("Copyover recovery initiated");
 	
 	fp = fopen (COPYOVER_FILE, "r");
 	
 	if (!fp) /* there are some descriptors open which will hang forever then ? */
 	{
 		perror ("copyover_recover:fopen");
-		logf ("Copyover file not found. Exitting.\n\r");
+		merc_logf ("Copyover file not found. Exitting.\n\r");
 		exit (1);
 	}
 

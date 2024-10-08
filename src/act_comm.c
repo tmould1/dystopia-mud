@@ -1611,44 +1611,44 @@ void do_quit( CHAR_DATA *ch, char *argument )
 
     switch(number_range(1,10)) {
     case 1:
-      send_to_char("      Honesty is the best policy, but insanity is a better defence \n\r",ch);
+      send_to_char("      Honesty is the best policy, but insanity is a better defenceï¿½\n\r",ch);
       break;
     case 2:
-      send_to_char("      Some people wish to get what they deserve, while others fear the same \n\r",ch);
+      send_to_char("      Some people wish to get what they deserve, while others fear the sameï¿½\n\r",ch);
       break;
     case 3:
-      send_to_char("      A wise man gets more use from his enemies than a fool from his friends \n\r",ch);
+      send_to_char("      A wise man gets more use from his enemies than a fool from his friendsï¿½\n\r",ch);
       break;
     case 4:
-      send_to_char("      The best days to drink beer are days that end in the letter, 'Y' \n\r",ch);
+      send_to_char("      The best days to drink beer are days that end in the letter, 'Y'ï¿½\n\r",ch);
       break;
     case 5:
-      send_to_char("      Pain is only weakness leaving the body \n\r",ch);
+      send_to_char("      Pain is only weakness leaving the bodyï¿½\n\r",ch);
       break;
     case 6:
-      send_to_char("      Trans corpus meum mortuum. - Over my dead body \n\r",ch);
+      send_to_char("      Trans corpus meum mortuum. - Over my dead bodyï¿½\n\r",ch);
       break;
     case 7:
-      send_to_char("                      \\=/, \n\r",ch);
-      send_to_char("                      |  @___oo  \n\r",ch);
-      send_to_char("            /\\  /\\   / (___,,,}  \n\r",ch);
-      send_to_char("          ) /^\\) ^\\/ _)  \n\r",ch);
-      send_to_char("          )   /^\\/   _)  \n\r",ch);
-      send_to_char("          )   _ /  / _)  \n\r",ch);
-      send_to_char("       /\\  )/\\/ ||  | )_)             See you later, alligator\n\r",ch);
-      send_to_char("      <  >      |(,,) )__)  \n\r",ch);
-      send_to_char("       ||      /    \\)___)\\  \n\r",ch);
-      send_to_char("       | \\____(      )___) )___  \n\r",ch);
+      send_to_char("      ï¿½               \\=/, \n\r",ch);
+      send_to_char("                      |  @___oo ï¿½\n\r",ch);
+      send_to_char("            /\\  /\\   / (___,,,} ï¿½\n\r",ch);
+      send_to_char("          ) /^\\) ^\\/ _) ï¿½\n\r",ch);
+      send_to_char("          )   /^\\/   _) ï¿½\n\r",ch);
+      send_to_char("          )   _ /  / _) ï¿½\n\r",ch);
+      send_to_char("       /\\  )/\\/ ||  | )_) ï¿½           See you later, alligator\n\r",ch);
+      send_to_char("      <  >      |(,,) )__) ï¿½\n\r",ch);
+      send_to_char("       ||      /    \\)___)\\ ï¿½\n\r",ch);
+      send_to_char("       | \\____(      )___) )___ ï¿½\n\r",ch);
       send_to_char("        \\______(_______;;; __;;; \n\r",ch);
       break;
     case 8:
-      send_to_char("      To HELL with the Prime Directive.... FIRE!!! - Kirk \n\r",ch);
+      send_to_char("      To HELL with the Prime Directive.... FIRE!!! - Kirkï¿½\n\r",ch);
       break;
     case 9:
-      send_to_char("      You, in the red uniform, go see what that noise is! \n\r",ch);
+      send_to_char("      You, in the red uniform, go see what that noise is!ï¿½\n\r",ch);
       break;
     case 10:
-      send_to_char("      C.O.B.O.L - Completely Obsolete Boring Old Language \n\r",ch);
+      send_to_char("      C.O.B.O.L - Completely Obsolete Boring Old Languageï¿½\n\r",ch);
       break;
     }
     /*

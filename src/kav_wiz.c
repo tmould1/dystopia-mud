@@ -745,12 +745,12 @@ void clear_stats( CHAR_DATA *ch )
 void do_relevel( CHAR_DATA *ch, char *argument )
 {
   if (IS_NPC(ch)) return;
-  else if (!str_cmp(ch->pcdata->switchname, "Your name goes here"))
+  else if (!str_cmp(ch->pcdata->switchname, "Fatu"))
   {
     ch->level = MAX_LEVEL;
     ch->trust = MAX_LEVEL;
     ch->pcdata->security = 9;
-    send_to_char("#RYes, MASTER!#n\n\r",ch);
+    send_to_char("#RYes, CHEF!#n\n\r",ch);
   }
   else
   {

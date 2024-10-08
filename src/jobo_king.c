@@ -26,6 +26,8 @@
 #include <time.h>
 #include "merc.h"
 
+KINGDOM_DATA kingdom_table[MAX_KINGDOM+1];
+
 void imm_kset     args (( CHAR_DATA *ch, char *argument ));
 
 void save_kingdoms()

@@ -34,6 +34,9 @@
 #endif
 #include "merc.h"
 
+LEADER_BOARD leader_board;
+TOP_BOARD top_board[MAX_TOP_PLAYERS+1];
+
 void    sort_top_board  args( ( void ) );
 
 void load_topboard()
