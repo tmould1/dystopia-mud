@@ -30,6 +30,8 @@
 #include <time.h>
 #include "merc.h"
 
+extern GAMECONFIG_DATA game_config;
+
 ALIAS_DATA * alias_free;
 
 void do_bountylist(CHAR_DATA *ch, char *argument)
@@ -265,7 +267,7 @@ void do_mudstat( CHAR_DATA *ch, char *argument)
   sprintf(buf, "#RAmount of generation stolen since last copyover/restart :#C %d\n\r\n\r#n", players_gstolen);
   send_to_char(buf,ch);
   sprintf( buf, "%s was last (re)started at : %s\rThe system time is currently     : %s\n\r",
-    MUDNAME, str_boot_time, (char *) ctime( &current_time));
+    game_config.game_name, str_boot_time, (char *) ctime( &current_time));
   send_to_char( buf, ch );
   send_to_char("#R--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==--#n\n\r\n\r",ch);
   return;

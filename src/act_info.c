@@ -2152,7 +2152,7 @@ void do_time( CHAR_DATA *ch, char *argument )
 	day_name[day % 7],
 	day, suf,
 	month_name[time_info.month],
-        MUDNAME,
+    game_config.game_name,
 	str_boot_time,
 	(char *) ctime( &current_time )
 	);
@@ -2814,7 +2814,7 @@ void do_who(CHAR_DATA *ch, char *argument)
   sprintf(buf, "\n\r #0<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r");
   send_to_char(buf, ch);
   sprintf(buf, "         #C%d#0/#C%d #GVisible players and #C%d #Gvisible immortals connected to %s#n\n\r",
-    nPlayerVis, nPlayerAll, nImmVis, MUDNAME);
+    nPlayerVis, nPlayerAll, nImmVis, game_config.game_name);
   send_to_char(buf, ch);
   sprintf(buf, " #0<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r");
   send_to_char(buf, ch);
@@ -4948,7 +4948,7 @@ void do_finger( CHAR_DATA *ch, char *argument )
   sprintf( strsave, "%sbackup/%s", PLAYER_DIR, capitalize(argument) );
   if ( ( fp = fopen( strsave, "r" ) ) != NULL )
   {
-    sprintf(buf2, "#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r", MUDNAME);
+    sprintf(buf2, "#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r", game_config.game_name);
     send_to_char(buf2,ch);
     buf=fread_string( fp );
     send_to_char(buf,ch);
@@ -5028,7 +5028,7 @@ void do_finger( CHAR_DATA *ch, char *argument )
     num2=fread_number(fp);  
     sprintf(buf2,"Mob Kills: %d, Mob Deaths: %d.\n\r",num,num2);
     send_to_char(buf2,ch);
-    sprintf(buf2, "#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r", MUDNAME);
+    sprintf(buf2, "#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r", game_config.game_name);
     send_to_char(buf2, ch);
   }
   else

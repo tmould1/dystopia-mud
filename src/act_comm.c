@@ -27,6 +27,7 @@
 #include <time.h>
 #include "merc.h"
 
+extern GAMECONFIG_DATA game_config;
 
 /*
  * Local functions.
@@ -1595,7 +1596,7 @@ void do_quit( CHAR_DATA *ch, char *argument )
     else if (ch->pcdata->obj_vnum == 0)
     {
         sprintf( buf, "#2%s #7has fled from #2%s#7.#n",
-          ch->pcdata->switchname, MUDNAME);
+          ch->pcdata->switchname, game_config.game_name);
         leave_info(buf);
     }   
 

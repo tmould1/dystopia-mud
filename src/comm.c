@@ -63,6 +63,7 @@
 
 #include "merc.h"
 
+extern GAMECONFIG_DATA game_config;
 
 /*
  * Malloc debugging stuff.
@@ -2412,9 +2413,9 @@ OUT OUT OUT */
 	else
 	{
   	  if (!ragnarok) sprintf(buf,"#2%s #7enters #R%s.#n",
-            ch->name, MUDNAME);
+            ch->name, game_config.game_name);
           else sprintf(buf,"#2%s #7enters #R%s #y(#0Ragnarok#y).#n",
-            ch->name, MUDNAME);
+            ch->name, game_config.game_name);
           enter_info(buf);
 	}
 
@@ -2694,7 +2695,7 @@ OUT OUT OUT */
 	}
 	do_board(ch,"");
         players_logged++;
-	sprintf(buf,"#7A #Rnew player#7 named #2%s #7enters #R%s.#n", ch->name, MUDNAME );
+	sprintf(buf,"#7A #Rnew player#7 named #2%s #7enters #R%s.#n", ch->name, game_config.game_name );
 	enter_info(buf);
 	ch->fight_timer = 0;
         ch->pcdata->revision = CURRENT_REVISION;

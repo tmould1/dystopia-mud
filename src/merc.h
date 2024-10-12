@@ -219,7 +219,6 @@ void save_gameconfig       args( (void) );
  * Increase the max'es if you add more of something.
  * Adjust the pulse numbers to suit yourself.
  */
-#define MUDNAME                    "Dystopian Spin-Off"
 #define MAX_ALIAS                  30
 #define MAX_KINGDOM                 5
 #define CURRENT_REVISION            1 // change this each time you update revision of pfiles
