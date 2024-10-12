@@ -87,8 +87,8 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 	char arg[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
 
-	argument = one_argument(argument, arg);
-	one_argument(argument, arg2);
+	argument = one_argument(argument, arg);	// Arg1 is a switch
+	one_argument_case(argument, arg2);		// Arg2 is the value, respect case
 
 	if (arg[0] == '\0')
 	{

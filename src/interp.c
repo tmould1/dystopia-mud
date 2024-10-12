@@ -2138,6 +2138,40 @@ char *one_argument( char *argument, char *arg_first )
     return argument;
 }
 
+/*
+ * Pick off one argument from a string and return the rest.
+ * Understands quotes, respects case sensitivity.
+ */
+char *one_argument_case( char *argument, char *arg_first )
+{
+    char cEnd;
+
+    while ( isspace(*argument) )
+	argument++;
+
+    cEnd = ' ';
+    if ( *argument == '\'' || *argument == '"' )
+	cEnd = *argument++;
+
+    while ( *argument != '\0' )
+    {
+	if ( *argument == cEnd )
+	{
+	    argument++;
+	    break;
+	}
+	*arg_first = *argument;
+	arg_first++;
+	argument++;
+    }
+    *arg_first = '\0';
+
+    while ( isspace(*argument) )
+	argument++;
+
+    return argument;
+}
+
 /* Syntax is:
 disable - shows disabled commands
 disable <command> - toggles disable status of command
