@@ -30,6 +30,7 @@
 #define MONK_AUTODROP 12
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM+1];
+extern GAMECONFIG_DATA game_config;
 
 /*
  * Local functions.
@@ -3182,6 +3183,8 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
 {
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
+  char formatted_xp[MSL];
+  char non_formatted_xp[MSL];
   CHAR_DATA *gch;
   CHAR_DATA *lch;
   CHAR_DATA *mount;
@@ -3194,18 +3197,22 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
    * P-killing doesn't help either.
    * Dying of mortal wounds or poison doesn't give xp to anyone!
    */
-  if ((IS_NPC(ch) && (mount = ch->mount) == NULL) || victim == ch) return;
+  if ((IS_NPC(ch) && (mount = ch->mount) == NULL) || victim == ch)
+    return;
+  
   members = 0;
   for ( gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room )
   {
     if ( is_same_group( gch, ch ) )
       members++;
   }
+
   if ( members == 0 )
   {
     bug( "Group_gain: members.", members );
     members = 1;
   }
+
   lch = (ch->leader != NULL) ? ch->leader : ch;
   for ( gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room )
   {
@@ -3261,21 +3268,60 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
     }
     strcat(buf2,"\n\r");
     xp = xp * xp_modifier / 100;
-    if (!IS_SET(gch->act, PLR_BRIEF4)) send_to_char(buf2,gch);
-    sprintf(buf2,"#RTotal modifier #G:#n %d percent bonus\n\r",xp_modifier - 100);
-    if (!IS_SET(gch->act, PLR_BRIEF4)) send_to_char(buf2,gch);
+
+    if (!IS_SET(gch->act, PLR_BRIEF4))
+      send_to_char(buf2,gch);
+    
+    sprintf(buf2,"#RTotal modifier #G:#n %d percent bonus\n\r", xp_modifier - 100);
+    
+    if (!IS_SET(gch->act, PLR_BRIEF4))
+      send_to_char(buf2,gch);
+
+    // HACK: prevent players from rolling over xp integer limit
     if (gch->exp > 2000000000)
     {
       send_to_char("YOU CANNOT GAIN ANY MORE EXP!\n\r",gch);
       xp = 0;
     }
-    if (xp > 1000000 && get_age(gch) - 17 < 2 ) xp = 1000000 + number_range(-100,100) * number_range(-100,100);
-    else if (xp > 3000000) xp = 3000000 + number_range(-100,100) * number_range(-100,100);
-    sprintf( buf, "You receive %d experience points.\n\r", xp );
+    // Don't let negative xp through group gain
+    if (xp < 0)
+      xp = 0;
+
+    // Max XP per kill
+    if (xp > game_config.max_xp_per_kill)
+    {
+      send_to_char("You have reached the maximum amount of experience points you can gain from a single kill.\n\r", gch);
+      xp = game_config.max_xp_per_kill;
+    }
+
+    sprintf(non_formatted_xp, "%d", xp);
+    sprintf(formatted_xp, "");
+    // Go through the non_formatted_xp starting from the beginning;
+    // emplace each character in the formatted string, and add a comma after every 3 characters
+    int len = strlen(non_formatted_xp);
+    int comma_count = (len - 1) / 3;
+    int formatted_len = len + comma_count;
+    formatted_xp[formatted_len] = '\0';
+
+    for (int i = len - 1, j = formatted_len - 1, k = 0; i >= 0; i--, j--, k++) {
+        if (k == 3) {
+            formatted_xp[j] = ',';
+            j--;
+            k = 0;
+        }
+        formatted_xp[j] = non_formatted_xp[i];
+    }
+    
+    // Character printout
+    sprintf( buf, "You receive %s experience points.\n\r", formatted_xp );
     send_to_char( buf, gch );
-    if ((mount = gch->mount) != NULL) send_to_char( buf, mount );
+
+    if ((mount = gch->mount) != NULL)
+      send_to_char( buf, mount );
+    
     gain_exp( gch, xp );
   }
+  
   return;
 }
 
@@ -3283,11 +3329,12 @@ int xp_compute( CHAR_DATA *gch, CHAR_DATA *victim )
 {
   double xp;
   int vnum;
+  double base_xp = (double) game_config.base_xp;
   
   if (victim->level < 100)
-    xp = 300 - URANGE(-5, 3 - (victim->level*5/3), 6 ) * 50;
+    xp = base_xp - URANGE(-5, 3 - (victim->level*5/3), 6 ) * 50;
   else
-    xp = 300 - URANGE(-10, 3 - (victim->level*5/3), 6 ) * 50;   
+    xp = base_xp - URANGE(-10, 3 - (victim->level*5/3), 6 ) * 50;   
 
     
   /* 
@@ -3339,7 +3386,6 @@ int xp_compute( CHAR_DATA *gch, CHAR_DATA *victim )
   xp  = number_range( xp * 3 / 4, xp * 5 / 4 );
   xp  = UMAX( 0, xp );
   xp  = (xp * (victim->level) * 0.60);
-  xp  = xp / 2; /* Put in cause players compaling to much exp :P */
   if (!IS_NPC(gch))
   {
     gch->pcdata->score[SCORE_TOTAL_LEVEL] += victim->level;

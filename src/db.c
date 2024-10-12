@@ -425,6 +425,7 @@ void boot_db(bool fCopyOver)
 	load_boards();
 	save_notes();
 	load_disabled();
+    load_gameconfig();
     }
  	
  	if (fCopyOver)
@@ -2548,8 +2549,8 @@ char *fread_string( FILE *fp )
     plast = top_string + sizeof(char *);
     if ( plast > &string_space[MAX_STRING - MAX_STRING_LENGTH] )
     {
-	bug( "Fread_string: MAX_STRING %d exceeded.", MAX_STRING );
-	exit( 1 );
+        bug( "Fread_string: MAX_STRING %d exceeded.", MAX_STRING );
+        exit( 1 );
     }
 
     /*
@@ -2558,12 +2559,13 @@ char *fread_string( FILE *fp )
      */
     do
     {
-	c = getc( fp );
+	    c = getc( fp );
     }
     while ( isspace(c) );
 
     if ( ( *plast++ = c ) == '~' )
-	return &str_empty[0];
+	    return &str_empty[0];
+    
     for ( ;; )
     {
 	/*
@@ -2574,72 +2576,71 @@ char *fread_string( FILE *fp )
         c = getc(fp);
         *plast = c;
         switch(c)
-//	switch ( *plast = getc( fp ) )
-	{
-	default:
-	    plast++;
-	    break;
+        {
+        default:
+            plast++;
+            break;
 
-	case EOF:
-	    bug( "Fread_string: EOF", 0 );
-	    exit( 1 );
-	    break;
+        case EOF:
+            bug( "Fread_string: EOF", 0 );
+            exit( 1 );
+            break;
 
-	case '\n':
-	    plast++;
-	    *plast++ = '\r';
-	    break;
+        case '\n':
+            plast++;
+            *plast++ = '\r';
+            break;
 
-	case '\r':
-	    break;
+        case '\r':
+            break;
 
-	case '~':
-	    plast++;
-	    {
-		union
-		{
-		    char *	pc;
-		    char	rgc[sizeof(char *)];
-		} u1;
-		int ic;
-		int iHash;
-		char *pHash;
-		char *pHashPrev;
-		char *pString;
+        case '~':
+            plast++;
+            {
+            union
+            {
+                char *	pc;
+                char	rgc[sizeof(char *)];
+            } u1;
+            int ic;
+            int iHash;
+            char *pHash;
+            char *pHashPrev;
+            char *pString;
 
-		plast[-1] = '\0';
-		iHash     = UMIN( MAX_KEY_HASH - 1, plast - 1 - top_string );
-		for ( pHash = string_hash[iHash]; pHash; pHash = pHashPrev )
-		{
-		    for ( ic = 0; ic < sizeof(char *); ic++ )
-			u1.rgc[ic] = pHash[ic];
-		    pHashPrev = u1.pc;
-		    pHash    += sizeof(char *);
+            plast[-1] = '\0';
+            iHash     = UMIN( MAX_KEY_HASH - 1, plast - 1 - top_string );
+            for ( pHash = string_hash[iHash]; pHash; pHash = pHashPrev )
+            {
+                for ( ic = 0; ic < sizeof(char *); ic++ )
+                u1.rgc[ic] = pHash[ic];
+                pHashPrev = u1.pc;
+                pHash    += sizeof(char *);
 
-		    if ( top_string[sizeof(char *)] == pHash[0]
-		    &&   !strcmp( top_string+sizeof(char *)+1, pHash+1 ) )
-			return pHash;
-		}
+                if ( top_string[sizeof(char *)] == pHash[0]
+                &&   !strcmp( top_string+sizeof(char *)+1, pHash+1 ) )
+                return pHash;
+            }
 
-		if ( fBootDb )
-		{
-		    pString		= top_string;
-		    top_string		= plast;
-		    u1.pc		= string_hash[iHash];
-		    for ( ic = 0; ic < sizeof(char *); ic++ )
-			pString[ic] = u1.rgc[ic];
-		    string_hash[iHash]	= pString;
+            if ( fBootDb )
+            {
+                pString		= top_string;
+                top_string		= plast;
+                u1.pc		= string_hash[iHash];
+                for ( ic = 0; ic < sizeof(char *); ic++ )
+                pString[ic] = u1.rgc[ic];
+                string_hash[iHash]	= pString;
 
-		    nAllocString += 1;
-		    sAllocString += top_string - pString;
-		    return pString + sizeof(char *);
-		}
-		else
-		{
-		    return str_dup( top_string + sizeof(char *) );
-		}
-	    }
-	}
+                nAllocString += 1;
+                sAllocString += top_string - pString;
+                return pString + sizeof(char *);
+            }
+            else
+            {
+                return str_dup( top_string + sizeof(char *) );
+            }
+            }
+        }
     }
 }
 

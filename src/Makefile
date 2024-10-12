@@ -11,7 +11,8 @@ O_FILES  = act_comm.o act_info.o act_move.o act_obj.o act_wiz.o bit.o mccp.o \
            olc_act.o olc_save.o save.o special.o string.o arena.o \
            update.o vamp.o ww.o shapeshifter.o tanarri.o undead_knight.o \
            samurai.o wizutil.o const.o spiderdroid.o lich.o jope.o \
-           jobo_king.o jobo_data.o jobo_fight.o jobo_act.o jobo_wiz.o jobo_util.o
+           jobo_king.o jobo_data.o jobo_fight.o jobo_act.o jobo_wiz.o jobo_util.o \
+           config.o
 
 # Target executable
 TARGET   = dystopia

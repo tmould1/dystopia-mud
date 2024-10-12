@@ -28,6 +28,7 @@
 #include "merc.h"
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM+1];
+extern GAMECONFIG_DATA game_config;
 
 char *	const	where_name	[] =
 {
@@ -2774,14 +2775,13 @@ void do_who(CHAR_DATA *ch, char *argument)
   /*   
    * Let's send the whole thing to the player.
    */
-  sprintf(buf, " #0<>==<>==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r",
-    MUDNAME);
+  sprintf(buf, " #0<>==<>==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r", game_config.game_name);
   send_to_char(buf, ch);
 
   if (a1)
   {
     sprintf(buf, "\n\r #0<>==<>==<>==<>==<>==<>==<>  #GGods of %s  #0<>==<>==<>==<>==<>==<>==<>==<>#n\n\r",
-      MUDNAME);
+      game_config.game_name);
     send_to_char(buf, ch);
     send_to_char(buf1, ch);
   }         

@@ -163,7 +163,7 @@ send_to_char("\n\r", ch);
                     case 32: sprintf(buf, " %15s : ", "Drow Abilities");break;
                     case 64: sprintf(buf, " %15s : ", "Monk Abilities");break;
                     case 128:sprintf(buf, " %15s : ", "Ninja Abilities");break;
-		    case 256:sprintf(buf, " %15s : ", "Lich Abilities");break;
+                    case 256:sprintf(buf, " %15s : ", "Lich Abilities");break;
                     case 512:sprintf(buf, " %15s : ", "Shapeshifter");break;
                     case 1024:sprintf(buf, " %15s : ", "Tanar'ri Powers");break;
                     case 2048:sprintf(buf, " %15s : ", "Angel Abilities");break;
@@ -1158,6 +1158,12 @@ LOG_NORMAL, 8, DISC_VAMP_THAN, 3 }, */
     { "alist",          do_alist,       POS_DEAD,    8,  LOG_NORMAL, 0, 0,0 },
     { "resets",         do_resets,      POS_DEAD,    8,  LOG_NORMAL, 0, 0,0 },
     { "relearn",         do_relearn,      POS_DEAD,    1,  LOG_NORMAL, 0, 0,0 },
+
+
+    /*
+     * Configuration commands.
+     */
+    { "gameconfig",         do_gameconfig,  POS_DEAD,   8,      LOG_ALWAYS, 0, 0, 0 },
 
     /*
      * End of list.

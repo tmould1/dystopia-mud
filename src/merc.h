@@ -193,6 +193,9 @@ void save_bans	       args( (void) );
 void load_kingdoms     args( (void) );
 void save_kingdoms     args( (void) );
 
+void load_gameconfig       args( (void) );
+void save_gameconfig       args( (void) );
+
 /* 
  * Godwars Game Parameters
  * By Rotain
@@ -336,6 +339,13 @@ typedef struct kingdom_data
   int    req_mana;   // mana req to join.
   int    req_qps;    // qps cost to join (will be donated to the kingdom vault).
 } KINGDOM_DATA;
+
+typedef struct config_data
+{
+  int base_xp;
+  int max_xp_per_kill;
+  char * game_name;
+} GAMECONFIG_DATA;
 
 
 
@@ -4134,6 +4144,8 @@ DECLARE_DO_FUN( do_guardian     );
 DECLARE_DO_FUN( do_servant      );
 DECLARE_DO_FUN( do_contraception );
 DECLARE_DO_FUN( do_relearn );
+
+DECLARE_DO_FUN( do_gameconfig );
 
 /*
 
