@@ -25,7 +25,7 @@ RUN apt-get update && \
 
 COPY . .
 
-# Open a port, set in comm.c
+# Open a port, set in comm.c and startup
 EXPOSE 8888
 
 RUN cd src && \
@@ -33,6 +33,11 @@ RUN cd src && \
     make && \
     chmod +x startup
 
-VOLUME ["/dystopia-1.4/vme/storage"]
+VOLUME [    "/dystopia-mud/player", \
+            "/dystopia-mud/area", \
+            "/dystopia-mud/log", \
+            "/dystopia-mud/notes", \
+            "/dystopia-mud/txt" \
+        ]
 
 ENTRYPOINT ["/bin/bash", "-c", "cd src && ./startup.sh && tail -f /dev/null"]
