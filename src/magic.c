@@ -65,14 +65,19 @@ void improve_spl( CHAR_DATA *ch, int dtype, int sn )
     else if (dtype == 7 ) sprintf(buftype,"violet");
     else return;
 
-    if (ch->spl[dtype] >= 240 && ch->class != CLASS_LICH) return;
-    else if (ch->spl[dtype] >= 200 && !IS_CLASS(ch, CLASS_MAGE) && ch->class != CLASS_LICH &&
-	!(IS_CLASS(ch, CLASS_DROW) && IS_SET(ch->special, SPC_DROW_MAG)
-   && (dtype == 0 || dtype == 1)) && !(IS_CLASS(ch, CLASS_DROW) && IS_SET(ch->special, SPC_DROW_CLE)
-   && (dtype == 2 || dtype == 3))) return;
-    if (ch->spl[dtype] >= 300) return;
-    if ((dice1 > ch->spl[dtype] || dice2 > ch->spl[dtype]) || (dice1==100 || dice2==100)) ch->spl[dtype] += 1;
-    else return;
+    if (ch->spl[dtype] >= 240 && ch->class != CLASS_LICH) 
+        return;
+    else if (   ch->spl[dtype] >= 200 && !IS_CLASS(ch, CLASS_MAGE) && ch->class != CLASS_LICH &&
+	            !(IS_CLASS(ch, CLASS_DROW) && IS_SET(ch->special, SPC_DROW_MAG)
+                && (dtype == 0 || dtype == 1)) && !(IS_CLASS(ch, CLASS_DROW) && IS_SET(ch->special, SPC_DROW_CLE)
+                && (dtype == 2 || dtype == 3))) 
+        return;
+    if (ch->spl[dtype] >= 300) 
+        return;
+    if ((dice1 > ch->spl[dtype] || dice2 > ch->spl[dtype]) || (dice1==100 || dice2==100)) 
+        ch->spl[dtype] += 1;
+    else 
+        return;
 
          if (ch->spl[dtype] == 1  ) sprintf(bufskill,"an apprentice of");
     else if (ch->spl[dtype] == 26 ) sprintf(bufskill,"a student at");
@@ -576,31 +581,30 @@ void do_cast( CHAR_DATA *ch, char *argument )
 
     if ( !IS_NPC(ch) && number_percent( ) > ch->pcdata->learned[sn] )
     {
-	send_to_char( "You lost your concentration.\n\r", ch );
-	ch->mana -= mana / 2;
-	improve_spl(ch,skill_table[sn].target,sn);
+        send_to_char( "You lost your concentration.\n\r", ch );
+        ch->mana -= mana / 2;
+        improve_spl(ch,skill_table[sn].target,sn);
     }
     else
     {
-	int tempentro = 0;
-	if (IS_ITEMAFF(ch, ITEMA_AFFENTROPY))
-	tempentro = 20;
+        int tempentro = 0;
+        if (IS_ITEMAFF(ch, ITEMA_AFFENTROPY))
+        tempentro = 20;
 
-	ch->mana -= mana;
-	/* Check players ability at spell type for spell power...KaVir */
-	if (IS_NPC(ch))
-	    (*skill_table[sn].spell_fun) ( sn, ch->level, ch, vo );
-	else if ( !IS_CLASS(ch, CLASS_MAGE) && !IS_CLASS(ch, CLASS_LICH))
-	{
-	    (*skill_table[sn].spell_fun) ( sn, ((ch->spl[skill_table[sn].target]*0.25)+tempentro), ch, vo );
-	    improve_spl(ch,skill_table[sn].target,sn);
-	}
-	else
-	{
-	  (*skill_table[sn].spell_fun) ( sn, (ch->spl[skill_table[sn].target]*.5+tempentro),ch, vo );
-	  improve_spl(ch,skill_table[sn].target,sn);
-	 
-	}
+        ch->mana -= mana;
+        /* Check players ability at spell type for spell power...KaVir */
+        if (IS_NPC(ch))
+            (*skill_table[sn].spell_fun) ( sn, ch->level, ch, vo );
+        else if ( !IS_CLASS(ch, CLASS_MAGE) && !IS_CLASS(ch, CLASS_LICH))
+        {
+            (*skill_table[sn].spell_fun) ( sn, ((ch->spl[skill_table[sn].target]*0.25)+tempentro), ch, vo );
+            improve_spl(ch,skill_table[sn].target,sn);
+        }
+        else
+        {
+            (*skill_table[sn].spell_fun) ( sn, (ch->spl[skill_table[sn].target]*.5+tempentro),ch, vo );
+            improve_spl(ch,skill_table[sn].target,sn);
+        }
      }
 
     if ( skill_table[sn].target == TAR_CHAR_OFFENSIVE
