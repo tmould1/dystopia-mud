@@ -1,0 +1,3 @@
+base_xp: 10000
+max_xp_per_kill: 1000000000
+game_name: Test Name
