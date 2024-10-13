@@ -39,6 +39,19 @@ void load_gameconfig()
 		// Format will be <variable>: <value>
 		char *variable = strtok(line, ":");
 		char *value = strtok(NULL, ":");
+
+		// The value could have spaces in front of it, so, we need to remove them.
+		while (value[0] == ' ')
+		{
+			value++;
+		}
+		
+		// If we are processing a string, we need to remove any newline and/or carriage return characters at the end.
+		if (value != NULL)
+		{
+			value[strcspn(value, "\r\n")] = 0;
+		}
+		
 		if (variable == NULL || value == NULL)
 		{
 			log_string("Error reading gameconfig.txt");
@@ -101,7 +114,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 		send_to_char(buf, ch);
 		sprintf(buf, "max_xp_per_kill - Max XP per kill: %d\n\r", game_config.max_xp_per_kill);
 		send_to_char(buf, ch);
-		sprintf(buf, "game_name - Game Name: %s\n\r", game_config.game_name);
+		sprintf(buf, "game_name - Game Name: \"%s\"\n\r", game_config.game_name);
 		send_to_char(buf, ch);
 		return;
 	}
@@ -148,7 +161,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 		if (arg2[0] == '\0')
 		{
 			char buf[MAX_STRING_LENGTH];
-			sprintf(buf, "Game Name: %s\n\r", game_config.game_name);
+			sprintf(buf, "Game Name: \"%s\"\n\r", game_config.game_name);
 			send_to_char(buf, ch);
 			return;
 		}
