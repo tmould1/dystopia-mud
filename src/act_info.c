@@ -2990,49 +2990,50 @@ void do_where( CHAR_DATA *ch, char *argument )
 
     if ( arg[0] == '\0' )
     {
-	send_to_char( "Players near you:\n\r", ch );
-	found = FALSE;
-	for ( d = descriptor_list; d != NULL; d = d->next )
-	{
-	    if ( ( d->connected == CON_PLAYING
-	    ||   d->connected == CON_EDITING)
-	    && ( victim = d->character ) != NULL
-	    &&   !IS_NPC(victim)
-	    &&   victim->in_room != NULL
-	    &&   victim->in_room->area == ch->in_room->area
-	    &&   victim->pcdata->chobj == NULL
-	    &&   can_see( ch, victim ) )
-	    {
-		found = TRUE;
-		sprintf( buf, "%-28s %s\n\r",
-		    victim->name, victim->in_room->name );
-		send_to_char( buf, ch );
-	    }
-	}
-	if ( !found )
-	    send_to_char( "None\n\r", ch );
+        sprintf(buf, "Players near you in %s:\n\r", ch->in_room->area->name);
+        send_to_char( buf, ch );
+        found = FALSE;
+        for ( d = descriptor_list; d != NULL; d = d->next )
+        {
+            if ( (   d->connected == CON_PLAYING
+                ||   d->connected == CON_EDITING)
+                && ( victim = d->character ) != NULL
+                &&   !IS_NPC(victim)
+                &&   victim->in_room != NULL
+                &&   victim->in_room->area == ch->in_room->area
+                &&   victim->pcdata->chobj == NULL
+                &&   can_see( ch, victim ) )
+            {
+                found = TRUE;
+                sprintf( buf, "%-28s %s\n\r",
+                    victim->name, victim->in_room->name );
+                send_to_char( buf, ch );
+            }
+        }
+        if ( !found )
+            send_to_char( "None\n\r", ch );
     }
     else
     {
-	found = FALSE;
-	for ( victim = char_list; victim != NULL; victim = victim->next )
-	{
-	    if ( victim->in_room != NULL
-	    &&   victim->in_room->area == ch->in_room->area
-	    &&   !IS_AFFECTED(victim, AFF_HIDE)
-	    &&   !IS_AFFECTED(victim, AFF_SNEAK)
-	    &&   can_see( ch, victim )
-	    &&   is_name( arg, victim->name ) )
-	    {
-		found = TRUE;
-		sprintf( buf, "%-28s %s\n\r",
-		    PERS(victim, ch), victim->in_room->name );
-		send_to_char( buf, ch );
-		break;
-	    }
-	}
-	if ( !found )
-	    act( "You didn't find any $T.", ch, NULL, arg, TO_CHAR );
+        found = FALSE;
+        for ( victim = char_list; victim != NULL; victim = victim->next )
+        {
+            if ( victim->in_room != NULL
+            &&   victim->in_room->area == ch->in_room->area
+            &&   !IS_AFFECTED(victim, AFF_HIDE)
+            &&   !IS_AFFECTED(victim, AFF_SNEAK)
+            &&   can_see( ch, victim )
+            &&   is_name( arg, victim->name ) )
+            {
+            found = TRUE;
+            sprintf( buf, "%-28s %s\n\r",
+                PERS(victim, ch), victim->in_room->name );
+            send_to_char( buf, ch );
+            break;
+            }
+        }
+        if ( !found )
+            act( "You didn't find any $T.", ch, NULL, arg, TO_CHAR );
     }
 
     return;
