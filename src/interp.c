@@ -2117,23 +2117,23 @@ char *one_argument( char *argument, char *arg_first )
 
     cEnd = ' ';
     if ( *argument == '\'' || *argument == '"' )
-	cEnd = *argument++;
+        cEnd = *argument++;
 
     while ( *argument != '\0' )
     {
-	if ( *argument == cEnd )
-	{
-	    argument++;
-	    break;
-	}
-	*arg_first = LOWER(*argument);
-	arg_first++;
-	argument++;
+        if ( *argument == cEnd )
+        {
+            argument++;
+            break;
+        }
+        *arg_first = LOWER(*argument);
+        arg_first++;
+        argument++;
     }
     *arg_first = '\0';
 
     while ( isspace(*argument) )
-	argument++;
+	    argument++;
 
     return argument;
 }
