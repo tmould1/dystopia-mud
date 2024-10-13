@@ -247,7 +247,6 @@ void save_gameconfig       args( (void) );
 
 #define PULSE_PER_SECOND	    4
 #define PULSE_VIOLENCE		  ( 3 * PULSE_PER_SECOND)
-#define OLOAD_30333		    1
 /* Save the database - OLC 1.1b */
 #define PULSE_DB_DUMP             (1800* PULSE_PER_SECOND ) /* 30 minutes  */
 
@@ -4736,6 +4735,7 @@ void	interpret	args( ( CHAR_DATA *ch, char *argument ) );
 bool	is_number	args( ( char *arg ) );
 int	number_argument	args( ( char *argument, char *arg ) );
 char *	one_argument	args( ( char *argument, char *arg_first ) );
+char *	one_argument_case	args( ( char *argument, char *arg_first ) );
 void	stage_update	args( ( CHAR_DATA *ch, CHAR_DATA *victim, int stage, char *argument ) );
 void    make_preg       args( ( CHAR_DATA *mother, CHAR_DATA *father ) );
 
