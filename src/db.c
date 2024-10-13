@@ -2883,6 +2883,8 @@ void free_string( char *pstr )
 void do_areas( CHAR_DATA *ch, char *argument )
 {
     char buf[MAX_STRING_LENGTH];
+    char left_area_buf[40];
+    char right_area_buf[40];
     AREA_DATA *pArea1;
     AREA_DATA *pArea2;
     int iArea;
@@ -2894,15 +2896,26 @@ void do_areas( CHAR_DATA *ch, char *argument )
     for ( iArea = 0; iArea < iAreaHalf; iArea++ )
 	pArea2 = pArea2->next;
 
+    // Create a header for both columns before printing the areas and their Builders.
+    // The entire line will be 80 characters long.
+    sprintf( left_area_buf, "%-10s%-29s","Builders", "Area Name" );
+    sprintf( right_area_buf, "%-10s%-29s","Builders", "Area Name" );
+    sprintf( buf, "%s%s\n\r", left_area_buf, right_area_buf );
+    send_to_char( buf, ch );
+    // a border to separate pre-text from area data
+    sprintf(buf, "--------------------------------------------------------------------------------\n\r");
+    send_to_char(buf, ch);
     
-   for ( iArea = 0; iArea < iAreaHalf; iArea++ )
+    for ( iArea = 0; iArea < iAreaHalf; iArea++ )
     {
-	sprintf( buf, "%-39s%-39s\n\r",
-	    pArea1->name, (pArea2 != NULL) ? pArea2->name : "" );
-	send_to_char( buf, ch );
-	pArea1 = pArea1->next;
-	if ( pArea2 != NULL )
-	    pArea2 = pArea2->next;
+        // Converting this to builders and area name.
+        sprintf( left_area_buf, "%-10s%-29s", pArea1->builders, pArea1->name );
+        sprintf( right_area_buf, "%-10s%-29s", (pArea2 != NULL) ? pArea2->builders : "", (pArea2 != NULL) ? pArea2->name : "" );
+        sprintf( buf, "%-39s%-39s\n\r", left_area_buf, right_area_buf );
+        send_to_char( buf, ch );
+        pArea1 = pArea1->next;
+        if ( pArea2 != NULL )
+            pArea2 = pArea2->next;
     }
 
     return;
