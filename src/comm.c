@@ -2698,7 +2698,7 @@ OUT OUT OUT */
 	sprintf(buf,"#7A #Rnew player#7 named #2%s #7enters #R%s.#n", ch->name, game_config.game_name );
 	enter_info(buf);
 	ch->fight_timer = 0;
-        ch->pcdata->revision = CURRENT_REVISION;
+    ch->pcdata->revision = CURRENT_REVISION;
 	act( "$n has entered the game.", ch, NULL, NULL, TO_ROOM );
         clear_stats(ch);
         do_wear(ch, "all");

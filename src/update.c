@@ -73,11 +73,11 @@ void gain_exp( CHAR_DATA *ch, int gain )
     CHAR_DATA *master = NULL;
     if ( IS_NPC(ch) && (mount = ch->mount) != NULL && !IS_NPC(mount))
     {
-	if ( (master = ch->master) == NULL || master != mount )
-	    mount->exp += gain;
+      if ( (master = ch->master) == NULL || master != mount )
+          mount->exp += gain;
     }
     if ( !IS_NPC(ch) )
-	ch->exp += gain;
+      ch->exp += gain;
     return;
 }
 
@@ -1632,7 +1632,7 @@ void update_cyborg (CHAR_DATA *ch)
 {
   if ( ch->hit < ch->max_hit || ch->mana < ch->max_mana || ch->move < ch->max_move)
     werewolf_regen(ch, 2);
-  regen_limb(ch);
+    regen_limb(ch);
   return;
 }
 
@@ -1745,7 +1745,6 @@ void update_angel(CHAR_DATA *ch)
   }
   return;
 }
-
 
 void update_monk(CHAR_DATA *ch)
 {
