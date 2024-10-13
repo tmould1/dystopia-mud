@@ -1,6 +1,6 @@
 #AREADATA
-Name        Spawn   Doom~
-Builders    None~
+Name        Doom~
+Builders    Spawn~
 VNUMs       11000 11058
 Security    3
 Recall      0

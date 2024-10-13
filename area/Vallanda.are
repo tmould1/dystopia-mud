@@ -1,6 +1,6 @@
 #AREADATA
-Name        KaVir   Vallandar's Tomb~
-Builders    None~
+Name        Vallandar's Tomb~
+Builders    KaVir~
 VNUMs       30300 30344
 Security    3
 Recall      0
@@ -1239,7 +1239,8 @@ T
 &swarm*bees*~
 The guardian says 'Well done, you have solved my puzzle!'.
 
-The guardian makes a few gestures and the gateway shimmers to life.~
+
+The guardian makes a few gestures and the gateway shimmers to life.~
 copy~
 all~
 1056768 12 30330
@@ -1265,15 +1266,20 @@ T
 >ENTER<~
 The guardian says 'I watched an army gathering supplies,'.
 
-The guardian says 'Over miles of countryside,'.
 
-The guardian says 'No homestead did they pillage,'.
+The guardian says 'Over miles of countryside,'.
 
-The guardian says 'No blade of grass was broken.'.
 
-The guardian grins evilly.
+The guardian says 'No homestead did they pillage,'.
 
-The guardian says 'What was this army?'.~
+
+The guardian says 'No blade of grass was broken.'.
+
+
+The guardian grins evilly.
+
+
+The guardian says 'What was this army?'.~
 copy~
 all~
 2 0 30330

@@ -1,6 +1,6 @@
 #AREADATA
-Name        Diku    Limbo~
-Builders    None~
+Name        Limbo~
+Builders    Diku~
 VNUMs       1 89
 Security    3
 Recall      0

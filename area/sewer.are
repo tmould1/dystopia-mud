@@ -1,6 +1,6 @@
 #AREADATA
-Name        Diku    Sewer~
-Builders    None~
+Name        Sewer~
+Builders    Diku~
 VNUMs       7000 7445
 Security    3
 Recall      0
