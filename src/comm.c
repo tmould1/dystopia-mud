@@ -1696,12 +1696,9 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt )
 	    ch = d->character;
 	    if (IS_HEAD(ch,LOST_HEAD) || IS_EXTRA(ch,EXTRA_OSWITCH))
 	    {
-		sprintf(exp_str, "%d", ch->exp);
-		COL_SCALE(exp_str, ch, ch->exp, 1000);
-/*
-	        sprintf( buf, "[%s exp] <?hp ?m ?mv> ",exp_str );
-*/
-	        sprintf( buf, "#7<[#4%sX#7] [#3?#1H #3?#6M #3?#2V#7]>#n ",exp_str );
+			add_commas_to_number(ch->exp, exp_str);
+			COL_SCALE(exp_str, ch, ch->exp, 10000000);
+	        sprintf( buf, "#7<[#4%sX#7] [#3?#1H #3?#6M #3?#2V#7]>#n ", exp_str );
 	    }
 	    else if (ch->position == POS_FIGHTING)
 	    {
@@ -1757,8 +1754,9 @@ hit_str, mana_str, move_str );
 		COL_SCALE(mana_str, ch, ch->mana, ch->max_mana);
 		sprintf(move_str, "%d", ch->move);
 		COL_SCALE(move_str, ch, ch->move, ch->max_move);
-		sprintf(exp_str, "%d", ch->exp);
-		COL_SCALE(exp_str, ch, ch->exp, 1000);
+		//sprintf(exp_str, "%d", ch->exp);
+		add_commas_to_number(ch->exp, exp_str);
+		COL_SCALE(exp_str, ch, ch->exp, 10000000);
 /*
 	        sprintf( buf, "[%s exp] <%shp %sm %smv> ",exp_str, hit_str, mana_str, move_str
 );
@@ -2032,6 +2030,24 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
             }
             txt++;
             break;
+		  case 'x': // xterm, BUG: do_say bleeds characters to the player using it. chat does not?
+		    // look for 3 more characters that should be numbers
+			if (isdigit(*(txt+1)) && isdigit(*(txt+2)) && isdigit(*(txt+3)))
+			{
+				*ptr++ = '\e';  *ptr++ = '[';
+				*ptr++ = '0';   *ptr++ = ';';
+				*ptr++ = '3';   *ptr++ = '8'; *ptr++ = ';';
+				*ptr++ = '5';   *ptr++ = ';';
+				*ptr++ = *(txt+1); *ptr++ = *(txt+2); *ptr++ = *(txt+3); *ptr++ = 'm';
+				txt += 4;
+				break;
+			}
+			else
+			{
+				txt++;
+				break;
+			}
+			break;
         }
     }
   }
@@ -3825,8 +3841,8 @@ void bust_a_prompt( DESCRIPTOR_DATA *d )
             ADD_COLOUR(ch, buf2, L_CYAN);
             i = buf2; break;
          case 'x' :
-            sprintf( buf2, "%d", ch->exp                               );
-            COL_SCALE(buf2, ch, ch->exp, 1000);
+		 	add_commas_to_number(ch->exp, buf2						   );
+            COL_SCALE(buf2, ch, ch->exp, 10000000);
             i = buf2; break;
          case 'g' :
             sprintf( buf2, "%d", ch->gold                              );
