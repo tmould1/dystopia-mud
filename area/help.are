@@ -536,8 +536,9 @@ is a piece of classeq that's better than your normal classeq.
 
 syntax : mastery
 
-NOTE : If you are so stupid that you gemstone your mastery item
-       it's your loss, don't expect anyone to care.
+NOTE : If you gemstone your mastery item, talk with a dev.
+[IDEA] - Allow mastery to accept your old mastery item as an
+argument to replace it, if you have done something you regret.
 
 ~
 
@@ -690,11 +691,11 @@ these classes by using the selfclass command just after, only
 exception is Battlemages which requires and additional 5K mana
 and 100 in all spell colors.
 
-#R[#0Demon#R]#n               Demonic fiends from hell.
+#0[#RDemon#0]#n               Demonic fiends from hell.
 #y((#LWerewolf#y))#n          Shapeshifting beasts of the night.
 #P.o0#0Drow#P0o.#n            Cruel dark elfs from the underdark.
 #C***#yNinja#C***#n           Masters of the martial arts and killers for hire.
-#0<<#RVampire#0>>#n           Ancient beings of great power.
+#R<<V#0ampire#R>>#n           Ancient beings of great power.
 #0.x[#lMonk#0]x.#n            Masters of the martial arts and inner peace.
 {{#CBattlemage#n}}        Masters of arcane magic.
 
