@@ -856,7 +856,7 @@ void do_plasma( CHAR_DATA *ch, char *argument )
     if ((obj = create_object(get_obj_index( 30007),60)) == NULL)
     {
         send_to_char( "Error - Please inform Dracknuur.\n\r", ch);
-	return;
+	    return;
     }
 
     act("$n transforms into $p and splashes to the ground.",ch,obj,NULL,TO_ROOM);

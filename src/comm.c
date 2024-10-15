@@ -2030,7 +2030,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
             }
             txt++;
             break;
-		  case 'x': // xterm, BUG: do_say bleeds characters to the player using it. chat does not?
+		  case 'x': // xterm, BUG: do_say bleeds characters to the player using it. do_chat does not?
 		    // look for 3 more characters that should be numbers
 			if (isdigit(*(txt+1)) && isdigit(*(txt+2)) && isdigit(*(txt+3)))
 			{
