@@ -940,8 +940,6 @@ bool check_blind( CHAR_DATA *ch )
     return TRUE;
 }
 
-
-
 void do_look( CHAR_DATA *ch, char *argument )
 {
     char buf  [MAX_STRING_LENGTH];
@@ -967,46 +965,47 @@ void do_look( CHAR_DATA *ch, char *argument )
 
     if ( ch->position < POS_SLEEPING )
     {
-	send_to_char( "You can't see anything but stars!\n\r", ch );
-	return;
+        send_to_char( "You can't see anything but stars!\n\r", ch );
+        return;
     }
 
     if ( ch->position == POS_SLEEPING )
     {
-	send_to_char( "You can't see anything, you're sleeping!\n\r", ch );
-	return;
+        send_to_char( "You can't see anything, you're sleeping!\n\r", ch );
+        return;
     }
 
     if ( IS_SET(ch->flag2,AFF_TOTALBLIND))
     {
-    send_to_char("You can't see anything because you're blinded!\n\r",ch);
-    return;
+        send_to_char("You can't see anything because you're blinded!\n\r",ch);
+        return;
     }
 
     if ( !check_blind( ch ) )
-	return;
+	    return;
 
-    if ( !IS_NPC(ch) && IS_SET(ch->in_room->room_flags, ROOM_TOTAL_DARKNESS) &&
-	!IS_ITEMAFF(ch, ITEMA_VISION) && !IS_IMMORTAL(ch) && !IS_CLASS(ch, CLASS_DROID) &&
-!(IS_CLASS(ch, CLASS_DROW)))
+    if (  !IS_NPC(ch) 
+        && IS_SET(ch->in_room->room_flags, ROOM_TOTAL_DARKNESS) 
+        && !IS_ITEMAFF(ch, ITEMA_VISION) && !IS_IMMORTAL(ch) 
+        && !IS_CLASS(ch, CLASS_DROID) && !(IS_CLASS(ch, CLASS_DROW)))
     {
-	send_to_char( "It is pitch black ... \n\r", ch );
-	return;
+        send_to_char( "It is pitch black ... \n\r", ch );
+        return;
     }
 
     if ( !IS_NPC(ch)
-    &&   !IS_SET(ch->act, PLR_HOLYLIGHT)
-    &&   !IS_ITEMAFF(ch, ITEMA_VISION)
-    &&   !IS_VAMPAFF(ch, VAM_NIGHTSIGHT)
-    &&   !IS_AFFECTED(ch, AFF_SHADOWPLANE)
-    &&   !(ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT
-    &&   !IS_NPC(ch) && ch->pcdata->chobj != NULL
-    &&   ch->pcdata->chobj->in_obj != NULL)
-    &&   room_is_dark( ch->in_room ) )
+      && !IS_SET(ch->act, PLR_HOLYLIGHT)
+      && !IS_ITEMAFF(ch, ITEMA_VISION)
+      && !IS_VAMPAFF(ch, VAM_NIGHTSIGHT)
+      && !IS_AFFECTED(ch, AFF_SHADOWPLANE)
+      && !(ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT
+      && !IS_NPC(ch) && ch->pcdata->chobj != NULL
+      && ch->pcdata->chobj->in_obj != NULL)
+      && room_is_dark( ch->in_room ) )
     {
-	send_to_char( "It is pitch black ... \n\r", ch );
-	show_char_to_char( ch->in_room->people, ch );
-	return;
+        send_to_char( "It is pitch black ... \n\r", ch );
+        show_char_to_char( ch->in_room->people, ch );
+        return;
     }
 
     argument = one_argument( argument, arg1 );
@@ -1014,31 +1013,32 @@ void do_look( CHAR_DATA *ch, char *argument )
 
     if ( arg1[0] == '\0' || !str_cmp( arg1, "auto" ) || !str_cmp( arg1, "scry"))
     {
-	/* 'look' or 'look auto' */
-	if (ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT
-	&& !IS_NPC(ch) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL)
-	    act( "$p",ch,ch->pcdata->chobj->in_obj,NULL,TO_CHAR);
-    	else if ( IS_AFFECTED(ch, AFF_SHADOWPLANE) )
-	    send_to_char( "The shadow plane\n\r", ch );
+        /* 'look' or 'look auto' */
+        if (ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT
+            && !IS_NPC(ch) && ch->pcdata->chobj != NULL
+            && ch->pcdata->chobj->in_obj != NULL)
+            act( "$p",ch,ch->pcdata->chobj->in_obj,NULL,TO_CHAR);
+        else if ( IS_AFFECTED(ch, AFF_SHADOWPLANE) )
+            send_to_char( "The shadow plane\n\r", ch );
 	else
 	{
-            if (!IS_NPC(ch) && ch->level > 6)
-            {
-              sprintf(buf, "%s #0[#7%d#0]#n\n\r", ch->in_room->name, ch->in_room->vnum);
-              send_to_char( buf, ch );
-            }
-            else
-            {
-  	      sprintf(buf, "%s\n\r", ch->in_room->name);
-  	      send_to_char( buf, ch );
-            }
+        if (!IS_NPC(ch) && ch->level > 6)
+        {
+            sprintf(buf, "%s #0[#7%d#0]#n\n\r", ch->in_room->name, ch->in_room->vnum);
+            send_to_char( buf, ch );
+        }
+        else
+        {
+            sprintf(buf, "%s\n\r", ch->in_room->name);
+            send_to_char( buf, ch );
+        }
 	}
 
 	if ( !IS_NPC(ch) && IS_SET(ch->act, PLR_AUTOEXIT) )
 	    do_exits( ch, "auto" );
 
 	if (ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT
-	&& !IS_NPC(ch) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL)
+	    && !IS_NPC(ch) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL)
 	{
 	    act( "You are inside $p.",ch,ch->pcdata->chobj->in_obj,NULL,TO_CHAR);
 	    show_list_to_char( ch->pcdata->chobj->in_obj->contains, ch, FALSE, FALSE );
