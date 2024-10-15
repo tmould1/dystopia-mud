@@ -2,7 +2,7 @@
 FROM debian:latest
 
 # Set the maintainer label
-LABEL description="Dystopia 1.4 Builder"
+LABEL description="Dystopia 1.3 Builder"
 
 # Set the working directory in the container
 WORKDIR /dystopia-mud
