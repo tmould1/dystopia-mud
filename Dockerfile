@@ -38,6 +38,7 @@ VOLUME [    "/dystopia-mud/player", \
             "/dystopia-mud/log", \
             "/dystopia-mud/notes", \
             "/dystopia-mud/txt" \
+            "/dystopia-mud/src" \
         ]
 
-ENTRYPOINT ["/bin/bash", "-c", "cd src && ./startup.sh && tail -f /dev/null"]
+ENTRYPOINT ["/bin/bash", "-c", "cd src && make && ./startup.sh && tail -f /dev/null"]
