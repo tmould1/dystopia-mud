@@ -838,7 +838,7 @@ void do_plasma( CHAR_DATA *ch, char *argument )
        return;
     }
  
-save_char_obj(ch);
+    save_char_obj(ch);
 
     if ( IS_AFFECTED(ch, AFF_POLYMORPH) )
     {
@@ -853,7 +853,7 @@ save_char_obj(ch);
     }
 
 
-  if ((obj = create_object(get_obj_index( 30007),60)) == NULL)
+    if ((obj = create_object(get_obj_index( 30007),60)) == NULL)
     {
         send_to_char( "Error - Please inform Dracknuur.\n\r", ch);
 	return;
@@ -916,75 +916,75 @@ void do_taste( CHAR_DATA *ch, char *argument )
         return;
     }                               
 
-sprintf(buf,"You examine $N's blood carefully.\n\r");
-act(buf,ch,NULL,victim,TO_CHAR);
-sprintf(buf,"$n examines your blood carefully.\n\r");
-act(buf,ch,NULL,victim,TO_VICT);
-sprintf(buf,"$n examines $N's blood carefully.\n\r");
-act(buf,ch,NULL,victim,TO_NOTVICT);
+    sprintf(buf,"You examine $N's blood carefully.\n\r");
+    act(buf,ch,NULL,victim,TO_CHAR);
+    sprintf(buf,"$n examines your blood carefully.\n\r");
+    act(buf,ch,NULL,victim,TO_VICT);
+    sprintf(buf,"$n examines $N's blood carefully.\n\r");
+    act(buf,ch,NULL,victim,TO_NOTVICT);
+    
+
+    send_to_char("\n\r",ch);
+    send_to_char("\n\r",victim);
+
+
+    if (victim->pcdata->rank == AGE_ANCILLA)         sprintf( age, "Ancilla");
+    else if (victim->pcdata->rank == AGE_CHILDE)     sprintf( age, "Childe");
+    else if (victim->pcdata->rank == AGE_NEONATE)    sprintf( age, "Neonate");
+    else if (victim->pcdata->rank == AGE_ELDER)      sprintf( age, "Elder");
+    else if (victim->pcdata->rank == AGE_METHUSELAH) sprintf( age, "Methuselah");
+    else if (victim->pcdata->rank == AGE_LA_MAGRA)   sprintf( age, "La Magra");
+    else if (victim->pcdata->rank == AGE_TRUEBLOOD)  sprintf( age, "TrueBlood");
+    if (victim->lord == NULL) sprintf(lord, "None");
+        else sprintf(lord, "%s",victim->lord);
+        sprintf( lin,
+    "---------------------------------------------------------------------------\n\r");
+    send_to_char( lin,ch);
+    send_to_char(
+    "                              Vampire Status\n\r",ch);
+    send_to_char(lin,ch);
+    sprintf(buf,
+    "Generation:%d  Bloodpool:%d  Age:%s  Lord:%s\n\r",
+    victim->generation,victim->pcdata->condition[COND_THIRST],
+    age,lord);
+    send_to_char(buf,ch);
+    send_to_char(lin,ch);
+    send_to_char(
+    "                              Disciplines\n\r",ch);
+    send_to_char(lin,ch);
+    sprintf(buf,
+    "Animalism:    [%d]             Celerity:   [%d]             Fortitude: [%d]\n\r",
+    victim->power[DISC_VAMP_ANIM],
+    victim->power[DISC_VAMP_CELE],
+    victim->power[DISC_VAMP_FORT]);
+    send_to_char(buf,ch);
+    sprintf(buf,
+    "Obtenebration:[%d]             Presence:   [%d]             Quietus:   [%d]\n\r",
+    victim->power[DISC_VAMP_OBTE],
+    victim->power[DISC_VAMP_PRES],
+    victim->power[DISC_VAMP_QUIE]);
+    send_to_char(buf,ch);
+    sprintf(buf,
+    "Thaumaturgy:  [%d]             Auspex:     [%d]             Dominate:  [%d]\n\r",
+    victim->power[DISC_VAMP_THAU],
+    victim->power[DISC_VAMP_AUSP],
+    victim->power[DISC_VAMP_DOMI]);
+    send_to_char(buf,ch);
+    sprintf(buf,
+    "Obfuscate:    [%d]             Potence:    [%d]             Protean:   [%d]\n\r",
+    victim->power[DISC_VAMP_OBFU],
+    victim->power[DISC_VAMP_POTE],
+    victim->power[DISC_VAMP_PROT]);
+    send_to_char(buf,ch);
+    sprintf(buf,
+    "Serpentis:    [%d]             Vicissitude:[%d]             Daimoinon: [%d]\n\r",
+    victim->power[DISC_VAMP_SERP],
+    victim->power[DISC_VAMP_VICI],
+    victim->power[DISC_VAMP_DAIM]);
+    send_to_char(buf,ch);
+    send_to_char(lin,ch);
  
-
-send_to_char("\n\r",ch);
-send_to_char("\n\r",victim);
-
-
-if (victim->pcdata->rank == AGE_ANCILLA)         sprintf( age, "Ancilla");
-else if (victim->pcdata->rank == AGE_CHILDE)     sprintf( age, "Childe");
-else if (victim->pcdata->rank == AGE_NEONATE)    sprintf( age, "Neonate");
-else if (victim->pcdata->rank == AGE_ELDER)      sprintf( age, "Elder");
-else if (victim->pcdata->rank == AGE_METHUSELAH) sprintf( age, "Methuselah");
-else if (victim->pcdata->rank == AGE_LA_MAGRA)   sprintf( age, "La Magra");
-else if (victim->pcdata->rank == AGE_TRUEBLOOD)  sprintf( age, "TrueBlood");
-if (victim->lord == NULL) sprintf(lord, "None");
-    else sprintf(lord, "%s",victim->lord);
-    sprintf( lin,
-"---------------------------------------------------------------------------\n\r");
-send_to_char( lin,ch);
-send_to_char(
-"                              Vampire Status\n\r",ch);
-send_to_char(lin,ch);
-sprintf(buf,
-"Generation:%d  Bloodpool:%d  Age:%s  Lord:%s\n\r",
-victim->generation,victim->pcdata->condition[COND_THIRST],
-age,lord);
-send_to_char(buf,ch);
-send_to_char(lin,ch);
-send_to_char(
-"                              Disciplines\n\r",ch);
-send_to_char(lin,ch);
-sprintf(buf,
-"Animalism:    [%d]             Celerity:   [%d]             Fortitude: [%d]\n\r",
-victim->power[DISC_VAMP_ANIM],
-victim->power[DISC_VAMP_CELE],
-victim->power[DISC_VAMP_FORT]);
-send_to_char(buf,ch);
-sprintf(buf,
-"Obtenebration:[%d]             Presence:   [%d]             Quietus:   [%d]\n\r",
-victim->power[DISC_VAMP_OBTE],
-victim->power[DISC_VAMP_PRES],
-victim->power[DISC_VAMP_QUIE]);
-send_to_char(buf,ch);
-sprintf(buf,
-"Thaumaturgy:  [%d]             Auspex:     [%d]             Dominate:  [%d]\n\r",
-victim->power[DISC_VAMP_THAU],
-victim->power[DISC_VAMP_AUSP],
-victim->power[DISC_VAMP_DOMI]);
-send_to_char(buf,ch);
-sprintf(buf,
-"Obfuscate:    [%d]             Potence:    [%d]             Protean:   [%d]\n\r",
-victim->power[DISC_VAMP_OBFU],
-victim->power[DISC_VAMP_POTE],
-victim->power[DISC_VAMP_PROT]);
-send_to_char(buf,ch);
-sprintf(buf,
-"Serpentis:    [%d]             Vicissitude:[%d]             Daimoinon: [%d]\n\r",
-victim->power[DISC_VAMP_SERP],
-victim->power[DISC_VAMP_VICI],
-victim->power[DISC_VAMP_DAIM]);
-send_to_char(buf,ch);
-send_to_char(lin,ch);
- 
-return;
+    return;
 }
  
  
@@ -1267,41 +1267,44 @@ if (!IS_NPC(victim)) {
 /* Raw-killing it from one theft is stupid. Im going to use the primal        */
 /* stat on the mobs for blood its quick, effective, and straightford, AND	  */
 /* no new fields have to be added to the mob.Shakti 09/07/98				  */
-			(blpr = number_range (30,40) );
-			(victim->practice -=blpr);
-            (ch->pcdata->condition[COND_THIRST] += blpr);
-		if (victim->practice < 0) {
-		sprintf(buf,"%s falls over dead.",victim->short_descr);
-		act(buf,ch,NULL,victim,TO_ROOM);
-		act(buf,ch,NULL,victim,TO_CHAR);
-		raw_kill(victim);}		
+			blpr = number_range (30,40);
+			victim->practice -=blpr;
+            ch->pcdata->condition[COND_THIRST] += blpr;
+            if (victim->practice < 0) 
+            {
+                sprintf(buf,"%s falls over dead.",victim->short_descr);
+                act(buf,ch,NULL,victim,TO_ROOM);
+                act(buf,ch,NULL,victim,TO_CHAR);
+                raw_kill(victim);
+            }		
 
-		 if (ch->pcdata->condition[COND_THIRST] >= bloodpool /ch->generation)
-             {
-              ch->pcdata->condition[COND_THIRST] = bloodpool / ch->generation;
-             }
-	if (ch->fighting == NULL) set_fighting(ch,victim);
+		    if (ch->pcdata->condition[COND_THIRST] >= bloodpool /ch->generation)
+            {
+                ch->pcdata->condition[COND_THIRST] = bloodpool / ch->generation;
+            }
+	        if (ch->fighting == NULL) 
+                set_fighting(ch,victim);
 
-         return;
+            return;
         }
         if (IS_SET(victim->act, PLR_ACID))
         {
-        send_to_char("Their blood is a deadly acid!\n\r", ch);
-        hurt_person(victim,ch,300);
-        victim->pcdata->condition[COND_THIRST] -= 30;
-        return;
+            send_to_char("Their blood is a deadly acid!\n\r", ch);
+            hurt_person(victim,ch,300);
+            victim->pcdata->condition[COND_THIRST] -= 30;
+            return;
         }
 
     if (!IS_NPC(victim)) 
-{
-victim->pcdata->condition[COND_THIRST] -=number_range(30,40);
-}
+    {
+        victim->pcdata->condition[COND_THIRST] -=number_range(30,40);
+    }
     if (ch->pcdata->condition[COND_THIRST] >= bloodpool / ch->generation)
     {
        ch->pcdata->condition[COND_THIRST] = bloodpool /ch->generation;
     }
 
-   if (victim->pcdata->condition[COND_THIRST] <= 0)
+    if (victim->pcdata->condition[COND_THIRST] <= 0)
     {
        victim->pcdata->condition[COND_THIRST] = 0; 
     }
