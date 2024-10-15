@@ -535,3 +535,29 @@ char* all_capitalize( const char *str )
     strcap[i] = '\0';
     return strcap;
 }
+
+void add_commas_to_number( int number, char* out_str )
+{
+  char non_formatted_string[MSL];
+
+  // Go through the non_formatted_xp starting from the beginning;
+  // emplace each character in the formatted string, and add a comma after every 3 characters  
+  sprintf( non_formatted_string, "%d", number );
+  int len = strlen( non_formatted_string );
+  int num_commas = ( len - 1 ) / 3;
+  int new_len = len + num_commas;
+  out_str[new_len] = '\0';
+
+  for ( int i = len - 1, j = new_len - 1, k = 0; 
+        i >= 0; 
+        i--, j--, k++)
+  {
+    if ( k == 3 )
+    {
+      out_str[j] = ',';
+      j--;
+      k = 0;
+    }
+    out_str[j] = non_formatted_string[i];
+  }
+}

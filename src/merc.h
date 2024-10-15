@@ -4932,6 +4932,7 @@ char *  first_arg       args( ( char *argument, char *arg_first, bool fCase ) );
 char *	string_unpad	args( ( char * argument ) );
 char *	string_proper	args( ( char * argument ) );
 char * all_capitalize	args( ( const char *str) );
+void  add_commas_to_number args ( ( int number, char *buf) );
 
 /* olc.c */
 bool	run_olc_editor	args( ( DESCRIPTOR_DATA *d ) );

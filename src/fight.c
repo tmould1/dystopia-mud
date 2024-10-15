@@ -3184,7 +3184,6 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   char formatted_xp[MSL];
-  char non_formatted_xp[MSL];
   CHAR_DATA *gch;
   CHAR_DATA *lch;
   CHAR_DATA *mount;
@@ -3294,23 +3293,8 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
       xp = game_config.max_xp_per_kill;
     }
 
-    sprintf(non_formatted_xp, "%d", xp);
     sprintf(formatted_xp, "");
-    // Go through the non_formatted_xp starting from the beginning;
-    // emplace each character in the formatted string, and add a comma after every 3 characters
-    int len = strlen(non_formatted_xp);
-    int comma_count = (len - 1) / 3;
-    int formatted_len = len + comma_count;
-    formatted_xp[formatted_len] = '\0';
-
-    for (int i = len - 1, j = formatted_len - 1, k = 0; i >= 0; i--, j--, k++) {
-        if (k == 3) {
-            formatted_xp[j] = ',';
-            j--;
-            k = 0;
-        }
-        formatted_xp[j] = non_formatted_xp[i];
-    }
+    add_commas_to_number(xp, formatted_xp);
     
     // Character printout
     sprintf( buf, "You receive %s experience points.\n\r", formatted_xp );
