@@ -61,6 +61,9 @@ void do_version( CHAR_DATA *ch, char *argument)
 {
   send_to_char("+++++++++++++++++++++++++++++++++++++++++++++++++++\n\r", ch);
   send_to_char("+ This mud runs the final release of dystopia 1.2 +\n\r", ch);
+  send_to_char("+  It has been modified for Quality of Life and   +\n\r", ch);
+  send_to_char("+  IaC to support faster and easier modifications +\n\r", ch);
+  send_to_char("+ This mud runs an alpha version of dystopia 1.3  +\n\r", ch);
   send_to_char("+++++++++++++++++++++++++++++++++++++++++++++++++++\n\r", ch);
   return;
 }
