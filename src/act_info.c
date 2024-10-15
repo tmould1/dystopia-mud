@@ -422,208 +422,232 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch )
 
 
     if (!IS_NPC(victim) && victim->pcdata->chobj != NULL )
-	return;
+	    return;
 
     if ((mount = victim->mount) != NULL && IS_SET(victim->mounted, IS_MOUNT))
-	return;
+	    return;
 
     if ( !IS_NPC(victim) && IS_SET(victim->flag2, VAMP_OBJMASK) )
     {
-	sprintf(buf, "     %s\n\r",victim->objdesc);
-	stc(buf,ch);
-	return;
+        sprintf(buf, "     %s\n\r",victim->objdesc);
+        stc(buf,ch);
+        return;
     }
 
 
     if ( IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH))
-	strcat( buf, "     " );
+	    strcat( buf, "     " );
     else {
-	if (!IS_NPC(victim) && victim->desc==NULL ) strcat( buf,"#y(Link-Dead)#n ");
-    	if ( IS_AFFECTED(victim, AFF_INVISIBLE)   ) strcat( buf, "#L(Invis)#n "   );
-    	if ( IS_AFFECTED(victim, AFF_HIDE)        ) strcat( buf, "#0(Hide)#n "    );
-    	if ( IS_AFFECTED(victim, AFF_CHARM)       ) strcat( buf, "#R(Charmed)#n " );
-    	if ( IS_AFFECTED(victim, AFF_PASS_DOOR)  ||
-         IS_AFFECTED(victim, AFF_ETHEREAL)    )
-	 strcat( buf, "#l(Translucent)#n ");
-    	if ( IS_AFFECTED(victim, AFF_FAERIE_FIRE) ) strcat( buf, "#P(Pink Aura)#n "  );
-    	if ( IS_EVIL(victim)
-    	&&   IS_AFFECTED(ch, AFF_DETECT_EVIL)     ) strcat( buf, "#R(Red Aura)#n "   );
-    	if ( IS_AFFECTED(victim, AFF_SANCTUARY)   ) strcat( buf, "#C(White Aura)#n " );
+        if (!IS_NPC(victim) && victim->desc==NULL ) strcat( buf,"#y(Link-Dead)#n ");
+            if ( IS_AFFECTED(victim, AFF_INVISIBLE)   ) strcat( buf, "#L(Invis)#n "   );
+            if ( IS_AFFECTED(victim, AFF_HIDE)        ) strcat( buf, "#0(Hide)#n "    );
+            if ( IS_AFFECTED(victim, AFF_CHARM)       ) strcat( buf, "#R(Charmed)#n " );
+            if ( IS_AFFECTED(victim, AFF_PASS_DOOR)  ||
+            IS_AFFECTED(victim, AFF_ETHEREAL)    )
+        strcat( buf, "#l(Translucent)#n ");
+            if ( IS_AFFECTED(victim, AFF_FAERIE_FIRE) ) strcat( buf, "#P(Pink Aura)#n "  );
+            if ( IS_EVIL(victim)
+            &&   IS_AFFECTED(ch, AFF_DETECT_EVIL)     ) strcat( buf, "#R(Red Aura)#n "   );
+            if ( IS_AFFECTED(victim, AFF_SANCTUARY)   ) strcat( buf, "#C(White Aura)#n " );
     }
+
     if ( IS_AFFECTED(ch, AFF_SHADOWPLANE) && !IS_AFFECTED(victim, AFF_SHADOWPLANE))
-	strcat( buf, "#0(#CNormal plane#0)#n "     );
+	    strcat( buf, "#0(#CNormal plane#0)#n "     );
     else if ( !IS_AFFECTED(ch, AFF_SHADOWPLANE) && IS_AFFECTED(victim, AFF_SHADOWPLANE))
-	strcat( buf, "#C(#0Shadowplane#C)#n "     );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim,CLASS_WEREWOLF) && IS_HERO(victim) && IS_HERO(ch))
-	strcat( buf, "#y(#LWerewolf#y)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_DEMON) && IS_HERO(victim) && IS_HERO(ch))
-        strcat( buf, "#R(#0Demon#R)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_NINJA) && IS_HERO(victim) && IS_HERO(ch))     
-        strcat( buf, "#R(#yNinja#R)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_MONK) && IS_HERO(victim) && IS_HERO(ch))     
-        strcat( buf, "#C(#nMonk#C)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_DROID) && IS_HERO(victim) && IS_HERO(ch))
-        strcat( buf, "#p(#PDrider#p)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_ANGEL) && IS_HERO(victim) && IS_HERO(ch))
-        strcat( buf, "#0(#7Angel#0)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_TANARRI) && IS_HERO(victim) && IS_HERO(ch))
-        strcat( buf, "#0(#RTanar'ri#0)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_LICH) && IS_HERO(victim) && IS_HERO(ch))
-        strcat( buf, "#0(#GLich#0)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_UNDEAD_KNIGHT) && IS_HERO(victim) && IS_HERO(ch))
-        strcat( buf, "#y(#0Death Knight#y)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_SAMURAI) && IS_HERO(victim) && IS_HERO(ch))
- 	strcat( buf,"#C(#ySamu#Rrai#C)#n " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_MAGE) && IS_HERO(victim) && IS_HERO(ch))
-	strcat( buf,"{{#CBattlemage#n}} " );
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_CLASS(victim, CLASS_DROW) && IS_HERO(victim) && IS_HERO(ch))
-	strcat(buf, "#P(#0Drow#P)#n ");
-    if ( !IS_NPC(ch) && IS_VAMPAFF(ch,VAM_AUSPEX) && 
-	 !IS_NPC(victim) && IS_CLASS(victim, CLASS_VAMPIRE) &&
-	  IS_VAMPAFF(victim, VAM_DISGUISED) )
+	    strcat( buf, "#C(#0Shadowplane#C)#n "     );
+
+    // Add class titles
+    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_HERO(victim))
     {
-	strcat( buf, "(");
-	strcat( buf, victim->name);
-	strcat( buf, ") ");
+        if ( IS_CLASS(victim,CLASS_WEREWOLF) )
+            strcat( buf, "#y(#LWerewolf#y)#n " );
+        if ( IS_CLASS(victim, CLASS_DEMON) )
+            strcat( buf, "#0(#RDemon#0)#n " );
+        if ( IS_CLASS(victim, CLASS_NINJA) )     
+            strcat( buf, "#R(#yNinja#R)#n " );
+        if ( IS_CLASS(victim, CLASS_MONK) )     
+            strcat( buf, "#C(#nMonk#C)#n " );
+        if ( IS_CLASS(victim, CLASS_DROID) )
+            strcat( buf, "#p(#PDrider#p)#n " );
+        if ( IS_CLASS(victim, CLASS_ANGEL) )
+            strcat( buf, "#0(#7Angel#0)#n " );
+        if ( IS_CLASS(victim, CLASS_TANARRI) )
+            strcat( buf, "#y(#RTanar'ri#y)#n " );
+        if ( IS_CLASS(victim, CLASS_LICH) )
+            strcat( buf, "#0(#GLich#0)#n " );
+        if ( IS_CLASS(victim, CLASS_UNDEAD_KNIGHT) )
+            strcat( buf, "#y(#0Death Knight#y)#n " );
+        if ( IS_CLASS(victim, CLASS_SAMURAI) )
+            strcat( buf,"#C(#ySamu#Rrai#C)#n " );
+        if ( IS_CLASS(victim, CLASS_MAGE) )
+            strcat( buf,"{{#CBattlemage#n}} " );
+        if ( IS_CLASS(victim, CLASS_DROW) )
+            strcat( buf, "#P(#0Drow#P)#n ");
+        if ( IS_CLASS(victim, CLASS_VAMPIRE) )
+        {
+            if (!IS_AFFECTED(victim, AFF_POLYMORPH))
+            {
+                strcat(buf, "#R(V#0ampire#R)#n ");
+            }
+        }
     }
-if (victim->embracing!= NULL)
-{
-sprintf(buf7,"\n\r...%s is holding %s in a stern embrace!",victim->name,victim->embracing->name);
-}
-else if (victim->embraced!=NULL)
-{
-sprintf(buf7,"\n\r...%s is being embraced by %s!",victim->name,victim->embraced->name);
-}
+
+    // Embrace section
+    if (victim->embracing!= NULL)
+    {
+        sprintf(buf7,"\n\r...%s is holding %s in a stern embrace!",victim->name,victim->embracing->name);
+    }
+    else if (victim->embraced!=NULL)
+    {
+        sprintf(buf7,"\n\r...%s is being embraced by %s!",victim->name,victim->embraced->name);
+    }
+
+    // Rot section
     if ( IS_EXTRA(victim, EXTRA_ROT))
-     {
+    {
         if (IS_NPC(victim)) 
-          sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->short_descr);
+            sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->short_descr);
         else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
-           sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->morph);
+            sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->morph);
         else 
-           sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->name);
-       }
+            sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->name);
+    }
 
-
+    // Flaming section
     if ( IS_AFFECTED(victim, AFF_FLAMING) ) 
     {
-	if (IS_NPC(victim))
-	    sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->short_descr );
-	else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
-	    sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->morph );
-	else
-	    sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->name );
+        if (IS_NPC(victim))
+            sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->short_descr );
+        else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
+            sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->morph );
+        else
+            sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->name );
     }
 
+    // Restrained section
     if ( !IS_NPC(victim) && IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH)) 
     {
-	if (IS_EXTRA(victim,GAGGED) && IS_EXTRA(victim,BLINDFOLDED))
-	    sprintf( buf3, "...%s is gagged and blindfolded, kinky!", victim->morph );
-	else if (IS_EXTRA(victim,GAGGED))
-	    sprintf( buf3, "...%s is gagged!", victim->morph );
-	else if (IS_EXTRA(victim,BLINDFOLDED))
-	    sprintf( buf3, "...%s is blindfolded!", victim->morph );
-    }
-    if ( IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH))
-    {
-	strcat( buf, victim->morph );
-	strcat( buf, " is lying here." );
-    	strcat( buf, buf2 );
-    	strcat( buf, buf3 );
-    	strcat( buf, buf6 );
-        strcat(buf,buf7);   
-     strcat( buf, "\n\r" );
-    	buf[5] = UPPER(buf[5]);
-    	send_to_char( buf, ch );
-	return;
-    }
-    
-    if ( IS_EXTRA(victim, TIED_UP) ) 
-    {
-	if (IS_NPC(victim))
-	    sprintf( buf3, "\n\r...%s is tied up", victim->short_descr );
-	else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
-	    sprintf( buf3, "\n\r...%s is tied up", victim->morph );
-	else
-	    sprintf( buf3, "\n\r...%s is tied up", victim->name );
-	if (IS_EXTRA(victim,GAGGED) && IS_EXTRA(victim,BLINDFOLDED))
-	    strcat( buf3, ", gagged and blindfolded!" );
-	else if (IS_EXTRA(victim,GAGGED))
-	    strcat( buf3, " and gagged!" );
-	else if (IS_EXTRA(victim,BLINDFOLDED))
-	    strcat( buf3, " and blindfolded!" );
-	else
-	    strcat( buf3, "!" );
+        if (IS_EXTRA(victim,GAGGED) && IS_EXTRA(victim,BLINDFOLDED))
+            sprintf( buf3, "...%s is gagged and blindfolded!", victim->morph );
+        else if (IS_EXTRA(victim,GAGGED))
+            sprintf( buf3, "...%s is gagged!", victim->morph );
+        else if (IS_EXTRA(victim,BLINDFOLDED))
+            sprintf( buf3, "...%s is blindfolded!", victim->morph );
     }
 
+    if ( IS_EXTRA(victim, TIED_UP) ) 
+    {
+        if (IS_NPC(victim))
+            sprintf( buf3, "\n\r...%s is tied up", victim->short_descr );
+        else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
+            sprintf( buf3, "\n\r...%s is tied up", victim->morph );
+        else
+            sprintf( buf3, "\n\r...%s is tied up", victim->name );
+        if (IS_EXTRA(victim,GAGGED) && IS_EXTRA(victim,BLINDFOLDED))
+            strcat( buf3, ", gagged and blindfolded!" );
+        else if (IS_EXTRA(victim,GAGGED))
+            strcat( buf3, " and gagged!" );
+        else if (IS_EXTRA(victim,BLINDFOLDED))
+            strcat( buf3, " and blindfolded!" );
+        else
+            strcat( buf3, "!" );
+    }
+
+    // Head section
+    if ( IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH))
+    {
+        strcat( buf, victim->morph );
+        strcat( buf, " is lying here." );
+            strcat( buf, buf2 );
+            strcat( buf, buf3 );
+            strcat( buf, buf6 );
+            strcat(buf,buf7);   
+        strcat( buf, "\n\r" );
+            buf[5] = UPPER(buf[5]);
+            send_to_char( buf, ch );
+        return;
+    }
+    
+    // Webbed
     if ( IS_AFFECTED(victim, AFF_WEBBED) ) 
     {
-	if (IS_NPC(victim))
-	    sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->short_descr );
-	else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
-	    sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->morph );
-	else
-	    sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->name );
-	strcat( buf3, buf4 );
+        if (IS_NPC(victim))
+            sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->short_descr );
+        else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
+            sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->morph );
+        else
+            sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->name );
+        strcat( buf3, buf4 );
     }
 
     if ( !IS_NPC(victim) && IS_AFFECTED(victim, AFF_POLYMORPH) )
-	strcat( buf, victim->morph );
+    {
+        if (IS_IMMORTAL(ch))
+        {
+            // Imms get the real character name in [] after the morph name.
+            sprintf( mount2, "%s #0[#n%s#0]#n", victim->morph, victim->name );
+            strcat( buf, mount2 );
+        }
+        else
+        {
+	        strcat( buf, victim->morph );
+        }
+    }
     else if ( victim->position == POS_STANDING && victim->long_descr[0] != '\0' && (mount = victim->mount) == NULL )
     {
-	strcat( buf, victim->long_descr );
-	send_to_char( buf, ch );
-	if ( IS_NPC(ch) || !IS_SET(ch->act, PLR_BRIEF) )
-	{
-	    if ( IS_ITEMAFF(victim, ITEMA_SHOCKSHIELD) ) 
-		act( "...$N is surrounded by a crackling shield of #ylightning#n.", ch,NULL,victim,TO_CHAR );
-	    if ( IS_ITEMAFF(victim, ITEMA_FIRESHIELD) ) 
-		act( "...$N is surrounded by a burning shield of #Rf#yi#Rr#ye#n.", ch,NULL,victim,TO_CHAR );
-	    if ( IS_ITEMAFF(victim, ITEMA_ICESHIELD) ) 
-		act( "...$N is surrounded by a shimmering shield of #Cice#n.", ch,NULL,victim,TO_CHAR );
-	    if ( IS_ITEMAFF(victim, ITEMA_ACIDSHIELD) ) 
-		act( "...$N is surrounded by a bubbling shield of #La#Rc#Li#Rd#n.", ch,NULL,victim,TO_CHAR );
-	    if ( IS_ITEMAFF(victim, ITEMA_CHAOSSHIELD) ) 
-		act( "...$N is surrounded by a swirling shield of #0c#Rh#0a#Ro#0s#n.", ch,NULL,victim,TO_CHAR );
-	    if ( IS_ITEMAFF(victim, ITEMA_REFLECT) ) 
-		act( "...$N is surrounded by a flickering shield of #0darkness#n.", ch,NULL,victim,TO_CHAR );
-	}
-	return;
+        strcat( buf, victim->long_descr );
+        send_to_char( buf, ch );
+        if ( IS_NPC(ch) || !IS_SET(ch->act, PLR_BRIEF) )
+        {
+            if ( IS_ITEMAFF(victim, ITEMA_SHOCKSHIELD) ) 
+            act( "...$N is surrounded by a crackling shield of #ylightning#n.", ch,NULL,victim,TO_CHAR );
+            if ( IS_ITEMAFF(victim, ITEMA_FIRESHIELD) ) 
+            act( "...$N is surrounded by a burning shield of #Rf#yi#Rr#ye#n.", ch,NULL,victim,TO_CHAR );
+            if ( IS_ITEMAFF(victim, ITEMA_ICESHIELD) ) 
+            act( "...$N is surrounded by a shimmering shield of #Cice#n.", ch,NULL,victim,TO_CHAR );
+            if ( IS_ITEMAFF(victim, ITEMA_ACIDSHIELD) ) 
+            act( "...$N is surrounded by a bubbling shield of #La#Rc#Li#Rd#n.", ch,NULL,victim,TO_CHAR );
+            if ( IS_ITEMAFF(victim, ITEMA_CHAOSSHIELD) ) 
+            act( "...$N is surrounded by a swirling shield of #0c#Rh#0a#Ro#0s#n.", ch,NULL,victim,TO_CHAR );
+            if ( IS_ITEMAFF(victim, ITEMA_REFLECT) ) 
+            act( "...$N is surrounded by a flickering shield of #0darkness#n.", ch,NULL,victim,TO_CHAR );
+        }
+        return;
     }
     else
     	strcat( buf, PERS( victim, ch ) );
 
     if ((mount = victim->mount) != NULL && victim->mounted == IS_RIDING)
     {
-	if (IS_NPC(mount))
-	    sprintf( mount2, " is here riding %s", mount->short_descr );
-	else
-	    sprintf( mount2, " is here riding %s", mount->name );
-	strcat( buf, mount2 );
-	if (victim->position == POS_FIGHTING)
-	{
-	    strcat( buf, ", fighting " );
-	    if ( victim->fighting == NULL )
-	        strcat( buf, "thin air??" );
-	    else if ( victim->fighting == ch )
-	    strcat( buf, "YOU!" );
-	    else if ( victim->in_room == victim->fighting->in_room )
-	    {
-	        strcat( buf, PERS( victim->fighting, ch ) );
-	        strcat( buf, "." );
-	    }
-	    else
-	        strcat( buf, "somone who left??" );
-	}
-	else strcat( buf, "." );
+        if (IS_NPC(mount))
+            sprintf( mount2, " is here riding %s", mount->short_descr );
+        else
+            sprintf( mount2, " is here riding %s", mount->name );
+        strcat( buf, mount2 );
+        if (victim->position == POS_FIGHTING)
+        {
+            strcat( buf, ", fighting " );
+            if ( victim->fighting == NULL )
+                strcat( buf, "thin air??" );
+            else if ( victim->fighting == ch )
+            strcat( buf, "YOU!" );
+            else if ( victim->in_room == victim->fighting->in_room )
+            {
+                strcat( buf, PERS( victim->fighting, ch ) );
+                strcat( buf, "." );
+            }
+            else
+                strcat( buf, "somone who left??" );
+        }
+        else strcat( buf, "." );
     }
     else if ( victim->position == POS_STANDING && IS_AFFECTED(victim, AFF_FLYING) )
-	strcat( buf, " is hovering here" );
+	    strcat( buf, " is hovering here" );
     else if ( victim->position == POS_STANDING && (!IS_NPC(victim) && (IS_VAMPAFF(victim, VAM_FLYING))) )
-	strcat( buf, " is hovering here" );
-    else if (victim->position == POS_STANDING && (!IS_NPC(victim) &&
-IS_CLASS(victim, CLASS_DROW) && IS_SET(victim->pcdata->powers[1], DPOWER_LEVITATION)))
-	strcat(buf, " is hovering here" );
+	    strcat( buf, " is hovering here" );
+    else if (victim->position == POS_STANDING && (!IS_NPC(victim) 
+            && IS_CLASS(victim, CLASS_DROW) && IS_SET(victim->pcdata->powers[1], DPOWER_LEVITATION)))
+	    strcat(buf, " is hovering here" );
     else
     {
     	switch ( victim->position )
@@ -870,39 +894,40 @@ void show_char_to_char( CHAR_DATA *list, CHAR_DATA *ch )
 
     for ( rch = list; rch != NULL; rch = rch->next_in_room )
     {
-	if ( rch == ch )
-	    continue;
+        if ( rch == ch )
+            continue;
 
-	if ( IS_IMMORTAL(ch) || IS_IMMORTAL(rch) )
-	{
-	    if ( !IS_NPC(rch)
-	    &&   IS_SET(rch->act, PLR_WIZINVIS)
-	    &&   get_trust( ch ) < get_trust( rch ) )
-		continue;
-	}
-	else
-	{
-	    if ( !IS_NPC(rch)
-	    && ( IS_SET(rch->act, PLR_WIZINVIS)
-	    ||   IS_ITEMAFF(rch, ITEMA_VANISH) )
-	    &&   !IS_SET(ch->act, PLR_HOLYLIGHT)
-	    &&   !IS_ITEMAFF(ch, ITEMA_VISION) )
-		continue;
-	}
+        if ( IS_IMMORTAL(ch) || IS_IMMORTAL(rch) )
+        {
+            if ( !IS_NPC(rch)
+                &&   IS_SET(rch->act, PLR_WIZINVIS)
+                &&   get_trust( ch ) < get_trust( rch ) 
+                )
+                continue;
+        }
+        else
+        {
+            if ( !IS_NPC(rch)
+            && ( IS_SET(rch->act, PLR_WIZINVIS)
+            ||   IS_ITEMAFF(rch, ITEMA_VANISH) )
+            &&   !IS_SET(ch->act, PLR_HOLYLIGHT)
+            &&   !IS_ITEMAFF(ch, ITEMA_VISION) )
+            continue;
+        }
 
-	if ( !IS_NPC(rch) && IS_HEAD(rch,LOST_HEAD))
-	    continue;
+        if ( !IS_NPC(rch) && IS_HEAD(rch,LOST_HEAD))
+            continue;
 
-	if ( !IS_NPC(rch) && IS_EXTRA(rch,EXTRA_OSWITCH))
-	    continue;
+        if ( !IS_NPC(rch) && IS_EXTRA(rch,EXTRA_OSWITCH))
+            continue;
 
-	if ( can_see( ch, rch ) )
-	    show_char_to_char_0( rch, ch );
-	else if ( room_is_dark( ch->in_room )
-	&&      ( IS_AFFECTED(rch, AFF_INFRARED)||(!IS_NPC(rch)&&IS_VAMPAFF(rch, VAM_NIGHTSIGHT))))
-	{
-	    send_to_char( "You see glowing #Rred#n eyes watching YOU!\n\r", ch );
-	}
+        if ( can_see( ch, rch ) )
+            show_char_to_char_0( rch, ch );
+        else if ( room_is_dark( ch->in_room )
+        &&      ( IS_AFFECTED(rch, AFF_INFRARED)||(!IS_NPC(rch)&&IS_VAMPAFF(rch, VAM_NIGHTSIGHT))))
+        {
+            send_to_char( "You see glowing #Rred#n eyes watching YOU!\n\r", ch );
+        }
     }
 
     return;
@@ -1020,321 +1045,322 @@ void do_look( CHAR_DATA *ch, char *argument )
             act( "$p",ch,ch->pcdata->chobj->in_obj,NULL,TO_CHAR);
         else if ( IS_AFFECTED(ch, AFF_SHADOWPLANE) )
             send_to_char( "The shadow plane\n\r", ch );
-	else
-	{
-        if (!IS_NPC(ch) && ch->level > 6)
-        {
-            sprintf(buf, "%s #0[#7%d#0]#n\n\r", ch->in_room->name, ch->in_room->vnum);
-            send_to_char( buf, ch );
-        }
         else
         {
-            sprintf(buf, "%s\n\r", ch->in_room->name);
-            send_to_char( buf, ch );
+            if (!IS_NPC(ch) && ch->level > 6)
+            {
+                sprintf(buf, "%s #0[#7%d#0]#n\n\r", ch->in_room->name, ch->in_room->vnum);
+                send_to_char( buf, ch );
+            }
+            else
+            {
+                sprintf(buf, "%s\n\r", ch->in_room->name);
+                send_to_char( buf, ch );
+            }
         }
-	}
 
-	if ( !IS_NPC(ch) && IS_SET(ch->act, PLR_AUTOEXIT) )
-	    do_exits( ch, "auto" );
+        if ( !IS_NPC(ch) && IS_SET(ch->act, PLR_AUTOEXIT) )
+            do_exits( ch, "auto" );
 
-	if (ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT
-	    && !IS_NPC(ch) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL)
-	{
-	    act( "You are inside $p.",ch,ch->pcdata->chobj->in_obj,NULL,TO_CHAR);
-	    show_list_to_char( ch->pcdata->chobj->in_obj->contains, ch, FALSE, FALSE );
-	}
-	else if ( (arg1[0] == '\0' || !str_cmp( arg1, "auto" ) ) && IS_AFFECTED(ch, AFF_SHADOWPLANE) )
-	    send_to_char( "You are standing in complete darkness.\n\r", ch );
-	else if ( ( !IS_NPC(ch) && !IS_SET(ch->act, PLR_BRIEF) ) &&
-		( arg1[0] == '\0' || !str_cmp( arg1, "auto" ) ) )
-	{
-	    send_to_char( ch->in_room->description, ch );
-	    if (ch->in_room->blood == 1000)
-		sprintf(buf,"You notice that the room is completely drenched in blood.\n\r");
-	    else if (ch->in_room->blood > 750)
-		sprintf(buf,"You notice that there is a very large amount of blood around the room.\n\r");
-	    else if (ch->in_room->blood > 500)
-		sprintf(buf,"You notice that there is a large quantity of blood around the room.\n\r");
-	    else if (ch->in_room->blood > 250)
-		sprintf(buf,"You notice a fair amount of blood on the floor.\n\r");
-	    else if (ch->in_room->blood > 100)
-		sprintf(buf,"You notice several blood stains on the floor.\n\r");
-	    else if (ch->in_room->blood > 50)
-		sprintf(buf,"You notice a few blood stains on the floor.\n\r");
-	    else if (ch->in_room->blood > 25)
-		sprintf(buf,"You notice a couple of blood stains on the floor.\n\r");
-	    else if (ch->in_room->blood > 0)
-		sprintf(buf,"You notice a few drops of blood on the floor.\n\r");
-	    else sprintf(buf,"You notice nothing special in the room.\n\r");
-	    ADD_COLOUR(ch, buf, L_RED);
-	    if (ch->in_room->blood > 0) send_to_char(buf,ch);
-	}
-            if (IS_SET(ch->in_room->room_flags, ROOM_FLAMING))
-            send_to_char("..This room is engulfed in flames!\n\r",ch);
+        if (ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT
+            && !IS_NPC(ch) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL)
+        {
+            act( "You are inside $p.",ch,ch->pcdata->chobj->in_obj,NULL,TO_CHAR);
+            show_list_to_char( ch->pcdata->chobj->in_obj->contains, ch, FALSE, FALSE );
+        }
+        else if ( (arg1[0] == '\0' || !str_cmp( arg1, "auto" ) ) && IS_AFFECTED(ch, AFF_SHADOWPLANE) )
+            send_to_char( "You are standing in complete darkness.\n\r", ch );
+        else if ( ( !IS_NPC(ch) && !IS_SET(ch->act, PLR_BRIEF) ) &&
+            ( arg1[0] == '\0' || !str_cmp( arg1, "auto" ) ) )
+        {
+            send_to_char( ch->in_room->description, ch );
+            if (ch->in_room->blood == 1000)
+            sprintf(buf,"You notice that the room is completely drenched in blood.\n\r");
+            else if (ch->in_room->blood > 750)
+            sprintf(buf,"You notice that there is a very large amount of blood around the room.\n\r");
+            else if (ch->in_room->blood > 500)
+            sprintf(buf,"You notice that there is a large quantity of blood around the room.\n\r");
+            else if (ch->in_room->blood > 250)
+            sprintf(buf,"You notice a fair amount of blood on the floor.\n\r");
+            else if (ch->in_room->blood > 100)
+            sprintf(buf,"You notice several blood stains on the floor.\n\r");
+            else if (ch->in_room->blood > 50)
+            sprintf(buf,"You notice a few blood stains on the floor.\n\r");
+            else if (ch->in_room->blood > 25)
+            sprintf(buf,"You notice a couple of blood stains on the floor.\n\r");
+            else if (ch->in_room->blood > 0)
+            sprintf(buf,"You notice a few drops of blood on the floor.\n\r");
+            else sprintf(buf,"You notice nothing special in the room.\n\r");
+            ADD_COLOUR(ch, buf, L_RED);
+            if (ch->in_room->blood > 0) send_to_char(buf,ch);
+        }
+                if (IS_SET(ch->in_room->room_flags, ROOM_FLAMING))
+                send_to_char("..This room is engulfed in flames!\n\r",ch);
 
-	show_list_to_char( ch->in_room->contents, ch, FALSE, FALSE );
+        show_list_to_char( ch->in_room->contents, ch, FALSE, FALSE );
 
         for (door=0 ; door < 6 ; door++)
-	{	
-	    if (ch->in_room == NULL) continue;
-	    if (ch->in_room->exit[door] == NULL) continue;
+        {	
+            if (ch->in_room == NULL) continue;
+            if (ch->in_room->exit[door] == NULL) continue;
 
-	    if (IS_SET(ch->in_room->exit[door]->exit_info,EX_PRISMATIC_WALL)) 	    
-	    {
-		sprintf(buf, "     You see a shimmering wall of many colours %s.\n\r", exitname2[door]);
-	        send_to_char(buf, ch);
-	    }
-	    else if (IS_SET(ch->in_room->exit[door]->exit_info, EX_ICE_WALL))
-	    {
-		sprintf(buf, "     You see a glacier of ice %s.\n\r", exitname2[door]);
-	        send_to_char(buf, ch);
-	    }
-	    else if (IS_SET(ch->in_room->exit[door]->exit_info,EX_CALTROP_WALL))
-	    {
-		sprintf(buf, "     You see a wall of caltrops %s.\n\r", exitname2[door]);
-	        send_to_char(buf, ch);
-	    }
-	    else if (IS_SET(ch->in_room->exit[door]->exit_info,EX_FIRE_WALL))
-	    {
-		sprintf(buf, "     You see a blazing wall of fire %s.\n\r", exitname2[door]);
-	        send_to_char(buf, ch);
-	    }
-	    else if (IS_SET(ch->in_room->exit[door]->exit_info,EX_SWORD_WALL))
-	    {
-		sprintf(buf, "     You see a spinning wall of swords %s.\n\r", exitname2[door]);
-	        send_to_char(buf, ch);
-	    }
-	    else if (IS_SET(ch->in_room->exit[door]->exit_info,EX_MUSHROOM_WALL))
-	    {
-		sprintf(buf, "     You see a vibrating mound of mushrooms %s.\n\r", exitname2[door]);
-	        send_to_char(buf, ch);
-	    }
-	    else if (IS_SET(ch->in_room->exit[door]->exit_info, EX_IRON_WALL))
-	    {
-		sprintf(buf, "    You see a solid wall of iron %s.\n\r", exitname2[door]);
-	        send_to_char(buf, ch);
-	    }
-	    else if (IS_SET(ch->in_room->exit[door]->exit_info, EX_ASH_WALL))
-	    {
-		sprintf(buf, "    You see a deadly wall of ash %s.\n\r", exitname2[door]);
-	        send_to_char(buf, ch);
-	    }
-	}
-	show_char_to_char( ch->in_room->people,   ch );
+            if (IS_SET(ch->in_room->exit[door]->exit_info,EX_PRISMATIC_WALL)) 	    
+            {
+            sprintf(buf, "     You see a shimmering wall of many colours %s.\n\r", exitname2[door]);
+                send_to_char(buf, ch);
+            }
+            else if (IS_SET(ch->in_room->exit[door]->exit_info, EX_ICE_WALL))
+            {
+            sprintf(buf, "     You see a glacier of ice %s.\n\r", exitname2[door]);
+                send_to_char(buf, ch);
+            }
+            else if (IS_SET(ch->in_room->exit[door]->exit_info,EX_CALTROP_WALL))
+            {
+            sprintf(buf, "     You see a wall of caltrops %s.\n\r", exitname2[door]);
+                send_to_char(buf, ch);
+            }
+            else if (IS_SET(ch->in_room->exit[door]->exit_info,EX_FIRE_WALL))
+            {
+            sprintf(buf, "     You see a blazing wall of fire %s.\n\r", exitname2[door]);
+                send_to_char(buf, ch);
+            }
+            else if (IS_SET(ch->in_room->exit[door]->exit_info,EX_SWORD_WALL))
+            {
+            sprintf(buf, "     You see a spinning wall of swords %s.\n\r", exitname2[door]);
+                send_to_char(buf, ch);
+            }
+            else if (IS_SET(ch->in_room->exit[door]->exit_info,EX_MUSHROOM_WALL))
+            {
+            sprintf(buf, "     You see a vibrating mound of mushrooms %s.\n\r", exitname2[door]);
+                send_to_char(buf, ch);
+            }
+            else if (IS_SET(ch->in_room->exit[door]->exit_info, EX_IRON_WALL))
+            {
+            sprintf(buf, "    You see a solid wall of iron %s.\n\r", exitname2[door]);
+                send_to_char(buf, ch);
+            }
+            else if (IS_SET(ch->in_room->exit[door]->exit_info, EX_ASH_WALL))
+            {
+            sprintf(buf, "    You see a deadly wall of ash %s.\n\r", exitname2[door]);
+                send_to_char(buf, ch);
+            }
+        }
+        
+        show_char_to_char( ch->in_room->people,   ch );
         if (str_cmp(arg1, "scry")) aggr_test(ch);
-	return;
+        return;
     }
 
     if ( !str_cmp( arg1, "i" ) || !str_cmp( arg1, "in" ) )
     {
-	/* 'look in' */
-	if ( arg2[0] == '\0' )
-	{
-	    send_to_char( "Look in what?\n\r", ch );
-	    return;
-	}
+        /* 'look in' */
+        if ( arg2[0] == '\0' )
+        {
+            send_to_char( "Look in what?\n\r", ch );
+            return;
+        }
 
-	if ( ( obj = get_obj_here( ch, arg2 ) ) == NULL )
-	{
-	    send_to_char( "You do not see that here.\n\r", ch );
-	    return;
-	}
+        if ( ( obj = get_obj_here( ch, arg2 ) ) == NULL )
+        {
+            send_to_char( "You do not see that here.\n\r", ch );
+            return;
+        }
 
-	switch ( obj->item_type )
-	{
-	default:
-	    send_to_char( "That is not a container.\n\r", ch );
-	    break;
+        switch ( obj->item_type )
+        {
+        default:
+            send_to_char( "That is not a container.\n\r", ch );
+            break;
 
-	case ITEM_PORTAL:
-	    pRoomIndex = get_room_index(obj->value[0]);
-	    location = ch->in_room;
-	    if ( pRoomIndex == NULL )
-	    {
-		send_to_char( "It doesn't seem to lead anywhere.\n\r", ch );
-		return;
-	    }
-	    if (obj->value[2] == 1 || obj->value[2] == 3)
-	    {
-		send_to_char( "It seems to be closed.\n\r", ch );
-		return;
-	    }
-	    char_from_room(ch);
-	    char_to_room(ch,pRoomIndex);
+        case ITEM_PORTAL:
+            pRoomIndex = get_room_index(obj->value[0]);
+            location = ch->in_room;
+            if ( pRoomIndex == NULL )
+            {
+            send_to_char( "It doesn't seem to lead anywhere.\n\r", ch );
+            return;
+            }
+            if (obj->value[2] == 1 || obj->value[2] == 3)
+            {
+            send_to_char( "It seems to be closed.\n\r", ch );
+            return;
+            }
+            char_from_room(ch);
+            char_to_room(ch,pRoomIndex);
 
-	    found = FALSE;
-	    for ( portal = ch->in_room->contents; portal != NULL; portal = portal_next )
-	    {
-		portal_next = portal->next_content;
-		if ( ( obj->value[0] == portal->value[3]  )
-		    && (obj->value[3] == portal->value[0]) )
-		{
-		    found = TRUE;
-		    if (IS_AFFECTED(ch, AFF_SHADOWPLANE) &&
-			!IS_SET(portal->extra_flags, ITEM_SHADOWPLANE) )
-		    {
-			REMOVE_BIT(ch->affected_by, AFF_SHADOWPLANE);
-	    		do_look(ch,"auto");
-			SET_BIT(ch->affected_by, AFF_SHADOWPLANE);
-			break;
-		    }
-		    else if (!IS_AFFECTED(ch, AFF_SHADOWPLANE) &&
-			IS_SET(portal->extra_flags, ITEM_SHADOWPLANE) )
-		    {
-			SET_BIT(ch->affected_by, AFF_SHADOWPLANE);
-	    		do_look(ch,"auto");
-			REMOVE_BIT(ch->affected_by, AFF_SHADOWPLANE);
-			break;
-		    }
-		    else
-		    {
-	    		do_look(ch,"auto");
-			break;
-		    }
-	    	}
-	    }
-	    char_from_room(ch);
-	    char_to_room(ch,location);
-	    break;
+            found = FALSE;
+            for ( portal = ch->in_room->contents; portal != NULL; portal = portal_next )
+            {
+            portal_next = portal->next_content;
+            if ( ( obj->value[0] == portal->value[3]  )
+                && (obj->value[3] == portal->value[0]) )
+            {
+                found = TRUE;
+                if (IS_AFFECTED(ch, AFF_SHADOWPLANE) &&
+                !IS_SET(portal->extra_flags, ITEM_SHADOWPLANE) )
+                {
+                REMOVE_BIT(ch->affected_by, AFF_SHADOWPLANE);
+                    do_look(ch,"auto");
+                SET_BIT(ch->affected_by, AFF_SHADOWPLANE);
+                break;
+                }
+                else if (!IS_AFFECTED(ch, AFF_SHADOWPLANE) &&
+                IS_SET(portal->extra_flags, ITEM_SHADOWPLANE) )
+                {
+                SET_BIT(ch->affected_by, AFF_SHADOWPLANE);
+                    do_look(ch,"auto");
+                REMOVE_BIT(ch->affected_by, AFF_SHADOWPLANE);
+                break;
+                }
+                else
+                {
+                    do_look(ch,"auto");
+                break;
+                }
+                }
+            }
+            char_from_room(ch);
+            char_to_room(ch,location);
+            break;
 
-	case ITEM_DRINK_CON:
-	    if ( obj->value[1] <= 0 )
-	    {
-		send_to_char( "It is empty.\n\r", ch );
-		break;
-	    }
+        case ITEM_DRINK_CON:
+            if ( obj->value[1] <= 0 )
+            {
+            send_to_char( "It is empty.\n\r", ch );
+            break;
+            }
 
-	    if (obj->value[1] < obj->value[0] / 5)
-	    	sprintf( buf, "There is a little %s liquid left in it.\n\r",liq_table[obj->value[2]].liq_color);
-	    else if (obj->value[1] < obj->value[0] / 4)
-	    	sprintf( buf, "It contains a small about of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
-	    else if (obj->value[1] < obj->value[0] / 3)
-	    	sprintf( buf, "It's about a third full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
-	    else if (obj->value[1] < obj->value[0] / 2)
-	    	sprintf( buf, "It's about half full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
-	    else if (obj->value[1] < obj->value[0])
-	    	sprintf( buf, "It is almost full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
-	    else if (obj->value[1] == obj->value[0])
-	    	sprintf( buf, "It's completely full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
-	    else
-	    	sprintf( buf, "Somehow it is MORE than full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
-	    send_to_char( buf, ch );
-	    break;
+            if (obj->value[1] < obj->value[0] / 5)
+                sprintf( buf, "There is a little %s liquid left in it.\n\r",liq_table[obj->value[2]].liq_color);
+            else if (obj->value[1] < obj->value[0] / 4)
+                sprintf( buf, "It contains a small about of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
+            else if (obj->value[1] < obj->value[0] / 3)
+                sprintf( buf, "It's about a third full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
+            else if (obj->value[1] < obj->value[0] / 2)
+                sprintf( buf, "It's about half full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
+            else if (obj->value[1] < obj->value[0])
+                sprintf( buf, "It is almost full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
+            else if (obj->value[1] == obj->value[0])
+                sprintf( buf, "It's completely full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
+            else
+                sprintf( buf, "Somehow it is MORE than full of %s liquid.\n\r",liq_table[obj->value[2]].liq_color);
+            send_to_char( buf, ch );
+            break;
 
-	case ITEM_CONTAINER:
-	case ITEM_CORPSE_NPC:
-	case ITEM_CORPSE_PC:
-	    if ( IS_SET(obj->value[1], CONT_CLOSED) )
-	    {
-		send_to_char( "It is closed.\n\r", ch );
-		break;
-	    }
+        case ITEM_CONTAINER:
+        case ITEM_CORPSE_NPC:
+        case ITEM_CORPSE_PC:
+            if ( IS_SET(obj->value[1], CONT_CLOSED) )
+            {
+            send_to_char( "It is closed.\n\r", ch );
+            break;
+            }
 
-	    act( "$p contains:", ch, obj, NULL, TO_CHAR );
-	    show_list_to_char( obj->contains, ch, TRUE, TRUE );
-	    break;
-	}
-	return;
+            act( "$p contains:", ch, obj, NULL, TO_CHAR );
+            show_list_to_char( obj->contains, ch, TRUE, TRUE );
+            break;
+        }
+        return;
     }
 
     if ( ( victim = get_char_room( ch, arg1 ) ) != NULL )
     {
-	show_char_to_char_1( victim, ch );
-	evil_eye(victim,ch);
-	return;
+        show_char_to_char_1( victim, ch );
+        evil_eye(victim,ch);
+        return;
     }
 
     for ( vch = char_list; vch != NULL; vch = vch_next )
     {
-	vch_next	= vch->next;
-	if ( vch->in_room == NULL )
-	    continue;
-	if ( vch->in_room == ch->in_room )
-	{
-	    if (!IS_NPC(vch) && !str_cmp(arg1,vch->morph))
-	    {
-		show_char_to_char_1( vch, ch );
-		evil_eye(vch,ch);
-		return;
-	    }
-	    continue;
-	}
+        vch_next	= vch->next;
+        if ( vch->in_room == NULL )
+            continue;
+        if ( vch->in_room == ch->in_room )
+        {
+            if (!IS_NPC(vch) && !str_cmp(arg1,vch->morph))
+            {
+                show_char_to_char_1( vch, ch );
+                evil_eye(vch,ch);
+                return;
+            }
+            continue;
+        }
     }
 
     if (!IS_NPC(ch) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL)
     {
-	obj = get_obj_in_obj(ch,arg1);
-	if (obj != NULL)
-	{
-	    send_to_char( obj->description, ch );
-	    send_to_char( "\n\r", ch );
-	    return;
-	}
+        obj = get_obj_in_obj(ch,arg1);
+        if (obj != NULL)
+        {
+            send_to_char( obj->description, ch );
+            send_to_char( "\n\r", ch );
+            return;
+        }
     }
 
     for ( obj = ch->carrying; obj != NULL; obj = obj->next_content )
     {
-	if (!IS_NPC(ch) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch)
-	    continue;
-	if ( can_see_obj( ch, obj ) )
-	{
-	    pdesc = get_extra_descr( arg1, obj->extra_descr );
-	    if ( pdesc != NULL )
-	    {
-		send_to_char( pdesc, ch );
-		return;
-	    }
+        if (!IS_NPC(ch) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch)
+            continue;
+        if ( can_see_obj( ch, obj ) )
+        {
+            pdesc = get_extra_descr( arg1, obj->extra_descr );
+            if ( pdesc != NULL )
+            {
+            send_to_char( pdesc, ch );
+            return;
+            }
 
-	    pdesc = get_extra_descr( arg1, obj->pIndexData->extra_descr );
-	    if ( pdesc != NULL )
-	    {
-		send_to_char( pdesc, ch );
-		return;
-	    }
-	}
+            pdesc = get_extra_descr( arg1, obj->pIndexData->extra_descr );
+            if ( pdesc != NULL )
+            {
+            send_to_char( pdesc, ch );
+            return;
+            }
+        }
 
-	if ( is_name( arg1, obj->name ) )
-	{
-	    send_to_char( obj->description, ch );
-	    send_to_char( "\n\r", ch );
-	    return;
-	}
+        if ( is_name( arg1, obj->name ) )
+        {
+            send_to_char( obj->description, ch );
+            send_to_char( "\n\r", ch );
+            return;
+        }
     }
 
     for ( obj = ch->in_room->contents; obj != NULL; obj = obj->next_content )
     {
-	if (!IS_NPC(ch) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch)
-	    continue;
-	if ( can_see_obj( ch, obj ) )
-	{
-	    pdesc = get_extra_descr( arg1, obj->extra_descr );
-	    if ( pdesc != NULL )
-	    {
-		send_to_char( pdesc, ch );
-		return;
-	    }
+        if (!IS_NPC(ch) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch)
+            continue;
+        if ( can_see_obj( ch, obj ) )
+        {
+            pdesc = get_extra_descr( arg1, obj->extra_descr );
+            if ( pdesc != NULL )
+            {
+            send_to_char( pdesc, ch );
+            return;
+            }
 
-	    pdesc = get_extra_descr( arg1, obj->pIndexData->extra_descr );
-	    if ( pdesc != NULL )
-	    {
-		send_to_char( pdesc, ch );
-		return;
-	    }
-	}
+            pdesc = get_extra_descr( arg1, obj->pIndexData->extra_descr );
+            if ( pdesc != NULL )
+            {
+            send_to_char( pdesc, ch );
+            return;
+            }
+        }
 
-	if ( is_name( arg1, obj->name ) )
-	{
-	    send_to_char( obj->description, ch );
-	    send_to_char( "\n\r", ch );
-	    return;
-	}
+        if ( is_name( arg1, obj->name ) )
+        {
+            send_to_char( obj->description, ch );
+            send_to_char( "\n\r", ch );
+            return;
+        }
     }
 
     pdesc = get_extra_descr( arg1, ch->in_room->extra_descr );
     if ( pdesc != NULL )
     {
-	send_to_char( pdesc, ch );
-	return;
+        send_to_char( pdesc, ch );
+        return;
     }
 
          if ( !str_cmp( arg1, "n" ) || !str_cmp( arg1, "north" ) ) door = 0;
@@ -1345,15 +1371,15 @@ void do_look( CHAR_DATA *ch, char *argument )
     else if ( !str_cmp( arg1, "d" ) || !str_cmp( arg1, "down"  ) ) door = 5;
     else
     {
-	send_to_char( "You do not see that here.\n\r", ch );
-	return;
+        send_to_char( "You do not see that here.\n\r", ch );
+        return;
     }
 
     /* 'look direction' */
     if ( ( pexit = ch->in_room->exit[door] ) == NULL )
     {
-	send_to_char( "Nothing special there.\n\r", ch );
-	return;
+        send_to_char( "Nothing special there.\n\r", ch );
+        return;
     }
 /*
     if ( pexit->description != NULL && pexit->description[0] != '\0' )
@@ -1366,44 +1392,44 @@ void do_look( CHAR_DATA *ch, char *argument )
     &&   pexit->keyword[0] != '\0'
     &&   pexit->keyword[0] != ' ' )
     {
-	if ( IS_SET(pexit->exit_info, EX_CLOSED) )
-	{
-	    act( "The $d is closed.", ch, NULL, pexit->keyword, TO_CHAR );
-	}
-	else if ( IS_SET(pexit->exit_info, EX_ISDOOR) )
-	{
-	    act( "The $d is open.",   ch, NULL, pexit->keyword, TO_CHAR );
-	    if ((pexit = ch->in_room->exit[door]) == NULL) return;
-	    if ((pRoomIndex = pexit->to_room) == NULL) return;
-	    location = ch->in_room;
-	    char_from_room(ch);
-	    char_to_room(ch,pRoomIndex);
-	    do_look(ch,"auto");
-	    char_from_room(ch);
-	    char_to_room(ch,location);
-	}
-	else
-	{
-	    if ((pexit = ch->in_room->exit[door]) == NULL) return;
-	    if ((pRoomIndex = pexit->to_room) == NULL) return;
-	    location = ch->in_room;
-	    char_from_room(ch);
-	    char_to_room(ch,pRoomIndex);
-	    do_look(ch,"auto");
-	    char_from_room(ch);
-	    char_to_room(ch,location);
-	}
+        if ( IS_SET(pexit->exit_info, EX_CLOSED) )
+        {
+            act( "The $d is closed.", ch, NULL, pexit->keyword, TO_CHAR );
+        }
+        else if ( IS_SET(pexit->exit_info, EX_ISDOOR) )
+        {
+            act( "The $d is open.",   ch, NULL, pexit->keyword, TO_CHAR );
+            if ((pexit = ch->in_room->exit[door]) == NULL) return;
+            if ((pRoomIndex = pexit->to_room) == NULL) return;
+            location = ch->in_room;
+            char_from_room(ch);
+            char_to_room(ch,pRoomIndex);
+            do_look(ch,"auto");
+            char_from_room(ch);
+            char_to_room(ch,location);
+        }
+        else
+        {
+            if ((pexit = ch->in_room->exit[door]) == NULL) return;
+            if ((pRoomIndex = pexit->to_room) == NULL) return;
+            location = ch->in_room;
+            char_from_room(ch);
+            char_to_room(ch,pRoomIndex);
+            do_look(ch,"auto");
+            char_from_room(ch);
+            char_to_room(ch,location);
+        }
     }
     else
     {
-	if ((pexit = ch->in_room->exit[door]) == NULL) return;
-	if ((pRoomIndex = pexit->to_room) == NULL) return;
-	location = ch->in_room;
-	char_from_room(ch);
-	char_to_room(ch,pRoomIndex);
-	do_look(ch,"auto");
-	char_from_room(ch);
-	char_to_room(ch,location);
+        if ((pexit = ch->in_room->exit[door]) == NULL) return;
+        if ((pRoomIndex = pexit->to_room) == NULL) return;
+        location = ch->in_room;
+        char_from_room(ch);
+        char_to_room(ch,pRoomIndex);
+        do_look(ch,"auto");
+        char_from_room(ch);
+        char_to_room(ch,location);
     }
 
     return;
@@ -1556,51 +1582,51 @@ void do_weaplist( CHAR_DATA *ch, char *argument )
     if (IS_NPC(ch)) return;
  
  
-send_to_char(
+    send_to_char(
 
-"------------------------------------------------------------------------------\n\r",ch);
-send_to_char(
- "                    Weapon, Stance, and Spell Skill           \n\r",ch);
-send_to_char(
+    "------------------------------------------------------------------------------\n\r",ch);
+    send_to_char(
+    "                    Weapon, Stance, and Spell Skill           \n\r",ch);
+    send_to_char(
 
-"------------------------------------------------------------------------------\n\r",ch);
-send_to_char(
- "                            Weapon\n\r",ch);
-sprintf( buf,
-"Unarm:%-4d Slice:%-4d Stab:%-4d Slash:%-4d Whip:%-4d Claw:%-4d Blast:%-4d\n\r",
-ch->wpn[0],ch->wpn[1],ch->wpn[2],ch->wpn[3],ch->wpn[4],ch->wpn[5],ch->wpn[6]);
-send_to_char(buf,ch);
-sprintf( buf,
-"Pound  :%-4d Crush  :%-4d Grep   :%-4d Bite    :%-4d Pierce:%-4d Suck   :%-4d\n\r",
-ch->wpn[7],ch->wpn[8],ch->wpn[9],ch->wpn[10],ch->wpn[11],ch->wpn[12]);
-send_to_char(buf,ch);
-send_to_char(
+    "------------------------------------------------------------------------------\n\r",ch);
+    send_to_char(
+    "                            Weapon\n\r",ch);
+    sprintf( buf,
+    "Unarm:%-4d Slice:%-4d Stab:%-4d Slash:%-4d Whip:%-4d Claw:%-4d Blast:%-4d\n\r",
+    ch->wpn[0],ch->wpn[1],ch->wpn[2],ch->wpn[3],ch->wpn[4],ch->wpn[5],ch->wpn[6]);
+    send_to_char(buf,ch);
+    sprintf( buf,
+    "Pound  :%-4d Crush  :%-4d Grep   :%-4d Bite    :%-4d Pierce:%-4d Suck   :%-4d\n\r",
+    ch->wpn[7],ch->wpn[8],ch->wpn[9],ch->wpn[10],ch->wpn[11],ch->wpn[12]);
+    send_to_char(buf,ch);
+    send_to_char(
 
-"------------------------------------------------------------------------------\n\r",ch);
-send_to_char(
- "                            Stances\n\r",ch);
-sprintf( buf,
-"Viper : %-4d Crane: %-4d Crab  : %-4d Mongoose: %-4d Bull: %-4d Mantis: %-4d\n\r",
-ch->stance[1],ch->stance[2],ch->stance[3],ch->stance[4],ch->stance[5],ch->stance[6]);
-send_to_char(buf,ch);
-sprintf( buf,
-"Dragon: %-4d Tiger: %-4d Monkey: %-4d Swallow: %-4d Leopard: %-4d\n\r",
-ch->stance[7],ch->stance[8],ch->stance[9],ch->stance[10],ch->stance[11]);
-send_to_char(buf,ch);
-send_to_char(
+    "------------------------------------------------------------------------------\n\r",ch);
+    send_to_char(
+    "                            Stances\n\r",ch);
+    sprintf( buf,
+    "Viper : %-4d Crane: %-4d Crab  : %-4d Mongoose: %-4d Bull: %-4d Mantis: %-4d\n\r",
+    ch->stance[1],ch->stance[2],ch->stance[3],ch->stance[4],ch->stance[5],ch->stance[6]);
+    send_to_char(buf,ch);
+    sprintf( buf,
+    "Dragon: %-4d Tiger: %-4d Monkey: %-4d Swallow: %-4d Leopard: %-4d\n\r",
+    ch->stance[7],ch->stance[8],ch->stance[9],ch->stance[10],ch->stance[11]);
+    send_to_char(buf,ch);
+    send_to_char(
 
-"------------------------------------------------------------------------------\n\r",ch);
-send_to_char(
- "                            Magic\n\r",ch);
-sprintf( buf,
-"Purple: %-4d  Red: %-4d  Blue: %-4d  Green: %-4d  Yellow: %-4d\n\r",ch->spl[0],ch->spl[1],ch->spl[2],ch->spl[3],ch->spl[4]);
-send_to_char(buf,ch);
-send_to_char(
+    "------------------------------------------------------------------------------\n\r",ch);
+    send_to_char(
+    "                            Magic\n\r",ch);
+    sprintf( buf,
+    "Purple: %-4d  Red: %-4d  Blue: %-4d  Green: %-4d  Yellow: %-4d\n\r",ch->spl[0],ch->spl[1],ch->spl[2],ch->spl[3],ch->spl[4]);
+    send_to_char(buf,ch);
+    send_to_char(
 
-"------------------------------------------------------------------------------\n\r",ch);
- 
- 
-return;
+    "------------------------------------------------------------------------------\n\r",ch);
+    
+    
+    return;
 }
 
  
@@ -2964,6 +2990,9 @@ void do_equipment( CHAR_DATA *ch, char *argument )
 
 void do_credits( CHAR_DATA *ch, char *argument )
 {
+    do_help( ch, "dystopia" );
+    do_help( ch, "godwars" );
+    do_help( ch, "merc" );
     do_help( ch, "diku" );
     return;
 }
