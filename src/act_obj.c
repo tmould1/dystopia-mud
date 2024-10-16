@@ -332,35 +332,32 @@ void get_obj( CHAR_DATA *ch, OBJ_DATA *obj, OBJ_DATA *container )
 
 void do_newbiepack( CHAR_DATA *ch, char *argument )
 {
-  if (ch->level >= 2)
-  {
-    send_to_char("You must be a mortal or avatar to create a newbie pack!\n\r",ch);
-    return;
-  }
-  else if (ch->level == 1)
-  {
-        ch->level = 12;
-        ch->trust = 12;
-        do_oload(ch,"30333");
-        do_oload(ch,"30334");
-        do_oload(ch,"30335");
-        do_oload(ch,"30336");
-        do_oload(ch,"30337");
+	int character_level = ch->level;
+	int character_trust = ch->trust;
+
+	ch->level = 12;
+	ch->trust = 12;
+	do_oload(ch,"30333");
+	do_oload(ch,"30334");
+	do_oload(ch,"30335");
+	do_oload(ch,"30336");
+	do_oload(ch,"30337");
 	do_oload(ch,"30338");
-        do_oload(ch,"30339");
-        do_oload(ch,"30339");
-        do_oload(ch,"30340");
-        do_oload(ch,"30340");
-        do_oload(ch,"30342");
-        do_oload(ch,"30342");
-        do_oload(ch,"30343");
-        do_oload(ch,"30343");
-        do_oload(ch,"2622");
-        do_oload(ch,"2204");
-        ch->level = 1;
-        ch->trust = 0;
-  }
-  return;
+	do_oload(ch,"30339");
+	do_oload(ch,"30339");
+	do_oload(ch,"30340");
+	do_oload(ch,"30340");
+	do_oload(ch,"30342");
+	do_oload(ch,"30342");
+	do_oload(ch,"30343");
+	do_oload(ch,"30343");
+	do_oload(ch,"2622");
+	do_oload(ch,"2204");
+	
+	ch->level = character_level;
+	ch->trust = character_trust;
+	send_to_char("You have created a newbie pack. Don't forget to equip items!\n\r",ch);
+	return;
 }
 
 void do_get( CHAR_DATA *ch, char *argument )
@@ -602,11 +599,13 @@ void do_put( CHAR_DATA *ch, char *argument )
 	    return;
 	}
 
-	if ( !can_drop_obj( ch, obj ) )
-	{
-	    send_to_char( "You can't let go of it.\n\r", ch );
-	    return;
-	}
+	// Putting is not dropping.  if you dont want someone dropping a container with
+	// a nodrop item, then scan when you are trying to drop the container.
+	// if ( !can_drop_obj( ch, obj ) )
+	// {
+	//     send_to_char( "You can't let go of it.\n\r", ch );
+	//     return;
+	// }
 
 	if ( get_obj_weight( obj ) + get_obj_weight( container )
 	     > container->value[0] )
@@ -3812,11 +3811,11 @@ void do_complete( CHAR_DATA *ch, char *argument )
 	send_to_char( "You are not carrying that object.\n\r", ch );
 	return;
     }
-    if (obj->questmaker != NULL && strlen(obj->questmaker) > 1)
-    {
-	send_to_char( "You cannot use that item.\n\r", ch );
-	return;
-    }
+    // if (obj->questmaker != NULL && strlen(obj->questmaker) > 1)
+    // {
+	// 	send_to_char( "You cannot use that item.\n\r", ch );
+	// 	return;
+    // }
     if (obj->pIndexData->vnum == 30037 || obj->pIndexData->vnum == 30041)
     {
 	send_to_char( "That item has lost its quest value, you must collect a new one.\n\r", ch );
