@@ -6,4 +6,6 @@ make sure you have the "build-essential" package installed
 run "make clean", then run "make"
 after it has compiled, run "./startup &" and it will startup on port 8000
 
-<img src=http://i.imgur.com/lzHkuGt.png>
+<img src=https://imgur.com/a/rXD3bQ8>
+
+
