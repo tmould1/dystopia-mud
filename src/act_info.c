@@ -106,7 +106,7 @@ char *format_obj_to_char( OBJ_DATA *obj, CHAR_DATA *ch, bool fShort )
     static char buf[MAX_STRING_LENGTH];
 
     buf[0] = '\0';
-    if ( IS_SET(obj->quest, QUEST_ARTIFACT)) strcat(buf, "#7(Artifact)#n ");
+    if ( IS_SET(obj->quest, QUEST_ARTIFACT)) strcat(buf, "#y(Artifact)#n ");
     else if ( IS_SET(obj->quest, QUEST_PRIZE)) strcat(buf, "#3(#CPrize#3)#n ");
     else if ( IS_SET(obj->quest, QUEST_RELIC)) strcat(buf,"#3(#7Relic#3)#n " );
     else if ( obj->points < 750 && obj->points != 0) strcat(buf,"#3(Legendary)#n " );
