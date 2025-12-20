@@ -16,15 +16,16 @@ void load_gameconfig()
 	game_config.max_xp_per_kill = 1000000000;
 	game_config.game_name = str_dup("Dystopian Spin-Off");
 
-	if ((fp = fopen("../txt/gameconfig.txt", "r")) == NULL)
+	if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "r")) == NULL)
 	{
 		// No gameconfig.txt found, let's make one.
-		if ((fp = fopen("../txt/gameconfig.txt", "w")) == NULL)
+		if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "w")) == NULL)
 		{
 			log_string("Error creating gameconfig.txt");
 			return;
 		}
-		if ((fp = fopen("../txt/gameconfig.txt", "r")) == NULL)
+		fclose(fp);
+		if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "r")) == NULL)
 		{
 			log_string("Fatal Error: gameconfig.txt not found!");
 			exit(1);
@@ -82,7 +83,7 @@ void save_gameconfig()
 {
 	FILE *fp;
 
-	if ((fp = fopen("../txt/gameconfig.txt", "w")) == NULL)
+	if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "w")) == NULL)
 	{
 		log_string("Error writing to gameconfig.txt");
 		return;

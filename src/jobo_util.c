@@ -10,7 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if !defined(WIN32)
 #include <unistd.h> /* close */
+#endif
 #include <time.h>
 #include "merc.h"
 
@@ -951,7 +953,11 @@ void recycle_descriptors()
     /*
      * Bye bye mr. Descriptor.
      */
+#if defined(WIN32)
+    closesocket( dclose->descriptor );
+#else
     close( dclose->descriptor );
+#endif
       
     /* 
      * And then we recycle

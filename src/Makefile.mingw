@@ -1,0 +1,40 @@
+# MinGW/MSYS2 Makefile for Dystopia MUD
+# Use with: make -f Makefile.mingw
+
+CC = gcc
+LD = gcc
+
+# Compiler flags
+C_FLAGS = -Wall -DWIN32 -DHAVE_ZLIB -O2 -c
+
+# Linker flags
+L_FLAGS = -lws2_32 -lbcrypt -lz
+
+# Object files
+O_FILES = act_comm.o act_info.o act_move.o act_obj.o act_wiz.o bit.o mccp.o \
+          board.o build.o clan.o comm.o daemon.o db.o angel.o socials.o \
+          demon.o drow.o fight.o kav_wiz.o handler.o kav_fight.o kav_info.o \
+          interp.o mage.o magic.o mem.o monk.o monk2.o ninja.o olc.o upgrade.o \
+          olc_act.o olc_save.o save.o special.o string.o arena.o \
+          update.o vamp.o ww.o shapeshifter.o tanarri.o undead_knight.o \
+          samurai.o wizutil.o const.o spiderdroid.o lich.o jope.o \
+          jobo_king.o jobo_data.o jobo_fight.o jobo_act.o jobo_wiz.o jobo_util.o \
+          config.o compat.o
+
+TARGET = dystopia.exe
+INSTALL_DIR = ..
+
+all: $(TARGET)
+	cp $(TARGET) $(INSTALL_DIR)/
+
+$(TARGET): $(O_FILES)
+	$(LD) -o $(TARGET) $(O_FILES) $(L_FLAGS)
+
+# Pattern rule for .c to .o
+%.o: %.c merc.h compat.h
+	$(CC) $(C_FLAGS) -o $@ $<
+
+clean:
+	rm -f $(O_FILES) $(TARGET)
+
+.PHONY: clean all

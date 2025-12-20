@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(gcc:*)",
+      "Bash(./build.bat)",
+      "Bash(C:/msys64/usr/bin/bash -lc \"export PATH=/mingw64/bin:$PATH && cd /d/Github/Dystopia/dystopia-mud/src && make -f Makefile.mingw clean && make -f Makefile.mingw 2>&1\")"
+    ]
+  }
+}

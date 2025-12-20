@@ -25,7 +25,9 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#if !defined(WIN32)
 #include <unistd.h>
+#endif
 
 
 
@@ -70,7 +72,7 @@ void do_linkdead(CHAR_DATA *ch, char *argument)
   {
     if (IS_NPC(gch) || gch->desc) continue;
     found = TRUE;
-    sprintf(buf, "Name: %12s. (Room: %5d)\n\r", gch->name, gch->in_room == NULL ? : gch->in_room->vnum);
+    sprintf(buf, "Name: %12s. (Room: %5d)\n\r", gch->name, gch->in_room == NULL ? 0 : gch->in_room->vnum);
     send_to_char(buf,ch);
   }
   if(!found) send_to_char("No Linkdead Players found\n\r",ch);
@@ -6495,7 +6497,7 @@ void do_hreload( CHAR_DATA *ch, char *argument )
     int i;
 
     /* in order of 'importance' */
-    char *helpfile[0] = {
+    char *helpfile[] = {
         "../area/help.are",
         };
 

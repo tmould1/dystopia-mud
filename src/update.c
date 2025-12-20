@@ -24,7 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#if !defined(WIN32)
 #include <unistd.h> /* unlink */
+#endif
 #include "merc.h"
 
 

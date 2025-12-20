@@ -35,7 +35,7 @@ void save_kingdoms()
   int i;
   FILE *fp;
 
-  if ((fp = fopen("../txt/kingdoms.txt","w")) == NULL)
+  if ((fp = fopen(mud_path(mud_txt_dir, "kingdoms.txt"),"w")) == NULL)
   {
     log_string("Error writing to kingdoms.txt");
     return;
@@ -72,10 +72,22 @@ void load_kingdoms()
   kingdom_table[0].req_mana = 0;
   kingdom_table[0].req_qps = 0;
 
-  if ((fp = fopen("../txt/kingdoms.txt", "r")) == NULL)
+  if ((fp = fopen(mud_path(mud_txt_dir, "kingdoms.txt"), "r")) == NULL)
   {
-    log_string("Fatal Error: kingdoms.txt not found!");
-    exit(1);
+    log_string("Warning: kingdoms.txt not found, creating empty one.");
+    if ((fp = fopen(mud_path(mud_txt_dir, "kingdoms.txt"), "w")) != NULL)
+    {
+      int j;
+      for (j = 1; j <= MAX_KINGDOM; j++)
+        fprintf(fp, "None~\nNone~\nNone~\nNone~\n0 0 0\n0 0 0 0\n");
+      fclose(fp);
+      fp = fopen(mud_path(mud_txt_dir, "kingdoms.txt"), "r");
+    }
+    if (fp == NULL)
+    {
+      log_string("Error: Cannot create kingdoms.txt!");
+      exit(1);
+    }
   }
   for (i = 1; i <= MAX_KINGDOM; i++)
   {

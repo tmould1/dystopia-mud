@@ -21,12 +21,16 @@
 
 #include <stdlib.h>
 #include <limits.h>
+#include <stdio.h>
+
+/* Windows compatibility - must come before POSIX headers */
+#include "compat.h"
+
 #if !defined(WIN32)
 #include <sys/cdefs.h>
-#endif
-#include <sys/time.h>  
-
+#include <sys/time.h>
 #include <pthread.h>
+#endif
 
 #include "monk.h"
 #include "garou.h"
@@ -79,16 +83,20 @@
 #define const
 #endif
 typedef int				sh_int;
-typedef int				bool;
 #define unix
 #else
 typedef short int			sh_int;
+#endif
+
+/* bool type - use stdbool.h on modern compilers, define manually on old ones */
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#include <stdbool.h>
+#else
 typedef unsigned char			bool;
 #endif
 
 /* mccp: support bits */
-   
-#include <zlib.h>
+#include "zlib.h"
 #define TELOPT_COMPRESS 85
 #define COMPRESS_BUF_SIZE 16384
 
@@ -4315,12 +4323,13 @@ char *	crypt		args( ( const char *key, const char *salt
 ) );
 #endif
 
-#if	defined(macintosh) || defined(WIN32)
+#if	defined(macintosh)
 #define NOCRYPT
 #if	defined(unix)
 #undef	unix
 #endif
 #endif
+/* Note: WIN32 uses crypt() from compat.h (SHA256-based) */
 
 #if	defined(MIPS_OS)
 char *	crypt		args( ( const char *key, const char *salt ) );
@@ -4374,8 +4383,9 @@ char *	crypt		args( ( const char *key, const char *salt ) );
  * In particular, the U.S. Government prohibits its export from the
  *   United States to foreign countries.
  * Turn on NOCRYPT to keep passwords in plain text.
+ * On Windows, crypt() is defined in compat.h as win32_crypt_sha256
  */
-#if	defined(NOCRYPT)
+#if defined(NOCRYPT)
 #define crypt(s1, s2)	(s1)
 #endif
 
@@ -4392,36 +4402,44 @@ char *	crypt		args( ( const char *key, const char *salt ) );
  *   so players can go ahead and telnet to all the other descriptors.
  * Then we close it whenever we need to open a file (e.g. a save file).
  */
-#if defined(macintosh)
 
-#define PLAYER_DIR	""		/* Player files			*/
-#define NULL_FILE	"proto.are"	/* To reserve one stream	*/
-#define BACKUP_DIR      "" /*reimburse shit -Infidel*/
+/*
+ * Path management - allows executable to run from any directory
+ */
+#define MUD_PATH_MAX 512
+
+#if defined(WIN32)
+#define PATH_SEPARATOR "\\"
+#define NULL_FILE      "nul"
+#else
+#define PATH_SEPARATOR "/"
+#define NULL_FILE      "/dev/null"
 #endif
 
-#if defined(MSDOS)
-#define PLAYER_DIR	""		/* Player files                 */
-#define NULL_FILE	"nul"		/* To reserve one stream	*/
-#endif
+/* Base directory paths - initialized at startup */
+extern char mud_base_dir[MUD_PATH_MAX];    /* Base directory (parent of area/) */
+extern char mud_area_dir[MUD_PATH_MAX];    /* Area files directory */
+extern char mud_player_dir[MUD_PATH_MAX];  /* Player save files */
+extern char mud_backup_dir[MUD_PATH_MAX];  /* Backup directory */
+extern char mud_txt_dir[MUD_PATH_MAX];     /* Text files (logs, etc) */
+extern char mud_log_dir[MUD_PATH_MAX];     /* Log files */
 
-#if defined( WIN32 )
-#define PLAYER_DIR       "..\\player\\"	/* Player files                 */
-#define NULL_FILE        "nul"		/* To reserve one stream        */
-#define BACKUP_DIR	"..\\backup\\"
-#endif
+/* Path building function - returns static buffer, use immediately or copy */
+char *mud_path(const char *dir, const char *filename);
 
-#if defined(unix)
-#define PLAYER_DIR	"../player/"	/* Player files			*/
-#define BACKUP_DIR      "../player/backup/" /*reimb shit*/
+/* Initialize all paths based on executable location or current directory */
+void mud_init_paths(const char *exe_path);
 
-#define NULL_FILE	"/dev/null"	/* To reserve one stream	*/
-#endif
+/* Compatibility macros - these now use the initialized path variables */
+#define PLAYER_DIR     mud_player_dir
+#define BACKUP_DIR     mud_backup_dir
+#define AREA_DIR       mud_area_dir
 
-#define AREA_LIST	"area.lst"	/* List of areas		*/
-#define BAN_LIST	"../txt/ban.txt"	/* baaan. */
-#define BUG_FILE	"../txt/bugs.txt"      /* For 'bug' and bug( )		*/
-#define SHUTDOWN_FILE	"shutdown.txt"	/* For 'shutdown'		*/
-#define CRASH_TEMP_FILE "../txt/crashtmp.txt" /* Need it for crash-recover */
+#define AREA_LIST      mud_path(mud_area_dir, "area.lst")
+#define BAN_LIST       mud_path(mud_txt_dir, "ban.txt")
+#define BUG_FILE       mud_path(mud_txt_dir, "bugs.txt")
+#define SHUTDOWN_FILE  mud_path(mud_area_dir, "shutdown.txt")
+#define CRASH_TEMP_FILE mud_path(mud_txt_dir, "crashtmp.txt")
 
 /*
  * Our function prototypes.

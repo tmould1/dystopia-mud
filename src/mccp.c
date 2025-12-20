@@ -26,17 +26,18 @@
  * retained intact.
  */
 
+#include "merc.h"
+#if !defined(WIN32)
 #include <sys/types.h>
 #include <sys/time.h>
+#include <unistd.h>
+#endif
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
-
-#include "merc.h"
 #include "telnet.h"
   
 char    compress_start  [] = { IAC, SB, TELOPT_COMPRESS, WILL, SE, '\0' };
@@ -167,7 +168,7 @@ bool processCompressed(DESCRIPTOR_DATA *desc)
         for (iStart = 0; iStart < len; iStart += nWrite)
         {
             nBlock = UMIN (len - iStart, 4096);
-            if ((nWrite = write (desc->descriptor, desc->out_compress_buf + iStart, nBlock)) < 0)
+            if ((nWrite = socket_write (desc->descriptor, desc->out_compress_buf + iStart, nBlock)) < 0)
             {
                 if (errno == EAGAIN ||
                     errno == ENOSR)

@@ -44,10 +44,23 @@ void load_topboard()
   int i;   
   FILE *fp;
 
-  if ((fp = fopen("../txt/topboard.txt", "r")) == NULL)
+  if ((fp = fopen(mud_path(mud_txt_dir, "topboard.txt"), "r")) == NULL)
   {
-    log_string("Error: topboard.txt not found!");
-    exit(1);
+    log_string("Warning: topboard.txt not found, creating empty one.");
+    /* Create an empty topboard file */
+    if ((fp = fopen(mud_path(mud_txt_dir, "topboard.txt"), "w")) != NULL)
+    {
+      int j;
+      for (j = 1; j <= MAX_TOP_PLAYERS; j++)
+        fprintf(fp, "Empty~\n0\n");
+      fclose(fp);
+      fp = fopen(mud_path(mud_txt_dir, "topboard.txt"), "r");
+    }
+    if (fp == NULL)
+    {
+      log_string("Error: Cannot create topboard.txt!");
+      exit(1);
+    }
   }
   top_board[0].name = " ";
   top_board[0].pkscore = 0;
@@ -128,7 +141,7 @@ void save_topboard()
   FILE *fp;
   int i;
 
-  if ((fp = fopen("../txt/topboard.txt","w")) == NULL)
+  if ((fp = fopen(mud_path(mud_txt_dir, "topboard.txt"),"w")) == NULL)
   {
     log_string("Error writing to topboard.txt");
     return;
@@ -145,10 +158,20 @@ void load_leaderboard()
 {
   FILE *fp;
 
-  if ((fp = fopen("../txt/leader.txt", "r")) == NULL)
-  {   
-    log_string("Error: leader.txt not found!");
-    exit(1);
+  if ((fp = fopen(mud_path(mud_txt_dir, "leader.txt"), "r")) == NULL)
+  {
+    log_string("Warning: leader.txt not found, creating empty one.");
+    if ((fp = fopen(mud_path(mud_txt_dir, "leader.txt"), "w")) != NULL)
+    {
+      fprintf(fp, "Nobody~\n0\nNobody~\n0\nNobody~\n0\nNobody~\n0\nNobody~\n0\nNobody~\n0\nNobody~\n0\n");
+      fclose(fp);
+      fp = fopen(mud_path(mud_txt_dir, "leader.txt"), "r");
+    }
+    if (fp == NULL)
+    {
+      log_string("Error: Cannot create leader.txt!");
+      exit(1);
+    }
   }
   leader_board.bestpk_name = fread_string(fp);  
   leader_board.bestpk_number = fread_number(fp);
@@ -171,7 +194,7 @@ void save_leaderboard()
 {
   FILE *fp;
 
-  if ((fp = fopen("../txt/leader.txt","w")) == NULL)
+  if ((fp = fopen(mud_path(mud_txt_dir, "leader.txt"),"w")) == NULL)
   {
     log_string("Error writing to leader.txt");
     return;

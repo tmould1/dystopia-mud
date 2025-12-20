@@ -89,10 +89,10 @@ void save_area_list()
     FILE *fp;
     AREA_DATA *pArea;
 
-    if ( ( fp = fopen( "area.lst", "w" ) ) == NULL )
+    if ( ( fp = fopen( AREA_LIST, "w" ) ) == NULL )
     {
 	bug( "Save_area_list: fopen", 0 );
-	perror( "area.lst" );
+	perror( AREA_LIST );
     }
     else
     {

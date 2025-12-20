@@ -31,6 +31,76 @@
 extern	int	_filbuf		args( (FILE *) );
 #endif
 
+/*
+ * Path management - allows executable to run from any directory
+ */
+char mud_base_dir[MUD_PATH_MAX]   = "";
+char mud_area_dir[MUD_PATH_MAX]   = "";
+char mud_player_dir[MUD_PATH_MAX] = "";
+char mud_backup_dir[MUD_PATH_MAX] = "";
+char mud_txt_dir[MUD_PATH_MAX]    = "";
+char mud_log_dir[MUD_PATH_MAX]    = "";
+
+/* Build a path from directory and filename - uses rotating static buffers */
+char *mud_path(const char *dir, const char *filename)
+{
+    static char buffers[4][MUD_PATH_MAX];
+    static int idx = 0;
+    char *buf;
+
+    buf = buffers[idx];
+    idx = (idx + 1) % 4;
+
+    if (dir && dir[0]) {
+        snprintf(buf, MUD_PATH_MAX, "%s%s%s", dir, PATH_SEPARATOR, filename);
+    } else {
+        snprintf(buf, MUD_PATH_MAX, "%s", filename);
+    }
+    return buf;
+}
+
+/* Initialize all paths based on executable location */
+void mud_init_paths(const char *exe_path)
+{
+    char *last_sep;
+    char exe_dir[MUD_PATH_MAX];
+
+    /* Get directory containing executable */
+    strncpy(exe_dir, exe_path, MUD_PATH_MAX - 1);
+    exe_dir[MUD_PATH_MAX - 1] = '\0';
+
+#if defined(WIN32)
+    last_sep = strrchr(exe_dir, '\\');
+    if (!last_sep) last_sep = strrchr(exe_dir, '/');
+#else
+    last_sep = strrchr(exe_dir, '/');
+#endif
+
+    if (last_sep) {
+        *last_sep = '\0';  /* Remove executable name, keep directory */
+    } else {
+        strcpy(exe_dir, ".");  /* No path separator, use current dir */
+    }
+
+    /* Base dir is where the executable lives (project root) */
+    strncpy(mud_base_dir, exe_dir, MUD_PATH_MAX - 1);
+    mud_base_dir[MUD_PATH_MAX - 1] = '\0';
+
+    /* Set up all subdirectories relative to base */
+    snprintf(mud_area_dir, MUD_PATH_MAX, "%s%sarea", mud_base_dir, PATH_SEPARATOR);
+    snprintf(mud_player_dir, MUD_PATH_MAX, "%s%splayer%s", mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR);
+    snprintf(mud_backup_dir, MUD_PATH_MAX, "%s%sbackup%s", mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR);
+    snprintf(mud_txt_dir, MUD_PATH_MAX, "%s%stxt", mud_base_dir, PATH_SEPARATOR);
+    snprintf(mud_log_dir, MUD_PATH_MAX, "%s%slog", mud_base_dir, PATH_SEPARATOR);
+
+    fprintf(stderr, "MUD paths initialized:\n");
+    fprintf(stderr, "  Base:   %s\n", mud_base_dir);
+    fprintf(stderr, "  Area:   %s\n", mud_area_dir);
+    fprintf(stderr, "  Player: %s\n", mud_player_dir);
+    fprintf(stderr, "  Backup: %s\n", mud_backup_dir);
+    fprintf(stderr, "  Txt:    %s\n", mud_txt_dir);
+    fprintf(stderr, "  Log:    %s\n", mud_log_dir);
+}
 
 /*
  * Globals.
@@ -361,7 +431,7 @@ void boot_db(bool fCopyOver)
 	    {
 		sprintf(buf,"loading %s",strArea);
 		log_string(buf);
-		if ( ( fpArea = fopen( strArea, "r" ) ) == NULL )
+		if ( ( fpArea = fopen( mud_path(mud_area_dir, strArea), "r" ) ) == NULL )
 		{
 		    perror( strArea );
 		    exit( 1 );
@@ -534,7 +604,7 @@ void new_load_area( FILE *fp )
     {
        word   = feof( fp ) ? "End" : fread_word( fp );
        fMatch = FALSE;
- 
+
        switch ( UPPER(word[0]) )
        {
            case 'N':

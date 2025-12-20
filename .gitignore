@@ -1,2 +1,24 @@
 *.o
+*.obj
 dystopia
+dystopia.exe
+src/dystopia.exe
+
+# Build artifacts
+src/build_log.txt
+src/crash.txt
+
+# IDE/Editor
+.vscode/
+.idea/
+
+# Player data (sensitive)
+player/
+
+# Windows DLLs (should be installed separately)
+*.dll
+
+# zlib headers bundled for Windows build
+src/zconf.h
+src/zlib.h
+src/zlib.lib

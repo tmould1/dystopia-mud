@@ -51,17 +51,15 @@
 #include <time.h>
 #if !defined(WIN32)
 #include <unistd.h>
-#endif
-
 #include <sys/types.h>
 #include <sys/wait.h>   // we need these to call wait()
-
-#if defined( WIN32 )
-#include <winsock.h>
-#include <sys/timeb.h> /*for _ftime(), uses _timeb struct*/
 #endif
 
 #include "merc.h"
+
+#if defined( WIN32 )
+#include <sys/timeb.h> /*for _ftime(), uses _timeb struct*/
+#endif
 
 extern GAMECONFIG_DATA game_config;
 
@@ -132,10 +130,23 @@ void show_string args((DESCRIPTOR_DATA *d, char *input ));
 #endif
 
 #if	defined( WIN32 )
-const   char echo_off_str	[] = { '\0' };
-const   char echo_on_str	[] = { '\0' };
-const   char go_ahead_str	[] = { '\0' };
-void    gettimeofday    args( ( struct timeval *tp, void *tzp ) );
+/* Telnet protocol constants for Windows (from arpa/telnet.h) */
+#define IAC             255     /* interpret as command */
+#define DONT            254     /* refuse to perform option */
+#define DO              253     /* request to perform option */
+#define WONT            252     /* refusal to perform option */
+#define WILL            251     /* agreement to perform option */
+#define GA              249     /* go ahead */
+#define TELOPT_ECHO     1       /* echo */
+#define TELOPT_COMPRESS 85      /* MCCP v1 */
+
+const   char echo_off_str	[] = { (char)IAC, (char)WILL, (char)TELOPT_ECHO, '\0' };
+const   char echo_on_str	[] = { (char)IAC, (char)WONT, (char)TELOPT_ECHO, '\0' };
+const   char go_ahead_str	[] = { (char)IAC, (char)GA, '\0' };
+const   char    compress_will   [] = { (char)IAC, (char)WILL, (char)TELOPT_COMPRESS, '\0' };
+const   char    compress_do     [] = { (char)IAC, (char)DO, (char)TELOPT_COMPRESS, '\0' };
+const   char    compress_dont   [] = { (char)IAC, (char)DONT, (char)TELOPT_COMPRESS, '\0' };
+
 void show_string args((DESCRIPTOR_DATA *d, char *input ));
 #endif
 
@@ -381,6 +392,24 @@ int main( int argc, char **argv )
 {
     struct timeval now_time;
     bool fCopyOver = FALSE;
+
+#if defined(WIN32)
+    /* Windows buffers stderr by default - disable for immediate log output */
+    setvbuf(stderr, NULL, _IONBF, 0);
+    setvbuf(stdout, NULL, _IONBF, 0);
+    /* Initialize mutex for memory allocation (Windows CRITICAL_SECTION needs runtime init) */
+    {
+        extern pthread_mutex_t memory_mutex;
+        InitializeCriticalSection(&memory_mutex);
+    }
+#endif
+
+    /*
+     * Initialize paths based on executable location.
+     * This allows the MUD to be run from any directory.
+     */
+    mud_init_paths(argv[0]);
+
     /*
      * Memory debugging if needed.
      */
@@ -528,7 +557,7 @@ int init_socket( int port )
     }
 #endif
 
-    if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &x, sizeof(x) ) < 0 )
+    if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&x, sizeof(x) ) < 0 )
     {
 	perror( "Init_socket: SO_REUSEADDR" );
 	close( fd );
@@ -1107,6 +1136,12 @@ void new_descriptor( int control )
 	perror( "New_descriptor: fcntl: FNDELAY" );
 	return;
     }
+#else
+    /* Set non-blocking mode on Windows */
+    {
+	u_long nonblocking = 1;
+	ioctlsocket( desc, FIONBIO, &nonblocking );
+    }
 #endif
 
     /*
@@ -1148,16 +1183,25 @@ void new_descriptor( int control )
 
         dnew->host = str_dup(buf);  // set the temporary ip as the host.
 
-        /* Set up the dummyarg for use in lookup_address */
-        dummyarg->buf      = str_dup((char *) &sock.sin_addr);
-        dummyarg->d        = dnew;
-
-        if (thread_count < 50) /* should be more than plenty */
+        /* Skip DNS lookup for localhost - no point and it can timeout on Windows */
+        if (addr == 0x7F000001) /* 127.0.0.1 */
         {
-          /* just use the ip, then make the thread do the lookup */
-          pthread_create( &thread_lookup, &attr, (void*)&lookup_address, (void*) dummyarg);
+          dnew->lookup_status = STATUS_DONE;
+          dnew->host = str_dup("localhost");
         }
-        else DOS_ATTACK = TRUE;
+        else
+        {
+          /* Set up the dummyarg for use in lookup_address */
+          dummyarg->buf      = str_dup((char *) &sock.sin_addr);
+          dummyarg->d        = dnew;
+
+          if (thread_count < 50) /* should be more than plenty */
+          {
+            /* just use the ip, then make the thread do the lookup */
+            pthread_create( &thread_lookup, &attr, (void*)&lookup_address, (void*) dummyarg);
+          }
+          else DOS_ATTACK = TRUE;
+        }
     }
 	
     /*
@@ -2275,7 +2319,7 @@ void nanny( DESCRIPTOR_DATA *d, char *argument )
 
 	if ( ch == NULL || (!IS_EXTRA(ch,EXTRA_NEWPASS) &&
 	    strcmp( argument, ch->pcdata->pwd ) &&
-	    strcmp( crypt ( argument, ch->pcdata->pwd ),ch->pcdata->pwd )))
+	    strcmp( crypt ( argument, ch->name ),ch->pcdata->pwd )))
 	{
 	    write_to_buffer( d, " Wrong password.\n\r", 0 );
 	    close_socket( d );
@@ -2283,7 +2327,7 @@ void nanny( DESCRIPTOR_DATA *d, char *argument )
 	}
 
 	else if ( ch == NULL || (IS_EXTRA(ch,EXTRA_NEWPASS)  &&
-	    strcmp( crypt ( argument, ch->pcdata->pwd ), ch->pcdata->pwd )))
+	    strcmp( crypt ( argument, ch->name ), ch->pcdata->pwd )))
 	{
 	    write_to_buffer( d, " Wrong password.\n\r", 0 );
 	    close_socket( d );
@@ -2592,7 +2636,7 @@ OUT OUT OUT */
 	write_to_buffer( d, "\n\r", 2 );
 #endif
 
-  if ( strcmp( crypt ( argument, ch->pcdata->pwd ), ch->pcdata->pwd ) )
+  if ( strcmp( crypt ( argument, ch->name ), ch->pcdata->pwd ) )
 	{
 	    write_to_buffer( d, " Passwords don't match.\n\r Retype password: ",
 		0 );
@@ -4190,13 +4234,7 @@ void show_string( DESCRIPTOR_DATA *d, char *input )
     return;
 }
 
-#if defined( WIN32 )
-void gettimeofday( struct timeval *tp, void *tzp )
-{
-    tp->tv_sec  = time( NULL );
-    tp->tv_usec = 0;
-}
-#endif
+/* gettimeofday for WIN32 is now in compat.c */
 
 void merc_logf (char * fmt, ...)
 {
