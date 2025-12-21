@@ -15,6 +15,9 @@
 #7Bold           #i##i#n
 #7Underline      #u##u#n
 #7White          #7##7#n
+#7X-Term Code    #x141##x141#n
+#7* X-Term supports ##x(0-255)
+#7 help xterm for more info.
 
 To stop a color from bleeding into the next line stop it with ##n
 
@@ -3529,6 +3532,13 @@ Gods Heal             God Heals you
 Gods Hold             God holds players when they flee 
 
 To train a mantra use '#cMantra Power Improve#n'.
+~
+
+0 XTERM~
+XTerm colors provide a larger range of colors.
+Use ##x, followed by your color's xterm code.
+This code is between 000 and 255.
+
 ~
 
 
