@@ -550,11 +550,15 @@ void dump_last_command()
 {
   FILE *fp;
   char buf[MAX_STRING_LENGTH];
+  const char *crash_file;
 
-  fp = fopen("../src/crash.txt","a");
-  fprintf (fp,"Last command typed : %s\n",last_command);
-  fflush(fp);
-  fclose(fp);
+  crash_file = mud_path(mud_txt_dir, "crash.txt");
+  fp = fopen(crash_file, "a");
+  if (fp) {
+    fprintf(fp, "Last command typed : %s\n", last_command);
+    fflush(fp);
+    fclose(fp);
+  }
 
   /*
    * creates a note to the immortals

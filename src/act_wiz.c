@@ -6590,11 +6590,7 @@ void do_resetpassword( CHAR_DATA *ch, char *argument )
 #define CH(descriptor)  ((descriptor)->original ? \
 (descriptor)->original : (descriptor)->character) \
 
-/* This file holds the copyover data */
-#define COPYOVER_FILE "copyover.data"
-
-/* This is the executable file */
-#define EXE_FILE	  "../src/dystopia"
+/* COPYOVER_FILE and EXE_FILE are now defined in merc.h using mud_path() */
 
 extern int port,control; /* db.c */
 
@@ -6604,7 +6600,14 @@ void do_copyover (CHAR_DATA *ch, char * argument)
         CHAR_DATA *gch;
 	DESCRIPTOR_DATA *d, *d_next;
         extern int port,control; /* db.c */
-	char buf[100], buf2[100];
+	char buf[100];
+#if !defined(WIN32)
+	char buf2[100];
+#endif
+
+	/* Debug: immediate log to stderr with flush */
+	fprintf(stderr, "do_copyover: ENTERED function\n");
+	fflush(stderr);
 
 	fp = fopen (COPYOVER_FILE, "w");
 
@@ -6654,14 +6657,102 @@ void do_copyover (CHAR_DATA *ch, char * argument)
      }
    }
 
-        sprintf (buf, "\n\r <*>         It is a time of changes         <*>\n\r");	
+        sprintf (buf, "\n\r <*>         It is a time of changes         <*>\n\r");
 
+#if defined(WIN32)
+	/*
+	 * Windows: Need to duplicate each client socket and save to binary file.
+	 * The text file will contain socket indices instead of raw descriptors.
+	 * Entry 0 in the socket file is the control (listening) socket.
+	 * Entries 1+ are the client sockets.
+	 */
+	{
+		FILE *socket_fp;
+		int socket_index = 1; /* Start at 1; index 0 is reserved for control socket */
+		DWORD target_pid = GetCurrentProcessId();
+		WSAPROTOCOL_INFOW proto_info;
+		char socket_path[MUD_PATH_MAX];
+
+		/* Copy path to local buffer to avoid mud_path() rotating buffer issues */
+		strncpy(socket_path, COPYOVER_SOCKET_FILE, sizeof(socket_path) - 1);
+		socket_path[sizeof(socket_path) - 1] = '\0';
+		merc_logf("do_copyover: opening socket file for write: %s", socket_path);
+
+		socket_fp = fopen(socket_path, "wb");
+		if (!socket_fp)
+		{
+			merc_logf("do_copyover: fopen failed for socket file: %s", socket_path);
+			send_to_char("Copyover FAILED - could not write socket file!\n\r", ch);
+			fclose(fp);
+			return;
+		}
+
+		/* First, write the control (listening) socket as entry 0 */
+		if (WSADuplicateSocketW((SOCKET)control, target_pid, &proto_info) == SOCKET_ERROR)
+		{
+			merc_logf("do_copyover: WSADuplicateSocket failed for control socket: %d", WSAGetLastError());
+			send_to_char("Copyover FAILED - could not duplicate control socket!\n\r", ch);
+			fclose(socket_fp);
+			fclose(fp);
+			return;
+		}
+		fwrite(&proto_info, sizeof(proto_info), 1, socket_fp);
+		merc_logf("do_copyover: wrote control socket to %s", socket_path);
+
+		/* For each playing descriptor, save its state */
+		for (d = descriptor_list; d ; d = d_next)
+		{
+			CHAR_DATA * och = CH (d);
+
+			d_next = d->next;
+
+			if (!d->character || d->connected != 0)
+			{
+				write_to_descriptor_2(d->descriptor, "\n\rSorry, we are rebooting. Come back in 30 seconds.\n\r", 0);
+				close_socket (d);
+			}
+			else
+			{
+				/* Duplicate this client socket */
+				if (WSADuplicateSocketW((SOCKET)d->descriptor, target_pid, &proto_info) == SOCKET_ERROR)
+				{
+					merc_logf("do_copyover: WSADuplicateSocket failed for client %s: %d",
+					          och->name, WSAGetLastError());
+					write_to_descriptor_2(d->descriptor, "\n\rCould not preserve your connection. Please reconnect.\n\r", 0);
+					close_socket(d);
+					continue;
+				}
+
+				/* Write the protocol info to binary file */
+				fwrite(&proto_info, sizeof(proto_info), 1, socket_fp);
+
+				/* Write index (not raw descriptor) to text file */
+				fprintf(fp, "%d %s %s\n", socket_index, och->name, d->host);
+				socket_index++;
+
+				if (och->level == 1)
+				{
+					write_to_descriptor(d, "Since you are level one, and level one characters do not save, you gain a free level!\n\r", 0);
+					och->level++;
+				}
+				save_char_obj(och);
+				write_to_descriptor(d, buf, 0);
+			}
+		}
+
+		merc_logf("do_copyover: wrote %d socket entries total (1 control + %d clients)",
+		          socket_index, socket_index - 1);
+		fflush(socket_fp);
+		fclose(socket_fp);
+		merc_logf("do_copyover: socket file closed");
+	}
+#else
 	/* For each playing descriptor, save its state */
 	for (d = descriptor_list; d ; d = d_next)
 	{
 		CHAR_DATA * och = CH (d);
 		d_next = d->next; /* We delete from the list , so need to save this */
-		
+
 		if (!d->character || d->connected != 0) /* drop those logging on */
 		{
 			write_to_descriptor_2(d->descriptor, "\n\rSorry, we are rebooting. Come back in 30 seconds.\n\r", 0);
@@ -6679,7 +6770,8 @@ void do_copyover (CHAR_DATA *ch, char * argument)
 			write_to_descriptor(d, buf, 0);
 		}
 	}
-	
+#endif
+
 	fprintf (fp, "-1\n");
 	fclose (fp);
 	
@@ -6690,14 +6782,66 @@ void do_copyover (CHAR_DATA *ch, char * argument)
         /* recycle descriptors */
         recycle_descriptors();
 
-	/* exec - descriptors are inherited */
-	
+	/* exec - descriptors are inherited (on Unix) */
+
 	sprintf (buf, "%d", port);
+
+#if defined(WIN32)
+	/*
+	 * Windows: Socket file was already written above with control socket at
+	 * index 0 and client sockets at indices 1+. Just exec the new process.
+	 */
+	{
+		char exe_path[MUD_PATH_MAX];
+		FILE *test_fp;
+
+		/* Verify socket file exists before exec */
+		test_fp = fopen(COPYOVER_SOCKET_FILE, "rb");
+		if (test_fp)
+		{
+			fseek(test_fp, 0, SEEK_END);
+			merc_logf("do_copyover: verified socket file exists, size=%ld", ftell(test_fp));
+			fclose(test_fp);
+		}
+		else
+		{
+			merc_logf("do_copyover: ERROR - socket file not found before exec!");
+		}
+
+		/* Prefer dystopia_new.exe if it exists (fresh build for hot-reload) */
+		strncpy(exe_path, EXE_FILE_NEW, sizeof(exe_path) - 1);
+		exe_path[sizeof(exe_path) - 1] = '\0';
+		if (_access(exe_path, 0) != 0)
+		{
+			/* No new exe, fall back to standard exe */
+			strncpy(exe_path, EXE_FILE, sizeof(exe_path) - 1);
+			exe_path[sizeof(exe_path) - 1] = '\0';
+			log_string("do_copyover: using dystopia.exe");
+		}
+		else
+		{
+			log_string("do_copyover: found dystopia_new.exe, using it for hot-reload");
+		}
+		log_string(exe_path);
+		/* Pass exe_path as argv[0] so mud_init_paths gets the full path */
+		execl(exe_path, exe_path, buf, "copyover", "wsasocket", (char *) NULL);
+	}
+#else
 	sprintf (buf2, "%d", control);
-	execl (EXE_FILE, "dystopia", buf, "copyover", buf2, (char *) NULL);
+
+	/* Log the executable path for debugging */
+	{
+		char exe_path[MUD_PATH_MAX];
+		strncpy(exe_path, EXE_FILE, sizeof(exe_path) - 1);
+		exe_path[sizeof(exe_path) - 1] = '\0';
+		log_string(exe_path);
+		/* Pass exe_path as argv[0] so mud_init_paths gets the full path */
+		execl(exe_path, exe_path, buf, "copyover", buf2, (char *) NULL);
+	}
+#endif
 
 	/* Failed - sucessful exec will not return */
-	
+
 	perror ("do_copyover: execl");
 	send_to_char ("Copyover FAILED!\n\r",ch);
 	
@@ -6713,33 +6857,99 @@ void copyover_recover ()
 	char host[MSL];
 	int desc;
 	bool fOld;
-	
+
+#if defined(WIN32)
+	/* Windows: Load all socket protocol infos from binary file first */
+	WSAPROTOCOL_INFOW *socket_infos = NULL;
+	int socket_count = 0;
+	long file_size;
+	FILE *socket_fp;
+
+	socket_fp = fopen(COPYOVER_SOCKET_FILE, "rb");
+	if (socket_fp)
+	{
+		/* Get file size to determine number of entries */
+		fseek(socket_fp, 0, SEEK_END);
+		file_size = ftell(socket_fp);
+		fseek(socket_fp, 0, SEEK_SET);
+
+		socket_count = (int)(file_size / sizeof(WSAPROTOCOL_INFOW));
+		merc_logf("copyover_recover: socket file size=%ld, sizeof(WSAPROTOCOL_INFOW)=%d, socket_count=%d",
+		          file_size, (int)sizeof(WSAPROTOCOL_INFOW), socket_count);
+		if (socket_count > 0)
+		{
+			socket_infos = (WSAPROTOCOL_INFOW *)malloc(file_size);
+			if (socket_infos)
+			{
+				fread(socket_infos, sizeof(WSAPROTOCOL_INFOW), socket_count, socket_fp);
+			}
+		}
+		fclose(socket_fp);
+		unlink(COPYOVER_SOCKET_FILE);
+	}
+	else
+	{
+		merc_logf("copyover_recover: could not open socket file: %s", COPYOVER_SOCKET_FILE);
+	}
+#endif
+
 	merc_logf ("Copyover recovery initiated");
-	
+
 	fp = fopen (COPYOVER_FILE, "r");
-	
+
 	if (!fp) /* there are some descriptors open which will hang forever then ? */
 	{
 		perror ("copyover_recover:fopen");
 		merc_logf ("Copyover file not found. Exitting.\n\r");
+#if defined(WIN32)
+		if (socket_infos) free(socket_infos);
+#endif
 		exit (1);
 	}
 
 	unlink (COPYOVER_FILE); /* In case something crashes - doesn't prevent reading	*/
-	
+
 	for (;;)
 	{
 		fscanf (fp, "%d %s %s\n", &desc, name, host);
 		if (desc == -1)
 			break;
 
-		/* Write something, and check if it goes error-free */		
-		if (!write_to_descriptor_2(desc, "\n\r <*>             The world spins             <*>\n\r",0))
+#if defined(WIN32)
+		/*
+		 * On Windows, 'desc' is actually an index into our socket_infos array.
+		 * We need to recreate the socket using WSASocket.
+		 */
+		if (socket_infos && desc >= 0 && desc < socket_count)
 		{
-			close (desc); /* nope */
+			int new_desc = (int)WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP,
+			                               &socket_infos[desc], 0, 0);
+			if (new_desc == INVALID_SOCKET)
+			{
+				merc_logf("copyover_recover: WSASocket failed for %s: %d",
+				          name, WSAGetLastError());
+				continue;
+			}
+			desc = new_desc;
+		}
+		else
+		{
+			merc_logf("copyover_recover: Invalid socket index %d for %s", desc, name);
 			continue;
 		}
-		
+#endif
+
+		/* Write something, and check if it goes error-free */
+		if (!write_to_descriptor_2(desc, "\n\r <*>             The world spins             <*>\n\r",0))
+		{
+#if defined(WIN32)
+			closesocket(desc);
+#else
+			close (desc); /* nope */
+#endif
+			continue;
+		}
+
 		d = alloc_perm (sizeof(DESCRIPTOR_DATA));
 		init_descriptor (d,desc); /* set up various stuff */
 
@@ -6749,21 +6959,21 @@ void copyover_recover ()
 		d->next = descriptor_list;
 		descriptor_list = d;
 		d->connected = CON_COPYOVER_RECOVER; /* -15, so close_socket frees the char */
-		
-	
+
+
 		/* Now, find the pfile */
-		
+
 		fOld = load_char_obj (d, name);
-		
+
 		if (!fOld) /* Player file not found?! */
 		{
 			write_to_descriptor_2(desc, "\n\rSomehow, your character was lost in the copyover. Sorry.\n\r", 0);
-			close_socket (d);			
+			close_socket (d);
 		}
 		else /* ok! */
 		{
 			write_to_descriptor_2(desc, "\n\r <*> And nothing will ever be the same again <*>\n\r",0);
-	
+
 			/* Just In Case */
 			if (!d->character->in_room)
 				d->character->in_room = get_room_index (ROOM_VNUM_TEMPLE);
@@ -6779,10 +6989,14 @@ void copyover_recover ()
                         d->lookup_status = STATUS_DONE;
                         retell_mccp(d);
 		}
-		
+
 	}
-	
+
 	fclose (fp);
+
+#if defined(WIN32)
+	if (socket_infos) free(socket_infos);
+#endif
 }
 
 void do_implag(CHAR_DATA *ch, char *argument)

@@ -64,6 +64,7 @@ void mud_init_paths(const char *exe_path)
 {
     char *last_sep;
     char exe_dir[MUD_PATH_MAX];
+    char abs_path[MUD_PATH_MAX];
 
     /* Get directory containing executable */
     strncpy(exe_dir, exe_path, MUD_PATH_MAX - 1);
@@ -81,6 +82,19 @@ void mud_init_paths(const char *exe_path)
     } else {
         strcpy(exe_dir, ".");  /* No path separator, use current dir */
     }
+
+    /* Convert to absolute path to ensure consistency across copyover */
+#if defined(WIN32)
+    if (_fullpath(abs_path, exe_dir, MUD_PATH_MAX) != NULL) {
+        strncpy(exe_dir, abs_path, MUD_PATH_MAX - 1);
+        exe_dir[MUD_PATH_MAX - 1] = '\0';
+    }
+#else
+    if (realpath(exe_dir, abs_path) != NULL) {
+        strncpy(exe_dir, abs_path, MUD_PATH_MAX - 1);
+        exe_dir[MUD_PATH_MAX - 1] = '\0';
+    }
+#endif
 
     /* Base dir is where the executable lives (project root) */
     strncpy(mud_base_dir, exe_dir, MUD_PATH_MAX - 1);
@@ -3411,17 +3425,43 @@ void bug( const char *str, int param )
 
 
 /*
- * Writes a string to the log.
+ * Writes a string to the log (stderr and log file).
+ * Log file is named by startup timestamp: YYYYMMDD-HHMMSS.log
  */
+static FILE *log_fp = NULL;
+
 void log_string( const char *str )
 {
     char *strtime;
-    char logout [MAX_STRING_LENGTH];
+    char logout[MAX_STRING_LENGTH];
+    struct tm *tm_info;
+    char log_filename[MUD_PATH_MAX];
 
-    strtime                    = ctime( &current_time );
+    strtime = ctime( &current_time );
     strtime[strlen(strtime)-1] = '\0';
+
+    /* Always write to stderr */
     fprintf( stderr, "%s :: %s\n", strtime, str );
-    strcpy ( logout, str );
+
+    /* Write to log file if log directory is set up */
+    if (mud_log_dir[0] != '\0') {
+        /* Open log file on first call, named by startup time */
+        if (log_fp == NULL) {
+            tm_info = localtime(&current_time);
+            snprintf(log_filename, sizeof(log_filename), "%s%s%04d%02d%02d-%02d%02d%02d.log",
+                mud_log_dir, PATH_SEPARATOR,
+                tm_info->tm_year + 1900, tm_info->tm_mon + 1, tm_info->tm_mday,
+                tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
+            log_fp = fopen(log_filename, "a");
+        }
+
+        if (log_fp != NULL) {
+            fprintf(log_fp, "%s :: %s\n", strtime, str);
+            fflush(log_fp);
+        }
+    }
+
+    strcpy( logout, str );
     logchan( logout );
     return;
 }

@@ -385,6 +385,42 @@ void     bust_a_header          args((DESCRIPTOR_DATA *d));
 void  lookup_address   args((DUMMY_ARG *dummyarg));  // Only threaded calls, please.
 bool  check_banned     args((DESCRIPTOR_DATA *dnew ));  // Ban check
 
+#if defined(WIN32)
+/*
+ * Promote dystopia_new.exe to dystopia.exe after hot-reload.
+ * When we're running as dystopia_new.exe (from a copyover with a fresh build),
+ * rename ourselves to dystopia.exe now that the old process has exited.
+ */
+void promote_new_executable(const char *argv0)
+{
+    char new_path[MUD_PATH_MAX];
+    char old_path[MUD_PATH_MAX];
+
+    /* Check if we're running as dystopia_new.exe */
+    if (strstr(argv0, "_new") == NULL)
+        return;  /* Not a shadow binary, nothing to do */
+
+    snprintf(old_path, sizeof(old_path), "%s", EXE_FILE);
+    snprintf(new_path, sizeof(new_path), "%s", EXE_FILE_NEW);
+
+    /* Delete old executable (now unlocked since old process exited) */
+    if (remove(old_path) == 0)
+    {
+        log_string("promote_new_executable: removed old dystopia.exe");
+    }
+
+    /* Rename ourselves to the standard name */
+    if (rename(new_path, old_path) == 0)
+    {
+        log_string("promote_new_executable: promoted dystopia_new.exe to dystopia.exe");
+    }
+    else
+    {
+        log_string("promote_new_executable: rename failed (this is normal if running from IDE)");
+    }
+}
+#endif
+
 int proc_pid;
 int port, control;
 
@@ -409,6 +445,14 @@ int main( int argc, char **argv )
      * This allows the MUD to be run from any directory.
      */
     mud_init_paths(argv[0]);
+
+#if defined(WIN32)
+    /*
+     * If we're running as dystopia_new.exe (from a copyover with fresh build),
+     * promote ourselves to dystopia.exe now that the old process has exited.
+     */
+    promote_new_executable(argv[0]);
+#endif
 
     /*
      * Memory debugging if needed.
@@ -485,9 +529,67 @@ int main( int argc, char **argv )
  	if (argv[2] && argv[2][0])
  	{
  		fCopyOver = TRUE;
+#if defined(WIN32)
+		/*
+		 * On Windows, socket handles don't inherit across _spawnl/_execl.
+		 * We used WSADuplicateSocket to serialize the socket state to a file,
+		 * and now we need to recreate it using WSASocket.
+		 */
+		if (strcmp(argv[3], "wsasocket") == 0)
+		{
+			WSAPROTOCOL_INFOW proto_info;
+			FILE *socket_fp;
+			WORD wVersionRequested = MAKEWORD(1, 1);
+			WSADATA wsaData;
+
+			/* Initialize Winsock first */
+			if (WSAStartup(wVersionRequested, &wsaData) != 0)
+			{
+				perror("Copyover recovery: WSAStartup failed");
+				exit(1);
+			}
+
+			/* Read the protocol info from file */
+			socket_fp = fopen(COPYOVER_SOCKET_FILE, "rb");
+			if (!socket_fp)
+			{
+				perror("Copyover recovery: fopen socket file");
+				exit(1);
+			}
+			if (fread(&proto_info, sizeof(proto_info), 1, socket_fp) != 1)
+			{
+				perror("Copyover recovery: fread socket file");
+				fclose(socket_fp);
+				exit(1);
+			}
+			fclose(socket_fp);
+
+			/* NOTE: Don't delete the socket file here!
+			 * copyover_recover() in boot_db() still needs to read
+			 * the client socket entries. It will delete the file
+			 * after reading all entries.
+			 */
+
+			/* Recreate the socket using the duplicated info */
+			control = (int)WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP,
+			                          &proto_info, 0, 0);
+			if (control == INVALID_SOCKET)
+			{
+				fprintf(stderr, "Copyover recovery: WSASocket failed: %d\n",
+				        WSAGetLastError());
+				exit(1);
+			}
+		}
+		else
+		{
+			/* Fallback for old-style copyover (shouldn't happen on Windows) */
+			control = atoi(argv[3]);
+		}
+#else
  		control = atoi(argv[3]);
+#endif
  	}
- 		
+
  	else
  		fCopyOver = FALSE;
     /*
@@ -495,7 +597,8 @@ int main( int argc, char **argv )
      */
 #if defined(macintosh) || defined(MSDOS)
     boot_db( );
-    log_string( "Dystopia is ready to rock." );
+    sprintf( log_buf, "%s is ready to rock.", game_config.game_name );
+    log_string( log_buf );
     game_loop_mac_msdos( );
 #endif
 
@@ -505,7 +608,7 @@ int main( int argc, char **argv )
  	boot_db (fCopyOver);
 
     arena = FIGHT_OPEN;
-    sprintf( log_buf, "Dystopia is ready to rock on port %d.", port );
+    sprintf( log_buf, "%s is ready to rock on port %d.", game_config.game_name, port );
     log_string( log_buf );
     game_loop_unix( control );
 #if !defined( WIN32 )
@@ -1578,8 +1681,7 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
 
 
 
-#define COPYOVER_FILE "copyover.data"
-#define EXE_FILE      "../src/dystopia"
+/* COPYOVER_FILE and EXE_FILE are now defined in merc.h using mud_path() */
 
 /*
  * Crash recovery system written by Mandrax, based on copyover

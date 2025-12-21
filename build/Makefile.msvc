@@ -1,0 +1,69 @@
+# MSVC Makefile for Dystopia MUD
+# Run from project root: nmake /f build\Makefile.msvc
+# Or from build dir: nmake /f Makefile.msvc
+
+CC = cl
+LINK = link
+
+# Directories
+SRC_DIR = src
+OBJ_DIR = build\obj
+
+# Compiler flags
+C_FLAGS = /DWIN32 /DHAVE_ZLIB /D_CRT_SECURE_NO_WARNINGS /W3 /O2 /MD /nologo /c
+
+# Linker flags (zlib.lib is in src folder)
+L_FLAGS = /nologo ws2_32.lib bcrypt.lib $(SRC_DIR)\zlib.lib
+
+# Object files (in build/obj directory)
+O_FILES = $(OBJ_DIR)\act_comm.obj $(OBJ_DIR)\act_info.obj $(OBJ_DIR)\act_move.obj \
+          $(OBJ_DIR)\act_obj.obj $(OBJ_DIR)\act_wiz.obj $(OBJ_DIR)\bit.obj \
+          $(OBJ_DIR)\mccp.obj $(OBJ_DIR)\board.obj $(OBJ_DIR)\build.obj \
+          $(OBJ_DIR)\clan.obj $(OBJ_DIR)\comm.obj $(OBJ_DIR)\daemon.obj \
+          $(OBJ_DIR)\db.obj $(OBJ_DIR)\angel.obj $(OBJ_DIR)\socials.obj \
+          $(OBJ_DIR)\demon.obj $(OBJ_DIR)\drow.obj $(OBJ_DIR)\fight.obj \
+          $(OBJ_DIR)\kav_wiz.obj $(OBJ_DIR)\handler.obj $(OBJ_DIR)\kav_fight.obj \
+          $(OBJ_DIR)\kav_info.obj $(OBJ_DIR)\interp.obj $(OBJ_DIR)\mage.obj \
+          $(OBJ_DIR)\magic.obj $(OBJ_DIR)\mem.obj $(OBJ_DIR)\monk.obj \
+          $(OBJ_DIR)\monk2.obj $(OBJ_DIR)\ninja.obj $(OBJ_DIR)\olc.obj \
+          $(OBJ_DIR)\upgrade.obj $(OBJ_DIR)\olc_act.obj $(OBJ_DIR)\olc_save.obj \
+          $(OBJ_DIR)\save.obj $(OBJ_DIR)\special.obj $(OBJ_DIR)\string.obj \
+          $(OBJ_DIR)\arena.obj $(OBJ_DIR)\update.obj $(OBJ_DIR)\vamp.obj \
+          $(OBJ_DIR)\ww.obj $(OBJ_DIR)\shapeshifter.obj $(OBJ_DIR)\tanarri.obj \
+          $(OBJ_DIR)\undead_knight.obj $(OBJ_DIR)\samurai.obj $(OBJ_DIR)\wizutil.obj \
+          $(OBJ_DIR)\const.obj $(OBJ_DIR)\spiderdroid.obj $(OBJ_DIR)\lich.obj \
+          $(OBJ_DIR)\jope.obj $(OBJ_DIR)\jobo_king.obj $(OBJ_DIR)\jobo_data.obj \
+          $(OBJ_DIR)\jobo_fight.obj $(OBJ_DIR)\jobo_act.obj $(OBJ_DIR)\jobo_wiz.obj \
+          $(OBJ_DIR)\jobo_util.obj $(OBJ_DIR)\config.obj $(OBJ_DIR)\compat.obj
+
+# Target executable (in project root)
+# Default builds dystopia_new.exe for hot-reload updates
+# Use 'nmake install' for fresh installs when nothing is running
+TARGET = dystopia_new.exe
+TARGET_INSTALL = dystopia.exe
+
+all: $(OBJ_DIR) $(TARGET)
+
+install: $(OBJ_DIR) $(O_FILES)
+	$(LINK) /OUT:$(TARGET_INSTALL) $(O_FILES) $(L_FLAGS)
+
+$(OBJ_DIR):
+	@if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+
+$(TARGET): $(O_FILES)
+	$(LINK) /OUT:$(TARGET) $(O_FILES) $(L_FLAGS)
+
+# Inference rule for .c to .obj
+{$(SRC_DIR)}.c{$(OBJ_DIR)}.obj:
+	$(CC) $(C_FLAGS) /I$(SRC_DIR) /Fo$@ $<
+
+# Dependencies on headers
+$(O_FILES): $(SRC_DIR)\merc.h $(SRC_DIR)\compat.h
+
+clean:
+	@if exist $(OBJ_DIR)\*.obj del /Q $(OBJ_DIR)\*.obj
+	@if exist $(OBJ_DIR) rmdir $(OBJ_DIR)
+	@if exist $(TARGET) del /Q $(TARGET)
+	@if exist $(TARGET_INSTALL) del /Q $(TARGET_INSTALL)
+
+.PHONY: clean all install

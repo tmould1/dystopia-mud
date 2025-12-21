@@ -246,14 +246,17 @@ extern void *fpReserve;
 extern int   port;
 extern int   control;
 
-#define CRASH_TEMP_FILE   "../txt/crash.txt"
-#define COPYOVER_FILE     "../txt/copyover.dat"
-#define EXE_FILE          "dystopia.exe"
+/* Path functions from db.c - use these instead of hardcoded paths */
+#define MUD_PATH_MAX 512
+extern char mud_txt_dir[MUD_PATH_MAX];
+extern char mud_log_dir[MUD_PATH_MAX];
+char *mud_path(const char *dir, const char *filename);
 
 /* Simplified crash handler - just logs and exits cleanly */
 LONG WINAPI win32_exception_filter(EXCEPTION_POINTERS *ExceptionInfo)
 {
     FILE *fp;
+    const char *crash_file;
 
     (void)ExceptionInfo;  /* Could log exception code if needed */
 
@@ -261,8 +264,9 @@ LONG WINAPI win32_exception_filter(EXCEPTION_POINTERS *ExceptionInfo)
     log_string("CRASH: Unhandled exception caught by SEH");
     dump_last_command();
 
-    /* Create crash marker file */
-    fp = fopen(CRASH_TEMP_FILE, "w");
+    /* Create crash marker file using proper path */
+    crash_file = mud_path(mud_txt_dir, "crash.txt");
+    fp = fopen(crash_file, "w");
     if (fp) {
         fprintf(fp, "Crash detected at %ld\n", (long)time(NULL));
         fclose(fp);

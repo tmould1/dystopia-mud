@@ -4440,6 +4440,20 @@ void mud_init_paths(const char *exe_path);
 #define BUG_FILE       mud_path(mud_txt_dir, "bugs.txt")
 #define SHUTDOWN_FILE  mud_path(mud_area_dir, "shutdown.txt")
 #define CRASH_TEMP_FILE mud_path(mud_txt_dir, "crashtmp.txt")
+#define COPYOVER_FILE  mud_path(mud_txt_dir, "copyover.data")
+
+/* Windows socket info file for copyover (WSADuplicateSocket data) */
+#if defined(WIN32)
+#define COPYOVER_SOCKET_FILE mud_path(mud_txt_dir, "copyover_socket.dat")
+#endif
+
+/* Executable file for copyover/crash recovery */
+#if defined(WIN32)
+#define EXE_FILE       mud_path(mud_base_dir, "dystopia.exe")
+#define EXE_FILE_NEW   mud_path(mud_base_dir, "dystopia_new.exe")
+#else
+#define EXE_FILE       mud_path(mud_base_dir, "dystopia")
+#endif
 
 /*
  * Our function prototypes.

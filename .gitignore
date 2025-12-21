@@ -1,12 +1,18 @@
-*.o
-*.obj
+# Executables
 dystopia
 dystopia.exe
-src/dystopia.exe
+dystopia_new.exe
 
 # Build artifacts
-src/build_log.txt
-src/crash.txt
+build/obj/
+build/logs/
+
+# Runtime logs
+log/
+
+# Runtime artifacts
+crash.txt
+build_log.txt
 
 # IDE/Editor
 .vscode/
