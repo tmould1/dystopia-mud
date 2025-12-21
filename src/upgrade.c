@@ -258,8 +258,6 @@ void clearshit(CHAR_DATA *ch)
          ch->spl[sn]                  = 4;
   for( sn=0 ; sn < 8 ; sn++ )
          ch->cmbt[sn]                 = 0;
-  for( sn=0 ; sn < 11 ; sn++ )
-         ch->cmbt[sn]                 = 0;
   ch->pcdata->followers               = 0;   
   ch->pcdata->perm_str                = 13;
   ch->pcdata->perm_int                = 13;

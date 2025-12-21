@@ -779,7 +779,7 @@ bool aedit_builder( CHAR_DATA *ch, char *argument )
 
     name[0] = UPPER( name[0] );
 
-    if ( strstr( pArea->builders, name ) != '\0' )
+    if ( strstr( pArea->builders, name ) != NULL )
     {
 	pArea->builders = string_replace( pArea->builders, name, "\0" );
 	pArea->builders = string_unpad( pArea->builders );
@@ -795,7 +795,7 @@ bool aedit_builder( CHAR_DATA *ch, char *argument )
     else
     {
 	buf[0] = '\0';
-	if ( strstr( pArea->builders, "None" ) != '\0' )
+	if ( strstr( pArea->builders, "None" ) != NULL )
 	{
 	    pArea->builders = string_replace( pArea->builders, "None", "\0" );
 	    pArea->builders = string_unpad( pArea->builders );
@@ -1242,6 +1242,7 @@ bool change_exit( CHAR_DATA *ch, char *argument, int door )
 	if ( !pRoom->exit[door] )		/* No exit.		*/
 	    pRoom->exit[door] = new_exit();
 
+	value = atoi(arg);
 	pRoom->exit[door]->to_room = pLinkRoom;	/* Assign data.		*/
 	pRoom->exit[door]->vnum = value;
 
@@ -1299,6 +1300,7 @@ bool change_exit( CHAR_DATA *ch, char *argument, int door )
 	if ( !pRoom->exit[door] )
 	    pRoom->exit[door] = new_exit();
 
+	value = atoi(arg);
 	pRoom->exit[door]->to_room = pLinkRoom;
 	pRoom->exit[door]->vnum = value;
 
@@ -3684,8 +3686,9 @@ HEDIT( hedit_index)
 	int level;
 	char output[MAX_STRING_LENGTH];
         char buf[MAX_STRING_LENGTH];
-                int bob;
+                int bob = 0;
 	buf[0] = '\0';
+	output[0] = '\0';
 
         for ( pHelp = help_first; pHelp != NULL; pHelp = pHelp->next )
     {

@@ -712,7 +712,7 @@ return;
             return;
         }
          
-        if (arg3 == '\0')
+        if (arg3[0] == '\0')
         {
             send_to_char( "pset <victim> immune <immunity>.\n\r", ch );
             return;
@@ -2702,7 +2702,6 @@ void do_pload( CHAR_DATA *ch, char *argument )
     char buf[MAX_STRING_LENGTH];
     DESCRIPTOR_DATA *d;
     ROOM_INDEX_DATA *in_room;
-    bool fOld;
 
     if ( IS_NPC(ch) || ch->desc == NULL || ch->in_room == NULL ) return;
 
@@ -2739,7 +2738,7 @@ void do_pload( CHAR_DATA *ch, char *argument )
     in_room = ch->in_room;
     extract_char(ch, TRUE);
     d->character = NULL;
-    fOld = load_char_obj( d, argument );
+    (void)load_char_obj( d, argument );
     ch   = d->character;
     ch->next = char_list;
     char_list = ch;
@@ -2754,7 +2753,6 @@ void do_preturn( CHAR_DATA *ch, char *argument )
     char arg[MAX_INPUT_LENGTH];
     char buf[MAX_STRING_LENGTH];
     DESCRIPTOR_DATA *d;
-    bool fOld;
 
     if (IS_NPC(ch)) {send_to_char("Huh?\n\r",ch);return;}
 
@@ -2781,7 +2779,7 @@ void do_preturn( CHAR_DATA *ch, char *argument )
     ch->next = char_list;
     char_list = ch;
 */
-    fOld = load_char_obj(d, capitalize(arg));
+    (void)load_char_obj(d, capitalize(arg));
     if (ch->in_room != NULL)
     	char_to_room(ch,ch->in_room);
     else
@@ -5598,12 +5596,11 @@ void do_evileye( CHAR_DATA *ch, char *argument )
     char buf[MAX_STRING_LENGTH];
     char arg1[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
-    int value;
- 
+
     smash_tilde( argument );
     argument = one_argument( argument, arg1 );
     strcpy( arg2, argument );
- 
+
     if (ch->power[DISC_DAEM_DISC] < 2)
     {
 	stc("You must obtain a level two Mastery of Discord.\n\r",ch);
@@ -5635,7 +5632,6 @@ void do_evileye( CHAR_DATA *ch, char *argument )
 	send_to_char(".\n\r",ch);
         return;
     }
-    value = is_number( arg2 ) ? atoi( arg2 ) : -1;
     if ( !str_cmp( arg1, "action" ) )
     {
 	free_string( ch->poweraction );
@@ -6430,7 +6426,6 @@ bool read_entry( CHAR_DATA *ch, FILE *fp, char *filename, char *arg )
 {
     char buf[MAX_STRING_LENGTH];
     HELP_DATA *new;
-    HELP_DATA *debug;
     char *test_keyword = 0;
     char *test_text = 0;
     int test_level = 0;
@@ -6468,8 +6463,7 @@ bool read_entry( CHAR_DATA *ch, FILE *fp, char *filename, char *arg )
             new->level   = test_level;
             new->text    = test_text;
 
-            debug = help_last;
-            if ( help_last ) 
+            if ( help_last )
                 help_last->next = new;
             help_last = new;
             
@@ -6553,13 +6547,13 @@ void do_resetpassword( CHAR_DATA *ch, char *argument )
 
     victim = get_char_world(ch, arg1);
 
-    if (  ( ch->pcdata->pwd != '\0' )
+    if (  ( ch->pcdata->pwd[0] != '\0' )
     && ( arg1[0] == '\0' || arg2[0] == '\0')  )
     {
         send_to_char( "Syntax: password <char> <new>.\n\r", ch );
         return;
     }
-    if( victim == '\0' )
+    if( victim == NULL )
     {
 		send_to_char( "That person isn't here, they have to be here to reset pwd's.\n\r", ch);
 	 	return;

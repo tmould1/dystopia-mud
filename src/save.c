@@ -797,8 +797,6 @@ bool load_char_short( DESCRIPTOR_DATA *d, char *name)
          ch->spl[sn]                    = 0;
     for( sn=0 ; sn < 8 ; sn++ )
          ch->cmbt[sn]                   = 0;
-    for( sn=0 ; sn < 11 ; sn++ )
-         ch->cmbt[sn]                   = 0;
 
     ch->pkill                           = 0;      
     ch->pdeath                          = 0;   
@@ -1035,8 +1033,6 @@ bool load_char_obj( DESCRIPTOR_DATA *d, char *name)
     for( sn=0 ; sn < 5 ; sn++ )
 	 ch->spl[sn]                    = 0;
     for( sn=0 ; sn < 8 ; sn++ )
-	 ch->cmbt[sn]                   = 0;
-    for( sn=0 ; sn < 11 ; sn++ )
 	 ch->cmbt[sn]                   = 0;
 
     ch->pkill                           = 0;

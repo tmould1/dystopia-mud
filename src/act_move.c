@@ -2020,7 +2020,7 @@ void do_escape( CHAR_DATA *ch, char *argument )
     char_to_room( ch, location );
     act( "$n fades into existance.", ch, NULL, NULL, TO_ROOM );
     do_look( ch, "auto" );
-    sprintf(buf,"%s has escaped #Gdefenceless#n, easy kill for the quick.",ch->pcdata->switchname);
+    snprintf(buf, sizeof(buf), "%s has escaped #Gdefenceless#n, easy kill for the quick.",ch->pcdata->switchname);
     do_info(ch,buf);
     if (IS_SET(ch->newbits, NEW_DARKNESS)) {
         REMOVE_BIT(ch->newbits, NEW_DARKNESS);
@@ -2560,8 +2560,9 @@ void do_train( CHAR_DATA *ch, char *argument )
     char arg1[MAX_STRING_LENGTH];
     char arg2[MAX_STRING_LENGTH];
     char buf[MAX_STRING_LENGTH];
-    sh_int *pAbility;
-    char *pOutput;
+    sh_int *pAbility = NULL;
+    sh_int quiet_pointer = 0;
+    char *pOutput = NULL;
     int cost;
     int magic;
     int immcost;
@@ -3275,7 +3276,7 @@ is_ok = TRUE;
 
 	else if (!str_cmp(arg1, "magic") && IS_CLASS(ch, CLASS_DROW))
 	{
-	  sh_int quiet_pointer=ch->pcdata->stats[DROW_MAGIC];
+	  quiet_pointer = ch->pcdata->stats[DROW_MAGIC];
 	  cost = magic;
 	  pAbility = &quiet_pointer;
 	  pOutput = "drow magic resistance";
@@ -3283,21 +3284,21 @@ is_ok = TRUE;
 	
     else if ( !str_cmp( arg1, "silver") && IS_CLASS(ch, CLASS_WEREWOLF) )
     {
-	sh_int quiet_pointer=ch->siltol; /* dirrent type of int*/
+	quiet_pointer = ch->siltol;
         cost        = silver;
 	pAbility    = &quiet_pointer;
 	pOutput     = "tolerance to silver";
     }
     else if ( !str_cmp( arg1, "gnosis") && IS_CLASS(ch, CLASS_WEREWOLF))
     {
-	sh_int quiet_pointer = ch->gnosis[GMAXIMUM];
+	quiet_pointer = ch->gnosis[GMAXIMUM];
 	cost 	    = gnosis;
         pAbility    = &quiet_pointer;
         pOutput     = "gnosis points";
     }
     else if ( !str_cmp( arg1, "control") && IS_CLASS(ch, CLASS_VAMPIRE))
     {
-	sh_int quiet_pointer = ch->beast;
+	quiet_pointer = ch->beast;
 	cost 	    = beast;
 	pAbility    = &quiet_pointer;
 	pOutput     = "control over your beast";
@@ -4081,7 +4082,7 @@ else
 	}
 	else if (!str_cmp(arg1, "magic"))
 		ch->pcdata->stats[DROW_MAGIC] += 1;
-	else if ( str_cmp(arg1, "avatar") )
+	else if ( str_cmp(arg1, "avatar") && pAbility != NULL )
 	{
             *pAbility		+= 1;
 	}
@@ -4244,7 +4245,7 @@ void do_tie( CHAR_DATA *ch, char *argument )
     {
       if (IS_SET(victim->in_room->room_flags, ROOM_ARENA))
       {
-        sprintf(buf,"#C%s #ohas been vanquished from the #Rarena#o by #C%s#n",victim->name,ch->name);
+        snprintf(buf, sizeof(buf), "#C%s #ohas been vanquished from the #Rarena#o by #C%s#n",victim->name,ch->name);
         do_info(ch,buf);
         victim->pcdata->alosses++;
         if ((location = get_room_index(ROOM_VNUM_ALTAR)) == NULL) return;
@@ -4267,7 +4268,7 @@ void do_tie( CHAR_DATA *ch, char *argument )
         }
         if (!found)
         {
-          sprintf(buf,"#C%s #oemerges victorious from the #Rarena#n",ch->name);
+          snprintf(buf, sizeof(buf), "#C%s #oemerges victorious from the #Rarena#n",ch->name);
           ch->pcdata->awins++;
           do_info(ch,buf);
           if ((location = get_room_index(ROOM_VNUM_ALTAR)) == NULL) return;
@@ -4285,7 +4286,7 @@ void do_tie( CHAR_DATA *ch, char *argument )
     act("$n quickly ties up $N.",ch,NULL,victim,TO_ROOM);
     send_to_char("You have been tied up!\n\r",victim);
     SET_BIT(victim->extra,TIED_UP);
-    sprintf(buf,"#P%s #yhas been tied up by #R%s#n",victim->name,ch->name);
+    snprintf(buf, sizeof(buf), "#P%s #yhas been tied up by #R%s#n",victim->name,ch->name);
     do_info(ch,buf);
     return;
 }

@@ -80,12 +80,13 @@ if ( ch->fighting != NULL )
     
     for ( victim = ch->in_room->people; victim != NULL; victim = v_next )
     {
+	v_next = victim->next_in_room;
                 /* this should kill mobs as well as players */
                         if ( !IS_CLASS(ch, CLASS_MAGE))
                 break;
     }
-    
-    if (victim->hit < -5)
+
+    if (victim != NULL && victim->hit < -5)
         { 
              rnd_chat = number_range (1, 10);
 
@@ -131,6 +132,7 @@ bool spec_assassin( CHAR_DATA *ch )
 
     for ( victim = ch->in_room->people; victim != NULL; victim = v_next )
     {
+	v_next = victim->next_in_room;
                /* this should kill mobs as well as players */
                         if ( !IS_CLASS(ch, CLASS_MAGE))
                                 break;
@@ -1625,12 +1627,13 @@ do_kick(ch,"victim");
 
     for ( victim = ch->in_room->people; victim != NULL; victim = v_next )
     {
+	v_next = victim->next_in_room;
                 /* this should kill mobs as well as players */
                         if ( !IS_CLASS(ch, CLASS_MAGE))
                 break;
     }
 
-    if (victim->hit < -5)
+    if (victim != NULL && victim->hit < -5)
         {
 rnd_chat = number_range (1, 10);
 

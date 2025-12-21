@@ -304,7 +304,7 @@ break;
         sprintf( buf, "%s the newbie chats #7'#R$t#7'.#n",ch->name);
       else
         sprintf( buf, "%s the newbie helper chats #7'#R$t#7'.#n",ch->name);
-        position        = ch->position;
+      position        = ch->position;
         ch->position    = POS_STANDING;
         act( buf, ch, argument, NULL, TO_CHAR );
         ch->position    = position;
@@ -937,7 +937,7 @@ void room_text( CHAR_DATA *ch, char *argument)
 	 || is_in(argument, rt->input)
 	 || all_in(argument, rt->input)) 
 	{
-	    if ( rt->name != NULL         && rt->name != '\0'
+	    if ( rt->name != NULL         && rt->name[0] != '\0'
 	    &&   str_cmp(rt->name,"all")  && str_cmp(rt->name,"|all*") ) 
 	    	if (!is_in(ch->name, rt->name) ) continue;
 	    mobfound = TRUE;
@@ -1919,13 +1919,12 @@ void do_order( CHAR_DATA *ch, char *argument )
 	}
     }
 
-    if ( found ) 
-	
+    if ( found )
 	send_to_char( "Ok.\n\r", ch );
     else
 	send_to_char( "You have no followers here.\n\r", ch );
-	WAIT_STATE( ch, 12 );    
-return;
+    WAIT_STATE( ch, 12 );
+    return;
 }
 
 

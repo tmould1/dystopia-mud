@@ -506,7 +506,7 @@ void mobile_update( void )
 
     if ( ch->in_room == NULL ) continue;
 
-    if ( ch->hunting != NULL && ch->hunting != '\0' && strlen(ch->hunting) > 1 )
+    if ( ch->hunting != NULL && ch->hunting[0] != '\0' && strlen(ch->hunting) > 1 )
     {
       check_hunt( ch );
       continue;
@@ -977,7 +977,7 @@ void room_update( void )
 	if (RTIMER(room, RTIMER_SWARM_RATS) == 1)
 	    room_message(room, "The rats scurry away into the floorboards.");
   
-      if( RTIMER(room, RTIMER_SILENCE) < 0) room->tick_timer[i] = UMAX(room->tick_timer[i], 0);
+      if( RTIMER(room, RTIMER_SILENCE) < 0) room->tick_timer[RTIMER_SILENCE] = UMAX(room->tick_timer[RTIMER_SILENCE], 0);
       if (RTIMER(room, RTIMER_SILENCE) == 1)
 	    room_message(room, "The silence disappates.");
 
@@ -1115,10 +1115,10 @@ void embrace_update( void )
       if ( IS_NPC(ch) || ch->embracing == NULL )
         continue;
 
-	if (!IS_CLASS(ch,CLASS_VAMPIRE))
-	  stop_embrace(ch,NULL);
+      if (!IS_CLASS(ch,CLASS_VAMPIRE))
+        stop_embrace(ch,NULL);
 
-	victim=ch->embracing;
+      victim=ch->embracing;
 
 /* Fix for embracing mobs by Shakti.					*/
 
@@ -1634,7 +1634,7 @@ void update_cyborg (CHAR_DATA *ch)
 {
   if ( ch->hit < ch->max_hit || ch->mana < ch->max_mana || ch->move < ch->max_move)
     werewolf_regen(ch, 2);
-    regen_limb(ch);
+  regen_limb(ch);
   return;
 }
 
@@ -1803,7 +1803,7 @@ void update_werewolf(CHAR_DATA *ch)
     if (ch->position == POS_FIGHTING)
     {
       if (ch->rage < 200) ch->rage += number_range(5,10);
-      if (ch->rage < 200 && ch->pcdata->powers[DISC_WERE_WOLF] > 3)	ch->rage += number_range(5,10);
+      if (ch->rage < 200 && ch->power[DISC_WERE_WOLF] > 3)	ch->rage += number_range(5,10);
       if (!IS_SET(ch->special, SPC_WOLFMAN) && ch->rage >= 100)	do_werewolf(ch,"");
     }
     else if (ch->rage > 0)
