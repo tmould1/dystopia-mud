@@ -34,9 +34,6 @@
 
 bool	check_social	args( ( CHAR_DATA *ch, char *command,
 			    char *argument ) );
-bool	check_xsocial	args( ( CHAR_DATA *ch, char *command,
-			    char *argument ) );
-void	make_preg	args( ( CHAR_DATA *mother, CHAR_DATA *father ) );
 
 
 int can_interpret args( (CHAR_DATA *ch, int cmd) );
@@ -335,10 +332,6 @@ const	struct	cmd_type	cmd_table	[] =
     { "typo",		do_typo,	POS_DEAD,	 	 0,  LOG_NORMAL, 0,0,0 },
     { "who",		do_who,	POS_DEAD,	 	 0,  LOG_NORMAL, 0,0,0 },
     { "wizlist",		do_wizlist,	POS_DEAD,	 	 0,  LOG_NORMAL, 0,0,0 },
-    { "xemot",		do_huh,	POS_DEAD,	 	 1,  LOG_NORMAL, 0,0,0 },
-    { "xemote",		do_xemote,	POS_SITTING,	 1,  LOG_NORMAL, 0,0,0 },
-    { "xsocial",		do_huh,	POS_DEAD,	 	 1,  LOG_NORMAL, 0,0,0 },
-    { "xsocials",		do_xsocials,POS_DEAD,	 	 1,  LOG_NORMAL, 0,0,0 },
     { "group",          do_group,       POS_DEAD,                0,  LOG_NORMAL, 0,0,0  },
 
     /*
@@ -373,8 +366,8 @@ const	struct	cmd_type	cmd_table	[] =
     { "clandisc",		do_clandisc,POS_SITTING,       3,  LOG_NORMAL, 0,0,0 },
     { "intro",		do_introduce,	POS_DEAD,	 3,LOG_NORMAL, 8,0,0, },
     { "intro",          do_introduce,   POS_DEAD,        3,LOG_NORMAL, 4,0,0, },
-    { "emote",		do_xemote,	POS_SITTING,	 0,  LOG_NORMAL,0,0,0 },
-    { ",",			do_xemote,	POS_SITTING,	 0,  LOG_NORMAL, 0,0,0},
+    { "emote",		do_emote,	POS_SITTING,	 0,  LOG_NORMAL,0,0,0 },
+    { ",",			do_emote,	POS_SITTING,	 0,  LOG_NORMAL, 0,0,0},
     { "gtell",		do_gtell,	POS_DEAD,	 	 0,  LOG_NORMAL, 0,0,0	},
     { ";",			do_gtell,	POS_DEAD,	 	 0,  LOG_NORMAL, 0,0,0	},
     { "howl",		do_howl,	POS_DEAD,	 	 1,  LOG_NORMAL, 0,0,0	},
@@ -726,12 +719,6 @@ LOG_NORMAL, 8, DISC_VAMP_THAN, 3 }, */
     { "visible",		do_visible,	POS_SLEEPING,	 1,  LOG_NORMAL, 0,0,0 },
     { "wake",		do_wake,	POS_SLEEPING,	 0,  LOG_NORMAL, 0,0,0	},
     { "where",		do_where,	POS_SITTING,	 0,  LOG_NORMAL, 0,0,0	},
-
-/* need it before forge */
-
-
-     { "contraception", do_contraception, POS_DEAD,  1,      LOG_NORMAL, 0,0,0},
-
 
  /*
   * Monk
@@ -1502,10 +1489,7 @@ found = TRUE;
 	 * Look for command in socials table.
 	 */
 	if ( !check_social( ch, command, argument ) )
-	{
-	    if ( !check_xsocial( ch, command, argument ) )
-		send_to_char( "Huh?\n\r", ch );
-	}
+	    send_to_char( "Huh?\n\r", ch );
 	return;
     }
     else /* a normal valid command.. check if it is disabled */
@@ -1687,375 +1671,17 @@ bool check_social( CHAR_DATA *ch, char *command, char *argument )
     return TRUE;
 }
 
-
-
-bool check_xsocial( CHAR_DATA *ch, char *command, char *argument )
+/* Removed: xsocial system - stage_update stub for compatibility */
+void stage_update( CHAR_DATA *ch, CHAR_DATA *victim, int stage, char *argument )
 {
-    char arg[MAX_STRING_LENGTH];
-    CHAR_DATA *victim;
-    CHAR_DATA *partner = NULL;
-    int cmd;
-    int stage;
-    int amount;
-    bool is_ok = FALSE;
-    bool found = FALSE;
-    bool one = FALSE;
-    bool two = FALSE;
-
-    if (IS_NPC(ch)) return FALSE;
-
-    for ( cmd = 0; xsocial_table[cmd].name[0] != '\0'; cmd++ )
-    {
-	if ( command[0] == xsocial_table[cmd].name[0]
-	&&   !str_prefix( command, xsocial_table[cmd].name ) )
-	{
-	    found = TRUE;
-	    break;
-	}
-    }
-
-    if ( !found )
-	return FALSE;
-
-    switch ( ch->position )
-    {
-
-    case POS_DEAD:
-	send_to_char( "Lie still; you are DEAD.\n\r", ch );
-	return TRUE;
-
-    case POS_INCAP:
-    case POS_MORTAL:
-	send_to_char( "You are hurt far too bad for that.\n\r", ch );
-	return TRUE;
-
-    case POS_STUNNED:
-	send_to_char( "You are too stunned to do that.\n\r", ch );
-	return TRUE;
-
-    case POS_SLEEPING:
-	send_to_char( "In your dreams, or what?\n\r", ch );
-	return TRUE;
-
-    }
-
-    one_argument( argument, arg );
-    victim = NULL;
-
-    if ( ( victim = get_char_room( ch, arg ) ) == NULL )
-    {
-	send_to_char( "They aren't here.\n\r", ch );
-	return TRUE;
-    }
-    if (IS_NPC(victim))
-    {
-	send_to_char("You can only perform xsocials on players.\n\r",ch);
-	return TRUE;
-    }
-
-	if( !str_cmp(ch->pcdata->switchname, "") )
-	{
-		victim->pcdata->partner = ch;
-	}
-  else if (IS_SET(victim->extra, TIED_UP))
-         { victim->pcdata->partner = ch;
-         }
-
-    
-	if (IS_EXTRA(ch, TIED_UP))
-    {
-	send_to_char("You wiggle and strain but the ropes only tighten.\n\r",ch);
-        act("$n strains helplessly against $m bonds.",ch,NULL,NULL,TO_ROOM);
-	return FALSE;
-    }
-    else if ( arg[0] == '\0' )
-    {
-	act( xsocial_table[cmd].others_no_arg, ch, NULL, victim, TO_ROOM    );
-	act( xsocial_table[cmd].char_no_arg,   ch, NULL, victim, TO_CHAR    );
-    }
-    else if ( victim == ch )
-    {
-	act( xsocial_table[cmd].others_auto,   ch, NULL, victim, TO_ROOM );
-	act( xsocial_table[cmd].char_auto,     ch, NULL, victim, TO_CHAR );
-    }
-/*    else if (ch->sex != SEX_MALE && ch->sex != SEX_FEMALE)
-    {
-	send_to_char("You must be either male or female to use these socials.\n\r",ch);
-    }
-    else if (victim->sex != SEX_MALE && victim->sex != SEX_FEMALE)
-    {
-	send_to_char("They must be either male or female for these socials.\n\r",ch);
-    }
-    else if (ch->sex == victim->sex)
-    {
-	send_to_char("Please stick to people of the opposite gender.\n\r",ch);
-    }
-*/    else
-    {
-	if (xsocial_table[cmd].gender == SEX_MALE && ch->sex != SEX_MALE)
-	{
-	    send_to_char("Only men can perform this type of social.\n\r",ch);
-	}
-	else if (xsocial_table[cmd].gender == SEX_FEMALE && ch->sex != SEX_FEMALE)
-	{
-	    send_to_char("Only women can perform this type of social.\n\r",ch);
-	}
-	else if (xsocial_table[cmd].gender == SEX_MALE && victim->sex != SEX_FEMALE)
-	{
-	    send_to_char("You can only perform this social on a woman.\n\r",ch);
-	}
-	else if (xsocial_table[cmd].gender == SEX_FEMALE && victim->sex != SEX_MALE)
-	{
-	    send_to_char("You can only perform this social on a man.\n\r",ch);
-	}
-	else if (xsocial_table[cmd].gender == 3 && ch->sex != SEX_FEMALE)
-	{
-		stc( "Only females may preform this command.\n\r",ch);
-	}
-	else if (xsocial_table[cmd].gender == 3 && victim->sex != SEX_FEMALE)
-	{
-		stc( "You can only preform this command on a female.\n\r",ch);
-	}
-	else if (((partner = victim->pcdata->partner) == NULL || partner != ch) && (!IS_SET (victim->in_room->room_flags, ROOM_SEX)))
-  	{
-         	stc("You cannot perform an xsocial on someone without their consent.\n\r",ch);
-	 }
-	else if (xsocial_table[cmd].stage == 0 && ch->pcdata->stage[0] < 1
-	    && ch->pcdata->stage[2] > 0 && ch->sex == 5)
-	    send_to_char("You have not yet recovered from last time!\n\r",ch);
-	else if (xsocial_table[cmd].stage == 0 && victim->pcdata->stage[0] < 1
-	    && victim->pcdata->stage[2] > 0 && victim->sex == 5)
-	    send_to_char("They have not yet recovered from last time!\n\r",ch);
-	else if (xsocial_table[cmd].stage > 0 && ch->pcdata->stage[0] < 100)
-	    send_to_char("You are not sufficiently aroused.\n\r",ch);
-	else if (xsocial_table[cmd].stage > 0 && victim->pcdata->stage[0] < 100)
-	    send_to_char("They are not sufficiently aroused.\n\r",ch);
-	else if (xsocial_table[cmd].stage > 1 && ch->pcdata->stage[1] < 1)
-	    send_to_char("You are not in the right position.\n\r",ch);
-	else if (xsocial_table[cmd].stage > 1 && victim->pcdata->stage[1] < 1)
-	    send_to_char("They are not in the right position.\n\r",ch);
-	else
-	{
-	    act(xsocial_table[cmd].others_found,  ch, NULL, victim, TO_NOTVICT);
-	    act(xsocial_table[cmd].char_found,    ch, NULL, victim, TO_CHAR   );
-	    act(xsocial_table[cmd].vict_found,    ch, NULL, victim, TO_VICT   );
-	    if (xsocial_table[cmd].chance)
-	    {
-		if (ch->sex == SEX_FEMALE && 
-		    !IS_EXTRA(ch, EXTRA_PREGNANT) && number_range(1,3) == 1) 
-		make_preg(ch,victim);
-		else if (victim->sex == SEX_FEMALE && 
-		    !IS_EXTRA(victim, EXTRA_PREGNANT) && 
-		    number_range(1,3) == 1) 
-		make_preg(victim,ch);
-	    }
-	    if (!str_prefix(xsocial_table[cmd].name,"x-tie"))
-	    {
-		SET_BIT(victim->extra, TIED_UP);
-	    }
-	    if (!str_prefix(xsocial_table[cmd].name,"x-gag"))
-	    {
-		SET_BIT(victim->extra, GAGGED);
-	    }
-	    if (!str_prefix(xsocial_table[cmd].name,"x-blindfold"))
-	    {
-		SET_BIT(victim->extra, BLINDFOLDED);
-	    }
-	    if (xsocial_table[cmd].stage == 1)
-	    {
-		ch->pcdata->stage[1] = xsocial_table[cmd].position;
-		victim->pcdata->stage[1] = xsocial_table[cmd].position;
-		if (!IS_SET(ch->extra, EXTRA_DONE))
-		{
-		    SET_BIT(ch->extra, EXTRA_DONE);
-		    if (ch->sex == SEX_FEMALE)
-		    {
-			act("You feel $n bleed as you enter $m.",ch,NULL,victim,TO_VICT);
-			act("You feel yourself bleed as $N enters you.",ch,NULL,victim,TO_CHAR);
-			ch->in_room->blood += 1;
-		    }
-		}
-		if (!IS_SET(victim->extra, EXTRA_DONE))
-		{
-		    SET_BIT(victim->extra, EXTRA_DONE);
-		    if (victim->sex == SEX_FEMALE)
-		    {
-			act("You feel $N bleed as you enter $M.",ch,NULL,victim,TO_CHAR);
-			act("You feel yourself bleed as $n enters you.",ch,NULL,victim,TO_VICT);
-			ch->in_room->blood += 1;
-		    }
-		}
-		stage = 2;
-	    }
-	    else stage = xsocial_table[cmd].stage;
-	    if (stage == 2) amount = ch->pcdata->stage[1];
-		else amount = 100;
-	    if (xsocial_table[cmd].self > 0)
-	    {
-		is_ok = FALSE;
-		if (ch->pcdata->stage[stage] >= amount) is_ok = TRUE;
-		ch->pcdata->stage[stage] += xsocial_table[cmd].self;
-		if (!is_ok && ch->pcdata->stage[stage] >= amount) 
-		{
-		    stage_update(ch,victim,stage,xsocial_table[cmd].name);
-		    one = TRUE;
-		}
-	    }
-	    if (xsocial_table[cmd].other > 0)
-	    {
-		is_ok = FALSE;
-		if (victim->pcdata->stage[stage] >= amount) is_ok = TRUE;
-		victim->pcdata->stage[stage] += xsocial_table[cmd].other;
-		if (!is_ok && victim->pcdata->stage[stage] >= amount) 
-		{
-		    stage_update(victim,ch,stage,xsocial_table[cmd].name);
-		    two = TRUE;
-		}
-	    }
-	    if ( one && two )
-	    {
-		    ch->pcdata->stage[0] = 0;
-		    victim->pcdata->stage[0] = 0;
-		if (!IS_EXTRA(ch, EXTRA_EXP))
-		{
-		    send_to_char("Congratulations on achieving a simultanious orgasm!  Recieve 100000 exp!\n\r",ch);
-		    SET_BIT(ch->extra, EXTRA_EXP);
-		    ch->exp += 100000;
-		}
-		if (!IS_EXTRA(victim, EXTRA_EXP))
-		{
-		    send_to_char("Congratulations on achieving a simultanious orgasm!  Recieve 100000 exp!\n\r",victim);
-		    SET_BIT(victim->extra, EXTRA_EXP);
-		    victim->exp += 100000;
-		}
-	    }
-	}
-    }
-    return TRUE;
-}
-
-void stage_update( CHAR_DATA *ch, CHAR_DATA *victim, int stage,char *argument )
-{
-    if (IS_NPC(ch) || IS_NPC(victim)) return;
-    if (stage == 0)
-    {
-	if (ch->sex == SEX_MALE)
-	{
-	    send_to_char("You get a boner.\n\r",ch);
-	    act("You feel $n get a boner.",ch,NULL,victim,TO_VICT);
-	    return;
-	}
-	else if (ch->sex == SEX_FEMALE)
-	{
-	    send_to_char("You get wet.\n\r",ch);
-	    act("You feel $n get wet.",ch,NULL,victim,TO_VICT);
-	    return;
-	}
-    }
-    else if (stage == 2)
-    {
-	if (ch->sex == SEX_MALE)
-	{
-	    if( str_cmp(argument,"xm-cum")   && str_cmp(argument,"xm-facial") && str_cmp(argument,"xm-canal") &&
-		str_cmp(argument,"xm-canal") && str_cmp(argument,"xm-cbreasts") && str_cmp(argument,"xm-chair") &&
-		str_cmp(argument,"xm-chand") && str_cmp(argument,"xm-cstomach") && str_cmp(argument,"xf-chands") &&
-		str_cmp(argument,"xf-cbreasts") )
-	    {
-		act("You grit your teeth as you shoot your creamy load inside of $M.",ch,NULL,victim,TO_CHAR);
-		act("$n grits his teeth as he shoots his load inside of you.",ch,NULL,victim,TO_VICT);
-		act("$n grits his teeth as he shoots a load of cum inside of $N.",ch,NULL,victim,TO_NOTVICT);
-	    }
-	    ch->pcdata->genes[8] += 1;
-	    victim->pcdata->genes[8] += 1;
-	    save_char_obj(ch);
-	    save_char_obj(victim);
-	    if (victim->pcdata->stage[2] < 1 || victim->pcdata->stage[2] >= 250)
-	    {
-		ch->pcdata->stage[2] = 0;
-		if (ch->pcdata->stage[0] >= 200) ch->pcdata->stage[0] -= 100;
-	    }
-	    else ch->pcdata->stage[2] = 200;
-	    if (victim->sex == SEX_FEMALE && 
-		!IS_EXTRA(victim, EXTRA_PREGNANT) && number_percent() <= 8) 
-	    make_preg(victim,ch);
-	    return;
-	}
-	else if (ch->sex == SEX_FEMALE)
-	{
-	    if( str_cmp(argument,"xf-cum") && str_cmp(argument,"xf-cface") )
-	    {
-		act("You whimper as you cum.",ch,NULL,victim,TO_CHAR);
-		act("$n whimpers as $e cums.",ch,NULL,victim,TO_ROOM);
-	    }
-	    if (victim->pcdata->stage[2] < 1 || victim->pcdata->stage[2] >= 250)
-	    {
-		ch->pcdata->stage[2] = 0;
-		if (ch->pcdata->stage[0] >= 200) ch->pcdata->stage[0] -= 100;
-	    }
-	    else ch->pcdata->stage[2] = 200;
-	    return;
-	}
-    }
+    (void)ch; (void)victim; (void)stage; (void)argument;
     return;
 }
 
+/* Removed: xsocial system - make_preg stub for compatibility */
 void make_preg( CHAR_DATA *mother, CHAR_DATA *father )
 {
-    char *strtime;
-    char buf [MAX_STRING_LENGTH];
-
-    if (IS_NPC(mother) || IS_NPC(father)) return;
-
-    if (IS_SET(mother->affected_by2, AFF_CONTRACEPTION)) return;
-
-  strtime = ctime( &current_time );
-    strtime[strlen(strtime)-1] = '\0';
-    free_string(mother->pcdata->conception);
-    mother->pcdata->conception = str_dup(strtime);
-    sprintf(buf,"%s", father->name);
-    free_string(mother->pcdata->cparents);
-    mother->pcdata->cparents = str_dup(buf);
-    SET_BIT(mother->extra, EXTRA_PREGNANT);
-    mother->pcdata->genes[0] = (mother->max_hit + father->max_hit) * 0.5;
-    mother->pcdata->genes[1] = (mother->max_mana + father->max_mana) * 0.5;
-    mother->pcdata->genes[2] = (mother->max_move + father->max_move) * 0.5;
-    if (IS_IMMUNE(mother, IMM_SLASH) && IS_IMMUNE(father, IMM_SLASH))
-	SET_BIT(mother->pcdata->genes[3], IMM_SLASH);
-    if (IS_IMMUNE(mother, IMM_STAB) && IS_IMMUNE(father, IMM_STAB))
-	SET_BIT(mother->pcdata->genes[3], IMM_STAB);
-    if (IS_IMMUNE(mother, IMM_SMASH) && IS_IMMUNE(father, IMM_SMASH))
-	SET_BIT(mother->pcdata->genes[3], IMM_SMASH);
-    if (IS_IMMUNE(mother, IMM_ANIMAL) && IS_IMMUNE(father, IMM_ANIMAL))
-	SET_BIT(mother->pcdata->genes[3], IMM_ANIMAL);
-    if (IS_IMMUNE(mother, IMM_MISC) && IS_IMMUNE(father, IMM_MISC))
-	SET_BIT(mother->pcdata->genes[3], IMM_MISC);
-    if (IS_IMMUNE(mother, IMM_CHARM) && IS_IMMUNE(father, IMM_CHARM))
-	SET_BIT(mother->pcdata->genes[3], IMM_CHARM);
-    if (IS_IMMUNE(mother, IMM_HEAT) && IS_IMMUNE(father, IMM_HEAT))
-	SET_BIT(mother->pcdata->genes[3], IMM_HEAT);
-    if (IS_IMMUNE(mother, IMM_COLD) && IS_IMMUNE(father, IMM_COLD))
-	SET_BIT(mother->pcdata->genes[3], IMM_COLD);
-    if (IS_IMMUNE(mother, IMM_LIGHTNING) && IS_IMMUNE(father, IMM_LIGHTNING))
-	SET_BIT(mother->pcdata->genes[3], IMM_LIGHTNING);
-    if (IS_IMMUNE(mother, IMM_ACID) && IS_IMMUNE(father, IMM_ACID))
-	SET_BIT(mother->pcdata->genes[3], IMM_ACID);
-    if (IS_IMMUNE(mother, IMM_VOODOO) && IS_IMMUNE(father, IMM_VOODOO))
-	SET_BIT(mother->pcdata->genes[3], IMM_VOODOO);
-    if (IS_IMMUNE(mother, IMM_HURL) && IS_IMMUNE(father, IMM_HURL))
-	SET_BIT(mother->pcdata->genes[3], IMM_HURL);
-    if (IS_IMMUNE(mother, IMM_BACKSTAB) && IS_IMMUNE(father, IMM_BACKSTAB))
-	SET_BIT(mother->pcdata->genes[3], IMM_BACKSTAB);
-    if (IS_IMMUNE(mother, IMM_KICK) && IS_IMMUNE(father, IMM_KICK))
-	SET_BIT(mother->pcdata->genes[3], IMM_KICK);
-    if (IS_IMMUNE(mother, IMM_DISARM) && IS_IMMUNE(father, IMM_DISARM))
-	SET_BIT(mother->pcdata->genes[3], IMM_DISARM);
-    if (IS_IMMUNE(mother, IMM_STEAL) && IS_IMMUNE(father, IMM_STEAL))
-	SET_BIT(mother->pcdata->genes[3], IMM_STEAL);
-    if (IS_IMMUNE(mother, IMM_SLEEP) && IS_IMMUNE(father, IMM_SLEEP))
-	SET_BIT(mother->pcdata->genes[3], IMM_SLEEP);
-    if (IS_IMMUNE(mother, IMM_DRAIN) && IS_IMMUNE(father, IMM_DRAIN))
-	SET_BIT(mother->pcdata->genes[3], IMM_DRAIN);
-    mother->pcdata->genes[4] = number_range(1,2);
+    (void)mother; (void)father;
     return;
 }
 

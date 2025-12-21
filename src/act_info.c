@@ -29,6 +29,7 @@
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM+1];
 extern GAMECONFIG_DATA game_config;
+extern int can_interpret args( (CHAR_DATA *ch, int cmd) );
 
 char *	const	where_name	[] =
 {
@@ -3708,27 +3709,7 @@ void do_socials( CHAR_DATA *ch, char *argument )
 
 
 
-void do_xsocials( CHAR_DATA *ch, char *argument )
-{
-    char buf[MAX_STRING_LENGTH];
-    int iSocial;
-    int col;
-
-    col = 0;
-
-    for ( iSocial = 0; xsocial_table[iSocial].name[0] != '\0'; iSocial++ )
-    {
-	sprintf( buf, "%-12s", xsocial_table[iSocial].name );
-	send_to_char( buf, ch );
-	if ( ++col % 6 == 0 )
-	    send_to_char( "\n\r", ch );
-    }
- 
-    if ( col % 6 != 0 )
-	send_to_char( "\n\r", ch );
-
-    return;
-}
+/* Removed: do_xsocials - xsocial system removed */
 
 
 
@@ -3754,30 +3735,173 @@ void do_spells( CHAR_DATA *ch, char *argument )
 
 
 
+/* Helper to get class name from class bitfield */
+static const char *get_class_name( int class_bits )
+{
+    if ( class_bits & CLASS_VAMPIRE )       return "Vampire";
+    if ( class_bits & CLASS_WEREWOLF )      return "Werewolf";
+    if ( class_bits & CLASS_DEMON )         return "Demon";
+    if ( class_bits & CLASS_MAGE )          return "Mage";
+    if ( class_bits & CLASS_MONK )          return "Monk";
+    if ( class_bits & CLASS_NINJA )         return "Ninja";
+    if ( class_bits & CLASS_DROW )          return "Drow";
+    if ( class_bits & CLASS_SAMURAI )       return "Samurai";
+    if ( class_bits & CLASS_LICH )          return "Lich";
+    if ( class_bits & CLASS_SHAPESHIFTER )  return "Shapeshifter";
+    if ( class_bits & CLASS_TANARRI )       return "Tanarri";
+    if ( class_bits & CLASS_ANGEL )         return "Angel";
+    if ( class_bits & CLASS_UNDEAD_KNIGHT ) return "Undead Knight";
+    if ( class_bits & CLASS_DROID )         return "Spider Droid";
+    return "Hero";
+}
+
 /*
  * Contributed by Alander.
+ * Modified to display commands sorted by level with section headers.
+ * Only shows commands the player can actually use (class/discipline check).
+ * Level 3 is split into generic Hero commands and class-specific commands.
  */
 void do_commands( CHAR_DATA *ch, char *argument )
 {
     char buf[MAX_STRING_LENGTH];
     int cmd;
     int col;
- 
-    col = 0;
-    for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ )
+    int level;
+    int trust = get_trust(ch);
+    bool found;
+
+    /* Level names for section headers */
+    static const char *level_names[] = {
+        "Newbie",           /* 0 */
+        "Player",           /* 1 */
+        "Mortal",           /* 2 */
+        "Hero",             /* 3 */
+        "Apprentice",       /* 4 */
+        "Mage",             /* 5 */
+        "Archmage",         /* 6 */
+        "Builder",          /* 7 */
+        "Questmaker",       /* 8 */
+        "Enforcer",         /* 9 */
+        "Judge",            /* 10 */
+        "High Judge",       /* 11 */
+        "Implementor"       /* 12 */
+    };
+
+    /* Loop through each level from 0 up to player's trust */
+    for ( level = 0; level <= trust && level <= MAX_LEVEL; level++ )
     {
-        if ( cmd_table[cmd].level == 0
-        &&   cmd_table[cmd].level <= get_trust( ch ) )
-	{
-	    sprintf( buf, "%-12s", cmd_table[cmd].name );
-	    send_to_char( buf, ch );
-	    if ( ++col % 6 == 0 )
-		send_to_char( "\n\r", ch );
-	}
+        /* Special handling for level 3: split into Hero (generic) and Class-specific */
+        if ( level == 3 )
+        {
+            /* First: Generic Hero commands (race=0 and discipline=0) */
+            found = FALSE;
+            for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ )
+            {
+                if ( cmd_table[cmd].level == 3
+                    && cmd_table[cmd].race == 0
+                    && cmd_table[cmd].discipline == 0
+                    && can_interpret(ch, cmd) > 0 )
+                {
+                    found = TRUE;
+                    break;
+                }
+            }
+
+            if ( found )
+            {
+                send_to_char( "\n\r#C--- Hero Commands (Level 3) ---#n\n\r", ch );
+                col = 0;
+                for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ )
+                {
+                    if ( cmd_table[cmd].level == 3
+                        && cmd_table[cmd].race == 0
+                        && cmd_table[cmd].discipline == 0
+                        && can_interpret(ch, cmd) > 0 )
+                    {
+                        snprintf( buf, sizeof(buf), "%-14s", cmd_table[cmd].name );
+                        send_to_char( buf, ch );
+                        if ( ++col % 6 == 0 )
+                            send_to_char( "\n\r", ch );
+                    }
+                }
+                if ( col % 6 != 0 )
+                    send_to_char( "\n\r", ch );
+            }
+
+            /* Second: Class-specific commands (race>0 or discipline>0) */
+            found = FALSE;
+            for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ )
+            {
+                if ( cmd_table[cmd].level == 3
+                    && (cmd_table[cmd].race > 0 || cmd_table[cmd].discipline > 0)
+                    && can_interpret(ch, cmd) > 0 )
+                {
+                    found = TRUE;
+                    break;
+                }
+            }
+
+            if ( found )
+            {
+                snprintf( buf, sizeof(buf), "\n\r#C--- %s Commands (Level 3) ---#n\n\r",
+                    get_class_name( ch->class ) );
+                send_to_char( buf, ch );
+                col = 0;
+                for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ )
+                {
+                    if ( cmd_table[cmd].level == 3
+                        && (cmd_table[cmd].race > 0 || cmd_table[cmd].discipline > 0)
+                        && can_interpret(ch, cmd) > 0 )
+                    {
+                        snprintf( buf, sizeof(buf), "%-14s", cmd_table[cmd].name );
+                        send_to_char( buf, ch );
+                        if ( ++col % 6 == 0 )
+                            send_to_char( "\n\r", ch );
+                    }
+                }
+                if ( col % 6 != 0 )
+                    send_to_char( "\n\r", ch );
+            }
+
+            continue;  /* Skip normal level 3 processing */
+        }
+
+        /* Normal processing for all other levels */
+        found = FALSE;
+        for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ )
+        {
+            if ( cmd_table[cmd].level == level && can_interpret(ch, cmd) > 0 )
+            {
+                found = TRUE;
+                break;
+            }
+        }
+
+        if ( !found )
+            continue;
+
+        /* Print section header */
+        snprintf( buf, sizeof(buf), "\n\r#C--- %s Commands (Level %d) ---#n\n\r",
+            level_names[level], level );
+        send_to_char( buf, ch );
+
+        /* List all commands at this level that the player can use */
+        col = 0;
+        for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ )
+        {
+            if ( cmd_table[cmd].level == level && can_interpret(ch, cmd) > 0 )
+            {
+                snprintf( buf, sizeof(buf), "%-14s", cmd_table[cmd].name );
+                send_to_char( buf, ch );
+                if ( ++col % 6 == 0 )
+                    send_to_char( "\n\r", ch );
+            }
+        }
+
+        if ( col % 6 != 0 )
+            send_to_char( "\n\r", ch );
     }
- 
-    if ( col % 6 != 0 )
-	send_to_char( "\n\r", ch );
+
     return;
 }
 

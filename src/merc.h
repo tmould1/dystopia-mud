@@ -3172,27 +3172,7 @@ struct	social_type
 };
 
 
-/*
- * Structure for an X-social in the socials table.
- */
-struct	xsocial_type
-{
-    char * const	name;
-    char * const	char_no_arg;
-    char * const	others_no_arg;
-    char * const	char_found;
-    char * const	others_found;
-    char * const	vict_found;
-    char * const	char_auto;
-    char * const	others_auto;
-    sh_int		gender;
-    sh_int		stage;
-    sh_int		position;
-    sh_int		self;
-    sh_int		other;
-    sh_int              extra;
-    bool		chance;
-};
+/* Removed: xsocial_type structure - xsocial system removed */
 
 
 
@@ -3215,7 +3195,7 @@ extern	const	struct	skill_type	skill_table	[MAX_SKILL];
 extern  const   char    *		discipline	[MAX_DISCIPLINES];
 extern  const   char    *               wwgift          [MAX_GIFTS];
 extern	const	struct	social_type	social_table	[];
-extern	const	struct	xsocial_type	xsocial_table	[];
+/* Removed: xsocial_table extern - xsocial system removed */
 
 
 /*
@@ -4136,8 +4116,7 @@ DECLARE_DO_FUN( do_linkdead	);
 DECLARE_DO_FUN(	do_wizlist	);
 DECLARE_DO_FUN( do_closemud	);
 DECLARE_DO_FUN(	do_wizlock	);
-DECLARE_DO_FUN(	do_xemote	);
-DECLARE_DO_FUN(	do_xsocials	);
+/* Removed: do_xemote, do_xsocials - xsocial system removed */
 DECLARE_DO_FUN(	do_yell		);
 DECLARE_DO_FUN(	do_zap		);
 DECLARE_DO_FUN( do_zuloform     );
@@ -4148,7 +4127,7 @@ DECLARE_DO_FUN( do_cserpent	);
 DECLARE_DO_FUN( do_scales	);
 DECLARE_DO_FUN( do_guardian     );
 DECLARE_DO_FUN( do_servant      );
-DECLARE_DO_FUN( do_contraception );
+/* Removed: do_contraception - xsocial system removed */
 DECLARE_DO_FUN( do_relearn );
 
 DECLARE_DO_FUN( do_gameconfig );

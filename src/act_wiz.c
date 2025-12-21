@@ -6353,24 +6353,7 @@ void do_release( CHAR_DATA *ch, char *argument )
 }
 
 
-void do_contraception( CHAR_DATA *ch, char *argument)
-{
-   if(IS_NPC(ch)) return;
-   if( ch->sex != SEX_FEMALE) return;
-    if( IS_SET(ch->affected_by2, AFF_CONTRACEPTION))
-    {
-	stc( "You remove your contraception.\n\r", ch);
-	REMOVE_BIT(ch->affected_by2, AFF_CONTRACEPTION);
-	return;
-    }
-    else
-    {
-	stc( "You use your contraception.\n\r", ch);
-	SET_BIT(ch->affected_by2, AFF_CONTRACEPTION);
-	return;
-    }
-    return;
-}
+/* Removed: do_contraception - xsocial system removed */
 
 /*----------------------------------------------------------------
  * functions for RELOAD command.  --Zarniwoop@Dutch Mountains  (4-28-97)

@@ -46,7 +46,6 @@ void	werewolf_regen	args ( ( CHAR_DATA *ch, int multiplier) );
 void update_morted_timer			args ((CHAR_DATA *ch));
 void update_sit_safe_counter			args ((CHAR_DATA *ch));
 void update_drunks				args ((CHAR_DATA *ch));
-void sex_update					args ((CHAR_DATA *ch));
 void update_vampire				args ((CHAR_DATA *ch));
 void update_vampire_regen			args ((CHAR_DATA *ch));
 void update_cyborg 				args ((CHAR_DATA *ch));
@@ -516,7 +515,6 @@ void mobile_update( void )
       update_morted_timer(ch);
       update_sit_safe_counter(ch);
       update_drunks(ch);
-      sex_update(ch);
       if (ch->level < 7 && IS_HERO(ch)) update_safe_powers(ch);
       if (IS_HERO(ch) && ch->hit > 0 && !IS_SET(ch->extra, EXTRA_AFK))
       {
@@ -1377,103 +1375,7 @@ void update_drunks(CHAR_DATA *ch)
   }
 }
 
-void sex_update(CHAR_DATA *ch)
-{
-	if (ch->pcdata->stage[0] > 0 || ch->pcdata->stage[2] > 0)
-	{
-		CHAR_DATA *vch;
-		if (ch->pcdata->stage[1] > 0 && ch->pcdata->stage[2] >= 225)
-		{
-			ch->pcdata->stage[2] += 1;
-			if ( ( vch = ch->pcdata->partner ) != NULL &&
-			!IS_NPC(vch) && vch->pcdata->partner == ch 
-			&& ((vch->pcdata->stage[2] >= 200 && vch->sex == SEX_FEMALE) 
-			|| (ch->pcdata->stage[2] >= 200 && ch->sex == SEX_FEMALE)))
-			{
-				if (ch->in_room != vch->in_room)return ;
-				if (vch->pcdata->stage[2] >= 225 
-				&& ch->pcdata->stage[2] >= 225 
-				&& vch->pcdata->stage[2] < 240 
-				&& ch->pcdata->stage[2] < 240)
-				{
-					ch->pcdata->stage[2] = 240;
-					vch->pcdata->stage[2] = 240;
-				}
-				if (ch->sex == SEX_MALE && vch->pcdata->stage[2] >= 240)
-				{
-					act("You thrust deeply between $N's warm, damp thighs.",ch,NULL,vch,TO_CHAR);
-					act("$n thrusts deeply between your warm, damp thighs.",ch,NULL,vch,TO_VICT);
-					act("$n thrusts deeply between $N's warm, damp thighs.",ch,NULL,vch,TO_NOTVICT);
-					if (vch->pcdata->stage[2] > ch->pcdata->stage[2])
-						ch->pcdata->stage[2] = vch->pcdata->stage[2];
-				}
-				else if (ch->sex == SEX_FEMALE && vch->pcdata->stage[2] >= 240)
-				{
-					act("You squeeze your legs tightly around $N, moaning loudly.",ch,NULL,vch,TO_CHAR);
-					act("$n squeezes $s legs tightly around you, moaning loudly.",ch,NULL,vch,TO_VICT);
-					act("$n squeezes $s legs tightly around $N, moaning loudly.",ch,NULL,vch,TO_NOTVICT);
-					if (vch->pcdata->stage[2] > ch->pcdata->stage[2])
-						ch->pcdata->stage[2] = vch->pcdata->stage[2];
-				}
-			}
-			if (ch->pcdata->stage[2] >= 250)
-			{
-				if ( ( vch = ch->pcdata->partner ) != NULL &&
-					!IS_NPC(vch) && vch->pcdata->partner == ch &&
-					ch->in_room == vch->in_room)
-				{
-					vch->pcdata->stage[2] = 250;
-					if (ch->sex == SEX_MALE)
-					{
-						stage_update(ch,vch,2,"xm-thrust");
-						stage_update(vch,ch,2,"xf-squeeze");
-					}
-					else
-					{
-						stage_update(vch,ch,2,"xm-thrust");
-						stage_update(ch,vch,2,"xf-squeeze");
-					}
-											
-					ch->pcdata->stage[0] = 0;
-					vch->pcdata->stage[0] = 0;
-					
-					if (!IS_EXTRA(ch, EXTRA_EXP))
-					{
-						send_to_char("Congratulations on achieving a simultanious orgasm!  Recieve 100000 exp!\n\r",ch);
-						SET_BIT(ch->extra, EXTRA_EXP);
-						ch->exp += 100000;
-					}
-					if (!IS_EXTRA(vch, EXTRA_EXP))
-					{
-						send_to_char("Congratulations on achieving a simultanious orgasm!  Recieve 100000 exp!\n\r",vch);
-						SET_BIT(vch->extra, EXTRA_EXP);
-						vch->exp += 100000;
-					}
-				}
-			}
-		}
-		else
-		{
-			if (ch->pcdata->stage[0] > 0 && ch->pcdata->stage[2] < 1 &&
-				ch->position != POS_RESTING) 
-			{
-				if (ch->pcdata->stage[0] > 1)
-					ch->pcdata->stage[0] -= 1;
-				else
-					ch->pcdata->stage[0] = 0;
-			}
-			else if (ch->pcdata->stage[2]>0 && ch->pcdata->stage[0] < 1)
-			{
-				if (ch->pcdata->stage[2] > 10)
-					ch->pcdata->stage[2] -= 10;
-				else
-					ch->pcdata->stage[2] = 0;
-				if (ch->sex == SEX_MALE && ch->pcdata->stage[2] == 0)
-					send_to_char("You feel fully recovered.\n\r",ch);
-			}
-		}
-	}
-}
+/* Removed: sex_update - xsocial system removed */
 
 void update_safe_powers(CHAR_DATA *ch)
 {
