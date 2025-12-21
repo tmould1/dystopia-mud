@@ -693,9 +693,8 @@ bool is_affected( CHAR_DATA *ch, int sn )
 void affect_join( CHAR_DATA *ch, AFFECT_DATA *paf )
 {
     AFFECT_DATA *paf_old;
-    bool found;
-
-    found = FALSE;
+    bool found = FALSE;
+    (void)found; /* Suppress unused warning */
     for ( paf_old = ch->affected; paf_old != NULL; paf_old = paf_old->next )
     {
 	if ( paf_old->type == paf->type )

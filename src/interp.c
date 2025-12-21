@@ -1179,21 +1179,21 @@ LOG_NORMAL, 8, DISC_VAMP_THAN, 3 }, */
 void interpret( CHAR_DATA *ch, char *argument )
 {
     CHAR_DATA *unveil;
-    char arg[MAX_STRING_LENGTH];
-    char argu[MAX_STRING_LENGTH];
+    char arg[MAX_INPUT_LENGTH];     /* Command argument */
+    char argu[MAX_INPUT_LENGTH * 2]; /* Combined args */
     char buf[MAX_INPUT_LENGTH];
-    char command[MAX_STRING_LENGTH];
+    char command[MAX_INPUT_LENGTH]; /* Command name */
     char logline[MAX_STRING_LENGTH];
     int cmd;
     int trust;
     bool found, foundstar = FALSE;
     sh_int col = 0;
     int star = 0;
-    char cmd_copy[MAX_INPUT_LENGTH] ;
+    char cmd_copy[MAX_INPUT_LENGTH];
 
     if (!ch || !ch->in_room) return;
 
-    sprintf(argu,"%s %s",arg,one_argument( argument, arg));
+    snprintf(argu, sizeof(argu), "%s %s", arg, one_argument( argument, arg));
 
     /*
      * Strip leading spaces.
@@ -1203,7 +1203,7 @@ void interpret( CHAR_DATA *ch, char *argument )
     if ( argument[0] == '\0' )
 	return;
 
-	strcpy(cmd_copy,argument);
+    strcpy(cmd_copy,argument);
 
 
     /*

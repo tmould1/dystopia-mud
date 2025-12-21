@@ -68,9 +68,9 @@ void move_char( CHAR_DATA *ch, int door )
     OBJ_DATA *obj;
     EXIT_DATA *pexit;
     DESCRIPTOR_DATA *d;
-    char buf  [MAX_STRING_LENGTH];
+    char buf  [16];  /* Direction: "the south" is longest (9 chars) */
     char poly [MAX_STRING_LENGTH];
-    char mount2 [MAX_INPUT_LENGTH];
+    char mount2 [64];  /* Mount description suffix */
     char leave [20];
     bool bad_wall = FALSE;
 
@@ -903,7 +903,8 @@ void do_enter( CHAR_DATA *ch, char *argument )
     OBJ_DATA *portal;
     OBJ_DATA *portal_next;
     CHAR_DATA *mount;
-    bool found;
+    bool found = FALSE;
+    (void)found; /* Suppress unused variable warning */
 
     argument = one_argument( argument, arg );
 
@@ -2070,7 +2071,6 @@ void gain_disc_points(CHAR_DATA *ch, int points)
 void do_research(CHAR_DATA *ch, char *argument)
 {
     int i;
-    int needed;
     int maxlevel;
     char buf[MAX_STRING_LENGTH];
 
@@ -2123,8 +2123,7 @@ void do_research(CHAR_DATA *ch, char *argument)
 	if (discipline[i][0] != '\0'
 	    && !str_prefix(argument, discipline[i]) )
 	{
-		needed = ((ch->power[i] - 5) * 10);
-	    if (ch->power[i] < 0)	    
+	    if (ch->power[i] < 0)
 	    {
     		stc("You don't know any disciplines of that name.\n\r", ch);
 		return;
@@ -2201,10 +2200,10 @@ const  char * discipline [MAX_DISCIPLINES] =
 
 };
 
-void do_disciplines(CHAR_DATA *ch, char *argument)    
+void do_disciplines(CHAR_DATA *ch, char *argument)
 {
-    char buf[MAX_INPUT_LENGTH];
-    char buf2[MAX_INPUT_LENGTH];
+    char buf[64];   /* Output line for discipline display */
+    char buf2[32];  /* Discipline name */
     int loop;
     int percent = 0, i;
     int indent = 0;
@@ -3197,6 +3196,8 @@ is_ok = TRUE;
     belt9 = 45000000;
     belt10 = 50000000;
 
+    (void)primal; /* Suppress unused warning - variable used for reference only */
+    (void)is_ok; /* Suppress unused warning - tracks valid option but not used in conditionals */
     primal = (1+ch->practice)*500;
     magic = (1+ch->pcdata->stats[DROW_MAGIC])*100;
     silver = (1+ch->siltol)*2500;
@@ -4484,6 +4485,7 @@ void check_hunt( CHAR_DATA *ch )
     CHAR_DATA *victim;
     bool found = FALSE;
     int direction = 0;
+    (void)found; /* Suppress unused warning */
     ROOM_INDEX_DATA *in_room;
     in_room = ch->in_room;
     if (!IS_NPC(ch) && number_percent() > ch->pcdata->learned[gsn_track])

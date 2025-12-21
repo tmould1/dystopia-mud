@@ -3036,9 +3036,11 @@ void do_quest( CHAR_DATA *ch, char *argument )
 
 	arg3[0] = UPPER(arg3[0]);
 
-	sprintf(buf,"%s flag set.\n\r",arg3);
-
-	send_to_char(buf,ch);
+	{
+	    char flag_msg[32];
+	    snprintf(flag_msg, sizeof(flag_msg), "%.16s flag set.\n\r", arg3);
+	    send_to_char(flag_msg, ch);
+	}
 
 	return;
 

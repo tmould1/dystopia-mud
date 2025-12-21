@@ -34,7 +34,7 @@
 void do_level( CHAR_DATA *ch, char *argument )
 {
     char arg       [MAX_INPUT_LENGTH];
-    char skill  [20];  
+    char skill  [50];  
     one_argument( argument, arg );
 
     if (IS_NPC(ch)) return;  
@@ -134,8 +134,8 @@ void do_level( CHAR_DATA *ch, char *argument )
     if ( IS_CLASS(ch, CLASS_DEMON) )
      send_to_char("You are a demon!\n\r", ch);
     if ( IS_CLASS(ch, CLASS_MAGE) )
-     send_to_char("You are a battlemage!\n\r", ch);    
-     if ( IS_CLASS(ch ,CLASS_SHAPESHIFTER))
+      send_to_char("You are a battlemage!\n\r", ch);
+    if ( IS_CLASS(ch ,CLASS_SHAPESHIFTER))
        send_to_char("You are a shapeshifter!\n\r",ch);
      if (IS_CLASS(ch, CLASS_UNDEAD_KNIGHT))
        send_to_char("You are an undead knight!\n\r",ch);
@@ -877,9 +877,9 @@ void do_taste( CHAR_DATA *ch, char *argument )
 {
     CHAR_DATA *victim;
     char      buf [MAX_STRING_LENGTH];
-    char      age [MAX_STRING_LENGTH];
+    char      age [16];   /* Vampire age title: "Methuselah" is longest */
     char      lin [MAX_STRING_LENGTH];
-    char     lord [MAX_STRING_LENGTH];
+    char     lord [32];   /* Lord status string */
     char      arg [MAX_INPUT_LENGTH];
 
     argument = one_argument (argument, arg );
@@ -4173,7 +4173,7 @@ void do_rage( CHAR_DATA *ch, char *argument )
      if (ch->beast < 1)
 	ch->beast = 1;
 
-        if (ch->beast > ch->rage || ch->rage < 125)
+     if (ch->beast > ch->rage || ch->rage < 125)
 	{
 	    ch->rage += number_range(ch->generation,25);
 	    stc("You scream as you plunge into a mad attacking frenzy.\n\r",ch);

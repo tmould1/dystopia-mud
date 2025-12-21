@@ -981,9 +981,10 @@ void do_look( CHAR_DATA *ch, char *argument )
     ROOM_INDEX_DATA *location;
     char *pdesc;
     int door;
-    bool found;
+    bool found = FALSE;
 
     if ( ch->desc == NULL && (wizard = ch->wizard) == NULL) return;
+    (void)found; /* Suppress unused variable warning - set but only for portal tracking */
 
     if (ch->in_room == NULL) return;
 
@@ -1706,7 +1707,7 @@ void do_stat( CHAR_DATA *ch, char *argument )
 {
     char buf   [MAX_STRING_LENGTH];
     char lin   [MAX_STRING_LENGTH];
-    char age   [MAX_STRING_LENGTH];
+    char age   [16];  /* Vampire age title: "Methuselah" is longest (10 chars) */
     int blood;
     int bloodpool;
 
@@ -1784,8 +1785,8 @@ return;
 void do_score( CHAR_DATA *ch, char *argument )
 {
     char buf[MAX_STRING_LENGTH];
-    char ss1[MAX_STRING_LENGTH];
-    char ss2[MAX_STRING_LENGTH];
+    char ss1[32];  /* Kill count string like "#C12345#n players" */
+    char ss2[32];  /* Kill count string like "#C12345#n players" */
     int a_c = char_ac(ch);
 
 	if (IS_NPC(ch)) return;
@@ -2191,9 +2192,9 @@ void do_who(CHAR_DATA *ch, char *argument)
   DESCRIPTOR_DATA *d;
   CHAR_DATA *gch;
   char arg[MAX_INPUT_LENGTH];
-  char pkratio[MAX_STRING_LENGTH];
-  char kav[MAX_STRING_LENGTH];
-  char faith[MAX_STRING_LENGTH];
+  char pkratio[64];  /* Ratio display, may include xterm color codes */
+  char kav[64];      /* Class abbreviation */
+  char faith[64];    /* Faith indicator, may include xterm color codes */
   char openb[20];
   char closeb[20];
   char buf[MAX_STRING_LENGTH]; // banners
@@ -2692,7 +2693,7 @@ void do_who(CHAR_DATA *ch, char *argument)
         
     if (gch->level > 6 )
     {
-      sprintf(buf1 + strlen(buf1), " %-16s %-6s %-24s %-12s %s\n\r",
+      snprintf(buf1 + strlen(buf1), sizeof(buf1) - strlen(buf1), " %-16s %-6s %-24s %-12s %s\n\r",
         title, pkratio, kav, gch->pcdata->switchname, faith);
       a1 = TRUE;
     }
@@ -2700,98 +2701,98 @@ void do_who(CHAR_DATA *ch, char *argument)
     {
       if (mightRate > 3500)
       {
-        sprintf(buf2 + strlen(buf2), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a2 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 3250)
       {
-        sprintf(buf3 + strlen(buf3), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf3 + strlen(buf3), sizeof(buf3) - strlen(buf3), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a3 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 3000)
       {
-        sprintf(buf4 + strlen(buf4), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf4 + strlen(buf4), sizeof(buf4) - strlen(buf4), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a4 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 2750)
       {
-        sprintf(buf5 + strlen(buf5), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf5 + strlen(buf5), sizeof(buf5) - strlen(buf5), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a5 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 2500)
       {
-        sprintf(buf6 + strlen(buf6), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf6 + strlen(buf6), sizeof(buf6) - strlen(buf6), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a6 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 2250)
       {
-        sprintf(buf7 + strlen(buf7), " %-16s %-6s %-24s %-12s %s\n\r",   
+        snprintf(buf7 + strlen(buf7), sizeof(buf7) - strlen(buf7), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a7 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 2000)
       {
-        sprintf(buf8 + strlen(buf8), " %-16s %-6s %-24s %-12s %s\n\r",   
+        snprintf(buf8 + strlen(buf8), sizeof(buf8) - strlen(buf8), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a8 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 1750)
       {
-        sprintf(buf9 + strlen(buf9), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf9 + strlen(buf9), sizeof(buf9) - strlen(buf9), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a9 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 1500)
       {
-        sprintf(buf10 + strlen(buf10), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf10 + strlen(buf10), sizeof(buf10) - strlen(buf10), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a10 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 1250)
       {
-        sprintf(buf11 + strlen(buf11), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf11 + strlen(buf11), sizeof(buf11) - strlen(buf11), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a11 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 1000)
       {
-        sprintf(buf12 + strlen(buf12), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf12 + strlen(buf12), sizeof(buf12) - strlen(buf12), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a12 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 750)
       {
-        sprintf(buf13 + strlen(buf13), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf13 + strlen(buf13), sizeof(buf13) - strlen(buf13), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a13 = TRUE; avatars = TRUE;
       }
-      else if (mightRate > 500)  
+      else if (mightRate > 500)
       {
-        sprintf(buf14 + strlen(buf14), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf14 + strlen(buf14), sizeof(buf14) - strlen(buf14), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a14 = TRUE; avatars = TRUE;
       }
-      else if (mightRate >= 150)   
+      else if (mightRate >= 150)
       {
-        sprintf(buf15 + strlen(buf15), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf15 + strlen(buf15), sizeof(buf15) - strlen(buf15), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a15 = TRUE; avatars = TRUE;
       }
       else
       {
-        sprintf(buf16 + strlen(buf16), " %-16s %-6s %-24s %-12s %s\n\r",
+        snprintf(buf16 + strlen(buf16), sizeof(buf16) - strlen(buf16), " %-16s %-6s %-24s %-12s %s\n\r",
           title, pkratio, kav, gch->pcdata->switchname, faith);
         a16 = TRUE; avatars = TRUE;
       }
     }
     else if (gch->level < 3)
     {
-      sprintf(buf17 + strlen(buf17), " %-16s %-6s %-24s %-12s %s\n\r",
+      snprintf(buf17 + strlen(buf17), sizeof(buf17) - strlen(buf17), " %-16s %-6s %-24s %-12s %s\n\r",
         title, pkratio, kav, gch->pcdata->switchname, faith);
       a17 = TRUE;
     }
@@ -2855,7 +2856,8 @@ void do_inventory( CHAR_DATA *ch, char *argument )
     OBJ_DATA *portal_next;
     ROOM_INDEX_DATA *pRoomIndex;
     ROOM_INDEX_DATA *location;
-    bool found;
+    bool found = FALSE;
+    (void)found; /* Suppress unused variable warning */
 
     if (!IS_NPC(ch) && IS_HEAD(ch,LOST_HEAD))
         {send_to_char( "You are not a container.\n\r", ch ); return;}
@@ -4952,7 +4954,7 @@ void do_cprompt( CHAR_DATA *ch, char *argument )
 void do_finger( CHAR_DATA *ch, char *argument )
 {
   char arg[MAX_STRING_LENGTH];
-  char strsave[MAX_INPUT_LENGTH];
+  char strsave[MUD_PATH_MAX + MAX_INPUT_LENGTH];  /* Path + filename */
   char *buf;
   char buf2[MAX_INPUT_LENGTH];
   FILE *fp; 
@@ -4974,7 +4976,7 @@ void do_finger( CHAR_DATA *ch, char *argument )
     return;
   }
   fclose( fpReserve );
-  sprintf( strsave, "%sbackup/%s", PLAYER_DIR, capitalize(argument) );
+  snprintf( strsave, sizeof(strsave), "%sbackup/%s", PLAYER_DIR, capitalize(argument) );
   if ( ( fp = fopen( strsave, "r" ) ) != NULL )
   {
     sprintf(buf2, "#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r", game_config.game_name);

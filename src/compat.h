@@ -90,7 +90,7 @@ char *win32_crypt_sha256(const char *password, const char *salt);
 
 /* fork() not available on Windows - return error */
 #define fork() (-1)
-#define wait(x) (0)
+#define wait(x) ((void)0)
 
 /* SEH crash handler - implemented in compat.c */
 void win32_setup_crash_handler(void);

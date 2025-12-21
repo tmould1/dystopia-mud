@@ -202,8 +202,8 @@ void do_gust( CHAR_DATA *ch, char *argument )
     ROOM_INDEX_DATA *to_room = NULL;
     EXIT_DATA       *pexit;
     EXIT_DATA       *pexit_rev;
-    char            buf       [MAX_INPUT_LENGTH];
-    char            direction [MAX_INPUT_LENGTH];
+    char            buf       [128];  /* Act message buffer */
+    char            direction [8];    /* "north", "south", "east", "west" */
     char            arg1      [MAX_INPUT_LENGTH];
     char            arg2      [MAX_INPUT_LENGTH];
     int             door;
@@ -1574,12 +1574,12 @@ void frost_breath(CHAR_DATA *ch, CHAR_DATA *victim, bool all)
 	    vch_next = vch->next_in_room;
 	    if (vch == ch) continue;
 
-	    if (is_safe(ch,vch) 
+	    if (is_safe(ch,vch)
 	    &&   (ch->fighting != vch || vch->fighting != ch))
 		continue;
 
-		cold_effect(vch,ch->explevel,dam,TARGET_CHAR);
-		damage(ch,vch,dam,skill_lookup("frost breath"));
+	    cold_effect(vch,ch->explevel,dam,TARGET_CHAR);
+	    damage(ch,vch,dam,skill_lookup("frost breath"));
 	}
 	return;
     }

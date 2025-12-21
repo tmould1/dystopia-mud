@@ -1263,7 +1263,7 @@ bool change_exit( CHAR_DATA *ch, char *argument, int door )
      */
     if ( !str_cmp( command, "dig" ) )
     {
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_INPUT_LENGTH + 16];
 	
 	if ( arg[0] == '\0' || !is_number( arg ) )
 	{
@@ -2981,6 +2981,7 @@ bool oedit_ed( CHAR_DATA *ch, char *argument )
 		break;
 	    ped = ed;
 	}
+	(void)ped; /* Suppress unused warning */
 
 	if ( !ed )
 	{

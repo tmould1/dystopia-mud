@@ -67,7 +67,8 @@ char * area_name (AREA_DATA *pArea)
 
   assert (pArea != NULL);
 
-  strncpy (buffer, pArea->filename, 64);
+  strncpy (buffer, pArea->filename, sizeof(buffer) - 1);
+  buffer[sizeof(buffer) - 1] = '\0';
   period = strchr (buffer, '.');
   if (period)
     *period = '\0';
@@ -277,6 +278,7 @@ void do_reimb(CHAR_DATA *ch, char *argument)
         CHAR_DATA       *vch;
         char            arg[MAX_INPUT_LENGTH];
         char            arg2[MAX_INPUT_LENGTH];
+        char            buf[MAX_STRING_LENGTH];
         int v;
  
         argument = one_argument(argument, arg);
@@ -314,10 +316,10 @@ void do_reimb(CHAR_DATA *ch, char *argument)
                 vch->mkill = 5;
                 do_autosave(ch, "");
         }
-        sprintf(arg2, "%s reimbursed %d %s.\n\r", vch->name, v, arg);
-        send_to_char(arg2, ch);
-        sprintf(arg2, "%s has reimbursed you %d %s.\n\r", ch->name, v, arg);
-        send_to_char(arg2, vch);
+        sprintf(buf, "%s reimbursed %d %s.\n\r", vch->name, v, arg);
+        send_to_char(buf, ch);
+        sprintf(buf, "%s has reimbursed you %d %s.\n\r", ch->name, v, arg);
+        send_to_char(buf, vch);
 }
         
 void do_affects( CHAR_DATA *ch, char *argument )

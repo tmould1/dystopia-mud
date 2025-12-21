@@ -1934,7 +1934,7 @@ void do_command( CHAR_DATA *ch, char *argument )
     char arg1[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
     char buf[MAX_STRING_LENGTH];
-    char buffy[MAX_STRING_LENGTH];
+    char buffy[MAX_INPUT_LENGTH * 2];  /* arg2 + argument */
     CHAR_DATA *victim;
     int awe;
 
@@ -2010,13 +2010,13 @@ void do_command( CHAR_DATA *ch, char *argument )
 
   if ( ch->power[DISC_VAMP_DOMI] > 1 )
   {
-    sprintf( buffy, "%s %s", arg2, argument );
+    snprintf( buffy, sizeof(buffy), "%s %s", arg2, argument );
     if (IS_NPC(victim))
-    	sprintf( buf, "I think %s wants to %s",victim->short_descr,buffy);
+    	snprintf( buf, sizeof(buf), "I think %s wants to %s",victim->short_descr,buffy);
     else if (!IS_NPC(victim) && IS_AFFECTED(victim, AFF_POLYMORPH))
-    	sprintf( buf, "I think %s wants to %s", victim->morph,buffy);
+    	snprintf( buf, sizeof(buf), "I think %s wants to %s", victim->morph,buffy);
     else
-    	sprintf( buf, "I think %s wants to %s", victim->name,buffy);
+    	snprintf( buf, sizeof(buf), "I think %s wants to %s", victim->name,buffy);
     do_say(ch,buf);
   }
   else

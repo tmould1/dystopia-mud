@@ -45,8 +45,8 @@ void	improve_spl	args( ( CHAR_DATA *ch, int dtype, int sn ) );
 void improve_spl( CHAR_DATA *ch, int dtype, int sn )
 {
     char buf[MAX_INPUT_LENGTH];
-    char bufskill[MAX_INPUT_LENGTH];
-    char buftype[MAX_INPUT_LENGTH];
+    char bufskill[32];  /* Max is "possesing lich knowledge of" (27 chars) */
+    char buftype[16];   /* Max is "orange" (6 chars) */
     int dice1;
     int dice2;
 
@@ -640,7 +640,7 @@ void obj_cast_spell( int sn, int level, CHAR_DATA *ch, CHAR_DATA *victim, OBJ_DA
     if ( sn <= 0 )
 	return;
 
-	if (IS_NPC(ch)) return;
+    if (IS_NPC(ch)) return;
 
 
     if ( sn >= MAX_SKILL || skill_table[sn].spell_fun == 0 )
@@ -1503,7 +1503,7 @@ void spell_dispel_magic( int sn, int level, CHAR_DATA *ch, void *vo )
     while (victim->affected)
 	affect_remove(victim,victim->affected);
 
-	if (dark == TRUE) REMOVE_BIT(ch->in_room->room_flags, ROOM_TOTAL_DARKNESS);
+    if (dark == TRUE) REMOVE_BIT(ch->in_room->room_flags, ROOM_TOTAL_DARKNESS);
 
     if ( ch == victim )
     {
@@ -3371,8 +3371,8 @@ void spell_gas_breath( int sn, int level, CHAR_DATA *ch, void *vo )
 	    dam  = number_range( hpch/6 + 1, hpch/3 );
 	    if ( saves_spell( level, vch ) )
 		dam /= 2;
-		dam /= 2;    
-	chhp = vch->hit;
+	    dam /= 2;
+	    chhp = vch->hit;
       if (dam > ch->damcap[DAM_CAP]) dam = number_range( (ch->damcap[DAM_CAP] - 200), (ch->damcap[DAM_CAP] + 100) );
        if ( IS_AFFECTED(vch, AFF_SANCTUARY) ) dam /=2;
 	    damage( ch, vch, dam, sn );

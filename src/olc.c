@@ -803,8 +803,8 @@ void do_redit( CHAR_DATA *ch, char *argument )
 /* Entry point for editing obj_index_data. */
 void do_oedit( CHAR_DATA *ch, char *argument )
 {
-    OBJ_INDEX_DATA *pObj;
-    AREA_DATA *pArea;
+    OBJ_INDEX_DATA *pObj = NULL;
+    AREA_DATA *pArea = NULL;
     char command[MAX_INPUT_LENGTH];
 
     argument = one_argument( argument, command );
@@ -866,8 +866,8 @@ void do_oedit( CHAR_DATA *ch, char *argument )
 /* Entry point for editing mob_index_data. */
 void do_medit( CHAR_DATA *ch, char *argument )
 {
-    MOB_INDEX_DATA *pMob;
-    AREA_DATA *pArea;
+    MOB_INDEX_DATA *pMob = NULL;
+    AREA_DATA *pArea = NULL;
     char command[MAX_INPUT_LENGTH];
 
     argument = one_argument( argument, command );
@@ -933,6 +933,7 @@ void display_resets( CHAR_DATA *ch )
 
     EDIT_ROOM(ch, pRoom);
     final[0]  = '\0';
+    (void)final; /* Suppress unused warning */
     
     send_to_char ( 
   " No.  Loads    Description       Location         Vnum    Max  Description"
@@ -1417,6 +1418,7 @@ void hedit( CHAR_DATA *ch, char *argument )
 
 	if(str_cmp(argument, "change"))
 		EDIT_HELP(ch, pHelp);
+	(void)pHelp; /* Suppress unused warning - set by EDIT_HELP macro */
 	smash_tilde( argument );
     strcpy( arg, argument );
     argument = one_argument( argument, command );

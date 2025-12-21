@@ -26,7 +26,7 @@
 #include <time.h>
 #include "merc.h"
 
-#if !defined(macintosh)
+#if !defined(macintosh) && !defined(WIN32)
 extern  int     _filbuf         args( (FILE *) );
 #endif
 
@@ -465,7 +465,7 @@ power[43]);
 	/* Save number of boards in case that number changes */
 	fprintf (fp, "Boards       %d ", MAX_BOARD);
 	for (i = 0; i < MAX_BOARD; i++)
-	fprintf (fp, "%s %ld ", boards[i].short_name, ch->pcdata->last_note[i]);
+	fprintf (fp, "%s %lld ", boards[i].short_name, (long long)ch->pcdata->last_note[i]);
 	fprintf (fp, "\n");
 	
 
@@ -2180,10 +2180,12 @@ void fread_char( CHAR_DATA *ch, FILE *fp )
 
 	if ( !fMatch )
 	{
-	    sprintf(buf, "Fread_char: no match. WORD: %s", word); 
+	    sprintf(buf, "Fread_char: no match. WORD: %s", word);
 	    bug( buf, 0 );
 	    fread_to_eol( fp );
 	}
     }
+    /* Suppress unused variable warnings - these are used to read/discard legacy data */
+    (void)dummy; (void)tempint;
 }
 

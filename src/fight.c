@@ -60,15 +60,11 @@ void  ragnarokdecap   args((CHAR_DATA *ch, CHAR_DATA *victim));
 void violence_update( void )
 {
   CHAR_DATA *ch;
-  CHAR_DATA *ch_next;
   CHAR_DATA *emb;
   CHAR_DATA *victim;
   CHAR_DATA *rch;
   CHAR_DATA *rch_next;
   CHAR_DATA *mount;
-  int chance;
-
-  chance = number_percent();
 
   for ( ch = char_list; ch != NULL; ch = ch->next )
   {
@@ -114,7 +110,6 @@ void violence_update( void )
       }
     }
     } /*end of blink*/
-    ch_next = ch->next;
     if (ch->fight_timer > 0) ch->fight_timer--;
     if (ch->rage > 0 && IS_CLASS(ch, CLASS_DEMON)) ch->rage--;
     if ( ch->embracing != NULL )
@@ -2802,13 +2797,7 @@ void update_pos( CHAR_DATA *victim )
   {
     if (victim->position <= POS_STUNNED)
     {
-      bool gm_stance = FALSE;
       victim->position = POS_STANDING;
-      if (!IS_NPC(victim) && victim->stance[0] > 0)
-      {
-        int stance = victim->stance[0];
-        if (victim->stance[stance] >= 200) gm_stance = TRUE;
-      }
       if (IS_NPC(victim) || victim->max_hit * 0.25 > victim->hit)
       {
         act( "$n clambers back to $s feet.", victim, NULL, NULL, TO_ROOM);
@@ -3183,9 +3172,8 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
 {
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  char formatted_xp[MSL];
+  char formatted_xp[20];  /* Number with commas: "2,147,483,647" (14 chars) */
   CHAR_DATA *gch;
-  CHAR_DATA *lch;
   CHAR_DATA *mount;
   int xp;
   int temp;
@@ -3212,7 +3200,6 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
     members = 1;
   }
 
-  lch = (ch->leader != NULL) ? ch->leader : ch;
   for ( gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room )
   {
     int xp_modifier = 100;
@@ -3293,7 +3280,7 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
       xp = game_config.max_xp_per_kill;
     }
 
-    sprintf(formatted_xp, "");
+    formatted_xp[0] = '\0';
     add_commas_to_number(xp, formatted_xp);
     
     // Character printout
@@ -4607,8 +4594,8 @@ void do_hurl( CHAR_DATA *ch, char *argument )
   ROOM_INDEX_DATA *to_room;
   EXIT_DATA *pexit;
   EXIT_DATA *pexit_rev;
-  char buf [MAX_INPUT_LENGTH];
-  char direction [MAX_INPUT_LENGTH];
+  char buf [128];       /* Act message buffer */
+  char direction [8];   /* "north", "south", "east", "west" */
   char arg1 [MAX_INPUT_LENGTH];
   char arg2 [MAX_INPUT_LENGTH];
   int door;

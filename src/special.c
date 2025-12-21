@@ -2270,6 +2270,8 @@ bool spec_zombie_lord( CHAR_DATA *ch )
 		}
 	    }
 	}
+	/* Suppress unused variable warnings - these track which dirs are blocked */
+	(void)north_ok; (void)south_ok; (void)east_ok; (void)west_ok; (void)up_ok; (void)down_ok;
 
 	if (countup < 1)
 	{
@@ -2675,6 +2677,8 @@ bool spec_dog( CHAR_DATA *ch )
 		}
 	    }
 	}
+	/* Suppress unused variable warnings - these track which dirs are blocked */
+	(void)north_ok; (void)south_ok; (void)east_ok; (void)west_ok; (void)up_ok; (void)down_ok;
 
 	if (countup < 1)
 	{

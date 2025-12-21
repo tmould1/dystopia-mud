@@ -15,6 +15,9 @@ cd /d "%~dp0.."
 REM Create logs directory if it doesn't exist
 if not exist "build\logs" mkdir "build\logs"
 
+REM Create obj directory if it doesn't exist
+if not exist "build\obj" mkdir "build\obj"
+
 REM Generate timestamp for log file
 for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set datetime=%%I
 set LOGFILE=build\logs\build_%datetime:~0,8%-%datetime:~8,6%.log

@@ -52,8 +52,8 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand )
     else if (IS_CLASS(ch, CLASS_SAMURAI)) max_skl = 1000;
     else if( IS_CLASS(ch, CLASS_SHAPESHIFTER) || IS_CLASS(ch, CLASS_TANARRI)) max_skl = 400;
 
-         if (right_hand == 1) 
-	    wield = get_eq_char( ch, WEAR_WIELD );
+    if (right_hand == 1)
+	wield = get_eq_char( ch, WEAR_WIELD );
     else if (right_hand == 2)           
 	    wield = get_eq_char( ch, WEAR_HOLD );
     else if (right_hand == 4)
@@ -134,7 +134,7 @@ void improve_stance( CHAR_DATA *ch )
     else if (ch->stance[stance] == 176) sprintf(bufskill,"a master of");
     else if (ch->stance[stance] == 200) sprintf(bufskill,"a grand master of");
     else return;
-         if (stance == STANCE_VIPER   ) sprintf(stancename,"viper"   );
+    if (stance == STANCE_VIPER   ) sprintf(stancename,"viper"   );
     else if (stance == STANCE_CRANE   ) sprintf(stancename,"crane"   );
     else if (stance == STANCE_CRAB    ) sprintf(stancename,"crab"    );
     else if (stance == STANCE_MONGOOSE) sprintf(stancename,"mongoose");
@@ -369,8 +369,9 @@ void do_throw( CHAR_DATA *ch, char *argument )
     OBJ_DATA        *obj;
     char            arg1      [MAX_INPUT_LENGTH];
     char            arg2      [MAX_INPUT_LENGTH];
-    char            buf       [MAX_INPUT_LENGTH];
-    char            revdoor   [MAX_INPUT_LENGTH];
+    char            buf       [128];  /* Act message buffer */
+    char            direction [8];    /* "north", "south", etc. */
+    char            revdoor   [8];    /* "north", "south", etc. */
     int             door;
 
     argument = one_argument( argument, arg1 );
@@ -392,17 +393,17 @@ void do_throw( CHAR_DATA *ch, char *argument )
     }
 
     if      ( !str_cmp( arg1, "n" ) || !str_cmp( arg1, "north" ) )
-	{door = 0;sprintf(arg1,"north");}
+	{door = 0;strcpy(direction,"north");}
     else if ( !str_cmp( arg1, "e" ) || !str_cmp( arg1, "east" ) )
-	{door = 1;sprintf(arg1,"east");}
+	{door = 1;strcpy(direction,"east");}
     else if ( !str_cmp( arg1, "s" ) || !str_cmp( arg1, "south" ) )
-	{door = 2;sprintf(arg1,"south");}
+	{door = 2;strcpy(direction,"south");}
     else if ( !str_cmp( arg1, "w" ) || !str_cmp( arg1, "west" ) )
-	{door = 3;sprintf(arg1,"west");}
+	{door = 3;strcpy(direction,"west");}
     else if ( !str_cmp( arg1, "u" ) || !str_cmp( arg1, "up" ) )
-	{door = 4;sprintf(arg1,"up");}
+	{door = 4;strcpy(direction,"up");}
     else if ( !str_cmp( arg1, "d" ) || !str_cmp( arg1, "down" ) )
-	{door = 5;sprintf(arg1,"down");}
+	{door = 5;strcpy(direction,"down");}
     else
     {
 	send_to_char("You can only throw north, south, east, west, up or down.\n\r", ch);
@@ -419,14 +420,14 @@ void do_throw( CHAR_DATA *ch, char *argument )
 
     location = ch->in_room;
 
-    sprintf(buf,"You hurl $p %s.",arg1);
+    sprintf(buf,"You hurl $p %s.",direction);
     act(buf,ch,obj,NULL,TO_CHAR);
-    sprintf(buf,"$n hurls $p %s.",arg1);
+    sprintf(buf,"$n hurls $p %s.",direction);
     act(buf,ch,obj,NULL,TO_ROOM);
     /* First room */
     if (( pexit = ch->in_room->exit[door]) == NULL || (to_room = pexit->to_room) == NULL)
     {
-	sprintf(buf,"$p bounces off the %s wall.",arg1);
+	sprintf(buf,"$p bounces off the %s wall.",direction);
 	act(buf,ch,obj,NULL,TO_ROOM);
 	act(buf,ch,obj,NULL,TO_CHAR);
 	obj_from_char(obj);
@@ -436,7 +437,7 @@ void do_throw( CHAR_DATA *ch, char *argument )
     pexit = ch->in_room->exit[door];
     if (IS_SET(pexit->exit_info, EX_CLOSED) )
     {
-	sprintf(buf,"$p bounces off the %s door.",arg1);
+	sprintf(buf,"$p bounces off the %s door.",direction);
 	act(buf,ch,obj,NULL,TO_ROOM);
 	act(buf,ch,obj,NULL,TO_CHAR);
 	obj_from_char(obj);
@@ -461,7 +462,7 @@ void do_throw( CHAR_DATA *ch, char *argument )
     /* Second room */
     if (( pexit = ch->in_room->exit[door]) == NULL || (to_room = pexit->to_room) == NULL)
     {
-	sprintf(buf,"$p comes flying in from the %s and strikes %s wall.",revdoor,arg1);
+	sprintf(buf,"$p comes flying in from the %s and strikes %s wall.",revdoor,direction);
 	act(buf,ch,obj,NULL,TO_ROOM);
 	obj_from_char(obj);
 	obj_to_room(obj, ch->in_room);
@@ -472,7 +473,7 @@ void do_throw( CHAR_DATA *ch, char *argument )
     pexit = ch->in_room->exit[door];
     if (IS_SET(pexit->exit_info, EX_CLOSED) )
     {
-	sprintf(buf,"$p comes flying in from the %s and strikes the %s door.",revdoor,arg1);
+	sprintf(buf,"$p comes flying in from the %s and strikes the %s door.",revdoor,direction);
 	act(buf,ch,obj,NULL,TO_ROOM);
 	obj_from_char(obj);
 	obj_to_room(obj, ch->in_room);
@@ -480,7 +481,7 @@ void do_throw( CHAR_DATA *ch, char *argument )
     	char_to_room(ch,location);
 	return;
     }
-    sprintf(buf,"$p comes flying in from the %s and carries on %s.",revdoor, arg1);
+    sprintf(buf,"$p comes flying in from the %s and carries on %s.",revdoor, direction);
     act(buf,ch,obj,NULL,TO_ROOM);
     char_from_room(ch);
     char_to_room(ch,to_room);
@@ -500,7 +501,7 @@ void do_throw( CHAR_DATA *ch, char *argument )
     /* Third room */
     if (( pexit = ch->in_room->exit[door]) == NULL || (to_room = pexit->to_room) == NULL)
     {
-	sprintf(buf,"$p comes flying in from the %s and strikes %s wall.",revdoor,arg1);
+	sprintf(buf,"$p comes flying in from the %s and strikes %s wall.",revdoor,direction);
 	act(buf,ch,obj,NULL,TO_ROOM);
 	obj_from_char(obj);
 	obj_to_room(obj, ch->in_room);
@@ -511,7 +512,7 @@ void do_throw( CHAR_DATA *ch, char *argument )
     pexit = ch->in_room->exit[door];
     if (IS_SET(pexit->exit_info, EX_CLOSED) )
     {
-	sprintf(buf,"$p comes flying in from the %s and strikes the %s door.",revdoor,arg1);
+	sprintf(buf,"$p comes flying in from the %s and strikes the %s door.",revdoor,direction);
 	act(buf,ch,obj,NULL,TO_ROOM);
 	obj_from_char(obj);
 	obj_to_room(obj, ch->in_room);
@@ -519,7 +520,7 @@ void do_throw( CHAR_DATA *ch, char *argument )
     	char_to_room(ch,location);
 	return;
     }
-    sprintf(buf,"$p comes flying in from the %s and carries on %s.",revdoor, arg1);
+    sprintf(buf,"$p comes flying in from the %s and carries on %s.",revdoor, direction);
     act(buf,ch,obj,NULL,TO_ROOM);
     char_from_room(ch);
     char_to_room(ch,to_room);
@@ -703,8 +704,8 @@ ch->power[DISC_WERE_WOLF]> 4 )
 void do_fightstyle( CHAR_DATA *ch, char *argument )
 {
     char            arg1     [MAX_INPUT_LENGTH];
-    char            arg2     [MAX_INPUT_LENGTH];
-    char            buf      [MAX_INPUT_LENGTH];
+    char            arg2     [16];  /* Max is "jumpkick", "spinkick" etc (9 chars) */
+    char            buf      [128]; /* Output message buffer */
     bool	    blah = FALSE;
     int             selection;
     int             value;
@@ -729,7 +730,7 @@ void do_fightstyle( CHAR_DATA *ch, char *argument )
 	send_to_char("[11] Punch     [12] Gouge     [13] Rip       [14] Stamp [15] Backfist\n\r",ch);
 	send_to_char("[16] Jumpkick  [17] Spinkick  [18] Hurl      [19] Sweep [20] Charge\n\r",ch);
 	send_to_char("==================================================================\n\r",ch);
-	sprintf(buf,"Selected options: 1:[%d] 2:[%d] 3:[%d] 4:[%d] 5:[%d] 6:[%d] 7:[%d] 8:[%d].\n\r",ch->cmbt[0],ch->cmbt[1],
+	snprintf(buf, sizeof(buf), "Selected options: 1:[%d] 2:[%d] 3:[%d] 4:[%d] 5:[%d] 6:[%d] 7:[%d] 8:[%d].\n\r",ch->cmbt[0],ch->cmbt[1],
 	ch->cmbt[2],ch->cmbt[3],ch->cmbt[4],ch->cmbt[5],ch->cmbt[6],ch->cmbt[7]);
 	send_to_char(buf,ch);
 	return;
@@ -2553,8 +2554,8 @@ void special_hurl( CHAR_DATA *ch, CHAR_DATA *victim )
     ROOM_INDEX_DATA *to_room;
     EXIT_DATA       *pexit;
     EXIT_DATA       *pexit_rev;
-    char            buf       [MAX_INPUT_LENGTH];
-    char            direction [MAX_INPUT_LENGTH];
+    char            buf       [128];  /* Act message buffer */
+    char            direction [8];    /* "north", "south", "east", "west" */
     int             door;
     int             rev_dir;
     int             dam;

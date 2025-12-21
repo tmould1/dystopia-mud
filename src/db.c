@@ -27,7 +27,7 @@
 #include <time.h>
 #include "merc.h"
 
-#if !defined(macintosh)
+#if !defined(macintosh) && !defined(WIN32)
 extern	int	_filbuf		args( (FILE *) );
 #endif
 
@@ -97,15 +97,21 @@ void mud_init_paths(const char *exe_path)
 #endif
 
     /* Base dir is where the executable lives (project root) */
-    strncpy(mud_base_dir, exe_dir, MUD_PATH_MAX - 1);
-    mud_base_dir[MUD_PATH_MAX - 1] = '\0';
+    /* Limit to 450 chars to guarantee room for subdirs + filenames */
+    {
+        size_t max_base = 450;
+        size_t len = strlen(exe_dir);
+        if (len > max_base) len = max_base;
+        memcpy(mud_base_dir, exe_dir, len);
+        mud_base_dir[len] = '\0';
+    }
 
     /* Set up all subdirectories relative to base */
-    snprintf(mud_area_dir, MUD_PATH_MAX, "%s%sarea", mud_base_dir, PATH_SEPARATOR);
-    snprintf(mud_player_dir, MUD_PATH_MAX, "%s%splayer%s", mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR);
-    snprintf(mud_backup_dir, MUD_PATH_MAX, "%s%sbackup%s", mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR);
-    snprintf(mud_txt_dir, MUD_PATH_MAX, "%s%stxt", mud_base_dir, PATH_SEPARATOR);
-    snprintf(mud_log_dir, MUD_PATH_MAX, "%s%slog", mud_base_dir, PATH_SEPARATOR);
+    snprintf(mud_area_dir, sizeof(mud_area_dir), "%.450s%sarea", mud_base_dir, PATH_SEPARATOR);
+    snprintf(mud_player_dir, sizeof(mud_player_dir), "%.450s%splayer%s", mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR);
+    snprintf(mud_backup_dir, sizeof(mud_backup_dir), "%.450s%sbackup%s", mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR);
+    snprintf(mud_txt_dir, sizeof(mud_txt_dir), "%.450s%stxt", mud_base_dir, PATH_SEPARATOR);
+    snprintf(mud_log_dir, sizeof(mud_log_dir), "%.450s%slog", mud_base_dir, PATH_SEPARATOR);
 
     fprintf(stderr, "MUD paths initialized:\n");
     fprintf(stderr, "  Base:   %s\n", mud_base_dir);
@@ -655,6 +661,7 @@ void new_load_area( FILE *fp )
              KEY( "Recall", pArea->recall, fread_number( fp ) );
             break;  
         }
+	(void)fMatch; /* Suppress unused warning - set by KEY macros */
     }
     log_string( pArea->name );
 }
@@ -2237,10 +2244,9 @@ OBJ_DATA *create_object( OBJ_INDEX_DATA *pObjIndex, int level )
   if (obj->pIndexData->vnum >= 33120 && obj->pIndexData->vnum <= 33139)
     SET_BIT(obj->spectype, SITEM_DEMONIC);
 
-
-    /*
-     * Mess with object properties.
-     */
+  /*
+   * Mess with object properties.
+   */
     switch ( obj->item_type )
     {
     default:
@@ -3435,7 +3441,7 @@ void log_string( const char *str )
     char *strtime;
     char logout[MAX_STRING_LENGTH];
     struct tm *tm_info;
-    char log_filename[MUD_PATH_MAX];
+    char log_filename[MUD_PATH_MAX + 32];  /* Extra room for date suffix */
 
     strtime = ctime( &current_time );
     strtime[strlen(strtime)-1] = '\0';
@@ -3448,7 +3454,7 @@ void log_string( const char *str )
         /* Open log file on first call, named by startup time */
         if (log_fp == NULL) {
             tm_info = localtime(&current_time);
-            snprintf(log_filename, sizeof(log_filename), "%s%s%04d%02d%02d-%02d%02d%02d.log",
+            snprintf(log_filename, sizeof(log_filename), "%.480s%s%04d%02d%02d-%02d%02d%02d.log",
                 mud_log_dir, PATH_SEPARATOR,
                 tm_info->tm_year + 1900, tm_info->tm_mon + 1, tm_info->tm_mday,
                 tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);

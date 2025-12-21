@@ -3060,8 +3060,7 @@ void do_infirmity( CHAR_DATA *ch, char *argument )
     if ( IS_NPC(ch) )
 	return;
 
-	
-  	if (!IS_CLASS(ch, CLASS_VAMPIRE))
+    if (!IS_CLASS(ch, CLASS_VAMPIRE))
         {
   	send_to_char("Huh?\n\r", ch);
         return;

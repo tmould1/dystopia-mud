@@ -143,11 +143,11 @@ void do_principles( CHAR_DATA *ch, char *argument )
 		send_to_char("Koryou -Consider- The read aura power, learn about your enemies.\n\r",ch);
 	    if (ch->pcdata->powers[NPOWER_SORA] > 2) 
 		send_to_char("Kakusu -Hidden- Enhanced Hide.  Only other ninjas can see you.\n\r",ch);
-	    if (ch->pcdata->powers[NPOWER_SORA] > 3) 
+	    if (ch->pcdata->powers[NPOWER_SORA] > 3)
 		send_to_char("Uro-Uro -Silent Walk- You leave no footprints behind.\n\r",ch);
-		if (ch->pcdata->powers[NPOWER_SORA] > 4)
+	    if (ch->pcdata->powers[NPOWER_SORA] > 4)
 		send_to_char("Kanzuite -Aware- The truesight power.\n\r", ch);
-		if (ch->pcdata->powers[NPOWER_SORA] > 5)
+	    if (ch->pcdata->powers[NPOWER_SORA] > 5)
 		send_to_char("Bomuzite -Sleep Gas- By mixing an potion, you can put everyone in a room to sleep.\n\r", ch);
 	    return;
 	}
@@ -162,9 +162,9 @@ void do_principles( CHAR_DATA *ch, char *argument )
 		send_to_char("Songai -Damage- Enhanced damage.\n\r",ch);
 	    if (ch->pcdata->powers[NPOWER_CHIKYU] > 2) 
 		send_to_char("Isogu -Haste- Adds two extra attacks.\n\r",ch);
-	    if (ch->pcdata->powers[NPOWER_CHIKYU] > 3) 
+	    if (ch->pcdata->powers[NPOWER_CHIKYU] > 3)
 		send_to_char("Tsuiseki -Hunt- Fast hunting.\n\r",ch);
-		if (ch->pcdata->powers[NPOWER_CHIKYU] > 4)
+	    if (ch->pcdata->powers[NPOWER_CHIKYU] > 4)
 		send_to_char("Sakeru -Sonic Speed- Dodge more attacks.\n\r", ch);
 	    if (ch->pcdata->powers[NPOWER_CHIKYU] > 5)
 		send_to_char("HaraKiri -Blood Power- Hurt yourself to gain  power.\n\r", ch );
@@ -181,9 +181,9 @@ void do_principles( CHAR_DATA *ch, char *argument )
 		send_to_char("Hakunetsu -First Strike- You get super backstabs.\n\r",ch);
 	    if (ch->pcdata->powers[NPOWER_NINGENNO] > 2) 
 		send_to_char("Mienaku -Vanish- Never fail flee.\n\r",ch);
-	    if (ch->pcdata->powers[NPOWER_NINGENNO] > 3) 
+	    if (ch->pcdata->powers[NPOWER_NINGENNO] > 3)
 		send_to_char("Shiroken -Throwing Star- Added attack per round, like headbutt for demons.\n\r",ch);
-		if (ch->pcdata->powers[NPOWER_NINGENNO] > 4)
+	    if (ch->pcdata->powers[NPOWER_NINGENNO] > 4)
 		send_to_char("Dokuyaku -Poison- Adds poisons to the Shiroken\n\r", ch);
 	if (ch->pcdata->powers[NPOWER_NINGENNO] > 5)
 	send_to_char("Circle - circle behind your opponent and hit him during battle\n\r", ch );

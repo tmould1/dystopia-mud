@@ -1048,7 +1048,7 @@ void game_loop_unix( int control )
 			   case CON_PLAYING:
                         if ( !run_olc_editor( d ) )
 				interpret( d->character, d->incomm );
-				break;
+			   break;
 			   case CON_EDITING:
 				edit_buffer( d->character, d->incomm );
 				break;
@@ -1694,7 +1694,10 @@ void crashrecov (int iSignal)
   FILE *fp;
   DESCRIPTOR_DATA *d, *d_next;
   char buf [200], buf2[100];
-  int pid, iFork;
+  int pid;
+#ifndef WIN32
+  int iFork;
+#endif
   FILE *fReturn;
   FILE *fCrash;
 
@@ -1715,10 +1718,18 @@ void crashrecov (int iSignal)
  
   /*
    * This will cause a core dump, even though the signal was handled
+   * Note: fork() is not available on Windows, so skip the core dump logic there
    */
+#ifndef WIN32
   iFork = fork();
   wait(NULL);
   if((pid = getpid()) != proc_pid)
+#else
+  /* On Windows, compat.h defines fork() as -1, which means it "failed" */
+  /* We just continue with crash recovery without a core dump */
+  (void)pid;  /* Suppress unused variable warning on Windows */
+  if(0)
+#endif
   {
         signal(SIGSEGV, SIG_IGN);
         raise(SIGSEGV);
@@ -2176,7 +2187,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
             }
             txt++;
             break;
-		  case 'x': // xterm, BUG: do_say bleeds characters to the player using it. do_chat does not?
+		  case 'x':
 		    // look for 3 more characters that should be numbers
 			if (isdigit(*(txt+1)) && isdigit(*(txt+2)) && isdigit(*(txt+3)))
 			{
@@ -2223,7 +2234,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
   }
               
   /* copy data */
-  strncpy(d->outbuf + d->outtop, output, length);
+  memcpy(d->outbuf + d->outtop, output, length);
   d->outtop += length;
   return;
 }
@@ -2329,7 +2340,7 @@ void nanny( DESCRIPTOR_DATA *d, char *argument )
         }
 
 	argument[0] = UPPER(argument[0]);
-	if ( !check_parse_name( argument ) && argument != "Vladd" )
+	if ( !check_parse_name( argument ) && strcmp(argument, "Vladd") != 0 )
 	{
 	    write_to_buffer( d, " Illegal name, try another.\n\r Enter thy name brave traveler: ", 0 );
 	    return;
@@ -3883,13 +3894,13 @@ void kavitem( const char *format, CHAR_DATA *ch, const void *arg1, const void *a
 
 void bust_a_header(DESCRIPTOR_DATA *d)
 {
-char class[MAX_STRING_LENGTH];
-char class2[MAX_STRING_LENGTH];
-char header[MAX_STRING_LENGTH];
-char header1[MAX_STRING_LENGTH];
-char blanklin[MAX_STRING_LENGTH];
+char class[16];    /* Class name: "Werewolf" is longest (8 chars) */
+char class2[48];   /* "Name the Class" format */
+char header[128];  /* ANSI escape sequence header */
+char header1[64];  /* "Name the Class  Align:1234" */
+char blanklin[8];
 CHAR_DATA *ch;
-char cls[MAX_STRING_LENGTH];
+char cls[32];      /* Color code + " " + NORMAL - needs space for ANSI sequences */
 sprintf(cls," ");
 
 ch=d->character;

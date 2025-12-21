@@ -886,12 +886,14 @@ void do_cone( CHAR_DATA *ch, char *argument ) {
     }
 
     if ( ( victim = get_char_room( ch, arg ) ) == NULL )
-	if ((victim = ch->fighting) == NULL)
     {
-        send_to_char( "They aren't here.\n\r", ch );
-        return;
+	if ((victim = ch->fighting) == NULL)
+	{
+	    send_to_char( "They aren't here.\n\r", ch );
+	    return;
+	}
     }
-	if (ch->mana < 100) {
+    if (ch->mana < 100) {
 		send_to_char("You don't have enough mana.\n\r", ch);
 		return;}
 

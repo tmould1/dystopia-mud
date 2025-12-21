@@ -390,10 +390,11 @@ void save_resets( FILE *fp, AREA_DATA *pArea )
 {
     RESET_DATA *pReset;
     MOB_INDEX_DATA *pLastMob = NULL;
-    OBJ_INDEX_DATA *pLastObj;
+    OBJ_INDEX_DATA *pLastObj = NULL;
     ROOM_INDEX_DATA *pRoomIndex;
     char buf[MAX_STRING_LENGTH];
     int vnum;
+    (void)pLastObj; /* Suppress unused warning */
 
     fprintf( fp, "#RESETS\n" );
 

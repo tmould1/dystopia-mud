@@ -134,8 +134,8 @@ static void append_note (FILE *fp, NOTE_DATA *note)
 {
 	fprintf (fp, "Sender  %s~\n", note->sender);
 	fprintf (fp, "Date    %s~\n", note->date);
-	fprintf (fp, "Stamp   %ld\n", note->date_stamp);
-	fprintf (fp, "Expire  %ld\n", note->expire);
+	fprintf (fp, "Stamp   %lld\n", (long long)note->date_stamp);
+	fprintf (fp, "Expire  %lld\n", (long long)note->expire);
 	fprintf (fp, "To      %s~\n", note->to_list);
 	fprintf (fp, "Subject %s~\n", note->subject);
 	fprintf (fp, "Text\n%s~\n\n", note->text);
@@ -247,7 +247,7 @@ static void save_board (BOARD_DATA *board)
 {
 	FILE *fp;
 	char filename[200];
-	char buf[200];
+	char buf[256];
 	NOTE_DATA *note;
 	
 	sprintf (filename, "%s%s", NOTE_DIR, board->short_name);
