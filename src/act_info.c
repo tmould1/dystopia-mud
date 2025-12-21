@@ -102,12 +102,11 @@ void 	check_right_leg		args( ( CHAR_DATA *ch, CHAR_DATA *victim ) );
 void	obj_score		args( ( CHAR_DATA *ch, OBJ_DATA *obj ) );
 
 /*
- * Get xterm-256 color code for time-of-day room description tinting.
- * Returns color code string based on hour and whether room is indoors.
- * Uses xterm palette: warm oranges for dawn/dusk, cool blues for night,
- * neutral/bright for daytime.
+ * Get xterm-256 color code for room description tinting.
+ * Considers room flags, sector type, light level, and time of day.
+ * Uses xterm palette for atmospheric lighting effects.
  */
-const char *get_time_tint_color( ROOM_INDEX_DATA *room )
+const char *get_room_tint_color( ROOM_INDEX_DATA *room )
 {
     bool indoors;
     int hour;
@@ -115,18 +114,40 @@ const char *get_time_tint_color( ROOM_INDEX_DATA *room )
     if ( room == NULL )
         return "";
 
+    /* Special room flags take priority */
+    if ( IS_SET( room->room_flags, ROOM_TOTAL_DARKNESS ) )
+        return "#x232";  /* Near black - magical darkness */
+
+    if ( IS_SET( room->room_flags, ROOM_FLAMING ) )
+        return "#x202";  /* Fiery orange-red */
+
+    if ( IS_SET( room->room_flags, ROOM_ARENA ) )
+        return "#x135";  /* Dramatic purple - arena lighting */
+
+    if ( IS_SET( room->room_flags, ROOM_DARK ) )
+        return "#x238";  /* Very dark grey */
+
     indoors = ( room->sector_type == SECT_INSIDE
              || IS_SET( room->room_flags, ROOM_INDOORS ) );
     hour = time_info.hour;
 
-    /* Indoor rooms get subtle neutral tinting only at night */
+    /* Indoor rooms - tinting based on light level and time */
     if ( indoors )
     {
-        /* Late night / early morning - dim interior lighting */
+        /* Light level affects indoor brightness */
+        if ( room->light >= 10 )
+            return "#x231";  /* Bright - well lit */
+        else if ( room->light >= 5 )
+            return "#x253";  /* Good lighting */
+        else if ( room->light >= 1 )
+            return "#x250";  /* Moderate lighting */
+        else if ( room->light <= -5 )
+            return "#x236";  /* Very dim */
+
+        /* No artificial light - depends on time of day */
         if ( hour >= 22 || hour <= 4 )
             return "#x243";  /* Dark grey - dim candlelight */
-        /* Normal indoor lighting */
-        return "#x251";      /* Light grey - neutral */
+        return "#x251";      /* Light grey - neutral daylight through windows */
     }
 
     /* Outdoor rooms get full time-of-day tinting */
@@ -1148,7 +1169,7 @@ void do_look( CHAR_DATA *ch, char *argument )
         {
             /* Apply time-of-day color tint to room description */
             snprintf( buf, sizeof(buf), "%s%s#n",
-                get_time_tint_color( ch->in_room ),
+                get_room_tint_color( ch->in_room ),
                 ch->in_room->description ? ch->in_room->description : "" );
             send_to_char( buf, ch );
             if (ch->in_room->blood == 1000)
