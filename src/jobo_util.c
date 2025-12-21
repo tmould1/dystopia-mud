@@ -913,9 +913,9 @@ void recycle_descriptors()
 
   for (dclose = descriptor_list; dclose; dclose = dclose_next)
   {
-    dclose_next = dclose->next;   
+    dclose_next = dclose->next;
     if (dclose->lookup_status != STATUS_CLOSED) continue;
-   
+
     /*
      * First let's get it out of the descriptor list.
      */
@@ -956,10 +956,13 @@ void recycle_descriptors()
    
     /*
      * Bye bye mr. Descriptor.
+     * Use shutdown() first to send FIN to client, then close the socket.
      */
 #if defined(WIN32)
+    shutdown( dclose->descriptor, SD_BOTH );
     closesocket( dclose->descriptor );
 #else
+    shutdown( dclose->descriptor, SHUT_RDWR );
     close( dclose->descriptor );
 #endif
       

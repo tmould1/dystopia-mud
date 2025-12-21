@@ -6914,10 +6914,24 @@ void copyover_recover ()
 				continue;
 			}
 			desc = new_desc;
+
+			/* Set non-blocking mode - must match new_descriptor() behavior */
+			{
+				u_long nonblocking = 1;
+				ioctlsocket(desc, FIONBIO, &nonblocking);
+			}
 		}
 		else
 		{
 			merc_logf("copyover_recover: Invalid socket index %d for %s", desc, name);
+			continue;
+		}
+#else
+		/* Set non-blocking mode on Unix - must match new_descriptor() behavior */
+		if (fcntl(desc, F_SETFL, FNDELAY) == -1)
+		{
+			perror("copyover_recover: fcntl: FNDELAY");
+			close(desc);
 			continue;
 		}
 #endif

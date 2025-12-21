@@ -1433,7 +1433,7 @@ void close_socket( DESCRIPTOR_DATA *dclose )
 void close_socket2( DESCRIPTOR_DATA *dclose, bool kickoff )
 {
   CHAR_DATA *ch;
-  
+
   if (dclose->lookup_status > STATUS_DONE) return;
   dclose->lookup_status += 2;
     
