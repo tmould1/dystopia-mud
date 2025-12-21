@@ -28,3 +28,7 @@ player/
 src/zconf.h
 src/zlib.h
 src/zlib.lib
+build_output.txt
+.gitignore
+txt/copyover.data
+txt/leader.txt
