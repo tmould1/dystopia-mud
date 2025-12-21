@@ -171,9 +171,9 @@ int char_damroll(CHAR_DATA *ch)
   if (IS_CLASS(ch, CLASS_VAMPIRE) && ch->rage > 0)
     value += ch->rage;
   if( IS_CLASS(ch, CLASS_MONK) && IS_ITEMAFF(ch, ITEMA_CHAOSHANDS ) )
-  	value += 200;
-	if (IS_CLASS(ch, CLASS_NINJA) && ch->rage > 0)
-  	value += ch->rage;
+    value += 200;
+  if (IS_CLASS(ch, CLASS_NINJA) && ch->rage > 0)
+    value += ch->rage;
   if (IS_SET(ch->special,SPC_WOLFMAN) && ch->rage > 99)
     value += ch->rage;
   if (IS_CLASS(ch, CLASS_DEMON) && ch->rage > 0)
@@ -229,13 +229,12 @@ int char_hitroll(CHAR_DATA *ch)
     if( IS_CLASS(ch, CLASS_MONK) && IS_ITEMAFF(ch, ITEMA_CHAOSHANDS ) )
 	value += 200;
 
-
-	if (IS_CLASS(ch, CLASS_NINJA) && ch->rage > 0)
+    if (IS_CLASS(ch, CLASS_NINJA) && ch->rage > 0)
 	value += ch->rage;
 
-	if (!IS_NPC(ch))
-	if (IS_CLASS(ch, CLASS_NINJA) && ch->pcdata->powers[NPOWER_CHIKYU] >= 6
-	&& ch->pcdata->powers[HARA_KIRI] > 0)
+    if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_NINJA)
+        && ch->pcdata->powers[NPOWER_CHIKYU] >= 6
+        && ch->pcdata->powers[HARA_KIRI] > 0)
 	value += 100;
 
     /* Werewolf Rage */
@@ -1642,7 +1641,7 @@ void do_far( CHAR_DATA *ch, char *argument )
     if ( IS_NPC(ch) )
 	return;
 
-	if (arg1[0] == '\0')
+    if (arg1[0] == '\0')
 	{
 	   send_to_char("Who do you wish to use farcommand on?\n\r",ch);
 	   return;
@@ -4145,7 +4144,7 @@ void do_diagnose( CHAR_DATA *ch, char *argument )
 
     argument = one_argument( argument, arg );
 
-    if (arg == '\0')
+    if (arg[0] == '\0')
     {
 	send_to_char("Who do you wish to diagnose?\n\r",ch);
 	return;

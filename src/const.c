@@ -1838,7 +1838,7 @@ void do_slay( CHAR_DATA *ch, char *argument )
     argument = one_argument(argument, who);
     argument = one_argument(argument, type);
 
-    if ( !str_prefix(who, "list") || who == NULL )
+    if ( !str_prefix(who, "list") || who[0] == '\0' )
     {
       send_to_char("\n\rSyntax: slay [who] <type>\n\r", ch);
       send_to_char("where type is one of the following...\n\r\n\r", ch);

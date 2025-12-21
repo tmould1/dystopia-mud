@@ -72,7 +72,6 @@ void move_char( CHAR_DATA *ch, int door )
     char poly [MAX_STRING_LENGTH];
     char mount2 [MAX_INPUT_LENGTH];
     char leave [20];
-    int revdoor;
     bool bad_wall = FALSE;
 
     if ( door < 0 || door > 5 )
@@ -465,12 +464,12 @@ IS_SET(ch->pcdata->powers[1], DPOWER_LEVITATION)))
     }
     char_from_room( ch );
     char_to_room( ch, to_room );
-    if      ( door == 0 ) {revdoor = 2;sprintf(buf,"the south");}
-    else if ( door == 1 ) {revdoor = 3;sprintf(buf,"the west");}
-    else if ( door == 2 ) {revdoor = 0;sprintf(buf,"the north");}
-    else if ( door == 3 ) {revdoor = 1;sprintf(buf,"the east");}
-    else if ( door == 4 ) {revdoor = 5;sprintf(buf,"below");}
-    else                  {revdoor = 4;sprintf(buf,"above");}
+    if      ( door == 0 ) sprintf(buf,"the south");
+    else if ( door == 1 ) sprintf(buf,"the west");
+    else if ( door == 2 ) sprintf(buf,"the north");
+    else if ( door == 3 ) sprintf(buf,"the east");
+    else if ( door == 4 ) sprintf(buf,"below");
+    else                  sprintf(buf,"above");
 
     for ( d = descriptor_list; d != NULL; d = d->next )
     {
@@ -4525,7 +4524,7 @@ void add_tracks( CHAR_DATA *ch, int direction )
     if (IS_NPC(ch)) return;
     if (IS_CLASS(ch, CLASS_WEREWOLF) && ch->power[DISC_WERE_LYNX] > 0)
 	return;
-	if (IS_CLASS(ch, CLASS_NINJA) && ch->pcdata->powers[NPOWER_SORA] >= 4)
+    if (IS_CLASS(ch, CLASS_NINJA) && ch->pcdata->powers[NPOWER_SORA] >= 4)
 	return;
     if (IS_ITEMAFF(ch, ITEMA_STALKER)) return;
     for ( loop = 0; loop <= 4; loop++ )

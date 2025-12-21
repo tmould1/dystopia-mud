@@ -631,7 +631,7 @@ if (!IS_CLASS(ch,CLASS_VAMPIRE))
 {send_to_char("Huh?\n\r",ch);return;}
 if (ch->power[DISC_VAMP_OBFU] < 4)
 {send_to_char("You need obfuscate 4 to dub items.\n\r",ch);return;}
-if (arg1 == NULL || arg2 == NULL)
+if (arg1[0] == '\0' || arg2[0] == '\0')
 {send_to_char("Syntax: Dub (item) (description)?\n\r",ch);return;}
 if ((obj=get_obj_carry(ch,arg1)) == NULL)
 {send_to_char("You dont have that item.\n\r",ch);return;}
@@ -855,11 +855,9 @@ send_to_char( "Whose blood do you wish to turn to water?\n\r", ch );
 void do_spew( CHAR_DATA *ch, char *argument )
 {
 char  buf[MAX_INPUT_LENGTH];
-int   sn;  
+int   sn;
 int   level;
-int   spelltype;
- 
- 
+
     if ( IS_NPC(ch) )return;
  
 if (!IS_CLASS(ch, CLASS_VAMPIRE))
@@ -891,7 +889,6 @@ return;
  
 }
  
-spelltype = skill_table[sn].target;
 level = ch->power[DISC_VAMP_THAU];
 (*skill_table[sn].spell_fun) ( sn, level, ch, NULL);
 WAIT_STATE( ch, 12 );
@@ -1572,12 +1569,11 @@ void do_entrance( CHAR_DATA *ch, char *argument )
     char arg [MAX_INPUT_LENGTH];
     int sn;
     int level;
-    int spelltype;
     char buf[MAX_STRING_LENGTH];
     argument = one_argument( argument, arg );
- 
+
     if (IS_NPC(ch)) return;
- 
+
     if (!IS_CLASS(ch, CLASS_VAMPIRE)) 
     {
 	send_to_char("Huh?\n\r",ch);
@@ -1613,7 +1609,6 @@ sprintf(buf,"A look of concentration crosses over $n's face.\n\r");
 act(buf,ch,NULL,victim,TO_ROOM);
  
     if ( ( sn = skill_lookup( "charm" ) ) < 0 ) return;
-    spelltype = skill_table[sn].target;
     level = ch->power[DISC_VAMP_PRES] * 40;
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );
     WAIT_STATE( ch, 12 );
@@ -2712,8 +2707,7 @@ void do_bloodagony(CHAR_DATA *ch, char *argument)
 {
     char arg[MAX_STRING_LENGTH];
     int value;
-    int pcost;
-    OBJ_DATA *obj; 
+    OBJ_DATA *obj;
     one_argument( argument,arg);
 
     if (!IS_CLASS(ch, CLASS_VAMPIRE))
@@ -2723,7 +2717,6 @@ void do_bloodagony(CHAR_DATA *ch, char *argument)
     }
 
     value = ch->power[DISC_VAMP_QUIE];
-    pcost = ch->power[DISC_VAMP_QUIE] * 60;
  
     if ( arg[0] == '\0')
     {
@@ -2839,15 +2832,8 @@ void do_embrace(CHAR_DATA *ch, char *argument  )
     char arg[MAX_INPUT_LENGTH];
     CHAR_DATA *victim;
     char buf[MAX_STRING_LENGTH];
-    int bloodpool;
     one_argument( argument, arg );
 
-    
-    if (IS_SET(ch->newbits, NEW_TIDE))
-    bloodpool = (3000 / ch->generation);
-    else bloodpool = (2000 / ch->generation);
-    
- 
     if (IS_NPC(ch)) return;
 
     if (!IS_CLASS(ch,CLASS_VAMPIRE))
@@ -3068,8 +3054,7 @@ void do_infirmity( CHAR_DATA *ch, char *argument )
     char  buf[MAX_INPUT_LENGTH];
     int   sn;
     int   level;
-    int   spelltype;
-    
+
     argument = one_argument (argument, arg);
 
     if ( IS_NPC(ch) )
@@ -3105,9 +3090,8 @@ sprintf(buf,"Yep, sn is bieng set to %d.",sn);
 send_to_char(buf,ch);
 return;
 
-}  
+}
 
-    spelltype = skill_table[sn].target;
     level = ch->power[DISC_VAMP_QUIE];
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );
     WAIT_STATE( ch, 12 );

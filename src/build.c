@@ -392,8 +392,10 @@ bool can_mmodify( CHAR_DATA *ch, CHAR_DATA *mob )
 		get_trust( mob ) )
 	     return TRUE;
 	   else
+	   {
 	     send_to_char( "You can't do that.\n\r", ch );
 	     return FALSE;
+	   }
 	}
 
 	if ( IS_NPC( ch ) )
@@ -913,7 +915,7 @@ char *copy_buffer( CHAR_DATA *ch )
       strcpy( tmp, ch->editor->line[x] );
       smush_tilde( tmp );
       len = strlen(tmp);
-      if ( tmp && tmp[len-1] == '~' )
+      if ( tmp[0] != '\0' && tmp[len-1] == '~' )
         tmp[len-1] = '\0';
       else
         strcat( tmp, "\n\r" );
