@@ -1,9 +1,15 @@
 # MinGW/MSYS2 Makefile for Dystopia MUD
 # Run from project root: make -f build/Makefile.mingw
 # Or use build.bat which handles logging automatically
+#
+# Parallel compilation: make -j$(nproc) -f build/Makefile.mingw
+# Or just use build.bat which auto-detects CPU cores
 
 CC = gcc
 LD = gcc
+
+# Enable parallel-safe output (GNU Make 4.0+)
+MAKEFLAGS += --output-sync=target
 
 # Directories
 SRC_DIR = src

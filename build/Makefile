@@ -1,8 +1,12 @@
 # Linux/Unix Makefile for Dystopia MUD
 # Run from project root: make -f build/Makefile
-# Or from build dir: make -f Makefile
+#
+# Parallel compilation: make -j$(nproc) -f build/Makefile
 
 CC = gcc
+
+# Enable parallel-safe output (GNU Make 4.0+)
+MAKEFLAGS += --output-sync=target
 
 # Directories
 SRC_DIR = src
