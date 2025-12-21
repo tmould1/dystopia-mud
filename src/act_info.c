@@ -101,6 +101,78 @@ void 	check_right_leg		args( ( CHAR_DATA *ch, CHAR_DATA *victim ) );
 
 void	obj_score		args( ( CHAR_DATA *ch, OBJ_DATA *obj ) );
 
+/*
+ * Get xterm-256 color code for time-of-day room description tinting.
+ * Returns color code string based on hour and whether room is indoors.
+ * Uses xterm palette: warm oranges for dawn/dusk, cool blues for night,
+ * neutral/bright for daytime.
+ */
+const char *get_time_tint_color( ROOM_INDEX_DATA *room )
+{
+    bool indoors;
+    int hour;
+
+    if ( room == NULL )
+        return "";
+
+    indoors = ( room->sector_type == SECT_INSIDE
+             || IS_SET( room->room_flags, ROOM_INDOORS ) );
+    hour = time_info.hour;
+
+    /* Indoor rooms get subtle neutral tinting only at night */
+    if ( indoors )
+    {
+        /* Late night / early morning - dim interior lighting */
+        if ( hour >= 22 || hour <= 4 )
+            return "#x243";  /* Dark grey - dim candlelight */
+        /* Normal indoor lighting */
+        return "#x251";      /* Light grey - neutral */
+    }
+
+    /* Outdoor rooms get full time-of-day tinting */
+    switch ( hour )
+    {
+        /* Deep night 0-3: dark blue */
+        case 0: case 1: case 2: case 3:
+            return "#x024";  /* Deep blue */
+
+        /* Pre-dawn 4: navy transitioning */
+        case 4:
+            return "#x025";  /* Dark blue-purple */
+
+        /* Dawn 5: golden-orange sunrise */
+        case 5:
+            return "#x214";  /* Warm orange-gold */
+
+        /* Early morning 6-7: soft warm light */
+        case 6: case 7:
+            return "#x223";  /* Soft yellow-white */
+
+        /* Morning to afternoon 8-16: bright daylight */
+        case 8: case 9: case 10: case 11:
+        case 12: case 13: case 14: case 15: case 16:
+            return "#x231";  /* Bright white */
+
+        /* Late afternoon 17-18: warm golden hour */
+        case 17: case 18:
+            return "#x222";  /* Golden */
+
+        /* Sunset 19: orange-red */
+        case 19:
+            return "#x208";  /* Deep orange-red */
+
+        /* Dusk 20: purple twilight */
+        case 20:
+            return "#x097";  /* Purple-blue */
+
+        /* Evening 21-23: deepening blue */
+        case 21: case 22: case 23:
+            return "#x062";  /* Dark blue */
+
+        default:
+            return "#x231";  /* Fallback to bright */
+    }
+}
 
 char *format_obj_to_char( OBJ_DATA *obj, CHAR_DATA *ch, bool fShort )
 {
@@ -1074,7 +1146,11 @@ void do_look( CHAR_DATA *ch, char *argument )
         else if ( ( !IS_NPC(ch) && !IS_SET(ch->act, PLR_BRIEF) ) &&
             ( arg1[0] == '\0' || !str_cmp( arg1, "auto" ) ) )
         {
-            send_to_char( ch->in_room->description, ch );
+            /* Apply time-of-day color tint to room description */
+            snprintf( buf, sizeof(buf), "%s%s#n",
+                get_time_tint_color( ch->in_room ),
+                ch->in_room->description ? ch->in_room->description : "" );
+            send_to_char( buf, ch );
             if (ch->in_room->blood == 1000)
             sprintf(buf,"You notice that the room is completely drenched in blood.\n\r");
             else if (ch->in_room->blood > 750)
