@@ -650,14 +650,11 @@ LOG_NORMAL, 8, DISC_VAMP_THAN, 3 }, */
     { "accep",		do_huh,		POS_STANDING,	 2,  LOG_NORMAL, 0,0,0	},
     { "accept",		do_accept,	POS_STANDING,	 2,  LOG_NORMAL, 0,0,0	},
     { "artifact",	do_artifact,	POS_STANDING,	 0,  LOG_NORMAL, 0,0,0	},
-    { "birth",		do_birth,	POS_STANDING,	 1,  LOG_NORMAL, 0,0,0	},
     { "blindfold",	do_blindfold,	POS_STANDING,	 0,  LOG_NORMAL, 0,0,0	},
     { "breaku",		do_huh,		POS_STANDING,	 2,  LOG_NORMAL, 0,0,0	},
     { "breakup",	do_breakup,	POS_STANDING,	 2,  LOG_NORMAL, 0,0,0	},
     { "claim",		do_claim,	POS_STANDING,	 0,  LOG_NORMAL, 0,0,0	},
     { "complete",	do_complete,	POS_STANDING,	 0,  LOG_NORMAL, 0,0,0	},
-    { "consen",		do_huh,		POS_STANDING,	 1,  LOG_NORMAL, 0,0,0	},
-    { "consent",	do_consent,	POS_STANDING,	 1, LOG_NORMAL, 0,0,0	},
     { "finger",		do_finger,	POS_SITTING,	 1,  LOG_NORMAL, 0,0,0	},
     { "follow",		do_follow,	POS_STANDING,	 0,  LOG_NORMAL, 0,0,0	},
     { "gag",		do_gag,		POS_STANDING,	 0,  LOG_NORMAL, 0,0,0	},
@@ -1423,7 +1420,6 @@ found = TRUE;
 		else if (!str_cmp( cmd_table[cmd].name, "upkeep" )) found = TRUE;
 		else if (!str_cmp( cmd_table[cmd].name, "score" )) found = TRUE;
 		else if (!str_cmp( cmd_table[cmd].name, "immune" )) found = TRUE;
-		else if (!str_cmp( cmd_table[cmd].name, "consent" )) found = TRUE;
 		else if (!str_cmp( cmd_table[cmd].name, "report" )) found = TRUE;
 		else if (!str_cmp( cmd_table[cmd].name, "goto" )) found = TRUE;
 		else if (!str_cmp( cmd_table[cmd].name, "flex" )) found = TRUE;
