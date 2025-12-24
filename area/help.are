@@ -16,7 +16,7 @@
 #7Underline      #u##u#n
 #7White          #7##7#n
 #7X-Term Code    #x141##x141#n
-#7* X-Term supports ##x(0-255)
+#7* X-Term supports ##x(000-255)
 #7 help xterm for more info.
 
 To stop a color from bleeding into the next line stop it with ##n
