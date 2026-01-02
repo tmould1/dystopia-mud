@@ -29,6 +29,20 @@ src/zconf.h
 src/zlib.h
 src/zlib.lib
 build_output.txt
-.gitignore
+
+# Runtime data files
 txt/copyover.data
 txt/leader.txt
+txt/kingdoms.txt
+txt/topboard.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Windows artifacts
+nul
+
+# Local settings
+.claude/settings.local.json
