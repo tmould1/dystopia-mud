@@ -2473,7 +2473,6 @@ void do_protocols(CHAR_DATA *ch, char *argument)
     const char *mccp_status;
     const char *gmcp_status;
     const char *mxp_status;
-    const char *mssp_status;
 
     if (ch->desc == NULL)
     {
@@ -2481,47 +2480,37 @@ void do_protocols(CHAR_DATA *ch, char *argument)
         return;
     }
 
-    /* Determine MCCP status */
+    /* Determine MCCP status - padded to same display width */
     if (ch->desc->out_compress != NULL)
     {
         if (ch->desc->mccp_version == 2)
-            mccp_status = "#GOn (v2)#n";
+            mccp_status = "#GOn#n (v2)";
         else if (ch->desc->mccp_version == 1)
-            mccp_status = "#GOn (v1)#n";
+            mccp_status = "#GOn#n (v1)";
         else
-            mccp_status = "#GOn#n";
+            mccp_status = "#GOn#n     ";
     }
     else
-        mccp_status = "#rOff#n";
+        mccp_status = "#rOff#n    ";
 
     /* Determine GMCP status */
-    if (ch->desc->gmcp_enabled)
-        gmcp_status = "#GOn#n";
-    else
-        gmcp_status = "#rOff#n";
+    gmcp_status = ch->desc->gmcp_enabled ? "#GOn#n " : "#rOff#n";
 
     /* Determine MXP status */
-    if (ch->desc->mxp_enabled)
-        mxp_status = "#GOn#n";
-    else
-        mxp_status = "#rOff#n";
-
-    /* MSSP is server-side only, client queries it */
-    mssp_status = "#ySupported#n";
+    mxp_status = ch->desc->mxp_enabled ? "#GOn#n " : "#rOff#n";
 
     snprintf(buf, sizeof(buf),
-        "#w+-----------------------------------+#n\n\r"
-        "#w|#n    #CMUD Protocol Status#n          #w|#n\n\r"
-        "#w+-----------------------------------+#n\n\r"
-        "#w|#n  #yMCCP#n  (Compression)    %s   #w|#n\n\r"
-        "#w|#n  #yGMCP#n  (Data Channel)   %s       #w|#n\n\r"
-        "#w|#n  #yMXP#n   (Extensions)     %s       #w|#n\n\r"
-        "#w|#n  #yMSSP#n  (Server Status)  %s #w|#n\n\r"
-        "#w+-----------------------------------+#n\n\r",
+        "#w+----------------------------------+#n\n\r"
+        "#w|#n      #CMUD Protocol Status#n       #w|#n\n\r"
+        "#w+----------------------------------+#n\n\r"
+        "#w|#n  #yMCCP#n  Compression      %s  #w|#n\n\r"
+        "#w|#n  #yGMCP#n  Data Channel     %s     #w|#n\n\r"
+        "#w|#n  #yMXP#n   Extensions       %s     #w|#n\n\r"
+        "#w|#n  #yMSSP#n  Server Status    #yAvail#n  #w|#n\n\r"
+        "#w+----------------------------------+#n\n\r",
         mccp_status,
         gmcp_status,
-        mxp_status,
-        mssp_status);
+        mxp_status);
 
     send_to_char(buf, ch);
 
