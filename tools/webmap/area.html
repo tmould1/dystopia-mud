@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dystopia MUD - Area Map</title>
+    <link rel="stylesheet" href="css/map.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>Dystopia MUD Area Map</h1>
+            <nav class="nav">
+                <a href="index.html">World Overview</a>
+                <a href="area.html" class="active">Area Detail</a>
+                <a href="analysis.html">Analysis</a>
+            </nav>
+        </header>
+
+        <div class="toolbar">
+            <div class="area-selector">
+                <label for="area-select">Select Area:</label>
+                <select id="area-select">
+                    <option value="">Loading areas...</option>
+                </select>
+            </div>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search rooms...">
+                <button id="search-btn">Search</button>
+            </div>
+            <div class="z-level-controls">
+                <label>Z-Level:</label>
+                <button id="z-down">-</button>
+                <span id="z-level">All</span>
+                <button id="z-up">+</button>
+                <button id="z-all">All</button>
+            </div>
+            <div class="text-size-controls">
+                <label>Label Size:</label>
+                <input type="range" id="text-size" min="0" max="16" value="8" step="1">
+                <span id="text-size-value">8px</span>
+            </div>
+            <div class="text-size-controls">
+                <label>Wrap Width:</label>
+                <input type="range" id="text-wrap" min="30" max="150" value="60" step="10">
+                <span id="text-wrap-value">60px</span>
+            </div>
+            <div class="warped-toggle">
+                <label>
+                    <input type="checkbox" id="show-warped">
+                    Show Warped
+                </label>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="cy" class="graph-container"></div>
+
+            <div class="sidebar" id="sidebar">
+                <h2>Room Info</h2>
+                <div id="room-info">
+                    <p>Click a room node to see details.</p>
+                </div>
+                <div id="area-stats" class="area-stats">
+                    <!-- Area statistics displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Sector Types</h3>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #808080;"></span>
+                <span>Inside</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #FFD700;"></span>
+                <span>City</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #90EE90;"></span>
+                <span>Field</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #228B22;"></span>
+                <span>Forest</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #8B4513;"></span>
+                <span>Hills</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #A0522D;"></span>
+                <span>Mountain</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #4169E1;"></span>
+                <span>Water</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #87CEEB;"></span>
+                <span>Air</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #F4A460;"></span>
+                <span>Desert</span>
+            </div>
+            <h3>Exit Types</h3>
+            <div class="legend-item">
+                <span class="legend-line solid"></span>
+                <span>Normal exit</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-line dashed"></span>
+                <span>One-way exit</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-line dotted"></span>
+                <span>Non-Euclidean</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ff4444;"></span>
+                <span>Dead-end room</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #9b59b6;"></span>
+                <span>Portal (other area)</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+    <script src="js/area-map.js"></script>
+</body>
+</html>

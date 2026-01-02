@@ -1,0 +1,705 @@
+[
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3000,
+    "keeper_name": "the wizard",
+    "room_vnum": 3033,
+    "room_name": "The Magic Shop",
+    "buy_types": [
+      "2",
+      "3",
+      "4",
+      "10"
+    ],
+    "profit_buy": 105,
+    "profit_sell": 15,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3001,
+    "keeper_name": "the baker",
+    "room_vnum": 3009,
+    "room_name": "The Bakery",
+    "buy_types": [],
+    "profit_buy": 110,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3002,
+    "keeper_name": "the grocer",
+    "room_vnum": 3010,
+    "room_name": "The General Store",
+    "buy_types": [
+      "1",
+      "8",
+      "13",
+      "15",
+      "19"
+    ],
+    "profit_buy": 150,
+    "profit_sell": 40,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3003,
+    "keeper_name": "the weaponsmith",
+    "room_vnum": 3011,
+    "room_name": "The Weapon Shop",
+    "buy_types": [
+      "5",
+      "6",
+      "7"
+    ],
+    "profit_buy": 130,
+    "profit_sell": 40,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3004,
+    "keeper_name": "the armourer",
+    "room_vnum": 3020,
+    "room_name": "The Armoury",
+    "buy_types": [
+      "9"
+    ],
+    "profit_buy": 100,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3006,
+    "keeper_name": "the captain",
+    "room_vnum": 3049,
+    "room_name": "Levee",
+    "buy_types": [
+      "22",
+      "18"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 90,
+    "hours": "6:00 - 22:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3008,
+    "keeper_name": "the pet shop boy",
+    "room_vnum": null,
+    "room_name": null,
+    "buy_types": [],
+    "profit_buy": 100,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3009,
+    "keeper_name": "the jeweller",
+    "room_vnum": 3034,
+    "room_name": "The Jeweller's Shop",
+    "buy_types": [
+      "8"
+    ],
+    "profit_buy": 150,
+    "profit_sell": 50,
+    "hours": "9:00 - 17:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3010,
+    "keeper_name": "the leather worker",
+    "room_vnum": 3035,
+    "room_name": "The Leather Shop",
+    "buy_types": [
+      "9"
+    ],
+    "profit_buy": 110,
+    "profit_sell": 90,
+    "hours": "8:00 - 21:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3040,
+    "keeper_name": "the bartender",
+    "room_vnum": 3007,
+    "room_name": "The Grunting Boar",
+    "buy_types": [],
+    "profit_buy": 110,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3042,
+    "keeper_name": "the waiter",
+    "room_vnum": 3018,
+    "room_name": "Mage's Bar",
+    "buy_types": [],
+    "profit_buy": 100,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3043,
+    "keeper_name": "the waiter",
+    "room_vnum": 3003,
+    "room_name": "Cleric's Bar",
+    "buy_types": [],
+    "profit_buy": 110,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3044,
+    "keeper_name": "the waiter",
+    "room_vnum": 3028,
+    "room_name": "The Thieves Bar",
+    "buy_types": [],
+    "profit_buy": 170,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3045,
+    "keeper_name": "the waiter",
+    "room_vnum": 3022,
+    "room_name": "The Bar of Swordsmen",
+    "buy_types": [],
+    "profit_buy": 150,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3046,
+    "keeper_name": "Filthy",
+    "room_vnum": 3048,
+    "room_name": "Grubby Inn",
+    "buy_types": [],
+    "profit_buy": 100,
+    "profit_sell": 90,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3050,
+    "keeper_name": "Aod the Dealer",
+    "room_vnum": 3025,
+    "room_name": "The Common Square",
+    "buy_types": [],
+    "profit_buy": 100,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "midgaard",
+    "area_name": "Midgaard",
+    "keeper_vnum": 3100,
+    "keeper_name": "the maid",
+    "room_vnum": 3106,
+    "room_name": "Park Cafe",
+    "buy_types": [],
+    "profit_buy": 110,
+    "profit_sell": 90,
+    "hours": "6:00 - 23:00"
+  },
+  {
+    "area_id": "atlantis",
+    "area_name": "Atlantis",
+    "keeper_vnum": 8116,
+    "keeper_name": "Mage Marid",
+    "room_vnum": 8136,
+    "room_name": "The Potions Shop",
+    "buy_types": [
+      "10"
+    ],
+    "profit_buy": 105,
+    "profit_sell": 75,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "atlantis",
+    "area_name": "Atlantis",
+    "keeper_vnum": 8117,
+    "keeper_name": "Sophia",
+    "room_vnum": 8137,
+    "room_name": "The Pub",
+    "buy_types": [
+      "19"
+    ],
+    "profit_buy": 105,
+    "profit_sell": 40,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "atlantis",
+    "area_name": "Atlantis",
+    "keeper_vnum": 8118,
+    "keeper_name": "Bruce the Fishman",
+    "room_vnum": 8138,
+    "room_name": "The Fish Store",
+    "buy_types": [],
+    "profit_buy": 105,
+    "profit_sell": 60,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "plains",
+    "area_name": "Plains of the North",
+    "keeper_vnum": 306,
+    "keeper_name": "Luxan",
+    "room_vnum": null,
+    "room_name": null,
+    "buy_types": [
+      "1",
+      "10",
+      "11",
+      "19"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 60,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "plains",
+    "area_name": "Plains of the North",
+    "keeper_vnum": 308,
+    "keeper_name": "the Innkeeper",
+    "room_vnum": null,
+    "room_name": null,
+    "buy_types": [],
+    "profit_buy": 110,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ultima",
+    "area_name": "Ultima",
+    "keeper_vnum": 2468,
+    "keeper_name": "the armourer",
+    "room_vnum": 2503,
+    "room_name": "The Armourer",
+    "buy_types": [
+      "9"
+    ],
+    "profit_buy": 110,
+    "profit_sell": 90,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ultima",
+    "area_name": "Ultima",
+    "keeper_vnum": 2469,
+    "keeper_name": "the weaponseller",
+    "room_vnum": 2505,
+    "room_name": "The Weaponsmith",
+    "buy_types": [
+      "5"
+    ],
+    "profit_buy": 110,
+    "profit_sell": 90,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ultima",
+    "area_name": "Ultima",
+    "keeper_vnum": 2470,
+    "keeper_name": "the boatseller",
+    "room_vnum": 2506,
+    "room_name": "The Boatseller",
+    "buy_types": [
+      "22"
+    ],
+    "profit_buy": 110,
+    "profit_sell": 90,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ofcol2",
+    "area_name": "New Ofcol",
+    "keeper_vnum": 604,
+    "keeper_name": "Jim the Blacksmith",
+    "room_vnum": 603,
+    "room_name": "The Blacksmith",
+    "buy_types": [
+      "5",
+      "9",
+      "15"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 80,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ofcol2",
+    "area_name": "New Ofcol",
+    "keeper_vnum": 605,
+    "keeper_name": "Sam",
+    "room_vnum": 604,
+    "room_name": "The Leather Shop",
+    "buy_types": [
+      "9"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 80,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ofcol2",
+    "area_name": "New Ofcol",
+    "keeper_vnum": 606,
+    "keeper_name": "Madam Tracy",
+    "room_vnum": 606,
+    "room_name": "The Pawn Shop.",
+    "buy_types": [
+      "8",
+      "12",
+      "13"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 80,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ofcol2",
+    "area_name": "New Ofcol",
+    "keeper_vnum": 607,
+    "keeper_name": "Marty",
+    "room_vnum": 607,
+    "room_name": "The Meat Store",
+    "buy_types": [
+      "19"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 10,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ofcol2",
+    "area_name": "New Ofcol",
+    "keeper_vnum": 608,
+    "keeper_name": "Farmer Elizabeth",
+    "room_vnum": 610,
+    "room_name": "Farmer's Market",
+    "buy_types": [
+      "17",
+      "19"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 10,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "ofcol2",
+    "area_name": "New Ofcol",
+    "keeper_vnum": 622,
+    "keeper_name": "Nyles the Bartender",
+    "room_vnum": 609,
+    "room_name": "Nyles' House of Ale",
+    "buy_types": [
+      "17"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 10,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "hitower",
+    "area_name": "High Tower of Sorcery",
+    "keeper_vnum": 1305,
+    "keeper_name": "Strick the bartender",
+    "room_vnum": 1318,
+    "room_name": "Mages Tavern",
+    "buy_types": [
+      "17",
+      "19"
+    ],
+    "profit_buy": 210,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "hitower",
+    "area_name": "High Tower of Sorcery",
+    "keeper_vnum": 1306,
+    "keeper_name": "Tatorious",
+    "room_vnum": 1319,
+    "room_name": "The Magic Shop",
+    "buy_types": [
+      "2",
+      "3",
+      "4",
+      "10",
+      "21"
+    ],
+    "profit_buy": 250,
+    "profit_sell": 30,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "olympus",
+    "area_name": "Olympus",
+    "keeper_vnum": 915,
+    "keeper_name": "Julius the Green Grocer",
+    "room_vnum": 924,
+    "room_name": "Bakery",
+    "buy_types": [
+      "1",
+      "8",
+      "13",
+      "15",
+      "19"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 80,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "shire",
+    "area_name": "The Shire",
+    "keeper_vnum": 1113,
+    "keeper_name": "the Innkeeper",
+    "room_vnum": 1116,
+    "room_name": "The Ivy Bush",
+    "buy_types": [
+      "17"
+    ],
+    "profit_buy": 150,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "shire",
+    "area_name": "The Shire",
+    "keeper_vnum": 1118,
+    "keeper_name": "the shopkeeper",
+    "room_vnum": 1105,
+    "room_name": "The General Store",
+    "buy_types": [
+      "13",
+      "5",
+      "15",
+      "1",
+      "17"
+    ],
+    "profit_buy": 150,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "shire",
+    "area_name": "The Shire",
+    "keeper_vnum": 1119,
+    "keeper_name": "the grocer",
+    "room_vnum": 1121,
+    "room_name": "The Grocer's Delight",
+    "buy_types": [
+      "13",
+      "5",
+      "15",
+      "1",
+      "17"
+    ],
+    "profit_buy": 150,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "shire",
+    "area_name": "The Shire",
+    "keeper_vnum": 1120,
+    "keeper_name": "the blacksmith",
+    "room_vnum": 1107,
+    "room_name": "The House of Arms",
+    "buy_types": [
+      "9",
+      "5"
+    ],
+    "profit_buy": 150,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "shire",
+    "area_name": "The Shire",
+    "keeper_vnum": 1130,
+    "keeper_name": "the Innkeeper",
+    "room_vnum": 1144,
+    "room_name": "The Green Dragon",
+    "buy_types": [
+      "17"
+    ],
+    "profit_buy": 150,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "school",
+    "area_name": "Mud School",
+    "keeper_vnum": 3717,
+    "keeper_name": "the adept of Frag",
+    "room_vnum": 3718,
+    "room_name": "The Store in Mud School",
+    "buy_types": [
+      "1",
+      "15",
+      "17",
+      "19"
+    ],
+    "profit_buy": 100,
+    "profit_sell": 100,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "mirror",
+    "area_name": "Old Thalos",
+    "keeper_vnum": 5310,
+    "keeper_name": "Dan the Barkeep",
+    "room_vnum": 5330,
+    "room_name": "The Tavern of the Sun",
+    "buy_types": [],
+    "profit_buy": 120,
+    "profit_sell": 90,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "mirror",
+    "area_name": "Old Thalos",
+    "keeper_vnum": 5311,
+    "keeper_name": "George the Butcher",
+    "room_vnum": 5317,
+    "room_name": "The meat stand",
+    "buy_types": [
+      "5",
+      "17",
+      "19"
+    ],
+    "profit_buy": 110,
+    "profit_sell": 90,
+    "hours": "6:00 - 20:00"
+  },
+  {
+    "area_id": "mirror",
+    "area_name": "Old Thalos",
+    "keeper_vnum": 5312,
+    "keeper_name": "Farmer Betty",
+    "room_vnum": 5320,
+    "room_name": "The produce stand",
+    "buy_types": [
+      "19"
+    ],
+    "profit_buy": 110,
+    "profit_sell": 90,
+    "hours": "7:00 - 19:00"
+  },
+  {
+    "area_id": "mirror",
+    "area_name": "Old Thalos",
+    "keeper_vnum": 5313,
+    "keeper_name": "Thaellor the dwarf",
+    "room_vnum": 5329,
+    "room_name": "A busy shop",
+    "buy_types": [
+      "5",
+      "9"
+    ],
+    "profit_buy": 130,
+    "profit_sell": 70,
+    "hours": "5:00 - 21:00"
+  },
+  {
+    "area_id": "mirror",
+    "area_name": "Old Thalos",
+    "keeper_vnum": 5314,
+    "keeper_name": "Ben the Smith",
+    "room_vnum": 5321,
+    "room_name": "The smithy",
+    "buy_types": [
+      "1",
+      "8",
+      "12",
+      "13",
+      "22"
+    ],
+    "profit_buy": 135,
+    "profit_sell": 65,
+    "hours": "8:00 - 18:00"
+  },
+  {
+    "area_id": "mirror",
+    "area_name": "Old Thalos",
+    "keeper_vnum": 5317,
+    "keeper_name": "an old wizard",
+    "room_vnum": 5338,
+    "room_name": "The Library Addition",
+    "buy_types": [
+      "2",
+      "3",
+      "4",
+      "10"
+    ],
+    "profit_buy": 120,
+    "profit_sell": 50,
+    "hours": "9:00 - 17:00"
+  },
+  {
+    "area_id": "dwarven",
+    "area_name": "Dwarven Kingdom",
+    "keeper_vnum": 6503,
+    "keeper_name": "the storekeeper",
+    "room_vnum": 6516,
+    "room_name": "Hide & Tooth Shop",
+    "buy_types": [],
+    "profit_buy": 150,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "dwarven",
+    "area_name": "Dwarven Kingdom",
+    "keeper_vnum": 6504,
+    "keeper_name": "the baker",
+    "room_vnum": 6535,
+    "room_name": "Granite Head's Bakery",
+    "buy_types": [],
+    "profit_buy": 150,
+    "profit_sell": 50,
+    "hours": "0:00 - 23:00"
+  },
+  {
+    "area_id": "canyon",
+    "area_name": "Elemental Canyon",
+    "keeper_vnum": 9238,
+    "keeper_name": "the elixir vendor",
+    "room_vnum": 9203,
+    "room_name": "Mountainside Tombs",
+    "buy_types": [],
+    "profit_buy": 105,
+    "profit_sell": 15,
+    "hours": "0:00 - 23:00"
+  }
+]

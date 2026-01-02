@@ -1,0 +1,11852 @@
+[
+  {
+    "from_vnum": 14083,
+    "to_vnum": 14083,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 14100,
+    "to_vnum": 14009,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -18,
+      16,
+      0
+    ]
+  },
+  {
+    "from_vnum": 19169,
+    "to_vnum": 19170,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -6,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 19170,
+    "to_vnum": 19169,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      6,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31067,
+    "to_vnum": 31068,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31067,
+    "to_vnum": 31068,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31067,
+    "to_vnum": 31070,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31068,
+    "to_vnum": 31067,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31068,
+    "to_vnum": 31069,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31068,
+    "to_vnum": 31069,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31069,
+    "to_vnum": 31068,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31069,
+    "to_vnum": 31070,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31069,
+    "to_vnum": 31070,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31070,
+    "to_vnum": 31067,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31070,
+    "to_vnum": 31069,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31070,
+    "to_vnum": 31067,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31098,
+    "to_vnum": 31099,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31099,
+    "to_vnum": 31098,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11161,
+    "to_vnum": 11164,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11161,
+    "to_vnum": 11168,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11162,
+    "to_vnum": 11163,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11162,
+    "to_vnum": 11167,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      4,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11163,
+    "to_vnum": 11162,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11163,
+    "to_vnum": 11166,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11164,
+    "to_vnum": 11161,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11166,
+    "to_vnum": 11170,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11166,
+    "to_vnum": 11163,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11166,
+    "to_vnum": 11167,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11167,
+    "to_vnum": 11166,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11167,
+    "to_vnum": 11162,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11167,
+    "to_vnum": 11169,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11168,
+    "to_vnum": 11172,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11168,
+    "to_vnum": 11161,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11169,
+    "to_vnum": 11167,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      5,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11169,
+    "to_vnum": 11172,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11170,
+    "to_vnum": 11166,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      4,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11170,
+    "to_vnum": 11171,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11171,
+    "to_vnum": 11170,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11172,
+    "to_vnum": 11168,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 11172,
+    "to_vnum": 11169,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31161,
+    "to_vnum": 31164,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31161,
+    "to_vnum": 31168,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31162,
+    "to_vnum": 31163,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31162,
+    "to_vnum": 31167,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      4,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31163,
+    "to_vnum": 31162,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31163,
+    "to_vnum": 31166,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31164,
+    "to_vnum": 31161,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31166,
+    "to_vnum": 31170,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31166,
+    "to_vnum": 31163,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31166,
+    "to_vnum": 31167,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31167,
+    "to_vnum": 31166,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31167,
+    "to_vnum": 31162,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31167,
+    "to_vnum": 31169,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31168,
+    "to_vnum": 31172,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31168,
+    "to_vnum": 31161,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31169,
+    "to_vnum": 31167,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      5,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31169,
+    "to_vnum": 31172,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31170,
+    "to_vnum": 31166,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      4,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31170,
+    "to_vnum": 31171,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31171,
+    "to_vnum": 31170,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31172,
+    "to_vnum": 31168,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 31172,
+    "to_vnum": 31169,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3003,
+    "to_vnum": 3004,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      6,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3004,
+    "to_vnum": 3003,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -6,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3004,
+    "to_vnum": 3005,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3005,
+    "to_vnum": 3004,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      5,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3006,
+    "to_vnum": 3007,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3007,
+    "to_vnum": 3006,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3012,
+    "to_vnum": 3033,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -8,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3012,
+    "to_vnum": 3013,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -7,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3012,
+    "to_vnum": 3017,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -8,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3013,
+    "to_vnum": 3012,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      7,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3017,
+    "to_vnum": 3012,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      8,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3021,
+    "to_vnum": 3022,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3022,
+    "to_vnum": 3021,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3024,
+    "to_vnum": 3025,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3024,
+    "to_vnum": 3048,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -6,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3024,
+    "to_vnum": 3044,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3025,
+    "to_vnum": 3024,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      5,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3026,
+    "to_vnum": 3045,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3026,
+    "to_vnum": 3027,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3027,
+    "to_vnum": 3026,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      4,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3033,
+    "to_vnum": 3012,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      8,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3035,
+    "to_vnum": 3044,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      9,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3041,
+    "to_vnum": 3053,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3042,
+    "to_vnum": 3043,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      11,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3043,
+    "to_vnum": 3042,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -11,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3043,
+    "to_vnum": 3044,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3043,
+    "to_vnum": 3047,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -11,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3044,
+    "to_vnum": 3035,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -9,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3044,
+    "to_vnum": 3024,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3044,
+    "to_vnum": 3043,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3045,
+    "to_vnum": 3049,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3045,
+    "to_vnum": 3026,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3047,
+    "to_vnum": 3043,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      11,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3048,
+    "to_vnum": 3024,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      6,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3049,
+    "to_vnum": 3045,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3049,
+    "to_vnum": 3203,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3053,
+    "to_vnum": 3041,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3102,
+    "to_vnum": 3103,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3102,
+    "to_vnum": 3105,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -10,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3103,
+    "to_vnum": 3102,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3104,
+    "to_vnum": 3130,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -6,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3105,
+    "to_vnum": 3102,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      10,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3105,
+    "to_vnum": 3106,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3106,
+    "to_vnum": 3105,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3107,
+    "to_vnum": 3113,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      5,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3113,
+    "to_vnum": 3107,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3114,
+    "to_vnum": 3115,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3115,
+    "to_vnum": 3116,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      5,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3115,
+    "to_vnum": 3114,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3116,
+    "to_vnum": 3115,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3120,
+    "to_vnum": 3133,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      6,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3120,
+    "to_vnum": 3136,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      15,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3120,
+    "to_vnum": 3134,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      14,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3130,
+    "to_vnum": 3104,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      6,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3133,
+    "to_vnum": 3120,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -6,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3134,
+    "to_vnum": 3120,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -14,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3136,
+    "to_vnum": 3120,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -15,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3203,
+    "to_vnum": 3049,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8102,
+    "to_vnum": 8103,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8103,
+    "to_vnum": 8102,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8104,
+    "to_vnum": 8107,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8105,
+    "to_vnum": 8108,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8105,
+    "to_vnum": 8110,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8106,
+    "to_vnum": 8109,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8107,
+    "to_vnum": 8104,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8108,
+    "to_vnum": 8105,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8108,
+    "to_vnum": 8109,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8109,
+    "to_vnum": 8108,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8109,
+    "to_vnum": 8106,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 116,
+    "to_vnum": 117,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 117,
+    "to_vnum": 116,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 302,
+    "to_vnum": 303,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 303,
+    "to_vnum": 302,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 304,
+    "to_vnum": 305,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 305,
+    "to_vnum": 306,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 305,
+    "to_vnum": 321,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 305,
+    "to_vnum": 304,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 306,
+    "to_vnum": 326,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 306,
+    "to_vnum": 307,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 306,
+    "to_vnum": 305,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 307,
+    "to_vnum": 306,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 308,
+    "to_vnum": 309,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 309,
+    "to_vnum": 308,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 312,
+    "to_vnum": 313,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 313,
+    "to_vnum": 312,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 321,
+    "to_vnum": 338,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 321,
+    "to_vnum": 305,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 325,
+    "to_vnum": 326,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 326,
+    "to_vnum": 306,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 326,
+    "to_vnum": 325,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 338,
+    "to_vnum": 321,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2437,
+    "to_vnum": 2444,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2444,
+    "to_vnum": 2437,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2444,
+    "to_vnum": 2445,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2445,
+    "to_vnum": 2444,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2469,
+    "to_vnum": 2470,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2470,
+    "to_vnum": 2455,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2471,
+    "to_vnum": 2476,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2471,
+    "to_vnum": 2470,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2472,
+    "to_vnum": 2471,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2472,
+    "to_vnum": 2482,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2472,
+    "to_vnum": 2475,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2473,
+    "to_vnum": 2469,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2473,
+    "to_vnum": 2483,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -10,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2473,
+    "to_vnum": 2474,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2473,
+    "to_vnum": 2472,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2474,
+    "to_vnum": 2473,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2474,
+    "to_vnum": 2475,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2474,
+    "to_vnum": 2478,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2474,
+    "to_vnum": 2483,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -9,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2475,
+    "to_vnum": 2482,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2475,
+    "to_vnum": 2472,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2476,
+    "to_vnum": 2481,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2476,
+    "to_vnum": 2471,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2477,
+    "to_vnum": 2478,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      9,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2477,
+    "to_vnum": 2470,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      8,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2478,
+    "to_vnum": 2469,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2478,
+    "to_vnum": 2479,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -10,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2478,
+    "to_vnum": 2477,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -9,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2479,
+    "to_vnum": 2480,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2479,
+    "to_vnum": 2469,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      10,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2479,
+    "to_vnum": 2478,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      10,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2480,
+    "to_vnum": 2481,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      12,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2480,
+    "to_vnum": 2479,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2481,
+    "to_vnum": 2471,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2481,
+    "to_vnum": 2480,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -12,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2481,
+    "to_vnum": 2476,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2482,
+    "to_vnum": 2483,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -11,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2482,
+    "to_vnum": 2475,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2482,
+    "to_vnum": 2472,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2483,
+    "to_vnum": 2473,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      10,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2483,
+    "to_vnum": 2482,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      11,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2483,
+    "to_vnum": 2479,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2483,
+    "to_vnum": 2474,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      9,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2484,
+    "to_vnum": 2480,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2518,
+    "to_vnum": 2584,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2519,
+    "to_vnum": 2518,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2519,
+    "to_vnum": 2520,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2520,
+    "to_vnum": 2519,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2520,
+    "to_vnum": 2518,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2521,
+    "to_vnum": 2522,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2521,
+    "to_vnum": 2523,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2521,
+    "to_vnum": 2518,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2522,
+    "to_vnum": 2523,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2522,
+    "to_vnum": 2525,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      4,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2522,
+    "to_vnum": 2521,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2523,
+    "to_vnum": 2522,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2523,
+    "to_vnum": 2526,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2523,
+    "to_vnum": 2521,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2524,
+    "to_vnum": 2526,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2524,
+    "to_vnum": 2525,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      5,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2524,
+    "to_vnum": 2521,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2525,
+    "to_vnum": 2519,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2525,
+    "to_vnum": 2522,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2525,
+    "to_vnum": 2524,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2525,
+    "to_vnum": 2526,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -6,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2526,
+    "to_vnum": 2520,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2526,
+    "to_vnum": 2524,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2526,
+    "to_vnum": 2523,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2526,
+    "to_vnum": 2525,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      6,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2527,
+    "to_vnum": 2524,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -7,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 600,
+    "to_vnum": 616,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      10,
+      0
+    ]
+  },
+  {
+    "from_vnum": 608,
+    "to_vnum": 611,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 611,
+    "to_vnum": 608,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 611,
+    "to_vnum": 668,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 616,
+    "to_vnum": 600,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -10,
+      0
+    ]
+  },
+  {
+    "from_vnum": 625,
+    "to_vnum": 629,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      4,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 626,
+    "to_vnum": 628,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 628,
+    "to_vnum": 626,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 629,
+    "to_vnum": 625,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 632,
+    "to_vnum": 635,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 633,
+    "to_vnum": 634,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 634,
+    "to_vnum": 633,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 635,
+    "to_vnum": 632,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 635,
+    "to_vnum": 636,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 636,
+    "to_vnum": 635,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      4,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 637,
+    "to_vnum": 640,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      5,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 638,
+    "to_vnum": 639,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 639,
+    "to_vnum": 638,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 640,
+    "to_vnum": 637,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 640,
+    "to_vnum": 641,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -6,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 641,
+    "to_vnum": 640,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      6,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 668,
+    "to_vnum": 611,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 669,
+    "to_vnum": 670,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 670,
+    "to_vnum": 675,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 670,
+    "to_vnum": 669,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 673,
+    "to_vnum": 684,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 675,
+    "to_vnum": 670,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 678,
+    "to_vnum": 680,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 680,
+    "to_vnum": 678,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 682,
+    "to_vnum": 685,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 684,
+    "to_vnum": 673,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 685,
+    "to_vnum": 682,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 695,
+    "to_vnum": 695,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1301,
+    "to_vnum": 1302,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1301,
+    "to_vnum": 1304,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1301,
+    "to_vnum": 1303,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1302,
+    "to_vnum": 1303,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1302,
+    "to_vnum": 1301,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1303,
+    "to_vnum": 1301,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1303,
+    "to_vnum": 1306,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1303,
+    "to_vnum": 1302,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1304,
+    "to_vnum": 1301,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1306,
+    "to_vnum": 1303,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1307,
+    "to_vnum": 1309,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1309,
+    "to_vnum": 1307,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1438,
+    "to_vnum": 1442,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1439,
+    "to_vnum": 1440,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1440,
+    "to_vnum": 1441,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1440,
+    "to_vnum": 1439,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1440,
+    "to_vnum": 1442,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1441,
+    "to_vnum": 1442,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1441,
+    "to_vnum": 1440,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1442,
+    "to_vnum": 1438,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1442,
+    "to_vnum": 1440,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1442,
+    "to_vnum": 1441,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 916,
+    "to_vnum": 917,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 916,
+    "to_vnum": 931,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 916,
+    "to_vnum": 932,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 917,
+    "to_vnum": 916,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 931,
+    "to_vnum": 916,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 932,
+    "to_vnum": 916,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 934,
+    "to_vnum": 937,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 934,
+    "to_vnum": 936,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 934,
+    "to_vnum": 935,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 935,
+    "to_vnum": 934,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 936,
+    "to_vnum": 934,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 937,
+    "to_vnum": 934,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 937,
+    "to_vnum": 938,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 938,
+    "to_vnum": 937,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1149,
+    "to_vnum": 1151,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      6,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1151,
+    "to_vnum": 1149,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -6,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1549,
+    "to_vnum": 1550,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 1550,
+    "to_vnum": 1549,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2013,
+    "to_vnum": 2069,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      6,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2033,
+    "to_vnum": 2029,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2040,
+    "to_vnum": 2048,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2046,
+    "to_vnum": 2047,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 2047,
+    "to_vnum": 2046,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 2048,
+    "to_vnum": 2040,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2048,
+    "to_vnum": 2056,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2054,
+    "to_vnum": 2066,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      8,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2054,
+    "to_vnum": 2059,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2055,
+    "to_vnum": 2062,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2056,
+    "to_vnum": 2048,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2057,
+    "to_vnum": 2066,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      8,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2058,
+    "to_vnum": 2059,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2059,
+    "to_vnum": 2054,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2059,
+    "to_vnum": 2060,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2059,
+    "to_vnum": 2058,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2060,
+    "to_vnum": 2059,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2062,
+    "to_vnum": 2055,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2332,
+    "to_vnum": 2337,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2332,
+    "to_vnum": 2334,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2333,
+    "to_vnum": 2333,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2333,
+    "to_vnum": 2333,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2334,
+    "to_vnum": 2338,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2334,
+    "to_vnum": 2332,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2334,
+    "to_vnum": 2336,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2336,
+    "to_vnum": 2334,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2336,
+    "to_vnum": 2338,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2337,
+    "to_vnum": 2332,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2337,
+    "to_vnum": 2338,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2338,
+    "to_vnum": 2336,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2338,
+    "to_vnum": 2337,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2338,
+    "to_vnum": 2334,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2352,
+    "to_vnum": 2354,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2354,
+    "to_vnum": 2356,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2354,
+    "to_vnum": 2352,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2355,
+    "to_vnum": 2357,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2355,
+    "to_vnum": 2356,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2356,
+    "to_vnum": 2354,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2356,
+    "to_vnum": 2355,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2356,
+    "to_vnum": 2359,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2357,
+    "to_vnum": 2355,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2357,
+    "to_vnum": 2358,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2358,
+    "to_vnum": 2359,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2358,
+    "to_vnum": 2357,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2359,
+    "to_vnum": 2356,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2359,
+    "to_vnum": 2358,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 3721,
+    "to_vnum": 3722,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -9,
+      2
+    ]
+  },
+  {
+    "from_vnum": 5014,
+    "to_vnum": 5015,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      1
+    ]
+  },
+  {
+    "from_vnum": 5015,
+    "to_vnum": 5014,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 5021,
+    "to_vnum": 5022,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      1
+    ]
+  },
+  {
+    "from_vnum": 5022,
+    "to_vnum": 5021,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 5024,
+    "to_vnum": 5030,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5025,
+    "to_vnum": 5026,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5026,
+    "to_vnum": 5032,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5026,
+    "to_vnum": 5029,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5026,
+    "to_vnum": 5025,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5029,
+    "to_vnum": 5026,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5029,
+    "to_vnum": 5032,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5030,
+    "to_vnum": 5024,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5031,
+    "to_vnum": 5032,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5032,
+    "to_vnum": 5029,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5032,
+    "to_vnum": 5026,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5032,
+    "to_vnum": 5031,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5070,
+    "to_vnum": 5009,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 2600,
+    "to_vnum": 2600,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2600,
+    "to_vnum": 2600,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2603,
+    "to_vnum": 2602,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2603,
+    "to_vnum": 2607,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 2604,
+    "to_vnum": 2605,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2604,
+    "to_vnum": 2602,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2604,
+    "to_vnum": 2607,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 2605,
+    "to_vnum": 2603,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2605,
+    "to_vnum": 2604,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2605,
+    "to_vnum": 2607,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 2606,
+    "to_vnum": 2607,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2606,
+    "to_vnum": 2605,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 2606,
+    "to_vnum": 2607,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2606,
+    "to_vnum": 2607,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2635,
+    "to_vnum": 2636,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2636,
+    "to_vnum": 2635,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2637,
+    "to_vnum": 2612,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 2638,
+    "to_vnum": 2637,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2649,
+    "to_vnum": 2648,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2654,
+    "to_vnum": 2654,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2654,
+    "to_vnum": 2653,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2654,
+    "to_vnum": 2654,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2655,
+    "to_vnum": 2654,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2655,
+    "to_vnum": 2655,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2655,
+    "to_vnum": 2655,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2656,
+    "to_vnum": 2656,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2656,
+    "to_vnum": 2657,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2656,
+    "to_vnum": 2656,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2656,
+    "to_vnum": 2655,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -6,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2657,
+    "to_vnum": 2657,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2657,
+    "to_vnum": 2656,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2657,
+    "to_vnum": 2657,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2658,
+    "to_vnum": 2657,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2658,
+    "to_vnum": 2659,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 2659,
+    "to_vnum": 2653,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5130,
+    "to_vnum": 5134,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -6,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5134,
+    "to_vnum": 5130,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      6,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5142,
+    "to_vnum": 5141,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5144,
+    "to_vnum": 5145,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5144,
+    "to_vnum": 5141,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5145,
+    "to_vnum": 5142,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5145,
+    "to_vnum": 5144,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5207,
+    "to_vnum": 5220,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -11,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5207,
+    "to_vnum": 5208,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -11,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5208,
+    "to_vnum": 5222,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5208,
+    "to_vnum": 5207,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      11,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5208,
+    "to_vnum": 5217,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5209,
+    "to_vnum": 5210,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5210,
+    "to_vnum": 5209,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5210,
+    "to_vnum": 5244,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5210,
+    "to_vnum": 5211,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5211,
+    "to_vnum": 5210,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5211,
+    "to_vnum": 5237,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      5,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5211,
+    "to_vnum": 5227,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5213,
+    "to_vnum": 5214,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5214,
+    "to_vnum": 5213,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5217,
+    "to_vnum": 5208,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5220,
+    "to_vnum": 5207,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      11,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5222,
+    "to_vnum": 5208,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5227,
+    "to_vnum": 5211,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5233,
+    "to_vnum": 5234,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5234,
+    "to_vnum": 5233,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5237,
+    "to_vnum": 5238,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5237,
+    "to_vnum": 5211,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5238,
+    "to_vnum": 5237,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5244,
+    "to_vnum": 5210,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5307,
+    "to_vnum": 5320,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -9,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5307,
+    "to_vnum": 5308,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -9,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5308,
+    "to_vnum": 5322,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5308,
+    "to_vnum": 5307,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      9,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5308,
+    "to_vnum": 5317,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5309,
+    "to_vnum": 5310,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5310,
+    "to_vnum": 5309,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5310,
+    "to_vnum": 5344,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5310,
+    "to_vnum": 5326,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5311,
+    "to_vnum": 5337,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      5,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5311,
+    "to_vnum": 5327,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5313,
+    "to_vnum": 5314,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5314,
+    "to_vnum": 5313,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5317,
+    "to_vnum": 5308,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5320,
+    "to_vnum": 5307,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      9,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5322,
+    "to_vnum": 5308,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5326,
+    "to_vnum": 5310,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5327,
+    "to_vnum": 5311,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5333,
+    "to_vnum": 5334,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5334,
+    "to_vnum": 5333,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5337,
+    "to_vnum": 5338,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5337,
+    "to_vnum": 5311,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5338,
+    "to_vnum": 5337,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5344,
+    "to_vnum": 5310,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5375,
+    "to_vnum": 5378,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5375,
+    "to_vnum": 5376,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 5376,
+    "to_vnum": 5377,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5376,
+    "to_vnum": 5376,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5376,
+    "to_vnum": 5377,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5376,
+    "to_vnum": 5376,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5376,
+    "to_vnum": 5375,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 5377,
+    "to_vnum": 5376,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5377,
+    "to_vnum": 5377,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5377,
+    "to_vnum": 5376,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5377,
+    "to_vnum": 5377,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5377,
+    "to_vnum": 5378,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 5378,
+    "to_vnum": 5375,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5378,
+    "to_vnum": 5377,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 5380,
+    "to_vnum": 5381,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 5381,
+    "to_vnum": 5380,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 6325,
+    "to_vnum": 6324,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 6368,
+    "to_vnum": 6369,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 6369,
+    "to_vnum": 6368,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      4,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 6549,
+    "to_vnum": 6548,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7005,
+    "to_vnum": 7011,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7009,
+    "to_vnum": 7017,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      5,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7011,
+    "to_vnum": 7024,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7011,
+    "to_vnum": 7005,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7016,
+    "to_vnum": 7017,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7017,
+    "to_vnum": 7016,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7017,
+    "to_vnum": 7009,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -5,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7024,
+    "to_vnum": 7011,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7029,
+    "to_vnum": 7035,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7029,
+    "to_vnum": 7030,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7030,
+    "to_vnum": 7029,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7035,
+    "to_vnum": 7029,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7052,
+    "to_vnum": 7053,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7053,
+    "to_vnum": 7052,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7056,
+    "to_vnum": 7057,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      5,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7057,
+    "to_vnum": 7056,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -5,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7064,
+    "to_vnum": 7069,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7064,
+    "to_vnum": 7065,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7065,
+    "to_vnum": 7064,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7069,
+    "to_vnum": 7064,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7107,
+    "to_vnum": 7190,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7108,
+    "to_vnum": 7190,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7109,
+    "to_vnum": 7190,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7117,
+    "to_vnum": 7114,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7118,
+    "to_vnum": 7114,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7120,
+    "to_vnum": 7123,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      5,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7120,
+    "to_vnum": 7114,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7123,
+    "to_vnum": 7120,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -5,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7406,
+    "to_vnum": 7407,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7407,
+    "to_vnum": 7406,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7428,
+    "to_vnum": 7429,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7429,
+    "to_vnum": 7428,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7856,
+    "to_vnum": 7857,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7857,
+    "to_vnum": 7856,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7859,
+    "to_vnum": 7860,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7860,
+    "to_vnum": 7859,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8311,
+    "to_vnum": 8313,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8312,
+    "to_vnum": 8313,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8313,
+    "to_vnum": 8311,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8313,
+    "to_vnum": 8314,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8313,
+    "to_vnum": 8312,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8314,
+    "to_vnum": 8313,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8601,
+    "to_vnum": 8602,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8602,
+    "to_vnum": 8601,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8603,
+    "to_vnum": 8606,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8604,
+    "to_vnum": 8605,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8604,
+    "to_vnum": 8607,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8605,
+    "to_vnum": 8608,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8605,
+    "to_vnum": 8604,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8606,
+    "to_vnum": 8603,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8607,
+    "to_vnum": 8604,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8607,
+    "to_vnum": 8608,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8608,
+    "to_vnum": 8605,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8608,
+    "to_vnum": 8607,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8610,
+    "to_vnum": 8613,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8610,
+    "to_vnum": 8620,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8611,
+    "to_vnum": 8630,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8611,
+    "to_vnum": 8612,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8611,
+    "to_vnum": 8614,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8611,
+    "to_vnum": 8621,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8612,
+    "to_vnum": 8615,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8612,
+    "to_vnum": 8611,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8612,
+    "to_vnum": 8622,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8613,
+    "to_vnum": 8610,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8613,
+    "to_vnum": 8614,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8613,
+    "to_vnum": 8636,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8613,
+    "to_vnum": 8623,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8614,
+    "to_vnum": 8611,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8614,
+    "to_vnum": 8615,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8614,
+    "to_vnum": 8617,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8614,
+    "to_vnum": 8613,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8614,
+    "to_vnum": 8624,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8615,
+    "to_vnum": 8612,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8615,
+    "to_vnum": 8632,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8615,
+    "to_vnum": 8614,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8615,
+    "to_vnum": 8625,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8616,
+    "to_vnum": 8626,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8617,
+    "to_vnum": 8614,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8617,
+    "to_vnum": 8618,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8617,
+    "to_vnum": 8634,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8617,
+    "to_vnum": 8627,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8618,
+    "to_vnum": 8617,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8618,
+    "to_vnum": 8628,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 8620,
+    "to_vnum": 8610,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8621,
+    "to_vnum": 8622,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8621,
+    "to_vnum": 8611,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      1,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8622,
+    "to_vnum": 8621,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8622,
+    "to_vnum": 8612,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8623,
+    "to_vnum": 8626,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8623,
+    "to_vnum": 8613,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      3,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8624,
+    "to_vnum": 8625,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8624,
+    "to_vnum": 8627,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8624,
+    "to_vnum": 8614,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8625,
+    "to_vnum": 8628,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8625,
+    "to_vnum": 8624,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8625,
+    "to_vnum": 8615,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      3,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8626,
+    "to_vnum": 8623,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8626,
+    "to_vnum": 8616,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8627,
+    "to_vnum": 8624,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8627,
+    "to_vnum": 8628,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8627,
+    "to_vnum": 8617,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      1,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8628,
+    "to_vnum": 8625,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8628,
+    "to_vnum": 8627,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8628,
+    "to_vnum": 8618,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 8630,
+    "to_vnum": 8611,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8632,
+    "to_vnum": 8615,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8634,
+    "to_vnum": 8617,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8636,
+    "to_vnum": 8613,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8913,
+    "to_vnum": 8915,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8913,
+    "to_vnum": 8916,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8915,
+    "to_vnum": 8913,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 8916,
+    "to_vnum": 8913,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9106,
+    "to_vnum": 9107,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9107,
+    "to_vnum": 9106,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9146,
+    "to_vnum": 9147,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 9146,
+    "to_vnum": 9144,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 9147,
+    "to_vnum": 9146,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 9169,
+    "to_vnum": 9170,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9170,
+    "to_vnum": 9169,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9177,
+    "to_vnum": 9178,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      4,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9178,
+    "to_vnum": 9177,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9178,
+    "to_vnum": 9179,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -5,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9179,
+    "to_vnum": 9178,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      5,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9304,
+    "to_vnum": 9305,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9304,
+    "to_vnum": 9322,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9305,
+    "to_vnum": 9304,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9309,
+    "to_vnum": 9314,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9313,
+    "to_vnum": 9314,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9314,
+    "to_vnum": 9318,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9314,
+    "to_vnum": 9313,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9314,
+    "to_vnum": 9309,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9317,
+    "to_vnum": 9318,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9318,
+    "to_vnum": 9317,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9318,
+    "to_vnum": 9314,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9319,
+    "to_vnum": 9320,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9319,
+    "to_vnum": 9320,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9319,
+    "to_vnum": 9320,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9322,
+    "to_vnum": 9304,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9326,
+    "to_vnum": 9327,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9327,
+    "to_vnum": 9326,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9329,
+    "to_vnum": 9330,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9330,
+    "to_vnum": 9329,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9330,
+    "to_vnum": 9333,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9330,
+    "to_vnum": 9331,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9331,
+    "to_vnum": 9330,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9333,
+    "to_vnum": 9330,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9367,
+    "to_vnum": 9368,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 9368,
+    "to_vnum": 9367,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 30324,
+    "to_vnum": 30324,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7708,
+    "to_vnum": 7710,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7708,
+    "to_vnum": 7712,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7709,
+    "to_vnum": 7714,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7709,
+    "to_vnum": 7710,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7709,
+    "to_vnum": 7711,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7710,
+    "to_vnum": 7708,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7710,
+    "to_vnum": 7713,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7710,
+    "to_vnum": 7709,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7711,
+    "to_vnum": 7716,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7711,
+    "to_vnum": 7712,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 7711,
+    "to_vnum": 7709,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      1,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7712,
+    "to_vnum": 7717,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 7712,
+    "to_vnum": 7708,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7712,
+    "to_vnum": 7711,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      2
+    ]
+  },
+  {
+    "from_vnum": 7712,
+    "to_vnum": 7715,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7713,
+    "to_vnum": 7715,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7713,
+    "to_vnum": 7714,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7713,
+    "to_vnum": 7710,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7714,
+    "to_vnum": 7717,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      2
+    ]
+  },
+  {
+    "from_vnum": 7714,
+    "to_vnum": 7709,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7714,
+    "to_vnum": 7718,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7714,
+    "to_vnum": 7713,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      0,
+      1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7715,
+    "to_vnum": 7722,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7715,
+    "to_vnum": 7713,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7715,
+    "to_vnum": 7712,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7715,
+    "to_vnum": 7716,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7716,
+    "to_vnum": 7719,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      5,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7716,
+    "to_vnum": 7711,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7716,
+    "to_vnum": 7715,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7716,
+    "to_vnum": 7717,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -3,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7717,
+    "to_vnum": 7722,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      3,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7717,
+    "to_vnum": 7712,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 7717,
+    "to_vnum": 7714,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 7717,
+    "to_vnum": 7716,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      3,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7718,
+    "to_vnum": 7709,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7718,
+    "to_vnum": 7714,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7718,
+    "to_vnum": 7719,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7719,
+    "to_vnum": 7710,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -5,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7719,
+    "to_vnum": 7718,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7719,
+    "to_vnum": 7716,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      -5,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7720,
+    "to_vnum": 7711,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -2,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7720,
+    "to_vnum": 7721,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7721,
+    "to_vnum": 7712,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7721,
+    "to_vnum": 7720,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7721,
+    "to_vnum": 7733,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -2,
+      2,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7722,
+    "to_vnum": 7712,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -3,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7722,
+    "to_vnum": 7717,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -3,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7722,
+    "to_vnum": 7715,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7722,
+    "to_vnum": 7734,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7723,
+    "to_vnum": 7724,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7723,
+    "to_vnum": 7728,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      -2
+    ]
+  },
+  {
+    "from_vnum": 7723,
+    "to_vnum": 7737,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      -3
+    ]
+  },
+  {
+    "from_vnum": 7723,
+    "to_vnum": 7726,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7723,
+    "to_vnum": 7732,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7724,
+    "to_vnum": 7725,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7724,
+    "to_vnum": 7729,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7724,
+    "to_vnum": 7723,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7724,
+    "to_vnum": 7730,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7725,
+    "to_vnum": 7741,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7725,
+    "to_vnum": 7727,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7725,
+    "to_vnum": 7724,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7725,
+    "to_vnum": 7728,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7725,
+    "to_vnum": 7730,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -2,
+      1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7726,
+    "to_vnum": 7731,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7726,
+    "to_vnum": 7723,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7726,
+    "to_vnum": 7727,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7726,
+    "to_vnum": 7743,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7726,
+    "to_vnum": 7729,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      2,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7727,
+    "to_vnum": 7726,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7727,
+    "to_vnum": 7732,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7727,
+    "to_vnum": 7725,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7727,
+    "to_vnum": 7731,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      2,
+      -3,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7727,
+    "to_vnum": 7744,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      1,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7728,
+    "to_vnum": 7709,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7728,
+    "to_vnum": 7747,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7728,
+    "to_vnum": 7723,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      2
+    ]
+  },
+  {
+    "from_vnum": 7728,
+    "to_vnum": 7725,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7729,
+    "to_vnum": 7730,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7729,
+    "to_vnum": 7749,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7729,
+    "to_vnum": 7735,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7729,
+    "to_vnum": 7724,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7729,
+    "to_vnum": 7726,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -2,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7730,
+    "to_vnum": 7729,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7730,
+    "to_vnum": 7725,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      2,
+      -1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7730,
+    "to_vnum": 7724,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7731,
+    "to_vnum": 7732,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -4,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7731,
+    "to_vnum": 7734,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7731,
+    "to_vnum": 7726,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -2,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7731,
+    "to_vnum": 7746,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -3,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7731,
+    "to_vnum": 7727,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -2,
+      3,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7732,
+    "to_vnum": 7749,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7732,
+    "to_vnum": 7731,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      4,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7732,
+    "to_vnum": 7727,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7732,
+    "to_vnum": 7723,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      1,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7733,
+    "to_vnum": 7721,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      2,
+      -2,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7734,
+    "to_vnum": 7731,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7734,
+    "to_vnum": 7722,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7735,
+    "to_vnum": 7729,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7737,
+    "to_vnum": 7723,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      3
+    ]
+  },
+  {
+    "from_vnum": 7741,
+    "to_vnum": 7725,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7742,
+    "to_vnum": 7743,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7743,
+    "to_vnum": 7742,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7743,
+    "to_vnum": 7726,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      2,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7744,
+    "to_vnum": 7727,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -1,
+      4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7745,
+    "to_vnum": 7746,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7745,
+    "to_vnum": 7749,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      3,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7746,
+    "to_vnum": 7733,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7746,
+    "to_vnum": 7745,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7746,
+    "to_vnum": 7747,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7746,
+    "to_vnum": 7731,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      3,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7747,
+    "to_vnum": 7734,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -2,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7747,
+    "to_vnum": 7746,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7747,
+    "to_vnum": 7728,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7747,
+    "to_vnum": 7748,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7748,
+    "to_vnum": 7735,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7748,
+    "to_vnum": 7749,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      3,
+      2,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7748,
+    "to_vnum": 7747,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      1,
+      2,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 7749,
+    "to_vnum": 7748,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -2,
+      1
+    ]
+  },
+  {
+    "from_vnum": 7749,
+    "to_vnum": 7745,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7749,
+    "to_vnum": 7732,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -3,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7749,
+    "to_vnum": 7729,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7756,
+    "to_vnum": 7757,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7757,
+    "to_vnum": 7756,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7768,
+    "to_vnum": 7768,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 7768,
+    "to_vnum": 7768,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 99014,
+    "to_vnum": 99000,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      1,
+      -4,
+      0
+    ]
+  },
+  {
+    "from_vnum": 99023,
+    "to_vnum": 99000,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      6,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 99040,
+    "to_vnum": 99000,
+    "direction": "down",
+    "expected_dir": [
+      0,
+      0,
+      -1
+    ],
+    "actual_offset": [
+      -6,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 99049,
+    "to_vnum": 99000,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -1,
+      6,
+      0
+    ]
+  },
+  {
+    "from_vnum": 30527,
+    "to_vnum": 30523,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 80072,
+    "to_vnum": 80001,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      0,
+      0,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 80083,
+    "to_vnum": 80001,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      4,
+      6,
+      -1
+    ]
+  },
+  {
+    "from_vnum": 93047,
+    "to_vnum": 93050,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 93050,
+    "to_vnum": 93047,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 50041,
+    "to_vnum": 50042,
+    "direction": "up",
+    "expected_dir": [
+      0,
+      0,
+      1
+    ],
+    "actual_offset": [
+      -7,
+      -3,
+      -3
+    ]
+  },
+  {
+    "from_vnum": 32012,
+    "to_vnum": 32013,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32013,
+    "to_vnum": 32014,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32013,
+    "to_vnum": 32012,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32015,
+    "to_vnum": 32014,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      7,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32021,
+    "to_vnum": 32020,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32021,
+    "to_vnum": 32022,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32022,
+    "to_vnum": 32021,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32026,
+    "to_vnum": 32027,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32027,
+    "to_vnum": 32026,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32033,
+    "to_vnum": 32029,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32033,
+    "to_vnum": 32034,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32034,
+    "to_vnum": 32033,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32037,
+    "to_vnum": 32038,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32038,
+    "to_vnum": 32037,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32038,
+    "to_vnum": 32039,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32042,
+    "to_vnum": 32043,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32042,
+    "to_vnum": 32044,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32043,
+    "to_vnum": 32042,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32044,
+    "to_vnum": 32042,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32045,
+    "to_vnum": 32046,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32045,
+    "to_vnum": 32047,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32046,
+    "to_vnum": 32045,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32047,
+    "to_vnum": 32045,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32049,
+    "to_vnum": 32050,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32050,
+    "to_vnum": 32051,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32050,
+    "to_vnum": 32049,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -1,
+      0
+    ]
+  },
+  {
+    "from_vnum": 32056,
+    "to_vnum": 32014,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -7,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77004,
+    "to_vnum": 77005,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77005,
+    "to_vnum": 77004,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      1,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77015,
+    "to_vnum": 77017,
+    "direction": "north",
+    "expected_dir": [
+      0,
+      1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77015,
+    "to_vnum": 77016,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      -3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77016,
+    "to_vnum": 77015,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      3,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77017,
+    "to_vnum": 77015,
+    "direction": "south",
+    "expected_dir": [
+      0,
+      -1,
+      0
+    ],
+    "actual_offset": [
+      0,
+      2,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77017,
+    "to_vnum": 77025,
+    "direction": "west",
+    "expected_dir": [
+      -1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77025,
+    "to_vnum": 77017,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      -1,
+      0,
+      0
+    ]
+  },
+  {
+    "from_vnum": 77032,
+    "to_vnum": 77027,
+    "direction": "east",
+    "expected_dir": [
+      1,
+      0,
+      0
+    ],
+    "actual_offset": [
+      0,
+      -3,
+      0
+    ]
+  }
+]

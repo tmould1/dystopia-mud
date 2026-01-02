@@ -1,0 +1,389 @@
+/* Dystopia MUD Map Viewer Styles */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    min-height: 100vh;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Header */
+.header {
+    background: #16213e;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #0f3460;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    color: #4a90d9;
+}
+
+.nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav a {
+    color: #aaa;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.nav a:hover {
+    color: #fff;
+    background: #0f3460;
+}
+
+.nav a.active {
+    color: #4a90d9;
+    background: #0f3460;
+}
+
+/* Toolbar */
+.toolbar {
+    background: #16213e;
+    padding: 0.75rem 2rem;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #0f3460;
+}
+
+.search-box {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-box input {
+    padding: 0.5rem 1rem;
+    border: 1px solid #0f3460;
+    border-radius: 4px;
+    background: #1a1a2e;
+    color: #eee;
+    width: 200px;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #4a90d9;
+}
+
+.search-box button,
+.z-level-controls button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background: #4a90d9;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.search-box button:hover,
+.z-level-controls button:hover {
+    background: #357abd;
+}
+
+.area-selector {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.area-selector select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #0f3460;
+    border-radius: 4px;
+    background: #1a1a2e;
+    color: #eee;
+    min-width: 200px;
+}
+
+.z-level-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.z-level-controls button {
+    padding: 0.5rem 0.75rem;
+    min-width: 40px;
+}
+
+#z-level {
+    min-width: 40px;
+    text-align: center;
+}
+
+.text-size-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.text-size-controls input[type="range"] {
+    width: 100px;
+    cursor: pointer;
+}
+
+#text-size-value {
+    min-width: 35px;
+    text-align: center;
+    color: #aaa;
+}
+
+.warped-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.warped-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.warped-toggle input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.stats {
+    margin-left: auto;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* Main Content */
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.graph-container {
+    flex: 1;
+    background: #0d1117;
+    position: relative;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 300px;
+    background: #16213e;
+    padding: 1rem;
+    overflow-y: auto;
+    border-left: 1px solid #0f3460;
+}
+
+.sidebar h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #4a90d9;
+    border-bottom: 1px solid #0f3460;
+    padding-bottom: 0.5rem;
+}
+
+#area-info, #room-info {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+#area-info p, #room-info p {
+    margin-bottom: 0.5rem;
+}
+
+#area-info strong, #room-info strong {
+    color: #4a90d9;
+}
+
+.info-label {
+    color: #888;
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 0.75rem;
+}
+
+.info-value {
+    color: #eee;
+}
+
+.exit-list {
+    list-style: none;
+    margin-top: 0.5rem;
+}
+
+.exit-list li {
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+}
+
+.exit-list .one-way {
+    color: #f0ad4e;
+}
+
+.exit-list .warped {
+    color: #d9534f;
+}
+
+.area-stats {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #0f3460;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+}
+
+.stat-item .label {
+    color: #888;
+}
+
+.stat-item .value {
+    color: #eee;
+}
+
+/* Legend */
+.legend {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    background: rgba(22, 33, 62, 0.95);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #0f3460;
+    max-width: 200px;
+    z-index: 100;
+}
+
+.legend h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: #4a90d9;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    color: #aaa;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legend-line {
+    width: 20px;
+    height: 2px;
+    flex-shrink: 0;
+}
+
+.legend-line.solid {
+    background: #888;
+}
+
+.legend-line.dashed {
+    background: repeating-linear-gradient(
+        90deg,
+        #f0ad4e,
+        #f0ad4e 4px,
+        transparent 4px,
+        transparent 8px
+    );
+}
+
+.legend-line.dotted {
+    background: repeating-linear-gradient(
+        90deg,
+        #d9534f,
+        #d9534f 2px,
+        transparent 2px,
+        transparent 6px
+    );
+}
+
+/* View Area Button */
+.view-area-btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: #4a90d9;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.view-area-btn:hover {
+    background: #357abd;
+}
+
+/* Connections List */
+.connections-list {
+    margin-top: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.connection-item {
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+    color: #ccc;
+    border-bottom: 1px solid #0f3460;
+}
+
+.connection-item:last-child {
+    border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 250px;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .stats {
+        margin-left: 0;
+    }
+
+    .legend {
+        display: none;
+    }
+}

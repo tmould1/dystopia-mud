@@ -1,0 +1,1462 @@
+{
+  "nodes": [
+    {
+      "id": "kavir",
+      "name": "Odds and ends",
+      "filename": "kavir.are",
+      "room_count": 6,
+      "mob_count": 12,
+      "obj_count": 169,
+      "vnum_range": [
+        2,
+        30073
+      ],
+      "x": 1,
+      "y": 0
+    },
+    {
+      "id": "dragon2",
+      "name": "DragonSpyre",
+      "filename": "dragon2.are",
+      "room_count": 100,
+      "mob_count": 12,
+      "obj_count": 32,
+      "vnum_range": [
+        14001,
+        14100
+      ],
+      "x": 1,
+      "y": 1
+    },
+    {
+      "id": "dragonheart",
+      "name": "Castle Dragonheart",
+      "filename": "dragonheart.are",
+      "room_count": 96,
+      "mob_count": 14,
+      "obj_count": 9,
+      "vnum_range": [
+        19100,
+        19195
+      ],
+      "x": 0,
+      "y": 1
+    },
+    {
+      "id": "sunyata",
+      "name": "Sunyata",
+      "filename": "sunyata.are",
+      "room_count": 50,
+      "mob_count": 19,
+      "obj_count": 18,
+      "vnum_range": [
+        31050,
+        31100
+      ],
+      "x": 1,
+      "y": -1
+    },
+    {
+      "id": "eoeasy",
+      "name": "Easy Evil Ones",
+      "filename": "eoeasy.are",
+      "room_count": 75,
+      "mob_count": 39,
+      "obj_count": 48,
+      "vnum_range": [
+        11100,
+        11199
+      ],
+      "x": 6,
+      "y": 0
+    },
+    {
+      "id": "eohard",
+      "name": "Mountain of the Evil Ones",
+      "filename": "eohard.are",
+      "room_count": 75,
+      "mob_count": 29,
+      "obj_count": 48,
+      "vnum_range": [
+        31100,
+        31178
+      ],
+      "x": 8,
+      "y": 0
+    },
+    {
+      "id": "midgaard",
+      "name": "Midgaard",
+      "filename": "midgaard.are",
+      "room_count": 102,
+      "mob_count": 54,
+      "obj_count": 83,
+      "vnum_range": [
+        3000,
+        29503
+      ],
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "atlantis",
+      "name": "Atlantis",
+      "filename": "atlantis.are",
+      "room_count": 51,
+      "mob_count": 25,
+      "obj_count": 33,
+      "vnum_range": [
+        8100,
+        8150
+      ],
+      "x": -1,
+      "y": -1
+    },
+    {
+      "id": "air",
+      "name": "In the Air",
+      "filename": "air.are",
+      "room_count": 40,
+      "mob_count": 2,
+      "obj_count": 1,
+      "vnum_range": [
+        1000,
+        1040
+      ],
+      "x": 10,
+      "y": 0
+    },
+    {
+      "id": "limbo",
+      "name": "Limbo",
+      "filename": "limbo.are",
+      "room_count": 2,
+      "mob_count": 1,
+      "obj_count": 17,
+      "vnum_range": [
+        1,
+        89
+      ],
+      "x": 12,
+      "y": 0
+    },
+    {
+      "id": "smurf",
+      "name": "Smurf Village",
+      "filename": "smurf.are",
+      "room_count": 29,
+      "mob_count": 12,
+      "obj_count": 10,
+      "vnum_range": [
+        100,
+        129
+      ],
+      "x": 0,
+      "y": 2
+    },
+    {
+      "id": "plains",
+      "name": "Plains of the North",
+      "filename": "plains.are",
+      "room_count": 44,
+      "mob_count": 9,
+      "obj_count": 11,
+      "vnum_range": [
+        300,
+        350
+      ],
+      "x": 1,
+      "y": 2
+    },
+    {
+      "id": "ultima",
+      "name": "Ultima",
+      "filename": "ultima.are",
+      "room_count": 185,
+      "mob_count": 71,
+      "obj_count": 69,
+      "vnum_range": [
+        2400,
+        2584
+      ],
+      "x": 14,
+      "y": 0
+    },
+    {
+      "id": "ofcol2",
+      "name": "New Ofcol",
+      "filename": "ofcol2.are",
+      "room_count": 100,
+      "mob_count": 35,
+      "obj_count": 68,
+      "vnum_range": [
+        600,
+        699
+      ],
+      "x": 2,
+      "y": 0
+    },
+    {
+      "id": "hitower",
+      "name": "High Tower of Sorcery",
+      "filename": "hitower.are",
+      "room_count": 183,
+      "mob_count": 66,
+      "obj_count": 95,
+      "vnum_range": [
+        1300,
+        1499
+      ],
+      "x": 2,
+      "y": 1
+    },
+    {
+      "id": "olympus",
+      "name": "Olympus",
+      "filename": "olympus.are",
+      "room_count": 50,
+      "mob_count": 26,
+      "obj_count": 28,
+      "vnum_range": [
+        900,
+        954
+      ],
+      "x": 2,
+      "y": 2
+    },
+    {
+      "id": "shire",
+      "name": "The Shire",
+      "filename": "shire.are",
+      "room_count": 58,
+      "mob_count": 32,
+      "obj_count": 15,
+      "vnum_range": [
+        1100,
+        1157
+      ],
+      "x": -1,
+      "y": 0
+    },
+    {
+      "id": "gnome",
+      "name": "Gnome Village",
+      "filename": "gnome.are",
+      "room_count": 89,
+      "mob_count": 25,
+      "obj_count": 24,
+      "vnum_range": [
+        1500,
+        1590
+      ],
+      "x": 0,
+      "y": -2
+    },
+    {
+      "id": "wyvern",
+      "name": "Wyvern's Tower",
+      "filename": "wyvern.are",
+      "room_count": 61,
+      "mob_count": 28,
+      "obj_count": 21,
+      "vnum_range": [
+        1601,
+        1720
+      ],
+      "x": 2,
+      "y": -1
+    },
+    {
+      "id": "catacomb",
+      "name": "Dwarven Catacombs",
+      "filename": "catacomb.are",
+      "room_count": 69,
+      "mob_count": 17,
+      "obj_count": 16,
+      "vnum_range": [
+        2001,
+        2069
+      ],
+      "x": 16,
+      "y": 0
+    },
+    {
+      "id": "hood",
+      "name": "Dangerous Neighborhood",
+      "filename": "hood.are",
+      "room_count": 72,
+      "mob_count": 8,
+      "obj_count": 12,
+      "vnum_range": [
+        2101,
+        2172
+      ],
+      "x": 0,
+      "y": -1
+    },
+    {
+      "id": "draconia",
+      "name": "Dragon Tower",
+      "filename": "draconia.are",
+      "room_count": 44,
+      "mob_count": 19,
+      "obj_count": 40,
+      "vnum_range": [
+        2200,
+        2299
+      ],
+      "x": -1,
+      "y": 1
+    },
+    {
+      "id": "mahntor",
+      "name": "The Keep of Mahn-Tor",
+      "filename": "mahntor.are",
+      "room_count": 100,
+      "mob_count": 34,
+      "obj_count": 94,
+      "vnum_range": [
+        2300,
+        2399
+      ],
+      "x": 1,
+      "y": -2
+    },
+    {
+      "id": "trollden",
+      "name": "Troll Den",
+      "filename": "trollden.are",
+      "room_count": 5,
+      "mob_count": 9,
+      "obj_count": 6,
+      "vnum_range": [
+        2800,
+        2808
+      ],
+      "x": 2,
+      "y": -2
+    },
+    {
+      "id": "firenewt",
+      "name": "Land of the Fire Newts",
+      "filename": "firenewt.are",
+      "room_count": 32,
+      "mob_count": 14,
+      "obj_count": 12,
+      "vnum_range": [
+        2900,
+        2931
+      ],
+      "x": -1,
+      "y": -3
+    },
+    {
+      "id": "chapel",
+      "name": "Chapel Catacombs",
+      "filename": "chapel.are",
+      "room_count": 67,
+      "mob_count": 17,
+      "obj_count": 24,
+      "vnum_range": [
+        3400,
+        3475
+      ],
+      "x": -1,
+      "y": -2
+    },
+    {
+      "id": "midennir",
+      "name": "Miden'nir",
+      "filename": "midennir.are",
+      "room_count": 45,
+      "mob_count": 8,
+      "obj_count": 0,
+      "vnum_range": [
+        3500,
+        3584
+      ],
+      "x": 0,
+      "y": -3
+    },
+    {
+      "id": "grave",
+      "name": "Graveyard",
+      "filename": "grave.are",
+      "room_count": 33,
+      "mob_count": 6,
+      "obj_count": 10,
+      "vnum_range": [
+        3600,
+        3651
+      ],
+      "x": 1,
+      "y": -3
+    },
+    {
+      "id": "school",
+      "name": "Mud School",
+      "filename": "school.are",
+      "room_count": 59,
+      "mob_count": 21,
+      "obj_count": 17,
+      "vnum_range": [
+        3700,
+        3760
+      ],
+      "x": 18,
+      "y": 0
+    },
+    {
+      "id": "moria",
+      "name": "Moria",
+      "filename": "moria.are",
+      "room_count": 121,
+      "mob_count": 33,
+      "obj_count": 15,
+      "vnum_range": [
+        3900,
+        4172
+      ],
+      "x": -1,
+      "y": 2
+    },
+    {
+      "id": "juargan",
+      "name": "Kingdom of Juargan",
+      "filename": "juargan.are",
+      "room_count": 86,
+      "mob_count": 9,
+      "obj_count": 9,
+      "vnum_range": [
+        4700,
+        4785
+      ],
+      "x": 2,
+      "y": -3
+    },
+    {
+      "id": "eastern",
+      "name": "Great Eastern Desert",
+      "filename": "eastern.are",
+      "room_count": 47,
+      "mob_count": 17,
+      "obj_count": 32,
+      "vnum_range": [
+        5000,
+        5070
+      ],
+      "x": 3,
+      "y": -1
+    },
+    {
+      "id": "pyramid",
+      "name": "The Great Pyramid",
+      "filename": "pyramid.are",
+      "room_count": 60,
+      "mob_count": 18,
+      "obj_count": 28,
+      "vnum_range": [
+        2600,
+        2659
+      ],
+      "x": 3,
+      "y": 0
+    },
+    {
+      "id": "drow",
+      "name": "Drow City",
+      "filename": "drow.are",
+      "room_count": 51,
+      "mob_count": 12,
+      "obj_count": 15,
+      "vnum_range": [
+        5100,
+        5150
+      ],
+      "x": 20,
+      "y": 0
+    },
+    {
+      "id": "thalos",
+      "name": "Thalos",
+      "filename": "thalos.are",
+      "room_count": 80,
+      "mob_count": 9,
+      "obj_count": 39,
+      "vnum_range": [
+        5200,
+        5280
+      ],
+      "x": 3,
+      "y": -3
+    },
+    {
+      "id": "mirror",
+      "name": "Old Thalos",
+      "filename": "mirror.are",
+      "room_count": 86,
+      "mob_count": 35,
+      "obj_count": 31,
+      "vnum_range": [
+        5300,
+        5386
+      ],
+      "x": -1,
+      "y": 3
+    },
+    {
+      "id": "ofcol",
+      "name": "Ofcol",
+      "filename": "ofcol.are",
+      "room_count": 8,
+      "mob_count": 0,
+      "obj_count": 0,
+      "vnum_range": [
+        5550,
+        5577
+      ],
+      "x": 0,
+      "y": 3
+    },
+    {
+      "id": "arachnos",
+      "name": "Arachnos",
+      "filename": "arachnos.are",
+      "room_count": 56,
+      "mob_count": 19,
+      "obj_count": 4,
+      "vnum_range": [
+        6200,
+        6399
+      ],
+      "x": 1,
+      "y": 3
+    },
+    {
+      "id": "haon",
+      "name": "Haon Dor",
+      "filename": "haon.are",
+      "room_count": 71,
+      "mob_count": 12,
+      "obj_count": 21,
+      "vnum_range": [
+        6000,
+        6155
+      ],
+      "x": 3,
+      "y": -2
+    },
+    {
+      "id": "dwarven",
+      "name": "Dwarven Kingdom",
+      "filename": "dwarven.are",
+      "room_count": 50,
+      "mob_count": 18,
+      "obj_count": 15,
+      "vnum_range": [
+        6500,
+        6554
+      ],
+      "x": 2,
+      "y": 3
+    },
+    {
+      "id": "daycare",
+      "name": "Dwarven Day Care",
+      "filename": "daycare.are",
+      "room_count": 19,
+      "mob_count": 9,
+      "obj_count": 7,
+      "vnum_range": [
+        6600,
+        6647
+      ],
+      "x": 3,
+      "y": 1
+    },
+    {
+      "id": "sewer",
+      "name": "Sewer",
+      "filename": "sewer.are",
+      "room_count": 177,
+      "mob_count": 24,
+      "obj_count": 33,
+      "vnum_range": [
+        7000,
+        7445
+      ],
+      "x": 22,
+      "y": 0
+    },
+    {
+      "id": "valley",
+      "name": "Valley of the Elves",
+      "filename": "valley.are",
+      "room_count": 84,
+      "mob_count": 15,
+      "obj_count": 25,
+      "vnum_range": [
+        7800,
+        7883
+      ],
+      "x": 3,
+      "y": 2
+    },
+    {
+      "id": "redferne",
+      "name": "Redferne's Residence",
+      "filename": "redferne.are",
+      "room_count": 17,
+      "mob_count": 1,
+      "obj_count": 3,
+      "vnum_range": [
+        7900,
+        7918
+      ],
+      "x": 3,
+      "y": 3
+    },
+    {
+      "id": "mega1",
+      "name": "Mega-City One",
+      "filename": "mega1.are",
+      "room_count": 28,
+      "mob_count": 13,
+      "obj_count": 14,
+      "vnum_range": [
+        8000,
+        8028
+      ],
+      "x": -2,
+      "y": -4
+    },
+    {
+      "id": "marsh",
+      "name": "Old Marsh",
+      "filename": "marsh.are",
+      "room_count": 18,
+      "mob_count": 17,
+      "obj_count": 5,
+      "vnum_range": [
+        8301,
+        8321
+      ],
+      "x": -2,
+      "y": -3
+    },
+    {
+      "id": "dream",
+      "name": "Machine Dreams",
+      "filename": "dream.are",
+      "room_count": 36,
+      "mob_count": 1,
+      "obj_count": 4,
+      "vnum_range": [
+        8600,
+        8699
+      ],
+      "x": 24,
+      "y": 0
+    },
+    {
+      "id": "grove",
+      "name": "Holy Grove",
+      "filename": "grove.are",
+      "room_count": 20,
+      "mob_count": 11,
+      "obj_count": 14,
+      "vnum_range": [
+        8900,
+        8999
+      ],
+      "x": -2,
+      "y": -2
+    },
+    {
+      "id": "dylan",
+      "name": "Dylan's Area",
+      "filename": "dylan.are",
+      "room_count": 88,
+      "mob_count": 7,
+      "obj_count": 5,
+      "vnum_range": [
+        9101,
+        9199
+      ],
+      "x": -2,
+      "y": -1
+    },
+    {
+      "id": "canyon",
+      "name": "Elemental Canyon",
+      "filename": "canyon.are",
+      "room_count": 55,
+      "mob_count": 37,
+      "obj_count": 31,
+      "vnum_range": [
+        9201,
+        9260
+      ],
+      "x": -2,
+      "y": 0
+    },
+    {
+      "id": "galaxy",
+      "name": "Galaxy",
+      "filename": "galaxy.are",
+      "room_count": 61,
+      "mob_count": 32,
+      "obj_count": 27,
+      "vnum_range": [
+        9301,
+        9371
+      ],
+      "x": 4,
+      "y": -2
+    },
+    {
+      "id": "mobfact",
+      "name": "Mob Factory",
+      "filename": "mobfact.are",
+      "room_count": 25,
+      "mob_count": 7,
+      "obj_count": 0,
+      "vnum_range": [
+        9400,
+        9424
+      ],
+      "x": 4,
+      "y": -1
+    },
+    {
+      "id": "start",
+      "name": "The learning centre",
+      "filename": "start.are",
+      "room_count": 24,
+      "mob_count": 11,
+      "obj_count": 15,
+      "vnum_range": [
+        25000,
+        25023
+      ],
+      "x": 26,
+      "y": 0
+    },
+    {
+      "id": "quest",
+      "name": "Artifacts",
+      "filename": "quest.are",
+      "room_count": 3,
+      "mob_count": 0,
+      "obj_count": 13,
+      "vnum_range": [
+        333,
+        29599
+      ],
+      "x": 28,
+      "y": 0
+    },
+    {
+      "id": "doom",
+      "name": "Doom",
+      "filename": "doom.are",
+      "room_count": 56,
+      "mob_count": 12,
+      "obj_count": 16,
+      "vnum_range": [
+        11000,
+        11058
+      ],
+      "x": -2,
+      "y": 1
+    },
+    {
+      "id": "Vallanda",
+      "name": "Vallandar's Tomb",
+      "filename": "Vallanda.are",
+      "room_count": 29,
+      "mob_count": 9,
+      "obj_count": 32,
+      "vnum_range": [
+        30300,
+        30344
+      ],
+      "x": -2,
+      "y": 2
+    },
+    {
+      "id": "weed",
+      "name": "Cannabis",
+      "filename": "weed.are",
+      "room_count": 30,
+      "mob_count": 9,
+      "obj_count": 7,
+      "vnum_range": [
+        30232,
+        30261
+      ],
+      "x": -2,
+      "y": 3
+    },
+    {
+      "id": "arena",
+      "name": "The Arena",
+      "filename": "arena.are",
+      "room_count": 21,
+      "mob_count": 0,
+      "obj_count": 0,
+      "vnum_range": [
+        50,
+        70
+      ],
+      "x": -1,
+      "y": -4
+    },
+    {
+      "id": "astral",
+      "name": "Astral/Githyanki",
+      "filename": "astral.are",
+      "room_count": 80,
+      "mob_count": 20,
+      "obj_count": 25,
+      "vnum_range": [
+        7700,
+        7779
+      ],
+      "x": 30,
+      "y": 0
+    },
+    {
+      "id": "hell",
+      "name": "Jobo's Hell",
+      "filename": "hell.are",
+      "room_count": 52,
+      "mob_count": 12,
+      "obj_count": 2,
+      "vnum_range": [
+        30100,
+        30200
+      ],
+      "x": 32,
+      "y": 0
+    },
+    {
+      "id": "heaven",
+      "name": "Jobo's Heaven",
+      "filename": "heaven.are",
+      "room_count": 50,
+      "mob_count": 5,
+      "obj_count": 1,
+      "vnum_range": [
+        99000,
+        99100
+      ],
+      "x": 34,
+      "y": 0
+    },
+    {
+      "id": "dystopia",
+      "name": "Old Dystopia",
+      "filename": "dystopia.are",
+      "room_count": 101,
+      "mob_count": 20,
+      "obj_count": 2,
+      "vnum_range": [
+        30400,
+        30650
+      ],
+      "x": -2,
+      "y": 4
+    },
+    {
+      "id": "dawnjobo",
+      "name": "Realm of the Dawnbringers",
+      "filename": "dawnjobo.are",
+      "room_count": 69,
+      "mob_count": 6,
+      "obj_count": 0,
+      "vnum_range": [
+        80001,
+        80100
+      ],
+      "x": 36,
+      "y": 0
+    },
+    {
+      "id": "classeq",
+      "name": "Class EQ and other Relics",
+      "filename": "classeq.are",
+      "room_count": 1,
+      "mob_count": 4,
+      "obj_count": 256,
+      "vnum_range": [
+        33000,
+        34000
+      ],
+      "x": 38,
+      "y": 0
+    },
+    {
+      "id": "domeship",
+      "name": "Dome Ship StarSword",
+      "filename": "domeship.are",
+      "room_count": 121,
+      "mob_count": 30,
+      "obj_count": 20,
+      "vnum_range": [
+        93000,
+        93150
+      ],
+      "x": -1,
+      "y": 4
+    },
+    {
+      "id": "disney",
+      "name": "Disneyworld",
+      "filename": "disney.are",
+      "room_count": 63,
+      "mob_count": 29,
+      "obj_count": 9,
+      "vnum_range": [
+        50000,
+        50100
+      ],
+      "x": 40,
+      "y": 0
+    },
+    {
+      "id": "classhq",
+      "name": "Class HQ's",
+      "filename": "classhq.are",
+      "room_count": 121,
+      "mob_count": 23,
+      "obj_count": 4,
+      "vnum_range": [
+        93300,
+        93499
+      ],
+      "x": 0,
+      "y": -4
+    },
+    {
+      "id": "willaz1",
+      "name": "Lair of the black Dragon",
+      "filename": "willaz1.are",
+      "room_count": 101,
+      "mob_count": 14,
+      "obj_count": 9,
+      "vnum_range": [
+        32000,
+        32100
+      ],
+      "x": 42,
+      "y": 0
+    },
+    {
+      "id": "workshop",
+      "name": "Santa's Workshop",
+      "filename": "workshop.are",
+      "room_count": 35,
+      "mob_count": 18,
+      "obj_count": 8,
+      "vnum_range": [
+        50201,
+        50300
+      ],
+      "x": 44,
+      "y": 0
+    },
+    {
+      "id": "jatr1",
+      "name": "Village of Kakakaru",
+      "filename": "jatr1.are",
+      "room_count": 59,
+      "mob_count": 18,
+      "obj_count": 6,
+      "vnum_range": [
+        77001,
+        77100
+      ],
+      "x": 46,
+      "y": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "dragon2",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "south"
+    },
+    {
+      "from": "dragonheart",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "south"
+    },
+    {
+      "from": "sunyata",
+      "to": "kavir",
+      "connection_count": 3,
+      "one_way_count": 3,
+      "direction": "north"
+    },
+    {
+      "from": "eoeasy",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "down"
+    },
+    {
+      "from": "eohard",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "down"
+    },
+    {
+      "from": "midgaard",
+      "to": "kavir",
+      "connection_count": 3,
+      "one_way_count": 0,
+      "direction": "east"
+    },
+    {
+      "from": "midgaard",
+      "to": "heaven",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "up"
+    },
+    {
+      "from": "atlantis",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 2,
+      "direction": "east"
+    },
+    {
+      "from": "air",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "down"
+    },
+    {
+      "from": "smurf",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "plains",
+      "to": "kavir",
+      "connection_count": 5,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "ultima",
+      "to": "kavir",
+      "connection_count": 3,
+      "one_way_count": 2,
+      "direction": "up"
+    },
+    {
+      "from": "ofcol2",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "west"
+    },
+    {
+      "from": "hitower",
+      "to": "kavir",
+      "connection_count": 9,
+      "one_way_count": 6,
+      "direction": "south"
+    },
+    {
+      "from": "olympus",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "shire",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 1,
+      "direction": "south"
+    },
+    {
+      "from": "gnome",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "wyvern",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "west"
+    },
+    {
+      "from": "catacomb",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 0,
+      "direction": "up"
+    },
+    {
+      "from": "hood",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "draconia",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "east"
+    },
+    {
+      "from": "mahntor",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 1,
+      "direction": "north"
+    },
+    {
+      "from": "trollden",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "firenewt",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "chapel",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "midennir",
+      "to": "kavir",
+      "connection_count": 7,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "midennir",
+      "to": "dystopia",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "grave",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "school",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 1,
+      "direction": "down"
+    },
+    {
+      "from": "moria",
+      "to": "kavir",
+      "connection_count": 6,
+      "one_way_count": 1,
+      "direction": "south"
+    },
+    {
+      "from": "juargan",
+      "to": "weed",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "juargan",
+      "to": "kavir",
+      "connection_count": 3,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "eastern",
+      "to": "kavir",
+      "connection_count": 3,
+      "one_way_count": 1,
+      "direction": "west"
+    },
+    {
+      "from": "pyramid",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "west"
+    },
+    {
+      "from": "drow",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "up"
+    },
+    {
+      "from": "thalos",
+      "to": "willaz1",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "down"
+    },
+    {
+      "from": "thalos",
+      "to": "kavir",
+      "connection_count": 6,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "mirror",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "ofcol",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "arachnos",
+      "to": "kavir",
+      "connection_count": 3,
+      "one_way_count": 2,
+      "direction": "south"
+    },
+    {
+      "from": "haon",
+      "to": "kavir",
+      "connection_count": 7,
+      "one_way_count": 1,
+      "direction": "north"
+    },
+    {
+      "from": "haon",
+      "to": "domeship",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "haon",
+      "to": "hell",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "down"
+    },
+    {
+      "from": "dwarven",
+      "to": "kavir",
+      "connection_count": 4,
+      "one_way_count": 0,
+      "direction": "down"
+    },
+    {
+      "from": "daycare",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "sewer",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "up"
+    },
+    {
+      "from": "valley",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "redferne",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "mega1",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "marsh",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "dream",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "down"
+    },
+    {
+      "from": "grove",
+      "to": "Vallanda",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "grove",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "dylan",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 1,
+      "direction": "north"
+    },
+    {
+      "from": "canyon",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "north"
+    },
+    {
+      "from": "galaxy",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 1,
+      "direction": "west"
+    },
+    {
+      "from": "mobfact",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "west"
+    },
+    {
+      "from": "doom",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "Vallanda",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "weed",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "arena",
+      "to": "kavir",
+      "connection_count": 2,
+      "one_way_count": 2,
+      "direction": "north"
+    },
+    {
+      "from": "astral",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "down"
+    },
+    {
+      "from": "hell",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "up"
+    },
+    {
+      "from": "heaven",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 1,
+      "direction": "down"
+    },
+    {
+      "from": "dystopia",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "domeship",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "south"
+    },
+    {
+      "from": "classhq",
+      "to": "kavir",
+      "connection_count": 9,
+      "one_way_count": 9,
+      "direction": "down"
+    },
+    {
+      "from": "willaz1",
+      "to": "kavir",
+      "connection_count": 1,
+      "one_way_count": 0,
+      "direction": "up"
+    }
+  ]
+}

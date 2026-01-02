@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dystopia MUD - World Map</title>
+    <link rel="stylesheet" href="css/map.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>Dystopia MUD World Map</h1>
+            <nav class="nav">
+                <a href="index.html" class="active">World Overview</a>
+                <a href="area.html">Area Detail</a>
+                <a href="analysis.html">Analysis</a>
+            </nav>
+        </header>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search areas...">
+                <button id="search-btn">Search</button>
+            </div>
+            <div class="stats" id="stats">
+                Loading...
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="cy" class="graph-container"></div>
+
+            <div class="sidebar" id="sidebar">
+                <h2>Area Info</h2>
+                <div id="area-info">
+                    <p>Click an area node to see details.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #4a90d9;"></span>
+                <span>Area (size = room count)</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-line solid"></span>
+                <span>Bidirectional connection</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-line dashed"></span>
+                <span>One-way connection</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+    <script src="js/world-map.js"></script>
+</body>
+</html>

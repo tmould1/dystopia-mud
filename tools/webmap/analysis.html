@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dystopia MUD - Area Analysis</title>
+    <link rel="stylesheet" href="css/map.css">
+    <style>
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            height: calc(100vh - 120px);
+            overflow: hidden;
+        }
+
+        .area-list {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .area-list h2 {
+            font-size: 1.1rem;
+            color: #4a90d9;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #0f3460;
+            padding-bottom: 0.5rem;
+        }
+
+        .area-item {
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .area-item:hover {
+            background: #0f3460;
+        }
+
+        .area-item.active {
+            background: #4a90d9;
+        }
+
+        .area-item .name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .area-item .stats {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .analysis-content {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #0f3460;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+            color: #aaa;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .tab:hover {
+            background: #0f3460;
+            color: #fff;
+        }
+
+        .tab.active {
+            background: #4a90d9;
+            color: #fff;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-card {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .summary-card h3 {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a90d9;
+        }
+
+        .summary-card .sub {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 0.5rem;
+            background: #0d1117;
+            color: #4a90d9;
+            border-bottom: 2px solid #0f3460;
+            cursor: pointer;
+        }
+
+        .data-table th:hover {
+            background: #0f3460;
+        }
+
+        .data-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .data-table tr:hover {
+            background: #0f3460;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .tier-trivial { background: #2d4a3e; color: #7ed3a4; }
+        .tier-easy { background: #3d4a2d; color: #a4d37e; }
+        .tier-normal { background: #4a4a2d; color: #d3d37e; }
+        .tier-hard { background: #4a3a2d; color: #d3a47e; }
+        .tier-deadly { background: #4a2d2d; color: #d37e7e; }
+
+        .tier-junk { background: #3d3d3d; color: #888; }
+        .tier-common { background: #2d4a3e; color: #7ed3a4; }
+        .tier-uncommon { background: #2d4a4a; color: #7ed3d3; }
+        .tier-rare { background: #2d3d4a; color: #7ea4d3; }
+        .tier-epic { background: #3d2d4a; color: #a47ed3; }
+        .tier-legendary { background: #4a3d2d; color: #d3a47e; }
+
+        .distribution-bar {
+            display: flex;
+            height: 24px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .distribution-bar .segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+            min-width: 20px;
+        }
+
+        .search-box {
+            margin-bottom: 1rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #0d1117;
+            color: #eee;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            align-items: center;
+        }
+
+        .sort-controls label {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .sort-controls select {
+            flex: 1;
+            padding: 0.4rem;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #0d1117;
+            color: #eee;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .sort-controls select:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>Dystopia MUD Analysis</h1>
+            <nav class="nav">
+                <a href="index.html">World Overview</a>
+                <a href="area.html">Area Detail</a>
+                <a href="analysis.html" class="active">Analysis</a>
+            </nav>
+        </header>
+
+        <div class="analysis-grid">
+            <div class="area-list">
+                <h2>Areas</h2>
+                <div class="search-box">
+                    <input type="text" id="area-search" placeholder="Search areas...">
+                </div>
+                <div class="sort-controls">
+                    <label>Sort:</label>
+                    <select id="area-sort">
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="level-asc">Level (Low-High)</option>
+                        <option value="level-desc">Level (High-Low)</option>
+                        <option value="difficulty-asc">Difficulty (Low-High)</option>
+                        <option value="difficulty-desc">Difficulty (High-Low)</option>
+                        <option value="mobs-desc">Most Mobs</option>
+                        <option value="rooms-desc">Most Rooms</option>
+                    </select>
+                </div>
+                <div id="area-list-items">
+                    <p>Loading areas...</p>
+                </div>
+            </div>
+
+            <div class="analysis-content">
+                <div class="tabs">
+                    <button class="tab active" data-tab="summary">Summary</button>
+                    <button class="tab" data-tab="mobs">Mobs</button>
+                    <button class="tab" data-tab="objects">Objects</button>
+                    <button class="tab" data-tab="spawns">Spawns</button>
+                    <button class="tab" data-tab="rankings">Global Rankings</button>
+                </div>
+
+                <div id="tab-content">
+                    <p>Select an area to view analysis.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let analysisData = null;
+        let mobRankings = null;
+        let objectRankings = null;
+        let currentArea = null;
+        let currentTab = 'summary';
+        let currentSort = 'name-asc';
+
+        async function init() {
+            const listItems = document.getElementById('area-list-items');
+            try {
+                listItems.innerHTML = '<p>Fetching data...</p>';
+
+                const analysisRes = await fetch('data/analysis.json');
+                if (!analysisRes.ok) throw new Error(`analysis.json: ${analysisRes.status}`);
+                listItems.innerHTML = '<p>Parsing analysis.json...</p>';
+                analysisData = await analysisRes.json();
+
+                const mobRes = await fetch('data/mob_rankings.json');
+                if (!mobRes.ok) throw new Error(`mob_rankings.json: ${mobRes.status}`);
+                listItems.innerHTML = '<p>Parsing mob_rankings.json...</p>';
+                mobRankings = await mobRes.json();
+
+                const objRes = await fetch('data/object_rankings.json');
+                if (!objRes.ok) throw new Error(`object_rankings.json: ${objRes.status}`);
+                listItems.innerHTML = '<p>Parsing object_rankings.json...</p>';
+                objectRankings = await objRes.json();
+
+                listItems.innerHTML = '<p>Rendering...</p>';
+                renderAreaList();
+                setupEventListeners();
+
+                // Check URL for area parameter
+                const params = new URLSearchParams(window.location.search);
+                const areaId = params.get('area');
+                if (areaId && analysisData[areaId]) {
+                    selectArea(areaId);
+                }
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                listItems.innerHTML =
+                    `<p style="color: #ff4444;">Failed to load: ${error.message}</p>`;
+                document.getElementById('tab-content').innerHTML =
+                    '<p style="color: #ff4444;">Failed to load analysis data.</p>';
+            }
+        }
+
+        function renderAreaList() {
+            const container = document.getElementById('area-list-items');
+            let areas = Object.entries(analysisData);
+
+            // Apply sorting
+            const [sortField, sortDir] = currentSort.split('-');
+            areas.sort((a, b) => {
+                let valA, valB;
+                switch (sortField) {
+                    case 'name':
+                        valA = a[1].summary.name.toLowerCase();
+                        valB = b[1].summary.name.toLowerCase();
+                        return sortDir === 'asc'
+                            ? valA.localeCompare(valB)
+                            : valB.localeCompare(valA);
+                    case 'level':
+                        valA = a[1].summary.avg_mob_level || 0;
+                        valB = b[1].summary.avg_mob_level || 0;
+                        break;
+                    case 'difficulty':
+                        valA = a[1].summary.avg_difficulty || 0;
+                        valB = b[1].summary.avg_difficulty || 0;
+                        break;
+                    case 'mobs':
+                        valA = a[1].summary.mob_count || 0;
+                        valB = b[1].summary.mob_count || 0;
+                        break;
+                    case 'rooms':
+                        valA = a[1].summary.room_count || 0;
+                        valB = b[1].summary.room_count || 0;
+                        break;
+                    default:
+                        return 0;
+                }
+                return sortDir === 'asc' ? valA - valB : valB - valA;
+            });
+
+            // Apply search filter
+            const searchQuery = document.getElementById('area-search').value.toLowerCase();
+
+            container.innerHTML = areas.map(([id, data]) => {
+                const name = data.summary.name;
+                const hidden = searchQuery && !name.toLowerCase().includes(searchQuery);
+                return `
+                    <div class="area-item${currentArea === id ? ' active' : ''}"
+                         data-area="${id}"
+                         style="${hidden ? 'display:none' : ''}">
+                        <span class="name">${name}</span>
+                        <span class="stats">L${Math.round(data.summary.avg_mob_level || 0)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setupEventListeners() {
+            // Area selection
+            document.getElementById('area-list-items').addEventListener('click', (e) => {
+                const item = e.target.closest('.area-item');
+                if (item) {
+                    selectArea(item.dataset.area);
+                }
+            });
+
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentTab = tab.dataset.tab;
+                    renderContent();
+                });
+            });
+
+            // Area search
+            document.getElementById('area-search').addEventListener('input', () => {
+                renderAreaList();
+            });
+
+            // Area sort
+            document.getElementById('area-sort').addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                renderAreaList();
+            });
+        }
+
+        function selectArea(areaId) {
+            currentArea = areaId;
+
+            // Update active state
+            document.querySelectorAll('.area-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.area === areaId);
+            });
+
+            // Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('area', areaId);
+            window.history.replaceState({}, '', url);
+
+            renderContent();
+        }
+
+        function renderContent() {
+            const content = document.getElementById('tab-content');
+
+            if (currentTab === 'rankings') {
+                renderGlobalRankings(content);
+                return;
+            }
+
+            if (!currentArea || !analysisData[currentArea]) {
+                content.innerHTML = '<p>Select an area to view analysis.</p>';
+                return;
+            }
+
+            const data = analysisData[currentArea];
+
+            switch (currentTab) {
+                case 'summary':
+                    renderSummary(content, data);
+                    break;
+                case 'mobs':
+                    renderMobs(content, data);
+                    break;
+                case 'objects':
+                    renderObjects(content, data);
+                    break;
+                case 'spawns':
+                    renderSpawns(content, data);
+                    break;
+            }
+        }
+
+        function renderSummary(container, data) {
+            const s = data.summary;
+            const diffDist = s.difficulty_distribution;
+            const powerDist = s.power_distribution;
+
+            container.innerHTML = `
+                <h2>${s.name}</h2>
+
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Rooms</h3>
+                        <div class="value">${s.room_count}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Mobs</h3>
+                        <div class="value">${s.mob_count}</div>
+                        <div class="sub">Avg Level: ${s.avg_mob_level.toFixed(1)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Objects</h3>
+                        <div class="value">${s.object_count}</div>
+                        <div class="sub">Avg Power: ${s.avg_object_power.toFixed(1)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Avg Difficulty</h3>
+                        <div class="value">${s.avg_difficulty.toFixed(0)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Gold per Reset</h3>
+                        <div class="value">${s.total_gold_per_reset.toLocaleString()}</div>
+                    </div>
+                </div>
+
+                <h3>Mob Difficulty Distribution</h3>
+                <div class="distribution-bar">
+                    ${renderDistributionBar(diffDist, ['trivial', 'easy', 'normal', 'hard', 'deadly'])}
+                </div>
+
+                <h3 style="margin-top: 1rem;">Object Power Distribution</h3>
+                <div class="distribution-bar">
+                    ${renderDistributionBar(powerDist, ['junk', 'common', 'uncommon', 'rare', 'epic', 'legendary'])}
+                </div>
+
+                ${s.shops.length > 0 ? `
+                    <h3 style="margin-top: 1rem;">Shops (${s.shops.length})</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Keeper</th>
+                                <th>Buys</th>
+                                <th>Buy %</th>
+                                <th>Sell %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${s.shops.map(shop => `
+                                <tr>
+                                    <td>${shop.keeper_name}</td>
+                                    <td>${shop.buy_types.join(', ') || 'None'}</td>
+                                    <td>${shop.profit_buy}%</td>
+                                    <td>${shop.profit_sell}%</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                ` : ''}
+            `;
+        }
+
+        function renderDistributionBar(dist, order) {
+            const total = order.reduce((sum, key) => sum + (dist[key] || 0), 0);
+            if (total === 0) return '<span style="color: #666;">No data</span>';
+
+            const colors = {
+                trivial: '#2d4a3e', easy: '#3d4a2d', normal: '#4a4a2d', hard: '#4a3a2d', deadly: '#4a2d2d',
+                junk: '#3d3d3d', common: '#2d4a3e', uncommon: '#2d4a4a', rare: '#2d3d4a', epic: '#3d2d4a', legendary: '#4a3d2d'
+            };
+
+            return order.map(key => {
+                const count = dist[key] || 0;
+                if (count === 0) return '';
+                const pct = (count / total * 100).toFixed(0);
+                return `<div class="segment" style="width: ${pct}%; background: ${colors[key]};">${count}</div>`;
+            }).join('');
+        }
+
+        function renderMobs(container, data) {
+            const mobs = Object.values(data.mobs)
+                .sort((a, b) => b.difficulty_score - a.difficulty_score);
+
+            container.innerHTML = `
+                <h2>Mobs in ${data.summary.name}</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>VNUM</th>
+                            <th>Name</th>
+                            <th>Level</th>
+                            <th>Difficulty</th>
+                            <th>HP</th>
+                            <th>Damage</th>
+                            <th>AC</th>
+                            <th>Hit</th>
+                            <th>Flags</th>
+                            <th>Spawns</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mobs.map(mob => `
+                            <tr>
+                                <td>${mob.vnum}</td>
+                                <td>${mob.name}${formatMobBadges(mob)}</td>
+                                <td>${mob.level}</td>
+                                <td>
+                                    <span class="tier-badge tier-${mob.difficulty_tier}">
+                                        ${mob.difficulty_tier}
+                                    </span>
+                                    ${mob.difficulty_score.toFixed(0)}
+                                </td>
+                                <td>${mob.avg_hp.toLocaleString()}</td>
+                                <td>${mob.avg_damage}</td>
+                                <td>${mob.ac}</td>
+                                <td>${mob.hitroll}</td>
+                                <td>${formatMobFlags(mob)}</td>
+                                <td>${mob.spawn_count}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function formatMobBadges(mob) {
+            let badges = '';
+            if (mob.is_mount) badges += ' <span style="color:#7ed3d3;font-size:0.75rem">🐴</span>';
+            if (mob.has_sanctuary) badges += ' <span style="color:#d3d37e;font-size:0.75rem">🛡️</span>';
+            if (mob.is_aggressive) badges += ' <span style="color:#d37e7e;font-size:0.75rem">⚔️</span>';
+            if (mob.gives_no_exp) badges += ' <span style="color:#888;font-size:0.75rem">∅</span>';
+            return badges;
+        }
+
+        function formatMobFlags(mob) {
+            const flags = [];
+            // Show significant act flags
+            const significantAct = ['aggressive', 'sanctuary', 'mount', 'noexp', 'pet', 'sentinel'];
+            (mob.act_flags || []).forEach(f => {
+                if (significantAct.includes(f)) flags.push(f);
+            });
+            // Show all aff flags as they're combat relevant
+            (mob.aff_flags || []).forEach(f => {
+                flags.push(`<span style="color:#a47ed3">${f}</span>`);
+            });
+            return flags.length > 0 ? flags.join(', ') : '-';
+        }
+
+        function renderObjects(container, data) {
+            const objects = Object.values(data.objects)
+                .sort((a, b) => b.power_score - a.power_score);
+
+            container.innerHTML = `
+                <h2>Objects in ${data.summary.name}</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>VNUM</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Power</th>
+                            <th>Details</th>
+                            <th>Stats</th>
+                            <th>Wear</th>
+                            <th>Spawns</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${objects.map(obj => `
+                            <tr>
+                                <td>${obj.vnum}</td>
+                                <td>${obj.name}</td>
+                                <td>${obj.item_type}</td>
+                                <td>
+                                    <span class="tier-badge tier-${obj.power_tier}">
+                                        ${obj.power_tier}
+                                    </span>
+                                    ${obj.power_score.toFixed(0)}
+                                </td>
+                                <td>${formatItemDetails(obj)}</td>
+                                <td>${formatStats(obj.stats_summary)}</td>
+                                <td>${obj.wear_location || '-'}</td>
+                                <td>${obj.spawn_count}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function formatItemDetails(obj) {
+            if (obj.weapon) {
+                const w = obj.weapon;
+                let details = `${w.damage_min}-${w.damage_max} ${w.weapon_type}`;
+                if (w.spell) {
+                    details += ` <span style="color:#d97e7e">⚔${w.spell}</span>`;
+                }
+                if (w.affect) {
+                    details += ` <span style="color:#a47ed3">✨${w.affect}</span>`;
+                }
+                return details;
+            }
+            if (obj.armor) {
+                const a = obj.armor;
+                let details = `AC ${a.ac}`;
+                if (a.special) details += ` <span style="color:#7ed3d3">${a.special}</span>`;
+                return details;
+            }
+            return '-';
+        }
+
+        function renderSpawns(container, data) {
+            const spawns = data.spawns || {};
+            const mobSpawns = spawns.mob_spawns || [];
+            const objSpawns = spawns.obj_spawns || [];
+            const crossMobs = spawns.cross_area_mobs || [];
+            const crossObjs = spawns.cross_area_objs || [];
+
+            const hasCrossArea = crossMobs.length > 0 || crossObjs.length > 0;
+
+            container.innerHTML = `
+                <h2>Spawns in ${data.summary.name}</h2>
+
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Mob Resets</h3>
+                        <div class="value">${spawns.total_mob_resets || 0}</div>
+                        ${crossMobs.length > 0 ? `<div class="sub" style="color:#d3a47e">${crossMobs.length} from other areas</div>` : ''}
+                    </div>
+                    <div class="summary-card">
+                        <h3>Object Resets</h3>
+                        <div class="value">${spawns.total_obj_resets || 0}</div>
+                        ${crossObjs.length > 0 ? `<div class="sub" style="color:#d3a47e">${crossObjs.length} from other areas</div>` : ''}
+                    </div>
+                </div>
+
+                ${hasCrossArea ? `
+                    <h3 style="margin-top: 1rem; color: #d3a47e;">⚠ Cross-Area Spawns</h3>
+                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 1rem;">
+                        These mobs/objects are defined in other areas but spawn here.
+                    </p>
+
+                    ${crossMobs.length > 0 ? `
+                        <h4>Cross-Area Mobs (${crossMobs.length})</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>VNUM</th>
+                                    <th>Name</th>
+                                    <th>Level</th>
+                                    <th>Source Area</th>
+                                    <th>Spawns In</th>
+                                    <th>Max</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${crossMobs.map(mob => `
+                                    <tr>
+                                        <td>${mob.vnum}</td>
+                                        <td>${mob.name}</td>
+                                        <td>${mob.level}</td>
+                                        <td><a href="analysis.html?area=${mob.source_area}">${mob.source_area}</a></td>
+                                        <td>${mob.room_name} (#${mob.room_vnum})</td>
+                                        <td>${mob.max_count}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    ` : ''}
+
+                    ${crossObjs.length > 0 ? `
+                        <h4 style="margin-top: 1rem;">Cross-Area Objects (${crossObjs.length})</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>VNUM</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Source Area</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${crossObjs.map(obj => `
+                                    <tr>
+                                        <td>${obj.vnum}</td>
+                                        <td>${obj.name}</td>
+                                        <td>${obj.type}</td>
+                                        <td><a href="analysis.html?area=${obj.source_area}">${obj.source_area}</a></td>
+                                        <td>${formatSpawnLocation(obj)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    ` : ''}
+                ` : '<p style="color: #7ed3a4; margin-top: 1rem;">✓ All spawns in this area use locally-defined mobs and objects.</p>'}
+
+                <h3 style="margin-top: 2rem;">All Mob Spawns (${mobSpawns.length})</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>VNUM</th>
+                            <th>Name</th>
+                            <th>Level</th>
+                            <th>Room</th>
+                            <th>Max</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mobSpawns.map(mob => `
+                            <tr style="${mob.is_cross_area ? 'background: #4a3d2d20;' : ''}">
+                                <td>${mob.vnum}</td>
+                                <td>${mob.name}</td>
+                                <td>${mob.level}</td>
+                                <td>${mob.room_name} (#${mob.room_vnum})</td>
+                                <td>${mob.max_count}</td>
+                                <td>${mob.is_cross_area
+                                    ? `<a href="analysis.html?area=${mob.source_area}" style="color:#d3a47e">${mob.source_area}</a>`
+                                    : '<span style="color:#7ed3a4">local</span>'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 2rem;">All Object Spawns (${objSpawns.length})</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>VNUM</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${objSpawns.map(obj => `
+                            <tr style="${obj.is_cross_area ? 'background: #4a3d2d20;' : ''}">
+                                <td>${obj.vnum}</td>
+                                <td>${obj.name}</td>
+                                <td>${obj.type}</td>
+                                <td>${formatSpawnLocation(obj)}</td>
+                                <td>${obj.is_cross_area
+                                    ? `<a href="analysis.html?area=${obj.source_area}" style="color:#d3a47e">${obj.source_area}</a>`
+                                    : '<span style="color:#7ed3a4">local</span>'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function formatSpawnLocation(obj) {
+            switch (obj.type) {
+                case 'object_room':
+                    return `${obj.room_name} (#${obj.room_vnum})`;
+                case 'object_inventory':
+                    return `inventory of ${obj.mob_name}`;
+                case 'object_equipped':
+                    return `${obj.wear_loc} on ${obj.mob_name}`;
+                case 'object_container':
+                    return `in ${obj.container_name}`;
+                default:
+                    return '-';
+            }
+        }
+
+        function renderGlobalRankings(container) {
+            container.innerHTML = `
+                <h2>Global Rankings</h2>
+
+                <h3>Top 50 Most Powerful Objects</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>VNUM</th>
+                            <th>Name</th>
+                            <th>Area</th>
+                            <th>Type</th>
+                            <th>Power</th>
+                            <th>Details</th>
+                            <th>Stats</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${objectRankings.slice(0, 50).map((obj, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${obj.vnum}</td>
+                                <td>${obj.name}</td>
+                                <td><a href="analysis.html?area=${obj.area_id}">${obj.area_name}</a></td>
+                                <td>${obj.item_type}</td>
+                                <td>
+                                    <span class="tier-badge tier-${obj.power_tier}">
+                                        ${obj.power_tier}
+                                    </span>
+                                    ${obj.power_score.toFixed(0)}
+                                </td>
+                                <td>${formatItemDetails(obj)}</td>
+                                <td>${formatStats(obj.stats_summary)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 2rem;">Top 50 Deadliest Mobs</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>VNUM</th>
+                            <th>Name</th>
+                            <th>Area</th>
+                            <th>Level</th>
+                            <th>Difficulty</th>
+                            <th>HP</th>
+                            <th>Damage</th>
+                            <th>AC</th>
+                            <th>Flags</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mobRankings.slice(0, 50).map((mob, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${mob.vnum}</td>
+                                <td>${mob.name}${formatMobBadges(mob)}</td>
+                                <td><a href="analysis.html?area=${mob.area_id}">${mob.area_name}</a></td>
+                                <td>${mob.level}</td>
+                                <td>
+                                    <span class="tier-badge tier-${mob.difficulty_tier}">
+                                        ${mob.difficulty_tier}
+                                    </span>
+                                    ${mob.difficulty_score.toFixed(0)}
+                                </td>
+                                <td>${mob.avg_hp.toLocaleString()}</td>
+                                <td>${mob.avg_damage || '-'}</td>
+                                <td>${mob.ac || '-'}</td>
+                                <td>${formatMobFlags(mob)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function formatStats(stats) {
+            if (!stats || Object.keys(stats).length === 0) return '-';
+            return Object.entries(stats)
+                .map(([key, val]) => `${key}: ${val > 0 ? '+' : ''}${val}`)
+                .join(', ');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
