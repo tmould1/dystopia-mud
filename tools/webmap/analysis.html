@@ -236,6 +236,96 @@
             outline: none;
             border-color: #4a90d9;
         }
+
+        /* Area filter for global rankings */
+        .area-filter {
+            margin-bottom: 1rem;
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .area-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .area-filter-header h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #4a90d9;
+        }
+
+        .area-filter-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .area-filter-actions button {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #16213e;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .area-filter-actions button:hover {
+            background: #0f3460;
+            color: #fff;
+        }
+
+        .area-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.25rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .area-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .area-filter-item:hover {
+            background: #0f3460;
+        }
+
+        .area-filter-item input {
+            cursor: pointer;
+        }
+
+        .area-filter-item label {
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .area-filter-item.excluded {
+            opacity: 0.5;
+        }
+
+        .area-filter-item.excluded label {
+            text-decoration: line-through;
+        }
+
+        .filter-count {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -296,6 +386,7 @@
         let currentArea = null;
         let currentTab = 'summary';
         let currentSort = 'name-asc';
+        let selectedAreas = new Set(); // Areas included in global rankings (empty = all)
 
         async function init() {
             const listItems = document.getElementById('area-list-items');
@@ -686,6 +777,19 @@
             return '-';
         }
 
+        function formatWeaponType(obj) {
+            if (!obj.weapon) return '-';
+            const w = obj.weapon;
+            let result = w.weapon_type || 'unknown';
+            if (w.spell) {
+                result += ` <span style="color:#d97e7e" title="On-hit: ${w.spell}">⚔</span>`;
+            }
+            if (w.affect) {
+                result += ` <span style="color:#a47ed3" title="Wielder: ${w.affect}">✨</span>`;
+            }
+            return result;
+        }
+
         function renderSpawns(container, data) {
             const spawns = data.spawns || {};
             const mobSpawns = spawns.mob_spawns || [];
@@ -844,10 +948,55 @@
         }
 
         function renderGlobalRankings(container) {
+            // Get all area IDs sorted by name
+            const allAreaIds = Object.keys(analysisData).sort((a, b) => {
+                const nameA = analysisData[a].summary.name.toLowerCase();
+                const nameB = analysisData[b].summary.name.toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+
+            // If no areas selected, include all
+            const activeFilter = selectedAreas.size > 0;
+            const includedAreas = activeFilter ? selectedAreas : new Set(allAreaIds);
+
+            // Filter rankings by selected areas
+            const filteredObjects = objectRankings.filter(obj => includedAreas.has(obj.area_id));
+            const filteredWeapons = filteredObjects.filter(obj => obj.item_type === 'weapon');
+            const filteredArmor = filteredObjects.filter(obj => obj.item_type === 'armor');
+            const filteredMobs = mobRankings.filter(mob => includedAreas.has(mob.area_id));
+
+            const filterCountText = activeFilter
+                ? `${selectedAreas.size} of ${allAreaIds.length} areas`
+                : `All ${allAreaIds.length} areas`;
+
             container.innerHTML = `
                 <h2>Global Rankings</h2>
 
-                <h3>Top 50 Most Powerful Objects</h3>
+                <div class="area-filter">
+                    <div class="area-filter-header">
+                        <h3>Filter by Area <span class="filter-count">(${filterCountText})</span></h3>
+                        <div class="area-filter-actions">
+                            <button onclick="selectAllAreas()">Select All</button>
+                            <button onclick="deselectAllAreas()">Deselect All</button>
+                        </div>
+                    </div>
+                    <div class="area-filter-grid">
+                        ${allAreaIds.map(areaId => {
+                            const name = analysisData[areaId].summary.name;
+                            const isChecked = !activeFilter || selectedAreas.has(areaId);
+                            return `
+                                <div class="area-filter-item ${isChecked ? '' : 'excluded'}">
+                                    <input type="checkbox" id="filter-${areaId}"
+                                           ${isChecked ? 'checked' : ''}
+                                           onchange="toggleAreaFilter('${areaId}', this.checked)">
+                                    <label for="filter-${areaId}" title="${name}">${name}</label>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <h3>Top 50 Weapons</h3>
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -855,27 +1004,64 @@
                             <th>VNUM</th>
                             <th>Name</th>
                             <th>Area</th>
-                            <th>Type</th>
                             <th>Power</th>
-                            <th>Details</th>
+                            <th>Damage</th>
+                            <th>Type</th>
                             <th>Stats</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${objectRankings.slice(0, 50).map((obj, i) => `
+                        ${filteredWeapons.slice(0, 50).map((obj, i) => `
                             <tr>
                                 <td>${i + 1}</td>
                                 <td>${obj.vnum}</td>
                                 <td>${obj.name}</td>
                                 <td><a href="analysis.html?area=${obj.area_id}">${obj.area_name}</a></td>
-                                <td>${obj.item_type}</td>
                                 <td>
                                     <span class="tier-badge tier-${obj.power_tier}">
                                         ${obj.power_tier}
                                     </span>
                                     ${obj.power_score.toFixed(0)}
                                 </td>
-                                <td>${formatItemDetails(obj)}</td>
+                                <td>${obj.weapon ? `${obj.weapon.damage_min}-${obj.weapon.damage_max}` : '-'}</td>
+                                <td>${formatWeaponType(obj)}</td>
+                                <td>${formatStats(obj.stats_summary)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 2rem;">Top 50 Armor</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>VNUM</th>
+                            <th>Name</th>
+                            <th>Area</th>
+                            <th>Power</th>
+                            <th>AC</th>
+                            <th>Special</th>
+                            <th>Wear</th>
+                            <th>Stats</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredArmor.slice(0, 50).map((obj, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${obj.vnum}</td>
+                                <td>${obj.name}</td>
+                                <td><a href="analysis.html?area=${obj.area_id}">${obj.area_name}</a></td>
+                                <td>
+                                    <span class="tier-badge tier-${obj.power_tier}">
+                                        ${obj.power_tier}
+                                    </span>
+                                    ${obj.power_score.toFixed(0)}
+                                </td>
+                                <td>${obj.armor ? obj.armor.ac : '-'}</td>
+                                <td>${obj.armor && obj.armor.special ? `<span style="color:#7ed3d3">${obj.armor.special}</span>` : '-'}</td>
+                                <td>${obj.wear_location || '-'}</td>
                                 <td>${formatStats(obj.stats_summary)}</td>
                             </tr>
                         `).join('')}
@@ -899,7 +1085,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        ${mobRankings.slice(0, 50).map((mob, i) => `
+                        ${filteredMobs.slice(0, 50).map((mob, i) => `
                             <tr>
                                 <td>${i + 1}</td>
                                 <td>${mob.vnum}</td>
@@ -921,6 +1107,39 @@
                     </tbody>
                 </table>
             `;
+        }
+
+        function toggleAreaFilter(areaId, isChecked) {
+            if (selectedAreas.size === 0) {
+                // First time filtering - start with all selected except the unchecked one
+                Object.keys(analysisData).forEach(id => {
+                    if (id !== areaId || isChecked) {
+                        selectedAreas.add(id);
+                    }
+                });
+                if (!isChecked) {
+                    selectedAreas.delete(areaId);
+                }
+            } else {
+                if (isChecked) {
+                    selectedAreas.add(areaId);
+                } else {
+                    selectedAreas.delete(areaId);
+                }
+            }
+            renderContent();
+        }
+
+        function selectAllAreas() {
+            selectedAreas.clear(); // Empty set means all areas
+            renderContent();
+        }
+
+        function deselectAllAreas() {
+            selectedAreas.clear();
+            // Add a dummy entry so the filter is "active" but nothing passes
+            selectedAreas.add('__none__');
+            renderContent();
         }
 
         function formatStats(stats) {
