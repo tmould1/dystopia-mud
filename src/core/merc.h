@@ -3589,6 +3589,8 @@ DECLARE_DO_FUN(	do_channels	);
 DECLARE_DO_FUN( do_compress	);
 DECLARE_DO_FUN( do_compres      );
 DECLARE_DO_FUN( do_mxp          );
+DECLARE_DO_FUN( do_gmcp         );
+DECLARE_DO_FUN( do_protocols    );
 DECLARE_DO_FUN( do_knightarmor  );
 DECLARE_DO_FUN( do_gain		);
 DECLARE_DO_FUN( do_weaponpractice );

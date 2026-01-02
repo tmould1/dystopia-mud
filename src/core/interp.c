@@ -345,6 +345,8 @@ const	struct	cmd_type	cmd_table	[] =
     { "compres",      do_compres,    POS_DEAD,        0,  LOG_NORMAL, 0,0,0 },
     { "compress",      do_compress,    POS_DEAD,        0,  LOG_NORMAL, 0,0,0 },
     { "mxp",           do_mxp,         POS_DEAD,        0,  LOG_NORMAL, 0,0,0 },
+    { "gmcp",          do_gmcp,        POS_DEAD,        0,  LOG_NORMAL, 0,0,0 },
+    { "protocols",     do_protocols,   POS_DEAD,        0,  LOG_NORMAL, 0,0,0 },
     { "description",	do_description,POS_DEAD,	 0,  LOG_NORMAL, 0,0,0	},
     { "password",		do_password,POS_DEAD,	 	 0,  LOG_NEVER, 0,0,0	},
     { "title",		do_title,	POS_DEAD,	 	 0,  LOG_NORMAL, 0,0,0	},

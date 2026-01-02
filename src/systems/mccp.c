@@ -41,9 +41,15 @@
 #include "telnet.h"
 
 /* MCCP v1 subnegotiation start sequence */
+#if defined(WIN32)
+char    compress_start  [] = { (char)IAC, (char)SB, (char)TELOPT_COMPRESS, (char)WILL, (char)SE, '\0' };
+/* MCCP v2 subnegotiation start sequence */
+char    compress2_start [] = { (char)IAC, (char)SB, (char)TELOPT_COMPRESS2, (char)IAC, (char)SE, '\0' };
+#else
 char    compress_start  [] = { IAC, SB, TELOPT_COMPRESS, WILL, SE, '\0' };
 /* MCCP v2 subnegotiation start sequence */
 char    compress2_start [] = { IAC, SB, TELOPT_COMPRESS2, IAC, SE, '\0' };
+#endif
 
 bool processCompressed(DESCRIPTOR_DATA *desc);
 bool   write_to_descriptor     args( ( DESCRIPTOR_DATA *d, char *txt, int length ) );
@@ -70,6 +76,7 @@ void zlib_free(void *opaque, void *address)
 bool compressStart(DESCRIPTOR_DATA *desc, int version)
 {
     z_stream *s;
+    int zresult;
 
     if (desc->out_compress) /* already compressing */
         return TRUE;
@@ -88,12 +95,18 @@ bool compressStart(DESCRIPTOR_DATA *desc, int version)
     s->zfree  = zlib_free;
     s->opaque = NULL;
 
-    if (deflateInit(s, 9) != Z_OK) {
+    zresult = deflateInit(s, 9);
+    if (zresult != Z_OK) {
         /* problems with zlib, try to clean up */
+        sprintf(log_buf, "MCCP: deflateInit failed with %d", zresult);
+        log_string(log_buf);
         free_mem(desc->out_compress_buf, COMPRESS_BUF_SIZE);
         free_mem(s, sizeof(z_stream));
         return FALSE;
     }
+
+    /* Set version BEFORE sending start sequence so it's available if needed */
+    desc->mccp_version = version;
 
     /* Send appropriate start sequence based on version */
     if (version == 2)
@@ -103,7 +116,6 @@ bool compressStart(DESCRIPTOR_DATA *desc, int version)
 
     /* now we're compressing */
     desc->out_compress = s;
-    desc->mccp_version = version;
     return TRUE;
 }
  

@@ -26,6 +26,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "gmcp.h"
 
 extern GAMECONFIG_DATA game_config;
 
@@ -2461,4 +2462,79 @@ void do_communicate( CHAR_DATA *ch, char *argument )
 	}
 	talk_channel(ch,argument,CHANNEL_COMMUNICATE,"communicate");
 	return;
+}
+
+/*
+ * Show MUD protocol status for the connection
+ */
+void do_protocols(CHAR_DATA *ch, char *argument)
+{
+    char buf[MAX_STRING_LENGTH];
+    const char *mccp_status;
+    const char *gmcp_status;
+    const char *mxp_status;
+    const char *mssp_status;
+
+    if (ch->desc == NULL)
+    {
+        send_to_char("No descriptor.\n\r", ch);
+        return;
+    }
+
+    /* Determine MCCP status */
+    if (ch->desc->out_compress != NULL)
+    {
+        if (ch->desc->mccp_version == 2)
+            mccp_status = "#GOn (v2)#n";
+        else if (ch->desc->mccp_version == 1)
+            mccp_status = "#GOn (v1)#n";
+        else
+            mccp_status = "#GOn#n";
+    }
+    else
+        mccp_status = "#rOff#n";
+
+    /* Determine GMCP status */
+    if (ch->desc->gmcp_enabled)
+        gmcp_status = "#GOn#n";
+    else
+        gmcp_status = "#rOff#n";
+
+    /* Determine MXP status */
+    if (ch->desc->mxp_enabled)
+        mxp_status = "#GOn#n";
+    else
+        mxp_status = "#rOff#n";
+
+    /* MSSP is server-side only, client queries it */
+    mssp_status = "#ySupported#n";
+
+    snprintf(buf, sizeof(buf),
+        "#w+-----------------------------------+#n\n\r"
+        "#w|#n    #CMUD Protocol Status#n          #w|#n\n\r"
+        "#w+-----------------------------------+#n\n\r"
+        "#w|#n  #yMCCP#n  (Compression)    %s   #w|#n\n\r"
+        "#w|#n  #yGMCP#n  (Data Channel)   %s       #w|#n\n\r"
+        "#w|#n  #yMXP#n   (Extensions)     %s       #w|#n\n\r"
+        "#w|#n  #yMSSP#n  (Server Status)  %s #w|#n\n\r"
+        "#w+-----------------------------------+#n\n\r",
+        mccp_status,
+        gmcp_status,
+        mxp_status,
+        mssp_status);
+
+    send_to_char(buf, ch);
+
+    /* Show additional GMCP details if enabled */
+    if (ch->desc->gmcp_enabled && ch->desc->gmcp_packages > 0)
+    {
+        snprintf(buf, sizeof(buf),
+            "\n\r#yGMCP Packages:#n %s%s%s%s%s\n\r",
+            (ch->desc->gmcp_packages & GMCP_PACKAGE_CORE) ? "Core " : "",
+            (ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR) ? "Char " : "",
+            (ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_VITALS) ? "Char.Vitals " : "",
+            (ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_STATUS) ? "Char.Status " : "",
+            (ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_INFO) ? "Char.Info " : "");
+        send_to_char(buf, ch);
+    }
 }

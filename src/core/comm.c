@@ -1347,18 +1347,13 @@ void new_descriptor( int control )
       return;
     }
 
-    /* mccp: tell the client we support compression (offer v2 first, then v1) */
-    write_to_buffer( dnew, compress2_will, 0 );
-    write_to_buffer( dnew, compress_will, 0 );
-
-    /* mssp: tell the client we support MSSP */
-    write_to_buffer( dnew, mssp_will, 0 );
-
-    /* mxp: tell the client we support MXP */
-    write_to_buffer( dnew, mxp_will, 0 );
-
-    /* gmcp: tell the client we support GMCP */
-    write_to_buffer( dnew, gmcp_will, 0 );
+    /* Offer protocol support to client */
+    write_to_buffer( dnew, compress2_will, 0 );  /* MCCP v2 preferred */
+    write_to_buffer( dnew, compress_will, 0 );   /* MCCP v1 fallback */
+    write_to_buffer( dnew, mssp_will, 0 );       /* MSSP server status */
+    /* MXP disabled - causes greeting truncation in Mudlet */
+    /* write_to_buffer( dnew, mxp_will, 0 ); */
+    write_to_buffer( dnew, gmcp_will, 0 );       /* GMCP protocol */
 
     /* send greeting */
     {
@@ -1610,6 +1605,7 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d )
 void read_from_buffer( DESCRIPTOR_DATA *d )
 {
     int i, j, k;
+    bool has_newline = FALSE;
 
     /*
      * Hold horses if pending command already.
@@ -1618,12 +1614,65 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
 	return;
 
     /*
-     * Look for at least one new line.
+     * Look for at least one new line, but still process telnet sequences.
      */
-    for ( i = 0; d->inbuf[i] != '\n' && d->inbuf[i] != '\r'; i++ )
+    for ( i = 0; d->inbuf[i] != '\0'; i++ )
     {
-	if ( d->inbuf[i] == '\0' )
-	    return;
+	if ( d->inbuf[i] == '\n' || d->inbuf[i] == '\r' )
+	{
+	    has_newline = TRUE;
+	    break;
+	}
+    }
+
+    /* Process telnet sequences even without newline */
+    if ( !has_newline )
+    {
+	/* Scan for and handle IAC sequences */
+	for ( i = 0; d->inbuf[i] != '\0'; i++ )
+	{
+	    if (d->inbuf[i] == (signed char)IAC) {
+		/* MCCP v2 (preferred) */
+		if (!memcmp(&d->inbuf[i], compress2_do, strlen(compress2_do))) {
+		    i += strlen(compress2_do) - 1;
+		    compressStart(d, 2);
+		}
+		else if (!memcmp(&d->inbuf[i], compress2_dont, strlen(compress2_dont))) {
+		    i += strlen(compress2_dont) - 1;
+		    /* Only end compression if we're using v2 */
+		    if (d->mccp_version == 2)
+			compressEnd(d);
+		}
+		/* MCCP v1 (fallback) */
+		else if (!memcmp(&d->inbuf[i], compress_do, strlen(compress_do))) {
+		    i += strlen(compress_do) - 1;
+		    compressStart(d, 1);
+		}
+		else if (!memcmp(&d->inbuf[i], compress_dont, strlen(compress_dont))) {
+		    i += strlen(compress_dont) - 1;
+		    /* Only end compression if we're using v1 */
+		    if (d->mccp_version == 1)
+			compressEnd(d);
+		}
+		/* MSSP */
+		else if (!memcmp(&d->inbuf[i], mssp_do, strlen(mssp_do))) {
+		    i += strlen(mssp_do) - 1;
+		    mssp_send(d);
+		}
+		/* GMCP */
+		else if (!memcmp(&d->inbuf[i], gmcp_do, strlen(gmcp_do))) {
+		    i += strlen(gmcp_do) - 1;
+		    gmcp_init(d);
+		}
+		else if (!memcmp(&d->inbuf[i], gmcp_dont, strlen(gmcp_dont))) {
+		    i += strlen(gmcp_dont) - 1;
+		    d->gmcp_enabled = FALSE;
+		}
+	    }
+	}
+	/* Clear buffer after processing telnet-only data */
+	d->inbuf[0] = '\0';
+	return;
     }
 
     /*
@@ -1658,7 +1707,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
             }
             else if (!memcmp(&d->inbuf[i], compress2_dont, strlen(compress2_dont))) {
                 i += strlen(compress2_dont) - 1;
-                compressEnd(d);
+                /* Only end compression if we're using v2 */
+                if (d->mccp_version == 2)
+                    compressEnd(d);
             }
             /* MCCP v1 (fallback) */
             else if (!memcmp(&d->inbuf[i], compress_do, strlen(compress_do))) {
@@ -1667,7 +1718,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
             }
             else if (!memcmp(&d->inbuf[i], compress_dont, strlen(compress_dont))) {
                 i += strlen(compress_dont) - 1;
-                compressEnd(d);
+                /* Only end compression if we're using v1 */
+                if (d->mccp_version == 1)
+                    compressEnd(d);
             }
             /* MSSP */
             else if (!memcmp(&d->inbuf[i], mssp_do, strlen(mssp_do))) {
@@ -2698,6 +2751,10 @@ OUT OUT OUT */
 	    do_look( ch, "auto" );
 	}
 	do_board(ch,"");
+
+	/* Send initial GMCP data now that character is fully loaded */
+	gmcp_send_char_data(ch);
+
         players_logged++;
         if (ch->level > 6) ; /* no info */
         else if (IS_SET(ch->pcdata->jflags, JFLAG_SETLOGIN)) login_message(ch);
@@ -2985,6 +3042,10 @@ OUT OUT OUT */
 	    do_look( ch, "auto" );
 	}
 	do_board(ch,"");
+
+	/* Send initial GMCP data now that character is fully loaded */
+	gmcp_send_char_data(ch);
+
         players_logged++;
 	sprintf(buf,"#7A #Rnew player#7 named #2%s #7enters #R%s.#n", ch->name, game_config.game_name );
 	enter_info(buf);

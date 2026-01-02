@@ -40,6 +40,12 @@ const char mxp_sb[]   = { '\0' };
 /*
  * Start MXP mode on a descriptor
  * Called when client responds with IAC DO MXP
+ *
+ * Note: We intentionally do NOT send the IAC SB MXP IAC SE subnegotiation
+ * immediately. Sending it during the initial telnet negotiation phase
+ * (before the greeting is fully sent) can corrupt the output stream in
+ * some clients. Instead, we just mark MXP as enabled and let MXP tags
+ * be used in subsequent output.
  */
 bool mxpStart(DESCRIPTOR_DATA *desc)
 {
@@ -49,12 +55,7 @@ bool mxpStart(DESCRIPTOR_DATA *desc)
     if (desc->mxp_enabled)
         return TRUE;  /* Already enabled */
 
-    /* Send subnegotiation to begin MXP mode */
-    write_to_descriptor(desc, (char *)mxp_sb, strlen(mxp_sb));
-
-    /* Set default to locked mode for security */
-    write_to_descriptor(desc, MXP_LOCKED_LINE, strlen(MXP_LOCKED_LINE));
-
+    /* Just mark as enabled - don't send subnegotiation during initial connect */
     desc->mxp_enabled = TRUE;
     return TRUE;
 }

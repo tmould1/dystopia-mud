@@ -1,20 +1,3 @@
-/***************************************************************************
- *  Original Diku Mud copyright (C) 1990, 1991 by Sebastian Hammer,        *
- *  Michael Seifert, Hans Henrik St{rfeldt, Tom Madsen, and Katja Nyboe.   *
- *                                                                         *
- *  Merc Diku Mud improvments copyright (C) 1992, 1993 by Michael          *
- *  Chastain, Michael Quan, and Mitchell Tse.                              *
- *                                                                         *
- *  In order to use any part of this Merc Diku Mud, you must comply with   *
- *  both the original Diku license in 'license.doc' as well the Merc       *
- *  license in 'license.txt'.  In particular, you may not remove either of *
- *  these copyright notices.                                               *
- *                                                                         *
- *  Much time and thought has gone into this software and you are          *
- *  benefitting.  We hope that you share your changes too.  What goes      *
- *  around, comes around.                                                  *
- ***************************************************************************/
-
 /*
  * gmcp.c - Generic MUD Communication Protocol support
  *
@@ -47,9 +30,15 @@
 /*
  * Telnet negotiation strings for GMCP
  */
+#if defined(WIN32)
+const char gmcp_will[] = { (char)IAC, (char)WILL, (char)TELOPT_GMCP, '\0' };
+const char gmcp_do[]   = { (char)IAC, (char)DO, (char)TELOPT_GMCP, '\0' };
+const char gmcp_dont[] = { (char)IAC, (char)DONT, (char)TELOPT_GMCP, '\0' };
+#else
 const char gmcp_will[] = { IAC, WILL, TELOPT_GMCP, '\0' };
 const char gmcp_do[]   = { IAC, DO, TELOPT_GMCP, '\0' };
 const char gmcp_dont[] = { IAC, DONT, TELOPT_GMCP, '\0' };
+#endif
 
 /* External functions */
 bool write_to_descriptor args( ( DESCRIPTOR_DATA *d, char *txt, int length ) );
@@ -141,7 +130,11 @@ void gmcp_init(DESCRIPTOR_DATA *d)
         return;
 
     d->gmcp_enabled = TRUE;
-    d->gmcp_packages = GMCP_PACKAGE_CORE;  /* Core is always enabled */
+
+    /* Enable Core and all Char packages by default */
+    d->gmcp_packages = GMCP_PACKAGE_CORE | GMCP_PACKAGE_CHAR |
+                       GMCP_PACKAGE_CHAR_VITALS | GMCP_PACKAGE_CHAR_STATUS |
+                       GMCP_PACKAGE_CHAR_INFO;
 
     /* Send Core.Hello to identify the server */
     gmcp_send(d, "Core.Hello",
@@ -218,7 +211,9 @@ void gmcp_send_vitals(CHAR_DATA *ch)
  */
 void gmcp_send_status(CHAR_DATA *ch)
 {
-    char buf[MAX_STRING_LENGTH];
+    char buf[512];
+    char class_buf[64];
+    char pos_buf[64];
 
     if (ch == NULL || ch->desc == NULL || !ch->desc->gmcp_enabled)
         return;
@@ -227,12 +222,15 @@ void gmcp_send_status(CHAR_DATA *ch)
     if (!(ch->desc->gmcp_packages & (GMCP_PACKAGE_CHAR | GMCP_PACKAGE_CHAR_STATUS)))
         return;
 
+    /* Copy escaped strings to avoid static buffer issues */
+    strncpy(class_buf, json_escape(get_class_name(ch->class)), sizeof(class_buf) - 1);
+    class_buf[sizeof(class_buf) - 1] = '\0';
+    strncpy(pos_buf, json_escape(get_pos_name(ch->position)), sizeof(pos_buf) - 1);
+    pos_buf[sizeof(pos_buf) - 1] = '\0';
+
     snprintf(buf, sizeof(buf),
         "{\"level\":%d,\"class\":\"%s\",\"position\":\"%s\",\"exp\":%d}",
-        ch->level,
-        json_escape(get_class_name(ch->class)),
-        json_escape(get_pos_name(ch->position)),
-        ch->exp);
+        ch->level, class_buf, pos_buf, ch->exp);
 
     gmcp_send(ch->desc, "Char.Status", buf);
 }
@@ -242,7 +240,9 @@ void gmcp_send_status(CHAR_DATA *ch)
  */
 void gmcp_send_info(CHAR_DATA *ch)
 {
-    char buf[MAX_STRING_LENGTH];
+    char buf[512];
+    char name_buf[128];
+    char clan_buf[128];
     const char *clan_name;
 
     if (ch == NULL || ch->desc == NULL || !ch->desc->gmcp_enabled)
@@ -254,10 +254,15 @@ void gmcp_send_info(CHAR_DATA *ch)
 
     clan_name = (ch->clan != NULL && ch->clan[0] != '\0') ? ch->clan : "None";
 
+    /* Copy escaped strings to avoid static buffer issues */
+    strncpy(name_buf, json_escape(ch->name), sizeof(name_buf) - 1);
+    name_buf[sizeof(name_buf) - 1] = '\0';
+    strncpy(clan_buf, json_escape(clan_name), sizeof(clan_buf) - 1);
+    clan_buf[sizeof(clan_buf) - 1] = '\0';
+
     snprintf(buf, sizeof(buf),
         "{\"name\":\"%s\",\"guild\":\"%s\"}",
-        json_escape(ch->name),
-        json_escape(clan_name));
+        name_buf, clan_buf);
 
     gmcp_send(ch->desc, "Char.Info", buf);
 }
