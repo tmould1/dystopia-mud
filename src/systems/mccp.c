@@ -39,8 +39,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include "telnet.h"
-  
+
+/* MCCP v1 subnegotiation start sequence */
 char    compress_start  [] = { IAC, SB, TELOPT_COMPRESS, WILL, SE, '\0' };
+/* MCCP v2 subnegotiation start sequence */
+char    compress2_start [] = { IAC, SB, TELOPT_COMPRESS2, IAC, SE, '\0' };
 
 bool processCompressed(DESCRIPTOR_DATA *desc);
 bool   write_to_descriptor     args( ( DESCRIPTOR_DATA *d, char *txt, int length ) );
@@ -62,8 +65,9 @@ void zlib_free(void *opaque, void *address)
 
 /*
  * Begin compressing data on `desc'
+ * version: 1 for MCCP v1, 2 for MCCP v2
  */
-bool compressStart(DESCRIPTOR_DATA *desc)
+bool compressStart(DESCRIPTOR_DATA *desc, int version)
 {
     z_stream *s;
 
@@ -79,7 +83,7 @@ bool compressStart(DESCRIPTOR_DATA *desc)
 
     s->next_out = desc->out_compress_buf;
     s->avail_out = COMPRESS_BUF_SIZE;
- 
+
     s->zalloc = zlib_alloc;
     s->zfree  = zlib_free;
     s->opaque = NULL;
@@ -90,11 +94,16 @@ bool compressStart(DESCRIPTOR_DATA *desc)
         free_mem(s, sizeof(z_stream));
         return FALSE;
     }
-    
-    write_to_descriptor(desc, compress_start, strlen(compress_start));
+
+    /* Send appropriate start sequence based on version */
+    if (version == 2)
+        write_to_descriptor(desc, compress2_start, strlen(compress2_start));
+    else
+        write_to_descriptor(desc, compress_start, strlen(compress_start));
 
     /* now we're compressing */
     desc->out_compress = s;
+    desc->mccp_version = version;
     return TRUE;
 }
  
@@ -239,11 +248,11 @@ void do_compress( CHAR_DATA *ch, char *argument )
     }
 
     if (!ch->desc->out_compress) {
-        if (!compressStart(ch->desc)) {
+        if (!compressStart(ch->desc, 2)) {  /* Default to MCCP v2 */
             send_to_char("Failed.\n", ch);
             return;
-        }       
- 
+        }
+
       send_to_char("Ok, compression enabled.\n", ch);
    } 
    else {

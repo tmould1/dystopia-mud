@@ -1871,6 +1871,9 @@ void werewolf_regen( CHAR_DATA *ch, int multiplier )
   ch->mana = UMIN (ch->mana+(mana_gain*multiplier), ch->max_mana);
   ch->move = UMIN (ch->move+(move_gain*multiplier), ch->max_move);
   update_pos(ch);
+  /* Send GMCP vitals update if enabled */
+  if (ch->desc != NULL && ch->desc->gmcp_enabled)
+    gmcp_send_vitals(ch);
   if ( ch->hit >= ch->max_hit && ch->mana >= ch->max_mana && ch->move >= ch->max_move )
     send_to_char("Your body has completely regenerated itself.\n\r",ch);
   return;

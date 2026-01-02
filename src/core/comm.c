@@ -121,31 +121,55 @@ const   char    compress_start  [] = { '\0' };
 const	char	echo_off_str	[] = { IAC, WILL, TELOPT_ECHO, '\0' };
 const	char	echo_on_str	[] = { IAC, WONT, TELOPT_ECHO, '\0' };
 const	char 	go_ahead_str	[] = { IAC, GA, '\0' };
+/* MCCP v1 */
 const   char    compress_will   [] = { IAC, WILL, TELOPT_COMPRESS, '\0' };
 const   char    compress_do     [] = { IAC, DO, TELOPT_COMPRESS, '\0' };
 const   char    compress_dont   [] = { IAC, DONT, TELOPT_COMPRESS, '\0' };
+/* MCCP v2 */
+const   char    compress2_will  [] = { IAC, WILL, TELOPT_COMPRESS2, '\0' };
+const   char    compress2_do    [] = { IAC, DO, TELOPT_COMPRESS2, '\0' };
+const   char    compress2_dont  [] = { IAC, DONT, TELOPT_COMPRESS2, '\0' };
+/* MSSP */
+extern const char mssp_will[];
+extern const char mssp_do[];
+/* MXP */
+extern const char mxp_will[];
+extern const char mxp_do[];
+extern const char mxp_dont[];
+/* GMCP */
+extern const char gmcp_will[];
+extern const char gmcp_do[];
+extern const char gmcp_dont[];
 
 void show_string args((DESCRIPTOR_DATA *d, char *input ));
 
 #endif
 
 #if	defined( WIN32 )
-/* Telnet protocol constants for Windows (from arpa/telnet.h) */
-#define IAC             255     /* interpret as command */
-#define DONT            254     /* refuse to perform option */
-#define DO              253     /* request to perform option */
-#define WONT            252     /* refusal to perform option */
-#define WILL            251     /* agreement to perform option */
-#define GA              249     /* go ahead */
-#define TELOPT_ECHO     1       /* echo */
-#define TELOPT_COMPRESS 85      /* MCCP v1 */
+#include "telnet.h"
 
 const   char echo_off_str	[] = { (char)IAC, (char)WILL, (char)TELOPT_ECHO, '\0' };
 const   char echo_on_str	[] = { (char)IAC, (char)WONT, (char)TELOPT_ECHO, '\0' };
 const   char go_ahead_str	[] = { (char)IAC, (char)GA, '\0' };
+/* MCCP v1 */
 const   char    compress_will   [] = { (char)IAC, (char)WILL, (char)TELOPT_COMPRESS, '\0' };
 const   char    compress_do     [] = { (char)IAC, (char)DO, (char)TELOPT_COMPRESS, '\0' };
 const   char    compress_dont   [] = { (char)IAC, (char)DONT, (char)TELOPT_COMPRESS, '\0' };
+/* MCCP v2 */
+const   char    compress2_will  [] = { (char)IAC, (char)WILL, (char)TELOPT_COMPRESS2, '\0' };
+const   char    compress2_do    [] = { (char)IAC, (char)DO, (char)TELOPT_COMPRESS2, '\0' };
+const   char    compress2_dont  [] = { (char)IAC, (char)DONT, (char)TELOPT_COMPRESS2, '\0' };
+/* MSSP */
+extern const char mssp_will[];
+extern const char mssp_do[];
+/* MXP */
+extern const char mxp_will[];
+extern const char mxp_do[];
+extern const char mxp_dont[];
+/* GMCP */
+extern const char gmcp_will[];
+extern const char gmcp_do[];
+extern const char gmcp_dont[];
 
 void show_string args((DESCRIPTOR_DATA *d, char *input ));
 #endif
@@ -333,6 +357,7 @@ bool		    wizlock;		/* Game is wizlocked		*/
 char		    str_boot_time[MAX_INPUT_LENGTH];
 char		    crypt_pwd[MAX_INPUT_LENGTH];
 time_t		    current_time;	/* Time of this pulse		*/
+time_t		    boot_time;		/* Time of server boot		*/
 int		    arena;
 
 /* Colour scale char list - Calamar */
@@ -486,6 +511,7 @@ int main( int argc, char **argv )
      */
     gettimeofday( &now_time, NULL );
     current_time = (time_t) now_time.tv_sec;
+    boot_time = current_time;
     strcpy( str_boot_time, ctime( &current_time ) );
     sprintf( crypt_pwd, "Don't bother." );
 
@@ -1188,7 +1214,8 @@ void game_loop_unix( int control )
  	dnew->editor = 0;			/* OLC */
  	dnew->outsize = 2000;
  	dnew->outbuf = alloc_mem (dnew->outsize);
- 	
+ 	dnew->mxp_enabled = FALSE;
+
  }
 
 #if defined(unix) || defined(WIN32)
@@ -1320,8 +1347,18 @@ void new_descriptor( int control )
       return;
     }
 
-    /* mccp: tell the client we support compression */
+    /* mccp: tell the client we support compression (offer v2 first, then v1) */
+    write_to_buffer( dnew, compress2_will, 0 );
     write_to_buffer( dnew, compress_will, 0 );
+
+    /* mssp: tell the client we support MSSP */
+    write_to_buffer( dnew, mssp_will, 0 );
+
+    /* mxp: tell the client we support MXP */
+    write_to_buffer( dnew, mxp_will, 0 );
+
+    /* gmcp: tell the client we support GMCP */
+    write_to_buffer( dnew, gmcp_will, 0 );
 
     /* send greeting */
     {
@@ -1614,13 +1651,64 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
 	else if ( isascii(d->inbuf[i]) && isprint(d->inbuf[i]) )
 	    d->incomm[k++] = d->inbuf[i];
         else if (d->inbuf[i] == (signed char)IAC) {
-            if (!memcmp(&d->inbuf[i], compress_do, strlen(compress_do))) {
+            /* MCCP v2 (preferred) */
+            if (!memcmp(&d->inbuf[i], compress2_do, strlen(compress2_do))) {
+                i += strlen(compress2_do) - 1;
+                compressStart(d, 2);
+            }
+            else if (!memcmp(&d->inbuf[i], compress2_dont, strlen(compress2_dont))) {
+                i += strlen(compress2_dont) - 1;
+                compressEnd(d);
+            }
+            /* MCCP v1 (fallback) */
+            else if (!memcmp(&d->inbuf[i], compress_do, strlen(compress_do))) {
                 i += strlen(compress_do) - 1;
-                compressStart(d);
+                compressStart(d, 1);
             }
             else if (!memcmp(&d->inbuf[i], compress_dont, strlen(compress_dont))) {
                 i += strlen(compress_dont) - 1;
                 compressEnd(d);
+            }
+            /* MSSP */
+            else if (!memcmp(&d->inbuf[i], mssp_do, strlen(mssp_do))) {
+                i += strlen(mssp_do) - 1;
+                mssp_send(d);
+            }
+            /* MXP */
+            else if (!memcmp(&d->inbuf[i], mxp_do, strlen(mxp_do))) {
+                i += strlen(mxp_do) - 1;
+                mxpStart(d);
+            }
+            else if (!memcmp(&d->inbuf[i], mxp_dont, strlen(mxp_dont))) {
+                i += strlen(mxp_dont) - 1;
+                mxpEnd(d);
+            }
+            /* GMCP */
+            else if (!memcmp(&d->inbuf[i], gmcp_do, strlen(gmcp_do))) {
+                i += strlen(gmcp_do) - 1;
+                gmcp_init(d);
+            }
+            else if (!memcmp(&d->inbuf[i], gmcp_dont, strlen(gmcp_dont))) {
+                i += strlen(gmcp_dont) - 1;
+                d->gmcp_enabled = FALSE;
+            }
+            /* GMCP subnegotiation: IAC SB GMCP ... IAC SE */
+            else if (d->inbuf[i+1] == (signed char)SB &&
+                     d->inbuf[i+2] == (signed char)TELOPT_GMCP) {
+                int sb_start = i + 3;
+                int sb_len = 0;
+                /* Find IAC SE that ends subnegotiation */
+                while (d->inbuf[sb_start + sb_len] != '\0') {
+                    if (d->inbuf[sb_start + sb_len] == (signed char)IAC &&
+                        d->inbuf[sb_start + sb_len + 1] == (signed char)SE) {
+                        break;
+                    }
+                    sb_len++;
+                }
+                if (sb_len > 0) {
+                    gmcp_handle_subnegotiation(d, (unsigned char *)&d->inbuf[sb_start], sb_len);
+                }
+                i += 3 + sb_len + 1; /* Skip IAC SB GMCP ... IAC SE */
             }
         }
 
@@ -1817,6 +1905,7 @@ void crashrecov (int iSignal)
 
 void retell_mccp( DESCRIPTOR_DATA *d)
 {
+  write_to_buffer( d, compress2_will, 0 );
   write_to_buffer( d, compress_will, 0 );
   return;
 }
@@ -2205,10 +2294,39 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
 				break;
 			}
 			break;
+          /* MXP mode switching codes */
+          case 'M':  // MXP Secure line start
+            if (d->mxp_enabled) {
+              *ptr++ = '\033'; *ptr++ = '['; *ptr++ = '1'; *ptr++ = 'z';
+            }
+            txt++;
+            break;
+          case '<':  // MXP entity escape for <
+            if (d->mxp_enabled) {
+              *ptr++ = '&'; *ptr++ = 'l'; *ptr++ = 't'; *ptr++ = ';';
+            } else {
+              *ptr++ = '<';
+            }
+            txt++;
+            break;
+          case '>':  // MXP entity escape for >
+            if (d->mxp_enabled) {
+              *ptr++ = '&'; *ptr++ = 'g'; *ptr++ = 't'; *ptr++ = ';';
+            } else {
+              *ptr++ = '>';
+            }
+            txt++;
+            break;
+          case ']':  // MXP Locked line (reset) - using ] instead of m to avoid conflict
+            if (d->mxp_enabled) {
+              *ptr++ = '\033'; *ptr++ = '['; *ptr++ = '2'; *ptr++ = 'z';
+            }
+            txt++;
+            break;
         }
     }
   }
-              
+
   /* and terminate it with the standard color */
   *ptr++ = '\e';  *ptr++ = '['; *ptr++ = '0';   *ptr++ = 'm'; *ptr = '\0';
                 
@@ -2959,7 +3077,7 @@ OUT OUT OUT */
 	}
 
 
-	ch->embraced=NULL; 
+	ch->embraced=NULL;
         ch->embracing=NULL;
         if (multicheck(ch))
         {
@@ -2970,6 +3088,9 @@ OUT OUT OUT */
           send_to_char("your actions will be monitored.\n\r",ch);
           send_to_char("#R====#0[#y**#0]#R====  #GWARNING  #R====#0[#y**#0]#R====#n\n\r",ch);
         }
+        /* Send initial GMCP data if enabled */
+        if (d->gmcp_enabled)
+            gmcp_send_char_data(ch);
 	break;
 
 	/* states for new note system, (c)1995-96 erwin@pip.dknet.dk */

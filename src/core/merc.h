@@ -565,6 +565,12 @@ struct descriptor_data
     /* mccp: support data */
     z_stream *          out_compress;
     unsigned char *     out_compress_buf;
+    int                 mccp_version;       /* 0=none, 1=v1, 2=v2 */
+    /* gmcp: support data */
+    bool                gmcp_enabled;       /* GMCP negotiation successful */
+    int                 gmcp_packages;      /* Bitmask of supported packages */
+    /* mxp: MUD eXtension Protocol support */
+    bool                mxp_enabled;        /* MXP negotiation successful */
 };
 
 
@@ -3237,6 +3243,7 @@ extern		PC_DATA		  *	pcdata_free;
 extern          BAN_DATA          *     ban_free;
 extern		char			bug_buf		[];
 extern		time_t			current_time;
+extern		time_t			boot_time;
 extern		bool			fLogAll;
 extern		FILE *			fpReserve;
 extern		KILL_DATA		kill_table	[];
@@ -3581,6 +3588,7 @@ DECLARE_DO_FUN(	do_changelight	);
 DECLARE_DO_FUN(	do_channels	);
 DECLARE_DO_FUN( do_compress	);
 DECLARE_DO_FUN( do_compres      );
+DECLARE_DO_FUN( do_mxp          );
 DECLARE_DO_FUN( do_knightarmor  );
 DECLARE_DO_FUN( do_gain		);
 DECLARE_DO_FUN( do_weaponpractice );
@@ -4782,13 +4790,27 @@ SF *	spec_lookup	args( ( const char *name ) );
 
   
 /* mccp.c */
-bool compressStart(DESCRIPTOR_DATA *desc);
+bool compressStart(DESCRIPTOR_DATA *desc, int version);
 bool compressEnd(DESCRIPTOR_DATA *desc);
 bool compressEnd2(DESCRIPTOR_DATA *desc); // threadsafe version.
 bool processCompressed(DESCRIPTOR_DATA *desc);
 bool writeCompressed(DESCRIPTOR_DATA *desc, char *txt, int length);
 
+/* mssp.c */
+void mssp_send(DESCRIPTOR_DATA *d);
 
+/* mxp.c */
+bool mxpStart(DESCRIPTOR_DATA *desc);
+void mxpEnd(DESCRIPTOR_DATA *desc);
+
+/* gmcp.c */
+void gmcp_init(DESCRIPTOR_DATA *d);
+void gmcp_send(DESCRIPTOR_DATA *d, const char *package, const char *data);
+void gmcp_send_vitals(CHAR_DATA *ch);
+void gmcp_send_status(CHAR_DATA *ch);
+void gmcp_send_info(CHAR_DATA *ch);
+void gmcp_send_char_data(CHAR_DATA *ch);
+void gmcp_handle_subnegotiation(DESCRIPTOR_DATA *d, unsigned char *data, int len);
 
 /* update.c */
 void	gain_exp	args( ( CHAR_DATA *ch, int gain ) );

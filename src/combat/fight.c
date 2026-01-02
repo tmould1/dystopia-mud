@@ -2099,6 +2099,10 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam )
   }
   update_pos( victim );
 
+  /* Send GMCP vitals update to victim if they have GMCP enabled */
+  if (victim->desc != NULL && victim->desc->gmcp_enabled)
+    gmcp_send_vitals(victim);
+
   switch( victim->position )
   {
     case POS_MORTAL:
