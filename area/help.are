@@ -1361,6 +1361,21 @@ EQUIPMENT lists your equipment (armor, weapons, and held items).
 INVENTORY lists your inventory.
 ~
 
+0 AC 'ARMOR CLASS' 'ARMOUR CLASS'~
+Armor Class (AC) represents how well protected you are from physical attacks.
+Lower AC values provide better protection - the more negative, the better.
+
+Your AC is determined by:
+  - Equipment worn (armor, shields, magical items)
+  - Magical effects and spells
+  - Class abilities and powers
+
+AC affects how often enemies hit you and how much damage you take.
+You can see your current AC in your SCORE.
+
+See also: EQUIPMENT, COMPARE, SCORE
+~
+
 0 COMPARE~
 Syntax: compare <object-1> <object-2>
 Syntax: compare <object>
