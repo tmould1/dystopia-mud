@@ -3174,10 +3174,39 @@ is_ok = TRUE;
             act("A pair of leathery wings grow out of $n's back.\n\r", ch, NULL, NULL, TO_ROOM);
         }
     }
-            
+
             send_to_char("Your mastery of ",ch);
             send_to_char(discipline[loop],ch);
             send_to_char(" increases.\n\r",ch);
+
+            /* Display newly unlocked abilities at this discipline level */
+            {
+                int cmd;
+                char abilities[MAX_STRING_LENGTH];
+                bool first_ability = TRUE;
+
+                abilities[0] = '\0';
+                for (cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++)
+                {
+                    if (cmd_table[cmd].discipline == loop
+                        && cmd_table[cmd].disclevel == ch->power[loop]
+                        && IS_CLASS(ch, cmd_table[cmd].race))
+                    {
+                        if (!first_ability)
+                            strcat(abilities, ", ");
+                        strcat(abilities, cmd_table[cmd].name);
+                        first_ability = FALSE;
+                    }
+                }
+                if (abilities[0] != '\0')
+                {
+                    send_to_char("New abilities unlocked: ", ch);
+                    send_to_char(abilities, ch);
+                    send_to_char("\n\r", ch);
+                    send_to_char("Type 'powers' to see all your abilities.\n\r", ch);
+                }
+            }
+
             return;
          }
     }
