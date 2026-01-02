@@ -18,10 +18,18 @@ make -f build/Makefile clean && make -f build/Makefile
 Requires: `build-essential` package (gcc, make) plus `libz-dev`, `libcrypt-dev`, `libpthread` libraries.
 
 ### Windows (MinGW/MSYS2)
+**Preferred**: Use `build\build.bat` which handles paths and parallel compilation automatically:
+```cmd
+build\build.bat clean   # Clean build artifacts
+build\build.bat         # Build with parallel jobs
+build\build.bat install # Build dystopia.exe (fresh install)
+```
+
+Or manually:
 ```bash
 make -f build/Makefile.mingw clean && make -f build/Makefile.mingw
 ```
-Produces `dystopia.exe` in project root. Requires `zlib1.dll` in same directory as executable.
+Produces `dystopia_new.exe` (or `dystopia.exe` with install target). Requires `zlib1.dll` in same directory as executable.
 
 ### Windows (MSVC)
 ```cmd
@@ -30,9 +38,25 @@ nmake /f build\Makefile.msvc
 ```
 Requires `zlib.lib` in src folder.
 
+## Source Directory Structure
+
+Source files are organized into functional subdirectories under `src/`:
+
+```
+src/
+├── core/       - Core engine (merc.h, comm.c, db.c, handler.c, interp.c, etc.)
+├── classes/    - Character classes (vamp.c, ww.c, demon.c, angel.c, etc.)
+├── combat/     - Combat systems (fight.c, kav_fight.c, magic.c, arena.c)
+├── commands/   - Player/admin commands (act_*.c, socials.c, wizutil.c)
+├── world/      - OLC/building (olc.c, olc_act.c, olc_save.c, build.c)
+└── systems/    - Game subsystems (update.c, save.c, clan.c, board.c, etc.)
+```
+
+Object files mirror this structure in `build/obj/`.
+
 ## Architecture
 
-### Core Files
+### Core Files (src/core/)
 - **merc.h** - Master header defining all structures (CHAR_DATA, OBJ_DATA, ROOM_INDEX_DATA, etc.), constants, and function prototypes. Include this in all source files.
 - **compat.h/compat.c** - Windows/POSIX compatibility layer providing threading, crypt, signals, and socket abstractions.
 - **comm.c** - Network I/O, game loop, descriptor handling. Data flow: `Game_loop -> Read_from_descriptor -> Read_from_buffer` and `Game_loop -> Process_Output -> Write_to_descriptor`.
@@ -40,7 +64,7 @@ Requires `zlib.lib` in src folder.
 - **interp.c** - Command interpreter and command table (`cmd_table`).
 - **handler.c** - Object/character manipulation, affect handling.
 
-### Character Classes (Races)
+### Character Classes (src/classes/)
 Each class has its own source file with powers and abilities:
 - `vamp.c` - Vampires
 - `ww.c` - Werewolves (uses `garou.h`)
@@ -57,14 +81,22 @@ Each class has its own source file with powers and abilities:
 - `undead_knight.c` - Undead Knights
 - `spiderdroid.c` - Spider Droids
 
-### Game Systems
+### Combat Systems (src/combat/)
 - **fight.c, kav_fight.c, jobo_fight.c** - Combat system
+- **magic.c** - Spell casting
+- **arena.c** - PvP arena
+- **special.c** - Special mob procedures
+
+### Game Systems (src/systems/)
 - **update.c** - Game tick updates (regeneration, weather, etc.)
 - **save.c** - Player file persistence
+- **clan.c** - Clan system
+- **board.c** - Message boards
+- **mccp.c** - MUD Client Compression Protocol
+
+### World Building (src/world/)
 - **olc.c, olc_act.c, olc_save.c** - Online creation system for building areas
 - **build.c** - Area/room/object/mobile building commands
-- **clan.c** - Clan system
-- **arena.c** - PvP arena
 
 ### Data Directories
 - `area/` - Area files (`.are`), loaded via `area/area.lst`

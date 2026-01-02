@@ -15,25 +15,47 @@ MAKEFLAGS += --output-sync=target
 SRC_DIR = src
 OBJ_DIR = build/obj
 
+# Subdirectories
+CORE_DIR     = $(SRC_DIR)/core
+CLASSES_DIR  = $(SRC_DIR)/classes
+COMBAT_DIR   = $(SRC_DIR)/combat
+COMMANDS_DIR = $(SRC_DIR)/commands
+WORLD_DIR    = $(SRC_DIR)/world
+SYSTEMS_DIR  = $(SRC_DIR)/systems
+
+# Include paths (so #include "merc.h" works from any source file)
+INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR)
+
 # Compiler flags
-C_FLAGS = -Wall -DWIN32 -DHAVE_ZLIB -O2 -c
+C_FLAGS = -Wall -DWIN32 -DHAVE_ZLIB -O2 -c $(INCLUDES)
 
 # Linker flags
 L_FLAGS = -lws2_32 -lbcrypt -lz
 
-# Source files
-SOURCES = act_comm.c act_info.c act_map.c act_move.c act_obj.c act_wiz.c bit.c mccp.c \
-          board.c build.c clan.c comm.c daemon.c db.c angel.c socials.c \
-          demon.c drow.c fight.c kav_wiz.c handler.c kav_fight.c kav_info.c \
-          interp.c mage.c magic.c mem.c monk.c monk2.c ninja.c olc.c upgrade.c \
-          olc_act.c olc_save.c save.c special.c string.c arena.c \
-          update.c vamp.c ww.c shapeshifter.c tanarri.c undead_knight.c \
-          samurai.c wizutil.c const.c spiderdroid.c lich.c jope.c \
-          jobo_king.c jobo_data.c jobo_fight.c jobo_act.c jobo_wiz.c jobo_util.c \
-          config.c compat.c
+# Source files by directory
+CORE_SRC = comm.c db.c mem.c handler.c interp.c config.c const.c string.c daemon.c compat.c
+CLASSES_SRC = vamp.c ww.c demon.c angel.c mage.c ninja.c monk.c monk2.c samurai.c \
+              drow.c lich.c shapeshifter.c tanarri.c undead_knight.c spiderdroid.c
+COMBAT_SRC = fight.c kav_fight.c jobo_fight.c magic.c arena.c special.c
+COMMANDS_SRC = act_comm.c act_info.c act_move.c act_obj.c act_map.c socials.c \
+               act_wiz.c kav_wiz.c jobo_wiz.c kav_info.c wizutil.c
+WORLD_SRC = olc.c olc_act.c olc_save.c build.c
+SYSTEMS_SRC = update.c save.c clan.c board.c bit.c upgrade.c mccp.c \
+              jobo_king.c jobo_data.c jobo_util.c jobo_act.c jope.c
 
-# Object files (in build/obj directory)
-O_FILES = $(addprefix $(OBJ_DIR)/,$(SOURCES:.c=.o))
+# Object files with subdirectory paths
+CORE_OBJ     = $(addprefix $(OBJ_DIR)/core/,$(CORE_SRC:.c=.o))
+CLASSES_OBJ  = $(addprefix $(OBJ_DIR)/classes/,$(CLASSES_SRC:.c=.o))
+COMBAT_OBJ   = $(addprefix $(OBJ_DIR)/combat/,$(COMBAT_SRC:.c=.o))
+COMMANDS_OBJ = $(addprefix $(OBJ_DIR)/commands/,$(COMMANDS_SRC:.c=.o))
+WORLD_OBJ    = $(addprefix $(OBJ_DIR)/world/,$(WORLD_SRC:.c=.o))
+SYSTEMS_OBJ  = $(addprefix $(OBJ_DIR)/systems/,$(SYSTEMS_SRC:.c=.o))
+
+O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ)
+
+# Object directory structure
+OBJ_DIRS = $(OBJ_DIR)/core $(OBJ_DIR)/classes $(OBJ_DIR)/combat \
+           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems
 
 # Target executable (in project root)
 # Default builds dystopia_new.exe for hot-reload updates
@@ -41,20 +63,36 @@ O_FILES = $(addprefix $(OBJ_DIR)/,$(SOURCES:.c=.o))
 TARGET = dystopia_new.exe
 TARGET_INSTALL = dystopia.exe
 
-all: $(OBJ_DIR) $(TARGET)
+all: $(OBJ_DIRS) $(TARGET)
 
-install: $(OBJ_DIR) $(O_FILES)
+install: $(OBJ_DIRS) $(O_FILES)
 	$(LD) -o $(TARGET_INSTALL) $(O_FILES) $(L_FLAGS)
 
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+# Create all object subdirectories
+$(OBJ_DIRS):
+	mkdir -p $@
 
 $(TARGET): $(O_FILES)
 	$(LD) -o $(TARGET) $(O_FILES) $(L_FLAGS)
 
-# Pattern rule for .c to .o
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_DIR)/merc.h $(SRC_DIR)/compat.h
-	$(CC) $(C_FLAGS) -I$(SRC_DIR) -o $@ $<
+# Pattern rules for each source directory
+$(OBJ_DIR)/core/%.o: $(CORE_DIR)/%.c $(CORE_DIR)/merc.h $(CORE_DIR)/compat.h
+	$(CC) $(C_FLAGS) -o $@ $<
+
+$(OBJ_DIR)/classes/%.o: $(CLASSES_DIR)/%.c $(CORE_DIR)/merc.h
+	$(CC) $(C_FLAGS) -o $@ $<
+
+$(OBJ_DIR)/combat/%.o: $(COMBAT_DIR)/%.c $(CORE_DIR)/merc.h
+	$(CC) $(C_FLAGS) -o $@ $<
+
+$(OBJ_DIR)/commands/%.o: $(COMMANDS_DIR)/%.c $(CORE_DIR)/merc.h
+	$(CC) $(C_FLAGS) -o $@ $<
+
+$(OBJ_DIR)/world/%.o: $(WORLD_DIR)/%.c $(CORE_DIR)/merc.h $(WORLD_DIR)/olc.h
+	$(CC) $(C_FLAGS) -o $@ $<
+
+$(OBJ_DIR)/systems/%.o: $(SYSTEMS_DIR)/%.c $(CORE_DIR)/merc.h
+	$(CC) $(C_FLAGS) -o $@ $<
 
 clean:
 	rm -f $(O_FILES) $(TARGET) $(TARGET_INSTALL)
