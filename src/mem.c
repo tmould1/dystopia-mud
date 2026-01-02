@@ -143,6 +143,14 @@ AREA_DATA *new_area( void )
     sprintf( buf, "area%d.are", pArea->vnum );
     pArea->filename	= str_dup( buf );
 
+    /* Runtime difficulty stats */
+    pArea->mob_count       = 0;
+    pArea->avg_mob_level   = 0;
+    pArea->min_mob_level   = 0;
+    pArea->max_mob_level   = 0;
+    pArea->avg_difficulty  = 0;
+    pArea->difficulty_tier = 0;
+
     return pArea;
 }
 

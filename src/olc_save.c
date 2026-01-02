@@ -786,6 +786,10 @@ void save_area( AREA_DATA *pArea )
 
     fclose( fp );
     fpReserve = fopen( NULL_FILE, "r" );
+
+    /* Recalculate area difficulty after saving changes */
+    calculate_area_difficulty( pArea );
+
     return;
 }
 

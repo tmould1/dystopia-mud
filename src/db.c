@@ -508,6 +508,7 @@ void boot_db(bool fCopyOver)
 	fix_exits();
 	fBootDb	= FALSE;
 	area_update();
+	calculate_all_area_difficulties();
 	load_bans();
         load_topboard();
         load_leaderboard();
@@ -553,6 +554,14 @@ void load_area( FILE *fp )
     pArea->uvnum        = 0;                    /* OLC */
     pArea->vnum         = top_area;             /* OLC */
     pArea->filename     = str_dup( strArea );   /* OLC */
+
+    /* Runtime difficulty stats */
+    pArea->mob_count       = 0;
+    pArea->avg_mob_level   = 0;
+    pArea->min_mob_level   = 0;
+    pArea->max_mob_level   = 0;
+    pArea->avg_difficulty  = 0;
+    pArea->difficulty_tier = 0;
 
     if ( area_first == NULL )
 	area_first = pArea;
@@ -619,7 +628,15 @@ void new_load_area( FILE *fp )
     pArea->uvnum        = 0;
     pArea->area_flags   = 0;
     pArea->recall       = ROOM_VNUM_TEMPLE;
- 
+
+    /* Runtime difficulty stats */
+    pArea->mob_count       = 0;
+    pArea->avg_mob_level   = 0;
+    pArea->min_mob_level   = 0;
+    pArea->max_mob_level   = 0;
+    pArea->avg_difficulty  = 0;
+    pArea->difficulty_tier = 0;
+
     for ( ; ; )
     {
        word   = feof( fp ) ? "End" : fread_word( fp );
@@ -2970,45 +2987,196 @@ void free_string( char *pstr )
 
 
 
+/*
+ * Calculate difficulty score for a single mob.
+ * Based on HP, damage output, AC, hitroll, and special flags.
+ */
+int calculate_mob_difficulty( MOB_INDEX_DATA *pMob )
+{
+    int avg_hp, avg_damage, num_attacks;
+    int hp_score, damage_score, ac_score, hitroll_score, disarm_score;
+    int difficulty;
+
+    if ( pMob == NULL )
+        return 0;
+
+    /* HP from dice: N*(S+1)/2 + P */
+    avg_hp = (pMob->hitnodice * (pMob->hitsizedice + 1) / 2) + pMob->hitplus;
+
+    /* Attack count: level thresholds + hitsizedice bonus */
+    num_attacks = 1;
+    if ( pMob->level >= 50 )   num_attacks++;
+    if ( pMob->level >= 100 )  num_attacks++;
+    if ( pMob->level >= 500 )  num_attacks++;
+    if ( pMob->level >= 1000 ) num_attacks++;
+    if ( pMob->level >= 1500 ) num_attacks++;
+    if ( pMob->level >= 2000 ) num_attacks += 2;
+    num_attacks += UMIN( pMob->hitsizedice, 20 );
+
+    /* NPC damage = level per hit, total = attacks * level */
+    avg_damage = pMob->level * num_attacks;
+
+    /* Component scores */
+    hp_score      = UMIN( avg_hp / 20, 500 );
+    damage_score  = avg_damage / 5;
+    ac_score      = ( pMob->ac < 0 ) ? UMIN( -pMob->ac / 10, 100 ) : -pMob->ac / 20;
+    hitroll_score = UMIN( pMob->hitroll, 100 );
+    disarm_score  = UMIN( pMob->level / 10, 50 );
+
+    difficulty = hp_score + damage_score + ac_score + hitroll_score + disarm_score;
+
+    /* Flag multipliers */
+    if ( IS_SET( pMob->affected_by, AFF_SANCTUARY ) )
+        difficulty = difficulty * 3 / 2;
+    if ( IS_SET( pMob->act, ACT_AGGRESSIVE ) )
+        difficulty = difficulty * 11 / 10;
+    if ( IS_SET( pMob->act, ACT_MOUNT ) )
+        difficulty = difficulty * 3 / 10;
+    if ( IS_SET( pMob->act, ACT_NOEXP ) || IS_SET( pMob->act, ACT_NOEXP2 ) )
+        difficulty = difficulty / 2;
+
+    return difficulty;
+}
+
+/*
+ * Calculate difficulty stats for an area based on its mobs.
+ */
+void calculate_area_difficulty( AREA_DATA *pArea )
+{
+    MOB_INDEX_DATA *pMob;
+    int vnum, total_level = 0, total_diff = 0, count = 0;
+    int min_lvl = 32767, max_lvl = 0;
+
+    if ( pArea == NULL )
+        return;
+
+    for ( vnum = pArea->lvnum; vnum <= pArea->uvnum; vnum++ )
+    {
+        if ( ( pMob = get_mob_index( vnum ) ) != NULL && pMob->area == pArea )
+        {
+            int diff = calculate_mob_difficulty( pMob );
+            count++;
+            total_level += pMob->level;
+            total_diff += diff;
+            if ( pMob->level < min_lvl ) min_lvl = pMob->level;
+            if ( pMob->level > max_lvl ) max_lvl = pMob->level;
+        }
+    }
+
+    pArea->mob_count = count;
+    if ( count > 0 )
+    {
+        pArea->avg_mob_level  = total_level / count;
+        pArea->avg_difficulty = total_diff / count;
+        pArea->min_mob_level  = min_lvl;
+        pArea->max_mob_level  = max_lvl;
+    }
+    else
+    {
+        pArea->avg_mob_level  = 0;
+        pArea->avg_difficulty = 0;
+        pArea->min_mob_level  = 0;
+        pArea->max_mob_level  = 0;
+    }
+
+    /* Assign tier */
+    if      ( pArea->avg_difficulty < 30 )  pArea->difficulty_tier = 0; /* trivial */
+    else if ( pArea->avg_difficulty < 100 ) pArea->difficulty_tier = 1; /* easy */
+    else if ( pArea->avg_difficulty < 300 ) pArea->difficulty_tier = 2; /* normal */
+    else if ( pArea->avg_difficulty < 600 ) pArea->difficulty_tier = 3; /* hard */
+    else                                    pArea->difficulty_tier = 4; /* deadly */
+}
+
+/*
+ * Calculate difficulty for all areas in the world.
+ */
+void calculate_all_area_difficulties( void )
+{
+    AREA_DATA *pArea;
+
+    for ( pArea = area_first; pArea != NULL; pArea = pArea->next )
+        calculate_area_difficulty( pArea );
+}
+
+static const char *tier_names[] = { "Trivial", "Easy", "Normal", "Hard", "Deadly" };
+
 void do_areas( CHAR_DATA *ch, char *argument )
 {
     char buf[MAX_STRING_LENGTH];
-    char left_area_buf[40];
-    char right_area_buf[40];
-    AREA_DATA *pArea1;
-    AREA_DATA *pArea2;
-    int iArea;
-    int iAreaHalf;
-    WAIT_STATE(ch,10);
-    iAreaHalf = (top_area + 1) / 2;
-    pArea1    = area_first;
-    pArea2    = area_first;
-    for ( iArea = 0; iArea < iAreaHalf; iArea++ )
-	pArea2 = pArea2->next;
+    char level_buf[20];
+    AREA_DATA *pArea;
+    AREA_DATA **arr;
+    int count = 0, i, j;
 
-    // Create a header for both columns before printing the areas and their Builders.
-    // The entire line will be 80 characters long.
-    sprintf( left_area_buf, "%-10s%-29s","Builders", "Area Name" );
-    sprintf( right_area_buf, "%-10s%-29s","Builders", "Area Name" );
-    sprintf( buf, "%s%s\n\r", left_area_buf, right_area_buf );
-    send_to_char( buf, ch );
-    // a border to separate pre-text from area data
-    sprintf(buf, "--------------------------------------------------------------------------------\n\r");
-    send_to_char(buf, ch);
-    
-    for ( iArea = 0; iArea < iAreaHalf; iArea++ )
+    WAIT_STATE( ch, 10 );
+
+    /* Count areas */
+    for ( pArea = area_first; pArea != NULL; pArea = pArea->next )
+        count++;
+
+    if ( count == 0 )
     {
-        // Converting this to builders and area name.
-        sprintf( left_area_buf, "%-10s%-29s", pArea1->builders, pArea1->name );
-        sprintf( right_area_buf, "%-10s%-29s", (pArea2 != NULL) ? pArea2->builders : "", (pArea2 != NULL) ? pArea2->name : "" );
-        sprintf( buf, "%-39s%-39s\n\r", left_area_buf, right_area_buf );
-        send_to_char( buf, ch );
-        pArea1 = pArea1->next;
-        if ( pArea2 != NULL )
-            pArea2 = pArea2->next;
+        send_to_char( "No areas found.\n\r", ch );
+        return;
     }
 
-    return;
+    /* Allocate array for sorting */
+    arr = alloc_mem( sizeof( AREA_DATA * ) * count );
+
+    /* Fill array */
+    i = 0;
+    for ( pArea = area_first; pArea != NULL; pArea = pArea->next )
+        arr[i++] = pArea;
+
+    /* Sort by difficulty_tier, then avg_mob_level within tier (insertion sort) */
+    for ( i = 1; i < count; i++ )
+    {
+        AREA_DATA *tmp = arr[i];
+        for ( j = i - 1; j >= 0; j-- )
+        {
+            if ( arr[j]->difficulty_tier > tmp->difficulty_tier )
+                arr[j + 1] = arr[j];
+            else if ( arr[j]->difficulty_tier == tmp->difficulty_tier
+                   && arr[j]->avg_mob_level > tmp->avg_mob_level )
+                arr[j + 1] = arr[j];
+            else
+                break;
+        }
+        arr[j + 1] = tmp;
+    }
+
+    /* Header */
+    send_to_char(
+        "#w------------------------------------------------------------------------------\n\r"
+        "Area Name                        Tier      Level      Builders\n\r"
+        "------------------------------------------------------------------------------#n\n\r", ch );
+
+    /* Display */
+    for ( i = 0; i < count; i++ )
+    {
+        pArea = arr[i];
+        if ( pArea->mob_count > 0 )
+        {
+            sprintf( level_buf, "%d-%d", pArea->min_mob_level, pArea->max_mob_level );
+            sprintf( buf, "%-32.32s %-9s %-10s %s\n\r",
+                pArea->name, tier_names[pArea->difficulty_tier],
+                level_buf, pArea->builders );
+        }
+        else
+        {
+            sprintf( buf, "%-32.32s %-9s %-10s %s\n\r",
+                pArea->name, "N/A", "No mobs", pArea->builders );
+        }
+        send_to_char( buf, ch );
+    }
+
+    /* Footer */
+    sprintf( buf,
+        "#w------------------------------------------------------------------------------#n\n\r"
+        "Total: %d areas\n\r", count );
+    send_to_char( buf, ch );
+
+    free_mem( arr, sizeof( AREA_DATA * ) * count );
 }
 
 

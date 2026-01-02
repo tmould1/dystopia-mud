@@ -2640,7 +2640,7 @@ struct	reset_data
 /*
  * Area definition.
  */
-struct  area_data   
+struct  area_data
 {
     AREA_DATA *         next;
     char *              name;
@@ -2654,6 +2654,14 @@ struct  area_data
     int                 uvnum;          /* OLC - Upper vnum */
     int                 vnum;           /* OLC - Area vnum  */
     int                 area_flags;     /* OLC */
+
+    /* Runtime difficulty stats - not saved to area files */
+    int                 mob_count;      /* Number of mobs in area */
+    int                 avg_mob_level;  /* Average mob level */
+    int                 min_mob_level;  /* Lowest mob level */
+    int                 max_mob_level;  /* Highest mob level */
+    int                 avg_difficulty; /* Calculated difficulty score */
+    int                 difficulty_tier;/* 0=trivial,1=easy,2=normal,3=hard,4=deadly */
 };
 
 
@@ -4552,6 +4560,9 @@ void  save_disabled   args( ( void ) );
 /* db.c */
 void	boot_db		args( (bool fCopyOver ) );
 void	area_update	args( ( void ) );
+int	calculate_mob_difficulty args( ( MOB_INDEX_DATA *pMob ) );
+void	calculate_area_difficulty args( ( AREA_DATA *pArea ) );
+void	calculate_all_area_difficulties args( ( void ) );
 CD *	create_mobile	args( ( MOB_INDEX_DATA *pMobIndex ) );
 OD *	create_object	args( ( OBJ_INDEX_DATA *pObjIndex, int level ) );
 void	clear_char	args( ( CHAR_DATA *ch ) );
