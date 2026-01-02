@@ -1348,12 +1348,12 @@ void new_descriptor( int control )
     }
 
     /* Offer protocol support to client */
+    /* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
     write_to_buffer( dnew, compress2_will, 0 );  /* MCCP v2 preferred */
     write_to_buffer( dnew, compress_will, 0 );   /* MCCP v1 fallback */
     write_to_buffer( dnew, mssp_will, 0 );       /* MSSP server status */
-    /* MXP disabled - causes greeting truncation in Mudlet */
-    /* write_to_buffer( dnew, mxp_will, 0 ); */
     write_to_buffer( dnew, gmcp_will, 0 );       /* GMCP protocol */
+    write_to_buffer( dnew, mxp_will, 0 );       /* MXP rich text */
 
     /* send greeting */
     {
@@ -1668,6 +1668,15 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
 		    i += strlen(gmcp_dont) - 1;
 		    d->gmcp_enabled = FALSE;
 		}
+		/* MXP - check strlen > 0 to avoid matching empty strings */
+		else if (strlen(mxp_do) > 0 && !memcmp(&d->inbuf[i], mxp_do, strlen(mxp_do))) {
+		    i += strlen(mxp_do) - 1;
+		    mxpStart(d);
+		}
+		else if (strlen(mxp_dont) > 0 && !memcmp(&d->inbuf[i], mxp_dont, strlen(mxp_dont))) {
+		    i += strlen(mxp_dont) - 1;
+		    mxpEnd(d);
+		}
 	    }
 	}
 	/* Clear buffer after processing telnet-only data */
@@ -1727,12 +1736,12 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
                 i += strlen(mssp_do) - 1;
                 mssp_send(d);
             }
-            /* MXP */
-            else if (!memcmp(&d->inbuf[i], mxp_do, strlen(mxp_do))) {
+            /* MXP - check strlen > 0 to avoid matching empty strings */
+            else if (strlen(mxp_do) > 0 && !memcmp(&d->inbuf[i], mxp_do, strlen(mxp_do))) {
                 i += strlen(mxp_do) - 1;
                 mxpStart(d);
             }
-            else if (!memcmp(&d->inbuf[i], mxp_dont, strlen(mxp_dont))) {
+            else if (strlen(mxp_dont) > 0 && !memcmp(&d->inbuf[i], mxp_dont, strlen(mxp_dont))) {
                 i += strlen(mxp_dont) - 1;
                 mxpEnd(d);
             }

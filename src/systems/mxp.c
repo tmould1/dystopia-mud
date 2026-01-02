@@ -38,14 +38,19 @@ const char mxp_sb[]   = { '\0' };
 #endif
 
 /*
+ * MXP mode escape sequences (ESC[#z)
+ * 0 = Open line, 1 = Secure line, 2 = Locked line
+ * 5 = Lock open, 6 = Lock secure, 7 = Lock locked (default)
+ */
+static const char mxp_lock_locked[] = "\033[7z";  /* Set default to locked mode */
+
+/*
  * Start MXP mode on a descriptor
  * Called when client responds with IAC DO MXP
  *
- * Note: We intentionally do NOT send the IAC SB MXP IAC SE subnegotiation
- * immediately. Sending it during the initial telnet negotiation phase
- * (before the greeting is fully sent) can corrupt the output stream in
- * some clients. Instead, we just mark MXP as enabled and let MXP tags
- * be used in subsequent output.
+ * Per MXP spec, after client sends IAC DO MXP, we must send:
+ * IAC SB MXP IAC SE to tell the client MXP mode is now active.
+ * Then we set locked mode as default so normal text isn't parsed.
  */
 bool mxpStart(DESCRIPTOR_DATA *desc)
 {
@@ -55,7 +60,14 @@ bool mxpStart(DESCRIPTOR_DATA *desc)
     if (desc->mxp_enabled)
         return TRUE;  /* Already enabled */
 
-    /* Just mark as enabled - don't send subnegotiation during initial connect */
+    /* Send the MXP subnegotiation start sequence */
+    write_to_descriptor(desc, (char *)mxp_sb, strlen(mxp_sb));
+
+    /* Set default mode to LOCKED so normal text isn't parsed as MXP.
+     * This prevents raw < and > from being interpreted as tags.
+     * Use #M escape in text to switch to secure mode for actual MXP tags. */
+    write_to_descriptor(desc, (char *)mxp_lock_locked, strlen(mxp_lock_locked));
+
     desc->mxp_enabled = TRUE;
     return TRUE;
 }
