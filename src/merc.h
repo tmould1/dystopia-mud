@@ -3856,6 +3856,8 @@ DECLARE_DO_FUN(	do_log		);
 DECLARE_DO_FUN(	do_look		);
 DECLARE_DO_FUN(	do_majesty	);
 DECLARE_DO_FUN( do_makepreg	);
+DECLARE_DO_FUN(	do_map		);
+DECLARE_DO_FUN(	do_amap		);
 DECLARE_DO_FUN(	do_marry	);
 DECLARE_DO_FUN(	do_mask		);
 DECLARE_DO_FUN(	do_meditate	);

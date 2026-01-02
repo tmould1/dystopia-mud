@@ -22,7 +22,7 @@ C_FLAGS = -Wall -DWIN32 -DHAVE_ZLIB -O2 -c
 L_FLAGS = -lws2_32 -lbcrypt -lz
 
 # Source files
-SOURCES = act_comm.c act_info.c act_move.c act_obj.c act_wiz.c bit.c mccp.c \
+SOURCES = act_comm.c act_info.c act_map.c act_move.c act_obj.c act_wiz.c bit.c mccp.c \
           board.c build.c clan.c comm.c daemon.c db.c angel.c socials.c \
           demon.c drow.c fight.c kav_wiz.c handler.c kav_fight.c kav_info.c \
           interp.c mage.c magic.c mem.c monk.c monk2.c ninja.c olc.c upgrade.c \

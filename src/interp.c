@@ -281,6 +281,8 @@ const	struct	cmd_type	cmd_table	[] =
     { "combatswitch",	do_combatswitch,	POS_FIGHTING, 0, LOG_NORMAL, 0,0,0},
     { "look",		do_look,	POS_MEDITATING,	 0,  LOG_NORMAL, 0,0,0	},
     { "ls",			do_look,	POS_MEDITATING,	 0,  LOG_NORMAL, 0,0,0	},
+    { "map",		do_map,		POS_RESTING,	 0,  LOG_NORMAL, 0,0,0	},
+    { "amap",		do_amap,	POS_DEAD,	 7,  LOG_NORMAL, 0,0,0	},
     { "meditate",		do_meditate,POS_MEDITATING,	 0,  LOG_NORMAL, 0,0,0	},
     { "mount",		do_mount,	POS_STANDING,	 0,  LOG_NORMAL, 0,0,0	},
     { "order",		do_order,	POS_SITTING,	 1,  LOG_ALWAYS, 0,0,0	},
