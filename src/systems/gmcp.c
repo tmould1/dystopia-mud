@@ -45,6 +45,9 @@ const char gmcp_dont[] = { IAC, DONT, TELOPT_GMCP, '\0' };
 /* External functions */
 bool write_to_descriptor args( ( DESCRIPTOR_DATA *d, char *txt, int length ) );
 
+/* External data */
+extern GAMECONFIG_DATA game_config;
+
 /*
  * Get class name from class bitmask
  */
@@ -270,6 +273,30 @@ void gmcp_send_info(CHAR_DATA *ch)
 }
 
 /*
+ * Send Client.GUI for Mudlet auto-install package
+ * Sends the URL and version of a Mudlet mpackage that clients will
+ * automatically download and install.
+ */
+void gmcp_send_gui(DESCRIPTOR_DATA *d)
+{
+    char buf[MAX_STRING_LENGTH];
+
+    if (d == NULL || !d->gmcp_enabled)
+        return;
+
+    /* Skip if no GUI URL configured */
+    if (game_config.gui_url == NULL || game_config.gui_url[0] == '\0')
+        return;
+
+    snprintf(buf, sizeof(buf),
+        "{\"version\":\"%s\",\"url\":\"%s\"}",
+        game_config.gui_version,
+        game_config.gui_url);
+
+    gmcp_send(d, "Client.GUI", buf);
+}
+
+/*
  * Send all character data (called on login)
  */
 void gmcp_send_char_data(CHAR_DATA *ch)
@@ -277,6 +304,7 @@ void gmcp_send_char_data(CHAR_DATA *ch)
     if (ch == NULL || ch->desc == NULL || !ch->desc->gmcp_enabled)
         return;
 
+    gmcp_send_gui(ch->desc);  /* Send GUI package first */
     gmcp_send_info(ch);
     gmcp_send_status(ch);
     gmcp_send_vitals(ch);

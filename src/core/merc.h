@@ -351,6 +351,8 @@ typedef struct config_data
   int base_xp;
   int max_xp_per_kill;
   char * game_name;
+  char * gui_url;       /* URL to Mudlet mpackage for GMCP Client.GUI */
+  char * gui_version;   /* Version string for Client.GUI updates */
 } GAMECONFIG_DATA;
 
 

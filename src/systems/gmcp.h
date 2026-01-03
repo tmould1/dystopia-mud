@@ -53,4 +53,7 @@ void gmcp_handle_subnegotiation(DESCRIPTOR_DATA *d, unsigned char *data, int len
 /* Send all character data (called on login) */
 void gmcp_send_char_data(CHAR_DATA *ch);
 
+/* Send Client.GUI for Mudlet auto-install package */
+void gmcp_send_gui(DESCRIPTOR_DATA *d);
+
 #endif /* GMCP_H */

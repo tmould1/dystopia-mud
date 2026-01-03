@@ -15,6 +15,8 @@ void load_gameconfig()
 	game_config.base_xp = 5000;
 	game_config.max_xp_per_kill = 1000000000;
 	game_config.game_name = str_dup("Dystopian Spin-Off");
+	game_config.gui_url = str_dup("");
+	game_config.gui_version = str_dup("1");
 
 	if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "r")) == NULL)
 	{
@@ -71,6 +73,16 @@ void load_gameconfig()
 		{
 			game_config.game_name = str_dup(value);
 		}
+		else if (!str_cmp(variable, "gui_url"))
+		{
+			free_string(game_config.gui_url);
+			game_config.gui_url = str_dup(value);
+		}
+		else if (!str_cmp(variable, "gui_version"))
+		{
+			free_string(game_config.gui_version);
+			game_config.gui_version = str_dup(value);
+		}
 		else
 		{
 			log_string("Unknown variable in gameconfig.txt");
@@ -92,6 +104,8 @@ void save_gameconfig()
 	fprintf(fp, "base_xp: %d\n", game_config.base_xp);
 	fprintf(fp, "max_xp_per_kill: %d\n", game_config.max_xp_per_kill);
 	fprintf(fp, "game_name: %s\n", game_config.game_name);
+	fprintf(fp, "gui_url: %s\n", game_config.gui_url);
+	fprintf(fp, "gui_version: %s\n", game_config.gui_version);
 
 	fclose(fp);
 }
@@ -116,6 +130,10 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 		sprintf(buf, "max_xp_per_kill - Max XP per kill: %d\n\r", game_config.max_xp_per_kill);
 		send_to_char(buf, ch);
 		sprintf(buf, "game_name - Game Name: \"%s\"\n\r", game_config.game_name);
+		send_to_char(buf, ch);
+		sprintf(buf, "gui_url - Mudlet GUI Package URL: \"%s\"\n\r", game_config.gui_url);
+		send_to_char(buf, ch);
+		sprintf(buf, "gui_version - Mudlet GUI Package Version: \"%s\"\n\r", game_config.gui_version);
 		send_to_char(buf, ch);
 		return;
 	}
@@ -172,6 +190,40 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 		sprintf(new_value, arg2);
 		free_string(game_config.game_name);
 		game_config.game_name = str_dup(new_value);
+	}
+	else if (!str_cmp(arg, "gui_url"))
+	{
+		// if arg2 is blank, report the value
+		if (arg2[0] == '\0')
+		{
+			char buf[MAX_STRING_LENGTH];
+			sprintf(buf, "GUI URL: \"%s\"\n\r", game_config.gui_url);
+			send_to_char(buf, ch);
+			return;
+		}
+
+		sprintf(modified_field, "GUI URL");
+		sprintf(old_value, "%s", game_config.gui_url);
+		sprintf(new_value, arg2);
+		free_string(game_config.gui_url);
+		game_config.gui_url = str_dup(new_value);
+	}
+	else if (!str_cmp(arg, "gui_version"))
+	{
+		// if arg2 is blank, report the value
+		if (arg2[0] == '\0')
+		{
+			char buf[MAX_STRING_LENGTH];
+			sprintf(buf, "GUI Version: \"%s\"\n\r", game_config.gui_version);
+			send_to_char(buf, ch);
+			return;
+		}
+
+		sprintf(modified_field, "GUI Version");
+		sprintf(old_value, "%s", game_config.gui_version);
+		sprintf(new_value, arg2);
+		free_string(game_config.gui_version);
+		game_config.gui_version = str_dup(new_value);
 	}
 	// arg1 not recognized, show prompt
 	else
