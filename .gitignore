@@ -30,11 +30,8 @@ src/zlib.h
 src/zlib.lib
 build_output.txt
 
-# Runtime data files
-txt/copyover.data
-txt/leader.txt
-txt/kingdoms.txt
-txt/topboard.txt
+# Runtime data files (auto-created on first launch if missing)
+txt/
 
 # Python cache
 __pycache__/
