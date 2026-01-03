@@ -123,21 +123,26 @@ const	char	echo_on_str	[] = { IAC, WONT, TELOPT_ECHO, '\0' };
 const	char 	go_ahead_str	[] = { IAC, GA, '\0' };
 /* MCCP v1 */
 const   char    compress_will   [] = { IAC, WILL, TELOPT_COMPRESS, '\0' };
+const   char    compress_wont   [] = { IAC, WONT, TELOPT_COMPRESS, '\0' };
 const   char    compress_do     [] = { IAC, DO, TELOPT_COMPRESS, '\0' };
 const   char    compress_dont   [] = { IAC, DONT, TELOPT_COMPRESS, '\0' };
 /* MCCP v2 */
 const   char    compress2_will  [] = { IAC, WILL, TELOPT_COMPRESS2, '\0' };
+const   char    compress2_wont  [] = { IAC, WONT, TELOPT_COMPRESS2, '\0' };
 const   char    compress2_do    [] = { IAC, DO, TELOPT_COMPRESS2, '\0' };
 const   char    compress2_dont  [] = { IAC, DONT, TELOPT_COMPRESS2, '\0' };
 /* MSSP */
 extern const char mssp_will[];
+extern const char mssp_wont[];
 extern const char mssp_do[];
 /* MXP */
 extern const char mxp_will[];
+extern const char mxp_wont[];
 extern const char mxp_do[];
 extern const char mxp_dont[];
 /* GMCP */
 extern const char gmcp_will[];
+extern const char gmcp_wont[];
 extern const char gmcp_do[];
 extern const char gmcp_dont[];
 
@@ -153,21 +158,26 @@ const   char echo_on_str	[] = { (char)IAC, (char)WONT, (char)TELOPT_ECHO, '\0' }
 const   char go_ahead_str	[] = { (char)IAC, (char)GA, '\0' };
 /* MCCP v1 */
 const   char    compress_will   [] = { (char)IAC, (char)WILL, (char)TELOPT_COMPRESS, '\0' };
+const   char    compress_wont   [] = { (char)IAC, (char)WONT, (char)TELOPT_COMPRESS, '\0' };
 const   char    compress_do     [] = { (char)IAC, (char)DO, (char)TELOPT_COMPRESS, '\0' };
 const   char    compress_dont   [] = { (char)IAC, (char)DONT, (char)TELOPT_COMPRESS, '\0' };
 /* MCCP v2 */
 const   char    compress2_will  [] = { (char)IAC, (char)WILL, (char)TELOPT_COMPRESS2, '\0' };
+const   char    compress2_wont  [] = { (char)IAC, (char)WONT, (char)TELOPT_COMPRESS2, '\0' };
 const   char    compress2_do    [] = { (char)IAC, (char)DO, (char)TELOPT_COMPRESS2, '\0' };
 const   char    compress2_dont  [] = { (char)IAC, (char)DONT, (char)TELOPT_COMPRESS2, '\0' };
 /* MSSP */
 extern const char mssp_will[];
+extern const char mssp_wont[];
 extern const char mssp_do[];
 /* MXP */
 extern const char mxp_will[];
+extern const char mxp_wont[];
 extern const char mxp_do[];
 extern const char mxp_dont[];
 /* GMCP */
 extern const char gmcp_will[];
+extern const char gmcp_wont[];
 extern const char gmcp_do[];
 extern const char gmcp_dont[];
 
@@ -1968,12 +1978,24 @@ void crashrecov (int iSignal)
 void retell_mccp( DESCRIPTOR_DATA *d)
 {
   /* Re-negotiate all protocols after copyover */
+  /* Per RFC 854, we must send WONT first to reset client's protocol state, */
+  /* then send WILL to re-offer. MUSHclient strictly follows RFC and ignores */
+  /* WILL offers for protocols it thinks are already active from pre-copyover. */
+
+  /* First, send WONT to reset client's protocol state */
+  write_to_descriptor( d, (char *)compress2_wont, strlen(compress2_wont) );
+  write_to_descriptor( d, (char *)compress_wont, strlen(compress_wont) );
+  write_to_descriptor( d, (char *)mssp_wont, strlen(mssp_wont) );
+  write_to_descriptor( d, (char *)gmcp_wont, strlen(gmcp_wont) );
+  write_to_descriptor( d, (char *)mxp_wont, strlen(mxp_wont) );
+
+  /* Now send WILL to offer protocols fresh */
   /* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
-  write_to_buffer( d, compress2_will, 0 );  /* MCCP v2 */
-  write_to_buffer( d, compress_will, 0 );   /* MCCP v1 */
-  write_to_buffer( d, mssp_will, 0 );       /* MSSP */
-  write_to_buffer( d, gmcp_will, 0 );       /* GMCP */
-  write_to_buffer( d, mxp_will, 0 );        /* MXP */
+  write_to_descriptor( d, (char *)compress2_will, strlen(compress2_will) );  /* MCCP v2 */
+  write_to_descriptor( d, (char *)compress_will, strlen(compress_will) );    /* MCCP v1 */
+  write_to_descriptor( d, (char *)mssp_will, strlen(mssp_will) );            /* MSSP */
+  write_to_descriptor( d, (char *)gmcp_will, strlen(gmcp_will) );            /* GMCP */
+  write_to_descriptor( d, (char *)mxp_will, strlen(mxp_will) );              /* MXP */
   return;
 }
 

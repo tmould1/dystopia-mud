@@ -6936,6 +6936,13 @@ void copyover_recover ()
 		}
 #endif
 
+		d = alloc_perm (sizeof(DESCRIPTOR_DATA));
+		init_descriptor (d,desc); /* set up various stuff */
+
+		/* Re-negotiate protocols FIRST, before any text output */
+		/* MUSHclient and some clients only accept WILL offers at connection start */
+		retell_mccp(d);
+
 		/* Write something, and check if it goes error-free */
 		if (!write_to_descriptor_2(desc, "\n\r <*>             The world spins             <*>\n\r",0))
 		{
@@ -6944,11 +6951,10 @@ void copyover_recover ()
 #else
 			close (desc); /* nope */
 #endif
+			/* Clean up the descriptor we just allocated */
+			free_mem(d->outbuf, d->outsize);
 			continue;
 		}
-
-		d = alloc_perm (sizeof(DESCRIPTOR_DATA));
-		init_descriptor (d,desc); /* set up various stuff */
 
                 players_logged++;
 
@@ -6984,7 +6990,6 @@ void copyover_recover ()
 			act ("$n materializes!", d->character, NULL, NULL, TO_ROOM);
 			d->connected = CON_PLAYING;
                         d->lookup_status = STATUS_DONE;
-                        retell_mccp(d);
 		}
 
 	}

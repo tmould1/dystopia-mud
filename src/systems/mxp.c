@@ -18,6 +18,7 @@ bool write_to_descriptor args( ( DESCRIPTOR_DATA *d, char *txt, int length ) );
  */
 #if defined(unix)
 const char mxp_will[] = { IAC, WILL, TELOPT_MXP, '\0' };
+const char mxp_wont[] = { IAC, WONT, TELOPT_MXP, '\0' };
 const char mxp_do[]   = { IAC, DO, TELOPT_MXP, '\0' };
 const char mxp_dont[] = { IAC, DONT, TELOPT_MXP, '\0' };
 const char mxp_sb[]   = { IAC, SB, TELOPT_MXP, IAC, SE, '\0' };
@@ -25,6 +26,7 @@ const char mxp_sb[]   = { IAC, SB, TELOPT_MXP, IAC, SE, '\0' };
 
 #if defined(WIN32)
 const char mxp_will[] = { (char)IAC, (char)WILL, (char)TELOPT_MXP, '\0' };
+const char mxp_wont[] = { (char)IAC, (char)WONT, (char)TELOPT_MXP, '\0' };
 const char mxp_do[]   = { (char)IAC, (char)DO, (char)TELOPT_MXP, '\0' };
 const char mxp_dont[] = { (char)IAC, (char)DONT, (char)TELOPT_MXP, '\0' };
 const char mxp_sb[]   = { (char)IAC, (char)SB, (char)TELOPT_MXP, (char)IAC, (char)SE, '\0' };
@@ -32,6 +34,7 @@ const char mxp_sb[]   = { (char)IAC, (char)SB, (char)TELOPT_MXP, (char)IAC, (cha
 
 #if defined(macintosh) || defined(MSDOS)
 const char mxp_will[] = { '\0' };
+const char mxp_wont[] = { '\0' };
 const char mxp_do[]   = { '\0' };
 const char mxp_dont[] = { '\0' };
 const char mxp_sb[]   = { '\0' };

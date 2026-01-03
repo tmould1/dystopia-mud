@@ -32,10 +32,12 @@
  */
 #if defined(WIN32)
 const char gmcp_will[] = { (char)IAC, (char)WILL, (char)TELOPT_GMCP, '\0' };
+const char gmcp_wont[] = { (char)IAC, (char)WONT, (char)TELOPT_GMCP, '\0' };
 const char gmcp_do[]   = { (char)IAC, (char)DO, (char)TELOPT_GMCP, '\0' };
 const char gmcp_dont[] = { (char)IAC, (char)DONT, (char)TELOPT_GMCP, '\0' };
 #else
 const char gmcp_will[] = { IAC, WILL, TELOPT_GMCP, '\0' };
+const char gmcp_wont[] = { IAC, WONT, TELOPT_GMCP, '\0' };
 const char gmcp_do[]   = { IAC, DO, TELOPT_GMCP, '\0' };
 const char gmcp_dont[] = { IAC, DONT, TELOPT_GMCP, '\0' };
 #endif

@@ -24,6 +24,7 @@
  * Telnet negotiation strings (defined in gmcp.c)
  */
 extern const char gmcp_will[];  /* IAC WILL GMCP - offer support */
+extern const char gmcp_wont[];  /* IAC WONT GMCP - withdraw support */
 extern const char gmcp_do[];    /* IAC DO GMCP - client accepts */
 extern const char gmcp_dont[];  /* IAC DONT GMCP - client refuses */
 

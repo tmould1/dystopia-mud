@@ -41,9 +41,11 @@ extern time_t boot_time;
 /* MSSP telnet negotiation sequences */
 #if defined(WIN32)
 const char mssp_will[] = { (char)IAC, (char)WILL, (char)TELOPT_MSSP, '\0' };
+const char mssp_wont[] = { (char)IAC, (char)WONT, (char)TELOPT_MSSP, '\0' };
 const char mssp_do[]   = { (char)IAC, (char)DO, (char)TELOPT_MSSP, '\0' };
 #else
 const char mssp_will[] = { IAC, WILL, TELOPT_MSSP, '\0' };
+const char mssp_wont[] = { IAC, WONT, TELOPT_MSSP, '\0' };
 const char mssp_do[]   = { IAC, DO, TELOPT_MSSP, '\0' };
 #endif
 
