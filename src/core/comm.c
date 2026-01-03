@@ -1967,8 +1967,13 @@ void crashrecov (int iSignal)
 
 void retell_mccp( DESCRIPTOR_DATA *d)
 {
-  write_to_buffer( d, compress2_will, 0 );
-  write_to_buffer( d, compress_will, 0 );
+  /* Re-negotiate all protocols after copyover */
+  /* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
+  write_to_buffer( d, compress2_will, 0 );  /* MCCP v2 */
+  write_to_buffer( d, compress_will, 0 );   /* MCCP v1 */
+  write_to_buffer( d, mssp_will, 0 );       /* MSSP */
+  write_to_buffer( d, gmcp_will, 0 );       /* GMCP */
+  write_to_buffer( d, mxp_will, 0 );        /* MXP */
   return;
 }
 

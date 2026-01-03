@@ -2480,13 +2480,13 @@ void do_protocols(CHAR_DATA *ch, char *argument)
         return;
     }
 
-    /* Determine MCCP status - padded to same display width */
+    /* Determine MCCP status */
     if (ch->desc->out_compress != NULL)
     {
         if (ch->desc->mccp_version == 2)
-            mccp_status = "#GOn#n (v2)";
+            mccp_status = "#GOn (v2)#n";
         else if (ch->desc->mccp_version == 1)
-            mccp_status = "#GOn#n (v1)";
+            mccp_status = "#GOn (v1)#n";
         else
             mccp_status = "#GOn#n     ";
     }
@@ -2499,20 +2499,18 @@ void do_protocols(CHAR_DATA *ch, char *argument)
     /* Determine MXP status */
     mxp_status = ch->desc->mxp_enabled ? "#GOn#n " : "#rOff#n";
 
-    snprintf(buf, sizeof(buf),
-        "#w+----------------------------------+#n\n\r"
-        "#w|#n      #CMUD Protocol Status#n       #w|#n\n\r"
-        "#w+----------------------------------+#n\n\r"
-        "#w|#n  #yMCCP#n  Compression      %s  #w|#n\n\r"
-        "#w|#n  #yGMCP#n  Data Channel     %s     #w|#n\n\r"
-        "#w|#n  #yMXP#n   Extensions       %s     #w|#n\n\r"
-        "#w|#n  #yMSSP#n  Server Status    #yAvail#n  #w|#n\n\r"
-        "#w+----------------------------------+#n\n\r",
-        mccp_status,
-        gmcp_status,
-        mxp_status);
-
+    /* Box width = 34 chars inside the + markers */
+    send_to_char("#w+----------------------------------+#n\n\r", ch);
+    send_to_char("#w|#n      #CMUD Protocol Status#n       #w|#n\n\r", ch);
+    send_to_char("#w+----------------------------------+#n\n\r", ch);
+    snprintf(buf, sizeof(buf), "#w|#n  #yMCCP#n  Compression      %s #w|#n\n\r", mccp_status);
     send_to_char(buf, ch);
+    snprintf(buf, sizeof(buf), "#w|#n  #yGMCP#n  Data Channel     %s    #w|#n\n\r", gmcp_status);
+    send_to_char(buf, ch);
+    snprintf(buf, sizeof(buf), "#w|#n  #yMXP#n   Extensions       %s    #w|#n\n\r", mxp_status);
+    send_to_char(buf, ch);
+    send_to_char("#w|#n  #yMSSP#n  Server Status    #yAvail#n  #w|#n\n\r", ch);
+    send_to_char("#w+----------------------------------+#n\n\r", ch);
 
     /* Show additional GMCP details if enabled */
     if (ch->desc->gmcp_enabled && ch->desc->gmcp_packages > 0)
