@@ -57,8 +57,10 @@ O_WORLD = $(OBJ_DIR)\world\olc.obj $(OBJ_DIR)\world\olc_act.obj $(OBJ_DIR)\world
 # Systems objects
 O_SYSTEMS = $(OBJ_DIR)\systems\update.obj $(OBJ_DIR)\systems\save.obj $(OBJ_DIR)\systems\clan.obj \
             $(OBJ_DIR)\systems\board.obj $(OBJ_DIR)\systems\bit.obj $(OBJ_DIR)\systems\upgrade.obj \
-            $(OBJ_DIR)\systems\mccp.obj $(OBJ_DIR)\systems\jobo_king.obj $(OBJ_DIR)\systems\jobo_data.obj \
-            $(OBJ_DIR)\systems\jobo_util.obj $(OBJ_DIR)\systems\jobo_act.obj $(OBJ_DIR)\systems\jope.obj
+            $(OBJ_DIR)\systems\mccp.obj $(OBJ_DIR)\systems\mssp.obj $(OBJ_DIR)\systems\mxp.obj \
+            $(OBJ_DIR)\systems\gmcp.obj $(OBJ_DIR)\systems\naws.obj $(OBJ_DIR)\systems\jobo_king.obj \
+            $(OBJ_DIR)\systems\jobo_data.obj $(OBJ_DIR)\systems\jobo_util.obj $(OBJ_DIR)\systems\jobo_act.obj \
+            $(OBJ_DIR)\systems\jope.obj
 
 O_FILES = $(O_CORE) $(O_CLASSES) $(O_COMBAT) $(O_COMMANDS) $(O_WORLD) $(O_SYSTEMS)
 

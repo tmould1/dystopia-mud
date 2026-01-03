@@ -2470,6 +2470,7 @@ void do_communicate( CHAR_DATA *ch, char *argument )
 void do_protocols(CHAR_DATA *ch, char *argument)
 {
     char buf[MAX_STRING_LENGTH];
+    char naws_status[64];
     const char *mccp_status;
     const char *gmcp_status;
     const char *mxp_status;
@@ -2499,6 +2500,13 @@ void do_protocols(CHAR_DATA *ch, char *argument)
     /* Determine MXP status */
     mxp_status = ch->desc->mxp_enabled ? "#GOn#n " : "#rOff#n";
 
+    /* Determine NAWS status */
+    if (ch->desc->naws_enabled)
+        snprintf(naws_status, sizeof(naws_status), "#GOn#n (%dx%d)",
+                 ch->desc->client_width, ch->desc->client_height);
+    else
+        snprintf(naws_status, sizeof(naws_status), "#rOff#n");
+
     /* Box width = 34 chars inside the + markers */
     send_to_char("#w+----------------------------------+#n\n\r", ch);
     send_to_char("#w|#n      #CMUD Protocol Status#n       #w|#n\n\r", ch);
@@ -2510,6 +2518,8 @@ void do_protocols(CHAR_DATA *ch, char *argument)
     snprintf(buf, sizeof(buf), "#w|#n  #yMXP#n   Extensions       %s    #w|#n\n\r", mxp_status);
     send_to_char(buf, ch);
     send_to_char("#w|#n  #yMSSP#n  Server Status    #yAvail#n  #w|#n\n\r", ch);
+    snprintf(buf, sizeof(buf), "#w|#n  #yNAWS#n  Window Size      %-10s#w|#n\n\r", naws_status);
+    send_to_char(buf, ch);
     send_to_char("#w+----------------------------------+#n\n\r", ch);
 
     /* Show additional GMCP details if enabled */

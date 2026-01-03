@@ -353,6 +353,9 @@ typedef struct config_data
   char * game_name;
   char * gui_url;       /* URL to Mudlet mpackage for GMCP Client.GUI */
   char * gui_version;   /* Version string for Client.GUI updates */
+  char * banner_left;   /* Left banner endcap, e.g. "#0<>#n" */
+  char * banner_right;  /* Right banner endcap, e.g. "#0<>#n" */
+  char * banner_fill;   /* Banner fill pattern, e.g. "#0==#n" */
 } GAMECONFIG_DATA;
 
 
@@ -573,6 +576,10 @@ struct descriptor_data
     int                 gmcp_packages;      /* Bitmask of supported packages */
     /* mxp: MUD eXtension Protocol support */
     bool                mxp_enabled;        /* MXP negotiation successful */
+    /* naws: window size support (RFC 1073) */
+    bool                naws_enabled;       /* NAWS negotiation successful */
+    int                 client_width;       /* Terminal width in columns */
+    int                 client_height;      /* Terminal height in rows */
 };
 
 
@@ -4815,6 +4822,11 @@ void gmcp_send_status(CHAR_DATA *ch);
 void gmcp_send_info(CHAR_DATA *ch);
 void gmcp_send_char_data(CHAR_DATA *ch);
 void gmcp_handle_subnegotiation(DESCRIPTOR_DATA *d, unsigned char *data, int len);
+
+/* naws.c */
+void naws_init(DESCRIPTOR_DATA *d);
+void naws_handle_subnegotiation(DESCRIPTOR_DATA *d, unsigned char *data, int len);
+int  naws_get_width(CHAR_DATA *ch);
 
 /* update.c */
 void	gain_exp	args( ( CHAR_DATA *ch, int gain ) );

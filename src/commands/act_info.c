@@ -32,6 +32,117 @@ extern KINGDOM_DATA kingdom_table[MAX_KINGDOM+1];
 extern GAMECONFIG_DATA game_config;
 extern int can_interpret args( (CHAR_DATA *ch, int cmd) );
 
+/*
+ * Calculate visible length of a string (excluding color codes).
+ * Color codes:
+ *   #X    - 2-char code (e.g., #R, #G, #0, #n)
+ *   #xNNN - 5-char extended 256-color code (e.g., #x237)
+ */
+static int visible_strlen(const char *str)
+{
+    int len = 0;
+    const char *p = str;
+
+    while (*p)
+    {
+        if (*p == '#' && *(p+1) != '\0')
+        {
+            /* Check for extended color code #xNNN */
+            if ((*(p+1) == 'x' || *(p+1) == 'X') &&
+                *(p+2) >= '0' && *(p+2) <= '9' &&
+                *(p+3) >= '0' && *(p+3) <= '9' &&
+                *(p+4) >= '0' && *(p+4) <= '9')
+            {
+                p += 5;  /* Skip #xNNN */
+            }
+            else
+            {
+                p += 2;  /* Skip #X */
+            }
+        }
+        else
+        {
+            len++;
+            p++;
+        }
+    }
+    return len;
+}
+
+/*
+ * Build a dynamic width banner for do_who.
+ * Format: endcap + fill*N + center_text + fill*N + endcap
+ * Uses game_config.banner_endcap and game_config.banner_fill.
+ * Width is clamped between 60-120 columns.
+ */
+static void make_who_banner(CHAR_DATA *ch, char *buf, size_t bufsize, const char *center_text)
+{
+    int width;
+    int left_visible_len, right_visible_len, fill_visible_len, center_visible_len;
+    int fill_space, left_fills, right_fills, extra;
+    int i;
+
+    /* Get effective width from NAWS, clamped 60-120, default 80 */
+    width = naws_get_width(ch);
+
+    /* Calculate visible lengths */
+    left_visible_len = visible_strlen(game_config.banner_left);
+    right_visible_len = visible_strlen(game_config.banner_right);
+    fill_visible_len = visible_strlen(game_config.banner_fill);
+    center_visible_len = visible_strlen(center_text);
+
+    /* Calculate how much space is available for fill patterns */
+    /* Total visible = left_endcap + fill patterns + center text + right_endcap */
+    fill_space = width - left_visible_len - right_visible_len - center_visible_len;
+    if (fill_space < 0)
+        fill_space = 0;
+
+    /* Split fill space evenly on each side */
+    if (fill_visible_len > 0)
+    {
+        left_fills = fill_space / 2 / fill_visible_len;
+        right_fills = left_fills;
+        extra = (fill_space / 2) % fill_visible_len;
+    }
+    else
+    {
+        left_fills = 0;
+        right_fills = 0;
+        extra = 0;
+    }
+
+    /* Build the banner */
+    buf[0] = '\0';
+
+    /* Left endcap */
+    strncat(buf, game_config.banner_left, bufsize - strlen(buf) - 1);
+
+    /* Left fill patterns */
+    for (i = 0; i < left_fills; i++)
+        strncat(buf, game_config.banner_fill, bufsize - strlen(buf) - 1);
+
+    /* Extra spaces to center (if fill doesn't divide evenly) */
+    for (i = 0; i < extra; i++)
+        strncat(buf, " ", bufsize - strlen(buf) - 1);
+
+    /* Center text */
+    strncat(buf, center_text, bufsize - strlen(buf) - 1);
+
+    /* Extra spaces on right side */
+    for (i = 0; i < extra; i++)
+        strncat(buf, " ", bufsize - strlen(buf) - 1);
+
+    /* Right fill patterns */
+    for (i = 0; i < right_fills; i++)
+        strncat(buf, game_config.banner_fill, bufsize - strlen(buf) - 1);
+
+    /* Right endcap */
+    strncat(buf, game_config.banner_right, bufsize - strlen(buf) - 1);
+
+    /* Reset color and newline */
+    strncat(buf, "#n\n\r", bufsize - strlen(buf) - 1);
+}
+
 char *	const	where_name	[] =
 {
     "#R[#CLight#R         ]#n ",
@@ -3083,52 +3194,68 @@ void do_who(CHAR_DATA *ch, char *argument)
     }
   }
 
-  /*   
+  /*
    * Let's send the whole thing to the player.
    */
-  sprintf(buf, " #0<>==<>==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r", game_config.game_name);
-  send_to_char(buf, ch);
+  {
+    char center_text[MAX_INPUT_LENGTH];
 
-  if (a1)
-  {
-    sprintf(buf, "\n\r #0<>==<>==<>==<>==<>==<>==<>  #GGods of %s  #0<>==<>==<>==<>==<>==<>==<>==<>#n\n\r",
-      game_config.game_name);
+    /* Title banner with game name */
+    snprintf(center_text, sizeof(center_text), "  #G%s#n  ", game_config.game_name);
+    make_who_banner(ch, buf, sizeof(buf), center_text);
     send_to_char(buf, ch);
-    send_to_char(buf1, ch);
-  }         
-  if (avatars)
-  {
-    sprintf(buf, "\n\r #0<>==<>==<>==<>==<>==<>==<>==<>==<>     #GAvatars      #0<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r");
+
+    if (a1)
+    {
+      snprintf(center_text, sizeof(center_text), "  #GGods of %s#n  ", game_config.game_name);
+      send_to_char("\n\r", ch);
+      make_who_banner(ch, buf, sizeof(buf), center_text);
+      send_to_char(buf, ch);
+      send_to_char(buf1, ch);
+    }
+    if (avatars)
+    {
+      send_to_char("\n\r", ch);
+      make_who_banner(ch, buf, sizeof(buf), "     #GAvatars#n      ");
+      send_to_char(buf, ch);
+      if (a2) send_to_char(buf2, ch);
+      if (a3) send_to_char(buf3, ch);
+      if (a4) send_to_char(buf4, ch);
+      if (a5) send_to_char(buf5, ch);
+      if (a6) send_to_char(buf6, ch);
+      if (a7) send_to_char(buf7, ch);
+      if (a8) send_to_char(buf8, ch);
+      if (a9) send_to_char(buf9, ch);
+      if (a10) send_to_char(buf10, ch);
+      if (a11) send_to_char(buf11, ch);
+      if (a12) send_to_char(buf12, ch);
+      if (a13) send_to_char(buf13, ch);
+      if (a14) send_to_char(buf14, ch);
+      if (a15) send_to_char(buf15, ch);
+      if (a16) send_to_char(buf16, ch);
+    }
+    if (a17)
+    {
+      send_to_char("\n\r", ch);
+      make_who_banner(ch, buf, sizeof(buf), "     #GMortals#n      ");
+      send_to_char(buf, ch);
+      send_to_char(buf17, ch);
+    }
+
+    /* Footer separator */
+    send_to_char("\n\r", ch);
+    make_who_banner(ch, buf, sizeof(buf), "");
     send_to_char(buf, ch);
-    if (a2) send_to_char(buf2, ch);
-    if (a3) send_to_char(buf3, ch);
-    if (a4) send_to_char(buf4, ch);
-    if (a5) send_to_char(buf5, ch);
-    if (a6) send_to_char(buf6, ch);
-    if (a7) send_to_char(buf7, ch);
-    if (a8) send_to_char(buf8, ch);
-    if (a9) send_to_char(buf9, ch);
-    if (a10) send_to_char(buf10, ch);
-    if (a11) send_to_char(buf11, ch);
-    if (a12) send_to_char(buf12, ch);
-    if (a13) send_to_char(buf13, ch);
-    if (a14) send_to_char(buf14, ch);
-    if (a15) send_to_char(buf15, ch);
-    if (a16) send_to_char(buf16, ch);
+
+    /* Player count line */
+    sprintf(buf, "         #C%d#0/#C%d #GVisible players and #C%d #Gvisible immortals connected to %s#n\n\r",
+      nPlayerVis, nPlayerAll, nImmVis, game_config.game_name);
+    send_to_char(buf, ch);
+
+    /* Bottom border */
+    make_who_banner(ch, buf, sizeof(buf), "");
+    send_to_char(buf, ch);
   }
-  if (a17)
-  {
-    sprintf(buf, "\n\r #0<>==<>==<>==<>==<>==<>==<>==<>==<>     #GMortals      #0<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r");
-    send_to_char(buf, ch);
-    send_to_char(buf17, ch);
-  }
-  sprintf(buf, "\n\r #0<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r");
-  send_to_char(buf, ch);
-  sprintf(buf, "         #C%d#0/#C%d #GVisible players and #C%d #Gvisible immortals connected to %s#n\n\r",
-    nPlayerVis, nPlayerAll, nImmVis, game_config.game_name);
-  send_to_char(buf, ch);
-  sprintf(buf, " #0<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>#n\n\r");
-  send_to_char(buf, ch);
   return;
 }
 

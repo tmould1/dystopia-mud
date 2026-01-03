@@ -17,6 +17,9 @@ void load_gameconfig()
 	game_config.game_name = str_dup("Dystopian Spin-Off");
 	game_config.gui_url = str_dup("");
 	game_config.gui_version = str_dup("1");
+	game_config.banner_left = str_dup("#0<>#n");
+	game_config.banner_right = str_dup("#0<>#n");
+	game_config.banner_fill = str_dup("#0==#n");
 
 	if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "r")) == NULL)
 	{
@@ -83,6 +86,21 @@ void load_gameconfig()
 			free_string(game_config.gui_version);
 			game_config.gui_version = str_dup(value);
 		}
+		else if (!str_cmp(variable, "banner_left"))
+		{
+			free_string(game_config.banner_left);
+			game_config.banner_left = str_dup(value);
+		}
+		else if (!str_cmp(variable, "banner_right"))
+		{
+			free_string(game_config.banner_right);
+			game_config.banner_right = str_dup(value);
+		}
+		else if (!str_cmp(variable, "banner_fill"))
+		{
+			free_string(game_config.banner_fill);
+			game_config.banner_fill = str_dup(value);
+		}
 		else
 		{
 			log_string("Unknown variable in gameconfig.txt");
@@ -106,6 +124,9 @@ void save_gameconfig()
 	fprintf(fp, "game_name: %s\n", game_config.game_name);
 	fprintf(fp, "gui_url: %s\n", game_config.gui_url);
 	fprintf(fp, "gui_version: %s\n", game_config.gui_version);
+	fprintf(fp, "banner_left: %s\n", game_config.banner_left);
+	fprintf(fp, "banner_right: %s\n", game_config.banner_right);
+	fprintf(fp, "banner_fill: %s\n", game_config.banner_fill);
 
 	fclose(fp);
 }
@@ -134,6 +155,12 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 		sprintf(buf, "gui_url - Mudlet GUI Package URL: \"%s\"\n\r", game_config.gui_url);
 		send_to_char(buf, ch);
 		sprintf(buf, "gui_version - Mudlet GUI Package Version: \"%s\"\n\r", game_config.gui_version);
+		send_to_char(buf, ch);
+		sprintf(buf, "banner_left - Who Banner Left Endcap: \"%s\"\n\r", game_config.banner_left);
+		send_to_char(buf, ch);
+		sprintf(buf, "banner_right - Who Banner Right Endcap: \"%s\"\n\r", game_config.banner_right);
+		send_to_char(buf, ch);
+		sprintf(buf, "banner_fill - Who Banner Fill: \"%s\"\n\r", game_config.banner_fill);
 		send_to_char(buf, ch);
 		return;
 	}
@@ -224,6 +251,57 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 		sprintf(new_value, arg2);
 		free_string(game_config.gui_version);
 		game_config.gui_version = str_dup(new_value);
+	}
+	else if (!str_cmp(arg, "banner_left"))
+	{
+		// if arg2 is blank, report the value
+		if (arg2[0] == '\0')
+		{
+			char buf[MAX_STRING_LENGTH];
+			sprintf(buf, "Banner Left Endcap: \"%s\"\n\r", game_config.banner_left);
+			send_to_char(buf, ch);
+			return;
+		}
+
+		sprintf(modified_field, "Banner Left Endcap");
+		sprintf(old_value, "%s", game_config.banner_left);
+		sprintf(new_value, arg2);
+		free_string(game_config.banner_left);
+		game_config.banner_left = str_dup(new_value);
+	}
+	else if (!str_cmp(arg, "banner_right"))
+	{
+		// if arg2 is blank, report the value
+		if (arg2[0] == '\0')
+		{
+			char buf[MAX_STRING_LENGTH];
+			sprintf(buf, "Banner Right Endcap: \"%s\"\n\r", game_config.banner_right);
+			send_to_char(buf, ch);
+			return;
+		}
+
+		sprintf(modified_field, "Banner Right Endcap");
+		sprintf(old_value, "%s", game_config.banner_right);
+		sprintf(new_value, arg2);
+		free_string(game_config.banner_right);
+		game_config.banner_right = str_dup(new_value);
+	}
+	else if (!str_cmp(arg, "banner_fill"))
+	{
+		// if arg2 is blank, report the value
+		if (arg2[0] == '\0')
+		{
+			char buf[MAX_STRING_LENGTH];
+			sprintf(buf, "Banner Fill: \"%s\"\n\r", game_config.banner_fill);
+			send_to_char(buf, ch);
+			return;
+		}
+
+		sprintf(modified_field, "Banner Fill");
+		sprintf(old_value, "%s", game_config.banner_fill);
+		sprintf(new_value, arg2);
+		free_string(game_config.banner_fill);
+		game_config.banner_fill = str_dup(new_value);
 	}
 	// arg1 not recognized, show prompt
 	else

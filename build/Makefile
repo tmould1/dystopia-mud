@@ -35,7 +35,7 @@ COMBAT_SRC = fight.c kav_fight.c jobo_fight.c magic.c arena.c special.c
 COMMANDS_SRC = act_comm.c act_info.c act_move.c act_obj.c act_map.c socials.c \
                act_wiz.c kav_wiz.c jobo_wiz.c kav_info.c wizutil.c
 WORLD_SRC = olc.c olc_act.c olc_save.c build.c
-SYSTEMS_SRC = update.c save.c clan.c board.c bit.c upgrade.c mccp.c mssp.c mxp.c gmcp.c \
+SYSTEMS_SRC = update.c save.c clan.c board.c bit.c upgrade.c mccp.c mssp.c mxp.c gmcp.c naws.c \
               jobo_king.c jobo_data.c jobo_util.c jobo_act.c jope.c
 
 # Object files with subdirectory paths

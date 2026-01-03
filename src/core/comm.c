@@ -145,6 +145,11 @@ extern const char gmcp_will[];
 extern const char gmcp_wont[];
 extern const char gmcp_do[];
 extern const char gmcp_dont[];
+/* NAWS */
+extern const char naws_do[];
+extern const char naws_dont[];
+extern const char naws_will[];
+extern const char naws_wont[];
 
 void show_string args((DESCRIPTOR_DATA *d, char *input ));
 
@@ -180,6 +185,11 @@ extern const char gmcp_will[];
 extern const char gmcp_wont[];
 extern const char gmcp_do[];
 extern const char gmcp_dont[];
+/* NAWS */
+extern const char naws_do[];
+extern const char naws_dont[];
+extern const char naws_will[];
+extern const char naws_wont[];
 
 void show_string args((DESCRIPTOR_DATA *d, char *input ));
 #endif
@@ -1225,6 +1235,10 @@ void game_loop_unix( int control )
  	dnew->outsize = 2000;
  	dnew->outbuf = alloc_mem (dnew->outsize);
  	dnew->mxp_enabled = FALSE;
+	/* NAWS defaults */
+	dnew->naws_enabled = FALSE;
+	dnew->client_width = NAWS_DEFAULT_WIDTH;
+	dnew->client_height = NAWS_DEFAULT_HEIGHT;
 
  }
 
@@ -1363,7 +1377,8 @@ void new_descriptor( int control )
     write_to_buffer( dnew, compress_will, 0 );   /* MCCP v1 fallback */
     write_to_buffer( dnew, mssp_will, 0 );       /* MSSP server status */
     write_to_buffer( dnew, gmcp_will, 0 );       /* GMCP protocol */
-    write_to_buffer( dnew, mxp_will, 0 );       /* MXP rich text */
+    write_to_buffer( dnew, mxp_will, 0 );        /* MXP rich text */
+    write_to_buffer( dnew, naws_do, 0 );         /* NAWS window size (request) */
 
     /* send greeting */
     {
@@ -1687,6 +1702,36 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
 		    i += strlen(mxp_dont) - 1;
 		    mxpEnd(d);
 		}
+		/* NAWS - client agrees to send window size */
+		else if (!memcmp(&d->inbuf[i], naws_will, strlen(naws_will))) {
+		    i += strlen(naws_will) - 1;
+		    /* Client will send subnegotiation with size */
+		}
+		else if (!memcmp(&d->inbuf[i], naws_wont, strlen(naws_wont))) {
+		    i += strlen(naws_wont) - 1;
+		    d->naws_enabled = FALSE;
+		}
+		/* NAWS subnegotiation: IAC SB NAWS <4+ bytes> IAC SE */
+		else if (d->inbuf[i+1] == (signed char)SB &&
+		         d->inbuf[i+2] == (signed char)TELOPT_NAWS) {
+		    int sb_start = i + 3;
+		    int sb_len = 0;
+		    /* Find IAC SE that ends subnegotiation
+		     * Note: NAWS data can contain NUL bytes (width/height high byte = 0)
+		     * so we can't use '\0' as terminator. Limit search to reasonable length. */
+		    while (sb_len < 16) {
+		        if ((unsigned char)d->inbuf[sb_start + sb_len] == IAC &&
+		            (unsigned char)d->inbuf[sb_start + sb_len + 1] == SE) {
+		            break;
+		        }
+		        sb_len++;
+		    }
+		    /* 4-8 bytes: 4 data bytes, possibly with IAC escaping */
+		    if (sb_len >= 4 && sb_len <= 8) {
+		        naws_handle_subnegotiation(d, (unsigned char *)&d->inbuf[sb_start], sb_len);
+		    }
+		    i += 3 + sb_len + 1; /* Skip IAC SB NAWS ... IAC SE */
+		}
 	    }
 	}
 	/* Clear buffer after processing telnet-only data */
@@ -1781,6 +1826,36 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
                     gmcp_handle_subnegotiation(d, (unsigned char *)&d->inbuf[sb_start], sb_len);
                 }
                 i += 3 + sb_len + 1; /* Skip IAC SB GMCP ... IAC SE */
+            }
+            /* NAWS - client agrees to send window size */
+            else if (!memcmp(&d->inbuf[i], naws_will, strlen(naws_will))) {
+                i += strlen(naws_will) - 1;
+                /* Client will send subnegotiation with size */
+            }
+            else if (!memcmp(&d->inbuf[i], naws_wont, strlen(naws_wont))) {
+                i += strlen(naws_wont) - 1;
+                d->naws_enabled = FALSE;
+            }
+            /* NAWS subnegotiation: IAC SB NAWS <4+ bytes> IAC SE */
+            else if (d->inbuf[i+1] == (signed char)SB &&
+                     d->inbuf[i+2] == (signed char)TELOPT_NAWS) {
+                int sb_start = i + 3;
+                int sb_len = 0;
+                /* Find IAC SE that ends subnegotiation
+                 * Note: NAWS data can contain NUL bytes (width/height high byte = 0)
+                 * so we can't use '\0' as terminator. Limit search to reasonable length. */
+                while (sb_len < 16) {
+                    if ((unsigned char)d->inbuf[sb_start + sb_len] == IAC &&
+                        (unsigned char)d->inbuf[sb_start + sb_len + 1] == SE) {
+                        break;
+                    }
+                    sb_len++;
+                }
+                /* 4-8 bytes: 4 data bytes, possibly with IAC escaping */
+                if (sb_len >= 4 && sb_len <= 8) {
+                    naws_handle_subnegotiation(d, (unsigned char *)&d->inbuf[sb_start], sb_len);
+                }
+                i += 3 + sb_len + 1; /* Skip IAC SB NAWS ... IAC SE */
             }
         }
 
@@ -1982,20 +2057,22 @@ void retell_mccp( DESCRIPTOR_DATA *d)
   /* then send WILL to re-offer. MUSHclient strictly follows RFC and ignores */
   /* WILL offers for protocols it thinks are already active from pre-copyover. */
 
-  /* First, send WONT to reset client's protocol state */
+  /* First, send WONT/DONT to reset client's protocol state */
   write_to_descriptor( d, (char *)compress2_wont, strlen(compress2_wont) );
   write_to_descriptor( d, (char *)compress_wont, strlen(compress_wont) );
   write_to_descriptor( d, (char *)mssp_wont, strlen(mssp_wont) );
   write_to_descriptor( d, (char *)gmcp_wont, strlen(gmcp_wont) );
   write_to_descriptor( d, (char *)mxp_wont, strlen(mxp_wont) );
+  write_to_descriptor( d, (char *)naws_dont, strlen(naws_dont) );  /* NAWS uses DO/DONT */
 
-  /* Now send WILL to offer protocols fresh */
+  /* Now send WILL/DO to offer protocols fresh */
   /* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
   write_to_descriptor( d, (char *)compress2_will, strlen(compress2_will) );  /* MCCP v2 */
   write_to_descriptor( d, (char *)compress_will, strlen(compress_will) );    /* MCCP v1 */
   write_to_descriptor( d, (char *)mssp_will, strlen(mssp_will) );            /* MSSP */
   write_to_descriptor( d, (char *)gmcp_will, strlen(gmcp_will) );            /* GMCP */
   write_to_descriptor( d, (char *)mxp_will, strlen(mxp_will) );              /* MXP */
+  write_to_descriptor( d, (char *)naws_do, strlen(naws_do) );                /* NAWS */
   return;
 }
 
