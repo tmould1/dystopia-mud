@@ -26,6 +26,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../systems/mxp.h"
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM+1];
 extern GAMECONFIG_DATA game_config;
@@ -390,11 +391,15 @@ int char_ac(CHAR_DATA *ch)
 /*
  * Show a list to a character.
  * Can coalesce duplicated items.
+ * Supports MXP clickable items when enabled.
+ *
+ * in_room: TRUE if items are on the ground (MXP: get), FALSE if inventory (MXP: identify)
  */
-void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNothing )
+void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNothing, bool in_room )
 {
     char buf[MAX_STRING_LENGTH];
     char **prgpstrShow;
+    OBJ_DATA **prgpObjShow;  /* Track first object of each type for MXP */
     int *prgnShow;
     char *pstrShow;
     OBJ_DATA *obj;
@@ -402,9 +407,13 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
     int iShow;
     int count;
     bool fCombine;
+    bool fMxp;
 
     if ( ch->desc == NULL )
 	return;
+
+    /* Check if MXP is enabled for this character */
+    fMxp = (ch->desc->mxp_enabled == TRUE);
 
     /*
      * Alloc space for output lines.
@@ -413,6 +422,7 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
     for ( obj = list; obj != NULL; obj = obj->next_content )
 	count++;
     prgpstrShow	= alloc_mem( count * sizeof(char *) );
+    prgpObjShow	= alloc_mem( count * sizeof(OBJ_DATA *) );
     prgnShow    = alloc_mem( count * sizeof(int)    );
     nShow	= 0;
 
@@ -420,7 +430,7 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
      * Format the list of objects.
      */
     for ( obj = list; obj != NULL; obj = obj->next_content )
-    { 
+    {
 	if (!IS_NPC(ch) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch)
 	    continue;
 	if ( obj->wear_loc == WEAR_NONE && can_see_obj( ch, obj ) )
@@ -451,6 +461,7 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	    if ( !fCombine )
 	    {
 		prgpstrShow [nShow] = str_dup( pstrShow );
+		prgpObjShow [nShow] = obj;  /* Save first object for MXP link */
 		prgnShow    [nShow] = 1;
 		nShow++;
 	    }
@@ -474,7 +485,15 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 		send_to_char( "     ", ch );
 	    }
 	}
-	send_to_char( prgpstrShow[iShow], ch );
+	/* Use MXP wrapper if enabled, otherwise send plain text */
+	if ( fMxp && prgpObjShow[iShow] != NULL )
+	{
+	    send_to_char( mxp_obj_link( prgpObjShow[iShow], ch, prgpstrShow[iShow], in_room ), ch );
+	}
+	else
+	{
+	    send_to_char( prgpstrShow[iShow], ch );
+	}
 	send_to_char( "\n\r", ch );
 	free_string( prgpstrShow[iShow] );
     }
@@ -490,6 +509,7 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
      * Clean up.
      */
     free_mem( prgpstrShow, count * sizeof(char *) );
+    free_mem( prgpObjShow, count * sizeof(OBJ_DATA *) );
     free_mem( prgnShow,    count * sizeof(int)    );
 
     return;
@@ -688,21 +708,23 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch )
     }
     else if ( victim->position == POS_STANDING && victim->long_descr[0] != '\0' && (mount = victim->mount) == NULL )
     {
+        /* For NPCs with long descriptions, wrap entire line in MXP */
         strcat( buf, victim->long_descr );
-        send_to_char( buf, ch );
+        buf[0] = UPPER(buf[0]);
+        send_to_char( mxp_char_link(victim, ch, buf), ch );
         if ( IS_NPC(ch) || !IS_SET(ch->act, PLR_BRIEF) )
         {
-            if ( IS_ITEMAFF(victim, ITEMA_SHOCKSHIELD) ) 
+            if ( IS_ITEMAFF(victim, ITEMA_SHOCKSHIELD) )
             act( "...$N is surrounded by a crackling shield of #ylightning#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_FIRESHIELD) ) 
+            if ( IS_ITEMAFF(victim, ITEMA_FIRESHIELD) )
             act( "...$N is surrounded by a burning shield of #Rf#yi#Rr#ye#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_ICESHIELD) ) 
+            if ( IS_ITEMAFF(victim, ITEMA_ICESHIELD) )
             act( "...$N is surrounded by a shimmering shield of #Cice#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_ACIDSHIELD) ) 
+            if ( IS_ITEMAFF(victim, ITEMA_ACIDSHIELD) )
             act( "...$N is surrounded by a bubbling shield of #La#Rc#Li#Rd#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_CHAOSSHIELD) ) 
+            if ( IS_ITEMAFF(victim, ITEMA_CHAOSSHIELD) )
             act( "...$N is surrounded by a swirling shield of #0c#Rh#0a#Ro#0s#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_REFLECT) ) 
+            if ( IS_ITEMAFF(victim, ITEMA_REFLECT) )
             act( "...$N is surrounded by a flickering shield of #0darkness#n.", ch,NULL,victim,TO_CHAR );
         }
         return;
@@ -800,7 +822,7 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch )
     strcat( buf, buf3 );
     strcat( buf, "\n\r" );
     buf[0] = UPPER(buf[0]);
-    send_to_char( buf, ch );
+    send_to_char( mxp_char_link(victim, ch, buf), ch );
 
     if ( !IS_NPC(ch) && IS_SET(ch->act, PLR_BRIEF) ) return;
 
@@ -973,7 +995,7 @@ void show_char_to_char_1( CHAR_DATA *victim, CHAR_DATA *ch )
     &&   number_percent( ) < ch->pcdata->learned[gsn_peek] )
     {
 	send_to_char( "\n\rYou peek at the inventory:\n\r", ch );
-	show_list_to_char( victim->carrying, ch, TRUE, TRUE );
+	show_list_to_char( victim->carrying, ch, TRUE, TRUE, FALSE );
     }
 
     return;
@@ -1160,7 +1182,7 @@ void do_look( CHAR_DATA *ch, char *argument )
             && !IS_NPC(ch) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL)
         {
             act( "You are inside $p.",ch,ch->pcdata->chobj->in_obj,NULL,TO_CHAR);
-            show_list_to_char( ch->pcdata->chobj->in_obj->contains, ch, FALSE, FALSE );
+            show_list_to_char( ch->pcdata->chobj->in_obj->contains, ch, FALSE, FALSE, FALSE );
         }
         else if ( (arg1[0] == '\0' || !str_cmp( arg1, "auto" ) ) && IS_AFFECTED(ch, AFF_SHADOWPLANE) )
             send_to_char( "You are standing in complete darkness.\n\r", ch );
@@ -1195,7 +1217,7 @@ void do_look( CHAR_DATA *ch, char *argument )
                 if (IS_SET(ch->in_room->room_flags, ROOM_FLAMING))
                 send_to_char("..This room is engulfed in flames!\n\r",ch);
 
-        show_list_to_char( ch->in_room->contents, ch, FALSE, FALSE );
+        show_list_to_char( ch->in_room->contents, ch, FALSE, FALSE, TRUE );
 
         for (door=0 ; door < 6 ; door++)
         {	
@@ -1355,7 +1377,7 @@ void do_look( CHAR_DATA *ch, char *argument )
             }
 
             act( "$p contains:", ch, obj, NULL, TO_CHAR );
-            show_list_to_char( obj->contains, ch, TRUE, TRUE );
+            show_list_to_char( obj->contains, ch, TRUE, TRUE, FALSE );
             break;
         }
         return;
@@ -1594,10 +1616,12 @@ void do_exits( CHAR_DATA *ch, char *argument )
     EXIT_DATA *pexit;
     bool found;
     bool fAuto;
+    bool fMxp;
     int door;
 
     buf[0] = '\0';
     fAuto  = !str_cmp( argument, "auto" );
+    fMxp   = (ch->desc != NULL && ch->desc->mxp_enabled);
 
     if ( !check_blind( ch ) )
 	return;
@@ -1615,16 +1639,37 @@ void do_exits( CHAR_DATA *ch, char *argument )
 	    if ( fAuto )
 	    {
 		strcat( buf, " " );
-		strcat( buf, dir_name[door] );
+		if ( fMxp )
+		    strcat( buf, mxp_exit_link(pexit, door, ch, (char *)dir_name[door]) );
+		else
+		    strcat( buf, dir_name[door] );
 	    }
 	    else
 	    {
-		sprintf( buf + strlen(buf), "%-5s - %s\n\r",
-		    capitalize( dir_name[door] ),
-		    room_is_dark( pexit->to_room )
-			?  "Too dark to tell"
-			: pexit->to_room->name
-		    );
+		char exit_line[256];
+		char dir_display[32];
+
+		snprintf(dir_display, sizeof(dir_display), "%-5s", capitalize( dir_name[door] ));
+
+		if ( fMxp )
+		{
+		    snprintf( exit_line, sizeof(exit_line), "%s - %s\n\r",
+			mxp_exit_link(pexit, door, ch, dir_display),
+			room_is_dark( pexit->to_room )
+			    ?  "Too dark to tell"
+			    : pexit->to_room->name
+			);
+		}
+		else
+		{
+		    snprintf( exit_line, sizeof(exit_line), "%s - %s\n\r",
+			dir_display,
+			room_is_dark( pexit->to_room )
+			    ?  "Too dark to tell"
+			    : pexit->to_room->name
+			);
+		}
+		strcat( buf, exit_line );
 	    }
 	}
     }
@@ -2295,6 +2340,7 @@ void do_who(CHAR_DATA *ch, char *argument)
   char faith[64];    /* Faith indicator, may include xterm color codes */
   char openb[20];
   char closeb[20];
+  char playername[512]; /* Player name, possibly MXP-wrapped */
   char buf[MAX_STRING_LENGTH]; // banners
   char buf1[MAX_STRING_LENGTH]; // Admin.
   char buf2[MAX_STRING_LENGTH];
@@ -2313,6 +2359,7 @@ void do_who(CHAR_DATA *ch, char *argument)
   char buf15[MAX_STRING_LENGTH];
   char buf16[MAX_STRING_LENGTH];
   char buf17[MAX_STRING_LENGTH]; // mortals.
+  bool fMxp = FALSE;
   int nPlayerAll = 0;
   int nPlayerVis = 0;
   int nImmVis = 0;
@@ -2340,6 +2387,10 @@ void do_who(CHAR_DATA *ch, char *argument)
   bool a17 = FALSE;
 
   if (IS_NPC(ch)) return;
+
+  /* Check if MXP is enabled for clickable player names */
+  if (ch->desc != NULL && ch->desc->mxp_enabled)
+    fMxp = TRUE;
 
   one_argument(argument, arg);
 
@@ -2785,113 +2836,129 @@ void do_who(CHAR_DATA *ch, char *argument)
     }
     else sprintf(faith, " ");
 
-    /* 
+    /*
+     * Format player name - wrap with MXP link if enabled
+     */
+    if (fMxp)
+    {
+      /* Wrap just the name with MXP, then add padding after */
+      char *wrapped = mxp_player_link(gch, ch, gch->pcdata->switchname);
+      int namelen = strlen(gch->pcdata->switchname);
+      int padding = (namelen < 12) ? 12 - namelen : 0;
+      snprintf(playername, sizeof(playername), "%s%*s", wrapped, padding, "");
+    }
+    else
+    {
+      snprintf(playername, sizeof(playername), "%-12s", gch->pcdata->switchname);
+    }
+
+    /*
      * Let's figure out where to place the player.
      */
-        
+
     if (gch->level > 6 )
     {
-      snprintf(buf1 + strlen(buf1), sizeof(buf1) - strlen(buf1), " %-16s %-6s %-24s %-12s %s\n\r",
-        title, pkratio, kav, gch->pcdata->switchname, faith);
+      snprintf(buf1 + strlen(buf1), sizeof(buf1) - strlen(buf1), " %-16s %-6s %-24s %s %s\n\r",
+        title, pkratio, kav, playername, faith);
       a1 = TRUE;
     }
     else if (gch->level >= 3 && gch->level <= 6)
     {
       if (mightRate > 3500)
       {
-        snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a2 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 3250)
       {
-        snprintf(buf3 + strlen(buf3), sizeof(buf3) - strlen(buf3), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf3 + strlen(buf3), sizeof(buf3) - strlen(buf3), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a3 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 3000)
       {
-        snprintf(buf4 + strlen(buf4), sizeof(buf4) - strlen(buf4), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf4 + strlen(buf4), sizeof(buf4) - strlen(buf4), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a4 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 2750)
       {
-        snprintf(buf5 + strlen(buf5), sizeof(buf5) - strlen(buf5), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf5 + strlen(buf5), sizeof(buf5) - strlen(buf5), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a5 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 2500)
       {
-        snprintf(buf6 + strlen(buf6), sizeof(buf6) - strlen(buf6), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf6 + strlen(buf6), sizeof(buf6) - strlen(buf6), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a6 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 2250)
       {
-        snprintf(buf7 + strlen(buf7), sizeof(buf7) - strlen(buf7), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf7 + strlen(buf7), sizeof(buf7) - strlen(buf7), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a7 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 2000)
       {
-        snprintf(buf8 + strlen(buf8), sizeof(buf8) - strlen(buf8), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf8 + strlen(buf8), sizeof(buf8) - strlen(buf8), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a8 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 1750)
       {
-        snprintf(buf9 + strlen(buf9), sizeof(buf9) - strlen(buf9), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf9 + strlen(buf9), sizeof(buf9) - strlen(buf9), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a9 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 1500)
       {
-        snprintf(buf10 + strlen(buf10), sizeof(buf10) - strlen(buf10), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf10 + strlen(buf10), sizeof(buf10) - strlen(buf10), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a10 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 1250)
       {
-        snprintf(buf11 + strlen(buf11), sizeof(buf11) - strlen(buf11), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf11 + strlen(buf11), sizeof(buf11) - strlen(buf11), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a11 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 1000)
       {
-        snprintf(buf12 + strlen(buf12), sizeof(buf12) - strlen(buf12), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf12 + strlen(buf12), sizeof(buf12) - strlen(buf12), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a12 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 750)
       {
-        snprintf(buf13 + strlen(buf13), sizeof(buf13) - strlen(buf13), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf13 + strlen(buf13), sizeof(buf13) - strlen(buf13), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a13 = TRUE; avatars = TRUE;
       }
       else if (mightRate > 500)
       {
-        snprintf(buf14 + strlen(buf14), sizeof(buf14) - strlen(buf14), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf14 + strlen(buf14), sizeof(buf14) - strlen(buf14), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a14 = TRUE; avatars = TRUE;
       }
       else if (mightRate >= 150)
       {
-        snprintf(buf15 + strlen(buf15), sizeof(buf15) - strlen(buf15), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf15 + strlen(buf15), sizeof(buf15) - strlen(buf15), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a15 = TRUE; avatars = TRUE;
       }
       else
       {
-        snprintf(buf16 + strlen(buf16), sizeof(buf16) - strlen(buf16), " %-16s %-6s %-24s %-12s %s\n\r",
-          title, pkratio, kav, gch->pcdata->switchname, faith);
+        snprintf(buf16 + strlen(buf16), sizeof(buf16) - strlen(buf16), " %-16s %-6s %-24s %s %s\n\r",
+          title, pkratio, kav, playername, faith);
         a16 = TRUE; avatars = TRUE;
       }
     }
     else if (gch->level < 3)
     {
-      snprintf(buf17 + strlen(buf17), sizeof(buf17) - strlen(buf17), " %-16s %-6s %-24s %-12s %s\n\r",
-        title, pkratio, kav, gch->pcdata->switchname, faith);
+      snprintf(buf17 + strlen(buf17), sizeof(buf17) - strlen(buf17), " %-16s %-6s %-24s %s %s\n\r",
+        title, pkratio, kav, playername, faith);
       a17 = TRUE;
     }
   }
@@ -3042,13 +3109,13 @@ void do_inventory( CHAR_DATA *ch, char *argument )
 	case ITEM_CORPSE_NPC:
 	case ITEM_CORPSE_PC:
 	    act( "$p contain:", ch, obj, NULL, TO_CHAR );
-	    show_list_to_char( obj->contains, ch, TRUE, TRUE );
+	    show_list_to_char( obj->contains, ch, TRUE, TRUE, FALSE );
 	    break;
 	}
 	return;
     }
     send_to_char( "You are carrying:\n\r", ch );
-    show_list_to_char( ch->carrying, ch, TRUE, TRUE );
+    show_list_to_char( ch->carrying, ch, TRUE, TRUE, FALSE );
     return;
 }
 

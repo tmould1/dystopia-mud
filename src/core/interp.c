@@ -278,6 +278,7 @@ const	struct	cmd_type	cmd_table	[] =
     { "medit",    do_medit,       POS_DEAD,   10,  LOG_NORMAL, 0, 0,0 },
     { "inventory",	do_inventory,POS_DEAD,	 	 0,  LOG_NORMAL, 0,0,0	},
     { "kill",		do_kill,	POS_FIGHTING,	 0,  LOG_NORMAL, 0,0,0	},
+    { "attack",		do_kill,	POS_FIGHTING,	 0,  LOG_NORMAL, 0,0,0	},
     { "combatswitch",	do_combatswitch,	POS_FIGHTING, 0, LOG_NORMAL, 0,0,0},
     { "look",		do_look,	POS_MEDITATING,	 0,  LOG_NORMAL, 0,0,0	},
     { "ls",			do_look,	POS_MEDITATING,	 0,  LOG_NORMAL, 0,0,0	},

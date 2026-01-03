@@ -35,15 +35,29 @@
 #define MXP_A_END           "</A>"          /* End anchor/link */
 
 /*
+ * MXP Frame tags for popup windows
+ */
+#define MXP_FRAME_OPEN      "<FRAME Name=\"Identify\" Action=\"OPEN\" Title=\"Item Info\">"
+#define MXP_FRAME_CLOSE     "</FRAME>"
+
+/*
  * MXP Buffer sizes
  */
 #define MXP_TAG_MAX_LEN     256     /* Max length of a single MXP tag */
+#define MXP_BUF_MAX_LEN     4096    /* Max length for MXP formatted output */
 
 /*
  * Function prototypes
  */
 bool mxpStart           args( ( DESCRIPTOR_DATA *desc ) );
 void mxpEnd             args( ( DESCRIPTOR_DATA *desc ) );
+
+/* MXP formatting helpers */
+char *mxp_obj_link      args( ( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_room ) );
+char *mxp_player_link   args( ( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) );
+char *mxp_exit_link     args( ( EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_text ) );
+char *mxp_char_link     args( ( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) );
+void mxp_escape_string  args( ( char *dest, const char *src, size_t maxlen ) );
 
 /* Player command */
 void do_mxp             args( ( CHAR_DATA *ch, char *argument ) );

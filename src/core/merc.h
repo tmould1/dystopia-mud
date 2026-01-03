@@ -4479,7 +4479,7 @@ void    room_message    args( ( ROOM_INDEX_DATA *room, char *message ) );
 /* act_info.c */
 void	set_title	args( ( CHAR_DATA *ch, char *title ) );
 void	show_list_to_char	args( ( OBJ_DATA *list, CHAR_DATA *ch,
-				    bool fShort, bool fShowNothing ) );
+				    bool fShort, bool fShowNothing, bool in_room ) );
 int	char_hitroll	args( ( CHAR_DATA *ch ) );
 int	char_damroll	args( ( CHAR_DATA *ch ) );
 int	char_ac		args( ( CHAR_DATA *ch ) );
