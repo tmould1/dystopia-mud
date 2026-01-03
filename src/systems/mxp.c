@@ -345,42 +345,62 @@ char *mxp_exit_link(EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_tex
     }
     else
     {
-        /* Build list of visible characters in the room */
-        hint[0] = '\0';
+        /* Start with room name */
+        snprintf(hint, sizeof(hint), "%s: ", to_room->name ? to_room->name : "Unknown");
 
+        /* Build list of visible characters - players first, then NPCs */
+        /* First pass: count and add players */
         for (vch = to_room->people; vch != NULL; vch = vch->next_in_room)
         {
+            if (IS_NPC(vch))
+                continue;
             if (!can_see(ch, vch))
                 continue;
 
             if (count >= 3)
             {
-                /* Too many to list, just indicate more */
-                strcat(hint, ", ...");
+                strncat(hint, ", ...", sizeof(hint) - strlen(hint) - 1);
+                count++;
                 break;
             }
 
             if (count > 0)
-                strcat(hint, ", ");
+                strncat(hint, ", ", sizeof(hint) - strlen(hint) - 1);
 
-            if (IS_NPC(vch))
-            {
-                /* Show NPC short description */
-                strncat(hint, vch->short_descr, sizeof(hint) - strlen(hint) - 1);
-            }
-            else if (IS_AFFECTED(vch, AFF_POLYMORPH))
-            {
+            if (IS_AFFECTED(vch, AFF_POLYMORPH) && vch->morph != NULL)
                 strncat(hint, vch->morph, sizeof(hint) - strlen(hint) - 1);
-            }
             else
-            {
                 strncat(hint, vch->name, sizeof(hint) - strlen(hint) - 1);
-            }
             count++;
         }
 
+        /* Second pass: add NPCs if we haven't hit the limit */
+        if (count <= 3)
+        {
+            for (vch = to_room->people; vch != NULL; vch = vch->next_in_room)
+            {
+                if (!IS_NPC(vch))
+                    continue;
+                if (!can_see(ch, vch))
+                    continue;
+
+                if (count >= 3)
+                {
+                    strncat(hint, ", ...", sizeof(hint) - strlen(hint) - 1);
+                    count++;
+                    break;
+                }
+
+                if (count > 0)
+                    strncat(hint, ", ", sizeof(hint) - strlen(hint) - 1);
+
+                strncat(hint, vch->short_descr, sizeof(hint) - strlen(hint) - 1);
+                count++;
+            }
+        }
+
         if (count == 0)
-            snprintf(hint, sizeof(hint), "Nobody here");
+            strncat(hint, "Nobody here", sizeof(hint) - strlen(hint) - 1);
     }
 
     /* Escape the hint for MXP */
