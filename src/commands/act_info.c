@@ -196,57 +196,117 @@ const char *get_room_tint_color( ROOM_INDEX_DATA *room )
     }
 }
 
+/*
+ * Build item prefixes with MXP tooltips into prefix_buf.
+ * Returns the prefix string (may be empty).
+ */
+static char *format_obj_prefixes(OBJ_DATA *obj, CHAR_DATA *ch)
+{
+    static char prefix_buf[MAX_STRING_LENGTH];
+    prefix_buf[0] = '\0';
+
+    /* === Item rarity/quest prefixes === */
+    if (IS_SET(obj->quest, QUEST_ARTIFACT))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#y(Artifact)#n ", "Artifact - unique powerful item", -1));
+    else if (IS_SET(obj->quest, QUEST_PRIZE))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#3(#CPrize#3)#n ", "Prize - quest reward", -1));
+    else if (IS_SET(obj->quest, QUEST_RELIC))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#3(#7Relic#3)#n ", "Relic - ancient powerful item", -1));
+    else if (obj->points < 750 && obj->points != 0)
+        strcat(prefix_buf, mxp_aura_tag(ch, "#3(Legendary)#n ", "Legendary item", -1));
+    else if (obj->points < 1250 && obj->points != 0)
+        strcat(prefix_buf, mxp_aura_tag(ch, "#7(#2Mythical#7)#n ", "Mythical item", -1));
+    else if (obj->points != 0)
+        strcat(prefix_buf, mxp_aura_tag(ch, "#6(#3Priceless#6)#n ", "Priceless item", -1));
+
+    /* === Magical property prefixes === */
+    if (IS_OBJ_STAT(obj, ITEM_GLOW))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#y(#rGlow#y)#n ", "Glowing - continual light", skill_lookup("continual light")));
+    if (IS_OBJ_STAT(obj, ITEM_HUM))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#y(#rHum#y)#n ", "Humming - magical resonance", -1));
+    if (IS_OBJ_STAT(obj, ITEM_INVIS))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#6(Invis)#n ", "Invisible item", skill_lookup("invis")));
+
+    /* === Alignment auras (requires detect evil) === */
+    if (IS_AFFECTED(ch, AFF_DETECT_EVIL)
+        && !IS_OBJ_STAT(obj, ITEM_ANTI_GOOD)
+        && IS_OBJ_STAT(obj, ITEM_ANTI_EVIL))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#4(Blue Aura)#n ", "Good-aligned item", -1));
+    else if (IS_AFFECTED(ch, AFF_DETECT_EVIL)
+        && IS_OBJ_STAT(obj, ITEM_ANTI_GOOD)
+        && !IS_OBJ_STAT(obj, ITEM_ANTI_EVIL))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#1(Red Aura)#n ", "Evil-aligned item", -1));
+    else if (IS_AFFECTED(ch, AFF_DETECT_EVIL)
+        && IS_OBJ_STAT(obj, ITEM_ANTI_GOOD)
+        && !IS_OBJ_STAT(obj, ITEM_ANTI_NEUTRAL)
+        && IS_OBJ_STAT(obj, ITEM_ANTI_EVIL))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#3(Yellow Aura)#n ", "Neutral-aligned item", -1));
+
+    /* === Magical detection (requires detect magic) === */
+    if (IS_AFFECTED(ch, AFF_DETECT_MAGIC) && IS_OBJ_STAT(obj, ITEM_MAGIC))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#4(Magical)#n ", "Magical enchantment", skill_lookup("detect magic")));
+
+    /* === Material prefixes === */
+    if (IS_SET(obj->spectype, SITEM_COPPER))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#r(Copper)#n ", "Copper material", -1));
+    if (IS_SET(obj->spectype, SITEM_IRON))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#c(Iron)#n ", "Iron material", -1));
+    if (IS_SET(obj->spectype, SITEM_STEEL))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#C(Steel)#n ", "Steel material", -1));
+    if (IS_SET(obj->spectype, SITEM_ADAMANTITE))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#0(#CAdamantite#0)#n ", "Adamantite material", -1));
+    if (IS_SET(obj->spectype, SITEM_HILT))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#P(Hilted)#n ", "Custom hilt", -1));
+    if (IS_SET(obj->spectype, SITEM_GEMSTONE))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#C(#yGemstoned#C)#n ", "Gemstone embedded", -1));
+
+    /* === Plane indicators === */
+    if (IS_OBJ_STAT(obj, ITEM_SHADOWPLANE) && obj->in_room != NULL && !IS_AFFECTED(ch, AFF_SHADOWPLANE))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#0(Shadowplane)#n ", "On shadow plane", -1));
+    if (!IS_OBJ_STAT(obj, ITEM_SHADOWPLANE) && obj->in_room != NULL && IS_AFFECTED(ch, AFF_SHADOWPLANE))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#7(Normal plane)#n ", "On normal plane", -1));
+
+    return prefix_buf;
+}
+
+/*
+ * Build item description (without prefixes).
+ * Returns just the item name/description.
+ */
+static char *format_obj_desc(OBJ_DATA *obj, CHAR_DATA *ch, bool fShort)
+{
+    static char desc_buf[MAX_STRING_LENGTH];
+    desc_buf[0] = '\0';
+
+    if (fShort)
+    {
+        if (obj->short_descr != NULL)
+            strcat(desc_buf, obj->short_descr);
+        if (obj->condition < 100)
+            strcat(desc_buf, " #1(Damaged)#n");
+    }
+    else
+    {
+        if (obj->description != NULL)
+            strcat(desc_buf, obj->description);
+    }
+
+    return desc_buf;
+}
+
+/*
+ * Format object for display - combines prefixes and description.
+ * NOTE: For MXP-enabled clients, prefixes are pre-wrapped with MXP tags.
+ * The caller should NOT wrap this entire string in another MXP tag.
+ * Use format_obj_prefixes() and format_obj_desc() separately for proper MXP handling.
+ */
 char *format_obj_to_char( OBJ_DATA *obj, CHAR_DATA *ch, bool fShort )
 {
     static char buf[MAX_STRING_LENGTH];
 
     buf[0] = '\0';
-    if ( IS_SET(obj->quest, QUEST_ARTIFACT)) strcat(buf, "#y(Artifact)#n ");
-    else if ( IS_SET(obj->quest, QUEST_PRIZE)) strcat(buf, "#3(#CPrize#3)#n ");
-    else if ( IS_SET(obj->quest, QUEST_RELIC)) strcat(buf,"#3(#7Relic#3)#n " );
-    else if ( obj->points < 750 && obj->points != 0) strcat(buf,"#3(Legendary)#n " );
-    else if ( obj->points < 1250 && obj->points != 0 ) strcat(buf, "#7(#2Mythical#7)#n " );
-    else if ( obj->points != 0) strcat(buf, "#6(#3Priceless#6)#n " );	
-    if (IS_OBJ_STAT(obj, ITEM_GLOW)) strcat(buf,"#y(#rGlow#y)#n ");
-    if (IS_OBJ_STAT(obj, ITEM_HUM))  strcat(buf,"#y(#rHum#y)#n ");
-    if ( IS_OBJ_STAT(obj, ITEM_INVIS)     )   strcat( buf, "#6(Invis)#n " );
-    if ( IS_AFFECTED(ch, AFF_DETECT_EVIL)
-         && !IS_OBJ_STAT(obj, ITEM_ANTI_GOOD)
-         && IS_OBJ_STAT(obj, ITEM_ANTI_EVIL)   )   strcat( buf, "#4(Blue Aura)#n "  );
-    else if ( IS_AFFECTED(ch, AFF_DETECT_EVIL)
-         && IS_OBJ_STAT(obj, ITEM_ANTI_GOOD)
-         && !IS_OBJ_STAT(obj, ITEM_ANTI_EVIL)   )   strcat( buf, "#1(Red Aura)#n "  );
-    else if ( IS_AFFECTED(ch, AFF_DETECT_EVIL)
-         && IS_OBJ_STAT(obj, ITEM_ANTI_GOOD)
-         && !IS_OBJ_STAT(obj, ITEM_ANTI_NEUTRAL)
-         && IS_OBJ_STAT(obj, ITEM_ANTI_EVIL)   )   strcat( buf, "#3(Yellow Aura)#n "  );
-    if ( IS_AFFECTED(ch, AFF_DETECT_MAGIC)
-         && IS_OBJ_STAT(obj, ITEM_MAGIC)  )   strcat( buf, "#4(Magical)#n " );
-        if (IS_SET(obj->spectype, SITEM_COPPER))  strcat(buf,"#r(Copper)#n ");
-    if (IS_SET(obj->spectype, SITEM_IRON))  strcat(buf,"#c(Iron)#n ");
-    if (IS_SET(obj->spectype, SITEM_STEEL))  strcat(buf,"#C(Steel)#n ");
-    if (IS_SET(obj->spectype, SITEM_ADAMANTITE))  strcat(buf,"#0(#CAdamantite#0)#n ");
-    if (IS_SET(obj->spectype, SITEM_HILT))  strcat(buf,"#P(Hilted)#n ");
-    if (IS_SET(obj->spectype, SITEM_GEMSTONE)) strcat(buf,"#C(#yGemstoned#C)#n ");
-    if ( IS_OBJ_STAT(obj, ITEM_SHADOWPLANE) &&
-	 obj->in_room != NULL &&
-	!IS_AFFECTED(ch,AFF_SHADOWPLANE) )    strcat( buf,
-"#0(Shadowplane)#n " );
-    if (!IS_OBJ_STAT(obj, ITEM_SHADOWPLANE) &&
-	 obj->in_room != NULL &&
-	 IS_AFFECTED(ch,AFF_SHADOWPLANE) )    strcat( buf, "#7(Normal plane)#n " );
-
-    if ( fShort )
-    {
-	if ( obj->short_descr != NULL )
-	    strcat( buf, obj->short_descr );
-	if ( obj->condition < 100) strcat(buf, " #1(Damaged)#n");
-    }
-    else
-    {
-	if ( obj->description != NULL )
-	    strcat( buf, obj->description );
-    }
+    strcat(buf, format_obj_prefixes(obj, ch));
+    strcat(buf, format_obj_desc(obj, ch, fShort));
 
     return buf;
 }
@@ -398,10 +458,14 @@ int char_ac(CHAR_DATA *ch)
 void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNothing, bool in_room )
 {
     char buf[MAX_STRING_LENGTH];
-    char **prgpstrShow;
+    char **prgpstrShow;     /* Full string for comparison (prefix + desc) */
+    char **prgpstrPrefix;   /* Just the MXP-tagged prefixes */
+    char **prgpstrDesc;     /* Just the item description */
     OBJ_DATA **prgpObjShow;  /* Track first object of each type for MXP */
     int *prgnShow;
     char *pstrShow;
+    char *pstrPrefix;
+    char *pstrDesc;
     OBJ_DATA *obj;
     int nShow;
     int iShow;
@@ -421,9 +485,11 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
     count = 0;
     for ( obj = list; obj != NULL; obj = obj->next_content )
 	count++;
-    prgpstrShow	= alloc_mem( count * sizeof(char *) );
-    prgpObjShow	= alloc_mem( count * sizeof(OBJ_DATA *) );
-    prgnShow    = alloc_mem( count * sizeof(int)    );
+    prgpstrShow	  = alloc_mem( count * sizeof(char *) );
+    prgpstrPrefix = alloc_mem( count * sizeof(char *) );
+    prgpstrDesc   = alloc_mem( count * sizeof(char *) );
+    prgpObjShow	  = alloc_mem( count * sizeof(OBJ_DATA *) );
+    prgnShow      = alloc_mem( count * sizeof(int)    );
     nShow	= 0;
 
     /*
@@ -436,6 +502,8 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	if ( obj->wear_loc == WEAR_NONE && can_see_obj( ch, obj ) )
 	{
 	    pstrShow = format_obj_to_char( obj, ch, fShort );
+	    pstrPrefix = format_obj_prefixes( obj, ch );
+	    pstrDesc = format_obj_desc( obj, ch, fShort );
 	    fCombine = FALSE;
 
 	    if ( IS_NPC(ch) || IS_SET(ch->act, PLR_COMBINE) )
@@ -460,9 +528,11 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	     */
 	    if ( !fCombine )
 	    {
-		prgpstrShow [nShow] = str_dup( pstrShow );
-		prgpObjShow [nShow] = obj;  /* Save first object for MXP link */
-		prgnShow    [nShow] = 1;
+		prgpstrShow  [nShow] = str_dup( pstrShow );
+		prgpstrPrefix[nShow] = str_dup( pstrPrefix );
+		prgpstrDesc  [nShow] = str_dup( pstrDesc );
+		prgpObjShow  [nShow] = obj;  /* Save first object for MXP link */
+		prgnShow     [nShow] = 1;
 		nShow++;
 	    }
 	}
@@ -485,17 +555,39 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 		send_to_char( "     ", ch );
 	    }
 	}
-	/* Use MXP wrapper if enabled, otherwise send plain text */
+
+	/*
+	 * MXP output: prefixes first (already MXP-wrapped), then description wrapped
+	 * Non-MXP output: just send the combined string
+	 */
 	if ( fMxp && prgpObjShow[iShow] != NULL )
 	{
-	    send_to_char( mxp_obj_link( prgpObjShow[iShow], ch, prgpstrShow[iShow], in_room ), ch );
+	    /* Output prefixes first (each already has its own MXP tooltip) */
+	    if ( prgpstrPrefix[iShow][0] != '\0' )
+		send_to_char( prgpstrPrefix[iShow], ch );
+
+	    /* Check if item is inside a container */
+	    if ( prgpObjShow[iShow]->in_obj != NULL )
+	    {
+		/* Item in container: click to get from container */
+		send_to_char( mxp_container_item_link( prgpObjShow[iShow],
+		    prgpObjShow[iShow]->in_obj, ch, prgpstrDesc[iShow] ), ch );
+	    }
+	    else
+	    {
+		/* Normal item: use standard get/wear/look menu */
+		send_to_char( mxp_obj_link( prgpObjShow[iShow], ch, prgpstrDesc[iShow], in_room ), ch );
+	    }
 	}
 	else
 	{
 	    send_to_char( prgpstrShow[iShow], ch );
 	}
+
 	send_to_char( "\n\r", ch );
 	free_string( prgpstrShow[iShow] );
+	free_string( prgpstrPrefix[iShow] );
+	free_string( prgpstrDesc[iShow] );
     }
 
     if ( fShowNothing && nShow == 0 )
@@ -508,337 +600,365 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
     /*
      * Clean up.
      */
-    free_mem( prgpstrShow, count * sizeof(char *) );
-    free_mem( prgpObjShow, count * sizeof(OBJ_DATA *) );
-    free_mem( prgnShow,    count * sizeof(int)    );
+    free_mem( prgpstrShow,   count * sizeof(char *) );
+    free_mem( prgpstrPrefix, count * sizeof(char *) );
+    free_mem( prgpstrDesc,   count * sizeof(char *) );
+    free_mem( prgpObjShow,   count * sizeof(OBJ_DATA *) );
+    free_mem( prgnShow,      count * sizeof(int)    );
 
     return;
 }
 
 
 
+/*
+ * Output character display with separate prefix and description handling.
+ * Ensures prefixes get individual MXP tooltips, description gets attack/look/consider.
+ */
+static void output_char_display(CHAR_DATA *ch, CHAR_DATA *victim,
+                                 char *prefix_buf, char *desc_buf,
+                                 char *suffix_buf)
+{
+    char final_desc[MAX_STRING_LENGTH];
+
+    /* Output prefixes first (each already has its own MXP wrapper) */
+    if (prefix_buf[0] != '\0')
+        send_to_char(prefix_buf, ch);
+
+    /* Build final description with suffix */
+    snprintf(final_desc, sizeof(final_desc), "%s%s", desc_buf, suffix_buf);
+    if (final_desc[0] != '\0')
+        final_desc[0] = UPPER(final_desc[0]);
+
+    /* Output description wrapped with attack/look/consider */
+    send_to_char(mxp_char_link(victim, ch, final_desc), ch);
+}
+
+/*
+ * Output item shield effects after main character display
+ */
+static void output_item_shields(CHAR_DATA *ch, CHAR_DATA *victim)
+{
+    if (!IS_NPC(ch) && IS_SET(ch->act, PLR_BRIEF))
+        return;
+
+    if (IS_ITEMAFF(victim, ITEMA_SHOCKSHIELD))
+        act("...$N is surrounded by a crackling shield of #ylightning#n.", ch, NULL, victim, TO_CHAR);
+    if (IS_ITEMAFF(victim, ITEMA_FIRESHIELD))
+        act("...$N is surrounded by a burning shield of #Rf#yi#Rr#ye#n.", ch, NULL, victim, TO_CHAR);
+    if (IS_ITEMAFF(victim, ITEMA_ICESHIELD))
+        act("...$N is surrounded by a shimmering shield of #Cice#n.", ch, NULL, victim, TO_CHAR);
+    if (IS_ITEMAFF(victim, ITEMA_ACIDSHIELD))
+        act("...$N is surrounded by a bubbling shield of #La#Rc#Li#Rd#n.", ch, NULL, victim, TO_CHAR);
+    if (IS_ITEMAFF(victim, ITEMA_CHAOSSHIELD))
+        act("...$N is surrounded by a swirling shield of #0c#Rh#0a#Ro#0s#n.", ch, NULL, victim, TO_CHAR);
+    if (IS_ITEMAFF(victim, ITEMA_REFLECT))
+        act("...$N is surrounded by a flickering shield of #0darkness#n.", ch, NULL, victim, TO_CHAR);
+}
+
 void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch )
 {
-    char buf[MAX_STRING_LENGTH];
-    char buf2[MAX_STRING_LENGTH];
-    char buf3[MAX_STRING_LENGTH];
-    char buf4[MAX_STRING_LENGTH];
-    char buf6[MAX_STRING_LENGTH];
-    char buf7[MAX_STRING_LENGTH];
-    char mount2[MAX_STRING_LENGTH];
+    char prefix_buf[MAX_STRING_LENGTH];   /* MXP-tagged status prefixes */
+    char desc_buf[MAX_STRING_LENGTH];     /* Character name/description */
+    char suffix_buf[MAX_STRING_LENGTH];   /* Position, condition, effects */
+    char mount_buf[MAX_STRING_LENGTH];
     CHAR_DATA *mount;
 
-    buf[0] = '\0';
-    buf2[0] = '\0';
-    buf3[0] = '\0';
-    buf6[0] = '\0';
+    /* Cache spell lookups for MXP tooltips */
+    int sn_invis      = skill_lookup("invis");
+    int sn_charm      = skill_lookup("charm person");
+    int sn_faerie     = skill_lookup("faerie fire");
+    int sn_sanctuary  = skill_lookup("sanctuary");
 
+    prefix_buf[0] = '\0';
+    desc_buf[0] = '\0';
+    suffix_buf[0] = '\0';
 
-    if (!IS_NPC(victim) && victim->pcdata->chobj != NULL )
-	    return;
+    /* Early exits for special cases */
+    if (!IS_NPC(victim) && victim->pcdata->chobj != NULL)
+        return;
 
     if ((mount = victim->mount) != NULL && IS_SET(victim->mounted, IS_MOUNT))
-	    return;
+        return;
 
-    if ( !IS_NPC(victim) && IS_SET(victim->flag2, VAMP_OBJMASK) )
+    if (!IS_NPC(victim) && IS_SET(victim->flag2, VAMP_OBJMASK))
     {
-        sprintf(buf, "     %s\n\r",victim->objdesc);
-        stc(buf,ch);
+        char buf[MAX_STRING_LENGTH];
+        sprintf(buf, "     %s\n\r", victim->objdesc);
+        stc(buf, ch);
         return;
     }
 
+    /* ========== PHASE 1: Build status prefixes with MXP tooltips ========== */
 
-    if ( IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH))
-	    strcat( buf, "     " );
-    else {
-        if (!IS_NPC(victim) && victim->desc==NULL ) strcat( buf,"#y(Link-Dead)#n ");
-            if ( IS_AFFECTED(victim, AFF_INVISIBLE)   ) strcat( buf, "#L(Invis)#n "   );
-            if ( IS_AFFECTED(victim, AFF_HIDE)        ) strcat( buf, "#0(Hide)#n "    );
-            if ( IS_AFFECTED(victim, AFF_CHARM)       ) strcat( buf, "#R(Charmed)#n " );
-            if ( IS_AFFECTED(victim, AFF_PASS_DOOR)  ||
-            IS_AFFECTED(victim, AFF_ETHEREAL)    )
-        strcat( buf, "#l(Translucent)#n ");
-            if ( IS_AFFECTED(victim, AFF_FAERIE_FIRE) ) strcat( buf, "#P(Pink Aura)#n "  );
-            if ( IS_EVIL(victim)
-            &&   IS_AFFECTED(ch, AFF_DETECT_EVIL)     ) strcat( buf, "#R(Red Aura)#n "   );
-            if ( IS_AFFECTED(victim, AFF_SANCTUARY)   ) strcat( buf, "#C(White Aura)#n " );
+    if (IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH))
+    {
+        strcat(prefix_buf, "     ");
+    }
+    else
+    {
+        if (!IS_NPC(victim) && victim->desc == NULL)
+            strcat(prefix_buf, mxp_aura_tag(ch, "#y(Link-Dead)#n ", "Player disconnected", -1));
+        if (IS_AFFECTED(victim, AFF_INVISIBLE))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#L(Invis)#n ", "Invisibility", sn_invis));
+        if (IS_AFFECTED(victim, AFF_HIDE))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#0(Hide)#n ", "Hiding", -1));
+        if (IS_AFFECTED(victim, AFF_CHARM))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#R(Charmed)#n ", "Charm person", sn_charm));
+        if (IS_AFFECTED(victim, AFF_PASS_DOOR) || IS_AFFECTED(victim, AFF_ETHEREAL))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#l(Translucent)#n ", "Pass door / Ethereal", -1));
+        if (IS_AFFECTED(victim, AFF_FAERIE_FIRE))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#P(Pink Aura)#n ", "Faerie fire", sn_faerie));
+        if (IS_EVIL(victim) && IS_AFFECTED(ch, AFF_DETECT_EVIL))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#R(Red Aura)#n ", "Evil alignment", -1));
+        if (IS_GOOD(victim) && IS_AFFECTED(ch, AFF_DETECT_EVIL))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#x220(Golden Aura)#n ", "Good alignment", -1));
+        if (IS_AFFECTED(victim, AFF_SANCTUARY))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#C(White Aura)#n ", "Sanctuary", sn_sanctuary));
     }
 
-    if ( IS_AFFECTED(ch, AFF_SHADOWPLANE) && !IS_AFFECTED(victim, AFF_SHADOWPLANE))
-	    strcat( buf, "#0(#CNormal plane#0)#n "     );
-    else if ( !IS_AFFECTED(ch, AFF_SHADOWPLANE) && IS_AFFECTED(victim, AFF_SHADOWPLANE))
-	    strcat( buf, "#C(#0Shadowplane#C)#n "     );
+    /* Plane indicators */
+    if (IS_AFFECTED(ch, AFF_SHADOWPLANE) && !IS_AFFECTED(victim, AFF_SHADOWPLANE))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#0(#CNormal plane#0)#n ", "On normal plane", -1));
+    else if (!IS_AFFECTED(ch, AFF_SHADOWPLANE) && IS_AFFECTED(victim, AFF_SHADOWPLANE))
+        strcat(prefix_buf, mxp_aura_tag(ch, "#C(#0Shadowplane#C)#n ", "On shadow plane", -1));
 
-    // Add class titles
-    if ( !IS_NPC(victim) && !IS_NPC(ch) && IS_HERO(victim))
+    /* Class titles */
+    if (!IS_NPC(victim) && !IS_NPC(ch) && IS_HERO(victim))
     {
-        if ( IS_CLASS(victim,CLASS_WEREWOLF) )
-            strcat( buf, "#y(#LWerewolf#y)#n " );
-        if ( IS_CLASS(victim, CLASS_DEMON) )
-            strcat( buf, "#0(#RDemon#0)#n " );
-        if ( IS_CLASS(victim, CLASS_NINJA) )     
-            strcat( buf, "#R(#yNinja#R)#n " );
-        if ( IS_CLASS(victim, CLASS_MONK) )     
-            strcat( buf, "#C(#nMonk#C)#n " );
-        if ( IS_CLASS(victim, CLASS_DROID) )
-            strcat( buf, "#p(#PDrider#p)#n " );
-        if ( IS_CLASS(victim, CLASS_ANGEL) )
-            strcat( buf, "#0(#7Angel#0)#n " );
-        if ( IS_CLASS(victim, CLASS_TANARRI) )
-            strcat( buf, "#y(#RTanar'ri#y)#n " );
-        if ( IS_CLASS(victim, CLASS_LICH) )
-            strcat( buf, "#0(#GLich#0)#n " );
-        if ( IS_CLASS(victim, CLASS_UNDEAD_KNIGHT) )
-            strcat( buf, "#y(#0Death Knight#y)#n " );
-        if ( IS_CLASS(victim, CLASS_SAMURAI) )
-            strcat( buf,"#C(#ySamu#Rrai#C)#n " );
-        if ( IS_CLASS(victim, CLASS_MAGE) )
-            strcat( buf,"{{#CBattlemage#n}} " );
-        if ( IS_CLASS(victim, CLASS_DROW) )
-            strcat( buf, "#P(#0Drow#P)#n ");
-        if ( IS_CLASS(victim, CLASS_VAMPIRE) )
-        {
-            if (!IS_AFFECTED(victim, AFF_POLYMORPH))
-            {
-                strcat(buf, "#R(V#0ampire#R)#n ");
-            }
-        }
+        if (IS_CLASS(victim, CLASS_WEREWOLF))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#y(#LWerewolf#y)#n ", "Werewolf", -1));
+        if (IS_CLASS(victim, CLASS_DEMON))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#0(#RDemon#0)#n ", "Demon", -1));
+        if (IS_CLASS(victim, CLASS_NINJA))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#R(#yNinja#R)#n ", "Ninja", -1));
+        if (IS_CLASS(victim, CLASS_MONK))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#C(#nMonk#C)#n ", "Monk", -1));
+        if (IS_CLASS(victim, CLASS_DROID))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#p(#PDrider#p)#n ", "Spider Droid", -1));
+        if (IS_CLASS(victim, CLASS_ANGEL))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#0(#7Angel#0)#n ", "Angel", -1));
+        if (IS_CLASS(victim, CLASS_TANARRI))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#y(#RTanar'ri#y)#n ", "Tanar'ri", -1));
+        if (IS_CLASS(victim, CLASS_LICH))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#0(#GLich#0)#n ", "Lich", -1));
+        if (IS_CLASS(victim, CLASS_UNDEAD_KNIGHT))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#y(#0Death Knight#y)#n ", "Death Knight", -1));
+        if (IS_CLASS(victim, CLASS_SAMURAI))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#C(#ySamu#Rrai#C)#n ", "Samurai", -1));
+        if (IS_CLASS(victim, CLASS_MAGE))
+            strcat(prefix_buf, mxp_aura_tag(ch, "{{#CBattlemage#n}} ", "Battlemage", -1));
+        if (IS_CLASS(victim, CLASS_DROW))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#P(#0Drow#P)#n ", "Drow", -1));
+        if (IS_CLASS(victim, CLASS_VAMPIRE) && !IS_AFFECTED(victim, AFF_POLYMORPH))
+            strcat(prefix_buf, mxp_aura_tag(ch, "#R(V#0ampire#R)#n ", "Vampire", -1));
     }
 
-    // Embrace section
-    if (victim->embracing!= NULL)
+    /* ========== PHASE 2: Build suffix (condition effects) ========== */
+
+    /* Embrace */
+    if (victim->embracing != NULL)
     {
-        sprintf(buf7,"\n\r...%s is holding %s in a stern embrace!",victim->name,victim->embracing->name);
+        sprintf(suffix_buf + strlen(suffix_buf), "\n\r...%s is holding %s in a stern embrace!",
+                victim->name, victim->embracing->name);
     }
-    else if (victim->embraced!=NULL)
+    else if (victim->embraced != NULL)
     {
-        sprintf(buf7,"\n\r...%s is being embraced by %s!",victim->name,victim->embraced->name);
+        sprintf(suffix_buf + strlen(suffix_buf), "\n\r...%s is being embraced by %s!",
+                victim->name, victim->embraced->name);
     }
 
-    // Rot section
-    if ( IS_EXTRA(victim, EXTRA_ROT))
+    /* Rot */
+    if (IS_EXTRA(victim, EXTRA_ROT))
     {
-        if (IS_NPC(victim)) 
-            sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->short_descr);
-        else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
-            sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->morph);
-        else 
-            sprintf(buf6,"\n\r...%s is coated with a layer of rotten skin!",victim->name);
+        const char *vname = IS_NPC(victim) ? victim->short_descr :
+                           (IS_AFFECTED(victim, AFF_POLYMORPH) ? victim->morph : victim->name);
+        sprintf(suffix_buf + strlen(suffix_buf), "\n\r...%s is coated with a layer of rotten skin!", vname);
     }
 
-    // Flaming section
-    if ( IS_AFFECTED(victim, AFF_FLAMING) ) 
+    /* Flaming */
+    if (IS_AFFECTED(victim, AFF_FLAMING))
     {
-        if (IS_NPC(victim))
-            sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->short_descr );
-        else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
-            sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->morph );
+        const char *vname = IS_NPC(victim) ? victim->short_descr :
+                           (IS_AFFECTED(victim, AFF_POLYMORPH) ? victim->morph : victim->name);
+        sprintf(suffix_buf + strlen(suffix_buf), "\n\r...%s is engulfed in blazing flames!", vname);
+    }
+
+    /* Restrained (LOST_HEAD case) */
+    if (!IS_NPC(victim) && IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH))
+    {
+        if (IS_EXTRA(victim, GAGGED) && IS_EXTRA(victim, BLINDFOLDED))
+            sprintf(suffix_buf + strlen(suffix_buf), "...%s is gagged and blindfolded!", victim->morph);
+        else if (IS_EXTRA(victim, GAGGED))
+            sprintf(suffix_buf + strlen(suffix_buf), "...%s is gagged!", victim->morph);
+        else if (IS_EXTRA(victim, BLINDFOLDED))
+            sprintf(suffix_buf + strlen(suffix_buf), "...%s is blindfolded!", victim->morph);
+    }
+
+    /* Tied up */
+    if (IS_EXTRA(victim, TIED_UP))
+    {
+        const char *vname = IS_NPC(victim) ? victim->short_descr :
+                           (IS_AFFECTED(victim, AFF_POLYMORPH) ? victim->morph : victim->name);
+        sprintf(suffix_buf + strlen(suffix_buf), "\n\r...%s is tied up", vname);
+        if (IS_EXTRA(victim, GAGGED) && IS_EXTRA(victim, BLINDFOLDED))
+            strcat(suffix_buf, ", gagged and blindfolded!");
+        else if (IS_EXTRA(victim, GAGGED))
+            strcat(suffix_buf, " and gagged!");
+        else if (IS_EXTRA(victim, BLINDFOLDED))
+            strcat(suffix_buf, " and blindfolded!");
         else
-            sprintf( buf2, "\n\r...%s is engulfed in blazing flames!", victim->name );
+            strcat(suffix_buf, "!");
     }
 
-    // Restrained section
-    if ( !IS_NPC(victim) && IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH)) 
+    /* Webbed */
+    if (IS_AFFECTED(victim, AFF_WEBBED))
     {
-        if (IS_EXTRA(victim,GAGGED) && IS_EXTRA(victim,BLINDFOLDED))
-            sprintf( buf3, "...%s is gagged and blindfolded!", victim->morph );
-        else if (IS_EXTRA(victim,GAGGED))
-            sprintf( buf3, "...%s is gagged!", victim->morph );
-        else if (IS_EXTRA(victim,BLINDFOLDED))
-            sprintf( buf3, "...%s is blindfolded!", victim->morph );
+        const char *vname = IS_NPC(victim) ? victim->short_descr :
+                           (IS_AFFECTED(victim, AFF_POLYMORPH) ? victim->morph : victim->name);
+        sprintf(suffix_buf + strlen(suffix_buf), "\n\r...%s is coated in a sticky web.", vname);
     }
 
-    if ( IS_EXTRA(victim, TIED_UP) ) 
-    {
-        if (IS_NPC(victim))
-            sprintf( buf3, "\n\r...%s is tied up", victim->short_descr );
-        else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
-            sprintf( buf3, "\n\r...%s is tied up", victim->morph );
-        else
-            sprintf( buf3, "\n\r...%s is tied up", victim->name );
-        if (IS_EXTRA(victim,GAGGED) && IS_EXTRA(victim,BLINDFOLDED))
-            strcat( buf3, ", gagged and blindfolded!" );
-        else if (IS_EXTRA(victim,GAGGED))
-            strcat( buf3, " and gagged!" );
-        else if (IS_EXTRA(victim,BLINDFOLDED))
-            strcat( buf3, " and blindfolded!" );
-        else
-            strcat( buf3, "!" );
-    }
+    /* ========== PHASE 3: Build character description ========== */
 
-    // Head section
-    if ( IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH))
+    if (IS_HEAD(victim, LOST_HEAD) && IS_AFFECTED(victim, AFF_POLYMORPH))
     {
-        strcat( buf, victim->morph );
-        strcat( buf, " is lying here." );
-            strcat( buf, buf2 );
-            strcat( buf, buf3 );
-            strcat( buf, buf6 );
-            strcat(buf,buf7);   
-        strcat( buf, "\n\r" );
-            buf[5] = UPPER(buf[5]);
-            send_to_char( buf, ch );
+        /* Severed head case */
+        strcat(desc_buf, victim->morph);
+        strcat(desc_buf, " is lying here.");
+        strcat(desc_buf, suffix_buf);
+        strcat(desc_buf, "\n\r");
+        output_char_display(ch, victim, prefix_buf, desc_buf, "");
         return;
     }
-    
-    // Webbed
-    if ( IS_AFFECTED(victim, AFF_WEBBED) ) 
+    else if (!IS_NPC(victim) && IS_AFFECTED(victim, AFF_POLYMORPH))
     {
-        if (IS_NPC(victim))
-            sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->short_descr );
-        else if (!IS_NPC(victim) && IS_AFFECTED(victim,AFF_POLYMORPH))
-            sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->morph );
-        else
-            sprintf( buf4, "\n\r...%s is coated in a sticky web.", victim->name );
-        strcat( buf3, buf4 );
-    }
-
-    if ( !IS_NPC(victim) && IS_AFFECTED(victim, AFF_POLYMORPH) )
-    {
+        /* Polymorphed player */
         if (IS_IMMORTAL(ch))
         {
-            // Imms get the real character name in [] after the morph name.
-            sprintf( mount2, "%s #0[#n%s#0]#n", victim->morph, victim->name );
-            strcat( buf, mount2 );
+            sprintf(mount_buf, "%s #0[#n%s#0]#n", victim->morph, victim->name);
+            strcat(desc_buf, mount_buf);
         }
         else
         {
-	        strcat( buf, victim->morph );
+            strcat(desc_buf, victim->morph);
         }
     }
-    else if ( victim->position == POS_STANDING && victim->long_descr[0] != '\0' && (mount = victim->mount) == NULL )
+    else if (victim->position == POS_STANDING && victim->long_descr[0] != '\0'
+             && (mount = victim->mount) == NULL)
     {
-        /* For NPCs with long descriptions, wrap entire line in MXP */
-        strcat( buf, victim->long_descr );
-        buf[0] = UPPER(buf[0]);
-        send_to_char( mxp_char_link(victim, ch, buf), ch );
-        if ( IS_NPC(ch) || !IS_SET(ch->act, PLR_BRIEF) )
-        {
-            if ( IS_ITEMAFF(victim, ITEMA_SHOCKSHIELD) )
-            act( "...$N is surrounded by a crackling shield of #ylightning#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_FIRESHIELD) )
-            act( "...$N is surrounded by a burning shield of #Rf#yi#Rr#ye#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_ICESHIELD) )
-            act( "...$N is surrounded by a shimmering shield of #Cice#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_ACIDSHIELD) )
-            act( "...$N is surrounded by a bubbling shield of #La#Rc#Li#Rd#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_CHAOSSHIELD) )
-            act( "...$N is surrounded by a swirling shield of #0c#Rh#0a#Ro#0s#n.", ch,NULL,victim,TO_CHAR );
-            if ( IS_ITEMAFF(victim, ITEMA_REFLECT) )
-            act( "...$N is surrounded by a flickering shield of #0darkness#n.", ch,NULL,victim,TO_CHAR );
-        }
+        /* NPC with long description - strip trailing newlines, we'll add them */
+        char *p;
+        strcat(desc_buf, victim->long_descr);
+        /* Strip trailing whitespace/newlines */
+        p = desc_buf + strlen(desc_buf) - 1;
+        while (p >= desc_buf && (*p == '\n' || *p == '\r' || *p == ' '))
+            *p-- = '\0';
+        strcat(desc_buf, "\n\r");
+        output_char_display(ch, victim, prefix_buf, desc_buf, "");
+        output_item_shields(ch, victim);
         return;
     }
     else
-    	strcat( buf, PERS( victim, ch ) );
+    {
+        strcat(desc_buf, PERS(victim, ch));
+    }
+
+    /* ========== PHASE 4: Build position text ========== */
 
     if ((mount = victim->mount) != NULL && victim->mounted == IS_RIDING)
     {
         if (IS_NPC(mount))
-            sprintf( mount2, " is here riding %s", mount->short_descr );
+            sprintf(mount_buf, " is here riding %s", mount->short_descr);
         else
-            sprintf( mount2, " is here riding %s", mount->name );
-        strcat( buf, mount2 );
+            sprintf(mount_buf, " is here riding %s", mount->name);
+        strcat(desc_buf, mount_buf);
         if (victim->position == POS_FIGHTING)
         {
-            strcat( buf, ", fighting " );
-            if ( victim->fighting == NULL )
-                strcat( buf, "thin air??" );
-            else if ( victim->fighting == ch )
-            strcat( buf, "YOU!" );
-            else if ( victim->in_room == victim->fighting->in_room )
+            strcat(desc_buf, ", fighting ");
+            if (victim->fighting == NULL)
+                strcat(desc_buf, "thin air??");
+            else if (victim->fighting == ch)
+                strcat(desc_buf, "YOU!");
+            else if (victim->in_room == victim->fighting->in_room)
             {
-                strcat( buf, PERS( victim->fighting, ch ) );
-                strcat( buf, "." );
+                strcat(desc_buf, PERS(victim->fighting, ch));
+                strcat(desc_buf, ".");
             }
             else
-                strcat( buf, "somone who left??" );
+                strcat(desc_buf, "someone who left??");
         }
-        else strcat( buf, "." );
+        else
+            strcat(desc_buf, ".");
     }
-    else if ( victim->position == POS_STANDING && IS_AFFECTED(victim, AFF_FLYING) )
-	    strcat( buf, " is hovering here" );
-    else if ( victim->position == POS_STANDING && (!IS_NPC(victim) && (IS_VAMPAFF(victim, VAM_FLYING))) )
-	    strcat( buf, " is hovering here" );
-    else if (victim->position == POS_STANDING && (!IS_NPC(victim) 
-            && IS_CLASS(victim, CLASS_DROW) && IS_SET(victim->pcdata->powers[1], DPOWER_LEVITATION)))
-	    strcat(buf, " is hovering here" );
+    else if (victim->position == POS_STANDING && IS_AFFECTED(victim, AFF_FLYING))
+        strcat(desc_buf, " is hovering here");
+    else if (victim->position == POS_STANDING && !IS_NPC(victim) && IS_VAMPAFF(victim, VAM_FLYING))
+        strcat(desc_buf, " is hovering here");
+    else if (victim->position == POS_STANDING && !IS_NPC(victim)
+             && IS_CLASS(victim, CLASS_DROW) && IS_SET(victim->pcdata->powers[1], DPOWER_LEVITATION))
+        strcat(desc_buf, " is hovering here");
     else
     {
-    	switch ( victim->position )
-    	{
-    	case POS_DEAD:     strcat( buf, " is DEAD!!" );              break;
-        case POS_MORTAL:   strcat( buf, " is #Rmortally wounded#n." );   break; 
-    	case POS_INCAP:    strcat( buf, " is #rincapacitated#n." );      break;
-    	case POS_STUNNED:  strcat( buf, " is lying here #Cstunned#n." ); break;
-    	case POS_SLEEPING: strcat( buf, " is sleeping here." );      break;
-    	case POS_RESTING:  strcat( buf, " is resting here." );       break;
-    	case POS_MEDITATING: strcat( buf, " is meditating here." );  break;
-    	case POS_SITTING:  strcat( buf, " is sitting here." );       break;
-    	case POS_STANDING:
-	    if      (!IS_NPC(victim) && victim->stance[0] == STANCE_NORMAL)
-		strcat( buf, " is here, crouched in a fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_VIPER)
-		strcat( buf, " is here, crouched in a viper fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_CRANE)
-		strcat( buf, " is here, crouched in a crane fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_CRAB)
-		strcat( buf, " is here, crouched in a crab fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_MONGOOSE)
-		strcat( buf, " is here, crouched in a mongoose fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_BULL)
-		strcat( buf, " is here, crouched in a bull fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_MANTIS)
-		strcat( buf, " is here, crouched in a mantis fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_DRAGON)
-		strcat( buf, " is here, crouched in a dragon fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_TIGER)
-		strcat( buf, " is here, crouched in a tiger fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_MONKEY)
-		strcat( buf, " is here, crouched in a monkey fighting stance." );
-	    else if (!IS_NPC(victim) && victim->stance[0] == STANCE_SWALLOW)
-		strcat( buf, " is here, crouched in a swallow fighting stance." );
-	    else
-		strcat( buf, " is here." );
-	    break;
-    	case POS_FIGHTING:
-	    strcat( buf, " is here, fighting " );
-	    if ( victim->fighting == NULL )
-	        strcat( buf, "thin air??" );
-	    else if ( victim->fighting == ch )
-	    strcat( buf, "YOU!" );
-	    else if ( victim->in_room == victim->fighting->in_room )
-	    {
-	        strcat( buf, PERS( victim->fighting, ch ) );
-	        strcat( buf, "." );
-	    }
-	    else
-	        strcat( buf, "somone who left??" );
-	    break;
-	}
+        switch (victim->position)
+        {
+        case POS_DEAD:      strcat(desc_buf, " is DEAD!!");                    break;
+        case POS_MORTAL:    strcat(desc_buf, " is #Rmortally wounded#n.");     break;
+        case POS_INCAP:     strcat(desc_buf, " is #rincapacitated#n.");        break;
+        case POS_STUNNED:   strcat(desc_buf, " is lying here #Cstunned#n.");   break;
+        case POS_SLEEPING:  strcat(desc_buf, " is sleeping here.");            break;
+        case POS_RESTING:   strcat(desc_buf, " is resting here.");             break;
+        case POS_MEDITATING: strcat(desc_buf, " is meditating here.");         break;
+        case POS_SITTING:   strcat(desc_buf, " is sitting here.");             break;
+        case POS_STANDING:
+            if (!IS_NPC(victim) && victim->stance[0] == STANCE_NORMAL)
+                strcat(desc_buf, " is here, crouched in a fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_VIPER)
+                strcat(desc_buf, " is here, crouched in a viper fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_CRANE)
+                strcat(desc_buf, " is here, crouched in a crane fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_CRAB)
+                strcat(desc_buf, " is here, crouched in a crab fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_MONGOOSE)
+                strcat(desc_buf, " is here, crouched in a mongoose fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_BULL)
+                strcat(desc_buf, " is here, crouched in a bull fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_MANTIS)
+                strcat(desc_buf, " is here, crouched in a mantis fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_DRAGON)
+                strcat(desc_buf, " is here, crouched in a dragon fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_TIGER)
+                strcat(desc_buf, " is here, crouched in a tiger fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_MONKEY)
+                strcat(desc_buf, " is here, crouched in a monkey fighting stance.");
+            else if (!IS_NPC(victim) && victim->stance[0] == STANCE_SWALLOW)
+                strcat(desc_buf, " is here, crouched in a swallow fighting stance.");
+            else
+                strcat(desc_buf, " is here.");
+            break;
+        case POS_FIGHTING:
+            strcat(desc_buf, " is here, fighting ");
+            if (victim->fighting == NULL)
+                strcat(desc_buf, "thin air??");
+            else if (victim->fighting == ch)
+                strcat(desc_buf, "YOU!");
+            else if (victim->in_room == victim->fighting->in_room)
+            {
+                strcat(desc_buf, PERS(victim->fighting, ch));
+                strcat(desc_buf, ".");
+            }
+            else
+                strcat(desc_buf, "someone who left??");
+            break;
+        }
     }
 
-    strcat( buf, buf2 );
-    strcat( buf, buf3 );
-    strcat( buf, "\n\r" );
-    buf[0] = UPPER(buf[0]);
-    send_to_char( mxp_char_link(victim, ch, buf), ch );
+    /* ========== PHASE 5: Unified output ========== */
 
-    if ( !IS_NPC(ch) && IS_SET(ch->act, PLR_BRIEF) ) return;
-
-    if ( IS_ITEMAFF(victim, ITEMA_SHOCKSHIELD) ) 
-	act( "...$N is surrounded by a crackling shield of lightning.", ch,NULL,victim,TO_CHAR );
-    if ( IS_ITEMAFF(victim, ITEMA_FIRESHIELD) ) 
-	act( "...$N is surrounded by a burning shield of fire.", ch,NULL,victim,TO_CHAR );
-    if ( IS_ITEMAFF(victim, ITEMA_ICESHIELD) ) 
-	act( "...$N is surrounded by a shimmering shield of ice.", ch,NULL,victim,TO_CHAR );
-    if ( IS_ITEMAFF(victim, ITEMA_ACIDSHIELD) ) 
-	act( "...$N is surrounded by a bubbling shield of acid.", ch,NULL,victim,TO_CHAR );
-    if ( IS_ITEMAFF(victim, ITEMA_CHAOSSHIELD) ) 
-	act( "...$N is surrounded by a swirling shield of chaos.", ch,NULL,victim,TO_CHAR );
-    if ( IS_ITEMAFF(victim, ITEMA_REFLECT) ) 
-	act( "...$N is surrounded by a flickering shield of darkness.", ch,NULL,victim,TO_CHAR );
-    return;
+    strcat(desc_buf, suffix_buf);
+    strcat(desc_buf, "\n\r");
+    output_char_display(ch, victim, prefix_buf, desc_buf, "");
+    output_item_shields(ch, victim);
 }
 
 
@@ -3124,6 +3244,8 @@ void do_inventory( CHAR_DATA *ch, char *argument )
 void do_equipment( CHAR_DATA *ch, char *argument )
 {
     OBJ_DATA *obj;
+    char *prefix;
+    char *desc;
     int iWear;
     bool found;
 
@@ -3137,7 +3259,14 @@ void do_equipment( CHAR_DATA *ch, char *argument )
 	send_to_char( where_name[iWear], ch );
 	if ( can_see_obj( ch, obj ) )
 	{
-	    send_to_char( format_obj_to_char( obj, ch, TRUE ), ch );
+	    /* Output prefixes first (each already has MXP tooltip) */
+	    prefix = format_obj_prefixes( obj, ch );
+	    if ( prefix[0] != '\0' )
+		send_to_char( prefix, ch );
+
+	    /* Wrap only the description with MXP remove/look/identify menu */
+	    desc = format_obj_desc( obj, ch, TRUE );
+	    send_to_char( mxp_equip_link( obj, ch, desc ), ch );
 	    send_to_char( "\n\r", ch );
 	}
 	else

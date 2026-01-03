@@ -53,11 +53,14 @@ bool mxpStart           args( ( DESCRIPTOR_DATA *desc ) );
 void mxpEnd             args( ( DESCRIPTOR_DATA *desc ) );
 
 /* MXP formatting helpers */
-char *mxp_obj_link      args( ( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_room ) );
-char *mxp_player_link   args( ( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) );
-char *mxp_exit_link     args( ( EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_text ) );
-char *mxp_char_link     args( ( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) );
-void mxp_escape_string  args( ( char *dest, const char *src, size_t maxlen ) );
+char *mxp_obj_link            args( ( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_room ) );
+char *mxp_equip_link          args( ( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text ) );
+char *mxp_container_item_link args( ( OBJ_DATA *obj, OBJ_DATA *container, CHAR_DATA *ch, char *display_text ) );
+char *mxp_player_link         args( ( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) );
+char *mxp_exit_link           args( ( EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_text ) );
+char *mxp_char_link           args( ( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) );
+char *mxp_aura_tag            args( ( CHAR_DATA *ch, const char *prefix, const char *tooltip, int sn ) );
+void mxp_escape_string        args( ( char *dest, const char *src, size_t maxlen ) );
 
 /* Player command */
 void do_mxp             args( ( CHAR_DATA *ch, char *argument ) );
