@@ -451,11 +451,26 @@ char *mxp_equip_link(OBJ_DATA *obj, CHAR_DATA *ch, char *display_text)
     /* Escape the hint for MXP */
     mxp_escape_string(escaped_hint, hint, sizeof(escaped_hint));
 
-    /* Build the MXP-wrapped string: remove/look
+    /* Build the MXP-wrapped string: remove/look (and look in for containers)
      * Use single quotes around keywords to handle multi-word names like 'newbie sword' */
-    snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'\" hint=\"%s|Remove|Look\">%s</SEND>" MXP_LOCK_LOCKED,
-        keywords, keywords, escaped_hint, display_text);
+    {
+        bool is_container = (obj->item_type == ITEM_CONTAINER
+                          || obj->item_type == ITEM_CORPSE_NPC
+                          || obj->item_type == ITEM_CORPSE_PC);
+
+        if (is_container)
+        {
+            snprintf(buf, sizeof(buf),
+                MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'|look in '%s'\" hint=\"%s|Remove|Look|Look In\">%s</SEND>" MXP_LOCK_LOCKED,
+                keywords, keywords, keywords, escaped_hint, display_text);
+        }
+        else
+        {
+            snprintf(buf, sizeof(buf),
+                MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'\" hint=\"%s|Remove|Look\">%s</SEND>" MXP_LOCK_LOCKED,
+                keywords, keywords, escaped_hint, display_text);
+        }
+    }
 
     return buf;
 }
