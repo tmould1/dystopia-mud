@@ -6986,7 +6986,7 @@ void copyover_recover ()
 			char_list = d->character;
 
 			char_to_room (d->character, d->character->in_room);
-			do_look (d->character, "");
+			/* Skip auto-look: protocols aren't negotiated yet so MXP won't work */
 			act ("$n materializes!", d->character, NULL, NULL, TO_ROOM);
 			d->connected = CON_PLAYING;
                         d->lookup_status = STATUS_DONE;
