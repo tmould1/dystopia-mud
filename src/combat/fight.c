@@ -3226,8 +3226,16 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim )
     {
       if (gch->desc->out_compress)
       {
-        xp_modifier += 25;
-        strcat(buf2," #Cmccp#n");
+        if (gch->desc->mccp_version == 2)
+        {
+          xp_modifier += 100;
+          strcat(buf2," #Cmccp2#n");
+        }
+        else
+        {
+          xp_modifier += 25;
+          strcat(buf2," #Cmccp#n");
+        }
       }
     }
     if((get_age(gch)-17)<2)  /* 4 hours worth of newbie exp. */

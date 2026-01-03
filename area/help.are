@@ -166,7 +166,7 @@ QuestMakers : None
 #n
 Please read the following help files before playing the game :
 
-RULES, POLICY, FORGE, BRIEF, NEWBIE, CLASS and MCCP
+RULES, POLICY, FORGE, BRIEF, NEWBIE, CLASS and PROTOCOLS
 
 It is very important that you read help on WHO, PARADOX and PARADOXSTATS
 
@@ -182,19 +182,7 @@ These are the changes done to the stock Dystopia 1.2 code
 ~
 
 1 RULES~
-1) Don't piss off or insult the immortals in any way.
-2) Respect the coders.
-3) If you need to talk to an immortal, you will address them
-   in proper english. Use lamerspeak an get ignored.
-4) Don't abuse the rules, if you think that you've found a
-   smart shortcut, don't think the coders made it that way
-   on purpose; report it or get deleted.
-5) Read help policy and help changes often, and read all
-   notes on board 3 (announcements), ignorance of the rules
-   is not an excuse, and you WILL be punished for breaking them.
-
-Don't fucking multiplay, no matter WHAT!!!...
-If you abuse a bug, you abuse the mud, you abuse US!...DIE!..
+1) Be cool.
 
 ~
 
@@ -328,32 +316,119 @@ Heres the syntax :
 
 ~
 
-1 MCCP~
-Mccp is a compression protocol, and the two main benefits of mccp are:
+1 MCCP MCCP2~
+MCCP (MUD Client Compression Protocol) compresses data sent between the
+server and your client. Benefits include:
 
-1. lower bandwidth usage by the mud.
-2. clients (i.e. players) get large responses (such as, for example, combat
-   spam) from the mud at a higher rate - the mud will "feel" faster, despite
-   the fact that the actual round-trip times are unchanged.
+1. Lower bandwidth usage by the mud.
+2. Faster response times - large outputs (like combat spam) arrive quicker.
 
-With a suitable client, mccp is entirely transparent to the user - it
-automatically enables itself when supported by both the server and client.
+MCCP is transparent to the user - it automatically enables itself when
+supported by both the server and client. Use the #yprotocols#n command to
+check if MCCP is active on your connection.
 
-For more details on the protocol, your welcome to visit the MCCP homepage
+#yVersions:#n
+  MCCP v1 - Original compression protocol
+  MCCP v2 - Improved protocol, preferred by modern clients
 
-#Ghttp://www.randomly.org/projects/MCCP/#n
- 
-Currently the following mud clients are know to support mccp.
+#yExperience Bonus:#n
+  MCCP v1: #G+25%#n exp bonus
+  MCCP v2: #G+100%#n exp bonus (4x the v1 bonus!)
 
-* Papaya
-* Tkturf
-* Mcl
-* Amcl (cvs only)
-* Kmud
-* Zmud (version 6 only)
-* Mushclient
+Most modern MUD clients support MCCP v2, including:
+  * Mudlet
+  * MUSHclient
+  * zMUD/CMUD
+  * TinTin++
+  * BlowTorch (Android)
 
-If you use mccp, you will be rewarded by an extra 25% exp bonus.
+~
+
+1 PROTOCOLS~
+#yProtocols Command#n
+
+The #yprotocols#n command displays your current protocol support status. It shows
+which protocols are active between your client and the server.
+
+#ySyntax:#n protocols
+
+#ySupported Protocols:#n
+  #GMCCP#n  - MUD Client Compression Protocol (see #yhelp mccp#n)
+  #GGMCP#n  - Generic MUD Communication Protocol (see #yhelp gmcp#n)
+  #GMXP#n   - MUD eXtension Protocol (see #yhelp mxp#n)
+  #GMSSP#n  - MUD Server Status Protocol (see #yhelp mssp#n)
+
+Protocol negotiation happens automatically when you connect. If your client
+supports a protocol, it will be enabled without any action needed from you.
+
+~
+
+1 GMCP~
+#yGMCP - Generic MUD Communication Protocol#n
+
+GMCP provides structured data communication between the server and client,
+enabling advanced client features like health bars, maps, and room info.
+
+#yFeatures:#n
+  * Real-time character vitals (HP, Mana, Move)
+  * Room information (name, exits, area)
+  * Character status updates
+  * Affects/buffs display
+
+#ySupported Packages:#n
+  Char.Vitals    - Health, mana, movement stats
+  Char.Status    - Character name, class, level info
+  Room.Info      - Current room details and exits
+
+GMCP data is invisible to the player but enables your client to display
+graphical gauges, mini-maps, and other enhanced interface elements.
+
+#yCompatible Clients:#n Mudlet, CMUD, MUSHclient (with plugin)
+
+Use the #yprotocols#n command to check if GMCP is active.
+
+~
+
+1 MXP~
+#yMXP - MUD eXtension Protocol#n
+
+MXP enables rich text features in compatible clients, including clickable
+links, popup menus, and enhanced text formatting.
+
+#yFeatures:#n
+  * Clickable commands and links
+  * Custom colors and formatting
+  * Entity definitions for special characters
+  * Secure and open line modes
+
+MXP works transparently - when enabled, certain game text may become
+clickable or show enhanced formatting in your client.
+
+#yCompatible Clients:#n Mudlet, MUSHclient, zMUD/CMUD
+
+Use the #yprotocols#n command to check if MXP is active.
+
+~
+
+1 MSSP~
+#yMSSP - MUD Server Status Protocol#n
+
+MSSP provides server information to MUD listing sites and crawlers. This
+protocol helps players discover the MUD through directory websites.
+
+#yInformation Provided:#n
+  * Server name and codebase
+  * Player count and uptime
+  * Gameplay features
+  * Connection details
+
+MSSP operates automatically and requires no player interaction. It simply
+allows the server to report its status to interested listing services.
+
+#yListing Sites:#n MUD listings like mudstats.com and topmudsites.com use
+MSSP to automatically gather server information.
+
+Use the #yprotocols#n command to check if MSSP is active.
 
 ~
 
@@ -425,24 +500,12 @@ the other character.
 #R* #nNo exp botting
   NOTE : xp-botting is getting ANY xp while NOT typing the commands yourself.
 #R* #nSpellbotting is allowed. OUTSIDE midgaard. Bot in midgaard and die.
-#R* #nNo multiplaying or playersharing. (read HELP MULTIPLAYING)
-#R* #nNo letting yourself be capped or genstolen.
-  - So NO selling of ratio or generation.
+#R* #nNo playersharing.
 #R* #nBe kind to newbies, being a total jerk to newbies isn't tolerated.
-#R* #nPurposely CRASHING of the mud.
-#R* #nIf your going to argue and bicker with someone, please use the flame
-  channel, spambitching on any of the other global channels is NOT
-  allowed, and you'll most likely get silenced permanently if you do so.
-  This rule is enforced by the imms, and the imms will be the ones who
-  decide whether this rule has been violated. Live with it.
-#R* #nNo saccing claimed eq in any way.
-#R* #nRead the announce board (board 3), any rulings made on that board
-  counts as policy, and ignorance is not an excuse.
 #R* #nIf you find some way to get around something that is not normal possibly
-  without breaking the rules, you can consider it illegal.
-  - Use your brain, if safeguards was made to prevent players to do certain
-    things, and you find a way around it, it's a bug, don't play stupid and
-    think the coders made it this way on purpose, report it instead.
+  without breaking the rules, you can consider it against TOS.
+  - Use your brain, if safeguards were made to prevent players to do certain
+    things, and you find a way around it, it's a bug, report it.
 
 #R** #nIf you don't like any or all of these rules or policies leave this site.
 
