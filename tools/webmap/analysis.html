@@ -326,6 +326,186 @@
             color: #888;
             margin-left: 0.5rem;
         }
+
+        /* Query tab styles */
+        .query-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .query-type-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .query-type-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #0d1117;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .query-type-btn:hover {
+            background: #16213e;
+            color: #fff;
+        }
+
+        .query-type-btn.active {
+            background: #4a90d9;
+            color: #fff;
+            border-color: #4a90d9;
+        }
+
+        .filter-builder {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+
+        .filter-row select, .filter-row input {
+            padding: 0.4rem 0.5rem;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #16213e;
+            color: #eee;
+            font-size: 0.85rem;
+        }
+
+        .filter-row select:focus, .filter-row input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+
+        .filter-field { width: 150px; }
+        .filter-operator { width: 120px; }
+        .filter-value { flex: 1; min-width: 150px; }
+
+        .filter-remove {
+            background: #4a2d2d;
+            color: #d37e7e;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-remove:hover {
+            background: #5a3d3d;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .filter-actions button {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #16213e;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .filter-actions button:hover {
+            background: #0f3460;
+            color: #fff;
+        }
+
+        .filter-actions .run-query {
+            background: #4a90d9;
+            border-color: #4a90d9;
+            color: #fff;
+        }
+
+        .filter-actions .run-query:hover {
+            background: #5a9fe9;
+        }
+
+        .query-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .query-results-count {
+            font-size: 0.95rem;
+            color: #7ed3a4;
+        }
+
+        .preset-queries {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .preset-btn {
+            padding: 0.3rem 0.6rem;
+            border: 1px solid #0f3460;
+            border-radius: 12px;
+            background: #16213e;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .preset-btn:hover {
+            background: #0f3460;
+            color: #4a90d9;
+            border-color: #4a90d9;
+        }
+
+        .area-filter-toggle {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #0d1117;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .area-filter-toggle:hover {
+            background: #16213e;
+        }
+
+        .area-filter-toggle.active {
+            border-color: #4a90d9;
+            color: #4a90d9;
+        }
+
+        .query-area-filter {
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .query-area-filter.visible {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -370,6 +550,7 @@
                     <button class="tab" data-tab="objects">Objects</button>
                     <button class="tab" data-tab="spawns">Spawns</button>
                     <button class="tab" data-tab="rankings">Global Rankings</button>
+                    <button class="tab" data-tab="query">Query</button>
                 </div>
 
                 <div id="tab-content">
@@ -533,6 +714,11 @@
 
             if (currentTab === 'rankings') {
                 renderGlobalRankings(content);
+                return;
+            }
+
+            if (currentTab === 'query') {
+                renderQuery(content);
                 return;
             }
 
@@ -1147,6 +1333,500 @@
             return Object.entries(stats)
                 .map(([key, val]) => `${key}: ${val > 0 ? '+' : ''}${val}`)
                 .join(', ');
+        }
+
+        // ========== QUERY SYSTEM ==========
+        let queryType = 'objects';
+        let queryFilters = [];
+        let queryResults = [];
+        let queryAreaFilter = new Set(); // Empty = all areas
+
+        const QUERY_FIELDS = {
+            objects: [
+                { id: 'item_type', label: 'Item Type', type: 'select',
+                  options: ['weapon', 'armor', 'container', 'light', 'scroll', 'wand', 'staff', 'treasure', 'potion', 'furniture', 'trash', 'drink', 'key', 'food', 'money', 'boat', 'fountain', 'pill', 'portal', 'quest', 'book', 'tool'] },
+                { id: 'power_tier', label: 'Power Tier', type: 'select',
+                  options: ['junk', 'common', 'uncommon', 'rare', 'epic', 'legendary'] },
+                { id: 'can_take', label: 'Can Pick Up', type: 'boolean' },
+                { id: 'can_drop', label: 'Can Drop', type: 'boolean' },
+                { id: 'wear_location', label: 'Wear Location', type: 'select',
+                  options: ['finger', 'neck', 'body', 'head', 'legs', 'feet', 'hands', 'arms', 'shield', 'about', 'waist', 'wrist', 'wield', 'hold', 'face', 'light'] },
+                { id: 'name', label: 'Name Contains', type: 'text' },
+                { id: 'weight', label: 'Weight', type: 'number' },
+                { id: 'cost', label: 'Cost', type: 'number' },
+                { id: 'power_score', label: 'Power Score', type: 'number' },
+                { id: 'hitroll', label: 'Hitroll', type: 'number' },
+                { id: 'damroll', label: 'Damroll', type: 'number' },
+                { id: 'spawn_count', label: 'Spawn Count', type: 'number' },
+            ],
+            mobs: [
+                { id: 'alignment', label: 'Alignment', type: 'number' },
+                { id: 'level', label: 'Level', type: 'number' },
+                { id: 'difficulty_tier', label: 'Difficulty', type: 'select',
+                  options: ['trivial', 'easy', 'normal', 'hard', 'deadly'] },
+                { id: 'difficulty_score', label: 'Difficulty Score', type: 'number' },
+                { id: 'name', label: 'Name Contains', type: 'text' },
+                { id: 'is_aggressive', label: 'Is Aggressive', type: 'boolean' },
+                { id: 'has_sanctuary', label: 'Has Sanctuary', type: 'boolean' },
+                { id: 'is_mount', label: 'Is Mount', type: 'boolean' },
+                { id: 'gives_no_exp', label: 'Gives No EXP', type: 'boolean' },
+                { id: 'avg_hp', label: 'Avg HP', type: 'number' },
+                { id: 'avg_damage', label: 'Avg Damage', type: 'number' },
+                { id: 'gold', label: 'Gold', type: 'number' },
+                { id: 'spawn_count', label: 'Spawn Count', type: 'number' },
+            ]
+        };
+
+        const QUERY_OPERATORS = {
+            select: [
+                { id: 'eq', label: 'equals' },
+                { id: 'neq', label: 'not equals' }
+            ],
+            text: [
+                { id: 'contains', label: 'contains' },
+                { id: 'eq', label: 'equals' },
+                { id: 'starts', label: 'starts with' }
+            ],
+            number: [
+                { id: 'eq', label: '=' },
+                { id: 'neq', label: '!=' },
+                { id: 'gt', label: '>' },
+                { id: 'gte', label: '>=' },
+                { id: 'lt', label: '<' },
+                { id: 'lte', label: '<=' }
+            ],
+            boolean: [
+                { id: 'eq', label: 'is' }
+            ]
+        };
+
+        const PRESET_QUERIES = {
+            objects: [
+                { label: 'Player Bags', filters: [
+                    { field: 'item_type', operator: 'eq', value: 'container' },
+                    { field: 'can_take', operator: 'eq', value: 'true' }
+                ]},
+                { label: 'Legendary Items', filters: [
+                    { field: 'power_tier', operator: 'eq', value: 'legendary' }
+                ]},
+                { label: 'Spell Weapons', filters: [
+                    { field: 'item_type', operator: 'eq', value: 'weapon' }
+                ]},
+                { label: 'High Hitroll', filters: [
+                    { field: 'hitroll', operator: 'gte', value: '50' }
+                ]},
+            ],
+            mobs: [
+                { label: 'Good Mobs', filters: [
+                    { field: 'alignment', operator: 'gt', value: '350' }
+                ]},
+                { label: 'Evil Mobs', filters: [
+                    { field: 'alignment', operator: 'lt', value: '-350' }
+                ]},
+                { label: 'Sanctuary Mobs', filters: [
+                    { field: 'has_sanctuary', operator: 'eq', value: 'true' }
+                ]},
+                { label: 'Aggressive Mobs', filters: [
+                    { field: 'is_aggressive', operator: 'eq', value: 'true' }
+                ]},
+                { label: 'Mounts', filters: [
+                    { field: 'is_mount', operator: 'eq', value: 'true' }
+                ]},
+                { label: 'Deadly Mobs', filters: [
+                    { field: 'difficulty_tier', operator: 'eq', value: 'deadly' }
+                ]},
+            ]
+        };
+
+        function renderQuery(container) {
+            const allAreaIds = Object.keys(analysisData).sort((a, b) => {
+                return analysisData[a].summary.name.localeCompare(analysisData[b].summary.name);
+            });
+
+            const activeAreaFilter = queryAreaFilter.size > 0;
+            const areaFilterText = activeAreaFilter
+                ? `${queryAreaFilter.size} of ${allAreaIds.length} areas`
+                : `All ${allAreaIds.length} areas`;
+
+            container.innerHTML = `
+                <h2>Query</h2>
+
+                <div class="query-container">
+                    <div class="query-type-selector">
+                        <button class="query-type-btn ${queryType === 'objects' ? 'active' : ''}"
+                                onclick="setQueryType('objects')">Objects</button>
+                        <button class="query-type-btn ${queryType === 'mobs' ? 'active' : ''}"
+                                onclick="setQueryType('mobs')">Mobs</button>
+                    </div>
+
+                    <div class="preset-queries">
+                        ${(PRESET_QUERIES[queryType] || []).map(preset => `
+                            <button class="preset-btn" onclick="applyPreset(${JSON.stringify(preset.filters).replace(/"/g, '&quot;')})">
+                                ${preset.label}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div class="filter-builder">
+                        <div id="filter-rows">
+                            ${queryFilters.length === 0
+                                ? '<p style="color: #888; margin: 0;">No filters. Click "Add Filter" to start.</p>'
+                                : queryFilters.map((filter, idx) => renderFilterRow(idx, filter)).join('')}
+                        </div>
+                        <div class="filter-actions">
+                            <button onclick="addFilter()">+ Add Filter</button>
+                            <button onclick="clearFilters()">Clear All</button>
+                            <button class="run-query" onclick="runQuery()">Run Query</button>
+                            <button class="area-filter-toggle ${activeAreaFilter ? 'active' : ''}"
+                                    onclick="toggleQueryAreaFilter()">
+                                Areas: ${areaFilterText}
+                            </button>
+                        </div>
+
+                        <div id="query-area-filter" class="query-area-filter area-filter">
+                            <div class="area-filter-header">
+                                <div class="area-filter-actions">
+                                    <button onclick="querySelectAllAreas()">Select All</button>
+                                    <button onclick="queryDeselectAllAreas()">Deselect All</button>
+                                </div>
+                            </div>
+                            <div class="area-filter-grid">
+                                ${allAreaIds.map(areaId => {
+                                    const name = analysisData[areaId].summary.name;
+                                    const isChecked = !activeAreaFilter || queryAreaFilter.has(areaId);
+                                    return `
+                                        <div class="area-filter-item ${isChecked ? '' : 'excluded'}">
+                                            <input type="checkbox" id="qfilter-${areaId}"
+                                                   ${isChecked ? 'checked' : ''}
+                                                   onchange="toggleQueryArea('${areaId}', this.checked)">
+                                            <label for="qfilter-${areaId}" title="${name}">${name}</label>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="query-results">
+                        ${renderQueryResults()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFilterRow(index, filter) {
+            const fields = QUERY_FIELDS[queryType] || [];
+            const fieldDef = fields.find(f => f.id === filter.field) || fields[0];
+            const operators = QUERY_OPERATORS[fieldDef?.type || 'text'];
+
+            return `
+                <div class="filter-row" data-index="${index}">
+                    <select class="filter-field" onchange="updateFilterField(${index}, this.value)">
+                        ${fields.map(f => `
+                            <option value="${f.id}" ${f.id === filter.field ? 'selected' : ''}>${f.label}</option>
+                        `).join('')}
+                    </select>
+                    <select class="filter-operator" onchange="updateFilterOperator(${index}, this.value)">
+                        ${operators.map(op => `
+                            <option value="${op.id}" ${op.id === filter.operator ? 'selected' : ''}>${op.label}</option>
+                        `).join('')}
+                    </select>
+                    ${renderFilterValueInput(index, filter, fieldDef)}
+                    <button class="filter-remove" onclick="removeFilter(${index})">×</button>
+                </div>
+            `;
+        }
+
+        function renderFilterValueInput(index, filter, fieldDef) {
+            if (!fieldDef) return '<input class="filter-value" type="text">';
+
+            if (fieldDef.type === 'select') {
+                return `
+                    <select class="filter-value" onchange="updateFilterValue(${index}, this.value)">
+                        ${fieldDef.options.map(opt => `
+                            <option value="${opt}" ${opt === filter.value ? 'selected' : ''}>${opt}</option>
+                        `).join('')}
+                    </select>
+                `;
+            } else if (fieldDef.type === 'boolean') {
+                return `
+                    <select class="filter-value" onchange="updateFilterValue(${index}, this.value)">
+                        <option value="true" ${filter.value === 'true' ? 'selected' : ''}>Yes</option>
+                        <option value="false" ${filter.value === 'false' ? 'selected' : ''}>No</option>
+                    </select>
+                `;
+            } else if (fieldDef.type === 'number') {
+                return `<input class="filter-value" type="number" value="${filter.value || ''}"
+                         onchange="updateFilterValue(${index}, this.value)">`;
+            } else {
+                return `<input class="filter-value" type="text" value="${filter.value || ''}"
+                         onchange="updateFilterValue(${index}, this.value)">`;
+            }
+        }
+
+        function renderQueryResults() {
+            if (queryResults.length === 0) {
+                return '<p style="color: #888;">Run a query to see results.</p>';
+            }
+
+            const uniqueAreas = new Set(queryResults.map(r => r.area_id));
+
+            if (queryType === 'objects') {
+                return `
+                    <div class="query-results-header">
+                        <span class="query-results-count">Found ${queryResults.length} objects across ${uniqueAreas.size} areas</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Area</th>
+                                <th>VNUM</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Power</th>
+                                <th>Take</th>
+                                <th>Wear</th>
+                                <th>Weight</th>
+                                <th>Stats</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${queryResults.slice(0, 200).map(obj => `
+                                <tr>
+                                    <td><a href="analysis.html?area=${obj.area_id}">${obj.area_name}</a></td>
+                                    <td>${obj.vnum}</td>
+                                    <td>${obj.name}</td>
+                                    <td>${obj.item_type}</td>
+                                    <td>
+                                        <span class="tier-badge tier-${obj.power_tier}">${obj.power_tier}</span>
+                                        ${obj.power_score.toFixed(0)}
+                                    </td>
+                                    <td>${obj.can_take ? '✓' : '✗'}</td>
+                                    <td>${obj.wear_location || '-'}</td>
+                                    <td>${obj.weight}</td>
+                                    <td>${formatStats(obj.stats_summary)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    ${queryResults.length > 200 ? `<p style="color: #888;">Showing first 200 of ${queryResults.length} results.</p>` : ''}
+                `;
+            } else {
+                return `
+                    <div class="query-results-header">
+                        <span class="query-results-count">Found ${queryResults.length} mobs across ${uniqueAreas.size} areas</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Area</th>
+                                <th>VNUM</th>
+                                <th>Name</th>
+                                <th>Level</th>
+                                <th>Align</th>
+                                <th>Difficulty</th>
+                                <th>HP</th>
+                                <th>Flags</th>
+                                <th>Spawns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${queryResults.slice(0, 200).map(mob => `
+                                <tr>
+                                    <td><a href="analysis.html?area=${mob.area_id}">${mob.area_name}</a></td>
+                                    <td>${mob.vnum}</td>
+                                    <td>${mob.name}${formatMobBadges(mob)}</td>
+                                    <td>${mob.level}</td>
+                                    <td style="color: ${mob.alignment > 350 ? '#7ed3a4' : mob.alignment < -350 ? '#d37e7e' : '#888'}">${mob.alignment}</td>
+                                    <td>
+                                        <span class="tier-badge tier-${mob.difficulty_tier}">${mob.difficulty_tier}</span>
+                                    </td>
+                                    <td>${mob.avg_hp.toLocaleString()}</td>
+                                    <td>${formatMobFlags(mob)}</td>
+                                    <td>${mob.spawn_count}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    ${queryResults.length > 200 ? `<p style="color: #888;">Showing first 200 of ${queryResults.length} results.</p>` : ''}
+                `;
+            }
+        }
+
+        function setQueryType(type) {
+            queryType = type;
+            queryFilters = [];
+            queryResults = [];
+            renderContent();
+        }
+
+        function addFilter() {
+            const fields = QUERY_FIELDS[queryType] || [];
+            const firstField = fields[0];
+            const operators = QUERY_OPERATORS[firstField?.type || 'text'];
+
+            queryFilters.push({
+                field: firstField?.id || '',
+                operator: operators[0]?.id || 'eq',
+                value: firstField?.type === 'select' ? (firstField.options[0] || '') :
+                       firstField?.type === 'boolean' ? 'true' : ''
+            });
+            renderContent();
+        }
+
+        function removeFilter(index) {
+            queryFilters.splice(index, 1);
+            renderContent();
+        }
+
+        function clearFilters() {
+            queryFilters = [];
+            queryResults = [];
+            renderContent();
+        }
+
+        function updateFilterField(index, fieldId) {
+            const fields = QUERY_FIELDS[queryType] || [];
+            const fieldDef = fields.find(f => f.id === fieldId);
+            const operators = QUERY_OPERATORS[fieldDef?.type || 'text'];
+
+            queryFilters[index].field = fieldId;
+            queryFilters[index].operator = operators[0]?.id || 'eq';
+            queryFilters[index].value = fieldDef?.type === 'select' ? (fieldDef.options[0] || '') :
+                                        fieldDef?.type === 'boolean' ? 'true' : '';
+            renderContent();
+        }
+
+        function updateFilterOperator(index, operator) {
+            queryFilters[index].operator = operator;
+        }
+
+        function updateFilterValue(index, value) {
+            queryFilters[index].value = value;
+        }
+
+        function applyPreset(filters) {
+            queryFilters = JSON.parse(JSON.stringify(filters));
+            runQuery();
+        }
+
+        function runQuery() {
+            queryResults = [];
+
+            const activeAreaFilter = queryAreaFilter.size > 0;
+            const areasToSearch = activeAreaFilter
+                ? Array.from(queryAreaFilter).filter(id => analysisData[id])
+                : Object.keys(analysisData);
+
+            for (const areaId of areasToSearch) {
+                const areaData = analysisData[areaId];
+                const areaName = areaData.summary.name;
+
+                const entities = queryType === 'objects'
+                    ? Object.values(areaData.objects || {})
+                    : Object.values(areaData.mobs || {});
+
+                for (const entity of entities) {
+                    if (matchesFilters(entity, queryFilters)) {
+                        queryResults.push({
+                            ...entity,
+                            area_id: areaId,
+                            area_name: areaName
+                        });
+                    }
+                }
+            }
+
+            // Sort results
+            if (queryType === 'objects') {
+                queryResults.sort((a, b) => b.power_score - a.power_score);
+            } else {
+                queryResults.sort((a, b) => b.difficulty_score - a.difficulty_score);
+            }
+
+            renderContent();
+        }
+
+        function matchesFilters(entity, filters) {
+            if (filters.length === 0) return true;
+
+            for (const filter of filters) {
+                const value = entity[filter.field];
+                const target = filter.value;
+
+                let matches = false;
+                switch (filter.operator) {
+                    case 'eq':
+                        if (typeof value === 'boolean') {
+                            matches = value === (target === 'true');
+                        } else if (typeof value === 'number') {
+                            matches = value === parseFloat(target);
+                        } else {
+                            matches = String(value).toLowerCase() === String(target).toLowerCase();
+                        }
+                        break;
+                    case 'neq':
+                        if (typeof value === 'number') {
+                            matches = value !== parseFloat(target);
+                        } else {
+                            matches = String(value).toLowerCase() !== String(target).toLowerCase();
+                        }
+                        break;
+                    case 'contains':
+                        matches = String(value).toLowerCase().includes(String(target).toLowerCase());
+                        break;
+                    case 'starts':
+                        matches = String(value).toLowerCase().startsWith(String(target).toLowerCase());
+                        break;
+                    case 'gt':
+                        matches = parseFloat(value) > parseFloat(target);
+                        break;
+                    case 'gte':
+                        matches = parseFloat(value) >= parseFloat(target);
+                        break;
+                    case 'lt':
+                        matches = parseFloat(value) < parseFloat(target);
+                        break;
+                    case 'lte':
+                        matches = parseFloat(value) <= parseFloat(target);
+                        break;
+                }
+
+                if (!matches) return false;
+            }
+            return true;
+        }
+
+        function toggleQueryAreaFilter() {
+            const panel = document.getElementById('query-area-filter');
+            panel.classList.toggle('visible');
+        }
+
+        function toggleQueryArea(areaId, isChecked) {
+            if (queryAreaFilter.size === 0 && !isChecked) {
+                // First time filtering - start with all selected except unchecked
+                Object.keys(analysisData).forEach(id => {
+                    if (id !== areaId) queryAreaFilter.add(id);
+                });
+            } else {
+                if (isChecked) {
+                    queryAreaFilter.add(areaId);
+                } else {
+                    queryAreaFilter.delete(areaId);
+                }
+            }
+            renderContent();
+        }
+
+        function querySelectAllAreas() {
+            queryAreaFilter.clear();
+            renderContent();
+        }
+
+        function queryDeselectAllAreas() {
+            queryAreaFilter.clear();
+            queryAreaFilter.add('__none__');
+            renderContent();
         }
 
         document.addEventListener('DOMContentLoaded', init);

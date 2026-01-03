@@ -7,7 +7,7 @@ Calculates mob difficulty ratings, object power ratings, and analyzes resets.
 from dataclasses import dataclass
 from typing import Dict, List, Any, Optional
 
-from .models import Area, Mobile, Object, Reset, ITEM_TYPES, APPLY_TYPES, WEAR_LOCATIONS, WEAPON_TYPES, ARMOR_SPECIALS, WEAPON_SPELLS, WEAPON_AFFECTS, ACT_FLAGS, AFF_FLAGS, decode_flags
+from .models import Area, Mobile, Object, Reset, ITEM_TYPES, APPLY_TYPES, WEAR_LOCATIONS, WEAPON_TYPES, ARMOR_SPECIALS, WEAPON_SPELLS, WEAPON_AFFECTS, ACT_FLAGS, AFF_FLAGS, EXTRA_FLAGS, WEAR_FLAGS, decode_flags
 
 
 @dataclass
@@ -94,6 +94,10 @@ class ObjectAnalysis:
     hitroll: int = 0
     damroll: int = 0
     ac_mod: int = 0  # AC modifier from affects (negative = better)
+    # Object flags for query filtering
+    extra_flags: List[str] = None  # Decoded extra flags (nodrop, noremove, etc.)
+    can_take: bool = True          # Can be picked up (ITEM_TAKE flag)
+    can_drop: bool = True          # Can be dropped (not NODROP)
 
     def to_dict(self) -> dict:
         result = {
@@ -112,6 +116,9 @@ class ObjectAnalysis:
             'hitroll': self.hitroll,
             'damroll': self.damroll,
             'ac_mod': self.ac_mod,
+            'extra_flags': self.extra_flags or [],
+            'can_take': self.can_take,
+            'can_drop': self.can_drop,
         }
         # Add weapon fields if relevant
         if self.item_type == 'weapon':
@@ -471,6 +478,13 @@ def calculate_object_power(obj: Object) -> ObjectAnalysis:
     else:
         tier = 'legendary'
 
+    # Decode extra flags for filtering
+    extra_flag_list = decode_flags(obj.extra_flags, EXTRA_FLAGS)
+    # Can pick up: ITEM_TAKE is bit 0 (value 1) in wear_flags
+    can_take = bool(obj.wear_flags & 1)
+    # Can drop: NOT nodrop flag (bit 128 in extra_flags)
+    can_drop = not bool(obj.extra_flags & 128)
+
     return ObjectAnalysis(
         vnum=obj.vnum,
         name=obj.short_descr,
@@ -500,6 +514,10 @@ def calculate_object_power(obj: Object) -> ObjectAnalysis:
         hitroll=hitroll,
         damroll=damroll,
         ac_mod=ac_mod,
+        # Object flags for query filtering
+        extra_flags=extra_flag_list,
+        can_take=can_take,
+        can_drop=can_drop,
     )
 
 

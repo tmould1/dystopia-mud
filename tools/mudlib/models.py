@@ -355,7 +355,53 @@ def decode_flags(value: int, flag_dict: dict) -> List[str]:
     return flags
 
 
-# Apply types for object affects
+# Extra flags for objects (bitfield) - from merc.h
+EXTRA_FLAGS = {
+    1: 'glow',           # Item glows
+    2: 'hum',            # Item hums
+    4: 'thrown',         # Throwable weapon
+    8: 'keep',           # Cannot be dropped
+    16: 'vanish',        # Vanishes on drop
+    32: 'invis',         # Invisible
+    64: 'magic',         # Magical item
+    128: 'nodrop',       # Cannot be dropped
+    256: 'bless',        # Blessed
+    512: 'anti_good',    # Cannot be used by good
+    1024: 'anti_evil',   # Cannot be used by evil
+    2048: 'anti_neutral', # Cannot be used by neutral
+    4096: 'noremove',    # Cannot be removed once worn
+    8192: 'inventory',   # Stays in inventory
+    16384: 'loyal',      # Loyal to owner
+    32768: 'shadowplane', # Exists in shadow plane
+    65536: 'menchant',   # Merchant item
+}
+
+# Wear flags for objects (bitfield) - from merc.h
+# Bit 0 (value 1) = ITEM_TAKE = can be picked up
+WEAR_FLAGS = {
+    1: 'take',           # Can be picked up
+    2: 'wear_finger',    # Worn on finger
+    4: 'wear_neck',      # Worn on neck
+    8: 'wear_body',      # Worn on body
+    16: 'wear_head',     # Worn on head
+    32: 'wear_legs',     # Worn on legs
+    64: 'wear_feet',     # Worn on feet
+    128: 'wear_hands',   # Worn on hands
+    256: 'wear_arms',    # Worn on arms
+    512: 'wear_shield',  # Used as shield
+    1024: 'wear_about',  # Worn about body
+    2048: 'wear_waist',  # Worn on waist
+    4096: 'wear_wrist',  # Worn on wrist
+    8192: 'wield',       # Can be wielded
+    16384: 'hold',       # Can be held
+    32768: 'wear_face',  # Worn on face
+    65536: 'wear_special', # Special wear slot
+    131072: 'wear_bodyart', # Body art
+    262144: 'wear_medal', # Medal slot
+    524288: 'wear_float', # Floating item
+}
+
+# Apply types for object affects - from merc.h
 APPLY_TYPES = {
     0: 'none',
     1: 'str',
@@ -363,17 +409,26 @@ APPLY_TYPES = {
     3: 'int',
     4: 'wis',
     5: 'con',
+    6: 'sex',
+    7: 'class',
+    8: 'level',
+    9: 'age',
+    10: 'height',
+    11: 'weight',
     12: 'mana',
     13: 'hit',
     14: 'move',
+    15: 'gold',
+    16: 'exp',
     17: 'ac',
     18: 'hitroll',
     19: 'damroll',
-    24: 'save_para',
-    25: 'save_rod',
-    26: 'save_petri',
-    27: 'save_breath',
-    28: 'save_spell',
+    20: 'save_para',
+    21: 'save_rod',
+    22: 'save_petri',
+    23: 'save_breath',
+    24: 'save_spell',
+    25: 'poly',
 }
 
 
