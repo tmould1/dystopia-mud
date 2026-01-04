@@ -2,239 +2,207 @@
 
 ## Overview
 
-Drow are dark elves with a hierarchical society based on generations. They follow the Church of Lloth and can specialize in one of three professions: Warrior, Mage, or Cleric.
+Drow are dark elves following the Church of Lloth. They use a hierarchical generation system where higher-generation drow can grant powers to lower. Three professions (Warrior, Mage, Cleric) provide different ability sets.
 
-**Source File**: `src/drow.c`
+**Source Files**: `src/classes/drow.c`, `src/classes/drow.h`
 **Class Constant**: `CLASS_DROW` (32)
 
 ## Core Mechanics
 
 ### Generation System
 
-Drow have a hierarchical generation system:
+Generation determines hierarchy and power granting:
 
 ```c
-ch->pcdata->generation  // Lower = older/more powerful
+ch->pcdata->generation  // Lower = more powerful, can grant to higher numbers
 ```
 
-- Higher-generation Drow can grant powers to lower
-- Generation affects maximum power potential
-- Hierarchy is central to Drow society
+- Generation < 3: Can be granted professions
+- Generation 2-3: Can grant professions to lower-generation drow
+- Generation > 2 + Level < 6: Cannot change another drow's existing profession
 
-### Drow Power Pool
+### Drow Points
 
-Resource for Drow abilities:
+Resource for granting powers (`drow.h`):
 
 ```c
-ch->pcdata->stats[DROW_POWER]  // Current power points
+ch->pcdata->stats[DROW_POWER]  // stats[8] - Points for granting powers
+ch->pcdata->stats[DROW_MAGIC]  // stats[11] - Magic resistance stat
+```
+
+### Power Storage
+
+All powers stored as bitfield in `ch->pcdata->powers[1]`:
+
+```c
+IS_SET(ch->pcdata->powers[1], DPOWER_*) // Check for power
 ```
 
 ### Professions
 
-Drow must choose one of three professions:
+Stored as flags in `ch->special`:
 
-```c
-// Checked via special power flags
-IS_DEMPOWER(ch, SPC_DROW_WAR)  // Warrior
-IS_DEMPOWER(ch, SPC_DROW_MAG)  // Mage
-IS_DEMPOWER(ch, SPC_DROW_CLE)  // Cleric
-```
+| Profession | Flag | Focus |
+|------------|------|-------|
+| Warrior | SPC_DROW_WAR (128) | Physical combat |
+| Mage | SPC_DROW_MAG (256) | Chaos magic |
+| Cleric | SPC_DROW_CLE (512) | Healing, Lloth worship |
 
-Each profession grants access to different abilities.
+## Powers by Cost
 
-## Profession Details
+| Power | Cost | Flag | Effect |
+|-------|------|------|--------|
+| Levitation | 1,000 | DPOWER_LEVITATION | Avoid fall damage |
+| Drowfire | 2,500 | DPOWER_DROWFIRE | Fire spell (100 mana) |
+| Drowpoison | 2,500 | DPOWER_DROWPOISON | Poison resistance |
+| Confuse | 2,500 | DPOWER_CONFUSE | 25% force flee (75 move) |
+| Dgarotte | 2,500 | DPOWER_DGAROTTE | Dark garotte (requires darkness) |
+| Drowsight | 5,000 | DPOWER_DROWSIGHT | Toggle holylight vision |
+| Drowshield | 5,000 | DPOWER_DROWSHIELD | Toggle IMM_SHIELDED |
+| Garotte | 5,000 | DPOWER_GAROTTE | Whip garrotte attack |
+| Web | 5,000 | DPOWER_WEB | Web spell to trap |
+| Glamour | 5,000 | DPOWER_GLAMOUR | Modify item appearance |
+| Speed | 7,500 | DPOWER_SPEED | +3-5 extra attacks |
+| Toughskin | 7,500 | DPOWER_TOUGHSKIN | Damage reduction |
+| Darkness | 7,500 | DPOWER_DARKNESS | Toggle darkness globe (500 mana) |
+| Earthshatter | 7,500 | DPOWER_EARTHSHATTER | AoE damage (150 mana) |
+| Shadowwalk | 10,000 | DPOWER_SHADOWWALK | Teleport to drow (250 move) |
+| Fightdance | 10,000 | DPOWER_FIGHTDANCE | 50%+ parry with whip |
+| Drowhate | 20,000 | DPOWER_DROWHATE | Toggle +650 max damage |
+| Spiderarms | 25,000 | DPOWER_ARMS | Spider arms |
+| Spiderform | 25,000 | DPOWER_SPIDERFORM | Transform (+400 hit/dam, -1000 AC) |
+| Darktendrils | 25,000 | DPOWER_DARKTENDRILS | Toggle 20% damage negation |
 
-### Warrior (SPC_DROW_WAR)
-- Focus on physical combat
-- Weapon mastery
-- Defensive techniques
-- Battle tactics
+**Note**: Granting to other drow multiplies cost by 5x
 
-### Mage (SPC_DROW_MAG)
-- Offensive magic
-- Dark spellcasting
-- Arcane manipulation
-- Area effects
+## Commands by Power
 
-### Cleric (SPC_DROW_CLE)
-- Divine magic (Lloth)
-- Healing abilities
-- Curses and blessings
-- Spider summoning
+### Toggle Powers
 
-## Power Granting System
+| Command | Power | Effect |
+|---------|-------|--------|
+| `drowsight` | DPOWER_DROWSIGHT | Toggle PLR_HOLYLIGHT (`drow.c:569`) |
+| `drowshield` | DPOWER_DROWSHIELD | Toggle IMM_SHIELDED (`drow.c:591`) |
+| `drowhate` | DPOWER_DROWHATE | Toggle +650 damage (`drow.c:452`) |
+| `darkness` | DPOWER_DARKNESS | Toggle darkness globe, 500 mana (`drow.c:715`) |
+| `darktendrils` | DPOWER_DARKTENDRILS | Toggle 20% damage negation (`drow.c:472`) |
+| `fightdance` | DPOWER_FIGHTDANCE | Toggle dance parry with whip (`drow.c:492`) |
+| `spiderform` | DPOWER_SPIDERFORM | Transform to giant mylochar (`drow.c:512`) |
 
-Higher-generation Drow can grant powers to lower:
+### Active Powers
 
-```c
-void do_grant(CHAR_DATA *ch, char *argument) {
-    // Check ch->generation < victim->generation
-    // Grant power from ch to victim
-    // Powers stored in ch->pcdata->powers[1] as bitfield
-}
-```
+| Command | Power | Cost | Effect |
+|---------|-------|------|--------|
+| `drowfire` | DPOWER_DROWFIRE | 100 mana | Fire damage + debuffs (`drow.c:321`) |
+| `garotte` | DPOWER_GAROTTE | - | Whip strangle attack (`fight.c:5246`) |
+| `dgarotte` | DPOWER_DGAROTTE | Requires darkness | 5-hit assassination (`fight.c:5312`) |
+| `web` | DPOWER_WEB | - | Trap target in web (`magic.c:5296`) |
+| `confuse` | DPOWER_CONFUSE | 75 move | 25% force flee (`drow.c:828`) |
+| `shadowwalk` | DPOWER_SHADOWWALK | 250 move | Teleport to drow (`drow.c:385`) |
+| `glamour` | DPOWER_GLAMOUR | - | Rename/restyle items (`drow.c:765`) |
+| `earthshatter` | DPOWER_EARTHSHATTER | 150 mana | AoE damage spell (`drow.c:865`) |
 
-### Grantable Powers
-Powers can be shared down the generation chain:
-- Combat abilities
-- Magical knowledge
-- Special techniques
-- Lloth's blessings
+### Profession-Based Commands
 
-## Power Storage
+| Command | Profession | Cost | Effect |
+|---------|------------|------|--------|
+| `chaosblast` | SPC_DROW_MAG | 750 mana | Chaos damage spell (`drow.c:214`) |
+| `heal` | SPC_DROW_CLE (or gen <= 2) | 750 mana | Self-heal BLUE_MAGIC*3 (`drow.c:362`) |
 
-```c
-ch->pcdata->powers[1]  // Bitfield of granted powers
-```
+### Utility Commands
 
-Powers are granted as bits that can be checked:
+| Command | Effect |
+|---------|--------|
+| `grant` | Grant powers/professions to lower-gen drow (`drow.c:57`) |
+| `drowpowers` | Display all granted powers and stats |
+| `lloth` | View Church of Lloth (all drow online) |
+| `drowcreate` | Create drow equipment (60 primal) (`drow.c:253`) |
 
-```c
-// Check if has a specific power
-if (IS_SET(ch->pcdata->powers[1], POWER_BIT)) {
-    // Has the power
-}
-```
+## Spiderform Details
 
-## Church of Lloth
+Transform to giant mylochar (`drow.c:512-566`):
 
-Drow belong to the Church of Lloth:
+**Requirements**: DPOWER_SPIDERFORM, not already polymorphed
 
-```c
-void do_church(CHAR_DATA *ch, char *argument) {
-    // Lists all online Drow
-    // Shows hierarchy and generations
-    // Church membership display
-}
-```
+**Bonuses**:
+- +400 hitroll
+- +400 damroll
+- -1000 AC (better armor)
+- THIRD_HAND and FOURTH_HAND (extra attacks)
 
-### Church Features
-- View all Drow online
-- See generation hierarchy
-- Track lineage
-- Communal worship
+**Visual**: Name changes to "[name] the giant mylochar"
 
-## Key Commands
+## Combat Mechanics
 
-### Profession
-- `profession <war|mag|cle>` - Choose profession (one-time)
-- `powers` - View available powers
+### Attack Bonuses (`fight.c`)
 
-### Power System
-- `grant <player> <power>` - Grant power to lower-gen Drow
-- `drow` - View Drow status
+- DPOWER_SPEED: +3-5 extra attacks per round
+- NEW_DROWHATE: +650 max damage
+- NEW_DFORM (spiderform): +650 max damage
 
-### Church
-- `church` - View Church of Lloth members
-- `lloth` - Pray to Lloth
+### Defense Bonuses
 
-### Combat (Profession-Based)
-- Warrior: Physical combat commands
-- Mage: Dark magic spells
-- Cleric: Divine spells and curses
+- DPOWER_SPEED: -50% enemy to-hit, +50% drow to-hit, +20 vs others
+- NEW_DARKTENDRILS: 20% chance to negate damage (up to 5 times)
+- NEW_FIGHTDANCE + whip: 50%+ parry chance
+- DPOWER_TOUGHSKIN: Damage reduction
 
-## Generation Mechanics
+### Magic Resistance
 
-### Hierarchy
-```
-Generation 1: Ancient Drow (most powerful)
-Generation 2: Elder Drow
-Generation 3: Mature Drow
-...
-Generation N: Newest Drow
-```
+`ch->pcdata->stats[DROW_MAGIC]` provides spell damage reduction:
+- Random % roll against DROW_MAGIC stat
+- On success: 50% damage reduction from hostile spells
 
-### Power Scaling
-```c
-// Higher generation = less maximum power
-max_power_level = base_max - (ch->pcdata->generation - 1);
-```
+## Drowfire Spell
 
-### Granting Rules
-- Can only grant to lower generation (higher number)
-- Cannot grant powers you don't have
-- Some powers require minimum generation
+Cast via `drowfire` command (`magic.c:5254-5293`):
 
-## Profession Abilities
+**Effects Applied**:
+- AFF_DROWFIRE, AFF_CURSE, AFF_BLIND
+- AC penalty: +200 (worse)
+- STR penalty: -2
+- HITROLL penalty: -10
+- Duration: 2 ticks
 
-### Warrior Abilities
-| Ability | Description |
-|---------|-------------|
-| Bladework | Enhanced melee damage |
-| Parry | Defensive blocking |
-| Riposte | Counter-attack |
-| Frenzy | Combat rage |
+## Dark Garotte
 
-### Mage Abilities
-| Ability | Description |
-|---------|-------------|
-| Darkfire | Shadow flame spell |
-| Webspell | Entangle targets |
-| Levitation | Float above ground |
-| Dispel | Remove magic |
+Special assassination attack (`fight.c:5312-5394`):
 
-### Cleric Abilities
-| Ability | Description |
-|---------|-------------|
-| Heal | Restore health |
-| Curse | Apply debuffs |
-| Summon Spider | Call spider ally |
-| Blessing | Apply buffs |
+**Requirements**:
+- DPOWER_GAROTTE + DPOWER_DGAROTTE
+- NEW_DARKNESS active
+- Target not fighting
+- Target at full HP
+- Not in arena
 
-## Combat Bonuses
+**Effect**: Removes darkness, delivers 5 backstab hits
 
-### Profession-Based
-```c
-// Warriors get melee bonus
-if (IS_DEMPOWER(ch, SPC_DROW_WAR)) {
-    damage += warrior_bonus;
-}
+## Regeneration
 
-// Mages get spell bonus
-if (IS_DEMPOWER(ch, SPC_DROW_MAG)) {
-    spell_power += mage_bonus;
-}
+Special drow homeland regeneration (`update.c:1741-1749`):
 
-// Clerics get healing bonus
-if (IS_DEMPOWER(ch, SPC_DROW_CLE)) {
-    heal_amount += cleric_bonus;
-}
-```
+**Zone**: Vnum 93440-93446
+- Triggers werewolf_regen(ch, 1) when below max stats
+- Restores HP, Mana, Move points
 
-### Innate Drow Abilities
-- Infravision (dark sight)
-- Magic resistance
-- Light sensitivity (weakness)
+## Equipment Creation
+
+`drowcreate` creates enchanted equipment (`drow.c:253-319`):
+
+**Cost**: 60 primal per piece
+
+**Available** (vnums 33060-33073):
+- Whip, Dagger, Ring, Amulet, Armor, Helmet
+- Leggings, Boots, Gauntlets, Sleeves, Belt, Bracer, Mask, Cloak
 
 ## Weaknesses
 
-- **Light**: Penalties in bright areas
-- **Surface Dwelling**: Less powerful above ground
-- **Inter-Drow Conflict**: Political dangers
-- **Lloth's Disfavor**: Disobedience punished
+**Note**: Sunlight damage and surface penalties are NOT implemented in current codebase.
 
-## Special Features
-
-### Spider Affinity
-Drow have connection to spiders:
-- Spider companions (Cleric)
-- Spider-themed abilities
-- Web-based powers
-
-### Faerie Fire
-Signature Drow ability:
-- Outlines invisible creatures
-- Reduces target defense
-- Dark purple glow
-
-## Relationship with Other Classes
-
-| Class | Relationship |
-|-------|--------------|
-| Angel | Mortal enemies |
-| Surface races | Generally hostile |
-| Demon | Potential allies |
-| Vampire | Uneasy coexistence |
+**Verified Restrictions**:
+- Cannot shadowwalk to/from astral rooms
+- Cannot shadowwalk to IMM_TRAVEL targets
+- Darkness blocked during fight_timer > 0
 
 ## Data Storage Summary
 
@@ -242,16 +210,8 @@ Signature Drow ability:
 |-------|----------|---------|
 | class | ch->class | CLASS_DROW bit |
 | generation | ch->pcdata->generation | Hierarchy position |
-| powers | ch->pcdata->powers[1] | Granted power bitfield |
-| profession | SPC_DROW_* flags | Chosen profession |
-| drow_power | ch->pcdata->stats[DROW_POWER] | Resource pool |
-
-## Design Notes
-
-The Drow class features:
-- Unique hierarchical society system
-- Power inheritance through generations
-- Three-way profession choice
-- Strong community/church integration
-
-The generation and granting system creates social gameplay where elder Drow mentor and empower newer ones, building a hierarchical community structure.
+| powers | ch->pcdata->powers[1] | DPOWER_* bitfield |
+| profession | ch->special | SPC_DROW_WAR/MAG/CLE |
+| drow_power | ch->pcdata->stats[8] | Points for granting |
+| drow_magic | ch->pcdata->stats[11] | Magic resistance |
+| newbits | ch->newbits | Toggle states (darkness, hate, etc.) |

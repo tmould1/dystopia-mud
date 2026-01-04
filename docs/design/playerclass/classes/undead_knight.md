@@ -2,120 +2,92 @@
 
 ## Overview
 
-Undead Knights are fallen Paladins cursed to live forever, never finding peace. They are an **upgrade class** obtained by upgrading from Vampire.
+Undead Knights are fallen Paladins cursed to spend eternity earthbound. They command dark forces and study the arts of necromancy. This is an **upgrade class** obtained by upgrading from Vampire.
 
-**Source Files**: `src/undead_knight.c`, `src/undead_knight.h`
+**Source Files**: `src/classes/undead_knight.c`, `src/classes/undead_knight.h`
 **Class Constant**: `CLASS_UNDEAD_KNIGHT` (4096)
 **Upgrades From**: Vampire
 
-## Lore (from help.are)
+## Core Mechanics
 
-> The Undead Knights where great knights fighting for good when they lived, but a tragic twist in their life made them fail on some important mission, and they have been cursed to spend eternity earthbound. These creatures command many dark forces, and study the arts of necromancy.
+### Power Paths
 
-## Power System
+Undead Knights have four trainable power paths stored in `ch->pcdata->powers[]`:
 
-Undead Knights have three power paths stored in `ch->pcdata->powers[]`:
+| Index | Path | Max Level | Purpose |
+|-------|------|-----------|---------|
+| NECROMANCY (1) | Necromancy | 10 | Auras and death powers |
+| INVOCATION (2) | Invocation | 5 | Powerword attacks |
+| UNDEAD_SPIRIT (3) | Spirit | 10 | Toughness/resilience |
+| WEAPONSKILL (4) | Weapon Skill | 10 | Combat proficiency |
 
-### Power Indices (undead_knight.h)
-```c
-#define NECROMANCY      1   // Necromancy level (0-10)
-// Additional paths defined elsewhere:
-// INVOCATION      2
-// SPIRIT          3
-```
+**Training Cost**: (current_level * 60 + 60) primal per level
 
-Necromancy maxes at level 10.
+### Aura System
 
-## Commands (from help.are)
+Auras are toggled via the `aura` command (`undead_knight.c:190`). Stored in `ch->pcdata->powers[AURAS]` as bitflags:
 
-| Command | Description |
-|---------|-------------|
-| knightarmor | Creates ancient armor from when alive |
-| gain | Gain access to darker, more powerful magics |
-| weaponpractice | Improve fighting skills |
-| powerword | Most feared of the knight's powers |
-| aura | Enable/disable fearsome auras |
-| command | Command the living to do your bidding |
-| unholysight | Truesight |
-| bloodrite | Blood sacrifice to gain health |
-| knighttalk | Class channel |
-| soulsuck | Drain lifeforce of good people |
+| Necromancy | Aura | Flag | Effect |
+|------------|------|------|--------|
+| 2 | Death | DEATH_AURA (2) | Extra attacks vs enemies (`fight.c:925`) |
+| 4 | Might | MIGHT_AURA (8) | +300 hitroll, +300 damroll (`undead_knight.c:246`) |
+| 6 | Bog | BOG_AURA (1) | 70% chance to prevent enemy flee (`fight.c:4166`) |
+| 9 | Fear | FEAR_AURA (4) | -20 damroll, -20 hitroll debuff on attacker (`fight.c:930`) |
 
-## Aura System (from help.are)
+## Commands
 
-Necromancy grants access to powerful auras via the `aura` command:
+### Combat Commands
 
-| Level | Aura | Effect |
-|-------|------|--------|
-| 2 | Death Aura | Your mere presence hurts those around you |
-| 4 | Might Aura | Increased damroll and hitroll |
-| 6 | Bog Aura | Permanent swamp, hard to flee from you |
-| 9 | Fear Aura | Fighting you makes warriors piss their pants |
-| 10 | Cloak of Death | Regen boost when about to die |
+| Command | Requirement | Effect | Code |
+|---------|-------------|--------|------|
+| `ride <target>` | - | Teleport to target on skeleton steed, 600 move (`undead_knight.c:34`) |
+| `unholyrite` | - | Sacrifice 500 mana to heal 500-1000 HP (`undead_knight.c:167`) |
 
-## Training Powers
+### Powerwords (INVOCATION)
 
-From undead_knight.c:209-330, gain command trains powers:
+Powerwords have a cooldown stored in `ch->pcdata->powers[POWER_TICK]`:
 
-### Necromancy Training
-- Max level: 10
-- Cost: (current_level * 60 + 60) primal per level
-- Syntax: `gain necromancy`
+| Command | Invocation | Effect | Cooldown |
+|---------|------------|--------|----------|
+| `powerword blind` | 1 | Blinds target, removes truesight (`undead_knight.c:462`) | 3 ticks |
+| `powerword kill` | 3 | 10% of target HP damage (max 1500 PC, 5000 NPC) (`undead_knight.c:502`) | 2 ticks |
+| `powerword flames` | 4 | 2x fireball hits on all enemies in room (`undead_knight.c:557`) | 2 ticks |
+| `powerword stun` | 5 | 24-round WAIT_STATE on target (`undead_knight.c:432`) | 4 ticks |
 
-## Key Ability Requirements
+### Training Commands
 
-From undead_knight.c:
+| Command | Effect |
+|---------|--------|
+| `gain` | Display/improve Necromancy, Invocation, Spirit paths (`undead_knight.c:294`) |
+| `weaponpractice` | Improve Weapon Skill (costs HP/mana/move set to 1) (`undead_knight.c:377`) |
 
-### Aura Toggles
-```c
-// Death aura requires NECROMANCY level 2
-if (ch->pcdata->powers[NECROMANCY] < 2)
+### Equipment
 
-// Might aura requires NECROMANCY level 4
-if (ch->pcdata->powers[NECROMANCY] < 4)
+| Command | Cost | Effect |
+|---------|------|--------|
+| `knightarmor <piece>` | 150 primal | Create unholy armor (vnums 29975-29988) (`undead_knight.c:110`) |
 
-// Bog aura requires NECROMANCY level 6
-if (ch->pcdata->powers[NECROMANCY] < 6)
+**Available pieces**: plate, ring, bracer, collar, helmet, leggings, boots, gauntlets, chains, cloak, belt, visor, longsword, shortsword
 
-// Fear aura requires NECROMANCY level 9
-if (ch->pcdata->powers[NECROMANCY] < 9)
-```
+## Combat Flags
 
-### Soulsuck (shared with Lich)
-From lich.c:153-156:
-- Requires SPIRIT level 4 for Undead Knights
-- Drains life from target, heals caster
+Aura flags stored in `ch->pcdata->powers[AURAS]`:
 
-## Status Display (undead_knight.c:307-310)
-
-```c
-sprintf(buf,"Necromancy: %d  Invocation: %d  Spirit: %d\n\r",
-    ch->pcdata->powers[NECROMANCY],
-    ch->pcdata->powers[INVOCATION],
-    ch->pcdata->powers[SPIRIT]);
-```
-
-## Combat Bonuses
-
-From update.c:278, high NECROMANCY provides regeneration bonus:
-```c
-if (IS_CLASS(ch, CLASS_UNDEAD_KNIGHT) && ch->pcdata->powers[NECROMANCY] > 9)
-    // Enhanced regeneration at level 10
-```
+| Flag | Value | Effect |
+|------|-------|--------|
+| BOG_AURA | 1 | 70% chance to prevent enemy flee |
+| DEATH_AURA | 2 | Extra deathaura attacks in combat |
+| FEAR_AURA | 4 | -20 hit/damroll debuff on attackers |
+| MIGHT_AURA | 8 | +300 hitroll, +300 damroll |
 
 ## Data Storage Summary
 
 | Field | Location | Purpose |
 |-------|----------|---------|
 | class | ch->class | CLASS_UNDEAD_KNIGHT bit |
-| necromancy | ch->pcdata->powers[NECROMANCY] | Necromancy level (0-10) |
-| invocation | ch->pcdata->powers[INVOCATION] | Invocation level |
-| spirit | ch->pcdata->powers[SPIRIT] | Spirit level |
-
-## Notes
-
-- Undead Knights are a unique class made for Dystopia
-- Command dark forces and study necromancy
-- Have access to powerful auras that scale with Necromancy level
-- Upgrade classes can further upgrade (levels 2-5) for additional combat bonuses
-- Share some abilities with Liches (soulsuck)
+| necromancy | ch->pcdata->powers[1] | Necromancy level (0-10) |
+| invocation | ch->pcdata->powers[2] | Invocation level (0-5) |
+| spirit | ch->pcdata->powers[3] | Spirit level (0-10) |
+| weaponskill | ch->pcdata->powers[4] | Weapon Skill level (0-10) |
+| auras | ch->pcdata->powers[5] | Active aura bitflags |
+| power_tick | ch->pcdata->powers[6] | Powerword cooldown timer |

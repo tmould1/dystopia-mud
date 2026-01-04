@@ -4,169 +4,173 @@
 
 The Tanar'ri are a fierce breed of demonkind who spend eternity fighting in the Blood Wars against their enemies the Baatezu. They are an **upgrade class** obtained by upgrading from Demon.
 
-**Source Files**: `src/tanarri.c`, `src/tanarri.h`
+**Source Files**: `src/classes/tanarri.c`, `src/classes/tanarri.h`
 **Class Constant**: `CLASS_TANARRI` (1024)
 **Upgrades From**: Demon
 
-## Lore (from help.are)
+## Core Mechanics
 
-> The Tanar'ri are a fierce breed of demonkind, who spends eternity fighting in the Blood Wars, a neverending struggle between the Tanar'ri and their abyssal enemies the Baatezu. Life for a Tanar'ri is mostly about wrecking havoc, killing Baatezu, and the occasional raids on the prime material plane.
+### Rank System
 
-## Power System
+Tanar'ri progression is based on rank, stored in `ch->pcdata->rank`:
 
-Tanar'ri use a rank-based power system stored in `ch->pcdata->powers[]`:
+| Rank | Value | Name |
+|------|-------|------|
+| 1 | TANARRI_FODDER | Fodder |
+| 2 | TANARRI_FIGHTER | Fighter |
+| 3 | TANARRI_ELITE | Elite |
+| 4 | TANARRI_CAPTAIN | Captain |
+| 5 | TANARRI_WARLORD | Warlord |
+| 6 | TANARRI_BALOR | Balor |
 
-### Power Indices (tanarri.h)
-```c
-#define TANARRI_POWER           1   // Bitfield of unlocked powers
-#define TANARRI_POWER_COUNTER   2   // Number of sacrifices made
-#define TANARRI_FURY_ON         3   // Fury toggle state
-```
+### Power System
 
-### Ranks (tanarri.h)
-```c
-#define TANARRI_FODDER   1   // Starting rank
-#define TANARRI_FIGHTER  2
-#define TANARRI_ELITE    3
-#define TANARRI_CAPTAIN  4
-#define TANARRI_WARLORD  5
-#define TANARRI_BALOR    6   // Highest rank
-```
+Powers are stored as bitflags in `ch->pcdata->powers[TANARRI_POWER]`. Acquired via `bloodsacrifice` command (`tanarri.c:224-394`).
 
-## Power Acquisition
+**Sacrifice Cost**: 10000 * (2^(rank-1)) tanarri points per power
+- Rank 1: 20,000 points per power
+- Rank 2: 40,000 points per power
+- Rank 3: 80,000 points per power
+- etc.
 
-Powers are gained through the `bloodsacrifice` command (`src/tanarri.c:228-392`).
+**Powers per Rank**: 3 powers available at each rank level
 
-Each sacrifice adds to `TANARRI_POWER_COUNTER`. When counter reaches rank thresholds (rank * 3), new powers are granted in order based on rank:
+### Combat Bonuses
 
-### Rank 1 Powers (Fodder)
-1. TANARRI_TRUESIGHT - Enhanced vision
-2. TANARRI_CLAWS - Grow claws
-3. TANARRI_EARTHQUAKE - Earth damage
+**Extra Attacks** (`fight.c:790-794`):
+- TANARRI_FANGS: +1 fang attack per round
+- TANARRI_HEAD: +1 attack (heads attack)
 
-### Rank 2 Powers (Fighter)
-1. TANARRI_EXOSKELETON - Damage resistance
-2. TANARRI_FANGS - Extra attack
-3. TANARRI_TORNADO - Lightning storm
+**Attack Count Bonus** (`fight.c:1007`, `fight.c:1099-1104`):
+- +rank extra attacks per round
+- TANARRI_SPEED: +2 additional attacks
 
-### Rank 3 Powers (Elite)
-1. TANARRI_SPEED - Enhanced speed
-2. TANARRI_MIGHT - Damage bonus
-3. TANARRI_CHAOSGATE - Portal ability
+**Damage Multiplier** (`fight.c:1354-1357`):
+- TANARRI_MIGHT: 1.5x damage
 
-### Rank 4 Powers (Captain)
-1. TANARRI_FIERY - Fire aura
-2. TANARRI_FURY - Beastial rage mode
-3. TANARRI_HEAD - Extra head attack
+**Damage Cap Bonus** (`fight.c:1774-1779`):
+- TANARRI_MIGHT: +500 max damage
+- TANARRI_FIERY: +150 * rank max damage
 
-### Rank 5 Powers (Warlord)
-1. TANARRI_BOOMING - Fear effect
-2. TANARRI_ENRAGE - Force others to fight
-3. TANARRI_FLAMES - Infernal flames
+**Damage Reduction** (`fight.c:1626-1629`):
+- TANARRI_EXOSKELETON: 80% damage reduction (takes only 20% damage)
 
-### Rank 6 Powers (Balor)
-1. TANARRI_TENDRILS - Extra attacks
-2. TANARRI_LAVA - Lava blast
-3. TANARRI_EMNITY - Cause discord
+**Dodge/Parry Bonus** (`fight.c:2414-2451`, `fight.c:2640-2677`):
+- TANARRI_HEAD: -15% enemy hit chance
+- TANARRI_SPEED: -5% enemy hit chance
+- TANARRI_FURY_ON: -5% enemy hit chance
 
-## Commands (from help.are)
+**Flee Prevention** (`fight.c:4137-4141`):
+- TANARRI_TENDRILS: 70% chance to prevent enemy flee
 
-| Command | Description |
-|---------|-------------|
-| bloodsacrifice | Sacrifice to gain powers |
-| tornado | Summon a powerful lightning storm |
-| infernalflames | Summon abyssal flames to strike enemy |
-| earthquake | Quake the earth and damage landdwellers |
-| boomingvoice | Strike fear into mortals |
-| enmity | Cause discord among friends |
-| enrage | Remove sanity, make them fight like beasts |
-| truesight | Enhanced vision |
-| web | Web mortals in demonic strands |
-| claws | Grow claws to tear limbs |
-| chaosgate | Open a portal to far away places |
-| fury | Let beastial side take over |
-| chaossurge | Destroy the pure of heart with chaos |
-| lavablast | Shower enemy with lava |
-| tantalk | Class channel |
-| taneq | Create class equipment |
+## Powers by Rank
 
-## Key Abilities
+### Rank 1 - Fodder (`tanarri.c:253-274`)
 
-### Chaossurge (tanarri.c:89-142)
-Damages based on target's alignment:
-- Alignment > 500 (good): 1500 damage
-- Alignment > 0: 1000 damage
-- Alignment > -500: 500 damage
-- Cannot target evil (alignment < -500)
+| Power | Flag | Effect |
+|-------|------|--------|
+| Truesight | TANARRI_TRUESIGHT (4) | Enhanced vision |
+| Claws | TANARRI_CLAWS (2) | Toggle claws for unarmed combat |
+| Earthquake | TANARRI_EARTHQUAKE (8) | AoE ground attack (1000 mana) |
 
-Also usable by Liches with CHAOS_MAGIC >= 3.
+### Rank 2 - Fighter (`tanarri.c:276-298`)
 
-### Enmity (tanarri.c:144-187)
-Forces two players to attack each other (60% success chance each).
-Requires TANARRI_EMNITY power.
+| Power | Flag | Effect |
+|-------|------|--------|
+| Exoskeleton | TANARRI_EXOSKELETON (16) | 80% damage reduction |
+| Fangs | TANARRI_FANGS (32) | Extra fang attack per round |
+| Tornado | TANARRI_TORNADO (64) | AoE lightning storm on flying targets (1500 mana) |
 
-### Fury Toggle (tanarri.c:548-575)
-Toggle ability that puts Tanar'ri in beastial combat mode.
-Stored in `powers[TANARRI_FURY_ON]`.
+### Rank 3 - Elite (`tanarri.c:299-321`)
 
-### Infernal Flames (tanarri.c:656-684)
-Fire attack that costs 500 mana.
-Also usable by Liches with CON_LORE >= 2.
+| Power | Flag | Effect |
+|-------|------|--------|
+| Speed | TANARRI_SPEED (128) | +2 attacks, dodge bonus |
+| Might | TANARRI_MIGHT (256) | 1.5x damage, +500 dam cap |
+| Chaosgate | TANARRI_CHAOSGATE (512) | Teleport to target (1000 move, 6.7% random destination) |
 
-## Equipment Creation
+### Rank 4 - Captain (`tanarri.c:322-344`)
 
-`taneq` command (tanarri.c:33-87) creates class armor for 150 primal:
-- Claymore, Bracer, Collar, Ring, Plate, Helmet
-- Leggings, Boots, Gauntlets, Sleeves, Cloak, Belt, Visor
+| Power | Flag | Effect |
+|-------|------|--------|
+| Fiery | TANARRI_FIERY (1024) | Fire aura, +150*rank dam cap |
+| Fury | TANARRI_FURY (2048) | Toggle +250 hit/damroll |
+| Head | TANARRI_HEAD (4096) | Extra head attack, dodge bonus |
 
-## Power Flag Definitions (tanarri.h)
+### Rank 5 - Warlord (`tanarri.c:345-367`)
 
-```c
-#define TANARRI_WEB             1
-#define TANARRI_CLAWS           2
-#define TANARRI_TRUESIGHT       4
-#define TANARRI_EARTHQUAKE      8
-#define TANARRI_EXOSKELETON     16
-#define TANARRI_FANGS           32
-#define TANARRI_TORNADO         64
-#define TANARRI_SPEED           128
-#define TANARRI_MIGHT           256
-#define TANARRI_CHAOSGATE       512
-#define TANARRI_FIERY           1024
-#define TANARRI_FURY            2048
-#define TANARRI_HEAD            4096
-#define TANARRI_BOOMING         8192
-#define TANARRI_ENRAGE          16384
-#define TANARRI_FLAMES          32768
-#define TANARRI_TENDRILS        65536
-#define TANARRI_LAVA            131072
-#define TANARRI_EMNITY          262144
-```
+| Power | Flag | Effect |
+|-------|------|--------|
+| Booming | TANARRI_BOOMING (8192) | Voice attack with 25% stun chance |
+| Enrage | TANARRI_ENRAGE (16384) | Force target into berserk (60% success) |
+| Flames | TANARRI_FLAMES (32768) | AoE 2x fireball on all in room (2000 mana) |
 
-## Checking Powers
+### Rank 6 - Balor (`tanarri.c:368-391`)
 
-```c
-// Check if has a specific power
-if (IS_SET(ch->pcdata->powers[TANARRI_POWER], TANARRI_CLAWS)) {
-    // Has claws power
-}
+| Power | Flag | Effect |
+|-------|------|--------|
+| Tendrils | TANARRI_TENDRILS (65536) | 70% chance to prevent enemy flee |
+| Lava | TANARRI_LAVA (131072) | 3x magma attack + set target on fire (1000 mana/move) |
+| Enmity | TANARRI_EMNITY (262144) | Force two players to attack each other (60% each) |
 
-// Grant a power
-SET_BIT(ch->pcdata->powers[TANARRI_POWER], TANARRI_CLAWS);
-```
+## Commands
+
+### Combat Commands
+
+| Command | Requirement | Effect | Code |
+|---------|-------------|--------|------|
+| `earthquake` | TANARRI_EARTHQUAKE | AoE attack on non-flying enemies (1000 mana) | `tanarri.c:575-612` |
+| `tornado` | TANARRI_TORNADO | AoE lightning on flying enemies (1500 mana) | `tanarri.c:614-652` |
+| `infernal` | TANARRI_FLAMES | AoE 2x fireball on all enemies (2000 mana) | `tanarri.c:654-699` |
+| `chaossurge <target>` | - | Alignment-based damage (PC only) | `tanarri.c:89-142` |
+| `booming <target>` | TANARRI_BOOMING | Voice attack, 25% stun chance | `tanarri.c:501-543` |
+| `lavablast` | TANARRI_LAVA | 3x magma hit + ignite (1000 mana/move) | `tanarri.c:396-430` |
+| `enrage <target>` | TANARRI_ENRAGE | Force target berserk (60% success) | `tanarri.c:189-222` |
+| `enmity <target1> <target2>` | TANARRI_EMNITY | Force two PCs to fight (60% each) | `tanarri.c:144-187` |
+
+### Chaossurge Details (`tanarri.c:89-142`)
+
+Damage based on target alignment:
+- Good (>500): 1500 damage
+- Neutral (>0): 1000 damage
+- Slightly evil (>-500): 500 damage
+- Cannot target evil (<-500)
+
+### Toggle Commands
+
+| Command | Requirement | Effect | Code |
+|---------|-------------|--------|------|
+| `fury` | TANARRI_FURY | Toggle +250 hitroll/damroll | `tanarri.c:545-573` |
+
+### Utility Commands
+
+| Command | Requirement | Effect | Code |
+|---------|-------------|--------|------|
+| `chaosgate <target>` | TANARRI_CHAOSGATE | Teleport (1000 move, 6.7% random) | `tanarri.c:432-499` |
+| `bloodsacrifice` | Rank 1+ | Spend tanarri points for powers | `tanarri.c:224-394` |
+| `taneq <piece>` | - | Create class equipment (150 primal) | `tanarri.c:33-87` |
+
+## Tanar'ri Armor
+
+Create equipment via `taneq <piece>` (`tanarri.c:33-87`):
+
+**Cost**: 150 primal per piece
+
+**Available pieces** (vnums 33200-33212): claymore, bracer, collar, ring, plate, helmet, leggings, boots, gauntlets, sleeves, cloak, belt, visor
+
+## Regeneration
+
+Home rooms (vnum 93330-93339): 1x werewolf_regen bonus (`update.c:1574-1578`)
+
+Note: Tanarri have no inherent regen beyond home rooms. Relies on ITEMA_REGENERATE artifacts.
 
 ## Data Storage Summary
 
 | Field | Location | Purpose |
 |-------|----------|---------|
 | class | ch->class | CLASS_TANARRI bit |
-| powers | ch->pcdata->powers[TANARRI_POWER] | Unlocked powers bitfield |
-| sacrifice_count | ch->pcdata->powers[TANARRI_POWER_COUNTER] | Number of sacrifices |
-| fury_on | ch->pcdata->powers[TANARRI_FURY_ON] | Fury toggle state |
-| rank | ch->pcdata->rank | Current Tanar'ri rank |
-
-## Notes
-
-- Tanar'ri is a unique class made for Dystopia
-- Upgrade classes can further upgrade (levels 2-5) for additional combat bonuses
-- Strive to become a True Tanar'ri Balor (rank 6)
+| rank | ch->pcdata->rank | Current rank (1-6) |
+| powers | ch->pcdata->powers[1] | Unlocked powers bitfield |
+| power_counter | ch->pcdata->powers[2] | Number of sacrifices made |
+| fury_on | ch->pcdata->powers[3] | Fury toggle state (0/1) |
+| tpoints | ch->pcdata->stats[8] | Tanarri points for sacrifices |

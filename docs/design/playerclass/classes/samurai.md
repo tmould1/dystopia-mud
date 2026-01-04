@@ -4,68 +4,157 @@
 
 Samurai are ancient warriors and masters of armed combat. They are an **upgrade class** obtained by upgrading from Ninja.
 
-**Source File**: `src/samurai.c`
+**Source Files**: `src/classes/samurai.c`, `src/classes/samurai.h`
 **Class Constant**: `CLASS_SAMURAI` (16)
 **Upgrades From**: Ninja
 
-## Lore (from help.are)
+## Core Mechanics
 
-> The Samurai is an ancient warrior and master of armed combat. A samurai must train for a long time before his true potential can be released. Once he has mastered the fighting weapons however, few can stand up to such power. Also the samurai is protected from most magiks by the spirits of the ancestors. Beware, the samurai may appear as only mortal, but much power resides in these warriors of old.
+### Focus System
 
-## Commands (from help.are)
+Focus is the core mechanic for Samurai combat, stored in `ch->pcdata->powers[SAMURAI_FOCUS]`.
 
-| Command | Description |
-|---------|-------------|
-| ancestralpath | Class portal |
-| technique | Start using ancient fighting techniques |
-| katana | Create the only weapon you'll ever need |
-| web | Throw webs at opponent |
-| martial | Command to learn the combos |
+**Building Focus**: Each martial art move adds focus points:
 
-## Focus/Combo System (from help.are)
+| Move | Focus Added | Code |
+|------|-------------|------|
+| `slide` | +1 | `samurai.c:211` |
+| `sidestep` | +2 | `samurai.c:246` |
+| `block` | +4 | `samurai.c:281` |
+| `countermove` | +8 | `samurai.c:316` |
 
-During combat, samurai can use four different attack forms, each affecting focus:
+**Focus Management**:
+- Cannot use moves when focus > 40 (exhaustion)
+- Use `focus` command to reduce focus (randomly reduces 1 to current focus) (`samurai.c:167-184`)
 
-| Attack Form | Focus Points |
-|-------------|-------------|
-| Slide | 1 point |
-| Sidestep | 2 points |
-| Block | 4 points |
-| Countermove | 8 points |
+### Combo System
 
-### Combo Triggers
-When focus hits certain thresholds, special attacks trigger automatically:
-- 10 focus: Special attack
-- 15 focus: Special attack
-- 20 focus: Special attack
-- 25 focus: Special attack
-- 30 focus: Special attack
-- 35 focus: Special attack
+When focus hits specific thresholds, automatic combo attacks trigger (`samurai.c:326-417`):
 
-### Focus Management
-- When not fighting, counter slowly drops
-- While fighting, use `focus` command to make it drop
-- Focus counter shown in prompt with `%k` flag
+| Focus | Effect | Requirements |
+|-------|--------|--------------|
+| 10 | 3x lightningslash attacks + taunt | Cannot repeat same combo |
+| 15 | Disarm opponent (67% success) | Cannot repeat same combo |
+| 20 | Paralyze target (24 WAIT_STATE) | Cannot repeat same combo |
+| 25 | Hurl opponent (67% success) | Cannot repeat same combo |
+| 30 | Self-heal 2000-4000 HP | Cannot repeat same combo |
+| 35 | 5-hit combo (backfist + thrustkick + monksweep + jumpkick + lightningslash) | Cannot repeat same combo |
 
-## Katana
+**Last Combo Tracking**: Stored in `ch->pcdata->powers[SAMURAI_LAST]` - prevents using same combo twice in a row.
 
-The `katana` command creates the samurai's signature weapon - the only weapon they'll ever need.
+### Martial Arts
 
-## Magic Resistance
+Learn martial art moves via `martial <move>` command (`samurai.c:419-512`).
 
-Samurai are protected from most magicks by the spirits of the ancestors.
+**Cost**: 150 million exp per move
+
+| Move | Flag | Cost |
+|------|------|------|
+| `slide` | SAM_SLIDE (1) | 150M exp |
+| `sidestep` | SAM_SIDESTEP (2) | 150M exp |
+| `block` | SAM_BLOCK (4) | 150M exp |
+| `countermove` | SAM_COUNTERMOVE (8) | 150M exp |
+
+Stored as bitflags in `ch->pcdata->powers[SAMURAI_MARTIAL]`.
+
+### Combat Bonuses
+
+**Attack Count** (`fight.c:1064`, `fight.c:1127`):
+- +5 attacks per round baseline (twice)
+
+**Extra Attacks** (`fight.c:836-837`):
+- NEW_BLADESPIN: Extra bladespin multi_hit attack per round
+
+**Damage Cap Bonus** (`fight.c:1859-1867`):
+- Sum of all weapon proficiencies / 200 (when wielding weapon)
+
+**Damage Reduction** (`fight.c:1647-1650`):
+- vs Shapeshifter: Takes 62.5% damage (1/1.6)
+
+**Deals Reduced Damage** (`fight.c:1635`, `fight.c:1713`):
+- vs Spider Droid: Deals 90% damage
+- vs Undead Knight: Deals 70% damage
+
+**Dodge/Parry Bonus** (`fight.c:2431`, `fight.c:2460`, `fight.c:2544-2545`, `fight.c:2657`, `fight.c:2686`, `fight.c:2731-2732`):
+- -25% enemy hit chance (dodge)
+- +25% dodge as defender
+- -15% enemy hit chance (parry)
+- +15% parry as defender
+
+**Charge Resistance** (`fight.c:421`):
+- Angel charge: Lower success (3-5 damage instead of 2-5)
+
+## Commands
+
+### Combat Commands
+
+| Command | Requirement | Effect | Code |
+|---------|-------------|--------|------|
+| `slide` | SAM_SLIDE | +1 focus, lightningslash, check combo | `samurai.c:186-219` |
+| `sidestep` | SAM_SIDESTEP | +2 focus, lightningslash, check combo | `samurai.c:221-254` |
+| `block` | SAM_BLOCK | +4 focus, lightningslash, check combo | `samurai.c:256-289` |
+| `countermove` | SAM_COUNTERMOVE | +8 focus, lightningslash, check combo | `samurai.c:291-324` |
+| `focus` | SAMURAI_FOCUS >= 10 | Reduce focus counter | `samurai.c:167-184` |
+| `bladespin` | wpn[3], wpn[0], wpn[1] >= 1000 | Toggle bladespin mode | `samurai.c:60-88` |
+
+### Bladespin Details (`samurai.c:60-88`)
+
+Requirements: Weapon skills (slash, hit, pierce) all >= 1000
+Toggle: NEW_BLADESPIN bit in ch->newbits
+Effect: Extra bladespin multi_hit attack each combat round
+
+### Movement Commands
+
+| Command | Effect | Code |
+|---------|--------|------|
+| `ancestralpath <target>` | Teleport to target (1000 move) | `samurai.c:90-165` |
+
+### Equipment
+
+| Command | Effect | Code |
+|---------|--------|------|
+| `katana` | Create katana weapon (250 primal) | `samurai.c:31-58` |
+| `martial <move>` | Learn martial art moves (150M exp) | `samurai.c:419-512` |
+
+## Samurai Katana
+
+Create weapon via `katana` command (`samurai.c:31-58`):
+
+**Cost**: 250 primal
+
+**Stats** (vnum 33176):
+- Damage: 65d115
+- QUEST_RELIC flag
+- Condition/Toughness: 100
+- Resistance: 1
+
+## Regeneration
+
+No inherent regen system. No update_samurai function exists.
+
+Relies on ITEMA_REGENERATE artifacts or other sources.
+
+## Class Interactions
+
+**Takes extra damage from** (`fight.c:421`):
+- Angel charge: Random 3-5 damage (vs 2-5 for others)
+
+**Takes reduced damage from**:
+- None specific
+
+**Deals reduced damage to** (`fight.c:1635`, `fight.c:1713`):
+- Spider Droid: 90%
+- Undead Knight: 70%
+
+**Bonus against** (`fight.c:1647-1650`):
+- vs Shapeshifter: Takes only 62.5% damage
 
 ## Data Storage Summary
 
 | Field | Location | Purpose |
 |-------|----------|---------|
 | class | ch->class | CLASS_SAMURAI bit |
-| focus | tracked during combat | Combo counter |
-
-## Notes
-
-- Samurais are built over the highlander class/concept
-- Must train extensively before true potential is released
-- Once weapons are mastered, few can stand against them
-- Focus system enables automatic special attacks at thresholds
-- Upgrade classes can further upgrade (levels 2-5) for additional combat bonuses
+| focus | ch->pcdata->powers[1] | Current focus counter |
+| last_combo | ch->pcdata->powers[2] | Last combo used (prevents repeats) |
+| martial | ch->pcdata->powers[3] | Learned martial arts bitflags |
+| bladespin | ch->newbits | NEW_BLADESPIN toggle |
