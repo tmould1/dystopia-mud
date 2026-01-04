@@ -306,7 +306,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
   {
     for(i = number_range(3,5);i>0;i--)
       one_hit(ch, victim, dt, 1); 
-    if(ch->pcdata->powers[NPOWER_NINGENNO] >=4)
+    if(ch->pcdata->powers[NPOWER_NINGENNO] >=5)
       spell_poison(gsn_poison,(ch->level*number_range(50,60)),ch,victim); 
     return;
   }
@@ -818,7 +818,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     one_hit(ch, victim, gsn_hellfire, 0);
   if (IS_CLASS(ch, CLASS_DEMON)  && IS_DEMAFF(ch, DEM_TAIL) && number_range(1,2) == 2)
     one_hit( ch, victim, gsn_sweep, 0 );
-  if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_NINJA) && ch->pcdata->powers[NPOWER_NINGENNO] >=5 && number_range(1,2) != 1)
+  if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_NINJA) && ch->pcdata->powers[NPOWER_NINGENNO] >=4 && number_range(1,2) != 1)
     multi_hit(ch, victim, gsn_shiroken);
 
   if (!IS_NPC(ch))
@@ -897,8 +897,6 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     spell_poison( gsn_poison, (ch->level*number_range(5,10)),ch,victim );
   else if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_DROW) && IS_SET(ch->pcdata->powers[1], DPOWER_DROWPOISON))
     spell_poison(gsn_poison,(ch->level*number_range(10,20)),ch,victim);
-  else if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_NINJA) && ch->pcdata->powers[NPOWER_NINGENNO] >=5)
-    spell_poison(gsn_poison,(ch->level*number_range(5,10)),ch,victim);
   if (victim->itemaffect < 1) return;
   if (IS_NPC(victim) || victim->spl[1] < 4) level = victim->level;
   else level = (victim->spl[1] * 0.25);
