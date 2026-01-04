@@ -1656,7 +1656,7 @@ void update_monk(CHAR_DATA *ch)
   {
     if ( ch->hit < ch->max_hit || ch->mana < ch->max_mana || ch->move < ch->max_move)
       werewolf_regen(ch, 1);
-  } 
+  }
   if (!IS_ITEMAFF(ch, ITEMA_MONKCHI))
   {
     if (ch->position != POS_FIGHTING 	&& ch->chi[CURRENT] > 0	&& number_range( 1,4 ) == 2)
@@ -1668,7 +1668,13 @@ void update_monk(CHAR_DATA *ch)
   }
   if ( ch->hit < ch->max_hit || ch->mana < ch->max_mana || ch->move < ch->max_move )
     werewolf_regen(ch, 2);
-  regen_limb(ch); 
+  /* Cloak of Life mantra - extra regen when badly hurt */
+  if ( IS_SET(ch->newbits, NEW_MONKCLOAK) && ch->hit < (ch->max_hit / 2) )
+  {
+    ch->hit += number_range(50, 150);
+    if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+  }
+  regen_limb(ch);
   return;
 }
 

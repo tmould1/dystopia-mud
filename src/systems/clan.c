@@ -1924,7 +1924,6 @@ void do_stake( CHAR_DATA *ch, char *argument )
     CHAR_DATA *victim;
     OBJ_DATA  *stake;
     char      arg [MAX_INPUT_LENGTH];
-    int       blood;
 
     argument = one_argument( argument, arg );
     if (IS_NPC( ch )) return;
@@ -3921,15 +3920,21 @@ void do_possession( CHAR_DATA *ch, char *argument )
     if ( IS_NPC(ch) )
 	return;
 
-    if (!IS_CLASS(ch, CLASS_VAMPIRE))
+    if (!IS_CLASS(ch, CLASS_VAMPIRE) && !IS_CLASS(ch, CLASS_DEMON))
     {
 	send_to_char("Huh?\n\r",ch);
 	return;
     }
 
-    if (ch->power[DISC_VAMP_DOMI] < 3 && IS_CLASS(ch, CLASS_MAGE) )
+    if (IS_CLASS(ch, CLASS_VAMPIRE) && ch->power[DISC_VAMP_DOMI] < 3)
     {
         send_to_char("You must obtain at least level 3 in Dominate to use Possession.\n\r",ch);
+	return;
+    }
+
+    if (IS_CLASS(ch, CLASS_DEMON) && ch->power[DISC_DAEM_TEMP] < 10)
+    {
+        send_to_char("You must obtain at least level 10 in Temptation to dominate others.\n\r",ch);
 	return;
     }
 
@@ -3944,7 +3949,7 @@ void do_possession( CHAR_DATA *ch, char *argument )
 
     if ( arg[0] == '\0' )
     {
-	send_to_char( "What do you wish to Possess?\n\r", ch );
+	send_to_char( "What do you wish to dominate?\n\r", ch );
 	return;
     }
 
@@ -3968,7 +3973,7 @@ void do_possession( CHAR_DATA *ch, char *argument )
 
     if (victim->wizard != NULL)
     {
-	send_to_char( "You are unable to possess them.\n\r", ch );
+	send_to_char( "You are unable to dominate them.\n\r", ch );
 	return;
     }
 
@@ -3978,18 +3983,38 @@ void do_possession( CHAR_DATA *ch, char *argument )
 	return;
     }
 
-    if ( ch->pcdata->condition[COND_THIRST] < 50 && IS_CLASS(ch, CLASS_VAMPIRE))
+    if (IS_CLASS(ch, CLASS_VAMPIRE) && ch->pcdata->condition[COND_THIRST] < 50)
     {
 	send_to_char("You have insufficient blood.\n\r",ch);
 	return;
     }
 
-    ch->pcdata->condition[COND_THIRST] -= 50;
+    if (IS_CLASS(ch, CLASS_DEMON) && ch->move < 500)
+    {
+	send_to_char("You lack the energy to dominate their will.\n\r",ch);
+	return;
+    }
+
+    /* Resource cost */
+    if (IS_CLASS(ch, CLASS_VAMPIRE))
+        ch->pcdata->condition[COND_THIRST] -= 50;
+    else if (IS_CLASS(ch, CLASS_DEMON))
+        ch->move -= 500;
+
     ch->pcdata->familiar = victim;
     victim->wizard = ch;
-    act("You concentrate on $N.",ch,NULL,victim,TO_CHAR);
+
+    if (IS_CLASS(ch, CLASS_DEMON))
+    {
+        act("You bend $N's will to your infernal desires.",ch,NULL,victim,TO_CHAR);
+        act("$n's eyes glow with hellish light as $e dominates $N!",ch,NULL,victim,TO_NOTVICT);
+    }
+    else
+    {
+        act("You concentrate on $N.",ch,NULL,victim,TO_CHAR);
+        act("$n starts staring at $N",ch,NULL,victim,TO_NOTVICT);
+    }
     act("$n is staring at you!",ch,NULL,victim,TO_VICT);
-    act("$n starts staring at $N",ch,NULL,victim,TO_NOTVICT);
     return;
 }
 

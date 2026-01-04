@@ -847,6 +847,7 @@ LOG_NORMAL, 8, DISC_VAMP_THAN, 3 }, */
     { "gust",		do_gust,	POS_STANDING,  3,  LOG_NORMAL, CLASS_DEMON,DISC_DAEM_GELU, 7 },
     { "entomb",		do_entomb,      POS_STANDING,  3,  LOG_NORMAL, CLASS_DEMON,DISC_DAEM_GELU, 6 },
     { "evileye",	do_evileye,     POS_STANDING,  3,  LOG_NORMAL, CLASS_DEMON,DISC_DAEM_DISC, 2 },
+    { "dominate",	do_possession,  POS_STANDING,  3,  LOG_NORMAL, CLASS_DEMON,DISC_DAEM_TEMP, 10 },
     { "leech",		do_leech,	POS_FIGHTING,  3,  LOG_NORMAL, CLASS_DEMON,DISC_DAEM_NETH,4 },
     { "deathsense",	do_deathsense,  POS_FIGHTING,  3,  LOG_NORMAL, CLASS_DEMON,DISC_DAEM_NETH, 2 },
     { "prefix",		do_prefix,	POS_DEAD,      10,  LOG_NORMAL, 0,0,0 },

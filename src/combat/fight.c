@@ -1694,6 +1694,8 @@ int cap_dam(CHAR_DATA *ch, CHAR_DATA *victim, int dam)
       dam *= (100 - (victim->chi[CURRENT] * 7) );
       dam /= 100;
     }
+    /* Steel Skin mantra - 20% damage reduction */
+    if (IS_SET(victim->newbits, NEW_MONKSKIN)) dam *= 0.80;
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_DEMON))
   {

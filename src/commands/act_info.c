@@ -438,6 +438,9 @@ int char_damroll(CHAR_DATA *ch)
     value += ch->rage;
   if( IS_CLASS(ch, CLASS_MONK) && IS_ITEMAFF(ch, ITEMA_CHAOSHANDS ) )
     value += 200;
+  /* Almighty's Favor mantra - damroll bonus */
+  if( IS_CLASS(ch, CLASS_MONK) && IS_SET(ch->newbits, NEW_MONKFAVOR) )
+    value += 50;
   if (IS_CLASS(ch, CLASS_NINJA) && ch->rage > 0)
     value += ch->rage;
   if (IS_SET(ch->special,SPC_WOLFMAN) && ch->rage > 99)
