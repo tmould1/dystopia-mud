@@ -1926,10 +1926,6 @@ void do_stake( CHAR_DATA *ch, char *argument )
     char      arg [MAX_INPUT_LENGTH];
     int       blood;
 
-    
-
-	return;
-
     argument = one_argument( argument, arg );
     if (IS_NPC( ch )) return;
 
@@ -1983,10 +1979,15 @@ void do_stake( CHAR_DATA *ch, char *argument )
     act("You plunge $p into $N's heart.", ch, stake, victim, TO_CHAR);
     act("$n plunges $p into $N's heart.", ch, stake, victim, TO_NOTVICT);
     send_to_char( "You feel a stake plunged through your heart.\n\r", victim );
-    if (IS_IMMUNE(victim,IMM_STAKE)) return;
+    if (IS_IMMUNE(victim,IMM_STAKE))
+    {
+        act("You resist the stake!", victim, NULL, NULL, TO_CHAR);
+        act("$N resists your stake!", ch, NULL, victim, TO_CHAR);
+        act("$N resists $n's stake!", ch, NULL, victim, TO_NOTVICT);
+        return;
+    }
 
     /* Have to make sure they have enough blood to change back */
-    blood = victim->pcdata->condition[COND_THIRST];
     victim->pcdata->condition[COND_THIRST] = 666;
 
     /* To take care of vampires who have powers in affect. */
@@ -2001,13 +2002,11 @@ void do_stake( CHAR_DATA *ch, char *argument )
     if (IS_VAMPAFF(victim,VAM_CHANGED) ) do_change(victim,"human");
     if (IS_POLYAFF(victim,POLY_SERPENT) ) do_serpent(victim,"");
     victim->rage = 0;
-    victim->pcdata->condition[COND_THIRST] = blood;
-
-    REMOVE_BIT(victim->class, CLASS_VAMPIRE);
+    
+    victim->pcdata->condition[COND_THIRST] = 0; // blood drained from stake
     obj_from_char(stake);
     obj_to_char(stake,victim);
     ch->exp = ch->exp + 1000;
-    victim->home = 3001;
     return;
 }
 

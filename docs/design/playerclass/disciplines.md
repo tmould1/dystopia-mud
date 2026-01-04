@@ -2,7 +2,20 @@
 
 ## Overview
 
-The discipline system provides a unified framework for character power progression across all classes. Each class has a set of disciplines (power trees) that can be learned and advanced.
+The discipline system provides a power progression framework for three classes: **Vampire**, **Werewolf**, and **Demon**. Each of these classes has a set of disciplines (power trees) that can be learned and advanced, stored in the `ch->power[]` array.
+
+**Note:** Other classes use different power systems:
+- **Mage**: Spheres (`ch->spl[]` - elemental magic colors)
+- **Angel**: Spheres (`ch->pcdata->powers[]` - Peace, Love, Justice, Harmony)
+- **Ninja**: Powers (`ch->pcdata->powers[]` - Sora, Chikyu, Ningenno paths)
+- **Monk**: Mantras (`ch->pcdata->powers[]` - Spirit, Body, Awareness, Combat)
+- **Drow**: Powers/Gifts (bit flags for Lolth-granted abilities)
+- **Lich**: Lores/Paths (Necromantic, Life, Death, Chaos, Conjuring)
+- **Samurai**: Focus/Martial techniques
+- **Shapeshifter**: Forms (Bull, Hydra, Tiger, Faerie)
+- **Spider Droid**: Implants (cybernetic upgrades)
+- **Tanarri**: Rank-based powers
+- **Undead Knight**: Paths/Auras (Necromancy, Invocation, Spirit)
 
 ## Architecture
 
