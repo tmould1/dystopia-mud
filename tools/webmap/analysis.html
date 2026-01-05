@@ -1339,12 +1339,16 @@
         let queryType = 'objects';
         let queryFilters = [];
         let queryResults = [];
+        let queryHasRun = false; // Track if a query has been executed
         let queryAreaFilter = new Set(); // Empty = all areas
 
         const QUERY_FIELDS = {
             objects: [
                 { id: 'item_type', label: 'Item Type', type: 'select',
                   options: ['weapon', 'armor', 'container', 'light', 'scroll', 'wand', 'staff', 'treasure', 'potion', 'furniture', 'trash', 'drink', 'key', 'food', 'money', 'boat', 'fountain', 'pill', 'portal', 'quest', 'book', 'tool'] },
+                { id: 'weapon.weapon_type', label: 'Weapon Type', type: 'select',
+                  options: ['hit', 'slice', 'stab', 'slash', 'whip', 'claw', 'blast', 'pound', 'crush', 'grep', 'bite', 'pierce', 'suck', 'INVALID_NEGATIVE', 'INVALID_HIGH'] },
+                { id: 'weapon.weapon_type_id', label: 'Weapon Type ID', type: 'number' },
                 { id: 'power_tier', label: 'Power Tier', type: 'select',
                   options: ['junk', 'common', 'uncommon', 'rare', 'epic', 'legendary'] },
                 { id: 'can_take', label: 'Can Pick Up', type: 'boolean' },
@@ -1414,6 +1418,12 @@
                 ]},
                 { label: 'High Hitroll', filters: [
                     { field: 'hitroll', operator: 'gte', value: '50' }
+                ]},
+                { label: 'Invalid Wpn Type (>12)', filters: [
+                    { field: 'weapon.weapon_type_id', operator: 'gt', value: '12' }
+                ]},
+                { label: 'Invalid Wpn Type (<0)', filters: [
+                    { field: 'weapon.weapon_type_id', operator: 'lt', value: '0' }
                 ]},
             ],
             mobs: [
@@ -1566,12 +1576,19 @@
 
         function renderQueryResults() {
             if (queryResults.length === 0) {
+                if (queryHasRun) {
+                    return '<p style="color: #d3a47e;">No results found. Try adjusting your filters.</p>';
+                }
                 return '<p style="color: #888;">Run a query to see results.</p>';
             }
 
             const uniqueAreas = new Set(queryResults.map(r => r.area_id));
 
             if (queryType === 'objects') {
+                // Check if we're showing weapons to add weapon-specific columns
+                const hasWeapons = queryResults.some(obj => obj.item_type === 'weapon');
+                const hasArmor = queryResults.some(obj => obj.item_type === 'armor');
+
                 return `
                     <div class="query-results-header">
                         <span class="query-results-count">Found ${queryResults.length} objects across ${uniqueAreas.size} areas</span>
@@ -1584,9 +1601,9 @@
                                 <th>Name</th>
                                 <th>Type</th>
                                 <th>Power</th>
-                                <th>Take</th>
+                                ${hasWeapons ? '<th>Damage</th><th>Wpn Type</th>' : ''}
+                                ${hasArmor ? '<th>AC</th>' : ''}
                                 <th>Wear</th>
-                                <th>Weight</th>
                                 <th>Stats</th>
                             </tr>
                         </thead>
@@ -1601,9 +1618,14 @@
                                         <span class="tier-badge tier-${obj.power_tier}">${obj.power_tier}</span>
                                         ${obj.power_score.toFixed(0)}
                                     </td>
-                                    <td>${obj.can_take ? '✓' : '✗'}</td>
+                                    ${hasWeapons ? `
+                                        <td>${obj.weapon ? `${obj.weapon.damage_min}-${obj.weapon.damage_max}` : '-'}</td>
+                                        <td>${formatWeaponType(obj)}</td>
+                                    ` : ''}
+                                    ${hasArmor ? `
+                                        <td>${obj.armor ? obj.armor.ac : '-'}</td>
+                                    ` : ''}
                                     <td>${obj.wear_location || '-'}</td>
-                                    <td>${obj.weight}</td>
                                     <td>${formatStats(obj.stats_summary)}</td>
                                 </tr>
                             `).join('')}
@@ -1657,6 +1679,7 @@
             queryType = type;
             queryFilters = [];
             queryResults = [];
+            queryHasRun = false;
             renderContent();
         }
 
@@ -1682,6 +1705,7 @@
         function clearFilters() {
             queryFilters = [];
             queryResults = [];
+            queryHasRun = false;
             renderContent();
         }
 
@@ -1712,6 +1736,7 @@
 
         function runQuery() {
             queryResults = [];
+            queryHasRun = true;
 
             const activeAreaFilter = queryAreaFilter.size > 0;
             const areasToSearch = activeAreaFilter
@@ -1747,11 +1772,22 @@
             renderContent();
         }
 
+        function getNestedValue(obj, path) {
+            // Handle nested paths like "weapon.weapon_type"
+            const parts = path.split('.');
+            let value = obj;
+            for (const part of parts) {
+                if (value == null) return undefined;
+                value = value[part];
+            }
+            return value;
+        }
+
         function matchesFilters(entity, filters) {
             if (filters.length === 0) return true;
 
             for (const filter of filters) {
-                const value = entity[filter.field];
+                const value = getNestedValue(entity, filter.field);
                 const target = filter.value;
 
                 let matches = false;

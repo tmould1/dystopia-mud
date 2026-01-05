@@ -80,6 +80,7 @@ class ObjectAnalysis:
     weapon_damage_max: int = 0
     weapon_damage_avg: float = 0.0
     weapon_type: Optional[str] = None
+    weapon_type_id: int = -1  # Raw value[3] for detecting invalid weapons
     is_spell_weapon: bool = False
     weapon_spell: Optional[str] = None      # On-hit spell effect
     weapon_affect: Optional[str] = None     # Passive wielder affect
@@ -127,6 +128,7 @@ class ObjectAnalysis:
                 'damage_max': self.weapon_damage_max,
                 'damage_avg': round(self.weapon_damage_avg, 1),
                 'weapon_type': self.weapon_type,
+                'weapon_type_id': self.weapon_type_id,
                 'is_spell_weapon': self.is_spell_weapon,
                 'spell': self.weapon_spell,
                 'affect': self.weapon_affect,
@@ -327,6 +329,7 @@ def calculate_object_power(obj: Object) -> ObjectAnalysis:
     weapon_damage_max = 0
     weapon_damage_avg = 0.0
     weapon_type = None
+    weapon_type_id = -1  # -1 means not a weapon
     is_spell_weapon = False
     weapon_spell = None
     weapon_affect = None
@@ -392,7 +395,15 @@ def calculate_object_power(obj: Object) -> ObjectAnalysis:
 
         weapon_damage_avg = (weapon_damage_min + weapon_damage_max) / 2 \
             if weapon_damage_max > 0 else float(weapon_damage_min)
-        weapon_type = WEAPON_TYPES.get(weapon_type_id, f'type_{weapon_type_id}')
+
+        # Detect invalid weapon types that could cause bugs
+        # Valid range is 0-12 based on fight.c checks
+        if weapon_type_id < 0:
+            weapon_type = 'INVALID_NEGATIVE'
+        elif weapon_type_id > 12:
+            weapon_type = 'INVALID_HIGH'
+        else:
+            weapon_type = WEAPON_TYPES.get(weapon_type_id, f'type_{weapon_type_id}')
 
         # Decode spell weapon components
         spell_id = spell_flags % 1000  # On-hit spell
@@ -500,6 +511,7 @@ def calculate_object_power(obj: Object) -> ObjectAnalysis:
         weapon_damage_max=weapon_damage_max,
         weapon_damage_avg=weapon_damage_avg,
         weapon_type=weapon_type,
+        weapon_type_id=weapon_type_id,
         is_spell_weapon=is_spell_weapon,
         weapon_spell=weapon_spell,
         weapon_affect=weapon_affect,
