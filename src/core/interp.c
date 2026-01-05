@@ -1748,6 +1748,27 @@ char *one_argument( char *argument, char *arg_first )
     if ( *argument == '\'' || *argument == '"' )
         cEnd = *argument++;
 
+    /* Handle N.'quoted string' pattern - copy N. prefix then process quoted part */
+    if ( cEnd == ' ' && isdigit(*argument) )
+    {
+        /* Copy digits and the dot prefix */
+        while ( isdigit(*argument) )
+        {
+            *arg_first = *argument;
+            arg_first++;
+            argument++;
+        }
+        if ( *argument == '.' )
+        {
+            *arg_first = *argument;
+            arg_first++;
+            argument++;
+            /* Now check for quote after the dot */
+            if ( *argument == '\'' || *argument == '"' )
+                cEnd = *argument++;
+        }
+    }
+
     while ( *argument != '\0' )
     {
         if ( *argument == cEnd )

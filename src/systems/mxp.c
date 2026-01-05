@@ -547,11 +547,14 @@ static void mxp_build_inventory_menu(OBJ_DATA *obj, CHAR_DATA *ch,
     snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf), "cast 'identify' '%s'", keywords);
     strncat(hint_buf, "Identify", hint_size - strlen(hint_buf) - 1);
 
-    /* Add "Put in <container>" for each container in player's inventory */
+    /* Add "Put in <container>" for each container in player's inventory (limit to 3) */
     if (obj->item_type != ITEM_CONTAINER && obj->item_type != ITEM_CORPSE_NPC
         && obj->item_type != ITEM_CORPSE_PC && ch->carrying != NULL)
     {
-        for (cont = ch->carrying; cont != NULL; cont = cont->next_content)
+        int container_count = 0;
+        const int max_containers = 3;
+
+        for (cont = ch->carrying; cont != NULL && container_count < max_containers; cont = cont->next_content)
         {
             /* Skip the item itself, skip non-containers, skip closed containers */
             if (cont == obj)
@@ -573,10 +576,11 @@ static void mxp_build_inventory_menu(OBJ_DATA *obj, CHAR_DATA *ch,
                 "put '%s' '%s'", keywords, cont_keywords);
             snprintf(hint_buf + strlen(hint_buf), hint_size - strlen(hint_buf),
                 "Put in %s", cont->short_descr);
+            container_count++;
         }
     }
 
-    /* Add "Forge onto <item>" for forging materials */
+    /* Add "Forge onto <item>" for forging materials (limit to 5 targets to avoid overflow) */
     {
         bool is_metal = (obj->item_type == ITEM_COPPER || obj->item_type == ITEM_IRON
                       || obj->item_type == ITEM_STEEL || obj->item_type == ITEM_ADAMANTITE);
@@ -588,8 +592,10 @@ static void mxp_build_inventory_menu(OBJ_DATA *obj, CHAR_DATA *ch,
             char target_keywords[MAX_INPUT_LENGTH];
             OBJ_DATA *count_obj;
             int item_index;
+            int forge_count = 0;
+            const int max_forge_targets = 5;
 
-            for (cont = ch->carrying; cont != NULL; cont = cont->next_content)
+            for (cont = ch->carrying; cont != NULL && forge_count < max_forge_targets; cont = cont->next_content)
             {
                 /* Skip the forging material itself */
                 if (cont == obj)
@@ -639,6 +645,7 @@ static void mxp_build_inventory_menu(OBJ_DATA *obj, CHAR_DATA *ch,
                     "forge '%s' %d.'%s'", keywords, item_index, target_keywords);
                 snprintf(hint_buf + strlen(hint_buf), hint_size - strlen(hint_buf),
                     "Forge onto %s", cont->short_descr);
+                forge_count++;
             }
         }
     }
@@ -742,10 +749,10 @@ char *mxp_obj_link(OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_roo
     mxp_add_sitem_options(obj, keywords, href_buf, sizeof(href_buf),
         hint_buf, sizeof(hint_buf));
 
-    /* Build final MXP tag - hint must come last */
+    /* Build final MXP tag - href first, then hint for popup menu */
     snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND hint=\"%s\" href=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
-        hint_buf, href_buf, display_text);
+        MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+        href_buf, hint_buf, display_text);
 
     return buf;
 }
@@ -826,14 +833,14 @@ char *mxp_equip_link(OBJ_DATA *obj, CHAR_DATA *ch, char *display_text)
         if (is_container)
         {
             snprintf(buf, sizeof(buf),
-                MXP_SECURE_LINE "<SEND hint=\"%s|Remove|Look|Look In\" href=\"remove '%s'|look '%s'|look in '%s'\">%s</SEND>" MXP_LOCK_LOCKED,
-                escaped_hint, keywords, keywords, keywords, display_text);
+                MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'|look in '%s'\" hint=\"%s|Remove|Look|Look In\">%s</SEND>" MXP_LOCK_LOCKED,
+                keywords, keywords, keywords, escaped_hint, display_text);
         }
         else
         {
             snprintf(buf, sizeof(buf),
-                MXP_SECURE_LINE "<SEND hint=\"%s|Remove|Look\" href=\"remove '%s'|look '%s'\">%s</SEND>" MXP_LOCK_LOCKED,
-                escaped_hint, keywords, keywords, display_text);
+                MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'\" hint=\"%s|Remove|Look\">%s</SEND>" MXP_LOCK_LOCKED,
+                keywords, keywords, escaped_hint, display_text);
         }
     }
 
@@ -901,8 +908,8 @@ char *mxp_container_item_link(OBJ_DATA *obj, OBJ_DATA *container, CHAR_DATA *ch,
 
     /* Simple click to get item from container - no menu needed */
     snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND hint=\"%s\" href=\"get '%s' '%s'\">%s</SEND>" MXP_LOCK_LOCKED,
-        escaped_hint, obj_keywords, container_keywords, display_text);
+        MXP_SECURE_LINE "<SEND href=\"get '%s' '%s'\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+        obj_keywords, container_keywords, escaped_hint, display_text);
 
     return buf;
 }
@@ -953,8 +960,8 @@ char *mxp_player_link(CHAR_DATA *victim, CHAR_DATA *ch, char *display_text)
 
     /* Build the MXP-wrapped string */
     snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND hint=\"%s\" href=\"finger %s\">%s</SEND>" MXP_LOCK_LOCKED,
-        escaped_hint, escaped_name, display_text);
+        MXP_SECURE_LINE "<SEND href=\"finger %s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+        escaped_name, escaped_hint, display_text);
 
     return buf;
 }
@@ -1089,8 +1096,8 @@ char *mxp_exit_link(EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_tex
 
     /* Build the MXP-wrapped string */
     snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND hint=\"%s\" href=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
-        escaped_hint, cmd, display_text);
+        MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+        cmd, escaped_hint, display_text);
 
     return buf;
 }
@@ -1227,15 +1234,15 @@ char *mxp_char_link(CHAR_DATA *victim, CHAR_DATA *ch, char *display_text)
     {
         /* 3 commands: attack, look, consider -> 4 hints: tooltip + 3 labels */
         snprintf(buf, sizeof(buf),
-            MXP_SECURE_LINE "<SEND hint=\"%s|Attack|Look|Consider\" href=\"attack %s|look %s|consider %s\">%s</SEND>" MXP_LOCK_LOCKED "%s",
-            escaped_hint, escaped_keyword, escaped_keyword, escaped_keyword, clean_text, trailing);
+            MXP_SECURE_LINE "<SEND href=\"attack %s|look %s|consider %s\" hint=\"%s|Attack|Look|Consider\">%s</SEND>" MXP_LOCK_LOCKED "%s",
+            escaped_keyword, escaped_keyword, escaped_keyword, escaped_hint, clean_text, trailing);
     }
     else
     {
         /* 4 commands: attack, look, consider, finger -> 5 hints: tooltip + 4 labels */
         snprintf(buf, sizeof(buf),
-            MXP_SECURE_LINE "<SEND hint=\"%s|Attack|Look|Consider|Finger\" href=\"attack %s|look %s|consider %s|finger %s\">%s</SEND>" MXP_LOCK_LOCKED "%s",
-            escaped_hint, escaped_keyword, escaped_keyword, escaped_keyword, escaped_keyword, clean_text, trailing);
+            MXP_SECURE_LINE "<SEND href=\"attack %s|look %s|consider %s|finger %s\" hint=\"%s|Attack|Look|Consider|Finger\">%s</SEND>" MXP_LOCK_LOCKED "%s",
+            escaped_keyword, escaped_keyword, escaped_keyword, escaped_keyword, escaped_hint, clean_text, trailing);
     }
 
     return buf;

@@ -36,9 +36,14 @@
 
 /*
  * MXP Frame tags for popup windows
+ * To use: Send FRAME_OPEN, then DEST_FRAME to redirect output,
+ * then content, then DEST_MAIN to return to main window.
+ * The frame stays open until explicitly closed with FRAME_CLOSE.
  */
 #define MXP_FRAME_OPEN      "<FRAME Name=\"Identify\" Action=\"OPEN\" Title=\"Item Info\">"
-#define MXP_FRAME_CLOSE     "</FRAME>"
+#define MXP_FRAME_REDIRECT  "<DEST Identify>"
+#define MXP_FRAME_DEST_END  "</DEST>"
+#define MXP_FRAME_CLOSE     "<FRAME Name=\"Identify\" Action=\"CLOSE\">"
 
 /*
  * MXP Buffer sizes
