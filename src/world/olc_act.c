@@ -2343,8 +2343,16 @@ bool set_obj_values( CHAR_DATA *ch, OBJ_INDEX_DATA *pObj, int value_num, char *a
 	            pObj->value[2] = atoi( argument );
 	            break;
 	        case 3:
-	            send_to_char( "WEAPON TYPE SET.\n\r\n\r", ch );
-	            pObj->value[3] = flag_value( weapon_flags, argument );
+	            {
+	                int wtype = flag_value( weapon_flags, argument );
+	                if ( wtype == NO_FLAG )
+	                {
+	                    send_to_char( "Invalid weapon type. Valid: hit, slice, stab, slash, whip, claw, blast, pound, crush, grep, bite, pierce, suck\n\r", ch );
+	                    return FALSE;
+	                }
+	                send_to_char( "WEAPON TYPE SET.\n\r\n\r", ch );
+	                pObj->value[3] = wtype;
+	            }
 	            break;
 	    }
             break;

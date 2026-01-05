@@ -573,7 +573,8 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     dt = TYPE_HIT;
     if ( wield != NULL && wield->item_type == ITEM_WEAPON )
     {
-      dt += wield->value[3];
+      if (wield->value[3] >= 0 && wield->value[3] <= 12)
+        dt += wield->value[3];
       if (wield->value[0] >= 1)
       {
         /* Look, just don't ask...   KaVir */
@@ -596,7 +597,10 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     if (wield != NULL && wield->item_type == ITEM_WEAPON)
     {
       int tempnum = wield->value[3];
-      chance = (ch->wpn[tempnum]) * 0.5;
+      if (tempnum >= 0 && tempnum <= 12)
+        chance = (ch->wpn[tempnum]) * 0.5;
+      else
+        chance = (ch->wpn[0]) * 0.5;  /* Invalid weapon type, use default */
     }
     else chance = (ch->wpn[0]) * 0.5;
     if (number_percent() <= chance) maxcount += 1;
@@ -1223,10 +1227,11 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype)
   if ( dt == TYPE_UNDEFINED )
   {
     dt = TYPE_HIT;
-    if ( wield != NULL && wield->item_type == ITEM_WEAPON )
+    if ( wield != NULL && wield->item_type == ITEM_WEAPON
+      && wield->value[3] >= 0 && wield->value[3] <= 12 )
       dt += wield->value[3];
   }
-  if (ch->wpn[dt-1000] > 5) level = (ch->wpn[dt-1000] / 5);
+  if (dt >= TYPE_HIT && dt <= TYPE_HIT + 12 && ch->wpn[dt-1000] > 5) level = (ch->wpn[dt-1000] / 5);
   else level = 1;
   if (level > 40) level = 40;
 
@@ -1315,7 +1320,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype)
    */
   dam += char_damroll(ch);
   if (!IS_AWAKE(victim)) dam *= 2;
-  if (!IS_NPC(ch) && dt >= TYPE_HIT) dam = dam + (dam * (UMIN(350,(ch->wpn[dt-1000]+1)) / 60));
+  if (!IS_NPC(ch) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12) dam = dam + (dam * (UMIN(350,(ch->wpn[dt-1000]+1)) / 60));
 
   /* Other Resistances */
    
@@ -2606,7 +2611,8 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
   int chance = 0;
 
   if (!IS_AWAKE(victim)) return FALSE;
-  if (!IS_NPC(ch)) chance -= (ch->wpn[dt-1000] * 0.1);
+  if (!IS_NPC(ch) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12) chance -= (ch->wpn[dt-1000] * 0.1);
+  else if (!IS_NPC(ch)) chance -= (ch->wpn[0] * 0.1);
   else chance -= (ch->level * 0.2);
   if (!IS_NPC(victim)) chance += (victim->wpn[0] * 0.5);
   else chance += victim->level;
