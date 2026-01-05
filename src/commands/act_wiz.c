@@ -6897,7 +6897,8 @@ void copyover_recover ()
 		int items_read = fscanf (fp, "%d %s %s\n", &desc, name, host);
 		if (items_read != 3 || desc == -1)
 		{
-			if (items_read != 3 && items_read != EOF)
+			/* Only warn if it's not EOF and not the -1 terminator line */
+			if (items_read != EOF && !(items_read >= 1 && desc == -1))
 				merc_logf("copyover_recover: malformed line in copyover file, stopping");
 			break;
 		}

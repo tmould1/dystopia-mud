@@ -858,6 +858,13 @@ void game_loop_mac_msdos( void )
 		   case CON_PLAYING:
                         if ( !run_olc_editor( d ) )
                             interpret( d->character, d->incomm );
+			/* If command changed connection state, flush output now */
+			if ( d->connected != CON_PLAYING && d->outtop > 0 )
+			{
+			    process_output( d, FALSE );
+			    if ( d->out_compress )
+			        processCompressed( d );
+			}
 			break;
 		   case CON_EDITING:
 			edit_buffer( d->character, d->incomm );
@@ -1085,7 +1092,7 @@ void game_loop_unix( int control )
                 else
                 if ( d->pString )
                     string_add( d->character, d->incomm );
-                else 
+                else
 		switch( d->connected )
 			  {
 			   default:
@@ -1102,6 +1109,17 @@ void game_loop_unix( int control )
                                 jope_interp( d->character, d->incomm );
                                 break;
 			  }
+
+		/* Flush output immediately so prompts appear before next input */
+		if ( d->outtop > 0 )
+		{
+		    /* Send GA (Go Ahead) signal for clients that need it */
+		    if ( d->character && IS_SET(d->character->act, PLR_TELNET_GA) )
+			write_to_buffer( d, go_ahead_str, 0 );
+		    process_output( d, FALSE );
+		    if ( d->out_compress )
+			processCompressed( d );
+		}
 
 		d->incomm[0]	= '\0';
 	    }
@@ -1297,6 +1315,12 @@ void new_descriptor( int control )
 	ioctlsocket( desc, FIONBIO, &nonblocking );
     }
 #endif
+
+    /* Disable Nagle algorithm for immediate send - helps prompts appear instantly */
+    {
+	int nodelay = 1;
+	setsockopt( desc, IPPROTO_TCP, TCP_NODELAY, (const char *)&nodelay, sizeof(nodelay) );
+    }
 
     /*
      * Cons a new descriptor.

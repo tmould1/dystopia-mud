@@ -8,7 +8,7 @@
 #define CON_NOTE_TEXT					17
 #define CON_NOTE_FINISH					18
 
-#define NOTE_DIR  				"../notes/" /* set it to something you like */
+#define NOTE_DIR  				mud_notes_dir /* uses initialized path from db.c */
 
 #define DEF_NORMAL  0 /* No forced change, but default (any string)   */
 #define DEF_INCLUDE 1 /* 'names' MUST be included (only ONE name!)    */

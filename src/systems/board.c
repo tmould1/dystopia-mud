@@ -146,7 +146,7 @@ void finish_note (BOARD_DATA *board, NOTE_DATA *note)
 {
 	FILE *fp;
 	NOTE_DATA *p;
-	char filename[200];
+	char filename[MUD_PATH_MAX];
 	
 	/* The following is done in order to generate unique date_stamps */
 
@@ -170,7 +170,7 @@ void finish_note (BOARD_DATA *board, NOTE_DATA *note)
 
 	/* append note to note file */		
 	
-	sprintf (filename, "%s%s", NOTE_DIR, board->short_name);
+	snprintf (filename, sizeof(filename), "%s%s", NOTE_DIR, board->short_name);
 	
 	fp = fopen (filename, "a");
 	if (!fp)
@@ -246,16 +246,16 @@ static NOTE_DATA* find_note (CHAR_DATA *ch, BOARD_DATA *board, int num)
 static void save_board (BOARD_DATA *board)
 {
 	FILE *fp;
-	char filename[200];
-	char buf[256];
+	char filename[MUD_PATH_MAX];
+	char buf[MUD_PATH_MAX + 32];
 	NOTE_DATA *note;
-	
-	sprintf (filename, "%s%s", NOTE_DIR, board->short_name);
-	
+
+	snprintf (filename, sizeof(filename), "%s%s", NOTE_DIR, board->short_name);
+
 	fp = fopen (filename, "w");
 	if (!fp)
 	{
-		sprintf (buf, "Error writing to: %s", filename);
+		snprintf (buf, sizeof(buf), "Error writing to: %s", filename);
 		bug (buf, 0);
 	}
 	else
@@ -302,9 +302,9 @@ static void load_board (BOARD_DATA *board)
 {
 	FILE *fp, *fp_archive;
 	NOTE_DATA *last_note;
-	char filename[200];
-	
-	sprintf (filename, "%s%s", NOTE_DIR, board->short_name);
+	char filename[MUD_PATH_MAX];
+
+	snprintf (filename, sizeof(filename), "%s%s", NOTE_DIR, board->short_name);
 	
 	fp = fopen (filename, "r");
 	
@@ -369,9 +369,9 @@ static void load_board (BOARD_DATA *board)
         
         if (pnote->expire < current_time)
         {
-			char archive_name[200];
+			char archive_name[MUD_PATH_MAX + 8];
 
-			sprintf (archive_name, "%s%s.old", NOTE_DIR, board->short_name);
+			snprintf (archive_name, sizeof(archive_name), "%s%s.old", NOTE_DIR, board->short_name);
 			fp_archive = fopen (archive_name, "a");
 			if (!fp_archive)
 				bug ("Could not open archive boards for writing",0);
@@ -561,8 +561,8 @@ static void do_nwrite (CHAR_DATA *ch, char *argument)
 		}			
 		
 		send_to_char (buf,ch);
-		send_to_char ("\n\r" BOLD YELLOW "To" NO_COLOR ":      ",ch);
-	
+		send_to_char ("\n\r" YELLOW "To" NO_COLOR ":      ",ch);
+
 		ch->desc->connected = CON_NOTE_TO;
 		/* nanny takes over from here */
 		

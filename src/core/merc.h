@@ -4429,6 +4429,7 @@ extern char mud_player_dir[MUD_PATH_MAX];  /* Player save files */
 extern char mud_backup_dir[MUD_PATH_MAX];  /* Backup directory */
 extern char mud_txt_dir[MUD_PATH_MAX];     /* Text files (logs, etc) */
 extern char mud_log_dir[MUD_PATH_MAX];     /* Log files */
+extern char mud_notes_dir[MUD_PATH_MAX];   /* Notes/boards directory */
 
 /* Path building function - returns static buffer, use immediately or copy */
 char *mud_path(const char *dir, const char *filename);
@@ -4550,6 +4551,8 @@ void	close_socket	args( ( DESCRIPTOR_DATA *dclose ) );
 void	close_socket2	args( ( DESCRIPTOR_DATA *dclose, bool kickoff ) );
 void	write_to_buffer	args( ( DESCRIPTOR_DATA *d, const char *txt,
 			    int length ) );
+bool	write_to_descriptor args( ( DESCRIPTOR_DATA *d, char *txt, int length ) );
+bool	process_output	args( ( DESCRIPTOR_DATA *d, bool fPrompt ) );
 void	send_to_char	args( ( const char *txt, CHAR_DATA *ch ) );
 void	act		args( ( const char *format, CHAR_DATA *ch,
 			    const void *arg1, const void *arg2, int type ) );

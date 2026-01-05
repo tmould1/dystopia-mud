@@ -40,6 +40,7 @@ char mud_player_dir[MUD_PATH_MAX] = "";
 char mud_backup_dir[MUD_PATH_MAX] = "";
 char mud_txt_dir[MUD_PATH_MAX]    = "";
 char mud_log_dir[MUD_PATH_MAX]    = "";
+char mud_notes_dir[MUD_PATH_MAX]  = "";
 
 /* Build a path from directory and filename - uses rotating static buffers */
 char *mud_path(const char *dir, const char *filename)
@@ -112,6 +113,7 @@ void mud_init_paths(const char *exe_path)
     snprintf(mud_backup_dir, sizeof(mud_backup_dir), "%.450s%sbackup%s", mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR);
     snprintf(mud_txt_dir, sizeof(mud_txt_dir), "%.450s%stxt", mud_base_dir, PATH_SEPARATOR);
     snprintf(mud_log_dir, sizeof(mud_log_dir), "%.450s%slog", mud_base_dir, PATH_SEPARATOR);
+    snprintf(mud_notes_dir, sizeof(mud_notes_dir), "%.450s%snotes%s", mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR);
 
     fprintf(stderr, "MUD paths initialized:\n");
     fprintf(stderr, "  Base:   %s\n", mud_base_dir);
@@ -120,6 +122,7 @@ void mud_init_paths(const char *exe_path)
     fprintf(stderr, "  Backup: %s\n", mud_backup_dir);
     fprintf(stderr, "  Txt:    %s\n", mud_txt_dir);
     fprintf(stderr, "  Log:    %s\n", mud_log_dir);
+    fprintf(stderr, "  Notes:  %s\n", mud_notes_dir);
 }
 
 /*
@@ -857,7 +860,7 @@ void load_mobiles( FILE *fp )
 	pMobIndex->pShop		= NULL;
 	pMobIndex->alignment		= fread_number( fp );
 	letter				= fread_letter( fp );
-	pMobIndex->level		= number_fuzzy( fread_number( fp ) );
+	pMobIndex->level		= fread_number( fp );
 
 	/*
 	 * The unused stuff is for imps who want to use the old-style

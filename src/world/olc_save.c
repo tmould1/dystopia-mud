@@ -692,8 +692,8 @@ void save_help()
 	FILE *fp;
 	HELP_DATA *pHelp;
 	char ack[10];
-	rename( "help.are", "help.bak");
-	if((fp=fopen( "help.are", "w")) == NULL)
+	rename( mud_path(mud_area_dir, "help.are"), mud_path(mud_area_dir, "help.bak"));
+	if((fp=fopen( mud_path(mud_area_dir, "help.are"), "w")) == NULL)
 	{		bug( "save_helps: fopen", 0);
 	perror( "help.are" );
 }
@@ -750,10 +750,10 @@ void save_area( AREA_DATA *pArea )
     FILE *fp;
 
     fclose( fpReserve );
-    if ( !( fp = fopen( pArea->filename, "w" ) ) )
+    if ( !( fp = fopen( mud_path(mud_area_dir, pArea->filename), "w" ) ) )
     {
 	bug( "Open_area: fopen", 0 );
-	perror( pArea->filename );
+	perror( mud_path(mud_area_dir, pArea->filename) );
     }
 
     fprintf( fp, "#AREADATA\n" );
