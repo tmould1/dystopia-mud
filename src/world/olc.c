@@ -234,6 +234,7 @@ const struct olc_cmd_type aedit_table[] =
     {   "commands",	show_commands		},
     {   "create",	aedit_create		},
     {   "filename",	aedit_file		},
+    {   "hidden",	aedit_hidden		},
     {   "name",		aedit_name		},
     {   "recall",	aedit_recall		},
     {	"reset",	aedit_reset		},
@@ -1390,19 +1391,20 @@ void do_alist( CHAR_DATA *ch, char *argument )
 	send_to_char("Huh?\n\r", ch);
 	return;}
 
-    sprintf( buf, "[%3s] [%-27s] (%-5s-%5s) [%-10s] %3s [%-10s]\n\r",
-       "Num", "Area Name", "lvnum", "uvnum", "Filename", "Sec", "Builders" );
+    sprintf( buf, "[%3s] [%-27s] (%-5s-%5s) [%-10s] %3s [%-10s] %s\n\r",
+       "Num", "Area Name", "lvnum", "uvnum", "Filename", "Sec", "Builders", "Hid" );
 	send_to_char(buf,ch);
     for ( pArea = area_first; pArea; pArea = pArea->next )
     {
-		sprintf( buf, "[%3d] %-29.29s (%-5d-%5d) %-12.12s [%d] [%-10.10s]\n\r",
+		sprintf( buf, "[%3d] %-29.29s (%-5d-%5d) %-12.12s [%d] [%-10.10s] %s\n\r",
 			pArea->vnum,
 			pArea->name,
 			pArea->lvnum,
 			pArea->uvnum,
 			pArea->filename,
 			pArea->security,
-			pArea->builders );
+			pArea->builders,
+			pArea->is_hidden ? "Yes" : "" );
 		send_to_char(buf, ch);
     }
     return;

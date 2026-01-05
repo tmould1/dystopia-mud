@@ -198,6 +198,8 @@ void load_leaderboard  args( (void) );
 void save_leaderboard  args( (void) );
 void load_bans	       args( (void) );
 void save_bans	       args( (void) );
+void load_hidden_areas args( (void) );
+void save_hidden_areas args( (void) );
 void load_kingdoms     args( (void) );
 void save_kingdoms     args( (void) );
 
@@ -2677,6 +2679,7 @@ struct  area_data
     int                 max_mob_level;  /* Highest mob level */
     int                 avg_difficulty; /* Calculated difficulty score */
     int                 difficulty_tier;/* 0=trivial,1=easy,2=normal,3=hard,4=deadly */
+    bool                is_hidden;      /* Hidden from player areas list */
 };
 
 
@@ -4443,6 +4446,7 @@ void mud_init_paths(const char *exe_path);
 #define AREA_DIR       mud_area_dir
 
 #define AREA_LIST      mud_path(mud_area_dir, "area.lst")
+#define HIDDEN_LIST    mud_path(mud_area_dir, "hidden.lst")
 #define BAN_LIST       mud_path(mud_txt_dir, "ban.txt")
 #define BUG_FILE       mud_path(mud_txt_dir, "bugs.txt")
 #define SHUTDOWN_FILE  mud_path(mud_area_dir, "shutdown.txt")

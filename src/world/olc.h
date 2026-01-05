@@ -143,6 +143,7 @@ DECLARE_OLC_FUN( aedit_show		);
 DECLARE_OLC_FUN( aedit_create		);
 DECLARE_OLC_FUN( aedit_name		);
 DECLARE_OLC_FUN( aedit_file		);
+DECLARE_OLC_FUN( aedit_hidden		);
 DECLARE_OLC_FUN( aedit_age		);
 DECLARE_OLC_FUN( aedit_recall		);
 DECLARE_OLC_FUN( aedit_reset		);

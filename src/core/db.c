@@ -512,6 +512,7 @@ void boot_db(bool fCopyOver)
 	fBootDb	= FALSE;
 	area_update();
 	calculate_all_area_difficulties();
+	load_hidden_areas();
 	load_bans();
         load_topboard();
         load_leaderboard();
@@ -565,6 +566,7 @@ void load_area( FILE *fp )
     pArea->max_mob_level   = 0;
     pArea->avg_difficulty  = 0;
     pArea->difficulty_tier = 0;
+    pArea->is_hidden       = FALSE;
 
     if ( area_first == NULL )
 	area_first = pArea;
@@ -639,6 +641,7 @@ void new_load_area( FILE *fp )
     pArea->max_mob_level   = 0;
     pArea->avg_difficulty  = 0;
     pArea->difficulty_tier = 0;
+    pArea->is_hidden       = FALSE;
 
     for ( ; ; )
     {
@@ -685,9 +688,83 @@ void new_load_area( FILE *fp )
     }
     log_string( pArea->name );
 }
-                
-             
-            
+
+
+/*
+ * Load hidden areas list from hidden.lst
+ */
+void load_hidden_areas( void )
+{
+    FILE *fp;
+    char *filename;
+    AREA_DATA *pArea;
+
+    if ( ( fp = fopen( HIDDEN_LIST, "r" ) ) == NULL )
+        return;  /* File doesn't exist yet - that's OK */
+
+    for ( ; ; )
+    {
+        filename = fread_word( fp );
+        if ( filename[0] == '$' )
+            break;
+
+        /* Find area by filename and mark hidden */
+        for ( pArea = area_first; pArea; pArea = pArea->next )
+        {
+            if ( !str_cmp( pArea->filename, filename ) )
+            {
+                pArea->is_hidden = TRUE;
+                break;
+            }
+        }
+    }
+    fclose( fp );
+}
+
+
+/*
+ * Save hidden areas list to hidden.lst
+ */
+void save_hidden_areas( void )
+{
+    FILE *fp;
+    AREA_DATA *pArea;
+    bool found = FALSE;
+
+    /* Check if any areas are hidden */
+    for ( pArea = area_first; pArea; pArea = pArea->next )
+    {
+        if ( pArea->is_hidden )
+        {
+            found = TRUE;
+            break;
+        }
+    }
+
+    /* If no hidden areas, remove file */
+    if ( !found )
+    {
+        unlink( HIDDEN_LIST );
+        return;
+    }
+
+    if ( ( fp = fopen( HIDDEN_LIST, "w" ) ) == NULL )
+    {
+        bug( "save_hidden_areas: fopen", 0 );
+        return;
+    }
+
+    for ( pArea = area_first; pArea; pArea = pArea->next )
+    {
+        if ( pArea->is_hidden )
+            fprintf( fp, "%s\n", pArea->filename );
+    }
+
+    fprintf( fp, "$\n" );
+    fclose( fp );
+}
+
+
 /*
  * Sets vnum range for area using OLC protection features.
  */
@@ -3137,9 +3214,12 @@ void do_areas( CHAR_DATA *ch, char *argument )
 
     WAIT_STATE( ch, 10 );
 
-    /* Count areas */
+    /* Count visible areas (skip hidden) */
     for ( pArea = area_first; pArea != NULL; pArea = pArea->next )
-        count++;
+    {
+        if ( !pArea->is_hidden )
+            count++;
+    }
 
     if ( count == 0 )
     {
@@ -3150,10 +3230,13 @@ void do_areas( CHAR_DATA *ch, char *argument )
     /* Allocate array for sorting */
     arr = alloc_mem( sizeof( AREA_DATA * ) * count );
 
-    /* Fill array */
+    /* Fill array (skip hidden) */
     i = 0;
     for ( pArea = area_first; pArea != NULL; pArea = pArea->next )
-        arr[i++] = pArea;
+    {
+        if ( !pArea->is_hidden )
+            arr[i++] = pArea;
+    }
 
     /* Sort by difficulty_tier, then avg_mob_level within tier (insertion sort) */
     for ( i = 1; i < count; i++ )

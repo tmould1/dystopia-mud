@@ -556,6 +556,9 @@ bool aedit_show( CHAR_DATA *ch, char *argument )
     sprintf( buf, "Flags:    [%s]\n\r", flag_string( area_flags, pArea->area_flags ) );
     send_to_char( buf, ch );
 
+    sprintf( buf, "Hidden:   [%s]\n\r", pArea->is_hidden ? "Yes" : "No" );
+    send_to_char( buf, ch );
+
     return FALSE;
 }
 
@@ -571,6 +574,25 @@ bool aedit_reset( CHAR_DATA *ch, char *argument )
     send_to_char( "Area reset.\n\r", ch );
 
     return FALSE;
+}
+
+
+
+bool aedit_hidden( CHAR_DATA *ch, char *argument )
+{
+    AREA_DATA *pArea;
+
+    EDIT_AREA(ch, pArea);
+
+    pArea->is_hidden = !pArea->is_hidden;
+
+    if ( pArea->is_hidden )
+        send_to_char( "Area is now hidden from the areas list.\n\r", ch );
+    else
+        send_to_char( "Area is now visible in the areas list.\n\r", ch );
+
+    save_hidden_areas();
+    return TRUE;
 }
 
 
