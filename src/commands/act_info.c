@@ -2915,21 +2915,21 @@ void do_who(CHAR_DATA *ch, char *argument)
       else if ( IS_CLASS(gch, CLASS_MONK))
       {
         if (gch->generation == 1)
-          sprintf(kav,"%s#lAbbot#n%s             ", openb, closeb);   
+          sprintf(kav,"%s#cAbbot#n%s             ", openb, closeb);   
         else if (gch->generation == 2)
-          sprintf(kav,"%s#lHigh Priest#n%s       ", openb, closeb);   
+          sprintf(kav,"%s#cHigh Priest#n%s       ", openb, closeb);   
         else if (gch->generation == 3)
-          sprintf(kav,"%s#lPriest#n%s            ", openb, closeb);   
+          sprintf(kav,"%s#cPriest#n%s            ", openb, closeb);   
         else if (gch->generation == 4)
-          sprintf(kav,"%s#lFather#n%s            ", openb, closeb);   
+          sprintf(kav,"%s#cFather#n%s            ", openb, closeb);   
         else if (gch->generation == 5)
-          sprintf(kav,"%s#lMonk#n%s              ", openb, closeb);   
+          sprintf(kav,"%s#cMonk#n%s              ", openb, closeb);   
         else if (gch->generation == 6)
-          sprintf(kav,"%s#lBrother#n%s           ", openb, closeb);   
+          sprintf(kav,"%s#cBrother#n%s           ", openb, closeb);   
         else if (gch->generation == 7)
-          sprintf(kav,"%s#lAcolyte#n%s           ", openb, closeb);   
+          sprintf(kav,"%s#cAcolyte#n%s           ", openb, closeb);   
         else
-         sprintf(kav,"%s#lFanatic#n%s           ", openb, closeb);
+         sprintf(kav,"%s#cFanatic#n%s           ", openb, closeb);
       }
       else if ( IS_CLASS(gch, CLASS_DROW)) 
       {

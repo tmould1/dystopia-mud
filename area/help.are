@@ -762,7 +762,7 @@ and 100 in all spell colors.
 #P.o0#0Drow#P0o.#n            Cruel dark elfs from the underdark.
 #C***#yNinja#C***#n           Masters of the martial arts and killers for hire.
 #R<<V#0ampire#R>>#n           Ancient beings of great power.
-#0.x[#lMonk#0]x.#n            Masters of the martial arts and inner peace.
+#0.x[#cMonk#0]x.#n            Masters of the martial arts and inner peace.
 {{#CBattlemage#n}}        Masters of arcane magic.
 
 UPGRADE CLASSES :
@@ -866,180 +866,258 @@ parry/attacks/etc.
 
 ~
 
-0 LICH~
-#n #n
-Lichs are powerful sorceres that have cheated death by entering a state of
-living death. No longer subject to the affects of time, they use their time
-to explore other planes and perfect their magic. The lichs grow in power, far
-beyond that of most mortal mages, since they have so much more time to perfect
-their art. If you thought mages were scary, try fighting a lich that has used
-the last 2000 years comming up with nasty spells to kill and destroy.
+0 LICH LICHS~
 
-Masters of conjuring, death, life, necromantics and chaos, lichs have
-acces to several powers, some of them are know as :
+        #x022>*<#x028>*<#x034>*<#n  #7L I C H#n  #x034>*<#x028>*<#x022>*<#n
 
-Conjuring   : Objectgate, Fireball, Planartravel, Golemsummon, Pentagram.
-Death       : Readaura, Chillhand, Painwreck, Creeping Doom.
-Life        : Regeneration, Earthswallow, Powertransfer, Polarity.
-Necromantic : Zombie, Soulsuck, Planarstorm, Planeshift.
-Chaos Magic : Chaosmagic, Chaossurge, Chaosshield.
+#x250Mages who unlocked the forbidden secret of immortality, binding their souls
+to phylacteries and transcending death itself. Their withered forms belie
+terrifying arcane mastery - five ancient lores of devastating power.#n
 
-Note : Lichs are a unique class made for Dystopia.
+#x034-------------------#x040[ #7CORE SYSTEMS #x040]#x034-------------------#n
+  #7Lores#n          Five paths of arcane mastery
+  #7Training#n       #Rstudylore#n <lore> to advance
+  #7Equipment#n      #Rlicharmor#n creates deathly artifacts
 
+#x034-------------------#x040[ #7KEY COMMANDS #x040]#x034-------------------#n
+  #Rlore#n            Display current lore levels
+  #Rstudylore#n <lore> Train a lore path
+  #Rlicharmor#n       Create lich equipment (150 primal)
+
+#x034---------------------#x040[ #7LORES #x040]#x034------------------------#n
+  #x196Conjuring#n    Golems, portals, and summoning magic
+  #x040Life#n         Regeneration, mana conversion, and draining
+  #x245Death#n        Pain, cold, and insect swarms
+  #x129Necromantic#n  Soul manipulation and planar travel
+  #x063Chaos#n        Unpredictable destruction and shielding
+
+#x245See also:#n #RLORES#n
+~
+
+0 LORES LICHLORE~
+
+        #x022>*<#x028>*<#x034>*<#n  #7L I C H   L O R E S#n  #x034>*<#x028>*<#x022>*<#n
+
+#x250The five ancient paths of arcane mastery. Each lore unlocks new abilities
+as you advance. Train with #Rstudylore#x250 <lore>.#n
+
+#x034-------------------#x196[ #7CONJURING #x196]#x034-------------------#n
+#x250Mastery of summoning and portal magic.#n
+  #Rfireball#n         AoE fire attack on all enemies
+  #Rplanartravel#n     Create portal to target location
+  #Rgolemsummon#n      Summon fire, clay, stone, or iron golems
+  #Rpentagram#n        Summon a player to your location
+
+#x034---------------------#x040[ #7LIFE #x040]#x034-----------------------#n
+#x250Control over vital energies and restoration.#n
+  #x245(passive)#n        Enables natural regeneration
+  #Rearthswallow#n     Send a player back to their altar
+  #Rpowertransfer#n    Convert mana into health
+  #Rpolarity#n         Drain mana from target, heal yourself
+
+#x034--------------------#x245[ #7DEATH #x245]#x034----------------------#n
+#x250Command over pain, cold, and decay.#n
+  #Rchillhand#n        Freezing touch that drains strength
+  #Rpainwreck#n        Agonizing attack with chance to stun
+  #Rcreepingdoom#n     Swarm of insects devours all enemies
+
+#x034-----------------#x129[ #7NECROMANTIC #x129]#x034-------------------#n
+#x250Manipulation of souls and the planes beyond.#n
+  #Rsoulsuck#n         Drain life force, healing yourself
+  #Rplanarstorm#n      Devastating AoE at cost to yourself
+  #Rplaneshift#n       Become ethereal, phasing between planes
+
+#x034--------------------#x063[ #7CHAOS #x063]#x034----------------------#n
+#x250Unpredictable magic of destruction and protection.#n
+  #Rchaossurge#n       Alignment-based damage against the good
+  #Rchaosshield#n      Toggle protective aura shielding
+
+#x245See also:#n #RLICH#n
 ~
 
 0 TANARRI TANAR~
-#n #n
-The Tanar'ri are a fierce breed of demonkind, who spends eternity fighting
-in the Blood Wars, a neverending struggle between the Tanar'ri and their
-abyssal enemies the Baatezu. Life for a Tanar'ri is mostly about wrecking
-havoc, killing Baatezu, and the occasional raids on the prime material
-plane. If you happen to stumble upon a True Tanar'ri or even worse
-a Tanar'ri Balor, run like you've never done before, these creatures
-are known to destroy entire cities single handed before they return
-to the Abyss to continue fighting in the Blood Wars.
 
-Bloodsacrifice   - Sacrifice to gain powers.
-Tornado		 - Summon a powerful lightning storm.
-Infernal flames  - Summon the abyssal flames to strike your enemy.
-Earthquake       - Quake the earth and damge the landdwellers.
-Booming	voice	 - Let your booming voice strike fear into the hearts of mortals.
-Enmity		 - Cause discord among friends.
-Enrage		 - Remove their sanity and let them fight like beasts.
-Truesight	 - Truesight.
-Web		 - Web the ugly mortals in icky demonic strands on power.
-Claws		 - Grow claws to tear the limbs of mortals.
-Chaosgate	 - Open a portal to far away places.
-Fury		 - Let your beastial side take over.
-Chaossurge       - Destroy the pure of heart with the power of chaos.
-Lavablast	 - Shower the enemy with lava, and eat the corpses for dinner.
-Tantalk		 - Talk with other Tanar'ri.
-Taneq		 - Make class eq.
+        #y{{{#x214{{#x208{#n  #RT A N A R ' R I#n  #x208}#x214}}#y}}}#n
 
-Also remember to train the status among the Tanar'ri, strive to
-become a True Tanar'ri Balor, so you can lead your own army
-against the puny Baatezu.
+#x250Savage demonkind forged in the endless Blood Wars against the Baatezu.
+These chaotic fiends claw their way through the ranks, from expendable
+fodder to the terrifying Balor lords who command infernal armies.#n
 
-NOTE : Tanar'ri is a unique class made for Dystopia.
+#y-------------------#x214[ #x208CORE SYSTEMS #x214]#y-------------------#n
+  #x208Rank#n          Fodder > Fighter > Elite > Captain > Warlord > Balor
+  #x208Powers#n        Unlocked via #Rbloodsacrifice#n (costs tanarri points)
+  #x208Equipment#n     #Rtaneq#n <piece> - create tanarri armor (150 primal)
+
+#y-------------------#x214[ #x208POWERS BY RANK #x214]#y-------------------#n
+  #x208Rank 1 Fodder#n     truesight, claws, earthquake
+  #x208Rank 2 Fighter#n    exoskeleton #x245(80% dmg reduce)#n, fangs, tornado
+  #x208Rank 3 Elite#n      speed #x245(+2 atks)#n, might #x245(1.5x dmg)#n, chaosgate
+  #x208Rank 4 Captain#n    fiery #x245(fire aura)#n, fury #x245(+250 hit/dam)#n, head
+  #x208Rank 5 Warlord#n    booming #x245(25% stun)#n, enrage, infernal flames
+  #x208Rank 6 Balor#n      tendrils #x245(70% no flee)#n, lavablast, enmity
+
+#y-------------------#x214[ #x208KEY COMMANDS #x214]#y-------------------#n
+  #Rbloodsacrifice#n    Spend tanarri points to unlock powers
+  #Rfury#n              Toggle +250 hitroll/damroll
+  #Rchaosgate#n         Teleport to target (1000 move)
+  #Rchaossurge#n        Alignment-based damage vs good targets
+  #Rtantalk#n           Tanarri class channel
+
+#x250Strive to become a True Tanar'ri Balor and lead your army against the Baatezu.#n
 
 ~
 
-0 ANGELS~
-#n #n
-Angels, being the creation of the holy God, were created perfect without
-any flaw or sin. They are considered holy due to the cause of their
-createn, smithing evil everywhere and being the messengers of God.
-The word of an angel is the direct word of God, and must be considered
-as a divine command by all worshippers.
+0 ANGELS ANGEL~
 
-Angelicaura      - The aura of justice let's you strike down evil.
-Martyr           - Suffer the pain of others.
-Innerpeace       - Let the love of God heal you wounds.
-Touch of God     - Let the burning wrath of God strike down unbelivers.
-God's peace      - No harm will come to those protected by god.
-Eye for an Eye   - They breake your arm, you cut both theirs off.
-                   They scare you gf, you kill their wife.
-                   They take your kill, your take their head.
-                    - IT'S THE JUSTICE OF GOD!
-God's Favor      - Fill yourself with the love of God.
-God's Senses     - See through God's eyes.
-Swoop            - When you have gained your wings, you can fly anywhere.
-House of God     - No fighting can happen in the house of God.
-Banish           - Banish creatures of pure EVIL.
-Forgiveness      - Forgive the sins of another.
-Sins of the past - Punish a person for his or her sins.
-Spiritform       - Return to your true form.
-Harmony          - Let the inbalance of your prey wreck his/her body.
-Touch of God     - Strike down the unbelievers with the touch of God.
+        #y.x.#x220.x#x235(#n  #7A N G E L#n  #x235)#x220x.#y.x.#n
 
-An angel also have WINGS and a HALO, and can create angelic armor
-suited for their war with hell. The command for creating this godly
-armor is 'angelicarmor <piece>'.
+#x250Heaven's chosen warriors, bathed in divine light and sent to punish the
+wicked. These celestial beings walk the four sacred paths - Peace, Love,
+Justice, and Harmony - wielding holy power against the forces of darkness.#n
 
-True angels master the art of : PEACE, LOVE, HARMONY and GOD'S JUSTICE
+#y-------------------#x220[ #7CORE SYSTEMS #x220]#y-------------------#n
+  #7Power Paths#n    4 paths, each maxes at level 5
+  #7Toggles#n        Wings (flight), Halo, Aura, Eye for an Eye
+  #7Equipment#n      #Rangelicarmor#n <piece> - create holy armor (150 primal)
+
+#y-------------------#x220[ #7PEACE PATH #x220]#y-------------------#n
+  #x2451#n #7gpeace#n        Cannot be attacked (toggle AFF_PEACE)
+  #x2452#n #7spiritform#n    Become ethereal spirit
+  #x2453#n #7innerpeace#n    Heal (PEACE*500) HP for 1500 mana
+  #x2455#n #7houseofgod#n    Stop all fighting in room (50-tick cooldown)
+
+#y-------------------#x220[ #7LOVE PATH #x220]#y-------------------#n
+  #x2451#n #7gsenses#n       Toggle truesight
+  #x2452#n #7gfavor#n        Toggle +400 hit/damroll, angel form (2000 mana/move)
+  #x2453#n #7forgiveness#n   Heal good-aligned PC 1000-1500 HP
+  #x2454#n #x245(passive)#n     2x regen + limb regeneration
+  #x2455#n #7martyr#n        Restore all PCs in room, set self to 1 HP/mana/move
+
+#y-------------------#x220[ #7JUSTICE PATH #x220]#y-------------------#n
+  #x2451#n #7awings#n/#7swoop#n  Toggle wings, fly to target (500 move)
+  #x2452#n #7halo#n          Toggle halo visibility
+  #x2453#n #7sinsofthepast#n Fire + poison + wrath attack
+  #x2454#n #7touchofgod#n    100-200 damage, 33% stun
+  #x2455#n #7eyeforaneye#n   Reflect damage back on attacker
+
+#y-------------------#x220[ #7HARMONY PATH #x220]#y-------------------#n
+  #x2452#n #7angelicaura#n   Toggle extra heavenlyaura attacks
+  #x2453#n #7gbanish#n       Alignment damage, 30% teleport to Hell
+  #x2455#n #7harmony#n       Cast spirit kiss spell on target
+
+#x245See also:#n #RPEACE#n/#RLOVE#n/#RHARMONY#n/#RJUSTICE#n
 
 ~
 
 1 PEACE LOVE HARMONY JUSTICE~
-#n #n
-PEACE                       HARMONY
-level 1 : gpeace            level 1 : <none yet>
-level 2 : spiritform        level 2 : angelicaura
-level 3 : innerpeace        level 3 : gbanish
-level 4 : <none yet>        level 4 : <none yet>
-level 5 : houseofgod        level 5 : harmony
 
-LOVE                        JUSTICE
-level 1 : gsenses           level 1 : swoop/awings
-level 2 : gfavor            level 2 : halo
-level 3 : forgiveness       level 3 : sinsofthepast
-level 4 : regeneration      level 4 : touchofgod
-level 5 : martyr            level 5 : eyeforaneye
+#y-------------------#x220[ #7ANGEL PATHS #x220]#y-------------------#n
+
+#7PEACE#n #x245(Protection)#n              #7HARMONY#n #x245(Balance)#n
+  #x2451#n gpeace #x245(untargetable)#n       #x2452#n angelicaura #x245(extra attacks)#n
+  #x2452#n spiritform #x245(ethereal)#n       #x2453#n gbanish #x245(alignment dmg)#n
+  #x2453#n innerpeace #x245(self heal)#n      #x2455#n harmony #x245(spirit kiss)#n
+  #x2455#n houseofgod #x245(stop fight)#n
+
+#7LOVE#n #x245(Healing)#n                  #7JUSTICE#n #x245(Combat)#n
+  #x2451#n gsenses #x245(truesight)#n         #x2451#n awings/swoop #x245(flight)#n
+  #x2452#n gfavor #x245(+400 hit/dam)#n       #x2452#n halo #x245(visibility)#n
+  #x2453#n forgiveness #x245(heal ally)#n     #x2453#n sinsofthepast #x245(attack)#n
+  #x2454#n #x245(passive regen)#n             #x2454#n touchofgod #x245(stun)#n
+  #x2455#n martyr #x245(restore room)#n       #x2455#n eyeforaneye #x245(reflect)#n
 
 ~
 
-0 UNDEAD KNIGHTS~
+0 UNDEAD KNIGHTS UNDEAD KNIGHT~
 
-The Undead Knights where great knights fighting for good when they lived,
-but a tragic twist in their life made them fail on some important mission,
-and they have been cursed to spend eternity earthbound.
+       #0|[#x033|[#x039|#n  #LUNDEAD KNIGHT#n  #x039|#x033]|#0]|#n
 
-These creatures command many dark forces, and study the arts of necromancy.
+#x250Once noble Paladins, now cursed to spend eternity earthbound as servants
+of darkness. These fallen warriors have traded their holy vows for the
+forbidden arts of necromancy, commanding death itself as their weapon.#n
 
-Knightarmor    - Creates the ancient armor that the knights used when they lived.
-Gain           - Gain acces to the darker and more powerful magics.
-Weaponpractice - Improves your fighting skills.
-Powerword      - The most feared of the knights powers.
-Aura           - Enable or disable some of the knights fearsome auras.
-Command        - Command the living to do your bidding.
-Unholysight    - Truesight.
-Bloodrite      - Make a blood sacrifice to gain health.
-Knighttalk     - Class Channel.
-Soulsuck       - Drain the lifeforce of good people.
+#0-------------------#x033[ #x039CORE SYSTEMS #x033]#0-------------------#n
+  #x039Necromancy#n    Auras and death powers (max 10)
+  #x039Invocation#n    Powerword attacks (max 5)
+  #x039Spirit#n        Toughness/resilience (max 10)
+  #x039Weapon Skill#n  Combat proficiency (max 10)
+  #x039Equipment#n     #Rknightarmor#n <piece> - create unholy armor (150 primal)
 
-Also read HELP AURAS.
+#0-------------------#x033[ #x039AURAS #x033]#0-------------------#n
+  #x245Nec 2#n  #LDeath Aura#n    Extra attacks vs enemies in combat
+  #x245Nec 4#n  #LMight Aura#n    +300 hitroll, +300 damroll
+  #x245Nec 6#n  #LBog Aura#n      70% chance to prevent enemy flee
+  #x245Nec 9#n  #LFear Aura#n     -20 hit/damroll debuff on attackers
 
-NOTE : Undead Knights are a unique class made for Dystopia.
+#0-------------------#x033[ #x039POWERWORDS #x033]#0-------------------#n
+  #x245Inv 1#n  #Rpowerword blind#n   Blinds target, removes truesight
+  #x245Inv 3#n  #Rpowerword kill#n    10% of target HP damage (max 1500)
+  #x245Inv 4#n  #Rpowerword flames#n  2x fireball on all enemies in room
+  #x245Inv 5#n  #Rpowerword stun#n    24-round stun on target
+
+#0-------------------#x033[ #x039KEY COMMANDS #x033]#0-------------------#n
+  #Rgain#n              Train Necromancy, Invocation, Spirit paths
+  #Rweaponpractice#n    Improve Weapon Skill (costs all HP/mana/move)
+  #Rride#n              Teleport to target on skeleton steed (600 move)
+  #Runholyrite#n        Sacrifice 500 mana to heal 500-1000 HP
+  #Raura#n              Toggle auras on/off
+  #Rknighttalk#n        Class channel
+
+#x245See also:#n #RAURAS#n
 
 ~
 
 0 AURAS~
 
-The Necromancy power gives the undead knight acces to powerful auras,
-that the knight can enable with the aura command.
+#0-------------------#x033[ #x039UNDEAD KNIGHT AURAS #x033]#0-------------------#n
 
-level 2  : Death Aura (Your mere presence hurts those around you).
-level 4  : Might Aura (Increased damroll and hitroll).
-level 6  : Bog Aura   (You stand in a permanent swamp, making it hard to flee from you).
-level 9  : Fear Aura  (Fighting you makes even the most brave warrior piss their pants).
-level 10 : Cloak of Death (Regen boost when your just about to die).
+#x250Toggle auras with the #Raura#x250 command. Requires Necromancy path levels.#n
+
+  #x245Nec 2#n   #LDeath Aura#n       Your presence hurts those around you
+                        #x245Extra attacks vs enemies in combat#n
+  #x245Nec 4#n   #LMight Aura#n       +300 hitroll, +300 damroll
+  #x245Nec 6#n   #LBog Aura#n         Standing in a permanent swamp
+                        #x24570% chance to prevent enemy flee#n
+  #x245Nec 9#n   #LFear Aura#n        Makes even the bravest warriors cower
+                        #x245-20 hit/damroll debuff on attackers#n
+  #x245Nec 10#n  #LCloak of Death#n   Regen boost when near death
 
 ~
 
-0 SHAPESHIFTERS~
+0 SHAPESHIFTERS SHAPESHIFTER~
 
-Shapeshifters are powerful creatures able to take any form they wish.
-No one knows what a shapechanger really looks like, so how can you know
-that your best friend isn't one... better kill him to be on the safe
-side.
+      #0[#P*#0]#x199*#x205*#n  #rS H A P E S H I F T E R#n  #x205*#x199*#0[#P*#0]#n
 
-Shift      - The command to change between the beastforms.
-Truesight  - Gain superior vision.
-Formlearn  - Learn more about the different beastforms.
-Mask       - Mask yourself as another player.
-Shapeshift - Change into ANYTHING.
-Hatform    - Why pull rabbits out of a hat, when you can be a hat instead.
-Camouflage - Camouflage your items.
-Mistwalk   - Class portal.
-Shapearmor - Make class eq.
+#x250The Malaugrym - ancient beings from the plane of shadows whose very essence
+is mutability. Their flesh flows like water between forms: the savage tiger,
+the many-headed hydra, the thundering bull, and the elusive faerie.#n
 
+#0-------------------#P[ #x205CORE SYSTEMS #P]#0-------------------#n
+  #x205Forms#n         Tiger, Hydra, Bull, Faerie (5 levels each)
+  #x205Shiftpowers#n   General abilities (5 levels)
+  #x205Equipment#n     #Rshapearmor#n <piece> - create armor (150 primal)
+  #x205Training#n      #Rformlearn#n <form> - improve form levels
 
-TIGER  : roar, phase.
-FAERIE : fblink, faeriecurse.
-HYDRA  : breath.
-BULL   : charge, stomp.
+#0-------------------#P[ #x205BEAST FORMS #P]#0-------------------#n
+  #rTiger#n    +450 hit/+300 dam, claws/fangs, #x245roar#n #x245(flee), phase (invuln)#n
+  #rHydra#n    +450 hit/+450 dam, multiple heads, #x245breath#n #x245(fire)#n
+  #rBull#n     +400 hit/+400 dam, 1.7x damage, #x245charge#n #x245(stun), stomp (sever)#n
+  #rFaerie#n   +250 hit/+250 dam, -500 AC, #x245fblink#n #x245(backstrike), faeriecurse#n
 
-NOTE : Shapeshifters are a unique class made for Dystopia.
+#0-------------------#P[ #x205SHIFTPOWERS #P]#0-------------------#n
+  #x2451#n #x205Truesight#n     See through illusions (passive)
+  #x2452#n #x205Mistwalk#n      Teleport to target (250 move)
+  #x2453#n #x205Hatform#n       Transform into a hat object
+  #x2454#n #x205Mask#n          Disguise as another player
+  #x2455#n #x205Shapeshift#n    Transform into anything
+
+#0-------------------#P[ #x205KEY COMMANDS #P]#0-------------------#n
+  #Rshift#n          Change between beast forms (heals 10% first 2 times)
+  #Rformlearn#n      Display/improve form levels
+  #Rcamouflage#n     Rename and redescribe items
+  #Rmistwalk#n       Class portal to target
+
+#x250Shifting too often causes fatigue. Each shift adds 10 to counter (max 35).#n
 
 ~
 
@@ -1883,155 +1961,212 @@ between 1 and 50 points).
 ~
 
 0 WEREWOLF WEREWOLVES~
- 
-The werewolf is a species of halfman, halfwolf beings that hunt down
-and destroy the wyrm.  The wyrm composed of vampires and the like
-have been a bane to the wolf society long enough.  From now on vile
-wyrm fear the wolves for they will destroy you all.
 
-#R*#n #GHowl#n        - A channel for the werewolf community.
-#R*#n #GTribe#n       - Shows information on other werewolves logged on.
-#R*#n #GDisciplines#n - Lists discipline spirits, use research to begin your
-                training in one and use train to improve your
-                discipline when its ready..
-#R*#n #GRage#n        - sends a werewolf into a violent rage that attacks
-                everyone in the room and gives increased hit/dam
+         #y(((#x184((#x220(#n  #LW E R E W O L F#n  #x220)#x184))#y)))#n
 
-for more information on the discipline spirits type 'help #Gtotem#n'.
+#x250Children of the moon, these shapechangers draw power from primal totem
+spirits. When rage consumes them, their bodies twist into devastating
+war forms of fang and claw. Silver is their bane.#n
+
+#y-------------------#x184[ #LCORE SYSTEMS #x184]#y-------------------#n
+  #LGnosis#n        Spiritual energy - powers abilities
+  #LRage#n          Build to 100+ to transform (+50 hit/dam, AoE attacks)
+  #LTotems#n        12 spirit disciplines (#Rresearch#n/#Rtrain#n)
+
+#y-------------------#x184[ #LKEY COMMANDS #x184]#y-------------------#n
+  #Rrage#n           Build rage, trigger werewolf form at 100+
+  #Rcalm#n           Reduce rage when not fighting
+  #Rclaws#n / #Rfangs#n  Extend natural weapons (Wolf totem)
+  #Rhowl#n           Werewolf class channel
+  #Rtribe#n          Show online werewolves
+  #Rmoonarmour#n     Create lunar equipment (60 primal)
+
+#y--------------------#x184[ #LTOTEMS #x184]#y-----------------------#n
+  #x245Use: research <totem> then train <totem> (10 levels each)#n
+  #LLuna#n    flameclaws, motherstouch, sclaws, moongate, moonbeam
+  #LBear#n    #x245passive regen#n, roar, skin, slam
+  #LWolf#n    claws, fangs, calm, razorclaws
+  #LOwl#n     vanish, shield, shadowplane, staredown, disquiet, cocoon
+  #LHawk#n    nightsight, shadowsight, quills, wither
+  #LRaptor#n  perception, devour, shred, jawlock, talons
+  #LBoar#n    burrow, rend #x245(destroys enemy eq)#n
+  #LSpider#n  web
+  #LMantis#n  #x245precision combat#n
+  #LPain#n    #x245pain tolerance#n
+  #LLynx#n    #x245stealth hunting#n
+  #LCongregation#n  #x245pack bonding#n
+
+#y-------------------#x184[ #LWEAKNESSES #x184]#y--------------------#n
+  #RSilver#n        +250 damage per silver weapon (reduced by tolerance)
+
+#x245See also:#n #RTOTEM#n
 ~
 
--1 VAMPIRE VAMPIRES~
-#0Vampires#n are the creatures of the night and thus take damage if exposed
-to daylight.  Vampires cannot eat food, or drink any liquids except for
-blood.  If they cannot drink blood for a long duration of time they will
-start taking damage or maybe even go berserk, so it's a good idea to store
-some blood in a drinking container.  Vampires take half damage from cold,
-none from gas, and double from fire, although those with the Heat
-immunity take normal fire damage rather than double.
+0 VAMPIRE VAMPIRES~
 
-#0Embrace#n     - embrace a mob to drain their blood, use embrace again to
-              release. (embrace depends on red spell level)
-#0Vamparmor#n   - create vampire eq. (make a ring for rage/regen)
-#0Vamptalk#n    - the channel for the vampire.
-#0Fangs#n       - use to extend and retract your fangs.
-#0Inconnu#n     - an inconnu vampire has to be diabed instead of decapped by
-              other vampires.
-#0Regenerate#n  - when unraged use this to regen.
-#0Disciplines#n - use research to begin a discipline when done train the
-              discipline. (theres 10 levels of each discipline)
-#0Age#n         - use train to increase your age the older the vamp the better.
+         #R<<<#x088<<#0<#n  #0V A M P I R E#n  #0>#x088>>#R>>>#n
 
-For more information on vamp disciplines type 'help #0disciplines#n'.
+#x250Undead creatures of the night, cursed to walk eternity sustained only by
+the blood of the living. Ancient disciplines grant terrible power, but the
+Beast lurks within - and sunlight remains their eternal enemy.#n
+
+#R-------------------#x088[ #0CORE SYSTEMS #x088]#R-------------------#n
+  #0Blood#n         Feed on victims (#Rembrace#n), powers cost blood
+  #0Beast#n         Hunger triggers frenzy - keep blood above 15
+  #0Generation#n    Lower = stronger (affects blood pool max)
+  #0Age Ranks#n     Childe > Neonate > Ancilla > Elder > Methuselah
+
+#R-------------------#x088[ #0KEY COMMANDS #x088]#R--------------------#n
+  #Rembrace#n        Drain blood from victim (NPC only)
+  #Rfangs#n / #Rclaws#n  Extend natural weapons
+  #Rregenerate#n     Heal when not enraged
+  #Rvamparmor#n      Create vampire equipment
+  #Rvamptalk#n       Vampire class channel
+  #Rinconnu#n        Join Inconnu society (Elder + 1M exp)
+
+#R-------------------#x088[ #0DISCIPLINES #x088]#R---------------------#n
+  #x245Use: research <disc> then train <disc> (10 levels each)#n
+  #0Combat#n       Potence #x245(+damage)#n Fortitude #x245(+resist)#n Celerity #x245(+attacks)#n
+  #0Stealth#n      Obfuscate #x245(vanish/mask)#n Obtenebration #x245(shadows)#n
+  #0Mind#n         Dominate #x245(control)#n Presence #x245(awe/entrance)#n Auspex #x245(senses)#n
+  #0Shape#n        Protean #x245(claws/forms)#n Vicissitude #x245(fleshcraft)#n Serpentis
+  #0Blood#n        Thaumaturgy #x245(blood magic)#n Necromancy #x245(death)#n Quietus
+  #0Other#n        Animalism Chimerstry Daimoinon Thanatosis Melpominee Obeah
+
+#R-------------------#x088[ #0WEAKNESSES #x088]#R----------------------#n
+  #RSunlight#n      5-10 damage/tick outdoors during day
+  #RLow Blood#n     Beast takes over at blood <= 15
+
+#x245See also:#n #RDISCIPLINES#n
 ~
 
 0 BATTLEMAGES MAGE MAGES~
 
-The battlemages are powerful wizards that use their knowledge of the arcane
-to help them in combat. They can command the elements to help or destroy
-those they choose. A mage is indeed someone to fear.
+         #{{{#x044{{#x051{#n  #CB A T T L E M A G E#n  #x051}#x044}}#n}}}#n
 
-Chant      - Use the common spells all battlemages have.
-Invoke     - Learn or use some of the more powerful magics.
-Magics     - Keep track of what magical affects affects you.
-Teleport   - Teleport to any given location.
-Objectgate - Summon items from afar.
-Truesight  - Enhanced vision.
-Discharge  - Discharge your elementalshields (striking everyone in the room)
-Scry       - Use your farvision.
-Reveal     - Reveals everyone in the room.
-Magearmor  - Make magical equipment.
-Magetalk   - Class channel.
-Chaosmagic - Random spell effect.
+#x250Wielders of raw arcane fury who have abandoned dusty tomes for the heat
+of battle. They channel the five spheres of magic through protective shields,
+unleashing devastating chants that bend reality to their will.#n
 
-Also note that the better the mage is at casting spells (higher spell levels),
-the more powerful the spells they cast become.
+#n-------------------#x044[ #CCORE SYSTEMS #x044]#n-------------------#n
+  #CSpheres#n       5 magic colors: Purple, Red, Blue, Green, Yellow
+  #CMana#n          Resource for all spells - meditation restores
+  #CInvoke#n        10-level progression unlocking shields/powers
 
-NOTE : Battlemages are a unique class made for Dystopia.
+#n-------------------#x044[ #CKEY COMMANDS #x044]#n-------------------#n
+  #Rchant#n <type>   heal/damage/bless/curse (requires meditation)
+  #Rinvoke#n         Learn/activate magical shields
+  #Rmagics#n         Show active shields and effects
+  #Rteleport#n       Travel to target (250 mana, invoke 1)
+  #Robjectgate#n     Summon objects from afar
+  #Rdischarge#n      AoE blast from active mageshield (invoke 4)
+  #Rreveal#n         Expose all hidden creatures (5000 mana)
+  #Rchaosmagic#n     Cast random spell (1500 mana)
+  #Rmagearmor#n      Create enchanted equipment (60 primal)
+  #Rmagetalk#n       Mage class channel
 
+#n-------------------#x044[ #CINVOKE SHIELDS #x044]#n--------------------#n
+  #x245Use: invoke learn (costs 20-200 primal per level)#n
+  Lv #x2452#n mageshield #x245(25 primal)#n   Primary defense layer
+  Lv #x2455#n deflector #x245(5 primal)#n     Dodge/parry bonus
+  Lv #x2456#n steelshield #x245(5 primal)#n   Hardened skin defense
+  Lv #x2458#n illusions #x245(5 primal)#n     Mirror image evasion
+  Lv #x2459#n beast #x245(10 primal)#n        Extra attacks/damage
+  Lv #x24510#n all #x245(50 primal)#n          Activate all shields
+
+#n--------------------#x044[ #CSPHERES #x044]#n-----------------------#n
+  #x129Purple#n  Underdark/Dark magic
+  #x196Red#n     Fire/Hell magic
+  #x033Blue#n    Storm/Lightning magic
+  #x034Green#n   Nature/Earth magic
+  #x226Yellow#n  Acid/Poison magic
+
+#x245Sphere levels power chant effectiveness. Train via practice.#n
 ~
 
 0 DEMON DEMONS~
-Demons are mortals who have sold their souls for power, but they must take the souls
-of others to make their power grow, for they are the foul beasts of hell that will
-stop at nothing to rule the world. To steal a soul, you must simply decap another player.
 
-#R*#n #0Inpart#n      - use this to give youself demonic powers.
-#R*#n #0Warps#n       - shows warps alrdy gained.
-#R*#n #0Obtain#n      - use this to gain warps (15000 dp each).
-#R*#n #0Disciplines#n - use research to begin a discipline, when you get a message
-                that you are done, use the train command to improve.
-#R*#n #0Demonarmour#n - use the command to create demonic armour.
-#R*#n #0Weaponform#n  - use this to transform yourself into a weapon, use the
-                command humanform to return.
+            #0[[[#x088[[#R[#n  #RD E M O N#n  #R]#x088]]#0]]]#n
 
-Also read help on demondiscs, demonpower, warps and evileye for more information.
+#x250Mortals who sold their souls for power. Earn #Rdemon points#x250 through
+slaughter, use them to purchase mutations, grant gifts, and master
+the dark disciplines of Hell.#n
 
+#0----------------------#x088[ #RCORE SYSTEMS #x088]#0----------------------#n
+  #RDemon Points#n  Earned from kills, spent on all powers
+  #RWarps#n         Random mutations (#Robtain#n, 15000 dp)
+  #RGifts#n         Permanent abilities (#Rinpart#n <gift>)
+  #RDisciplines#n   Trainable power paths (#Rresearch#n/#Rtrain#n)
+
+#0----------------------#x088[ #RKEY COMMANDS #x088]#0-----------------------#n
+  #Rwarps#n          View your mutations
+  #Robtain#n         Purchase a random warp (15000 dp)
+  #Rinpart#n <gift>  Grant permanent ability
+  #Rdemonarmour#n    Create demonic equipment (60 primal)
+  #Rweaponform#n     Transform into a demonic weapon
+
+#0-----------------------#x088[ #RDISCIPLINES #x088]#0-----------------------#n
+  #x245Use: research <disc> then train <disc>#n
+  #RHellfire#n     #x2452#n immolate #x2453#n inferno #x2457#n daemonseed #x2458#n hellfire
+  #RAttack#n       #x2451#n claws #x2452#n fangs #x2453#n rage #x2454#n calm #x2455#n graft #x2457#n blink
+  #RGelugon#n      #x2451#n freezeweapon #x2452#n frostbreath #x2456#n entomb #x2457#n gust
+  #RDiscord#n      #x2451#n unnerve #x2452#n evileye #x2454#n chaosportal
+  #RNether#n       #x2452#n deathsense #x2454#n leech
+  #RCorruption#n   #x2454#n caust #x245(weapon venom)#n
+  #RTemptation#n   #x24510#n dominate #x245(control NPCs)#n
+  #RImmunities#n   #x245passive: 4% damage reduction per level#n
+
+#x245See also:#n #RDEMONPOWER#n, #RWARPS#n
 ~
 0 DEMONPOWER~
-#R*#n #0Fangs#n          2500          Slide out razor sharp fangs, extra attack.
-#R*#n #0Horns    #n      2500          Slide out horns, extra headbutt attack.
-#R*#n #0Nightsight #n    3000          See perfectly at night.
-#R*#n #0Toughness  #n    7500          Skin hardens and take lesser damage.
-#R*#n #0Scry   #n        7500          Scry a opponent, to know where they are.
-#R*#n #0Leap    #n        500          Leap to objects, or people when in weaponform.
-#R*#n #0Shield     #n   20000          Shield yourself, so no one can scry you.
-#R*#n #0Immolate   #n    2500          Immolate a weapon to burn someone in combat.
-#R*#n #0Unnerve   #n     5000          Force your opponent to unstance in combat.
-#R*#n #0Leech   #n      15000          Leech off your opponent hitpoints.
-#R*#n #0Claws  #n        2500          Slide razor sharp claws, to aid in combat.
-#R*#n #0Hooves  #n       1500          Feet transform to hooves, improve kick.
-#R*#n #0Wings #n         1000          Able to fly, and unfold wings, to be unhurable.
-#R*#n #0Speed #n         7500          Have Great speed for better dodges/parries.
-#R*#n #0Truesight#n      7500          Better awareness, see all.
-#R*#n #0Magic#n          1000          Able to control your magic in weaponform.
-#R*#n #0Longsword  #n       0          Transform to a longsword.
-#R*#n #0Inferno #n      20000          Burn yourself when morted, to escape.
-#R*#n #0Freezeweapon #n  3000          Freeze your weapon, and hurt them with ice.
-#R*#n #0Demonform  #n   25000          Transform to a huge demon, better attributes.
-#R*#n #0Tail  #n         5000          Extend your tail, for an extra tail attack.
-#R*#n #0Graft  #n       20000          Graft 2 more arms, to carry more objects.
-#R*#n #0Might  #n        7500          Resist some damage when fighting.
-#R*#n #0Travel #n        1500          Travel to any mob or player with nosum on
-#R*#n #0Move #n           500          Able to move when in weaponform.
-#R*#n #0Lifespan#n        100          Crumble up faster when a severed head.
-#R*#n #0Caust#n          3000          Caust your weapon, better average damage.
-#R*#n #0Entomb#n        20000          Entomb a person, n,s,w,e,up,and down.
-#R*#n #0Blink#n         15000          Blink a person and do devasting attacks.
+
+#0----------------------#x088[ #RDEMON GIFTS #x088]#0----------------------#n
+#x245Use: #Rinpart <gift>#x245 to grant permanent abilities (costs demon points)#n
+
+#0---------#x088[ #RCOMBAT GIFTS #x088]#0---------#n   #0---------#x088[ #RDEFENSE GIFTS #x088]#0---------#n
+  #RFangs#n        #x2452500#n  Extra fang attack     #RToughness#n   #x2457500#n  Reduce damage taken
+  #RHorns#n        #x2452500#n  Extra headbutt        #RShield#n     #x24520000#n  Block scrying
+  #RClaws#n        #x2452500#n  Extra claw attack     #RSpeed#n       #x2457500#n  Better dodge/parry
+  #RHooves#n       #x2451500#n  Improved kick         #RMight#n       #x2457500#n  Damage resistance
+  #RTail#n         #x2455000#n  Extra tail attack     #RWings#n       #x2451000#n  Fly, become unhurtable
+
+#0---------#x088[ #RWEAPON GIFTS #x088]#0---------#n   #0---------#x088[ #RUTILITY GIFTS #x088]#0---------#n
+  #RImmolate#n     #x2452500#n  Fire weapon coating   #RNightsight#n  #x2453000#n  See in darkness
+  #RFreezeweapon#n #x2453000#n  Ice weapon coating    #RTruesight#n   #x2457500#n  See all hidden
+  #RCaust#n        #x2453000#n  Venom weapon coating  #RScry#n        #x2457500#n  Locate players/mobs
+  #RUnnerve#n      #x2455000#n  Force unstance        #RTravel#n      #x2451500#n  Teleport to target
+  #RLeech#n       #x24515000#n  Drain HP from target  #RGraft#n      #x24520000#n  +2 arms for items
+
+#0---------#x088[ #RWEAPONFORM GIFTS #x088]#0--------#n   #0---------#x088[ #RFORMS #x088]#0---------#n
+  #RLongsword#n       #x2450#n  Transform to sword    #RDemonform#n  #x24525000#n  Huge demon (+stats)
+  #RLeap#n          #x245500#n  Jump to target        #RInferno#n    #x24520000#n  Escape when morted
+  #RMove#n          #x245500#n  Move while weapon     #REntomb#n     #x24520000#n  Ice wall trap
+  #RMagic#n        #x2451000#n  Cast while weapon     #RBlink#n      #x24515000#n  Blink + attack combo
+  #RLifespan#n      #x245100#n  Faster head crumble
 
 ~
 
 1 WARPS~
 
-All warps are automatic, so you don't need any commands to activate them, just the command
-obtain to get new warps. Theres a total of 18 warps, some have an affect, others don't.
+#0----------------------#x088[ #RDEMON WARPS #x088]#0----------------------#n
+#x245Use: #Robtain#x245 to purchase a random warp (15000 demon points)
+Warps are permanent mutations. Most are automatic combat bonuses.#n
 
-These are the possibly warps :
+#0---------#x088[ #RDEFENSE WARPS #x088]#0---------#n   #0---------#x088[ #RATTACK WARPS #x088]#0---------#n
+  #RCrystal Shell#n  Indestructable      #RVenomous Tongue#n  Poison attacks
+  #RSteel Skin#n     Hardened defense    #RSpiked Tail#n      Extra tail hits
+  #RStrong Arms#n    Enhanced strength   #RDeadly Breath#n    Putrid damage
+  #RStrong Legs#n    Enhanced mobility   #RMagma Body#n       Fire damage aura
+  #RIncr. Stamina#n  Damage reduction    #RIce Shards#n       Frost damage aura
 
-Your body is protected by a indestructable crystal shell.
-Your skin is as hard as steel.
-Your arms are incredibly strong.
-Your legs are incredibly strong.
-Your tongue is long and venomous.
-Your tail fires deadly spikes during combat.
-Your breath is putrid and deadly.
-You have incredible speed.
-You have increased stamina, reducing the damage you take.
-Your heightened senses enable you to hunt people. (*)
-You have the ability to devour your opponents, sending them into the pits of Hell. (*)
-Your features are so horrid that they may stun those who look at you. (*)
-Your body has the ability to regenerate incredibly fast.
-Your mounts transform into hideous Demons. (use the mount spell)
-You have the power to transform into a deadly battle axe. (*)
-Your body is composed of deadly magma.
-Your skin is covered with shards of ice.
-A pair of leathery wings protrude from your back.
+#0---------#x088[ #RUTILITY WARPS #x088]#0---------#n   #0---------#x088[ #RSPECIAL WARPS #x088]#0---------#n
+  #RIncr. Speed#n    Faster movement     #RDemon Mounts#n     Mount transforms
+  #RFast Regen#n     Quick HP recovery   #RLeathery Wings#n   Flying ability
+  #RHunt Senses#n    #x245(cosmetic)#n         #RBattle Axe#n       #x245(cosmetic)#n
+  #RDevour#n         #x245(cosmetic)#n         #RHorrid Face#n      #x245(cosmetic)#n
 
-The warps with (*) doesn't have any affect, and some of the warps are
-used together with inparts or disciplines, most are just extra attacks
-in combat or extra toughnes.
-
-Maybe some day when I have some spare time, I'll clean up the demon powers,
-but currently you'll just have to live with the mess.
+#x245Warps marked (cosmetic) have flavor text but no mechanical effect.
+Most warps provide passive combat bonuses or extra attacks.#n
 
 ~
 
@@ -2056,185 +2191,308 @@ Help file donated by Faekiss.
 ~
 
 0 DEMONDISCS~
- 
-Hellfire      - Immolate, Inferno, Demonseed, Hellfire.
-Morphosis     - Polymorphing powers.
-Discord       - Chaosportal, Unnerve, Evileye.
-Attack        - Claws, Fangs, Rage, Horns, Calm, Graft, Wings, Blink.
-Corruption    - Caust.
-Nether        - Deathsense, Leech.
-Temptation    - The power of hellish charm.
-Geluge        - Entomb, Gust, Freezeweapon, Frostbreath.
-Immunae       - Demon Toughness.
+
+#x196-----------------#x202[ #x208DEMON DISCIPLINE DETAILS #x202]#x196-----------------#n
+
+#x208Hellfire#n #x245- Flames of the pit#n
+  Lv #x2452#n immolate    Coat weapon in flame (+damage)
+  Lv #x2453#n inferno     1500-2000 damage to room when near death
+  Lv #x2457#n daemonseed  Plant explosive seeds in items
+  Lv #x2458#n hellfire    Summon fire walls in all directions
+
+#x208Attack#n #x245- Combat enhancements#n
+  Lv #x2451#n claws       Toggle claws for extra attacks
+  Lv #x2452#n fangs       Toggle fangs for extra attacks
+  Lv #x2453#n rage        Increase rage for combat bonus
+  Lv #x2454#n calm        Reduce rage when not fighting
+  Lv #x2455#n graft       Graft extra arms (up to 4 total)
+  Lv #x2457#n blink       Vanish from combat, reappear next round
+
+#x208Gelugon#n #x245- Ice demon powers#n
+  Lv #x2451#n freezeweapon  Coat weapon in frost (+damage)
+  Lv #x2452#n frostbreath   Breathe freezing air at targets
+  Lv #x2456#n entomb        Create ice walls, heal 10% HP
+  Lv #x2457#n gust          Blow target with damaging wind
+
+#x208Discord#n #x245- Chaos and deception#n
+  Lv #x2451#n unnerve       Force target to unstance
+  Lv #x2452#n evileye       Punish those who look at you
+  Lv #x2454#n chaosportal   Teleport to random location
+
+#x208Nether#n #x245- Death magic#n
+  Lv #x2452#n deathsense    Toggle truesight vision
+  Lv #x2454#n leech         Drain life, heal yourself
+
+#x208Corruption#n #x245- Weapon enhancement#n
+  Lv #x2454#n caust         Coat weapon in corrosive venom
+
+#x208Temptation#n #x245- Hellish charm#n
+  Lv #x24510#n dominate     Take control of an NPC
+
+#x208Immunities#n #x245- Passive protection#n
+  Each level grants 4% damage reduction (max 40% at level 10)
 
 ~
 
 0 SAMURAI~
-The Samurai is an ancient warrior and master of armed combat. 
-A samurai must train for a long time before his true potential can
-be released. Once he has masterd the fighting weapons however, few 
-can stand up to such power. Also the samurai is protected from most 
-magiks by the spirits of the ancestors. Beware, the samurai may appear
-as only mortal, but much power resides in these warriros of old.
 
-ancestralpath -  Class portal.
-technique     -  Start using the ancient fighting techniques.
-katana        -  Create the only weapon you'll ever need.
-web           -  These buggers have been know to throw webs at the opponent.
-martial       -  Command to learn the combos.
+         #C-=#x045-=#x051-#n  #RS A M#yu R A I#n  #x051-#x045=-#C=-#n
 
-Also read help on SAMURAICOMBO.
+#x250Warriors who have transcended mere combat to achieve martial perfection.
+Through discipline and focus, they channel their ancestral spirits into
+devastating blade techniques that flow like water and strike like thunder.#n
 
-NOTE : Samurais are built over the highlander class/concept.
+#C-------------------#x045[ #x051CORE SYSTEMS #x045]#C-------------------#n
+  #x051Focus#n         Build by using martial moves (slide/sidestep/block/counter)
+  #x051Combos#n        Auto-trigger at focus 10, 15, 20, 25, 30, 35
+  #x051Bladespin#n     Extra attack per round (requires 1000 in 3 wpn skills)
+  #x051Equipment#n     #Rkatana#n - create legendary weapon (250 primal)
+
+#C-------------------#x045[ #x051MARTIAL MOVES #x045]#C-------------------#n
+  #x245(Learn with #Rmartial <move>#x245 - costs 150M exp each)#n
+  #Rslide#n          +1 focus + lightningslash, check combo
+  #Rsidestep#n       +2 focus + lightningslash, check combo
+  #Rblock#n          +4 focus + lightningslash, check combo
+  #Rcountermove#n    +8 focus + lightningslash, check combo
+  #Rfocus#n          Reduce focus counter (when >= 10)
+
+#C-------------------#x045[ #x051COMBOS #x045]#C-------------------#n
+  #x051Focus 10#n    3x lightningslash + taunt
+  #x051Focus 15#n    Disarm opponent (67% success)
+  #x051Focus 20#n    Paralyze target (24-round stun)
+  #x051Focus 25#n    Hurl opponent (67% success)
+  #x051Focus 30#n    Self-heal 2000-4000 HP
+  #x051Focus 35#n    5-hit combo (backfist+thrustkick+sweep+jumpkick+lightning)
+
+#C-------------------#x045[ #x051KEY COMMANDS #x045]#C-------------------#n
+  #Rancestralpath#n    Teleport to target (1000 move)
+  #Rbladespin#n        Toggle extra attack mode
+  #Rweb#n              Throw webs at opponent
+
+#x250Cannot exceed 40 focus. Cannot repeat the same combo twice in a row.#n
+
+#x245See also:#n #RSAMURAICOMBO#n
 
 ~
 
 0 SAMURAICOMBO~
-During combat a samurai can use four different attack forms, each will
-affect the samurais focus a bit.
 
-Slide         1 point
-Sidestep      2 points
-Block         4 points
-Countermove   8 points
+#C-------------------#x045[ #x051SAMURAI COMBO SYSTEM #x045]#C-------------------#n
 
-When the samurais focus hits 10, 15, 20, 25, 30 or 35 he or she will
-be allowed to make a special attack (auto).
+#x250Build focus with martial moves. Combos auto-trigger at thresholds.#n
 
-When not fighting the counter will slowly drop, while fighting, the
-samurai can use the focus command to make it drop.
+#x051MARTIAL MOVES#n                 #x051COMBO EFFECTS#n
+  #Rslide#n         +1 focus          #x051Focus 10#n  3x lightningslash + taunt
+  #Rsidestep#n      +2 focus          #x051Focus 15#n  Disarm (67% success)
+  #Rblock#n         +4 focus          #x051Focus 20#n  Paralyze (24-round stun)
+  #Rcountermove#n   +8 focus          #x051Focus 25#n  Hurl opponent (67%)
+                                  #x051Focus 30#n  Self-heal 2000-4000 HP
+                                  #x051Focus 35#n  5-hit combo
 
-The focus counter can be added to the samurais prompt with the %k
-flag, read help prompt for details.
+#x245Cannot exceed 40 focus. Cannot repeat same combo twice in a row.
+Use #Rfocus#x245 command to reduce focus when >= 10.
+Add focus to prompt with %k - see help prompt for details.#n
 
 ~
 
-0 SPIDER DROID~
+0 SPIDER DROID SPIDERDROID~
 
-The drows are know for spawning elite warriors, and from the very
-best of this fighter elite, Lloth chooses her champions, and bless
-them with powers way beyond that of normal drows. These creatures
-are called driders, and among them exists a few who are so close
-to their goddess that she has blessed them with superior bodies.
-These are the Spider Droids, the machine beeings who spread chaos
-and havoc in the name of the Spider Queen, their goddess Lloth.
+      #p{#0-#p}#x135{#0-#x141}#n  #0S P I D E R   D R O I D#n  #x141{#0-#x135}#p{#0-#p}#n
 
-Venomspit     - Spit venom on your opponent.
-AvatarofLloth - Accept Lloth into your body.
-Darkness      - Summon a globe of darkness.
-Llothsight    - Superior vision.
-Preach        - Preach the will of Lloth to your fellow Driders.
-Dridereq      - Create unholy Drider eq.
-Implant       - Graft mechanical bodypart onto your body.
-Lloth         - List the members of the Church of Lloth.
-Web           - Entangle your opponent in a sticky web.
-Scry          - Spy on mobs/players.
-Readaura      - Know the true power of your enemy.
+#x250Lloth's ultimate servants - driders who have merged their flesh with
+forbidden machinery. Part spider, part machine, these cybernetic horrors
+graft ever more implants onto their twisted forms in service to the Spider Queen.#n
 
-NOTE : spider droids are a modified cyborg class.
+#p-------------------#x135[ #x141IMPLANT SYSTEM #x135]#p-------------------#n
+  #x141Face (5 max)#n     Vision enhancements, sensor array
+  #x141Legs (5 max)#n     Combat speed, attacks, dodge
+  #x141Body (6 max)#n     Armor, stingers, regen (requires Legs 1+)
+  #x245Upgrade with #Rimplant <area> improve#x245 (costs drider power points)#n
+
+#p-------------------#x135[ #x141FACE IMPLANTS #x135]#p-------------------#n
+  #x2451#n Nightsight    #x2452#n Shadowsight    #x2453#n Holylight (truesight)
+  #x2454#n Aura Shield   #x2455#n Sensor (see stats/location)
+
+#p-------------------#x135[ #x141LEG IMPLANTS #x135]#p-------------------#n
+  #x2451#n +1 attack, +10% dodge, 1.3x damage
+  #x2452#n Superior Speed (+1 attack)
+  #x2453#n Champion (enhanced fighting)
+  #x2454#n True Warrior (supreme fighting)
+  #x2455#n Poison Spit (unlocks #Rvenomspit#n)
+
+#p-------------------#x135[ #x141BODY IMPLANTS #x135]#p-------------------#n
+  #x2451#n Armor (+50 dam cap)    #x2454#n Cloak (invisibility/darkness)
+  #x2452#n Absorption             #x2455#n Stingers (#Ravataroflloth#n)
+  #x2453#n Body Slam attack       #x2456#n Regeneration (2x regen)
+
+#p-------------------#x135[ #x141KEY COMMANDS #x135]#p-------------------#n
+  #Rvenomspit#n        3x stuntube + poison + fire (Body 5, Legs 5)
+  #Ravataroflloth#n    Toggle +250 hit/dam (Body 5)
+  #Rllothsight#n       Toggle vision modes
+  #Rdridereq#n         Create drider equipment (150 primal)
+  #Rweb#n / #Rscry#n / #Rreadaura#n / #Rdarkness#n - Inherited from Drow
 
 ~
 
 0 DROW DROWS~
 
-Drow are an elite and deadly force of mages clerics and warriors.  They 
-are dedicated to there deity Lloth.  Lloth binds them togther and grants 
-them there powers.  The drow channel power thought Lloth avatar to gain 
-favour's in return.
+          #P.o0#x199.o#00#n  #0D R O W#n  #00#x199o.#P0o.#n
 
-* Grant         - Command to grant powers to followers
-* Drowcreate    - Command to create drow relics
-* Sign          - Drow chat channel
-* Drowpowers    - View the powers you currently have
-* Lloth		- Show all online members of the church of Lloth
+#x250Dark elves who dwell in the endless caverns below, devoted servants of
+the Spider Queen Lloth. Their society is built on ruthless hierarchy - the
+powerful grant gifts to the weak, and all serve the will of the matrons.#n
 
-In addition drow's can have a number of powers granted to them by Lloth 
-Type 'help Drowpowers' or 'help Drowclasses' for more
+#P-------------------#x199[ #0CORE SYSTEMS #x199]#P-------------------#n
+  #0Generation#n    Lower = more powerful, grants to higher numbers
+  #0Drow Points#n   Earn to grant powers (5x cost to give to others)
+  #0Professions#n   Warrior/Mage/Cleric - granted by matron (gen <= 3)
+
+#P-------------------#x199[ #0KEY COMMANDS #x199]#P-------------------#n
+  #Rgrant#n          Grant powers/profession to lower-gen drow
+  #Rdrowpowers#n     View your granted powers and stats
+  #Rdrowcreate#n     Create drow equipment (60 primal)
+  #Rsign#n           Drow class channel
+  #Rlloth#n          Show all Church of Lloth members online
+
+#P--------------------#x199[ #0POWERS #x199]#P------------------------#n
+  #x245Powers are granted by higher-gen drow (costs drow points)#n
+  #0Toggle#n    drowsight, drowshield, darkness, drowhate, darktendrils
+  #0Combat#n    drowfire, garotte, dgarotte, web, confuse, earthshatter
+  #0Utility#n   shadowwalk, glamour, fightdance, spiderform
+  #0Passive#n   levitation, drowpoison, speed, toughskin, spiderarms
+
+#P------------------#x199[ #0PROFESSIONS #x199]#P---------------------#n
+  #0Warrior#n   Extra attack, higher weapon skill
+  #0Mage#n      Higher red/purple magic, #Rchaosblast#n (750 mana)
+  #0Cleric#n    Higher blue/green magic, #Rheal#n (750 mana)
+
+#P------------------#x199[ #0SPIDERFORM #x199]#P----------------------#n
+  Transform to giant mylochar: +400 hit/dam, -1000 AC, extra arms
+
+#x245See also:#n #RDROWPOWERS#n, #RDROWCLASSES#n
 ~
 
 0 DROWPOWERS~
 
-* Drowsight      -  lets you see all people and rooms
-* Drowshield     -  shield your aura from others
-* Levivation     -  super fly spell (automatic)
-* Darkness       -  turns a room complety dark to everyone else
-* Drowpoison     -  favour to grant poison & immunity (automatic)
-* Drowfire       -  improved faerie fire    
-* Spider         -  creates a drow spider follower   (cast mount)
-* Garotte        -  utilize a whip to choke your victim
-* Dgarotte       -  Dark Garotte used from the Darkness
-* Spiderarms     -  more arms to increase parry/attack speed (automatic)
-* Drowhate       -  invoke the hatred drows have (+dam,random attacks)
-* Spiderform     -  can transform into a giant mutant spider
-* Web            -  shoot spidery webs at your victim
-* Confuse        -  confuse your opponent, causing them to flee
-* Glamour        -  make your items appear more glamourous
-* Earthshatter   -  shake the earth, damaging the whole room
-* Speed          -  drow quickness!
-* Toughskin      -  reduce damage due to toughened skin
-* Darktendrils   -  extra attacks that almost always hit.
-* Fightdance     -  Your weapon dances around parrys.
+#P--------------------#x199[ #0DROW POWERS #x199]#P--------------------#n
+#x245Powers are granted by higher-generation drow (costs drow points)#n
+
+#P---------#x199[ #0TOGGLE POWERS #x199]#P--------#n   #P---------#x199[ #0COMBAT POWERS #x199]#P--------#n
+  #0Drowsight#n     See all hidden        #0Drowfire#n      Improved faerie fire
+  #0Drowshield#n    Block aura reading    #0Garotte#n       Choke with whip
+  #0Darkness#n      Room goes dark        #0Dgarotte#n      Garotte from darkness
+  #0Drowhate#n      +dam, random hits     #0Web#n           Trap in webbing
+  #0Darktendrils#n  Extra sure-hit atks   #0Confuse#n       Force target to flee
+                                        #0Earthshatter#n  AoE room damage
+
+#P---------#x199[ #0PASSIVE POWERS #x199]#P-------#n   #P---------#x199[ #0UTILITY POWERS #x199]#P-------#n
+  #0Levitation#n    Permanent fly         #0Shadowwalk#n    Travel to target
+  #0Drowpoison#n    Poison + immunity     #0Glamour#n       Rename items
+  #0Speed#n         Drow quickness        #0Fightdance#n    Weapon bypasses parry
+  #0Toughskin#n     Damage reduction      #0Spider#n        Create spider mount
+  #0Spiderarms#n    +parry, +attack speed #0Spiderform#n    Giant spider form
+
 ~
 
 0 DROWCLASSES~
 
-Drows can be granted specialization in a class by their matron.
+#P-------------------#x199[ #0DROW PROFESSIONS #x199]#P-------------------#n
+#x245Granted by matron (gen <= 3). Use: #Rgrant <target> <profession>#n
 
-* Mage -  Higher spell levels in red and purple magic.
-          'chaosblast' skill.
+  #0Warrior#n        Extra attack per round
+                   Higher weapon skill proficiency
 
-* Cleric -  Higher spell levels in blue and green magic.
-            'heal' skill.
+  #0Mage#n           Higher red and purple magic levels
+                   #Rchaosblast#n skill (750 mana)
 
-* Warrior -  Higher weapon skill.
-             Extra attack.
+  #0Cleric#n         Higher blue and green magic levels
+                   #Rheal#n skill (750 mana)
 
-* Weaponmasters - Gain both heal, chaosblast and the extra attacks.
-  You can only become a weaponmaster by getting generation 2.
+  #0Weaponmaster#n   All abilities combined (requires gen 2)
+                   heal + chaosblast + extra attacks
 
 ~
 0 TOTEM TOTEMS~
-Each totem spirit grants the werewolf certian powers depentant on their
-devotion to the spirit. May the spirits grant your wishes.
 
-#GLuna#n    - Flame claws, Moonarmour, Motherstouch, Grandmotherstouch,
-          Silverclaws, Moongate, Moonbeam.
-#GBoar#n    - Rend
-#GBear#n    - Quills, Roar, Skin, Slam.
-#GRaptor#n  - Run, Perception, Devour, Shred, Jawlock, Talons.
-#GOwl#n     - Vanish, Shield, Shadowplane, Staredown, Disquiet, Reshape, Cocoon.
-#GHawk#n    - Nightsight, Shadowsight, Truesight, Quills, Burrow, Wither.
-#GWolf#n    - Calm, Razorclaws, Claws, Fangs.
-#GSpider#n  - Web.
+#y------------------#x184[ #LWEREWOLF TOTEM DETAILS #x184]#y------------------#n
 
+#LLuna#n #x245- Moon/Healing#n
+  Lv #x2451#n flameclaws     Toggle flaming claws (+fire damage)
+  Lv #x2452#n moonarmour     Create lunar equipment (60 primal)
+  Lv #x2453#n motherstouch   Heal target 100/500 HP (fight/peace)
+  Lv #x2454#n gmotherstouch  Heal target 200/600 HP (fight/peace)
+  Lv #x2455#n sclaws         Toggle pure silver claws (+damage)
+  Lv #x2456#n moongate       Teleport portal to/from player
+  Lv #x2458#n moonbeam       Alignment damage (good 500, evil 1000)
+
+#LBear#n #x245- Strength/Combat#n
+  Lv #x2453#n #x245(passive)#n      Enhanced regeneration
+  Lv #x2456#n roar           33% chance to make enemy flee
+  Lv #x2457#n skin           Toggle hardened skin (+100 AC)
+  Lv #x2458#n slam           Toggle shoulder slam attacks
+
+#LWolf#n #x245- Pure Form#n
+  Lv #x2451#n claws          Toggle extended claws
+  Lv #x2452#n fangs          Toggle sharp fangs
+  Lv #x2453#n calm           Reduce rage value
+  Lv #x2454#n razorclaws     Toggle razor edges (25d35 damage)
+
+#LOwl#n #x245- Manipulation/Deception#n
+  Lv #x2451#n vanish         Toggle hiding
+  Lv #x2452#n shield         Shield from detection
+  Lv #x2453#n shadowplane    Toggle shadow plane travel
+  Lv #x2455#n staredown      Force fighting target to flee
+  Lv #x2456#n disquiet       Reduce target hit/dam (1 gnosis)
+  Lv #x2457#n reshape        Rename/reshape items
+  Lv #x2458#n cocoon         Protective shield (2 gnosis, 50% resist)
+
+#LHawk#n #x245- Perception#n
+  Lv #x2451#n nightsight     Toggle dark vision
+  Lv #x2452#n shadowsight    Toggle shadow plane sight
+  Lv #x2455#n quills         Toggle sharp bristly fur defense
+  Lv #x2456#n burrow         Travel to another werewolf
+  Lv #x2457#n wither         Wither victim's arm (3 gnosis)
+
+#LRaptor#n #x245- Predation#n
+  Lv #x2453#n perception     Toggle enhanced stealth detection
+  Lv #x2455#n devour         Eat NPC corpse for 100-250 HP
+  Lv #x2457#n shred          Multi-strike from shadowplane (2-5 hits)
+  Lv #x2458#n jawlock        Toggle clamping jaw attack
+  Lv #x24510#n talons         Heavy talon attack (400-4000 damage)
+
+#LBoar#n #x245- Ferocity#n
+  Lv #x2455#n burrow         Travel to another werewolf
+  Lv #x2457#n rend           Toggle equipment destruction in combat
+
+#LSpider#n
+  Lv #x2452#n web            Trap target in webbing
+
+#x245Passive totems: Mantis (precision), Pain (tolerance), Lynx (stealth), Congregation (pack)#n
 ~
 
 0 DISCIPLINE DISCIPLINES~
 
-Each Discipline has several power levels and each level
-must be learnt before the next can be gained.
+#R-------------------#x088[ #0VAMPIRE DISCIPLINES #x088]#R-------------------#n
+#x245Each discipline has 10 levels. Use: #Rresearch <disc>#x245 then #Rtrain <disc>#n
 
-   obtenebration : lamprey grab shadowgaze shroud shadowstep shadowplane shadowsight 
-        presence : mindblast entrance summon far awe majesty 
-         quietus : spit assassinate bloodagony sharpen vsilence flash infirmity 
-     thaumaturgy : spew gourge taste cauldron tide theft 
-          auspex : truesight readaura scry astralwalk unveil 
-        dominate : mesmerise command baal forget acid possession 
-       obfuscate : vanish mask shield conceal 
-         protean : flamehands change claws earthmeld healing nightsight 
-       serpentis : tongue tendrils coil darkheart poison serpent 
-     vicissitude : fleshcraft dragonform bonemod plasma zuloform 
-       daimoinon : servant guardian fear portal vtwist bloodwall 
-       animalism : pigeon share frenzy beckon serenity 
-      chimerstry : mirror formillusion controlclone 
-      thanatosis : hagswrinkles putrefaction withering drainlife 
-      necromancy : preserve spiritgate spiritguard zombie bloodwater 
-      melpominee : scream 
-           obeah : (purify) (Beast control) (Movement of pure magic)
+#R---------#x088[ #0COMBAT #x088]#R---------#n        #R---------#x088[ #0STEALTH #x088]#R---------#n
+  #0Potence#n      Raw physical power      #0Obfuscate#n    vanish, mask, conceal
+  #0Fortitude#n    Damage resistance       #0Obtenebration#n Shadow powers
+  #0Celerity#n     Extra attacks           #0Chimerstry#n   Illusions, clones
 
-For more information, type 'help <discipline name>
+#R---------#x088[ #0MIND #x088]#R---------#n          #R---------#x088[ #0SHAPE #x088]#R---------#n
+  #0Dominate#n     Control, command        #0Protean#n      Claws, forms, meld
+  #0Presence#n     Awe, entrance, majesty  #0Vicissitude#n  Fleshcraft, zuloform
+  #0Auspex#n       Truesight, scry, unveil #0Serpentis#n    Tongue, coil, serpent
 
-thanks to WillaZ for making the missing discipline helps.
+#R---------#x088[ #0BLOOD #x088]#R---------#n         #R---------#x088[ #0OTHER #x088]#R---------#n
+  #0Thaumaturgy#n  Blood magic             #0Animalism#n    Animal control
+  #0Necromancy#n   Death magic, zombies    #0Thanatosis#n   Death/wither powers
+  #0Quietus#n      Assassination           #0Daimoinon#n    Demon pacts
+                                         #0Melpominee#n   Voice powers
+                                         #0Obeah#n        Healing arts
+
+#x245Type #Rhelp <discipline>#x245 for detailed power list.#n
 
 ~
 0 THANATOSIS~
@@ -3471,59 +3729,75 @@ third and final action, 'Burn', will set the victim on fire, as well as
 destroy the doll itself.
 ~
 
-0 NINJAS~
+0 NINJA NINJAS~
 
-Ninja's are warriors trained in the dark art of Ninjutsu.  They fight
-using stealth and quickness making them a deadly foe.  Ninja's have few, yet
-powerful powers at their disposal, and when these powers are mastered a 
-ninja can be a most powerful adversary.  Through stealth a ninja can sneak
-upon a victim and do a deadly amount of damage, and if this is not enough
-they can slink away and hide in the shadows.  However, if you try to run
-from a master ninja you shall find yourself hard pressed to make it out
-alive.
+            #C***#x044**#x051*#n  #yN I N J A#n  #x051*#x044**#C***#n
 
-It is vital for a ninja to focus his or her Ki, this is done with the command
-'michi'. A ninja CANNOT regen while not in a state of michi. Ninjas are   
-ranked with a system of belts. Each belt adds more punch to the ninjas
-abilities in combat, meaning more damage, better dodge, more attacks, etc.
-Belts can be trained with the command 'train beltX' where X is the current
-belt that the ninja wish to learn.
+#x250Shadow warriors trained in the ancient arts of Ninjutsu. They strike from
+darkness with deadly precision, mastering the three principles of Sky, Earth,
+and Human to become perfect instruments of stealth and assassination.#n
 
-Read help on principles.
+#C-------------------#x044[ #yCORE SYSTEMS #x044]#C-------------------#n
+  #yMichi#n         Focus Ki to enable regeneration (500 move)
+  #yBelts#n         10 ranks - train beltX for +damage/dodge/attacks
+  #yPrinciples#n    3 paths with 6 levels each (costs primal)
+
+#C-------------------#x044[ #yKEY COMMANDS #x044]#C-------------------#n
+  #Rmichi#n          Focus Ki - REQUIRED for regeneration
+  #Rstalk#n <target> Shadow teleport to target (500 move)
+  #Rprinciples#n     View/improve principle paths
+  #Rninjaarmor#n     Create ninja equipment (60 primal)
+
+#C-------------------#x044[ #yPRINCIPLES #x044]#C---------------------#n
+  #x245Use: principles <path> improve (costs (level+1)*10 primal)#n
+
+#ySora#n #x245(Sky)#n - Finding and Observing
+  #x2451#n mitsukeru #x245(scry)#n  #x2452#n koryou #x245(read aura)#n  #x2453#n kakusu #x245(ninja-only hide)#n
+  #x2454#n uro-uro #x245(no tracks)#n  #x2455#n kanzuite #x245(truesight)#n  #x2456#n bomuzite #x245(sleep gas)#n
+
+#yChikyu#n #x245(Earth)#n - Battle Preparation (all passive)
+  #x2451#n tsuyoku #x245(resist)#n  #x2452#n songai #x245(+damage)#n  #x2453#n isogu #x245(+attacks)#n
+  #x2454#n tsuiseki #x245(fast hunt)#n  #x2455#n sakeru #x245(+dodge)#n  #x2456#n harakiri #x245(HP for damcap)#n
+
+#yNingenno#n #x245(Human)#n - Combat and Assassination
+  #x2451#n tsume #x245(claws)#n  #x2452#n hakunetsu #x245(4-hit backstab)#n  #x2453#n mienaku #x245(sure flee)#n
+  #x2454#n shiroken #x245(+star attacks)#n  #x2455#n dokuyaku #x245(poison stars)#n  #x2456#n circle #x245(combat bs)#n
+
+#C--------------------#x044[ #yBELTS #x044]#C-------------------------#n
+  Train: #Rtrain beltX#n (1-10). Higher = more damage, better dodge.
+  Belt 8-10: Circle backstab multiplier (2x/2.5x/3x)
+
+#x245See also:#n #RPRINCIPLES#n
 ~
 
 0 PRINCIPLES~
-For a ninja to improve his or her principles, the syntax is :
 
-   #R       principles <sora/ningenno/chikyu> improve#n
+#C------------------#x044[ #yNINJA PRINCIPLE DETAILS #x044]#C------------------#n
+  #x245Improve: principles <sora/chikyu/ningenno> improve (costs (lvl+1)*10 primal)#n
 
-#GSORA#n
+#ySora#n #x245(Sky)#n - Finding and Observing
+  Lv #x2451#n Mitsukeru    Scry/locate targets anywhere       #x245mitsukeru <target>#n
+  Lv #x2452#n Koryou       Read aura - view stats/HP/eq       #x245koryou <target>#n
+  Lv #x2453#n Kakusu       Ninja-only hide (500 move)         #x245kakusu#n
+  Lv #x2454#n Uro-Uro      Leave no tracks                    #x245(automatic)#n
+  Lv #x2455#n Kanzuite     Toggle truesight (500 move)        #x245kanzuite#n
+  Lv #x2456#n Bomuzite     Sleep gas attack (500 move)        #x245bomuzite <target>#n
 
-1: Mitsukeru : Scry type power.                  Syntax: (mitsukeru target)
-2: Koryo     : Readaura type power.              Syntax: (koro target)
-3: Kakusu    : Class invis                       Syntax: (kakusu)
-4: Uro-Uro   : Super Sneak, leave no tracks.     Syntax: (automatic)
-5: Kanzuite  : TrueSight power.                  Syntax: (Kanzuite)
-6: Bomuzite  : sleepgas, puts victim to sleep.   Syntax: (bomuzite target)
+#yChikyu#n #x245(Earth)#n - Battle Preparation
+  Lv #x2451#n Tsuyoku      Damage resistance                  #x245(automatic)#n
+  Lv #x2452#n Songai       Enhanced damage output             #x245(automatic)#n
+  Lv #x2453#n Isogu        Extra attack per round             #x245(automatic)#n
+  Lv #x2454#n Tsuiseki     Fast hunting                       #x245hunt <target>#n
+  Lv #x2455#n Sakeru       Enhanced dodge/AC bonus            #x245(automatic)#n
+  Lv #x2456#n Harakiri     Sacrifice HP for damage cap        #x245harakiri#n
 
-#GCHIKYU#n
-
-1: Tsuyoku  : Damage resistance power.           Syntax: (automatic)
-2: Songai   : Inhanced Damage.                   Syntax: (automatic)
-3: Isogu    : Adds one attack.                   Syntax: (automatic)
-4: Tsuiseki : Fast Hunting.                      Syntax: (hunt target)
-5: Sakeru   : Enhanced Dodging ability.          Syntax: (automatic)
-6: Harakiri : Hurt yourself to gain damcap.      Syntax: (harakiri *self*)
-
-#GNINGENNO#n
-
-1: Tsume     : IronClaws worn on wrist.          Syntax: (tsume)
-2: Hakunetsu : Super Backstab                    Syntax: (hakunetsu <target>)
-3: Mienaku   : Improved flee.                    Syntax: (mienaku)
-4: Shiroken  : Added attacks per-round.          Syntax: (automatic)
-5: Dokuyaku  : Adds poison to the Shiroken.      Syntax: (automatic)
-6: Circle    : Backstab while in combat.         Syntax: (circle target)
-
+#yNingenno#n #x245(Human)#n - Combat and Assassination
+  Lv #x2451#n Tsume        Toggle iron claws                  #x245tsume#n
+  Lv #x2452#n Hakunetsu    4-hit super backstab (85%)         #x245hakunetsu <target>#n
+  Lv #x2453#n Mienaku      Never-fail flee (200 move)         #x245mienaku#n
+  Lv #x2454#n Shiroken     Extra throwing star attacks        #x245(automatic)#n
+  Lv #x2455#n Dokuyaku     Poison on Shiroken attacks         #x245(automatic)#n
+  Lv #x2456#n Circle       Backstab while fighting            #x245circle [target]#n
 ~
 
 0 QUEST~
@@ -3540,76 +3814,103 @@ Also help QUESTS.
 
 0 MONK MONKS~
 
-These Followers of god, have devoted their lives to protect and help
-the good. They will fight against evil anytime to destroy and banish the evil
-from this world. With them they have been granted with the power of god.
-These powers are called mantras.
+           #0.x[#x245.x#c[#n  #cM O N K#n  #c]#x245x.#0]x.#n
 
-#G*#R*#L Mantra#n      : list currant monk powers.
-#G*#R*#L Monkarmor#n   : Make special equipment bestowed by the gods.
-#G*#R*#L Learn#n       : Learn the monk techniques and abilities.
+#x250Followers of God who protect the good. Master chi for combat power, learn
+mantras for divine abilities, and perform devastating technique combos.#n
 
-For more in depth information, See the following helps:
-#LMONKABILITIES#n,#L MONKCHI#n,#LMONKCOMBO#n,#LMANTRA#n
+#0-------------------#x245[ #cCORE SYSTEMS #x245]#0-------------------#n
+  #cChi#n           Focus in combat (1-6), boosts damage multiplier
+  #cMantras#n       14 divine powers (costs primal to advance)
+  #cTracks#n        4 ability paths: Awareness, Body, Combat, Spirit
+  #cCombos#n        Chain techniques for special attacks
+
+#0-------------------#x245[ #cKEY COMMANDS #x245]#0-------------------#n
+  #Rchi#n / #Rrelax#n     Focus or release chi in combat
+  #Rmantra#n          View mantras, #Rmantra power improve#n to advance
+  #Rlearn#n           Learn fight styles, techniques, abilities
+  #Rmonkarmor#n       Create holy equipment (60 primal)
+
+#0--------------------#x245[ #cMANTRAS #x245]#0-----------------------#n
+  #x245Use: mantra power improve (costs (level+1)*10 primal)#n
+  #c1#n godseye #c2#n shield/scry #c3#n sacredinvis #c4#n wrathofgod
+  #c5#n flaminghands #c6#n steelskin #c7#n godsbless #c8#n darkblaze
+  #c9#n chands #c10#n celestial #c11#n cloak #c12#n godsheal #c13#n ghold
+
+#0-------------------#x245[ #cTRACKS #x245]#0------------------------#n
+  #x245Train via: learn ability <track> (500k exp per level, max 4)#n
+  #cAwareness#n  nightsight, shadowsight, truesight, scry
+  #cBody#n       adamantium #x245(hands)#n, spiritpower #x245(+200 hit/dam)#n
+  #cCombat#n     #x245passive +attacks and +damcap per level#n
+  #cSpirit#n     healingtouch, deathtouch #x245(damage-over-time)#n
+
+#0--------------------#x245[ #cCOMBOS #x245]#0------------------------#n
+  #x245Chain techniques: learn techniques <name> (200k exp each)#n
+  #cLightning Kick#n   #x245Multi-hit damage attack#n
+  #cTornado Kick#n     #x245Strikes everyone in room#n
+  #cChoyoken#n         #x245Drain movement, heal self#n
+  #cRaptor Strike#n    #x245Siphon mystical energies#n
+  #cNerve Pinch#n      #x245Devastating stun attack#n
+
+#x245Discover the correct technique sequences through experimentation!#n
+
+#x245See also:#n #RMONKABILITIES#n, #RMONKCHI#n, #RMANTRA#n
 ~
 
 0 MONKABILITIES~
 
-Monks have four special abilities granted to them by God.
-Each ability has four levels, which cost 500k exp each.
+#0-------------------#x245[ #cMONK ABILITIES #x245]#0-------------------#n
 
-#LSpirit#n      - Blinding agony, Healingtouch, Deathtouch.
-#LBody#n        - Adamantium hands, Spiritpower.
-#LAwareness#n   - Nightsight, Shadowsight, Truesight, Scry.
-#LCombat#n      - Combat bonuses per level.
+#x250Monks have four special abilities granted by God. Each ability has
+four levels, costing 500k exp each. Train via: learn ability <track>#n
+
+  #cSpirit#n      Blinding agony, Healingtouch, Deathtouch
+  #cBody#n        Adamantium hands, Spiritpower (+200 hit/dam)
+  #cAwareness#n   Nightsight, Shadowsight, Truesight, Scry
+  #cCombat#n      +1 attack/level, +50 dam cap/level
 ~
 
 0 MONKCHI~
 
-A monk's chi is the essential part of combat.  The higher
-the monk's chi, the better he or she can parry and dodge
-blows.  It also gives the monk more strength and power,
-thus letting him or her inflict more damage and receive
-less.  Maintaining chi is very strenuous, and requires
-that the monk have plenty of vitality.
+#0-------------------#x245[ #cMONK CHI SYSTEM #x245]#0-------------------#n
+
+#x250Chi is the essential part of monk combat. Build chi with the #Rchi#x250
+command. Higher chi increases dodge, parry, damage, and reduces damage
+taken. Chi drains movement points while active. Use #Rrelax#x250 to lower.#n
+
+  #cChi 1-6#n    Damage multiplier from 1x to 2x
+              Better parry and dodge chances
+              Requires vitality (move) to maintain
 ~
 
-0 MONKCOMBO~
+0 MANTRA MANTRAS~
 
-By using his or her special techniques, such as thrust kick,
-in a certain order, he or she may perform special combos.
-Each combo has a different effect.  Some may do damage to the
-victim, some syphon movement points, and some may stun the victim.
-A monk's combos are a very mysterious thing, thus the monk
-must spend much of his or her life trying to perfect
-these combos.
+              #0.x[#x245.x#c[#n  #cM A N T R A S#n  #c]#x245x.#0]x.#n
 
-Lightning Kick - Strikes the opponent with a series of powerful kicks.
-Tornado Kick   - Strikes everyone in the room with kicks.
-Choyoken       - A devastating attack that targets the opponents stamina.
-Raptor Strike  - An attack that syphons the mystical energies of the target.
-Nerve Pinch    - A series of attacks targeted at central nerves, paralysing.
+#x250Divine prayers that grant supernatural abilities. Learn mantras by
+spending #cmantra points#x250, then improve them with #Rmantra power improve#x250.#n
 
-~
+#0-------------------#x245[ #cMANTRA LIST #x245]#0-------------------#n
+  #cEyes of God#n           Truesight vision
+  #cShield#n                Shielding abilities (with Readaura/Scry)
+  #cSacred Invisibility#n   Monk-specific invisibility
+  #cHeart of the Oak#n      Increased toughness
+  #cAdamantium Hands#n      Advanced parry ability
+  #cFlaming Hands#n         Set opponents on fire
+  #cSkin of Steel#n         Damage reduction
+  #cThe Almighty Favor#n    Strength bonus
+  #cDark Blaze#n            Blinds opponent completely
+  #cCelestial Path#n        Portal to players/mobs
+  #cPrayer of the Ages#n    Divine protection
+  #cCloak of Life#n         Regeneration boost when critically hurt
+  #cGods Heal#n             Divine healing
+  #cGods Hold#n             Prevents enemy flee
 
-0 MANTRA~
+#0-------------------#x245[ #cCOMMANDS #x245]#0-------------------#n
+  #Rmantra#n                View available mantras and costs
+  #Rmantra power improve#n  Train a mantra ability
 
-Eyes of God           Truesight
-Shield/Readaura/Scry  <----
-Sacred Invisibility   Monk Invisibility
-Heart of the Oak      Toughness
-Adamantium Hands      Advanced Parry
-Flaming Hands         Sets your opponent on fire
-Skin of Steel         Reduced Damage
-The Almighty Favor    Adds Strength
-Dark Blaze            Totally blinds the opponent
-Celestial Path        Portal to players/mobs
-Prayer of the Ages    (unknown)
-Cloak of Life         Regenboost when hurt bad
-Gods Heal             God Heals you
-Gods Hold             God holds players when they flee 
-
-To train a mantra use '#cMantra Power Improve#n'.
+#x245See also:#n #RMONK#n, #RMONKCHI#n, #RMONKABILITIES#n
 ~
 
 0 XTERM~
