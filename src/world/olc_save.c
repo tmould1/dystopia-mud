@@ -94,7 +94,7 @@ void save_area_list()
     FILE *fp;
     AREA_DATA *pArea;
 
-    if ( ( fp = fopen( AREA_LIST, "w" ) ) == NULL )
+    if ( ( fp = fopen( AREA_LIST, "wb" ) ) == NULL )
     {
 	bug( "Save_area_list: fopen", 0 );
 	perror( AREA_LIST );

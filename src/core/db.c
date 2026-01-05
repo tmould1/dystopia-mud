@@ -748,7 +748,7 @@ void save_hidden_areas( void )
         return;
     }
 
-    if ( ( fp = fopen( HIDDEN_LIST, "w" ) ) == NULL )
+    if ( ( fp = fopen( HIDDEN_LIST, "wb" ) ) == NULL )
     {
         bug( "save_hidden_areas: fopen", 0 );
         return;
