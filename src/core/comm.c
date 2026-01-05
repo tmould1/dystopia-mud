@@ -3431,7 +3431,10 @@ bool check_reconnect( DESCRIPTOR_DATA *d, char *name, bool fConn )
 		sprintf( log_buf, "%s@%s reconnected.",ch->name, ch->lasthost );
 		log_string( log_buf );
 		d->connected = CON_PLAYING;
- 		/* Inform the character of a note in progress and the possbility of continuation! */		
+		/* Send GMCP data on reconnect */
+		if (d->gmcp_enabled)
+		    gmcp_send_char_data(ch);
+ 		/* Inform the character of a note in progress and the possbility of continuation! */
  		if (ch->pcdata->in_progress)
  			send_to_char ("You have a note in progress. Type NWRITE to continue it.\n\r",ch);
 

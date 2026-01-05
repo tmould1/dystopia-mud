@@ -75,10 +75,20 @@ void gain_exp( CHAR_DATA *ch, int gain )
     if ( IS_NPC(ch) && (mount = ch->mount) != NULL && !IS_NPC(mount))
     {
       if ( (master = ch->master) == NULL || master != mount )
+      {
           mount->exp += gain;
+          /* Send GMCP status update for mount */
+          if (mount->desc != NULL && mount->desc->gmcp_enabled)
+              gmcp_send_status(mount);
+      }
     }
     if ( !IS_NPC(ch) )
+    {
       ch->exp += gain;
+      /* Send GMCP status update for exp change */
+      if (ch->desc != NULL && ch->desc->gmcp_enabled)
+          gmcp_send_status(ch);
+    }
     return;
 }
 
