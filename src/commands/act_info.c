@@ -1860,7 +1860,10 @@ void do_exits( CHAR_DATA *ch, char *argument )
     if ( !check_blind( ch ) )
 	return;
 
-    strcpy( buf, fAuto ? "#R[#GExits#7:#C" : "Obvious exits:\n\r" );
+    if ( fAuto && fMxp )
+	strcpy( buf, MXP_SECURE_LINE "#R[#GExits#7:#C" );
+    else
+	strcpy( buf, fAuto ? "#R[#GExits#7:#C" : "Obvious exits:\n\r" );
 
     found = FALSE;
     for ( door = 0; door <= 5; door++ )

@@ -119,8 +119,38 @@ void do_mxp(CHAR_DATA *ch, char *argument)
 }
 
 /*
+ * Strip MUD color codes from a string
+ * Color codes are #X where X is a digit (0-9) or letter (R,G,B,Y,C,M,W,L,n,x,etc)
+ * ## produces a literal #, #- produces a literal - (consistent with col_str_len)
+ * Used to clean strings for MXP attributes
+ */
+static void mxp_strip_colors(char *dest, const char *src, size_t maxlen)
+{
+    size_t i = 0;
+
+    if (dest == NULL || src == NULL || maxlen == 0)
+        return;
+
+    while (*src && i < maxlen - 1)
+    {
+        if (*src == '#' && *(src + 1) != '\0')
+        {
+            src++;  /* Skip the # */
+            /* ## and #- are literal characters */
+            if (*src == '#' || *src == '-')
+                dest[i++] = *src;
+            src++;  /* Skip the color code character */
+            continue;
+        }
+        dest[i++] = *src++;
+    }
+    dest[i] = '\0';
+}
+
+/*
  * Escape special characters for MXP attributes
  * < > " & must be escaped in MXP tag attributes
+ * Also filter out control characters that could break tags
  */
 void mxp_escape_string(char *dest, const char *src, size_t maxlen)
 {
@@ -144,6 +174,11 @@ void mxp_escape_string(char *dest, const char *src, size_t maxlen)
                 break;
             case '&':
                 if (i + 5 < maxlen) { strcpy(&dest[i], "&amp;"); i += 5; }
+                break;
+            case '\n':
+            case '\r':
+            case '\033':  /* ESC - could break MXP mode tags */
+                /* Skip control characters that could break MXP tags */
                 break;
             default:
                 dest[i++] = *src;
@@ -978,7 +1013,10 @@ char *mxp_player_link(CHAR_DATA *victim, CHAR_DATA *ch, char *display_text)
  */
 char *mxp_exit_link(EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_text)
 {
-    static char buf[MXP_BUF_MAX_LEN];
+    /* Use rotating buffers since exits are processed in a loop */
+    static char buf[8][MXP_BUF_MAX_LEN];
+    static int buf_index = 0;
+    char *outbuf;
     static const char *dir_cmd[] = { "north", "east", "south", "west", "up", "down" };
     char hint[256];
     char escaped_hint[512];
@@ -1002,6 +1040,10 @@ char *mxp_exit_link(EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_tex
     to_room = pexit->to_room;
     if (to_room == NULL)
         return display_text;
+
+    /* Select next rotating buffer */
+    outbuf = buf[buf_index];
+    buf_index = (buf_index + 1) % 8;
 
     /* Check if closed door blocks movement */
     if (IS_SET(pexit->exit_info, EX_CLOSED)
@@ -1094,12 +1136,99 @@ char *mxp_exit_link(EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_tex
     else
         snprintf(cmd, sizeof(cmd), "%s", dir_cmd[door]);
 
-    /* Build the MXP-wrapped string */
-    snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+    /* Build the MXP hint - room name plus occupant list */
+    {
+        char simple_hint[256];
+        char clean_name[128];
+        CHAR_DATA *vch;
+        int count = 0;
+        size_t len;
+
+        if (IS_SET(pexit->exit_info, EX_CLOSED))
+        {
+            if (IS_SET(pexit->exit_info, EX_LOCKED))
+                snprintf(simple_hint, sizeof(simple_hint), "Locked door");
+            else
+                snprintf(simple_hint, sizeof(simple_hint), "Closed door");
+        }
+        else if (room_is_dark(to_room) && !IS_AFFECTED(ch, AFF_INFRARED)
+                 && !IS_SET(ch->act, PLR_HOLYLIGHT))
+        {
+            snprintf(simple_hint, sizeof(simple_hint), "Too dark to see");
+        }
+        else
+        {
+            /* Start with room name (color stripped) */
+            mxp_strip_colors(clean_name, to_room->name ? to_room->name : "Unknown",
+                sizeof(clean_name));
+            snprintf(simple_hint, sizeof(simple_hint), "%s", clean_name);
+            len = strlen(simple_hint);
+
+            /* Add occupants - players first, then NPCs */
+            for (vch = to_room->people; vch != NULL; vch = vch->next_in_room)
+            {
+                char name_buf[64];
+                const char *name;
+
+                if (IS_NPC(vch))
+                    continue;  /* Skip NPCs in first pass */
+                if (!can_see(ch, vch))
+                    continue;
+
+                if (IS_AFFECTED(vch, AFF_POLYMORPH) && vch->morph != NULL)
+                    name = vch->morph;
+                else
+                    name = vch->name;
+
+                mxp_strip_colors(name_buf, name, sizeof(name_buf));
+
+                if (count == 0)
+                    len += snprintf(simple_hint + len, sizeof(simple_hint) - len, " - %s", name_buf);
+                else if (count < 4)
+                    len += snprintf(simple_hint + len, sizeof(simple_hint) - len, ", %s", name_buf);
+                else
+                {
+                    len += snprintf(simple_hint + len, sizeof(simple_hint) - len, "...");
+                    break;
+                }
+                count++;
+            }
+
+            /* Second pass: NPCs */
+            if (count <= 4)
+            {
+                for (vch = to_room->people; vch != NULL; vch = vch->next_in_room)
+                {
+                    char name_buf[64];
+
+                    if (!IS_NPC(vch))
+                        continue;
+                    if (!can_see(ch, vch))
+                        continue;
+
+                    mxp_strip_colors(name_buf, vch->short_descr, sizeof(name_buf));
+
+                    if (count == 0)
+                        len += snprintf(simple_hint + len, sizeof(simple_hint) - len, " - %s", name_buf);
+                    else if (count < 4)
+                        len += snprintf(simple_hint + len, sizeof(simple_hint) - len, ", %s", name_buf);
+                    else
+                    {
+                        len += snprintf(simple_hint + len, sizeof(simple_hint) - len, "...");
+                        break;
+                    }
+                    count++;
+                }
+            }
+        }
+        mxp_escape_string(escaped_hint, simple_hint, sizeof(escaped_hint));
+    }
+
+    snprintf(outbuf, MXP_BUF_MAX_LEN,
+        "<SEND href=\"%s\" hint=\"%s\">%s</SEND>",
         cmd, escaped_hint, display_text);
 
-    return buf;
+    return outbuf;
 }
 
 /*
@@ -1142,7 +1271,6 @@ char *mxp_char_link(CHAR_DATA *victim, CHAR_DATA *ch, char *display_text)
     char escaped_hint[512];
     char keyword[MAX_INPUT_LENGTH];
     char escaped_keyword[MAX_INPUT_LENGTH];
-    char arg[MAX_INPUT_LENGTH];
     char clean_text[MAX_STRING_LENGTH];
     char trailing[8] = "";
 
@@ -1182,26 +1310,25 @@ char *mxp_char_link(CHAR_DATA *victim, CHAR_DATA *ch, char *display_text)
         }
     }
 
-    /* Get keyword to target this character */
+    /* Get keyword to target this character - use full name with quotes
+     * to reduce mismatches when multiple similar NPCs are in room */
     if (IS_NPC(victim))
     {
-        /* Use first keyword from NPC name */
-        one_argument(victim->name, arg);
-        if (arg[0] == '\0')
+        /* Use full NPC name in quotes for precise targeting */
+        if (victim->name == NULL || victim->name[0] == '\0')
             return display_text;
-        snprintf(keyword, sizeof(keyword), "%s", arg);
+        snprintf(keyword, sizeof(keyword), "'%s'", victim->name);
     }
     else
     {
         /* Use player name */
         if (IS_AFFECTED(victim, AFF_POLYMORPH) && victim->morph != NULL)
         {
-            /* Polymorphed - use morph name for targeting */
-            one_argument(victim->morph, arg);
-            if (arg[0] == '\0')
-                snprintf(keyword, sizeof(keyword), "%s", victim->name);
+            /* Polymorphed - use full morph name in quotes for targeting */
+            if (victim->morph[0] != '\0')
+                snprintf(keyword, sizeof(keyword), "'%s'", victim->morph);
             else
-                snprintf(keyword, sizeof(keyword), "%s", arg);
+                snprintf(keyword, sizeof(keyword), "%s", victim->name);
         }
         else
         {
