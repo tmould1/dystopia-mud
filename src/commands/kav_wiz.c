@@ -51,7 +51,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     send_to_char( "You are not carrying that item.\n\r", ch );
     return;
   }
-  if (!str_prefix(arg1, "copper"))
+  if (!str_infix("copper", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL )
     {
@@ -76,7 +76,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     act("$n forges copper onto $p.\n\r",ch,obj,NULL,TO_ROOM);	
     return;
   }
-  if (!str_prefix(arg1, "iron"))
+  if (!str_infix("iron", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL )
     {
@@ -101,7 +101,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     act("$n forges iron onto $p.\n\r",ch,obj,NULL,TO_ROOM);
     return;
   }
-  if (!str_prefix(arg1, "steel"))
+  if (!str_infix("steel", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL )
     {
@@ -126,7 +126,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     act("$n forges steel onto $p.\n\r",ch,obj,NULL,TO_ROOM);
     return;
   }
-  if (!str_prefix(arg1, "adamantite"))
+  if (!str_infix("adamantite", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL )
     {
@@ -151,7 +151,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     act("$n forges adamantite onto $p.\n\r",ch,obj,NULL,TO_ROOM);
     return;
   }
-  if (!str_prefix( arg1, "diamond" ))
+  if (!str_infix("diamond", arg1))
   {
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL)
     {
@@ -180,7 +180,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 8;
     return;
   }
-  if (!str_prefix( arg1, "emerald" ))
+  if (!str_infix("emerald", arg1))
   {
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL)
     {
@@ -209,7 +209,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 13;
     return;
   }
-  if (!str_prefix( arg1, "sapphire" ))
+  if (!str_infix("sapphire", arg1))
   {      
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL) 
     {        
@@ -238,7 +238,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 12;
     return;
   }
-  if (!str_prefix( arg1, "ruby" ))
+  if (!str_infix("ruby", arg1))
   {      
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL) 
     {        
@@ -267,7 +267,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 11;
     return;
   }
-  if (!str_prefix( arg1, "pearl" ))
+  if (!str_infix("pearl", arg1))
   {      
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL) 
     {        
@@ -296,7 +296,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 5;
     return;
   }        
-  if (!str_prefix( arg1, "topaz" ))
+  if (!str_infix("topaz", arg1))
   {      
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL) 
     {        
@@ -325,7 +325,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 10;
     return;
   }        
-  if (!str_prefix( arg1, "amethyst" ))
+  if (!str_infix("amethyst", arg1))
   {      
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL) 
     {        
@@ -354,7 +354,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 3;
     return;
   }        
-  if (!str_prefix( arg1, "onyx" ))
+  if (!str_infix("onyx", arg1))
   {      
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL) 
     {        
@@ -383,7 +383,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 9;
     return;
   }        
-  if (!str_prefix( arg1, "opal" ))
+  if (!str_infix("opal", arg1))
   {      
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL) 
     {        
@@ -412,7 +412,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 6;
     return;
   }        
-  if (!str_prefix( arg1, "lazuli" ))
+  if (!str_infix("lazuli", arg1))
   {      
     if ((obj2 = get_obj_carry(ch, (arg1))) == NULL) 
     {        
@@ -441,7 +441,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     else if (obj->item_type == ITEM_ARMOR) obj->value[3] = 2;
     return;
   }
-  if (!str_prefix( arg1, "jade" ))
+  if (!str_infix("jade", arg1))
   {
     if (( obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {
@@ -475,7 +475,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     }
     return;
   }
-  if (!str_prefix(arg1, "ivory"))
+  if (!str_infix("ivory", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {
@@ -504,7 +504,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     obj->value[0] += 24;
     return;
   }
-  if (!str_prefix(arg1, "ebony"))
+  if (!str_infix("ebony", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {
@@ -533,7 +533,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     obj->value[0] += 4;
     return;
   }
-  if (!str_prefix(arg1, "crystal"))
+  if (!str_infix("crystal", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {
@@ -562,7 +562,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     obj->value[0] += 30;
     return;
   }
-  if (!str_prefix(arg1, "marble"))
+  if (!str_infix("marble", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {
@@ -591,7 +591,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     obj->value[0] += 34;
     return;
   }
-  if (!str_prefix(arg1, "gold"))
+  if (!str_infix("gold", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {
@@ -620,7 +620,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     obj->value[0] += 48;
     return;
   }
-  if (!str_prefix(arg1, "bronze"))
+  if (!str_infix("bronze", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {
@@ -649,7 +649,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     obj->value[0] += 1;
     return;
   }
-  if (!str_prefix(arg1, "sandstone"))
+  if (!str_infix("sandstone", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {
@@ -678,7 +678,7 @@ void do_forge( CHAR_DATA *ch, char *argument )
     obj->value[0] += 36;
     return;
   }
-  if (!str_prefix(arg1, "limestone"))
+  if (!str_infix("limestone", arg1))
   {
     if ((obj2 = get_obj_carry( ch, (arg1))) == NULL)
     {

@@ -53,7 +53,7 @@ bool mxpStart           args( ( DESCRIPTOR_DATA *desc ) );
 void mxpEnd             args( ( DESCRIPTOR_DATA *desc ) );
 
 /* MXP formatting helpers */
-char *mxp_obj_link            args( ( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_room ) );
+char *mxp_obj_link            args( ( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_room, int count ) );
 char *mxp_equip_link          args( ( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text ) );
 char *mxp_container_item_link args( ( OBJ_DATA *obj, OBJ_DATA *container, CHAR_DATA *ch, char *display_text ) );
 char *mxp_player_link         args( ( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) );

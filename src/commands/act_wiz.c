@@ -6894,9 +6894,13 @@ void copyover_recover ()
 
 	for (;;)
 	{
-		fscanf (fp, "%d %s %s\n", &desc, name, host);
-		if (desc == -1)
+		int items_read = fscanf (fp, "%d %s %s\n", &desc, name, host);
+		if (items_read != 3 || desc == -1)
+		{
+			if (items_read != 3 && items_read != EOF)
+				merc_logf("copyover_recover: malformed line in copyover file, stopping");
 			break;
+		}
 
 #if defined(WIN32)
 		/*

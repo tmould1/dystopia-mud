@@ -690,7 +690,7 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	    else
 	    {
 		/* Normal item: use standard get/wear/look menu */
-		send_to_char( mxp_obj_link( prgpObjShow[iShow], ch, prgpstrDesc[iShow], in_room ), ch );
+		send_to_char( mxp_obj_link( prgpObjShow[iShow], ch, prgpstrDesc[iShow], in_room, prgnShow[iShow] ), ch );
 	    }
 	}
 	else

@@ -3,6 +3,11 @@
  *
  * Provides MXP support for rich text features in compatible clients.
  * Follows the MCCP pattern for protocol negotiation.
+ *
+ * Note: Forge-able items (copper, iron, steel, adamantite, gemstone, hilt)
+ * display "Forge onto <item>" options in their MXP tooltip menu for each
+ * valid target item in the player's inventory. Hilts only apply to weapons;
+ * metals and gems apply to weapons and armor.
  */
 
 #include "../core/merc.h"
@@ -150,20 +155,558 @@ void mxp_escape_string(char *dest, const char *src, size_t maxlen)
 }
 
 /*
+ * Extract spell names from items that cast spells (potions, scrolls, pills, wands, staffs)
+ * Writes comma-separated spell names to buf
+ */
+static void mxp_get_spell_names(OBJ_DATA *obj, char *buf, size_t maxlen)
+{
+    char temp[128];
+    int first = 1;
+
+    if (buf == NULL || maxlen == 0)
+        return;
+
+    buf[0] = '\0';
+
+    /* For potions/pills/scrolls: value[1], value[2], value[3] are spell slots */
+    if (obj->item_type == ITEM_POTION || obj->item_type == ITEM_PILL || obj->item_type == ITEM_SCROLL)
+    {
+        if (obj->value[1] >= 0 && obj->value[1] < MAX_SKILL && skill_table[obj->value[1]].name != NULL)
+        {
+            snprintf(temp, sizeof(temp), "'%s'", skill_table[obj->value[1]].name);
+            strncat(buf, temp, maxlen - strlen(buf) - 1);
+            first = 0;
+        }
+        if (obj->value[2] >= 0 && obj->value[2] < MAX_SKILL && skill_table[obj->value[2]].name != NULL)
+        {
+            snprintf(temp, sizeof(temp), "%s'%s'", first ? "" : " ", skill_table[obj->value[2]].name);
+            strncat(buf, temp, maxlen - strlen(buf) - 1);
+            first = 0;
+        }
+        if (obj->value[3] >= 0 && obj->value[3] < MAX_SKILL && skill_table[obj->value[3]].name != NULL)
+        {
+            snprintf(temp, sizeof(temp), "%s'%s'", first ? "" : " ", skill_table[obj->value[3]].name);
+            strncat(buf, temp, maxlen - strlen(buf) - 1);
+        }
+    }
+    /* For wands/staffs: value[3] is the spell */
+    else if (obj->item_type == ITEM_WAND || obj->item_type == ITEM_STAFF)
+    {
+        if (obj->value[3] >= 0 && obj->value[3] < MAX_SKILL && skill_table[obj->value[3]].name != NULL)
+        {
+            snprintf(buf, maxlen, "'%s'", skill_table[obj->value[3]].name);
+        }
+    }
+}
+
+/*
+ * Get the destination room name for a portal or wgate
+ * Returns static string with room name or "Unknown"
+ */
+static const char *mxp_get_portal_destination(OBJ_DATA *obj)
+{
+    ROOM_INDEX_DATA *room;
+
+    if (obj == NULL || obj->value[0] <= 0)
+        return "Unknown";
+
+    room = get_room_index(obj->value[0]);
+    if (room == NULL)
+        return "Nowhere";
+
+    return room->name ? room->name : "Unknown";
+}
+
+/*
+ * Build enhanced tooltip based on item type
+ * Includes item-specific information like spells, charges, destinations, etc.
+ */
+static void mxp_build_item_tooltip(OBJ_DATA *obj, CHAR_DATA *ch, char *hint, size_t maxlen)
+{
+    char material[64] = "";
+    char condition[32] = "";
+    char extra[384] = "";
+    char spells[256];
+
+    if (obj == NULL || hint == NULL || maxlen == 0)
+        return;
+
+    /* Determine material if visible */
+    if (IS_SET(obj->spectype, SITEM_ADAMANTITE))
+        strcpy(material, ", Adamantite");
+    else if (IS_SET(obj->spectype, SITEM_STEEL))
+        strcpy(material, ", Steel");
+    else if (IS_SET(obj->spectype, SITEM_IRON))
+        strcpy(material, ", Iron");
+    else if (IS_SET(obj->spectype, SITEM_COPPER))
+        strcpy(material, ", Copper");
+    else if (IS_SET(obj->spectype, SITEM_DEMONIC))
+        strcpy(material, ", Demonsteel");
+    else if (IS_SET(obj->spectype, SITEM_SILVER))
+        strcpy(material, ", Silver");
+
+    /* Show condition if damaged */
+    if (obj->condition < 100)
+        snprintf(condition, sizeof(condition), ", %d%%", obj->condition);
+
+    /* Item-type specific extras */
+    switch (obj->item_type)
+    {
+        case ITEM_POTION:
+        case ITEM_PILL:
+        case ITEM_SCROLL:
+            mxp_get_spell_names(obj, spells, sizeof(spells));
+            if (spells[0] != '\0')
+                snprintf(extra, sizeof(extra), ", %s Lvl %d", spells, obj->value[0]);
+            break;
+
+        case ITEM_WAND:
+        case ITEM_STAFF:
+            mxp_get_spell_names(obj, spells, sizeof(spells));
+            if (spells[0] != '\0')
+                snprintf(extra, sizeof(extra), ", %d/%d %s", obj->value[2], obj->value[1], spells);
+            else
+                snprintf(extra, sizeof(extra), ", %d/%d charges", obj->value[2], obj->value[1]);
+            break;
+
+        case ITEM_PORTAL:
+        case ITEM_WGATE:
+            snprintf(extra, sizeof(extra), ", To: %s", mxp_get_portal_destination(obj));
+            break;
+
+        case ITEM_FOUNTAIN:
+            if (obj->value[2] >= 0 && obj->value[2] < LIQ_MAX)
+                snprintf(extra, sizeof(extra), ", %s", liq_table[obj->value[2]].liq_name);
+            break;
+
+        case ITEM_DRINK_CON:
+            if (obj->value[1] <= 0)
+                strcpy(extra, ", Empty");
+            else if (obj->value[2] >= 0 && obj->value[2] < LIQ_MAX)
+                snprintf(extra, sizeof(extra), ", %d/%d %s",
+                    obj->value[1], obj->value[0], liq_table[obj->value[2]].liq_name);
+            break;
+
+        case ITEM_LIGHT:
+            if (obj->value[2] == -1)
+                strcpy(extra, ", Infinite");
+            else if (obj->value[2] > 0)
+                snprintf(extra, sizeof(extra), ", %d hrs", obj->value[2]);
+            else
+                strcpy(extra, ", Burned out");
+            break;
+
+        case ITEM_FOOD:
+            if (obj->value[3] != 0)
+                snprintf(extra, sizeof(extra), ", Fills %d (Poisoned!)", obj->value[0]);
+            else
+                snprintf(extra, sizeof(extra), ", Fills %d", obj->value[0]);
+            break;
+
+        case ITEM_QUEST:
+            snprintf(extra, sizeof(extra), ", %d QP", obj->value[0]);
+            break;
+
+        case ITEM_QUESTCARD:
+            snprintf(extra, sizeof(extra), ", Reward: %d QP", obj->level);
+            break;
+
+        case ITEM_MONEY:
+            snprintf(extra, sizeof(extra), ", %d gold", obj->value[0]);
+            break;
+
+        case ITEM_AMMO:
+            snprintf(extra, sizeof(extra), ", Dmg %d-%d", obj->value[1], obj->value[2]);
+            break;
+
+        case ITEM_MISSILE:
+            snprintf(extra, sizeof(extra), ", %d/%d loaded", obj->value[1], obj->value[2]);
+            break;
+
+        case ITEM_ARMOR:
+            snprintf(extra, sizeof(extra), ", AC %d", obj->value[0]);
+            break;
+
+        case ITEM_WEAPON:
+            snprintf(extra, sizeof(extra), ", %dd%d", obj->value[1], obj->value[2]);
+            break;
+
+        default:
+            break;
+    }
+
+    snprintf(hint, maxlen, "%s, Wt: %d%s%s%s",
+        item_type_name(obj), obj->weight, material, condition, extra);
+}
+
+/*
+ * Build MXP menu for items on the ground (in_room = TRUE)
+ * Context-aware primary action based on item type
+ */
+static void mxp_build_ground_menu(OBJ_DATA *obj, CHAR_DATA *ch,
+                                   const char *keywords, const char *escaped_hint,
+                                   char *href_buf, size_t href_size,
+                                   char *hint_buf, size_t hint_size)
+{
+    if (obj == NULL || keywords == NULL)
+        return;
+
+    href_buf[0] = '\0';
+    hint_buf[0] = '\0';
+
+    switch (obj->item_type)
+    {
+        case ITEM_PORTAL:
+        case ITEM_WGATE:
+            snprintf(href_buf, href_size, "enter '%s'|look '%s'", keywords, keywords);
+            snprintf(hint_buf, hint_size, "%s|Enter|Look", escaped_hint);
+            break;
+
+        case ITEM_FOUNTAIN:
+            {
+                /* Check if player has any drink containers to fill */
+                OBJ_DATA *drink_con;
+                bool has_container = FALSE;
+
+                for (drink_con = ch->carrying; drink_con != NULL; drink_con = drink_con->next_content)
+                {
+                    if (drink_con->item_type == ITEM_DRINK_CON)
+                    {
+                        has_container = TRUE;
+                        break;
+                    }
+                }
+
+                if (has_container)
+                {
+                    snprintf(href_buf, href_size, "drink '%s'|fill '%s'|look '%s'",
+                        keywords, keywords, keywords);
+                    snprintf(hint_buf, hint_size, "%s|Drink|Fill|Look", escaped_hint);
+                }
+                else
+                {
+                    snprintf(href_buf, href_size, "drink '%s'|look '%s'",
+                        keywords, keywords);
+                    snprintf(hint_buf, hint_size, "%s|Drink|Look", escaped_hint);
+                }
+            }
+            break;
+
+        case ITEM_FURNITURE:
+            snprintf(href_buf, href_size, "sit '%s'|rest '%s'|sleep '%s'|look '%s'",
+                keywords, keywords, keywords, keywords);
+            snprintf(hint_buf, hint_size, "%s|Sit|Rest|Sleep|Look", escaped_hint);
+            break;
+
+        case ITEM_QUESTMACHINE:
+            snprintf(href_buf, href_size, "request|complete|look '%s'", keywords);
+            snprintf(hint_buf, hint_size, "%s|Request|Complete|Look", escaped_hint);
+            break;
+
+        case ITEM_CONTAINER:
+        case ITEM_CORPSE_NPC:
+        case ITEM_CORPSE_PC:
+            snprintf(href_buf, href_size, "get '%s'|look '%s'|look in '%s'|sacrifice '%s'",
+                keywords, keywords, keywords, keywords);
+            snprintf(hint_buf, hint_size, "%s|Get|Look|Look In|Sacrifice", escaped_hint);
+            break;
+
+        case ITEM_MONEY:
+            snprintf(href_buf, href_size, "get '%s'|look '%s'", keywords, keywords);
+            snprintf(hint_buf, hint_size, "%s|Get|Look", escaped_hint);
+            break;
+
+        default:
+            /* Standard ground item: get/look/sacrifice */
+            snprintf(href_buf, href_size, "get '%s'|look '%s'|sacrifice '%s'",
+                keywords, keywords, keywords);
+            snprintf(hint_buf, hint_size, "%s|Get|Look|Sacrifice", escaped_hint);
+            break;
+    }
+}
+
+/*
+ * Build MXP menu for items in inventory (in_room = FALSE)
+ * Context-aware primary action based on item type
+ * count = number of stacked items (for "Drop All" option)
+ */
+static void mxp_build_inventory_menu(OBJ_DATA *obj, CHAR_DATA *ch,
+                                      const char *keywords, const char *escaped_hint,
+                                      char *href_buf, size_t href_size,
+                                      char *hint_buf, size_t hint_size,
+                                      int count)
+{
+    const char *use_cmd = NULL;
+    const char *use_label = NULL;
+    OBJ_DATA *cont;
+    char cont_keywords[MAX_INPUT_LENGTH];
+
+    if (obj == NULL || keywords == NULL)
+        return;
+
+    href_buf[0] = '\0';
+    hint_buf[0] = '\0';
+
+    /* Determine primary use command based on item type */
+    switch (obj->item_type)
+    {
+        case ITEM_POTION:
+            use_cmd = "quaff"; use_label = "Quaff"; break;
+        case ITEM_PILL:
+        case ITEM_FOOD:
+        case ITEM_EGG:
+        case ITEM_QUEST:
+        case ITEM_DTOKEN:
+        case ITEM_DRAGONGEM:
+            use_cmd = "eat"; use_label = "Eat"; break;
+        case ITEM_DRINK_CON:
+            use_cmd = "drink"; use_label = "Drink"; break;
+        case ITEM_SCROLL:
+            use_cmd = "recite"; use_label = "Recite"; break;
+        case ITEM_WAND:
+        case ITEM_STAFF:
+            use_cmd = "brandish"; use_label = "Use"; break;
+        case ITEM_BOOK:
+            use_cmd = "open"; use_label = "Open"; break;
+        case ITEM_PAGE:
+            use_cmd = "read"; use_label = "Read"; break;
+        case ITEM_INSTRUMENT:
+            use_cmd = "play"; use_label = "Play"; break;
+        case ITEM_STAKE:
+        case ITEM_VOODOO:
+        case ITEM_LIGHT:
+            use_cmd = "hold"; use_label = "Hold"; break;
+        case ITEM_HEAD:
+            use_cmd = "sacrifice"; use_label = "Sacrifice"; break;
+        case ITEM_COPPER:
+        case ITEM_IRON:
+        case ITEM_STEEL:
+        case ITEM_ADAMANTITE:
+        case ITEM_GEMSTONE:
+        case ITEM_HILT:
+            /* Forging materials - handle specially below */
+            use_cmd = NULL; use_label = NULL; break;
+        case ITEM_CONTAINER:
+        case ITEM_CORPSE_NPC:
+        case ITEM_CORPSE_PC:
+            use_cmd = "look in"; use_label = "Look In"; break;
+        default:
+            /* Check wear flags for equipment */
+            if (CAN_WEAR(obj, ITEM_WIELD))
+            { use_cmd = "wield"; use_label = "Wield"; }
+            else if (CAN_WEAR(obj, ITEM_HOLD))
+            { use_cmd = "hold"; use_label = "Hold"; }
+            else if (obj->wear_flags > ITEM_TAKE)
+            { use_cmd = "wear"; use_label = "Wear"; }
+            break;
+    }
+
+    /* Build the menu - start with primary action */
+    if (use_cmd != NULL)
+    {
+        snprintf(href_buf, href_size, "%s '%s'", use_cmd, keywords);
+        snprintf(hint_buf, hint_size, "%s|%s", escaped_hint, use_label);
+    }
+    else
+    {
+        strcpy(hint_buf, escaped_hint);
+    }
+
+    /* Add look */
+    if (href_buf[0] != '\0')
+    {
+        strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+        strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+    }
+    else
+    {
+        /* No primary action - hint already has tooltip, need separator before Look */
+        strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+    }
+    snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf), "look '%s'", keywords);
+    strncat(hint_buf, "Look", hint_size - strlen(hint_buf) - 1);
+
+    /* Add drop */
+    strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+    strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+    snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf), "drop '%s'", keywords);
+    strncat(hint_buf, "Drop", hint_size - strlen(hint_buf) - 1);
+
+    /* Add drop all for stacked items */
+    if (count > 1)
+    {
+        strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+        strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+        snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf), "drop all.'%s'", keywords);
+        strncat(hint_buf, "Drop All", hint_size - strlen(hint_buf) - 1);
+    }
+
+    /* Add identify */
+    strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+    strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+    snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf), "cast 'identify' '%s'", keywords);
+    strncat(hint_buf, "Identify", hint_size - strlen(hint_buf) - 1);
+
+    /* Add "Put in <container>" for each container in player's inventory */
+    if (obj->item_type != ITEM_CONTAINER && obj->item_type != ITEM_CORPSE_NPC
+        && obj->item_type != ITEM_CORPSE_PC && ch->carrying != NULL)
+    {
+        for (cont = ch->carrying; cont != NULL; cont = cont->next_content)
+        {
+            /* Skip the item itself, skip non-containers, skip closed containers */
+            if (cont == obj)
+                continue;
+            if (cont->item_type != ITEM_CONTAINER)
+                continue;
+            if (IS_SET(cont->value[1], CONT_CLOSED))
+                continue;
+
+            /* Get full container name for exact matching */
+            if (cont->name == NULL || cont->name[0] == '\0')
+                continue;
+            mxp_escape_string(cont_keywords, cont->name, sizeof(cont_keywords));
+
+            /* Add to menu */
+            strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+            strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+            snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf),
+                "put '%s' '%s'", keywords, cont_keywords);
+            snprintf(hint_buf + strlen(hint_buf), hint_size - strlen(hint_buf),
+                "Put in %s", cont->short_descr);
+        }
+    }
+
+    /* Add "Forge onto <item>" for forging materials */
+    {
+        bool is_metal = (obj->item_type == ITEM_COPPER || obj->item_type == ITEM_IRON
+                      || obj->item_type == ITEM_STEEL || obj->item_type == ITEM_ADAMANTITE);
+        bool is_gem = (obj->item_type == ITEM_GEMSTONE);
+        bool is_hilt = (obj->item_type == ITEM_HILT);
+
+        if ((is_metal || is_gem || is_hilt) && ch->carrying != NULL)
+        {
+            char target_keywords[MAX_INPUT_LENGTH];
+            OBJ_DATA *count_obj;
+            int item_index;
+
+            for (cont = ch->carrying; cont != NULL; cont = cont->next_content)
+            {
+                /* Skip the forging material itself */
+                if (cont == obj)
+                    continue;
+
+                /* Skip worn items - can only forge items in inventory */
+                if (cont->wear_loc != WEAR_NONE)
+                    continue;
+
+                /* Hilts can only be forged onto weapons */
+                if (is_hilt && cont->item_type != ITEM_WEAPON)
+                    continue;
+
+                /* Metals and gems can be forged onto weapons and armor */
+                if (!is_hilt && cont->item_type != ITEM_WEAPON && cont->item_type != ITEM_ARMOR)
+                    continue;
+
+                /* Skip items already forged with metal (for metal slabs) */
+                if (is_metal && (IS_SET(cont->spectype, SITEM_COPPER)
+                              || IS_SET(cont->spectype, SITEM_IRON)
+                              || IS_SET(cont->spectype, SITEM_STEEL)
+                              || IS_SET(cont->spectype, SITEM_ADAMANTITE)))
+                    continue;
+
+                /* Skip items already forged with gem (for gemstones) */
+                if (is_gem && IS_SET(cont->spectype, SITEM_GEMSTONE))
+                    continue;
+
+                /* Get item name for command */
+                if (cont->name == NULL || cont->name[0] == '\0')
+                    continue;
+                mxp_escape_string(target_keywords, cont->name, sizeof(target_keywords));
+
+                /* Count how many items with same vnum come before this one */
+                item_index = 1;
+                for (count_obj = ch->carrying; count_obj != cont; count_obj = count_obj->next_content)
+                {
+                    if (count_obj->pIndexData->vnum == cont->pIndexData->vnum
+                        && count_obj->wear_loc == WEAR_NONE)
+                        item_index++;
+                }
+
+                /* Add to menu with index prefix for disambiguation */
+                strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+                strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+                snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf),
+                    "forge '%s' %d.'%s'", keywords, item_index, target_keywords);
+                snprintf(hint_buf + strlen(hint_buf), hint_size - strlen(hint_buf),
+                    "Forge onto %s", cont->short_descr);
+            }
+        }
+    }
+}
+
+/*
+ * Add SITEM special flag options to the menu
+ * For items with SITEM_ACTIVATE, SITEM_PRESS, SITEM_TWIST, SITEM_PULL flags
+ */
+static void mxp_add_sitem_options(OBJ_DATA *obj, const char *keywords,
+                                   char *href_buf, size_t href_size,
+                                   char *hint_buf, size_t hint_size)
+{
+    if (obj == NULL || keywords == NULL)
+        return;
+
+    if (IS_SET(obj->spectype, SITEM_ACTIVATE))
+    {
+        strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+        strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+        snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf),
+            "activate '%s'", keywords);
+        strncat(hint_buf, "Activate", hint_size - strlen(hint_buf) - 1);
+    }
+    if (IS_SET(obj->spectype, SITEM_PRESS))
+    {
+        strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+        strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+        snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf),
+            "press '%s'", keywords);
+        strncat(hint_buf, "Press", hint_size - strlen(hint_buf) - 1);
+    }
+    if (IS_SET(obj->spectype, SITEM_TWIST))
+    {
+        strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+        strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+        snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf),
+            "twist '%s'", keywords);
+        strncat(hint_buf, "Twist", hint_size - strlen(hint_buf) - 1);
+    }
+    if (IS_SET(obj->spectype, SITEM_PULL))
+    {
+        strncat(href_buf, "|", href_size - strlen(href_buf) - 1);
+        strncat(hint_buf, "|", hint_size - strlen(hint_buf) - 1);
+        snprintf(href_buf + strlen(href_buf), href_size - strlen(href_buf),
+            "pull '%s'", keywords);
+        strncat(hint_buf, "Pull", hint_size - strlen(hint_buf) - 1);
+    }
+}
+
+/*
  * Format an object with MXP clickable link and tooltip
  * Returns a static buffer with MXP-wrapped text
  *
- * in_room = TRUE:  Item is on the ground - click to get, menu for look/get
- * in_room = FALSE: Item is in inventory - click to identify
+ * in_room = TRUE:  Item is on the ground - context-aware primary action
+ * in_room = FALSE: Item is in inventory - context-aware use action
+ * count = number of stacked items (for "Drop All" option when count > 1)
  *
- * Tooltip shows item type, weight, material, and condition.
+ * Tooltip shows item type, weight, material, condition, and item-specific info.
  */
-char *mxp_obj_link(OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_room)
+char *mxp_obj_link(OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_room, int count)
 {
     static char buf[MXP_BUF_MAX_LEN];
     char keywords[MAX_INPUT_LENGTH];
-    char hint[256];
-    char escaped_hint[512];
+    char hint[512];
+    char escaped_hint[1024];
+    char href_buf[2048];
+    char hint_buf[2048];
 
     if (obj == NULL || ch == NULL || display_text == NULL)
         return display_text;
@@ -179,208 +722,30 @@ char *mxp_obj_link(OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_roo
     /* Escape the full name for MXP */
     mxp_escape_string(keywords, obj->name, sizeof(keywords));
 
-    /* Build the tooltip hint - visible item properties */
-    {
-        char material[64] = "";
-        char condition[32] = "";
-
-        /* Determine material if visible */
-        if (IS_SET(obj->spectype, SITEM_ADAMANTITE))
-            strcpy(material, ", Adamantite");
-        else if (IS_SET(obj->spectype, SITEM_STEEL))
-            strcpy(material, ", Steel");
-        else if (IS_SET(obj->spectype, SITEM_IRON))
-            strcpy(material, ", Iron");
-        else if (IS_SET(obj->spectype, SITEM_COPPER))
-            strcpy(material, ", Copper");
-        else if (IS_SET(obj->spectype, SITEM_DEMONIC))
-            strcpy(material, ", Demonsteel");
-        else if (IS_SET(obj->spectype, SITEM_SILVER))
-            strcpy(material, ", Silver");
-
-        /* Show condition if damaged */
-        if (obj->condition < 100)
-            snprintf(condition, sizeof(condition), ", %d%% condition", obj->condition);
-
-        snprintf(hint, sizeof(hint), "%s, Weight: %d%s%s",
-            item_type_name(obj), obj->weight, material, condition);
-    }
-
-    /* Escape the hint for MXP */
+    /* Build enhanced tooltip with item-specific information */
+    mxp_build_item_tooltip(obj, ch, hint, sizeof(hint));
     mxp_escape_string(escaped_hint, hint, sizeof(escaped_hint));
 
-    /* Build the MXP-wrapped string based on context
-     * Use single quotes around keywords for exact matching */
+    /* Build context-aware menu based on location */
     if (in_room)
     {
-        bool is_container = (obj->item_type == ITEM_CONTAINER
-                          || obj->item_type == ITEM_CORPSE_NPC
-                          || obj->item_type == ITEM_CORPSE_PC);
-
-        if (is_container)
-        {
-            /* Container on ground: get/look/look in/sacrifice */
-            snprintf(buf, sizeof(buf),
-                MXP_SECURE_LINE "<SEND href=\"get '%s'|look '%s'|look in '%s'|sacrifice '%s'\" hint=\"%s|Get|Look|Look In|Sacrifice\">%s</SEND>" MXP_LOCK_LOCKED,
-                keywords, keywords, keywords, keywords, escaped_hint, display_text);
-        }
-        else
-        {
-            /* Regular item on ground: get/look/sacrifice */
-            snprintf(buf, sizeof(buf),
-                MXP_SECURE_LINE "<SEND href=\"get '%s'|look '%s'|sacrifice '%s'\" hint=\"%s|Get|Look|Sacrifice\">%s</SEND>" MXP_LOCK_LOCKED,
-                keywords, keywords, keywords, escaped_hint, display_text);
-        }
+        mxp_build_ground_menu(obj, ch, keywords, escaped_hint,
+            href_buf, sizeof(href_buf), hint_buf, sizeof(hint_buf));
     }
     else
     {
-        /* Inventory items - build dynamic menu */
-        char href_buf[2048];
-        char hint_buf[1024];
-        const char *use_cmd = NULL;
-        const char *use_label = NULL;
-        bool is_container = (obj->item_type == ITEM_CONTAINER
-                          || obj->item_type == ITEM_CORPSE_NPC
-                          || obj->item_type == ITEM_CORPSE_PC);
-        OBJ_DATA *cont;
-        char cont_keywords[MAX_INPUT_LENGTH];
-
-        /* Priority 1: Check if item is wearable/wieldable/holdable */
-        if (CAN_WEAR(obj, ITEM_WIELD))
-        {
-            use_cmd = "wield";
-            use_label = "Wield";
-        }
-        else if (CAN_WEAR(obj, ITEM_HOLD))
-        {
-            use_cmd = "hold";
-            use_label = "Hold";
-        }
-        else if (obj->wear_flags > ITEM_TAKE)
-        {
-            use_cmd = "wear";
-            use_label = "Wear";
-        }
-
-        /* Priority 2: If not wearable, check consumable item types */
-        if (use_cmd == NULL)
-        {
-            switch (obj->item_type)
-            {
-                case ITEM_POTION:
-                    use_cmd = "quaff";
-                    use_label = "Quaff";
-                    break;
-                case ITEM_PILL:
-                case ITEM_FOOD:
-                    use_cmd = "eat";
-                    use_label = "Eat";
-                    break;
-                case ITEM_DRINK_CON:
-                    use_cmd = "drink";
-                    use_label = "Drink";
-                    break;
-                case ITEM_SCROLL:
-                    use_cmd = "recite";
-                    use_label = "Recite";
-                    break;
-                case ITEM_WAND:
-                case ITEM_STAFF:
-                    use_cmd = "brandish";
-                    use_label = "Use";
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        /* Start building href and hint strings */
-        href_buf[0] = '\0';
-        hint_buf[0] = '\0';
-
-        /* Add primary action with quoted keywords */
-        if (use_cmd != NULL)
-        {
-            snprintf(href_buf, sizeof(href_buf), "%s '%s'", use_cmd, keywords);
-            snprintf(hint_buf, sizeof(hint_buf), "%s|%s", escaped_hint, use_label);
-        }
-
-        /* Add look in for containers */
-        if (is_container)
-        {
-            if (href_buf[0] != '\0')
-            {
-                strcat(href_buf, "|");
-                strcat(hint_buf, "|");
-            }
-            snprintf(href_buf + strlen(href_buf), sizeof(href_buf) - strlen(href_buf),
-                "look in '%s'", keywords);
-            strcat(hint_buf, "Look In");
-        }
-
-        /* Add look */
-        if (href_buf[0] != '\0')
-        {
-            strcat(href_buf, "|");
-            strcat(hint_buf, "|");
-        }
-        else
-        {
-            /* No primary action yet, start with hint */
-            strcpy(hint_buf, escaped_hint);
-            strcat(hint_buf, "|");
-        }
-        snprintf(href_buf + strlen(href_buf), sizeof(href_buf) - strlen(href_buf),
-            "look '%s'", keywords);
-        strcat(hint_buf, "Look");
-
-        /* Add drop */
-        strcat(href_buf, "|");
-        strcat(hint_buf, "|");
-        snprintf(href_buf + strlen(href_buf), sizeof(href_buf) - strlen(href_buf),
-            "drop '%s'", keywords);
-        strcat(hint_buf, "Drop");
-
-        /* Add identify */
-        strcat(href_buf, "|");
-        strcat(hint_buf, "|");
-        snprintf(href_buf + strlen(href_buf), sizeof(href_buf) - strlen(href_buf),
-            "cast 'identify' '%s'", keywords);
-        strcat(hint_buf, "Identify");
-
-        /* Add "Put in <container>" for each container in player's inventory */
-        if (!is_container && ch->carrying != NULL)
-        {
-            for (cont = ch->carrying; cont != NULL; cont = cont->next_content)
-            {
-                /* Skip the item itself, skip non-containers, skip closed containers */
-                if (cont == obj)
-                    continue;
-                if (cont->item_type != ITEM_CONTAINER)
-                    continue;
-                if (IS_SET(cont->value[1], CONT_CLOSED))
-                    continue;
-
-                /* Get full container name for exact matching */
-                if (cont->name == NULL || cont->name[0] == '\0')
-                    continue;
-                mxp_escape_string(cont_keywords, cont->name, sizeof(cont_keywords));
-
-                /* Add to menu */
-                strcat(href_buf, "|");
-                strcat(hint_buf, "|");
-                snprintf(href_buf + strlen(href_buf), sizeof(href_buf) - strlen(href_buf),
-                    "put '%s' '%s'", keywords, cont_keywords);
-                snprintf(hint_buf + strlen(hint_buf), sizeof(hint_buf) - strlen(hint_buf),
-                    "Put in %s", cont->short_descr);
-            }
-        }
-
-        /* Build final MXP tag */
-        snprintf(buf, sizeof(buf),
-            MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
-            href_buf, hint_buf, display_text);
+        mxp_build_inventory_menu(obj, ch, keywords, escaped_hint,
+            href_buf, sizeof(href_buf), hint_buf, sizeof(hint_buf), count);
     }
+
+    /* Add SITEM special flag options (activate/press/twist/pull) */
+    mxp_add_sitem_options(obj, keywords, href_buf, sizeof(href_buf),
+        hint_buf, sizeof(hint_buf));
+
+    /* Build final MXP tag - hint must come last */
+    snprintf(buf, sizeof(buf),
+        MXP_SECURE_LINE "<SEND hint=\"%s\" href=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+        hint_buf, href_buf, display_text);
 
     return buf;
 }
@@ -461,14 +826,14 @@ char *mxp_equip_link(OBJ_DATA *obj, CHAR_DATA *ch, char *display_text)
         if (is_container)
         {
             snprintf(buf, sizeof(buf),
-                MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'|look in '%s'\" hint=\"%s|Remove|Look|Look In\">%s</SEND>" MXP_LOCK_LOCKED,
-                keywords, keywords, keywords, escaped_hint, display_text);
+                MXP_SECURE_LINE "<SEND hint=\"%s|Remove|Look|Look In\" href=\"remove '%s'|look '%s'|look in '%s'\">%s</SEND>" MXP_LOCK_LOCKED,
+                escaped_hint, keywords, keywords, keywords, display_text);
         }
         else
         {
             snprintf(buf, sizeof(buf),
-                MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'\" hint=\"%s|Remove|Look\">%s</SEND>" MXP_LOCK_LOCKED,
-                keywords, keywords, escaped_hint, display_text);
+                MXP_SECURE_LINE "<SEND hint=\"%s|Remove|Look\" href=\"remove '%s'|look '%s'\">%s</SEND>" MXP_LOCK_LOCKED,
+                escaped_hint, keywords, keywords, display_text);
         }
     }
 
@@ -536,8 +901,8 @@ char *mxp_container_item_link(OBJ_DATA *obj, OBJ_DATA *container, CHAR_DATA *ch,
 
     /* Simple click to get item from container - no menu needed */
     snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND href=\"get '%s' '%s'\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
-        obj_keywords, container_keywords, escaped_hint, display_text);
+        MXP_SECURE_LINE "<SEND hint=\"%s\" href=\"get '%s' '%s'\">%s</SEND>" MXP_LOCK_LOCKED,
+        escaped_hint, obj_keywords, container_keywords, display_text);
 
     return buf;
 }
@@ -588,8 +953,8 @@ char *mxp_player_link(CHAR_DATA *victim, CHAR_DATA *ch, char *display_text)
 
     /* Build the MXP-wrapped string */
     snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND href=\"finger %s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
-        escaped_name, escaped_hint, display_text);
+        MXP_SECURE_LINE "<SEND hint=\"%s\" href=\"finger %s\">%s</SEND>" MXP_LOCK_LOCKED,
+        escaped_hint, escaped_name, display_text);
 
     return buf;
 }
@@ -724,8 +1089,8 @@ char *mxp_exit_link(EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_tex
 
     /* Build the MXP-wrapped string */
     snprintf(buf, sizeof(buf),
-        MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
-        cmd, escaped_hint, display_text);
+        MXP_SECURE_LINE "<SEND hint=\"%s\" href=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+        escaped_hint, cmd, display_text);
 
     return buf;
 }
@@ -862,15 +1227,15 @@ char *mxp_char_link(CHAR_DATA *victim, CHAR_DATA *ch, char *display_text)
     {
         /* 3 commands: attack, look, consider -> 4 hints: tooltip + 3 labels */
         snprintf(buf, sizeof(buf),
-            MXP_SECURE_LINE "<SEND href=\"attack %s|look %s|consider %s\" hint=\"%s|Attack|Look|Consider\">%s</SEND>" MXP_LOCK_LOCKED "%s",
-            escaped_keyword, escaped_keyword, escaped_keyword, escaped_hint, clean_text, trailing);
+            MXP_SECURE_LINE "<SEND hint=\"%s|Attack|Look|Consider\" href=\"attack %s|look %s|consider %s\">%s</SEND>" MXP_LOCK_LOCKED "%s",
+            escaped_hint, escaped_keyword, escaped_keyword, escaped_keyword, clean_text, trailing);
     }
     else
     {
         /* 4 commands: attack, look, consider, finger -> 5 hints: tooltip + 4 labels */
         snprintf(buf, sizeof(buf),
-            MXP_SECURE_LINE "<SEND href=\"attack %s|look %s|consider %s|finger %s\" hint=\"%s|Attack|Look|Consider|Finger\">%s</SEND>" MXP_LOCK_LOCKED "%s",
-            escaped_keyword, escaped_keyword, escaped_keyword, escaped_keyword, escaped_hint, clean_text, trailing);
+            MXP_SECURE_LINE "<SEND hint=\"%s|Attack|Look|Consider|Finger\" href=\"attack %s|look %s|consider %s|finger %s\">%s</SEND>" MXP_LOCK_LOCKED "%s",
+            escaped_hint, escaped_keyword, escaped_keyword, escaped_keyword, escaped_keyword, clean_text, trailing);
     }
 
     return buf;
