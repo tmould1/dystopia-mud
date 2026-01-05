@@ -17,6 +17,7 @@ build_log.txt
 # IDE/Editor
 .vscode/
 .idea/
+.vs/
 
 # Player data (sensitive)
 player/
