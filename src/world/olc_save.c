@@ -55,26 +55,31 @@
 /*****************************************************************************
  Name:		fix_string
  Purpose:	Returns a string without \r and ~.
+ Note:      Uses rotating buffers so multiple calls in same expression work.
  ****************************************************************************/
 char *fix_string( const char *str )
 {
-    static char strfix[MAX_STRING_LENGTH];
+    static char strfix[8][MAX_STRING_LENGTH];
+    static int current_buf = 0;
+    char *buf;
     int i;
     int o;
 
     if ( str == NULL )
-        return '\0';
+        return "";
+
+    buf = strfix[current_buf];
+    current_buf = (current_buf + 1) % 8;
 
     for ( o = i = 0; str[i+o] != '\0'; i++ )
     {
         if (str[i+o] == '\r' || str[i+o] == '~')
             o++;
-//        strfix[i] = str[i+o];
-        if ((strfix[i] = str[i+o]) == '\0')
+        if ((buf[i] = str[i+o]) == '\0')
           break;
     }
-    strfix[i] = '\0';
-    return strfix;
+    buf[i] = '\0';
+    return buf;
 }
 
 
@@ -134,8 +139,8 @@ void save_mobiles( FILE *fp, AREA_DATA *pArea )
 	    if ( pMobIndex->area == pArea )
             {
                 fprintf( fp, "#%d\n",		pMobIndex->vnum );
-                fprintf( fp, "%s~\n",		pMobIndex->player_name );
-                fprintf( fp, "%s~\n",		pMobIndex->short_descr );
+                fprintf( fp, "%s~\n",		fix_string( pMobIndex->player_name ) );
+                fprintf( fp, "%s~\n",		fix_string( pMobIndex->short_descr ) );
                 fprintf( fp, "%s~\n",		fix_string( pMobIndex->long_descr ) );
                 fprintf( fp, "%s~\n",		fix_string( pMobIndex->description ) );
                 fprintf( fp, "%d ",		pMobIndex->act );
@@ -182,8 +187,8 @@ void save_objects( FILE *fp, AREA_DATA *pArea )
 	    if ( pObjIndex->area == pArea )
             {
                 fprintf( fp, "#%d\n",    pObjIndex->vnum );
-                fprintf( fp, "%s~\n",    pObjIndex->name );
-                fprintf( fp, "%s~\n",    pObjIndex->short_descr );
+                fprintf( fp, "%s~\n",    fix_string( pObjIndex->name ) );
+                fprintf( fp, "%s~\n",    fix_string( pObjIndex->short_descr ) );
                 fprintf( fp, "%s~\n",    fix_string( pObjIndex->description ) );
                 fprintf( fp, "~\n" );
                 fprintf( fp, "%d ",      pObjIndex->item_type );
@@ -236,13 +241,13 @@ void save_objects( FILE *fp, AREA_DATA *pArea )
 
                 for( pEd = pObjIndex->extra_descr; pEd; pEd = pEd->next )
                 {
-                fprintf( fp, "E\n%s~\n%s~\n", pEd->keyword,
+                fprintf( fp, "E\n%s~\n%s~\n", fix_string( pEd->keyword ),
                                               fix_string( pEd->description ) );
                 }
 		fprintf( fp, "Q\n%s~\n%s~\n%s~\n%s~\n%s~\n%s~\n%d %d\n",
-		pObjIndex->chpoweron, pObjIndex->chpoweroff, 
-		pObjIndex->chpoweruse, pObjIndex->victpoweron,
-		pObjIndex->victpoweroff, pObjIndex->victpoweruse,
+		fix_string( pObjIndex->chpoweron ), fix_string( pObjIndex->chpoweroff ),
+		fix_string( pObjIndex->chpoweruse ), fix_string( pObjIndex->victpoweron ),
+		fix_string( pObjIndex->victpoweroff ), fix_string( pObjIndex->victpoweruse ),
 		pObjIndex->spectype, pObjIndex->specpower);
             }
         }
@@ -284,15 +289,15 @@ void save_rooms( FILE *fp, AREA_DATA *pArea )
 
 		for ( pEd = pRoomIndex->extra_descr; pEd; pEd = pEd->next )
                 {
-		    fprintf( fp, "E\n%s~\n%s~\n", pEd->keyword,
+		    fprintf( fp, "E\n%s~\n%s~\n", fix_string( pEd->keyword ),
 			fix_string( pEd->description ) );
                 }
 		for (prt = pRoomIndex->roomtext; prt; prt = prt->next )
 		{
 		fprintf(fp, "T\n%s~\n%s~\n%s~\n%s~\n%d %d %d\n",
-		prt->input, prt->output, prt->choutput,
-		prt->name, prt->type, prt->power, prt->mob);
-		 
+		fix_string( prt->input ), fix_string( prt->output ), fix_string( prt->choutput ),
+		fix_string( prt->name ), prt->type, prt->power, prt->mob);
+
 		}
 		for( door = 0; door < MAX_DIR; door++ )
 		{
@@ -693,7 +698,7 @@ void save_help()
 	HELP_DATA *pHelp;
 	char ack[10];
 	rename( mud_path(mud_area_dir, "help.are"), mud_path(mud_area_dir, "help.bak"));
-	if((fp=fopen( mud_path(mud_area_dir, "help.are"), "w")) == NULL)
+	if((fp=fopen( mud_path(mud_area_dir, "help.are"), "wb")) == NULL)
 	{		bug( "save_helps: fopen", 0);
 	perror( "help.are" );
 }
@@ -750,7 +755,7 @@ void save_area( AREA_DATA *pArea )
     FILE *fp;
 
     fclose( fpReserve );
-    if ( !( fp = fopen( mud_path(mud_area_dir, pArea->filename), "w" ) ) )
+    if ( !( fp = fopen( mud_path(mud_area_dir, pArea->filename), "wb" ) ) )
     {
 	bug( "Open_area: fopen", 0 );
 	perror( mud_path(mud_area_dir, pArea->filename) );

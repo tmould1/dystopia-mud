@@ -1013,6 +1013,7 @@ void load_objects( FILE *fp )
 	    if ( letter == 'A' )
 	    {
 		AFFECT_DATA *paf;
+		AFFECT_DATA **paf_last;
 
 		paf			= alloc_perm( sizeof(*paf) );
 		paf->type		= -1;
@@ -1020,20 +1021,27 @@ void load_objects( FILE *fp )
 		paf->location		= fread_number( fp );
 		paf->modifier		= fread_number( fp );
 		paf->bitvector		= 0;
-		paf->next		= pObjIndex->affected;
-		pObjIndex->affected	= paf;
+		paf->next		= NULL;
+		/* Append to end of list to preserve order */
+		for ( paf_last = &pObjIndex->affected; *paf_last; paf_last = &(*paf_last)->next )
+		    ;
+		*paf_last = paf;
 		top_affect++;
 	    }
 
 	    else if ( letter == 'E' )
 	    {
 		EXTRA_DESCR_DATA *ed;
+		EXTRA_DESCR_DATA **ed_last;
 
 		ed			= alloc_perm( sizeof(*ed) );
 		ed->keyword		= fread_string( fp );
 		ed->description		= fread_string( fp );
-		ed->next		= pObjIndex->extra_descr;
-		pObjIndex->extra_descr	= ed;
+		ed->next		= NULL;
+		/* Append to end of list to preserve order */
+		for ( ed_last = &pObjIndex->extra_descr; *ed_last; ed_last = &(*ed_last)->next )
+		    ;
+		*ed_last = ed;
 		top_ed++;
 	    }
 
@@ -1390,17 +1398,22 @@ void load_rooms( FILE *fp )
 	    else if ( letter == 'E' )
 	    {
 		EXTRA_DESCR_DATA *ed;
+		EXTRA_DESCR_DATA **ed_last;
 
 		ed			= alloc_perm( sizeof(*ed) );
 		ed->keyword		= fread_string( fp );
 		ed->description		= fread_string( fp );
-		ed->next		= pRoomIndex->extra_descr;
-		pRoomIndex->extra_descr	= ed;
+		ed->next		= NULL;
+		/* Append to end of list to preserve order */
+		for ( ed_last = &pRoomIndex->extra_descr; *ed_last; ed_last = &(*ed_last)->next )
+		    ;
+		*ed_last = ed;
 		top_ed++;
 	    }
 	    else if ( letter == 'T' )
 	    {
 		ROOMTEXT_DATA *rt;
+		ROOMTEXT_DATA **rt_last;
 
 		rt			= alloc_perm( sizeof(*rt) );
 		rt->input		= fread_string( fp );
@@ -1410,8 +1423,11 @@ void load_rooms( FILE *fp )
 		rt->type		= fread_number( fp );
 		rt->power		= fread_number( fp );
 		rt->mob			= fread_number( fp );
-		rt->next		= pRoomIndex->roomtext;
-		pRoomIndex->roomtext	= rt;
+		rt->next		= NULL;
+		/* Append to end of list to preserve order */
+		for ( rt_last = &pRoomIndex->roomtext; *rt_last; rt_last = &(*rt_last)->next )
+		    ;
+		*rt_last = rt;
 		top_rt++;
 	    }
 	    else
@@ -1533,17 +1549,22 @@ void new_load_rooms( FILE *fp )
             else if ( letter == 'E' )
             {
                 EXTRA_DESCR_DATA *ed;
-                
+                EXTRA_DESCR_DATA **ed_last;
+
                 ed                      = alloc_perm( sizeof( *ed ) );
                 ed->keyword             = fread_string( fp );
                 ed->description         = fread_string( fp );
-                ed->next                = pRoomIndex->extra_descr;
-                pRoomIndex->extra_descr = ed;
+                ed->next                = NULL;
+                /* Append to end of list to preserve order */
+                for ( ed_last = &pRoomIndex->extra_descr; *ed_last; ed_last = &(*ed_last)->next )
+                    ;
+                *ed_last = ed;
                 top_ed++;
             }
             else if ( letter == 'T' )
             {
                 ROOMTEXT_DATA *rt;
+                ROOMTEXT_DATA **rt_last;
 
                 rt                      = alloc_perm( sizeof(*rt) );
                 rt->input               = fread_string( fp );
@@ -1553,8 +1574,11 @@ void new_load_rooms( FILE *fp )
                 rt->type                = fread_number( fp );
                 rt->power               = fread_number( fp );
                 rt->mob                 = fread_number( fp );
-                rt->next                = pRoomIndex->roomtext;
-                pRoomIndex->roomtext    = rt;
+                rt->next                = NULL;
+                /* Append to end of list to preserve order */
+                for ( rt_last = &pRoomIndex->roomtext; *rt_last; rt_last = &(*rt_last)->next )
+                    ;
+                *rt_last = rt;
                 top_rt++;
             }
 
