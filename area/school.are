@@ -705,6 +705,7 @@ all~
 T
 |areas*destinations*where should*~
 The spirit says 'I know directions to these beginner areas, $n:'
+The spirit says 'The ARENA - just 1 south from here, practice combat safely!'
 The spirit says 'The SMURF village - easy creatures for new adventurers'
 The spirit says 'The GNOME village - good for learning combat'
 The spirit says 'The SHIRE - peaceful hobbits to practice on'
@@ -854,10 +855,18 @@ The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 1345 3721
 T
+|arena*~
+The spirit says 'The newbie arena is just 1 south from here, $n!'
+The spirit says 'You can practice combat safely there.'
+The spirit says 'I also know directions to: SMURF village, GNOME village, SHIRE, DWARVEN drop-off.'~
+copy~
+all~
+1048576 0 3721
+T
 |smurf*~
 The spirit says 'To get to the smurf village from recall,'
 The spirit says 'Go 2 south, 3 west, and keep going north!'
-The spirit says 'I also know directions to: GNOME village, SHIRE, DWARVEN drop-off.'~
+The spirit says 'I also know directions to: ARENA, GNOME village, SHIRE, DWARVEN drop-off.'~
 copy~
 all~
 1048576 0 3721
@@ -865,7 +874,7 @@ T
 |gnome*~
 The spirit says 'To get to the gnome village from recall,'
 The spirit says 'Go 2 south, 5 east, and then go south.'
-The spirit says 'I also know directions to: SMURF village, SHIRE, DWARVEN drop-off.'~
+The spirit says 'I also know directions to: ARENA, SMURF village, SHIRE, DWARVEN drop-off.'~
 copy~
 all~
 1048576 0 3721
@@ -873,7 +882,7 @@ T
 |shire*~
 The spirit says 'To get to the shire from recall,'
 The spirit says 'Go 2 south, 5 west, and then keep going north.'
-The spirit says 'I also know directions to: SMURF village, GNOME village, DWARVEN drop-off.'~
+The spirit says 'I also know directions to: ARENA, SMURF village, GNOME village, DWARVEN drop-off.'~
 copy~
 all~
 1048576 0 3721
@@ -881,7 +890,7 @@ T
 |dwarven*drop*~
 The spirit says 'To get to the dwarven drop-off centre from recall,'
 The spirit says 'Go 2 south, 6 east, 1 down, then go south.'
-The spirit says 'I also know directions to: SMURF village, GNOME village, SHIRE.'~
+The spirit says 'I also know directions to: ARENA, SMURF village, GNOME village, SHIRE.'~
 copy~
 all~
 1048576 0 3721
