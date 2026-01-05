@@ -650,9 +650,8 @@ go south.
 T
 >ENTER<~
 The spirit says 'Welcome to mud school, $n!'
-
-
-The spirit says 'If you need any help, just ask.'~
+The spirit says 'If you need any help, just ask.'
+The spirit says 'I can give you EQUIPMENT or tell you about AREAS to explore!'~
 copy~
 all~
 1048576 0 3721
@@ -676,7 +675,8 @@ all~
 1048576 0 3721
 T
 |help*~
-The spirit says 'Look at me to see what I can do.'~
+The spirit says 'I can help you with EQUIPMENT for your journey, or give DIRECTIONS to beginner areas!'
+The spirit says 'Try asking: "equipment" or "areas" or "where should I go?"'~
 copy~
 all~
 1048576 0 3721
@@ -693,206 +693,195 @@ copy~
 all~
 1048576 0 3721
 T
+|equipment*gear*~
+The spirit says 'I can conjure these items for you, $n:'
+The spirit says 'Armor: BREASTPLATE, HELMET, SLEEVES, LEGGINGS, GAUNTLETS, BOOTS'
+The spirit says 'Accessories: BRACER, BUCKLER, RING, COLLAR, BACKPACK'
+The spirit says 'Weapons: LONGSWORD, AXE, WAR BANNER'
+The spirit says 'Just say the item name and I will give it to you!'~
+copy~
+all~
+1048576 0 3721
+T
+|areas*destinations*where should*~
+The spirit says 'I know directions to these beginner areas, $n:'
+The spirit says 'The SMURF village - easy creatures for new adventurers'
+The spirit says 'The GNOME village - good for learning combat'
+The spirit says 'The SHIRE - peaceful hobbits to practice on'
+The spirit says 'The DWARVEN drop-off centre - useful supplies'
+The spirit says 'Just ask about any area and I will give you directions!'~
+copy~
+all~
+1048576 0 3721
+T
 |axe*executioner*~
-The spirit says 'Here you go $n, maybe this axe will help!'.
-
-
-^MThe spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this axe will help!'.
-
-
-^MThe spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this axe will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this axe will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 3005 3721
 T
 |banner*light*~
-The spirit says 'Here you go $n, maybe this war banner will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this war banner will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this war banner will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this war banner will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 3716 3721
 T
 |breastplate*~
-The spirit says 'Here you go $n, maybe this breastplate will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this breastplate will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this breastplate will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this breastplate will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30333 3721
 T
 |helmet*~
-The spirit says 'Here you go $n, maybe this helmet will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this helmet will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this helmet will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this helmet will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30334 3721
 T
 |sleeves*~
-The spirit says 'Here you go $n, maybe this sleeves will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this sleeves will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this sleeves will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this sleeves will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30335 3721
 T
 |leggings*~
-The spirit says 'Here you go $n, maybe this leggings will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this leggings will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this leggings will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this leggings will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30336 3721
 T
 |gauntlets*~
-The spirit says 'Here you go $n, maybe this gauntlets will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this gauntlets will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this gauntlets will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this gauntlets will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30337 3721
 T
 |boots*~
-The spirit says 'Here you go $n, maybe this boots will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this boots will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this boots will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this boots will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30338 3721
 T
 |bracer*~
-The spirit says 'Here you go $n, maybe this bracer will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this bracer will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this bracer will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this bracer will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30339 3721
 T
 |longsword*~
-The spirit says 'Here you go $n, maybe this longsword will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this longsword will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this longsword will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this longsword will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30340 3721
 T
 |buckler*~
-The spirit says 'Here you go $n, maybe this buckler will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this buckler will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this buckler will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this buckler will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30341 3721
 T
 |ring*~
-The spirit says 'Here you go $n, maybe this ring will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this ring will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this ring will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this ring will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30342 3721
 T
 |collar*~
-The spirit says 'Here you go $n, maybe this collar will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this collar will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this collar will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this collar will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 30343 3721
 T
 |backpack*~
-The spirit says 'Here you go $n, maybe this backpack will help!'.
-
-
-The spirit gives $n $p.~
-The spirit says 'Here you go $n, maybe this backpack will help!'.
-
-
-The spirit gives you $p.~
+The spirit says 'Here you go $n, maybe this backpack will help!'
+The spirit gives $n $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
+The spirit says 'Here you go $n, maybe this backpack will help!'
+The spirit gives you $p.
+The spirit says 'Ask for more EQUIPMENT if you need it!'~
 all~
 1048608 1345 3721
 T
 |smurf*~
-The spirit says 'To get to the smurf village from recall,'.
-
-
-The spirit says 'Go 2 south, 3 west, and keep going north!'.~
+The spirit says 'To get to the smurf village from recall,'
+The spirit says 'Go 2 south, 3 west, and keep going north!'
+The spirit says 'I also know directions to: GNOME village, SHIRE, DWARVEN drop-off.'~
 copy~
 all~
 1048576 0 3721
 T
 |gnome*~
-The spirit says 'To get to the gnome village from recall,'.
-
-
-The spirit says 'Go 2 south, 5 east, and then go south.'.~
+The spirit says 'To get to the gnome village from recall,'
+The spirit says 'Go 2 south, 5 east, and then go south.'
+The spirit says 'I also know directions to: SMURF village, SHIRE, DWARVEN drop-off.'~
 copy~
 all~
 1048576 0 3721
 T
 |shire*~
-The spirit says 'To get to the shire from recall,'.
-
-
-The spirit says 'Go 2 south, 5 west, and then keep going north.'.~
+The spirit says 'To get to the shire from recall,'
+The spirit says 'Go 2 south, 5 west, and then keep going north.'
+The spirit says 'I also know directions to: SMURF village, GNOME village, DWARVEN drop-off.'~
 copy~
 all~
 1048576 0 3721
 T
 |dwarven*drop*~
-The spirit says 'To get to the dwarven drop-off centre from recall,'.
-
-
-The spirit says 'Go 2 south, 6 east, 1 down, then go south.'.~
+The spirit says 'To get to the dwarven drop-off centre from recall,'
+The spirit says 'Go 2 south, 6 east, 1 down, then go south.'
+The spirit says 'I also know directions to: SMURF village, GNOME village, SHIRE.'~
 copy~
 all~
 1048576 0 3721
@@ -2378,6 +2367,7 @@ S
 
 
 #RESETS
+M 0 3721 1 3700
 M 0 3700 1 3701
 M 0 3701 1 3710
 M 0 3707 1 3712
