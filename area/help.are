@@ -883,6 +883,7 @@ terrifying arcane mastery - five ancient lores of devastating power.#n
   #Rlore#n            Display current lore levels
   #Rstudylore#n <lore> Train a lore path
   #Rlicharmor#n       Create lich equipment (150 primal)
+  #Rlichtalk#n        Lich class channel
 
 #x034---------------------#x040[ #7LORES #x040]#x034------------------------#n
   #x196Conjuring#n    Golems, portals, and summoning magic
@@ -979,6 +980,7 @@ Justice, and Harmony - wielding holy power against the forces of darkness.#n
   #7Power Paths#n    4 paths, each maxes at level 5
   #7Toggles#n        Wings (flight), Halo, Aura, Eye for an Eye
   #7Equipment#n      #Rangelicarmor#n <piece> - create holy armor (150 primal)
+  #7Channel#n        #Rprayer#n - Angel class channel
 
 #y-------------------#x220[ #7PEACE PATH #x220]#y-------------------#n
   #x2451#n #7gpeace#n        Cannot be attacked (toggle AFF_PEACE)
@@ -2268,6 +2270,7 @@ devastating blade techniques that flow like water and strike like thunder.#n
   #Rancestralpath#n    Teleport to target (1000 move)
   #Rbladespin#n        Toggle extra attack mode
   #Rweb#n              Throw webs at opponent
+  #Rsamtalk#n          Samurai class channel
 
 #x250Cannot exceed 40 focus. Cannot repeat the same combo twice in a row.#n
 
@@ -3747,6 +3750,7 @@ and Human to become perfect instruments of stealth and assassination.#n
   #Rstalk#n <target> Shadow teleport to target (500 move)
   #Rprinciples#n     View/improve principle paths
   #Rninjaarmor#n     Create ninja equipment (60 primal)
+  #Rmiktalk#n        Ninja class channel
 
 #C-------------------#x044[ #yPRINCIPLES #x044]#C---------------------#n
   #x245Use: principles <path> improve (costs (level+1)*10 primal)#n
@@ -3830,6 +3834,7 @@ mantras for divine abilities, and perform devastating technique combos.#n
   #Rmantra#n          View mantras, #Rmantra power improve#n to advance
   #Rlearn#n           Learn fight styles, techniques, abilities
   #Rmonkarmor#n       Create holy equipment (60 primal)
+  #Rmonktalk#n        Monk class channel (or #Rhum#n)
 
 #0--------------------#x245[ #cMANTRAS #x245]#0-----------------------#n
   #x245Use: mantra power improve (costs (level+1)*10 primal)#n
