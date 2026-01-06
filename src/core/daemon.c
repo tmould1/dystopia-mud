@@ -181,7 +181,7 @@ void do_entomb (CHAR_DATA *ch, char *argument)
       obj->item_type = ITEM_WALL;
     }
 
-    heal_char(ch, ch->max_hit * 0.1);
+    heal_char(ch, (int)(ch->max_hit * 0.1));
     SET_TIMER(ch, TIMER_ENTOMB, 12);
 
     act("$n calls forth sheets of ice, blocking your path in every direction.", ch, NULL, NULL, TO_ROOM);

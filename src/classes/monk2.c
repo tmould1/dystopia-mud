@@ -40,17 +40,17 @@ int find_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam, bool foot )
     dam = dam/2;
   if (!IS_AWAKE(victim))
     dam *= 2;
-  if ( !IS_NPC(ch) && IS_CLASS(ch, CLASS_VAMPIRE) && ch->power[DISC_VAMP_POTE] > 0) dam *= (ch->power[DISC_VAMP_POTE] * .4);
-  else if (ch->power[DISC_DAEM_ATTA] > 0) dam *= ch->power[DISC_DAEM_ATTA] * .5;
+  if ( !IS_NPC(ch) && IS_CLASS(ch, CLASS_VAMPIRE) && ch->power[DISC_VAMP_POTE] > 0) dam = (int)(dam * (ch->power[DISC_VAMP_POTE] * .4));
+  else if (ch->power[DISC_DAEM_ATTA] > 0) dam = (int)(dam * ch->power[DISC_DAEM_ATTA] * .5);
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_MONK) )
   {
-    if (ch->chi[CURRENT] > 0 && ch->chi[CURRENT] < 3) dam *= 1.2;
+    if (ch->chi[CURRENT] > 0 && ch->chi[CURRENT] < 3) dam = (int)(dam * 1.2);
     if (ch->chi[CURRENT] > 2) dam *= ( ch->chi[CURRENT] / 2 );
   }
   if ( !IS_NPC(victim) && IS_CLASS(victim, CLASS_WEREWOLF) )
   {
-    if (IS_SET(victim->special, SPC_WOLFMAN)) dam *= 0.3;
-    if (victim->power[DISC_WERE_BOAR] > 2 ) dam *= 0.3;
+    if (IS_SET(victim->special, SPC_WOLFMAN)) dam = (int)(dam * 0.3);
+    if (victim->power[DISC_WERE_BOAR] > 2 ) dam = (int)(dam * 0.3);
     if (foot == TRUE)
     {
       if ((boots = get_eq_char( ch, WEAR_FEET )) != NULL && IS_SET(boots->spectype, SITEM_SILVER)) 
@@ -67,19 +67,19 @@ int find_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam, bool foot )
     if (ch->power[DISC_WERE_LUNA] > 6)
     {
       if (weather_info.sunlight == SUN_DARK)
-        dam *= 1.6;
+        dam = (int)(dam * 1.6);
     }
   }    
   if ( !IS_NPC(ch) && IS_CLASS(ch, CLASS_VAMPIRE) )
   {
-    if (weather_info.sunlight == SUN_LIGHT && dam > 1) dam /= 1.5;
-    else if (weather_info.sunlight == SUN_DARK) dam *= 1.5;
+    if (weather_info.sunlight == SUN_LIGHT && dam > 1) dam = (int)(dam / 1.5);
+    else if (weather_info.sunlight == SUN_DARK) dam = (int)(dam * 1.5);
   }
   if ( !IS_NPC(ch) ) dam = dam + (dam * ((ch->wpn[0]+1) / 100));
   if ( !IS_NPC(ch) )
   {
     stance = ch->stance[0];
-    if ( IS_STANCE(ch, STANCE_NORMAL) ) dam *= 1.25;
+    if ( IS_STANCE(ch, STANCE_NORMAL) ) dam = (int)(dam * 1.25);
     else dam = dambonus(ch,victim,dam,stance);
   }
   if (!IS_NPC(victim) && dam > 1000) dam = number_range( 940, 1020 );
@@ -474,31 +474,31 @@ void do_spinkick( CHAR_DATA *ch, char *argument )
     act("$n's aura pulsates and channels energy into $s attack.",ch,NULL,victim,TO_VICT);
     act("$n's aura pulsates and channels energy into $s attack.",ch,NULL,victim,TO_NOTVICT);
     ch->monkcrap = 0;
-    dam /= 1.2;
+    dam = (int)(dam / 1.2);
     damage( ch, victim, dam, gsn_lightningkick );
     if ( ch->chi[CURRENT] > 1 )
     {
-      dam /= 1.2;
+      dam = (int)(dam / 1.2);
       damage( ch, victim, dam, gsn_lightningkick );
     }
     if ( ch->chi[CURRENT] > 2 )
     {
-      dam /= 1.2;
+      dam = (int)(dam / 1.2);
       damage( ch, victim, dam, gsn_lightningkick );
     }
     if ( ch->chi[CURRENT] > 3 )
     {
-      dam /= 1.2;
+      dam = (int)(dam / 1.2);
       damage( ch, victim, dam, gsn_lightningkick );
     }
     if ( ch->chi[CURRENT] > 4 )
     {
-      dam /= 1.2;
+      dam = (int)(dam / 1.2);
       damage( ch, victim, dam, gsn_lightningkick );
     }
     if ( ch->chi[CURRENT] > 5 )
     {
-      dam /= 1.2;
+      dam = (int)(dam / 1.2);
       damage( ch, victim, dam, gsn_lightningkick );
     }
     return;

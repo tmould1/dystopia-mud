@@ -528,7 +528,7 @@ void do_powerword (CHAR_DATA *ch, char *argument)
       }
       if (!IS_NPC(victim) || victim->level > 100)
       {
-        int dam = victim->hit *.1;
+        int dam = (int)(victim->hit * .1);
         if (IS_NPC(victim) && dam > 5000) dam = 5000;
         if (!IS_NPC(victim) && dam > 1500) dam = 1500;
         hurt_person(ch,victim,dam);

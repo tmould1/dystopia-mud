@@ -110,9 +110,9 @@ bool compressStart(DESCRIPTOR_DATA *desc, int version)
 
     /* Send appropriate start sequence based on version */
     if (version == 2)
-        write_to_descriptor(desc, compress2_start, strlen(compress2_start));
+        write_to_descriptor(desc, compress2_start, (int)strlen(compress2_start));
     else
-        write_to_descriptor(desc, compress_start, strlen(compress_start));
+        write_to_descriptor(desc, compress_start, (int)strlen(compress_start));
 
     /* now we're compressing */
     desc->out_compress = s;
@@ -182,7 +182,7 @@ bool processCompressed(DESCRIPTOR_DATA *desc)
         return TRUE;
  
     /* Try to write out some data.. */
-    len = desc->out_compress->next_out - desc->out_compress_buf;
+    len = (int)(desc->out_compress->next_out - desc->out_compress_buf);
     if (len > 0) {
         /* we have some data to write */
 
@@ -223,7 +223,7 @@ bool writeCompressed(DESCRIPTOR_DATA *desc, char *txt, int length)
     s->avail_in = length;
     
     while (s->avail_in) {
-        s->avail_out = COMPRESS_BUF_SIZE - (s->next_out - desc->out_compress_buf);
+        s->avail_out = (uInt)(COMPRESS_BUF_SIZE - (s->next_out - desc->out_compress_buf));
                 
         if (s->avail_out) {
             int status = deflate(s, Z_SYNC_FLUSH);

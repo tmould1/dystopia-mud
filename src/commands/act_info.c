@@ -3080,7 +3080,7 @@ void do_who(CHAR_DATA *ch, char *argument)
     {
       /* Wrap just the name with MXP, then add padding after */
       char *wrapped = mxp_player_link(gch, ch, gch->pcdata->switchname);
-      int namelen = strlen(gch->pcdata->switchname);
+      int namelen = (int)strlen(gch->pcdata->switchname);
       int padding = (namelen < 12) ? 12 - namelen : 0;
       snprintf(playername, sizeof(playername), "%s%*s", wrapped, padding, "");
     }

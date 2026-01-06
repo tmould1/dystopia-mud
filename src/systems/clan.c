@@ -767,11 +767,11 @@ void do_dragon (CHAR_DATA *ch, char *argument)
         ch->pcdata->condition[COND_THIRST] -= 6;
         if ((!IS_NPC(victim)) && IS_CLASS(victim, CLASS_VAMPIRE))
         {
-         dam *= 1.5;
+         dam = (int)(dam * 1.5);
         }
         if ((!IS_NPC(victim)) && IS_CLASS(victim, CLASS_WEREWOLF))
         {
-         if (ch->power[DISC_WERE_BOAR] > 2) dam *= 1.5;
+         if (ch->power[DISC_WERE_BOAR] > 2) dam = (int)(dam * 1.5);
         }
  
         if (dam <= 0)
@@ -3220,8 +3220,8 @@ void do_serpent( CHAR_DATA *ch, char *argument )
     clear_stats(ch);
     if (ch->wpn[0] > 0)
     {
-    	ch->hitroll += ch->wpn[0] * 0.75;
-    	ch->damroll += ch->wpn[0] * 0.75;
+    	ch->hitroll += (int)(ch->wpn[0] * 0.75);
+    	ch->damroll += (int)(ch->wpn[0] * 0.75);
     	ch->armor   -= ch->wpn[0] * 3;
     }
     if (ch->stance[0] != -1) do_stance(ch,"");
@@ -4351,7 +4351,7 @@ void do_web( CHAR_DATA *ch, char *argument )
 
     if ( ( sn = skill_lookup( "web" ) ) < 0 ) return;
     spelltype = skill_table[sn].target;
-    level = ch->spl[spelltype] * 0.25;
+    level = (int)(ch->spl[spelltype] * 0.25);
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );
     WAIT_STATE( ch, 12 );
     return;

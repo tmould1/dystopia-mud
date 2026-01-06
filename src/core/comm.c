@@ -699,7 +699,7 @@ int init_socket( int port )
 	exit( 1 );
     }
 
-    if ( ( fd = socket( PF_INET, SOCK_STREAM, 0 ) ) < 0 )
+    if ( ( fd = (int)socket( PF_INET, SOCK_STREAM, 0 ) ) < 0 )
     {
         perror( "Init_socket: socket" );
 	exit( 1 );
@@ -709,7 +709,11 @@ int init_socket( int port )
     if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&x, sizeof(x) ) < 0 )
     {
 	perror( "Init_socket: SO_REUSEADDR" );
+#if defined(WIN32)
+	_close( fd );
+#else
 	close( fd );
+#endif
 	exit( 1 );
     }
 
@@ -1292,7 +1296,7 @@ void new_descriptor( int control )
 
     size = sizeof(sock);
     getsockname( control, (struct sockaddr *) &sock, &size );
-    if ( ( desc = accept( control, (struct sockaddr *) &sock, &size) ) < 0 )
+    if ( ( desc = (int)accept( control, (struct sockaddr *) &sock, &size) ) < 0 )
     {
 	perror( "New_descriptor: accept" );
 	return;
@@ -1570,8 +1574,8 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d )
         return TRUE;
 
     /* Check for overflow. */
-    iStart = strlen(d->inbuf);
-    if ( iStart >= sizeof(d->inbuf) - 10 )
+    iStart = (int)strlen(d->inbuf);
+    if ( iStart >= (int)sizeof(d->inbuf) - 10 )
     {
 	if (d != NULL && d->character != NULL) {
 	    sprintf( log_buf, "%s input overflow!", d->character->lasthost );
@@ -1683,56 +1687,56 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
 	    if (d->inbuf[i] == (signed char)IAC) {
 		/* MCCP v2 (preferred) */
 		if (!memcmp(&d->inbuf[i], compress2_do, strlen(compress2_do))) {
-		    i += strlen(compress2_do) - 1;
+		    i += (int)strlen(compress2_do) - 1;
 		    compressStart(d, 2);
 		}
 		else if (!memcmp(&d->inbuf[i], compress2_dont, strlen(compress2_dont))) {
-		    i += strlen(compress2_dont) - 1;
+		    i += (int)strlen(compress2_dont) - 1;
 		    /* Only end compression if we're using v2 */
 		    if (d->mccp_version == 2)
 			compressEnd(d);
 		}
 		/* MCCP v1 (fallback) */
 		else if (!memcmp(&d->inbuf[i], compress_do, strlen(compress_do))) {
-		    i += strlen(compress_do) - 1;
+		    i += (int)strlen(compress_do) - 1;
 		    compressStart(d, 1);
 		}
 		else if (!memcmp(&d->inbuf[i], compress_dont, strlen(compress_dont))) {
-		    i += strlen(compress_dont) - 1;
+		    i += (int)strlen(compress_dont) - 1;
 		    /* Only end compression if we're using v1 */
 		    if (d->mccp_version == 1)
 			compressEnd(d);
 		}
 		/* MSSP */
 		else if (!memcmp(&d->inbuf[i], mssp_do, strlen(mssp_do))) {
-		    i += strlen(mssp_do) - 1;
+		    i += (int)strlen(mssp_do) - 1;
 		    mssp_send(d);
 		}
 		/* GMCP */
 		else if (!memcmp(&d->inbuf[i], gmcp_do, strlen(gmcp_do))) {
-		    i += strlen(gmcp_do) - 1;
+		    i += (int)strlen(gmcp_do) - 1;
 		    gmcp_init(d);
 		}
 		else if (!memcmp(&d->inbuf[i], gmcp_dont, strlen(gmcp_dont))) {
-		    i += strlen(gmcp_dont) - 1;
+		    i += (int)strlen(gmcp_dont) - 1;
 		    d->gmcp_enabled = FALSE;
 		}
 		/* MXP - check strlen > 0 to avoid matching empty strings */
 		else if (strlen(mxp_do) > 0 && !memcmp(&d->inbuf[i], mxp_do, strlen(mxp_do))) {
-		    i += strlen(mxp_do) - 1;
+		    i += (int)strlen(mxp_do) - 1;
 		    mxpStart(d);
 		}
 		else if (strlen(mxp_dont) > 0 && !memcmp(&d->inbuf[i], mxp_dont, strlen(mxp_dont))) {
-		    i += strlen(mxp_dont) - 1;
+		    i += (int)strlen(mxp_dont) - 1;
 		    mxpEnd(d);
 		}
 		/* NAWS - client agrees to send window size */
 		else if (!memcmp(&d->inbuf[i], naws_will, strlen(naws_will))) {
-		    i += strlen(naws_will) - 1;
+		    i += (int)strlen(naws_will) - 1;
 		    /* Client will send subnegotiation with size */
 		}
 		else if (!memcmp(&d->inbuf[i], naws_wont, strlen(naws_wont))) {
-		    i += strlen(naws_wont) - 1;
+		    i += (int)strlen(naws_wont) - 1;
 		    d->naws_enabled = FALSE;
 		}
 		/* NAWS subnegotiation: IAC SB NAWS <4+ bytes> IAC SE */
@@ -1790,47 +1794,47 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
         else if (d->inbuf[i] == (signed char)IAC) {
             /* MCCP v2 (preferred) */
             if (!memcmp(&d->inbuf[i], compress2_do, strlen(compress2_do))) {
-                i += strlen(compress2_do) - 1;
+                i += (int)strlen(compress2_do) - 1;
                 compressStart(d, 2);
             }
             else if (!memcmp(&d->inbuf[i], compress2_dont, strlen(compress2_dont))) {
-                i += strlen(compress2_dont) - 1;
+                i += (int)strlen(compress2_dont) - 1;
                 /* Only end compression if we're using v2 */
                 if (d->mccp_version == 2)
                     compressEnd(d);
             }
             /* MCCP v1 (fallback) */
             else if (!memcmp(&d->inbuf[i], compress_do, strlen(compress_do))) {
-                i += strlen(compress_do) - 1;
+                i += (int)strlen(compress_do) - 1;
                 compressStart(d, 1);
             }
             else if (!memcmp(&d->inbuf[i], compress_dont, strlen(compress_dont))) {
-                i += strlen(compress_dont) - 1;
+                i += (int)strlen(compress_dont) - 1;
                 /* Only end compression if we're using v1 */
                 if (d->mccp_version == 1)
                     compressEnd(d);
             }
             /* MSSP */
             else if (!memcmp(&d->inbuf[i], mssp_do, strlen(mssp_do))) {
-                i += strlen(mssp_do) - 1;
+                i += (int)strlen(mssp_do) - 1;
                 mssp_send(d);
             }
             /* MXP - check strlen > 0 to avoid matching empty strings */
             else if (strlen(mxp_do) > 0 && !memcmp(&d->inbuf[i], mxp_do, strlen(mxp_do))) {
-                i += strlen(mxp_do) - 1;
+                i += (int)strlen(mxp_do) - 1;
                 mxpStart(d);
             }
             else if (strlen(mxp_dont) > 0 && !memcmp(&d->inbuf[i], mxp_dont, strlen(mxp_dont))) {
-                i += strlen(mxp_dont) - 1;
+                i += (int)strlen(mxp_dont) - 1;
                 mxpEnd(d);
             }
             /* GMCP */
             else if (!memcmp(&d->inbuf[i], gmcp_do, strlen(gmcp_do))) {
-                i += strlen(gmcp_do) - 1;
+                i += (int)strlen(gmcp_do) - 1;
                 gmcp_init(d);
             }
             else if (!memcmp(&d->inbuf[i], gmcp_dont, strlen(gmcp_dont))) {
-                i += strlen(gmcp_dont) - 1;
+                i += (int)strlen(gmcp_dont) - 1;
                 d->gmcp_enabled = FALSE;
             }
             /* GMCP subnegotiation: IAC SB GMCP ... IAC SE */
@@ -1853,11 +1857,11 @@ void read_from_buffer( DESCRIPTOR_DATA *d )
             }
             /* NAWS - client agrees to send window size */
             else if (!memcmp(&d->inbuf[i], naws_will, strlen(naws_will))) {
-                i += strlen(naws_will) - 1;
+                i += (int)strlen(naws_will) - 1;
                 /* Client will send subnegotiation with size */
             }
             else if (!memcmp(&d->inbuf[i], naws_wont, strlen(naws_wont))) {
-                i += strlen(naws_wont) - 1;
+                i += (int)strlen(naws_wont) - 1;
                 d->naws_enabled = FALSE;
             }
             /* NAWS subnegotiation: IAC SB NAWS <4+ bytes> IAC SE */
@@ -2082,21 +2086,21 @@ void retell_mccp( DESCRIPTOR_DATA *d)
   /* WILL offers for protocols it thinks are already active from pre-copyover. */
 
   /* First, send WONT/DONT to reset client's protocol state */
-  write_to_descriptor( d, (char *)compress2_wont, strlen(compress2_wont) );
-  write_to_descriptor( d, (char *)compress_wont, strlen(compress_wont) );
-  write_to_descriptor( d, (char *)mssp_wont, strlen(mssp_wont) );
-  write_to_descriptor( d, (char *)gmcp_wont, strlen(gmcp_wont) );
-  write_to_descriptor( d, (char *)mxp_wont, strlen(mxp_wont) );
-  write_to_descriptor( d, (char *)naws_dont, strlen(naws_dont) );  /* NAWS uses DO/DONT */
+  write_to_descriptor( d, (char *)compress2_wont, (int)strlen(compress2_wont) );
+  write_to_descriptor( d, (char *)compress_wont, (int)strlen(compress_wont) );
+  write_to_descriptor( d, (char *)mssp_wont, (int)strlen(mssp_wont) );
+  write_to_descriptor( d, (char *)gmcp_wont, (int)strlen(gmcp_wont) );
+  write_to_descriptor( d, (char *)mxp_wont, (int)strlen(mxp_wont) );
+  write_to_descriptor( d, (char *)naws_dont, (int)strlen(naws_dont) );  /* NAWS uses DO/DONT */
 
   /* Now send WILL/DO to offer protocols fresh */
   /* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
-  write_to_descriptor( d, (char *)compress2_will, strlen(compress2_will) );  /* MCCP v2 */
-  write_to_descriptor( d, (char *)compress_will, strlen(compress_will) );    /* MCCP v1 */
-  write_to_descriptor( d, (char *)mssp_will, strlen(mssp_will) );            /* MSSP */
-  write_to_descriptor( d, (char *)gmcp_will, strlen(gmcp_will) );            /* GMCP */
-  write_to_descriptor( d, (char *)mxp_will, strlen(mxp_will) );              /* MXP */
-  write_to_descriptor( d, (char *)naws_do, strlen(naws_do) );                /* NAWS */
+  write_to_descriptor( d, (char *)compress2_will, (int)strlen(compress2_will) );  /* MCCP v2 */
+  write_to_descriptor( d, (char *)compress_will, (int)strlen(compress_will) );    /* MCCP v1 */
+  write_to_descriptor( d, (char *)mssp_will, (int)strlen(mssp_will) );            /* MSSP */
+  write_to_descriptor( d, (char *)gmcp_will, (int)strlen(gmcp_will) );            /* GMCP */
+  write_to_descriptor( d, (char *)mxp_will, (int)strlen(mxp_will) );              /* MXP */
+  write_to_descriptor( d, (char *)naws_do, (int)strlen(naws_do) );                /* NAWS */
   return;
 }
 
@@ -2249,7 +2253,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
   ptr = output;   
           
   if (length <= 0)
-    length = strlen(txt);
+    length = (int)strlen(txt);
             
   if (length >= MAX_STRING_LENGTH )
   {
@@ -2292,97 +2296,97 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
             txt++;
             break;
           case 'i':  // bold
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '7';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '7';
             *ptr++ = 'm';   txt++;          break;
           case 'u':  // underline
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '4';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '4';
             *ptr++ = 'm';   txt++;          break;
           case 'n':  // stock color
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = 'm';   txt++;          break;
           case '7':  // White
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '7';   *ptr++ = 'm';
             txt++;          break;
           case '8':  // Black
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '0';   *ptr++ = 'm';
             txt++;          break;
           case '9':  // White 2
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '7';   *ptr++ = 'm';
             txt++;          break;
           case '0':  // Black 2
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '0';   *ptr++ = 'm';
             txt++;          break;
           case 'r':  // Red
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '1';   *ptr++ = 'm';
             txt++;          break;
           case '1':
           case 'R':  // red 2
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '1';   *ptr++ = 'm';
             txt++;          break;
           case 'g': // Green
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '2';   *ptr++ = 'm';
             txt++;          break;
           case '2':
           case 'G': // Green 2
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '2';   *ptr++ = 'm';
             txt++;          break;
           case 'o':  // Yellow (Brown)
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '3';   *ptr++ = 'm';
             txt++;          break;
           case '3':
           case 'y':  // Yellow 2
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '3';   *ptr++ = 'm';
             txt++;          break;
           case 'l':  // Blue
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '4';   *ptr++ = 'm';
             txt++;          break;
           case '4':
           case 'L':  // Blue 2
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '4';   *ptr++ = 'm';
             txt++;          break;
           case 'p':  // Purple
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '5';   *ptr++ = 'm';
             txt++;          break;
           case '5':
           case 'P':  // Purple 2
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '5';   *ptr++ = 'm';
             txt++;          break;
           case 'c':  // Cyan  
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '6';   *ptr++ = 'm';
             txt++;          break;
           case '6':
           case 'C':  // Cyan 2
-            *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+            *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
             *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
             *ptr++ = '3';   *ptr++ = '6';   *ptr++ = 'm';
             txt++;          break;
@@ -2390,76 +2394,76 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
             switch(number_range(1,15))
             {
               case 1:  // White
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '7';   *ptr++ = 'm';
                 break;
               case 2:  // Black
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '0';   *ptr++ = 'm';
                 break;
               case 3:  // Black 2
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '0';   *ptr++ = 'm';
                 break;
               case 4:  // Red
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '1';   *ptr++ = 'm';
                 break;
               case 5:  // red 2
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '1';   *ptr++ = 'm';
                 break;
               case 6: // Green
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '2';   *ptr++ = 'm';
                 break;
               case 7: // Green 2
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '2';   *ptr++ = 'm';
                 break;
               case 8:  // Yellow (Brown)
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '3';   *ptr++ = 'm';
                 break;
               case 9:  // Yellow 2
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '3';   *ptr++ = 'm';
                 break;
               case 10:  // Blue  
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '4';   *ptr++ = 'm';
                 break;
               case 11:  // Blue 2
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '4';   *ptr++ = 'm';
                 break;
               case 12:  // Purple
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '5';   *ptr++ = 'm';
                 break;
               case 13:  // Purple 2
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '5';   *ptr++ = 'm';
                 break;
               case 14:  // Cyan 
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '0';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '6';   *ptr++ = 'm';
               case 15:  // Cyan 2
-                *ptr++ = '\e';  *ptr++ = '[';   *ptr++ = '0';
+                *ptr++ = '\033';  *ptr++ = '[';   *ptr++ = '0';
                 *ptr++ = ';';   *ptr++ = '1';   *ptr++ = ';';
                 *ptr++ = '3';   *ptr++ = '6';   *ptr++ = 'm';
                 break;
@@ -2470,7 +2474,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
 		    // look for 3 more characters that should be numbers
 			if (isdigit(*(txt+1)) && isdigit(*(txt+2)) && isdigit(*(txt+3)))
 			{
-				*ptr++ = '\e';  *ptr++ = '[';
+				*ptr++ = '\033';  *ptr++ = '[';
 				*ptr++ = '0';   *ptr++ = ';';
 				*ptr++ = '3';   *ptr++ = '8'; *ptr++ = ';';
 				*ptr++ = '5';   *ptr++ = ';';
@@ -2518,9 +2522,9 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length)
   }
 
   /* and terminate it with the standard color */
-  *ptr++ = '\e';  *ptr++ = '['; *ptr++ = '0';   *ptr++ = 'm'; *ptr = '\0';
-                
-  length = strlen(output);
+  *ptr++ = '\033';  *ptr++ = '['; *ptr++ = '0';   *ptr++ = 'm'; *ptr = '\0';
+
+  length = (int)strlen(output);
               
   /* Expand the buffer as needed */
   while (d->outtop + length >= d->outsize)
@@ -2566,7 +2570,7 @@ bool write_to_descriptor_2( int desc, char *txt, int length )
 #endif
 
     if ( length <= 0 )
-	length = strlen(txt);
+	length = (int)strlen(txt);
 
     for ( iStart = 0; iStart < length; iStart += nWrite )
     {
@@ -3550,7 +3554,7 @@ void stop_idling( CHAR_DATA *ch )
 void stc( const char *txt, CHAR_DATA *ch )
 {
     if ( txt != NULL && ch->desc != NULL )
-	write_to_buffer( ch->desc, txt, strlen(txt) );
+	write_to_buffer( ch->desc, txt, (int)strlen(txt) );
     return;
 }
 
@@ -3624,7 +3628,7 @@ void banner_to_char(char *txt, CHAR_DATA *ch)
 {
 char buf[MAX_STRING_LENGTH];
 int loop,wdth,ln;
-ln = strlen(txt);
+ln = (int)strlen(txt);
 if (ln > 16)
 {
 	sprintf(buf, "#4-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[                   ]#4=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-#n"); 
@@ -3645,7 +3649,7 @@ void banner2_to_char(char *txt, CHAR_DATA *ch)
 {
 char buf[MAX_STRING_LENGTH];
 int loop,wdth,ln;
-ln = strlen(txt);
+ln = (int)strlen(txt);
 if (ln > 16)
 {
 	sprintf(buf, "#4    -   -  - - -#6- ---===#7                               #6===--- -#4- - -  -   -\r\n"); 
@@ -3672,17 +3676,17 @@ void send_to_char( const char *txt, CHAR_DATA *ch )
 
     if ( ch->desc == NULL && IS_NPC(ch) && (wizard = ch->wizard) != NULL )
     {
-	if (!IS_NPC(wizard) && (familiar = wizard->pcdata->familiar) != NULL 
+	if (!IS_NPC(wizard) && (familiar = wizard->pcdata->familiar) != NULL
 	    && familiar == ch && ch->in_room != wizard->in_room)
 	{
 	    send_to_char("[ ",wizard);
 	    if ( txt != NULL && wizard->desc != NULL )
-		write_to_buffer( wizard->desc, txt, strlen(txt) );
+		write_to_buffer( wizard->desc, txt, (int)strlen(txt) );
 	}
     }
 
     if ( txt != NULL && ch->desc != NULL )
-	write_to_buffer( ch->desc, txt, strlen(txt) );
+	write_to_buffer( ch->desc, txt, (int)strlen(txt) );
     return;
 }
 
@@ -3883,7 +3887,7 @@ void act( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2,
 
 	buf[0]   = UPPER(buf[0]);
 	if (to->desc && (to->desc->connected == CON_PLAYING))
-	write_to_buffer( to->desc, buf, point - buf );
+	write_to_buffer( to->desc, buf, (int)(point - buf) );
 
 	if (is_fam) to = to_old;
 
@@ -4083,7 +4087,7 @@ void act2( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2
 	}
 
 	buf[0]   = UPPER(buf[0]);
-	write_to_buffer( to->desc, buf, point - buf );
+	write_to_buffer( to->desc, buf, (int)(point - buf) );
 
 	if (is_fam) to = to_old;
 
@@ -4208,7 +4212,7 @@ void kavitem( const char *format, CHAR_DATA *ch, const void *arg1, const void *a
 	*point++ = '\n';
 	*point++ = '\r';
 	buf[0]   = UPPER(buf[0]);
-	write_to_buffer( to->desc, buf, point - buf );
+	write_to_buffer( to->desc, buf, (int)(point - buf) );
     }
 
     return;
@@ -4525,9 +4529,9 @@ void bust_a_prompt( DESCRIPTOR_DATA *d )
       } 
       ++str;
       while( ( *point = *i ) != '\0' )
-         ++point, ++i;      
+         ++point, ++i;
    }
-   write_to_buffer( d, buf, point - buf );
+   write_to_buffer( d, buf, (int)(point - buf) );
    return;
 }
 
@@ -4652,7 +4656,7 @@ void show_string( DESCRIPTOR_DATA *d, char *input )
     d->showstr_point = end;
 
     if ( end - start )
-        write_to_buffer( d, start, end - start );
+        write_to_buffer( d, start, (int)(end - start) );
 
     /* See if this is the end (or near the end) of the string */
     /* ------------------------------------------------------ */

@@ -1215,7 +1215,7 @@ void ww_update( void )
 {
     DESCRIPTOR_DATA *d;
     CHAR_DATA       *victim;
-    float            dam = 0;
+    int              dam = 0;
 
     for ( d = descriptor_list; d != NULL; d = d->next )
       {
@@ -1235,9 +1235,8 @@ void ww_update( void )
       act( "The blades drop to the ground inert.", d->character, NULL, NULL, TO_CHAR );
       act( "The blades drop to the ground inert.", d->character, NULL, NULL, TO_ROOM );
 
-      dam = number_range( 7, 14 );
-      dam = dam / 100;
-      dam = d->character->hit * dam;
+      int pct = number_range( 7, 14 );
+      dam = (d->character->hit * pct) / 100;
       if ( dam < 100 ) dam = 100;
       d->character->hit = d->character->hit - dam;
       if ( d->character->hit < -10 ) d->character->hit = -10;
@@ -1413,7 +1412,7 @@ void update_safe_powers(CHAR_DATA *ch)
   {
     cost *= 4;
   }
-  if (IS_CLASS(ch, CLASS_WEREWOLF)) cost *= 1.5;
+  if (IS_CLASS(ch, CLASS_WEREWOLF)) cost = (int)(cost * 1.5);
   if (!IS_HEAD(ch,LOST_HEAD) && IS_EXTRA(ch,EXTRA_OSWITCH))
   {
     if (ch->move >= cost) use_move(ch, cost);

@@ -385,8 +385,8 @@ void boot_db(bool fCopyOver)
     {
 	long lhour, lday, lmonth;
 
-	lhour		= (current_time - 650336715)
-			/ (PULSE_TICK / PULSE_PER_SECOND);
+	lhour		= (long)((current_time - 650336715)
+			/ (PULSE_TICK / PULSE_PER_SECOND));
 	time_info.hour	= lhour  % 24;
 	lday		= lhour  / 24;
 	time_info.day	= lday   % 35;
@@ -2820,7 +2820,7 @@ char *fread_string( FILE *fp )
             char *pString;
 
             plast[-1] = '\0';
-            iHash     = UMIN( MAX_KEY_HASH - 1, plast - 1 - top_string );
+            iHash     = (int)UMIN( MAX_KEY_HASH - 1, plast - 1 - top_string );
             for ( pHash = string_hash[iHash]; pHash; pHash = pHashPrev )
             {
                 for ( ic = 0; ic < sizeof(char *); ic++ )
@@ -2843,7 +2843,7 @@ char *fread_string( FILE *fp )
                 string_hash[iHash]	= pString;
 
                 nAllocString += 1;
-                sAllocString += top_string - pString;
+                sAllocString += (int)(top_string - pString);
                 return pString + sizeof(char *);
             }
             else
@@ -3060,7 +3060,7 @@ char *str_dup( const char *str )
     {
 	return (char *) str;
     }
-    str_new = alloc_mem( strlen(str) + 1 );
+    str_new = alloc_mem( (int)strlen(str) + 1 );
     strcpy( str_new, str );
     return str_new;
 }
@@ -3083,7 +3083,7 @@ void free_string( char *pstr )
 	return;
     }
 
-    free_mem( pstr, strlen(pstr) + 1 );
+    free_mem( pstr, (int)strlen(pstr) + 1 );
     return;
 }
 
@@ -3572,8 +3572,8 @@ bool str_infix( const char *astr, const char *bstr )
     if ( ( c0 = LOWER(astr[0]) ) == '\0' )
 	return FALSE;
 
-    sstr1 = strlen(astr);
-    sstr2 = strlen(bstr);
+    sstr1 = (int)strlen(astr);
+    sstr2 = (int)strlen(bstr);
 
     for ( ichar = 0; ichar <= sstr2 - sstr1; ichar++ )
     {
@@ -3596,8 +3596,8 @@ bool str_suffix( const char *astr, const char *bstr )
     int sstr1;
     int sstr2;
 
-    sstr1 = strlen(astr);
-    sstr2 = strlen(bstr);
+    sstr1 = (int)strlen(astr);
+    sstr2 = (int)strlen(bstr);
     if ( sstr1 <= sstr2 && !str_cmp( astr, bstr + sstr2 - sstr1 ) )
 	return FALSE;
     else

@@ -2279,7 +2279,7 @@ char *socialc( CHAR_DATA *ch, char *argument, char *you, char *them )
 
     for ( pName = argument; *pName != '\0'; pName += length )
     {
-	for ( iSyl = 0; (length = strlen(spk_table[iSyl].old)) != 0; iSyl++ )
+	for ( iSyl = 0; (length = (int)strlen(spk_table[iSyl].old)) != 0; iSyl++ )
 	{
 	    if ( !str_prefix( spk_table[iSyl].old, pName ) )
 	    {
@@ -2345,7 +2345,7 @@ char *socialv( CHAR_DATA *ch, char *argument, char *you, char *them )
 
     for ( pName = argument; *pName != '\0'; pName += length )
     {
-	for ( iSyl = 0; (length = strlen(spk_table[iSyl].old)) != 0; iSyl++ )
+	for ( iSyl = 0; (length = (int)strlen(spk_table[iSyl].old)) != 0; iSyl++ )
 	{
 	    if ( !str_prefix( spk_table[iSyl].old, pName ) )
 	    {
@@ -2420,7 +2420,7 @@ char *socialn( CHAR_DATA *ch, char *argument, char *you, char *them )
 
     for ( pName = argument; *pName != '\0'; pName += length )
     {
-	for ( iSyl = 0; (length = strlen(spk_table[iSyl].old)) != 0; iSyl++ )
+	for ( iSyl = 0; (length = (int)strlen(spk_table[iSyl].old)) != 0; iSyl++ )
 	{
 	    if ( !str_prefix( spk_table[iSyl].old, pName ) )
 	    {

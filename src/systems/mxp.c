@@ -69,12 +69,12 @@ bool mxpStart(DESCRIPTOR_DATA *desc)
         return TRUE;  /* Already enabled */
 
     /* Send the MXP subnegotiation start sequence */
-    write_to_descriptor(desc, (char *)mxp_sb, strlen(mxp_sb));
+    write_to_descriptor(desc, (char *)mxp_sb, (int)strlen(mxp_sb));
 
     /* Set default mode to LOCKED so normal text isn't parsed as MXP.
      * This prevents raw < and > from being interpreted as tags.
      * Use #M escape in text to switch to secure mode for actual MXP tags. */
-    write_to_descriptor(desc, (char *)mxp_lock_locked, strlen(mxp_lock_locked));
+    write_to_descriptor(desc, (char *)mxp_lock_locked, (int)strlen(mxp_lock_locked));
 
     desc->mxp_enabled = TRUE;
     return TRUE;

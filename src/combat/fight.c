@@ -594,11 +594,11 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     {
       int tempnum = wield->value[3];
       if (tempnum >= 0 && tempnum <= 12)
-        chance = (ch->wpn[tempnum]) * 0.5;
+        chance = (int)((ch->wpn[tempnum]) * 0.5);
       else
-        chance = (ch->wpn[0]) * 0.5;  /* Invalid weapon type, use default */
+        chance = (int)((ch->wpn[0]) * 0.5);  /* Invalid weapon type, use default */
     }
-    else chance = (ch->wpn[0]) * 0.5;
+    else chance = (int)((ch->wpn[0]) * 0.5);
     if (number_percent() <= chance) maxcount += 1;
   }
   if (wieldorig == 3) maxcount += 1;
@@ -899,7 +899,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     spell_poison(gsn_poison,(ch->level*number_range(10,20)),ch,victim);
   if (victim->itemaffect < 1) return;
   if (IS_NPC(victim) || victim->spl[1] < 4) level = victim->level;
-  else level = (victim->spl[1] * 0.25);
+  else level = (int)(victim->spl[1] * 0.25);
   if (IS_SET(victim->newbits, NEW_MONKFLAME) && !IS_AFFECTED(ch, AFF_FLAMING))
   {
     if (number_percent() > 95)
@@ -992,15 +992,15 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim )
       if (ch->pcdata->upgrade_level > 0) count += ch->pcdata->upgrade_level;
       if ( IS_CLASS(ch, CLASS_VAMPIRE) && ch->power[DISC_VAMP_CELE] > 0)
       {
-        count += .5;
+        count += (int).5;
         if (ch->power[DISC_VAMP_CELE] > 5)
         {
-          count += .5;
+          count += (int).5;
           if ( ch->power[DISC_VAMP_CELE] > 7)
           {
-            count += .5;
+            count += (int).5;
             if ( ch->power[DISC_VAMP_CELE] > 9)
-              count += .5;
+              count += (int).5;
           }
         }
       }
@@ -1024,7 +1024,7 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim )
         count +=2;
         if (ch->pcdata->powers[SHAPE_FORM] == BULL_FORM) count += ch->pcdata->powers[BULL_LEVEL]/2;
         if (ch->pcdata->powers[SHAPE_FORM] == TIGER_FORM) count += ch->pcdata->powers[TIGER_LEVEL]*2;
-        if (ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM) count += ch->pcdata->powers[FAERIE_LEVEL]*1.5;
+        if (ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM) count += (int)(ch->pcdata->powers[FAERIE_LEVEL]*1.5);
         if (ch->pcdata->powers[SHAPE_FORM] == HYDRA_FORM) count += ch->pcdata->powers[HYDRA_LEVEL];
       }
       if ( IS_CLASS(ch, CLASS_DEMON))
@@ -1282,7 +1282,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype)
   {
     dam = number_range( ch->level / 2, ch->level * 3 / 2 );
     if ( wield != NULL )
-      dam += dam * 0.5;
+      dam += (int)(dam * 0.5);
   }
   else
   {
@@ -1334,15 +1334,15 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype)
   /* up that damage */
   if (!IS_NPC(ch)) {
     if (ch->pcdata->upgrade_level == 1)
-      dam *= 1.05;
+      dam = (int)(dam * 1.05);
     else if (ch->pcdata->upgrade_level == 2)
-      dam *= 1.10;
+      dam = (int)(dam * 1.10);
     else if (ch->pcdata->upgrade_level == 3)
-      dam *= 1.15;
+      dam = (int)(dam * 1.15);
     else if (ch->pcdata->upgrade_level == 4)
-      dam *= 1.20;
+      dam = (int)(dam * 1.20);
     else if (ch->pcdata->upgrade_level == 5)
-      dam *= 1.25;
+      dam = (int)(dam * 1.25);
     /* 5% extra damage per level */
   }
 
@@ -1354,7 +1354,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype)
 
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_TANARRI))
   {
-    if (IS_SET(ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT)) dam *= 1.5;
+    if (IS_SET(ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT)) dam = (int)(dam * 1.5);
   }
 
   /*
@@ -1363,88 +1363,88 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype)
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_ANGEL)) dam *= (1 + ch->pcdata->powers[ANGEL_JUSTICE] / 10);
 
   if ( !IS_NPC(ch) && IS_CLASS(ch, CLASS_DEMON) &&  IS_DEMPOWER(ch, DEM_MIGHT) )
-    dam *= 1.1;
-  if (!IS_NPC(ch) && !IS_NPC(victim) && IS_CLASS(ch, CLASS_UNDEAD_KNIGHT) && IS_CLASS(victim, CLASS_SHAPESHIFTER)) dam *= 1.2;
+    dam = (int)(dam * 1.1);
+  if (!IS_NPC(ch) && !IS_NPC(victim) && IS_CLASS(ch, CLASS_UNDEAD_KNIGHT) && IS_CLASS(victim, CLASS_SHAPESHIFTER)) dam = (int)(dam * 1.2);
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_MAGE))
   {
-    if (dt==gsn_mageshield && ch->pcdata->powers[PINVOKE]>6) dam *=1.4;
-    if (dt==gsn_mageshield && ch->pcdata->powers[PINVOKE]>9) dam *=1.4;
+    if (dt==gsn_mageshield && ch->pcdata->powers[PINVOKE]>6) dam = (int)(dam * 1.4);
+    if (dt==gsn_mageshield && ch->pcdata->powers[PINVOKE]>9) dam = (int)(dam * 1.4);
   }
   if ( !IS_NPC(ch) && IS_CLASS(ch, CLASS_NINJA))
   {
-    if (ch->pcdata->rank == BELT_ONE) dam *= 1.1;
-    else if (ch->pcdata->rank == BELT_TWO) dam *= 1.2;
-    else if (ch->pcdata->rank == BELT_THREE) dam *= 1.3;
-    else if (ch->pcdata->rank == BELT_FOUR) dam *= 1.4;
-    else if (ch->pcdata->rank == BELT_FIVE) dam *= 1.5;
-    else if (ch->pcdata->rank == BELT_SIX) dam *= 1.6;
-    else if (ch->pcdata->rank == BELT_SEVEN) dam *= 1.7;
-    else if (ch->pcdata->rank == BELT_EIGHT) dam *= 1.8;
-    else if (ch->pcdata->rank == BELT_NINE) dam *= 1.9;
-    else if (ch->pcdata->rank == BELT_TEN) dam *= 2.0;
+    if (ch->pcdata->rank == BELT_ONE) dam = (int)(dam * 1.1);
+    else if (ch->pcdata->rank == BELT_TWO) dam = (int)(dam * 1.2);
+    else if (ch->pcdata->rank == BELT_THREE) dam = (int)(dam * 1.3);
+    else if (ch->pcdata->rank == BELT_FOUR) dam = (int)(dam * 1.4);
+    else if (ch->pcdata->rank == BELT_FIVE) dam = (int)(dam * 1.5);
+    else if (ch->pcdata->rank == BELT_SIX) dam = (int)(dam * 1.6);
+    else if (ch->pcdata->rank == BELT_SEVEN) dam = (int)(dam * 1.7);
+    else if (ch->pcdata->rank == BELT_EIGHT) dam = (int)(dam * 1.8);
+    else if (ch->pcdata->rank == BELT_NINE) dam = (int)(dam * 1.9);
+    else if (ch->pcdata->rank == BELT_TEN) dam = (int)(dam * 2.0);
   }
   if ( !IS_NPC(ch) && IS_CLASS(ch, CLASS_DEMON) &&  IS_SET(ch->warp, WARP_STRONGARMS))
-    dam   *= 1.2;
+    dam = (int)(dam * 1.2);
 
   if(IS_NPC(victim)) {
 
   if ( ch->stance[0] > 12 && IS_SET(ch->stance[(ch->stance[0]+6)], STANCEPOWER_DAMAGE_3)
     && ch->stance[(ch->stance[0])] >100)
-      dam += dam * 1.5 * (ch->stance[(ch->stance[0])] / 200);
+      dam += (int)(dam * 1.5 * (ch->stance[(ch->stance[0])] / 200));
   else if ( ch->stance[0] > 12 && IS_SET(ch->stance[(ch->stance[0]+6)], STANCEPOWER_DAMAGE_2)
     && ch->stance[(ch->stance[0])] >100)
-      dam += dam * 1.0 * (ch->stance[(ch->stance[0])] / 200);
+      dam += (int)(dam * 1.0 * (ch->stance[(ch->stance[0])] / 200));
   else if ( ch->stance[0] > 12 && IS_SET(ch->stance[(ch->stance[0]+6)], STANCEPOWER_DAMAGE_1)
     && ch->stance[(ch->stance[0])] >100)
-      dam += dam * 0.5 * (ch->stance[(ch->stance[0])] / 200);
+      dam += (int)(dam * 0.5 * (ch->stance[(ch->stance[0])] / 200));
   }
 
   if(!IS_NPC(victim)) {
-    
+
   if ( ch->stance[0] > 12 && IS_SET(ch->stance[(ch->stance[0]+6)], STANCEPOWER_DAMAGE_3)
     && ch->stance[(ch->stance[0])] >100)
-      dam += dam * 0.5 * (ch->stance[(ch->stance[0])] / 200);
+      dam += (int)(dam * 0.5 * (ch->stance[(ch->stance[0])] / 200));
   else if ( ch->stance[0] > 12 && IS_SET(ch->stance[(ch->stance[0]+6)], STANCEPOWER_DAMAGE_2)
     && ch->stance[(ch->stance[0])] >100)
-      dam += dam * 0.3 * (ch->stance[(ch->stance[0])] / 200);
+      dam += (int)(dam * 0.3 * (ch->stance[(ch->stance[0])] / 200));
   else if ( ch->stance[0] > 12 && IS_SET(ch->stance[(ch->stance[0]+6)], STANCEPOWER_DAMAGE_1)
     && ch->stance[(ch->stance[0])] >100)
-      dam += dam * 0.1 * (ch->stance[(ch->stance[0])] / 200);
+      dam += (int)(dam * 0.1 * (ch->stance[(ch->stance[0])] / 200));
   }
 
   if ( victim->stance[0] > 12 && IS_SET(victim->stance[(victim->stance[0]+6)], STANCEPOWER_RESIST_3)
     && victim->stance[(victim->stance[0])] >100)
-      dam *= 0.7;
+      dam = (int)(dam * 0.7);
   else if ( victim->stance[0] > 12 && IS_SET(victim->stance[(victim->stance[0]+6)], STANCEPOWER_RESIST_2)
     && victim->stance[(victim->stance[0])] >100)
-      dam *= 0.8;
+      dam = (int)(dam * 0.8);
   else if ( victim->stance[0] > 12 && IS_SET(victim->stance[(victim->stance[0]+6)], STANCEPOWER_RESIST_1)
     && victim->stance[(victim->stance[0])] >100)
-      dam *= 0.9;
+      dam = (int)(dam * 0.9);
 
   /* The test ends here */
 
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_SHAPESHIFTER))
   {
-    dam *= 1.4;
-    if (ch->pcdata->powers[SHAPE_FORM] == TIGER_FORM && ch->pcdata->powers[TIGER_LEVEL] > 1) dam *= 1.5;
-    else if (ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM && ch->pcdata->powers[FAERIE_LEVEL] > 1) dam *= 1.2;
-    else if (ch->pcdata->powers[SHAPE_FORM] == HYDRA_FORM && ch->pcdata->powers[HYDRA_LEVEL] > 1) dam *= 1.6;
-    else if (ch->pcdata->powers[SHAPE_FORM] == BULL_FORM && ch->pcdata->powers[BULL_LEVEL] > 1) dam *= 1.7;
+    dam = (int)(dam * 1.4);
+    if (ch->pcdata->powers[SHAPE_FORM] == TIGER_FORM && ch->pcdata->powers[TIGER_LEVEL] > 1) dam = (int)(dam * 1.5);
+    else if (ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM && ch->pcdata->powers[FAERIE_LEVEL] > 1) dam = (int)(dam * 1.2);
+    else if (ch->pcdata->powers[SHAPE_FORM] == HYDRA_FORM && ch->pcdata->powers[HYDRA_LEVEL] > 1) dam = (int)(dam * 1.6);
+    else if (ch->pcdata->powers[SHAPE_FORM] == BULL_FORM && ch->pcdata->powers[BULL_LEVEL] > 1) dam = (int)(dam * 1.7);
     else dam = dam;
   }
   if (IS_CLASS(ch,CLASS_DROID) && !IS_NPC(ch))
   {
-    if (ch->pcdata->powers[CYBORG_LIMBS] > 0) dam *= 1.3;
-    if (ch->pcdata->powers[CYBORG_LIMBS] > 2) dam *= 1.5;
+    if (ch->pcdata->powers[CYBORG_LIMBS] > 0) dam = (int)(dam * 1.3);
+    if (ch->pcdata->powers[CYBORG_LIMBS] > 2) dam = (int)(dam * 1.5);
   }
   if (IS_CLASS(ch, CLASS_UNDEAD_KNIGHT))
   {
-    if (ch->pcdata->powers[WEAPONSKILL] > 4) dam *=1.2;
-    if (ch->pcdata->powers[WEAPONSKILL] > 8) dam *=1.3;
+    if (ch->pcdata->powers[WEAPONSKILL] > 4) dam = (int)(dam * 1.2);
+    if (ch->pcdata->powers[WEAPONSKILL] > 8) dam = (int)(dam * 1.3);
   }
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_WEREWOLF) && ch->power[DISC_WERE_BEAR] > 5)
-    dam *= 1.2;
+    dam = (int)(dam * 1.2);
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_SHAPESHIFTER))
   {
     if (victim->pcdata->powers[SHAPE_FORM] == FAERIE_FORM && victim->pcdata->powers[FAERIE_LEVEL]>0)
@@ -1534,7 +1534,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype)
   }
   if ( !IS_NPC(ch) && IS_CLASS(ch, CLASS_MONK) && dt != gsn_heavenlyaura )
   {
-    if (ch->chi[CURRENT] > 0 && ch->chi[CURRENT] < 3 ) dam *= 1.3;
+    if (ch->chi[CURRENT] > 0 && ch->chi[CURRENT] < 3 ) dam = (int)(dam * 1.3);
     if (ch->chi[CURRENT] > 2 && ch->chi[CURRENT] < 7 ) dam *= ((ch->chi[CURRENT]) / 2);
   }
   if ( dt == gsn_garotte )
@@ -1554,13 +1554,13 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype)
   /*
    * Damage type modifiers.
    */
-  if (dt == gsn_magma && IS_CLASS(ch, CLASS_TANARRI))        dam *= 1.5;
+  if (dt == gsn_magma && IS_CLASS(ch, CLASS_TANARRI))        dam = (int)(dam * 1.5);
   if (dt == gsn_booming && !IS_NPC(ch))                      dam *= ch->pcdata->rank/2;
   if (dt == gsn_circle && ch->pcdata->rank == BELT_EIGHT)    dam *= 2;
-  if (dt == gsn_circle && ch->pcdata->rank == BELT_NINE)     dam *= 2.5;
-  if (dt == gsn_circle && ch->pcdata->rank == BELT_TEN)      dam *= 3.0;
+  if (dt == gsn_circle && ch->pcdata->rank == BELT_NINE)     dam = (int)(dam * 2.5);
+  if (dt == gsn_circle && ch->pcdata->rank == BELT_TEN)      dam = (int)(dam * 3.0);
   if (dt == gsn_heavenlyaura && IS_CLASS(ch, CLASS_MONK))    dam /= 20;
-  if (dt == gsn_deathaura)                                   dam /= 1.7;
+  if (dt == gsn_deathaura)                                   dam = (int)(dam / 1.7);
   if (dt == gsn_potato)                                      dam /= 2;
   if (dt == gsn_shred)                                       dam *= 2;
 
@@ -1599,15 +1599,15 @@ int cap_dam(CHAR_DATA *ch, CHAR_DATA *victim, int dam)
 
   if (!IS_NPC(victim)) {
     if (victim->pcdata->upgrade_level == 1)
-      dam *= 0.95;
+      dam = (int)(dam * 0.95);
     else if (victim->pcdata->upgrade_level == 2)
-      dam *= 0.90;
+      dam = (int)(dam * 0.90);
     else if (victim->pcdata->upgrade_level == 3)
-      dam *= 0.85;
+      dam = (int)(dam * 0.85);
     else if (victim->pcdata->upgrade_level == 4)
-      dam *= 0.80;
+      dam = (int)(dam * 0.80);
     else if (victim->pcdata->upgrade_level == 5)
-      dam *= 0.75;
+      dam = (int)(dam * 0.75);
     /* 5% less damage per level */
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_DROW)) 
@@ -1626,38 +1626,38 @@ int cap_dam(CHAR_DATA *ch, CHAR_DATA *victim, int dam)
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_TANARRI))
   {
-    if (IS_SET(victim->pcdata->powers[TANARRI_POWER], TANARRI_EXOSKELETON)) dam *= 0.20;
-    if (IS_CLASS(ch, CLASS_ANGEL)) dam *= 0.75; /* trained to kill angels */
-    if (IS_CLASS(ch, CLASS_DROID)) dam *= 0.8;
+    if (IS_SET(victim->pcdata->powers[TANARRI_POWER], TANARRI_EXOSKELETON)) dam = (int)(dam * 0.20);
+    if (IS_CLASS(ch, CLASS_ANGEL)) dam = (int)(dam * 0.75); /* trained to kill angels */
+    if (IS_CLASS(ch, CLASS_DROID)) dam = (int)(dam * 0.8);
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_DROID))
   {
-    if (IS_CLASS(ch, CLASS_SHAPESHIFTER)) dam *= 0.85;
-    if (IS_CLASS(ch, CLASS_SAMURAI)) dam *= 0.9;
-    if (victim->pcdata->powers[CYBORG_BODY] > 0) dam /= 1.75;
+    if (IS_CLASS(ch, CLASS_SHAPESHIFTER)) dam = (int)(dam * 0.85);
+    if (IS_CLASS(ch, CLASS_SAMURAI)) dam = (int)(dam * 0.9);
+    if (victim->pcdata->powers[CYBORG_BODY] > 0) dam = (int)(dam / 1.75);
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_VAMPIRE))
   {
-    if (victim->power[DISC_VAMP_PROT] >= 10) dam /= 1.5;
+    if (victim->power[DISC_VAMP_PROT] >= 10) dam = (int)(dam / 1.5);
     if (victim->power[DISC_VAMP_FORT] > 0)
     {
-      dam *= (100 - (victim->power[DISC_VAMP_FORT] * 5.5));
+      dam = (int)(dam * (100 - (victim->power[DISC_VAMP_FORT] * 5.5)));
       dam /= 100;
     }
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_SAMURAI))
   {
-    if (IS_CLASS(ch, CLASS_SHAPESHIFTER)) dam /= 1.6; /* damn shapies */
-    dam /= 1.75;
+    if (IS_CLASS(ch, CLASS_SHAPESHIFTER)) dam = (int)(dam / 1.6); /* damn shapies */
+    dam = (int)(dam / 1.75);
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_MAGE))
   {
-    if (IS_ITEMAFF(victim, ITEMA_STEELSHIELD)) dam /= 1.8;
-    if (IS_ITEMAFF(victim, ITEMA_BEAST))       dam /= 1.8;
+    if (IS_ITEMAFF(victim, ITEMA_STEELSHIELD)) dam = (int)(dam / 1.8);
+    if (IS_ITEMAFF(victim, ITEMA_BEAST))       dam = (int)(dam / 1.8);
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_SHAPESHIFTER))
   {
-    dam /= 2.5;
+    dam = (int)(dam / 2.5);
     if (victim->pcdata->powers[SHAPE_FORM] == FAERIE_FORM)
     {
       dam *= (100 - victim->pcdata->powers[FAERIE_LEVEL]*9);
@@ -1669,7 +1669,7 @@ int cap_dam(CHAR_DATA *ch, CHAR_DATA *victim, int dam)
       dam /= 100;
       if (victim->pcdata->powers[PHASE_COUNTER] > 0)
       {
-        dam *= (100 - victim->pcdata->powers[PHASE_COUNTER] * 2.5);
+        dam = (int)(dam * (100 - victim->pcdata->powers[PHASE_COUNTER] * 2.5));
         dam /= 100;
       }
     }
@@ -1687,14 +1687,14 @@ int cap_dam(CHAR_DATA *ch, CHAR_DATA *victim, int dam)
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_MONK))
   {
-    if (victim->monkab[BODY] >= 2) dam /= 1.5;
+    if (victim->monkab[BODY] >= 2) dam = (int)(dam / 1.5);
     if (victim->chi[CURRENT] > 0 )
     {
       dam *= (100 - (victim->chi[CURRENT] * 7) );
       dam /= 100;
     }
     /* Steel Skin mantra - 20% damage reduction */
-    if (IS_SET(victim->newbits, NEW_MONKSKIN)) dam *= 0.80;
+    if (IS_SET(victim->newbits, NEW_MONKSKIN)) dam = (int)(dam * 0.80);
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_DEMON))
   {
@@ -1703,21 +1703,21 @@ int cap_dam(CHAR_DATA *ch, CHAR_DATA *victim, int dam)
       dam *= (100 - (victim->power[DISC_DAEM_IMMU] * 4));
       dam /= 100;
     }
-    if (IS_DEMPOWER( victim, DEM_TOUGH))    dam *= 0.8;
-    if (IS_SET(victim->warp, WARP_STAMINA)) dam *= 0.8;
-    if (IS_SET(victim->warp, WARP_SBODY))   dam *= 0.8;
-    if (IS_SET(victim->warp, WARP_CBODY))   dam *= 0.8;    
+    if (IS_DEMPOWER( victim, DEM_TOUGH))    dam = (int)(dam * 0.8);
+    if (IS_SET(victim->warp, WARP_STAMINA)) dam = (int)(dam * 0.8);
+    if (IS_SET(victim->warp, WARP_SBODY))   dam = (int)(dam * 0.8);
+    if (IS_SET(victim->warp, WARP_CBODY))   dam = (int)(dam * 0.8);    
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_UNDEAD_KNIGHT))
   {
-    if (IS_CLASS(ch, CLASS_SHAPESHIFTER)) dam *= 0.75;
-    if (IS_CLASS(ch, CLASS_SAMURAI)) dam *= 0.7;
+    if (IS_CLASS(ch, CLASS_SHAPESHIFTER)) dam = (int)(dam * 0.75);
+    if (IS_CLASS(ch, CLASS_SAMURAI)) dam = (int)(dam * 0.7);
     dam *= (100 - (victim->pcdata->powers[UNDEAD_SPIRIT] * 6));
     dam /= 100;
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_NINJA))
   {
-    if (victim->pcdata->powers[NPOWER_CHIKYU] >= 1) dam /= 2.2;
+    if (victim->pcdata->powers[NPOWER_CHIKYU] >= 1) dam = (int)(dam / 2.2);
   }
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_WEREWOLF))
   {
@@ -1733,7 +1733,7 @@ int cap_dam(CHAR_DATA *ch, CHAR_DATA *victim, int dam)
   if (dam <= 0) dam = 1;
   if (dam > 1000000) dam = 1000000;                                               
   if (dam > ch->damcap[DAM_CAP]) dam = number_range( (ch->damcap[DAM_CAP] - 200), (ch->damcap[DAM_CAP] + 100) );
-  if ( IS_AFFECTED(victim, AFF_SANCTUARY ) ) dam *= 0.5;
+  if ( IS_AFFECTED(victim, AFF_SANCTUARY ) ) dam = (int)(dam * 0.5);
   return dam;
 }
 
@@ -1890,7 +1890,7 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim )
 
   if (!IS_NPC(victim))
   {
-    int silver_tol = (victim->siltol * 2.5);
+    int silver_tol = (int)(victim->siltol * 2.5);
     if (IS_CLASS(victim, CLASS_WEREWOLF) && IS_ITEMAFF(ch, ITEMA_RIGHT_SILVER))
       max_dam += (250 - silver_tol);
     if (IS_CLASS(victim, CLASS_WEREWOLF) && IS_ITEMAFF(ch, ITEMA_LEFT_SILVER))
@@ -1905,7 +1905,7 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim )
       else if (victim->stance[0] == STANCE_SWALLOW) max_dam -= 250;
     }
     if (IS_CLASS(victim,CLASS_DEMON) && (victim->in_room->vnum >= 93420 && victim->in_room->vnum <= 93426))
-      max_dam *= 0.5;
+      max_dam = (int)(max_dam * 0.5);
   }
 
   if (ch->level >= LEVEL_BUILDER) max_dam = 30000;
@@ -1974,16 +1974,16 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt )
     {
       if (!can_see(victim,ch)) 
       {
-        dam *= 1.5;
+        dam = (int)(dam * 1.5);
         send_to_char("You use your concealment to get a surprise attack!\n\r",ch);
       }
       REMOVE_BIT( ch->affected_by, AFF_HIDE );
       act( "$n leaps from $s concealment.", ch, NULL, NULL, TO_ROOM );
     }
     if ( IS_AFFECTED(victim, AFF_PROTECT) && IS_EVIL(ch) && dam > 1  )
-      dam -= dam * 0.25;
+      dam -= (int)(dam * 0.25);
     if ( IS_AFFECTED(victim, AFF_PROTECT_GOOD) && IS_GOOD(ch) && dam > 1  )
-      dam -= dam * 0.25;
+      dam -= (int)(dam * 0.25);
     if ( dam < 0 ) dam = 0;
     /*
      * Check for disarm, trip, parry, and dodge.
@@ -2092,7 +2092,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam )
     victim->hit = 1;
   if (!IS_NPC(victim) && IS_SET(victim->newbits, NEW_CLOAK) && victim->hit < 1)
   {
-    heal_char(victim, UMIN((victim->max_hit * .1), 4000));
+    heal_char(victim, (int)UMIN((victim->max_hit * .1), 4000));
     if (IS_CLASS(victim, CLASS_MONK)) send_to_char("your cloak of life saves your from certain death.\n\r",victim);
     else send_to_char("your cloak of death prevents the destruction of your body.\n\r",victim);
     send_to_char("#0They escape your final blow.#n\n\r",ch);
@@ -2363,37 +2363,37 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
   if ( ( dt < 1000 || dt > 1012) && !IS_CLASS(ch, CLASS_MONK) ) return FALSE;
   if (  dt >= 1000 && dt <= 1012 )
   {
-    if (!IS_NPC(ch)) chance -= (ch->wpn[dt-1000] * 0.1);
-    else chance -= (ch->level * 0.2);
-    if (!IS_NPC(victim)) chance += (victim->wpn[dt-1000] * 0.5);
+    if (!IS_NPC(ch)) chance -= (int)(ch->wpn[dt-1000] * 0.1);
+    else chance -= (int)(ch->level * 0.2);
+    if (!IS_NPC(victim)) chance += (int)(victim->wpn[dt-1000] * 0.5);
     else chance += victim->level;
   }
   else
   {
-    if (!IS_NPC(ch)) chance -= (ch->wpn[0] * 0.1);
-    else chance -= (ch->level * 0.2);
-    if (!IS_NPC(victim)) chance += (victim->wpn[0] * 0.5);
+    if (!IS_NPC(ch)) chance -= (int)(ch->wpn[0] * 0.1);
+    else chance -= (int)(ch->level * 0.2);
+    if (!IS_NPC(victim)) chance += (int)(victim->wpn[0] * 0.5);
     else chance += victim->level;
   }
   if (!IS_NPC(victim) && IS_STANCE(victim, STANCE_CRANE) && victim->stance[STANCE_CRANE] > 0 
   && !can_counter(ch) && !can_bypass(ch,victim))
-    chance += (victim->stance[STANCE_CRANE] * 0.25);
+    chance += (int)(victim->stance[STANCE_CRANE] * 0.25);
   else if (!IS_NPC(victim) && IS_STANCE(victim, STANCE_MANTIS) && victim->stance[STANCE_MANTIS] > 0 
   && !can_counter(ch) && !can_bypass(ch,victim))  
-    chance += (victim->stance[STANCE_MANTIS] * 0.25);
+    chance += (int)(victim->stance[STANCE_MANTIS] * 0.25);
 
 /* ------------ This is the part for superstances, Jobo ------------------- */
   if (!IS_NPC(victim) && victim->stance[0] > 12 
   && IS_SET(victim->stance[(victim->stance[0]+6)], STANCEPOWER_PARRY)
   && victim->stance[(victim->stance[0])] > 100 && !can_counter(ch) && !can_bypass(ch,victim))
-    chance += victim->stance[(victim->stance[0])] * 0.25;
+    chance += (int)(victim->stance[(victim->stance[0])] * 0.25);
 /* ------------ This is the end for superstances, Jobo ------------------- */
   
-  chance -= (char_hitroll(ch) * 0.1);
+  chance -= (int)(char_hitroll(ch) * 0.1);
   if (claws) 
   {
-     if (victim->power[DISC_WERE_LYNX] > 3) chance += (char_hitroll(victim) * 0.1);
-     else chance += (char_hitroll(victim) * 0.075);
+     if (victim->power[DISC_WERE_LYNX] > 3) chance += (int)(char_hitroll(victim) * 0.1);
+     else chance += (int)(char_hitroll(victim) * 0.075);
   }
   if (!IS_NPC(ch))
   {
@@ -2403,7 +2403,7 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     if (IS_CLASS(ch, CLASS_SHAPESHIFTER))
     {
       if (ch->pcdata->powers[SHAPE_FORM] == TIGER_FORM) chance -= ch->pcdata->powers[TIGER_LEVEL]*11;
-      else if (ch->pcdata->powers[SHAPE_FORM] == BULL_FORM) chance -= ch->pcdata->powers[BULL_LEVEL]*7.5;
+      else if (ch->pcdata->powers[SHAPE_FORM] == BULL_FORM) chance -= (int)(ch->pcdata->powers[BULL_LEVEL]*7.5);
       else if (ch->pcdata->powers[SHAPE_FORM] == HYDRA_FORM) chance -= ch->pcdata->powers[HYDRA_LEVEL]*7;
       else if (ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM) chance -= ch->pcdata->powers[FAERIE_LEVEL]*6;
       else chance -= 10;
@@ -2420,7 +2420,7 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     if (ch->pcdata->powers[NPOWER_CHIKYU] >= 5 && IS_CLASS(ch, CLASS_NINJA)) chance -= 20;
     if (IS_CLASS(ch, CLASS_DEMON) && IS_DEMPOWER(ch, DEM_SPEED)) chance -= 25;
     if (IS_CLASS(ch, CLASS_MONK) && ch->chi[CURRENT] > 0) chance -= (ch->chi[CURRENT] * 7);
-    if (IS_CLASS(ch, CLASS_UNDEAD_KNIGHT)) chance -= ch->pcdata->powers[WEAPONSKILL]*3.5;
+    if (IS_CLASS(ch, CLASS_UNDEAD_KNIGHT)) chance -= (int)(ch->pcdata->powers[WEAPONSKILL]*3.5);
     if (IS_CLASS(ch, CLASS_MAGE) && IS_ITEMAFF(ch, ITEMA_BEAST)) chance -= 30;
     if (IS_CLASS(ch, CLASS_DROW) && IS_SET(ch->pcdata->powers[1], DPOWER_ARMS)) chance -= 30;
     if (IS_SET(ch->newbits, NEW_MONKFLAME)) chance -= 3;
@@ -2503,7 +2503,7 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
   }
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_MAGE) && IS_ITEMAFF(ch, ITEMA_BEAST)) chance -= 10;
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_UNDEAD_KNIGHT)) chance -= ch->pcdata->powers[WEAPONSKILL];
-  if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_UNDEAD_KNIGHT)) chance += victim->pcdata->powers[WEAPONSKILL]*1.5;
+  if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_UNDEAD_KNIGHT)) chance += (int)(victim->pcdata->powers[WEAPONSKILL]*1.5);
   if (!IS_NPC(ch) && IS_CLASS(ch, CLASS_NINJA))                                   
   {
     if( ch->pcdata->rank == BELT_TEN)  chance -= 20;
@@ -2603,23 +2603,23 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
   int chance = 0;
 
   if (!IS_AWAKE(victim)) return FALSE;
-  if (!IS_NPC(ch) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12) chance -= (ch->wpn[dt-1000] * 0.1);
-  else if (!IS_NPC(ch)) chance -= (ch->wpn[0] * 0.1);
-  else chance -= (ch->level * 0.2);
-  if (!IS_NPC(victim)) chance += (victim->wpn[0] * 0.5);
+  if (!IS_NPC(ch) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12) chance -= (int)(ch->wpn[dt-1000] * 0.1);
+  else if (!IS_NPC(ch)) chance -= (int)(ch->wpn[0] * 0.1);
+  else chance -= (int)(ch->level * 0.2);
+  if (!IS_NPC(victim)) chance += (int)(victim->wpn[0] * 0.5);
   else chance += victim->level;
   if (!IS_NPC(victim) && IS_STANCE(victim, STANCE_MONGOOSE) && victim->stance[STANCE_MONGOOSE] > 0 
   && !can_counter(ch) &&!can_bypass(ch,victim))
-    chance += victim->stance[STANCE_MONGOOSE] * 0.25;
+    chance += (int)(victim->stance[STANCE_MONGOOSE] * 0.25);
   if (!IS_NPC(victim) && IS_STANCE(victim, STANCE_SWALLOW) && victim->stance[STANCE_SWALLOW] > 0 
   && !can_counter(ch) && !can_bypass(ch,victim))
-    chance += victim->stance[STANCE_SWALLOW] * 0.25;
+    chance += (int)(victim->stance[STANCE_SWALLOW] * 0.25);
 
 /* ------------ This is the part for superstances, Jobo ------------------- */
   if (!IS_NPC(victim) && victim->stance[0] > 12 
   && IS_SET(victim->stance[(victim->stance[0]+6)], STANCEPOWER_DODGE)
   && victim->stance[(victim->stance[0])] > 100 && !can_counter(ch) && !can_bypass(ch,victim))
-    chance += victim->stance[(victim->stance[0])] * 0.25;
+    chance += (int)(victim->stance[(victim->stance[0])] * 0.25);
 /* ------------ This is the end for superstances, Jobo ------------------- */
 
   if (!IS_NPC(ch))
@@ -2630,7 +2630,7 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     if (IS_CLASS(ch, CLASS_SHAPESHIFTER))
     {
       if (ch->pcdata->powers[SHAPE_FORM] == TIGER_FORM) chance -= ch->pcdata->powers[TIGER_LEVEL]*9;
-      else if (ch->pcdata->powers[SHAPE_FORM] == BULL_FORM) chance -= ch->pcdata->powers[BULL_LEVEL]*7.5;
+      else if (ch->pcdata->powers[SHAPE_FORM] == BULL_FORM) chance -= (int)(ch->pcdata->powers[BULL_LEVEL]*7.5);
       else if (ch->pcdata->powers[SHAPE_FORM] == HYDRA_FORM) chance -= ch->pcdata->powers[HYDRA_LEVEL]*7;
       else if (ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM) chance -= ch->pcdata->powers[FAERIE_LEVEL]*6;
       else chance -= 10;
@@ -2679,10 +2679,10 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt )
     if (IS_CLASS(victim, CLASS_ANGEL)) chance += victim->pcdata->powers[ANGEL_PEACE]*9;
     if (victim->power[DISC_VAMP_CELE] > 0 && IS_CLASS(victim, CLASS_VAMPIRE)) chance += (victim->power[DISC_VAMP_CELE]*3);
     if (IS_CLASS(victim, CLASS_DEMON) && IS_DEMPOWER( victim, DEM_SPEED)) chance += 25;
-    if (IS_CLASS(victim, CLASS_WEREWOLF) && victim->power[DISC_WERE_MANT] > 6) chance +=(victim->power[DISC_WERE_MANT] * 3.5);
+    if (IS_CLASS(victim, CLASS_WEREWOLF) && victim->power[DISC_WERE_MANT] > 6) chance += (int)(victim->power[DISC_WERE_MANT] * 3.5);
     if (IS_CLASS(victim, CLASS_DROW) &&  IS_SET(victim->pcdata->powers[1], DPOWER_SPEED)) chance += 50;
     if (IS_CLASS(victim, CLASS_SAMURAI)) chance +=25;
-    if (IS_CLASS(victim, CLASS_UNDEAD_KNIGHT)) chance += victim->pcdata->powers[WEAPONSKILL]*4.5;
+    if (IS_CLASS(victim, CLASS_UNDEAD_KNIGHT)) chance += (int)(victim->pcdata->powers[WEAPONSKILL]*4.5);
     if (!IS_CLASS(victim, CLASS_WEREWOLF) && IS_ITEMAFF(victim,ITEMA_AFFMANTIS)) chance += 15;
     if (IS_CLASS(victim, CLASS_MAGE) && IS_ITEMAFF(victim, ITEMA_DEFLECTOR)) chance += 40;
   }
@@ -3364,17 +3364,17 @@ int xp_compute( CHAR_DATA *gch, CHAR_DATA *victim )
    *   +1/8 for each target under 'par' (  up to + 25%)
    */
   xp -= xp * number_range( -2, 2 ) / 8;
-  xp  = number_range( xp * 3 / 4, xp * 5 / 4 );
+  xp  = number_range( (int)(xp * 3 / 4), (int)(xp * 5 / 4) );
   xp  = UMAX( 0, xp );
-  xp  = (xp * (victim->level) * 0.60);
+  xp  = (int)(xp * (victim->level) * 0.60);
   if (!IS_NPC(gch))
   {
     gch->pcdata->score[SCORE_TOTAL_LEVEL] += victim->level;
     if (victim->level > gch->pcdata->score[SCORE_HIGH_LEVEL])
     gch->pcdata->score[SCORE_HIGH_LEVEL] += victim->level;
-    gch->pcdata->score[SCORE_TOTAL_XP] += xp;
+    gch->pcdata->score[SCORE_TOTAL_XP] += (int)xp;
     if (xp > gch->pcdata->score[SCORE_HIGH_XP])
-    gch->pcdata->score[SCORE_HIGH_XP] += xp;
+    gch->pcdata->score[SCORE_HIGH_XP] += (int)xp;
   }
   if (!IS_NPC(gch) && xp > 499 && gch->pcdata->disc_points != 999 && gch->pcdata->disc_research != -1)
   {
@@ -4287,8 +4287,8 @@ void do_kick( CHAR_DATA *ch, char *argument )
   if(IS_NPC(ch)) dam *= 100;
   if ( !IS_NPC(victim) && IS_CLASS(victim, CLASS_WEREWOLF) )
   {
-    if (IS_SET(victim->special, SPC_WOLFMAN)) dam *= 0.8;
-    if (victim->power[DISC_WERE_BOAR] > 2 ) dam *= 0.5;
+    if (IS_SET(victim->special, SPC_WOLFMAN)) dam = (int)(dam * 0.8);
+    if (victim->power[DISC_WERE_BOAR] > 2 ) dam = (int)(dam * 0.5);
     if ((boots = get_eq_char( ch, WEAR_FEET ) ) != NULL 
     && IS_SET(boots->spectype, SITEM_SILVER)) dam *= 2;
   }
@@ -4296,7 +4296,7 @@ void do_kick( CHAR_DATA *ch, char *argument )
   if (!IS_NPC(ch))
   {
     stance = ch->stance[0];
-    if ( IS_STANCE(ch, STANCE_NORMAL) ) dam *= 1.25;
+    if ( IS_STANCE(ch, STANCE_NORMAL) ) dam = (int)(dam * 1.25);
     else dam = dambonus(ch,victim,dam,stance);
   }
   if (!IS_NPC(ch) && !IS_NPC(victim) && dam > 750) dam = 750;
@@ -4333,7 +4333,7 @@ int dambonus( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int stance)
   {
     if ( IS_STANCE(ch, STANCE_MONKEY) )
     {
-      int mindam = dam * 0.25;
+      int mindam = (int)(dam * 0.25);
       dam *= (ch->stance[STANCE_MONKEY]+1) / 200;
       if (dam < mindam) dam = mindam;
     }
@@ -4358,7 +4358,7 @@ int dambonus( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int stance)
 /* ------------ This is the end for superstances, Jobo ------------------- */
 
     else if ( ch->stance[0] > 0 && ch->stance[stance] < 100 )
-      dam *= 0.5;
+      dam = (int)(dam * 0.5);
   }
   if (!IS_NPC(victim) && !can_counter(ch))
   {

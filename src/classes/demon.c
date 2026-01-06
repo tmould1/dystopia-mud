@@ -899,8 +899,8 @@ void do_cone( CHAR_DATA *ch, char *argument ) {
 
     if ( ( sn = skill_lookup( "cone" ) ) < 0 ) return;
     spelltype = skill_table[sn].target;
-    level = ch->spl[spelltype] * 1.0;
-	level = level * 1.0;
+    level = (int)(ch->spl[spelltype] * 1.0);
+	level = (int)(level * 1.0);
 	act("You Blast $N with a cone of fire.",ch,NULL,victim,TO_CHAR);
 	act("$n Blasts you with a cone of fire.",ch,NULL,victim,TO_VICT);
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );

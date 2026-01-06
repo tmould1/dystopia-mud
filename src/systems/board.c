@@ -154,8 +154,8 @@ void finish_note (BOARD_DATA *board, NOTE_DATA *note)
 		note->date_stamp = ++last_note_stamp;
 	else
 	{
-	    note->date_stamp = current_time;
-	    last_note_stamp = current_time;
+	    note->date_stamp = (long)current_time;
+	    last_note_stamp = (long)current_time;
 	}
 	
 	if (board->note_first) /* are there any notes in there now? */

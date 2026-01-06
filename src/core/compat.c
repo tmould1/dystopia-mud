@@ -168,7 +168,7 @@ void win32_mutex_init(pthread_mutex_t *mutex)
 
 /* ============================================
  * SECTION 3: DNS Lookup Wrapper
- * Thread-safe wrapper for gethostbyaddr
+ * Thread-safe wrapper using getnameinfo (replaces deprecated gethostbyaddr)
  * ============================================ */
 
 struct hostent *win32_gethostbyaddr_wrapper(const char *addr, int len, int type,
@@ -176,21 +176,45 @@ struct hostent *win32_gethostbyaddr_wrapper(const char *addr, int len, int type,
                                              size_t buflen, struct hostent **res,
                                              int *h_errnop)
 {
-    struct hostent *host;
+    static struct hostent host_result;
+    static char hostname[NI_MAXHOST];
+    static char *h_aliases[] = { NULL };
+    static char *h_addr_list[2];
+    static char addr_copy[16];
+    struct sockaddr_in sa;
+    int ret;
 
-    (void)result;  /* Not used - Windows gethostbyaddr returns static buffer */
+    (void)result;  /* Not used - we use our own static buffer */
     (void)buf;
     (void)buflen;
+    (void)type;    /* Assumed AF_INET */
 
-    host = gethostbyaddr(addr, len, type);
-    if (host) {
-        *res = host;
+    /* Build sockaddr_in for getnameinfo */
+    memset(&sa, 0, sizeof(sa));
+    sa.sin_family = AF_INET;
+    memcpy(&sa.sin_addr, addr, len);
+
+    ret = getnameinfo((struct sockaddr *)&sa, sizeof(sa), hostname, sizeof(hostname), NULL, 0, 0);
+    if (ret == 0) {
+        /* Populate hostent structure */
+        memcpy(addr_copy, addr, len);
+        h_addr_list[0] = addr_copy;
+        h_addr_list[1] = NULL;
+
+        host_result.h_name = hostname;
+        host_result.h_aliases = h_aliases;
+        host_result.h_addrtype = AF_INET;
+        host_result.h_length = len;
+        host_result.h_addr_list = h_addr_list;
+
+        *res = &host_result;
         if (h_errnop) *h_errnop = 0;
+        return &host_result;
     } else {
         *res = NULL;
         if (h_errnop) *h_errnop = WSAGetLastError();
+        return NULL;
     }
-    return host;
 }
 
 /* ============================================

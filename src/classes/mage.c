@@ -819,7 +819,7 @@ void do_discharge (CHAR_DATA *ch, char *argument)
         if ((mount = ch->mount) != NULL)
           if (mount == vch) continue;
         dam = number_range(magic_power*7/2, magic_power*9/2) + ch->damroll;
-        if (IS_AFFECTED(vch, AFF_SANCTUARY)) dam *= 0.5;
+        if (IS_AFFECTED(vch, AFF_SANCTUARY)) dam = (int)(dam * 0.5);
         sprintf(buf1,"$n's mystical shields explodes in a shower of flames striking $N [#C%d#n]",dam);
         sprintf(buf2,"Your mystical shields explodes in a shower of flames striking $N [#C%d#n]",dam);
         sprintf(buf3,"$n's mystical shields explodes in a shower of flames striking you [#C%d#n]",dam);

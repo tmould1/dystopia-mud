@@ -1656,7 +1656,7 @@ void do_tendrils( CHAR_DATA *ch, char *argument )
  if (is_safe(ch,victim) == TRUE) return;
     if ( ( sn = skill_lookup( "web" ) ) < 0 ) return;
     spelltype = skill_table[sn].target;
-    level = ch->spl[spelltype] * 0.25;
+    level = (int)(ch->spl[spelltype] * 0.25);
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );
     WAIT_STATE( ch, 12 );
     return;
@@ -1712,7 +1712,7 @@ dam = ch->power[DISC_VAMP_OBTE] * 100;
 }
 if ( !IS_NPC(victim) && IS_CLASS(victim, CLASS_WEREWOLF) )
 {
-    if (victim->power[DISC_WERE_BOAR] > 2 ) dam *= 0.5;
+    if (victim->power[DISC_WERE_BOAR] > 2 ) dam = (int)(dam * 0.5);
 }
 if (is_safe(ch,victim) == TRUE) return; 
 dam += number_range(1,30);
@@ -1982,7 +1982,7 @@ dam = ch->power[DISC_VAMP_SERP] * 125;
 }
 if ( !IS_NPC(victim) && IS_CLASS(victim, CLASS_WEREWOLF) )
 {
-    if (victim->power[DISC_WERE_BOAR] > 2 ) dam *= 0.5;
+    if (victim->power[DISC_WERE_BOAR] > 2 ) dam = (int)(dam * 0.5);
 }
  if (is_safe(ch,victim)== TRUE) return;
 dam += number_range(1,30);
@@ -3311,9 +3311,9 @@ send_to_char( "You aren't fighting anyone.\n\r", ch );
     ch->pcdata->condition[COND_THIRST] -= 5;
     if ( !IS_NPC(victim) && IS_CLASS(victim, CLASS_WEREWOLF) )
     {
-	if (victim->power[DISC_WERE_BOAR] > 2 ) dam *= 0.5;
+	if (victim->power[DISC_WERE_BOAR] > 2 ) dam = (int)(dam * 0.5);
     }
- 
+
     dam += number_range(1,30);
     if ( dam <= 0 )
        dam = 1;
@@ -4226,7 +4226,7 @@ if (is_safe(ch,victim) == TRUE) return;
     
     if (!IS_NPC(victim))  
         {
-          dam = value * 1.5;
+          dam = (int)(value * 1.5);
         hurt_person(ch, victim, dam);
         if (victim->pcdata->condition[COND_THIRST] < value)
         victim->pcdata->condition[COND_THIRST] = 1;

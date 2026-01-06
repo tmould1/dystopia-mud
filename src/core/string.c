@@ -115,7 +115,7 @@ char * string_replace( char * orig, char * old, char * new )
     strcpy( xbuf, orig );
     if ( strstr( orig, old ) != NULL )
     {
-        i = strlen( orig ) - strlen( strstr( orig, old ) );
+        i = (int)strlen( orig ) - (int)strlen( strstr( orig, old ) );
         xbuf[i] = '\0';
         strcat( xbuf, new );
         strcat( xbuf, &orig[i+strlen( old )] );
@@ -543,7 +543,7 @@ void add_commas_to_number( int number, char* out_str )
   // Go through the non_formatted_xp starting from the beginning;
   // emplace each character in the formatted string, and add a comma after every 3 characters  
   sprintf( non_formatted_string, "%d", number );
-  int len = strlen( non_formatted_string );
+  int len = (int)strlen( non_formatted_string );
   int num_commas = ( len - 1 ) / 3;
   int new_len = len + num_commas;
   out_str[new_len] = '\0';

@@ -199,7 +199,7 @@ void show_spec_cmds( CHAR_DATA *ch )
     buf1[0] = '\0';
     col = 0;
     send_to_char( "Preceed special functions with 'spec_'\n\r\n\r", ch );
-    for (spec = 0; *spec_table[spec].spec_fun; spec++)
+    for (spec = 0; spec_table[spec].spec_fun; spec++)
     {
 	sprintf( buf, "%-19.18s", &spec_table[spec].spec_name[5] );
 	strcat( buf1, buf );
@@ -659,7 +659,7 @@ bool aedit_file( CHAR_DATA *ch, char *argument )
     /*
      * Simple Syntax Check.
      */
-    length = strlen( argument );
+    length = (int)strlen( argument );
     if ( length > 8 )
     {
 	send_to_char( "No more than eight characters allowed.\n\r", ch );
@@ -1075,7 +1075,7 @@ bool redit_show( CHAR_DATA *ch, char *argument )
     {
 	int end;
 
-	end = strlen(buf1) - 1;
+	end = (int)strlen(buf1) - 1;
 	buf1[end] = ']';
 	strcat( buf1, "\n\r" );
     }
@@ -1096,7 +1096,7 @@ bool redit_show( CHAR_DATA *ch, char *argument )
     {
 	int end;
 
-	end = strlen(buf1) - 1;
+	end = (int)strlen(buf1) - 1;
 	buf1[end] = ']';
 	strcat( buf1, "\n\r" );
     }
@@ -1135,7 +1135,7 @@ bool redit_show( CHAR_DATA *ch, char *argument )
 		{
 		    int end;
 
-		    end = strlen(buf1) - 1;
+		    end = (int)strlen(buf1) - 1;
 		    buf1[end] = ']';
 		    strcat( buf1, "\n\r" );
 		    break;
@@ -1143,7 +1143,7 @@ bool redit_show( CHAR_DATA *ch, char *argument )
 
 		if ( str_infix( word, reset_state ) )
 		{
-		    length = strlen(word);
+		    length = (int)strlen(word);
 		    for (i = 0; i < length; i++)
 			word[i] = toupper(word[i]);
 		}

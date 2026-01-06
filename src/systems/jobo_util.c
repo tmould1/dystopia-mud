@@ -23,9 +23,9 @@
 bool is_contained( const char *astr, const char *bstr )
 {
   int i, alen, blen, count;
-   
-  alen = strlen(astr);
-  blen = strlen(bstr);
+
+  alen = (int)strlen(astr);
+  blen = (int)strlen(bstr);
   if (alen > blen) return FALSE;
   for (i = 0; i <= (blen - alen); i++)
   {
@@ -39,9 +39,9 @@ bool is_contained( const char *astr, const char *bstr )
 bool is_contained2( const char *astr, const char *bstr )
 {
   int i, alen, blen, count;
-   
-  alen = strlen(astr);
-  blen = strlen(bstr);
+
+  alen = (int)strlen(astr);
+  blen = (int)strlen(bstr);
   if (alen > blen) return FALSE;
   for (i = 0; i <= (blen - alen); i++)
   {
@@ -57,7 +57,7 @@ int strlen2(const char *s)
   int i, b, count=0;
 
   if (s[0] == '\0') return 0;
-  b = strlen(s);
+  b = (int)strlen(s);
   for (i = 0; i < b; i++)
   {
     if (s[i] == '#') count++;
@@ -651,11 +651,11 @@ void logout_message(CHAR_DATA *ch)
   {
     if (d->lookup_status != STATUS_DONE) continue;
     if (d->connected != CON_PLAYING ) continue;
-    write_to_buffer( d, buf, ptr - buf );
+    write_to_buffer( d, buf, (int)(ptr - buf) );
   }
   return;
 }
-  
+
 void tie_message(CHAR_DATA *ch, CHAR_DATA *victim)
 {
   static char * const he_she  [] = { "XX", "he",  "she" };
@@ -715,7 +715,7 @@ void tie_message(CHAR_DATA *ch, CHAR_DATA *victim)
   {
     if (d->lookup_status != STATUS_DONE) continue;
     if (d->connected != CON_PLAYING ) continue;
-    write_to_buffer( d, buf, ptr - buf );
+    write_to_buffer( d, buf, (int)(ptr - buf) );
   }
   return;
 }
@@ -771,12 +771,12 @@ void login_message(CHAR_DATA *ch)
   }
   *ptr++ = '\n';
   *ptr++ = '\r';
-    
+
   for (d = descriptor_list; d; d = d->next)
   {
     if (d->lookup_status != STATUS_DONE) continue;
     if (d->connected != CON_PLAYING ) continue;
-    write_to_buffer( d, buf, ptr - buf );
+    write_to_buffer( d, buf, (int)(ptr - buf) );
   }
   return;
 }
@@ -835,12 +835,12 @@ void special_decap_message(CHAR_DATA *ch, CHAR_DATA *victim)
   }
   *ptr++ = '\n';
   *ptr++ = '\r';
-  
+
   for (d = descriptor_list; d; d = d->next)
   {
     if (d->lookup_status != STATUS_DONE) continue;
     if (d->connected != CON_PLAYING ) continue;
-    write_to_buffer( d, buf, ptr - buf );
+    write_to_buffer( d, buf, (int)(ptr - buf) );
   }
   return;
 }
@@ -895,16 +895,16 @@ void avatar_message(CHAR_DATA *ch)
       ++ptr, ++i;
   }
   *ptr++ = '\n';
-  *ptr++ = '\r'; 
-   
+  *ptr++ = '\r';
+
   for (d = descriptor_list; d; d = d->next)
   {
     if (d->lookup_status != STATUS_DONE) continue;
     if (d->connected != CON_PLAYING ) continue;
-    write_to_buffer( d, buf, ptr - buf );
+    write_to_buffer( d, buf, (int)(ptr - buf) );
   }
   return;
-} 
+}
 
 void recycle_descriptors()
 {

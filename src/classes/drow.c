@@ -353,7 +353,7 @@ void do_drowfire( CHAR_DATA *ch, char *argument ) {
 
     if ( ( sn = skill_lookup( "drowfire" ) ) < 0 ) return;
     spelltype = skill_table[sn].target;
-    level = ch->spl[spelltype] * 1.5;
+    level = (int)(ch->spl[spelltype] * 1.5);
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );
     WAIT_STATE( ch, 12 );
     use_mana(ch, 100);

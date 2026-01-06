@@ -402,7 +402,7 @@ void do_shift (CHAR_DATA *ch, char *argument)
     if (ch->pcdata->powers[SHAPE_COUNTER] < 15)
     {
       send_to_char("#CYour wounds mend and close.\n\r#n",ch);
-      heal_char(ch, UMIN(5000,ch->max_hit*0.1));
+      heal_char(ch, (int)UMIN(5000,ch->max_hit*0.1));
     }
     sprintf(buf,"%s the huge phase tiger",ch->name);
     free_string(ch->morph);
@@ -428,7 +428,7 @@ void do_shift (CHAR_DATA *ch, char *argument)
     if (ch->pcdata->powers[SHAPE_COUNTER] < 15)
     {
       send_to_char("#CYour wounds mend and close.\n\r#n",ch);
-      heal_char(ch, UMIN(5000,ch->max_hit*0.1));
+      heal_char(ch, (int)UMIN(5000,ch->max_hit*0.1));
     }
     sprintf(buf,"%s the horrific hydra",ch->name);
     free_string(ch->morph);
@@ -454,7 +454,7 @@ void do_shift (CHAR_DATA *ch, char *argument)
     if (ch->pcdata->powers[SHAPE_COUNTER] < 15)
     {
       send_to_char("#CYour wounds mend and close.\n\r#n",ch);
-      heal_char(ch, UMIN(5000,ch->max_hit*0.1));
+      heal_char(ch, (int)UMIN(5000,ch->max_hit*0.1));
     }
     sprintf(buf,"%s the black bull",ch->name);
     free_string(ch->morph);
@@ -480,7 +480,7 @@ void do_shift (CHAR_DATA *ch, char *argument)
     if (ch->pcdata->powers[SHAPE_COUNTER] < 15)
     {
       send_to_char("#CYour wounds mend and close.\n\r#n",ch);
-      heal_char(ch, UMIN(5000,ch->max_hit*0.1));
+      heal_char(ch, (int)UMIN(5000,ch->max_hit*0.1));
     }
     sprintf(buf,"%s the small pixie",ch->name);
     free_string(ch->morph);

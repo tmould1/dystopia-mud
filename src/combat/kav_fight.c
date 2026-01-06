@@ -71,8 +71,8 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand )
     if ( dtype < 1000 || dtype > 1012 ) return;
 	    dtype -= 1000;
 
-    if (ch->generation == 2) max_skl += max_skl *0.1;
-    else if(ch->generation == 1) max_skl += max_skl *0.2;
+    if (ch->generation == 2) max_skl += (int)(max_skl *0.1);
+    else if(ch->generation == 1) max_skl += (int)(max_skl *0.2);
     if (max_skl > 1100) max_skl = 1100;
 
     if( ch->level < 3 && ch->class != CLASS_MONK && ch->class != CLASS_WEREWOLF) max_skl = 200;
@@ -193,7 +193,7 @@ void do_alignment( CHAR_DATA *ch, char *argument )
       send_to_char( "Please enter 'good', 'neutral', or 'evil'.\n\r", ch );
       return;
     }
-    ch->exp -= ch->exp * 0.1;
+    ch->exp -= (int)(ch->exp * 0.1);
     return;
 }
 

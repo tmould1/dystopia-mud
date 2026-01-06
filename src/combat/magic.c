@@ -230,7 +230,7 @@ void say_spell( CHAR_DATA *ch, int sn )
     buf[0]	= '\0';
     for ( pName = skill_table[sn].name; *pName != '\0'; pName += length )
     {
-	for ( iSyl = 0; (length = strlen(syl_table[iSyl].old)) != 0; iSyl++ )
+	for ( iSyl = 0; (length = (int)strlen(syl_table[iSyl].old)) != 0; iSyl++ )
 	{
 	    if ( !str_prefix( syl_table[iSyl].old, pName ) )
 	    {
@@ -306,8 +306,8 @@ bool saves_spell( int level, CHAR_DATA *victim )
 
     if (!IS_NPC(victim))
     {
-	tsave = ( victim->spl[0]+victim->spl[1]+victim->spl[2]+
-		  victim->spl[3]+victim->spl[4] ) * 0.05;
+	tsave = (int)(( victim->spl[0]+victim->spl[1]+victim->spl[2]+
+		  victim->spl[3]+victim->spl[4] ) * 0.05);
     	save = 50 + ( tsave - level - victim->saving_throw ) * 5;
     }
     else
@@ -598,12 +598,12 @@ void do_cast( CHAR_DATA *ch, char *argument )
             (*skill_table[sn].spell_fun) ( sn, ch->level, ch, vo );
         else if ( !IS_CLASS(ch, CLASS_MAGE) && !IS_CLASS(ch, CLASS_LICH))
         {
-            (*skill_table[sn].spell_fun) ( sn, ((ch->spl[skill_table[sn].target]*0.25)+tempentro), ch, vo );
+            (*skill_table[sn].spell_fun) ( sn, (int)((ch->spl[skill_table[sn].target]*0.25)+tempentro), ch, vo );
             improve_spl(ch,skill_table[sn].target,sn);
         }
         else
         {
-            (*skill_table[sn].spell_fun) ( sn, (ch->spl[skill_table[sn].target]*.5+tempentro),ch, vo );
+            (*skill_table[sn].spell_fun) ( sn, (int)(ch->spl[skill_table[sn].target]*.5+tempentro),ch, vo );
             improve_spl(ch,skill_table[sn].target,sn);
         }
      }
@@ -2247,9 +2247,9 @@ void spell_high_explosive( int sn, int level, CHAR_DATA *ch, void *vo )
     int dam;
 	return;
     dam = dice( level, 150 );
-    if ( saves_spell( level, victim ) ) dam *= 0.5;
+    if ( saves_spell( level, victim ) ) dam = (int)(dam * 0.5);
     damage( ch, victim, dam, sn );
-    return; 
+    return;
 }
 
 void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo )
@@ -5161,10 +5161,10 @@ void spell_chaos_blast( int sn, int level, CHAR_DATA *ch, void *vo )
 
 	if (IS_ITEMAFF(victim, ITEMA_CHAOSSHIELD)) return;
 	dam = dice( level, 150 );
-	if ( saves_spell( level, victim ) ) dam *= 0.5;
-	if (IS_AFFECTED(ch, AFF_SANCTUARY) ) dam *= 0.5;
-	if (IS_ITEMAFF(ch, ITEMA_CHAOSSHIELD)) dam *= 0.75;
-        if (!IS_NPC(ch)) dam *= 0.5;
+	if ( saves_spell( level, victim ) ) dam = (int)(dam * 0.5);
+	if (IS_AFFECTED(ch, AFF_SANCTUARY) ) dam = (int)(dam * 0.5);
+	if (IS_ITEMAFF(ch, ITEMA_CHAOSSHIELD)) dam = (int)(dam * 0.75);
+        if (!IS_NPC(ch)) dam = (int)(dam * 0.5);
         if (IS_NPC(victim) && dam >= victim->hit) dam = victim->hit-1;
         if (dam==0) return;
 	damage( ch, victim, dam, sn );

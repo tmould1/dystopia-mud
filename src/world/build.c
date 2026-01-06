@@ -599,7 +599,7 @@ void edit_buffer( CHAR_DATA *ch, char *argument )
 		send_to_char( "Done.\n\r> ", ch );
 		return;
 	    }
-	    count = 0;  wordln = strlen(word1);  (void)strlen(word2);
+	    count = 0;  wordln = (int)strlen(word1);  (void)strlen(word2);
 	    sprintf( buf, "Replacing all occurrences of %s with %s...\n\r", word1, word2 );
 	     stc(buf, ch);
 	    for ( x = edit->on_line; x < edit->numlines; x++ )
@@ -610,16 +610,16 @@ void edit_buffer( CHAR_DATA *ch, char *argument )
 		    sptr = lwptr;
 		    lwptr = wptr + wordln;
 		    sprintf( buf, "%s%s", word2, wptr + wordln );
-		    lineln = wptr - edit->line[x] - wordln;
+		    lineln = (int)(wptr - edit->line[x]) - wordln;
 		    ++count;
-		    if ( strlen(buf) + lineln > 79 )
+		    if ( (int)strlen(buf) + lineln > 79 )
 		    {
-			lineln = UMAX(0, (79 - strlen(buf)));
+			lineln = UMAX(0, (79 - (int)strlen(buf)));
 			buf[lineln] = '\0';
 			break;
 		    }
 		    else
-			lineln = strlen(buf);
+			lineln = (int)strlen(buf);
 		    buf[lineln] = '\0';
 		    strcpy( wptr, buf );
 		}
@@ -815,7 +815,7 @@ void smush_tilde( char *str )
     
     strptr = str;
     
-    len  = strlen( str );
+    len  = (int)strlen( str );
     if ( len )
       last = strptr[len-1];
     else
@@ -914,7 +914,7 @@ char *copy_buffer( CHAR_DATA *ch )
    {
       strcpy( tmp, ch->editor->line[x] );
       smush_tilde( tmp );
-      len = strlen(tmp);
+      len = (sh_int)strlen(tmp);
       if ( tmp[0] != '\0' && tmp[len-1] == '~' )
         tmp[len-1] = '\0';
       else
