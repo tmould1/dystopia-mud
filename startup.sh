@@ -34,19 +34,9 @@ if [ -e "$GAMEDATA_DIR/area/shutdown.txt" ]; then
 fi
 
 while true; do
-  # If you want to have logs in a different directory,
-  # change the 'logfile' line to reflect the directory name.
-  index=1000
-  while true; do
-    logfile="$GAMEDATA_DIR/log/$index.log"
-    if [ ! -e "$logfile" ]; then
-      break
-    fi
-    ((index++))
-  done
-
   # Run the MUD (executable is in gamedata/)
-  "$GAMEDATA_DIR/dystopia" "$port" >& "$logfile"
+  # Logs are written internally to gamedata/log/ with timestamped filenames
+  "$GAMEDATA_DIR/dystopia" "$port"
 
   # Restart, giving old connections a chance to die.
   if [ -e "$GAMEDATA_DIR/area/shutdown.txt" ]; then

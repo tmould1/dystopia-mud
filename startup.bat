@@ -26,19 +26,10 @@ if exist "%GAMEDATA_DIR%\area\shutdown.txt" (
 )
 
 :loop
-    REM Find next available log file number
-    set index=1000
-    :findlog
-        set logfile=%GAMEDATA_DIR%\log\!index!.log
-        if not exist "!logfile!" goto :runmud
-        set /a index+=1
-        goto :findlog
-
-    :runmud
     REM Run the MUD (executable is in gamedata/)
+    REM Logs are written internally to gamedata/log/ with timestamped filenames
     echo Starting Dystopia MUD on port %port%...
-    echo Log file: !logfile!
-    "%GAMEDATA_DIR%\dystopia.exe" %port% > "!logfile!" 2>&1
+    "%GAMEDATA_DIR%\dystopia.exe" %port%
 
     REM Check for shutdown file
     if exist "%GAMEDATA_DIR%\area\shutdown.txt" (

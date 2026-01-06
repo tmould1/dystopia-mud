@@ -123,14 +123,25 @@ void mud_init_paths(const char *exe_path)
     snprintf(mud_log_dir, sizeof(mud_log_dir), "%.450s%slog", gamedata_dir, PATH_SEPARATOR);
     snprintf(mud_notes_dir, sizeof(mud_notes_dir), "%.450s%snotes%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR);
 
-    fprintf(stderr, "MUD paths initialized:\n");
-    fprintf(stderr, "  Base:     %s\n", mud_base_dir);
-    fprintf(stderr, "  Area:     %s\n", mud_area_dir);
-    fprintf(stderr, "  Player:   %s\n", mud_player_dir);
-    fprintf(stderr, "  Backup:   %s\n", mud_backup_dir);
-    fprintf(stderr, "  Txt:      %s\n", mud_txt_dir);
-    fprintf(stderr, "  Log:      %s\n", mud_log_dir);
-    fprintf(stderr, "  Notes:    %s\n", mud_notes_dir);
+    /* Log path initialization - uses log_string() to write to both stderr and log file */
+    log_string("MUD paths initialized:");
+    {
+        char buf[MAX_STRING_LENGTH];
+        snprintf(buf, sizeof(buf), "  Base:     %s", mud_base_dir);
+        log_string(buf);
+        snprintf(buf, sizeof(buf), "  Area:     %s", mud_area_dir);
+        log_string(buf);
+        snprintf(buf, sizeof(buf), "  Player:   %s", mud_player_dir);
+        log_string(buf);
+        snprintf(buf, sizeof(buf), "  Backup:   %s", mud_backup_dir);
+        log_string(buf);
+        snprintf(buf, sizeof(buf), "  Txt:      %s", mud_txt_dir);
+        log_string(buf);
+        snprintf(buf, sizeof(buf), "  Log:      %s", mud_log_dir);
+        log_string(buf);
+        snprintf(buf, sizeof(buf), "  Notes:    %s", mud_notes_dir);
+        log_string(buf);
+    }
 }
 
 /*
