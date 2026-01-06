@@ -6405,7 +6405,7 @@ bool free_helps( CHAR_DATA *ch, char *arg )
 }
 
 
-bool read_entry( CHAR_DATA *ch, FILE *fp, char *filename, char *arg )
+bool read_entry( CHAR_DATA *ch, FILE *fp, const char *filename, char *arg )
 {
     char buf[MAX_STRING_LENGTH];
     HELP_DATA *new;
@@ -6469,14 +6469,9 @@ void do_hreload( CHAR_DATA *ch, char *argument )
 {
     char arg[MAX_INPUT_LENGTH];
     char buf[MAX_STRING_LENGTH];
+    const char *helpfile;
     FILE *fp;
     bool found = FALSE;
-    int i;
-
-    /* in order of 'importance' */
-    char *helpfile[] = {
-        "../area/help.are",
-        };
 
     argument = one_argument( argument, arg );
 
@@ -6492,23 +6487,19 @@ void do_hreload( CHAR_DATA *ch, char *argument )
 
     /* here we go */
     fclose( fpReserve );
-    for ( i = 0; i < 9; i++ )
+
+    helpfile = mud_path(mud_area_dir, "help.are");
+    if ( ( fp = fopen( helpfile, "r" ) ) == NULL )
     {
-        if ( ( fp = fopen( helpfile[i], "r" ) ) == NULL )
-        {
-            sprintf( buf, "do_reload: couldn't open %s.\n\r", helpfile[i] );
-            send_to_char( buf, ch );
-        }
-        else
-        {
-            if ( ( found = read_entry( ch, fp, helpfile[i], arg ) ) == TRUE )
-            {
-                fclose( fp );
-                break;
-            }
-            fclose( fp );
-        }
+        sprintf( buf, "do_reload: couldn't open %s.\n\r", helpfile );
+        send_to_char( buf, ch );
     }
+    else
+    {
+        found = read_entry( ch, fp, helpfile, arg );
+        fclose( fp );
+    }
+
     fpReserve = fopen( NULL_FILE, "r" );
     return;
 }

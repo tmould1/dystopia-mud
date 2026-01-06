@@ -572,7 +572,7 @@ int main( int argc, char **argv )
 	}
     }
 
- 	if (argv[2] && argv[2][0])
+ 	if (argc > 2 && argv[2] && argv[2][0])
  	{
  		fCopyOver = TRUE;
 #if defined(WIN32)

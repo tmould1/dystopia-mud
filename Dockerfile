@@ -28,17 +28,19 @@ COPY . .
 # Open a port, set in comm.c and startup
 EXPOSE 8888
 
-RUN cd src && \
-    make clean && \
-    make && \
-    chmod +x startup
+# Build from game/build directory
+RUN cd game/build && \
+    make -f Makefile clean && \
+    make -f Makefile && \
+    chmod +x ../../devops/startup.sh
 
-VOLUME [    "/dystopia-mud/player", \
-            "/dystopia-mud/area", \
-            "/dystopia-mud/log", \
-            "/dystopia-mud/notes", \
-            "/dystopia-mud/txt" \
-            "/dystopia-mud/src" \
+# Mount points for runtime data
+VOLUME [    "/dystopia-mud/gamedata/player", \
+            "/dystopia-mud/gamedata/area", \
+            "/dystopia-mud/gamedata/log", \
+            "/dystopia-mud/gamedata/notes", \
+            "/dystopia-mud/gamedata/txt", \
+            "/dystopia-mud/game/src" \
         ]
 
-ENTRYPOINT ["/bin/bash", "-c", "cd src && make && ./startup.sh && tail -f /dev/null"]
+ENTRYPOINT ["/bin/bash", "-c", "cd game/build && make -f Makefile && cd ../../devops && ./startup.sh && tail -f /dev/null"]

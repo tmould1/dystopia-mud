@@ -1110,13 +1110,15 @@ void do_hset( CHAR_DATA *ch, char *argument )
     if ( !str_cmp( arg1, "save" ) )
     {
 	FILE *fpout;
+	const char *help_file = mud_path(mud_area_dir, "help.are");
+	const char *help_bak = mud_path(mud_area_dir, "help.are.bak");
 
-	rename( "help.are", "help.are.bak" );
+	rename( help_file, help_bak );
 	fclose( fpReserve );
-	if ( ( fpout = fopen( "help.are", "w" ) ) == NULL )
+	if ( ( fpout = fopen( help_file, "w" ) ) == NULL )
 	{
 	   bug( "hset save: fopen", 0 );
-	   perror( "help.are" );
+	   perror( help_file );
 	   fpReserve = fopen( NULL_FILE, "r" );
 	   return;
 	}

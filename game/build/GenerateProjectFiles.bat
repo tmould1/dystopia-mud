@@ -1,0 +1,619 @@
+@echo off
+setlocal enabledelayedexpansion
+
+REM ============================================================================
+REM GenerateProjectFiles.bat - Dystopia MUD Build File Generator
+REM ============================================================================
+REM Scans src/ subdirectories and generates:
+REM   - build/Makefile              (Linux GCC)
+REM   - build/Makefile.mingw        (Windows MinGW)
+REM   - build/dystopia.sln          (Visual Studio Solution)
+REM   - build/dystopia.vcxproj      (Visual Studio Project)
+REM   - build/dystopia.vcxproj.filters (VS Folder Structure)
+REM
+REM Usage: GenerateProjectFiles.bat
+REM ============================================================================
+
+echo.
+echo ============================================================
+echo  Dystopia MUD - Project File Generator
+echo ============================================================
+echo.
+
+REM Navigate to script directory (game/build/)
+cd /d "%~dp0"
+
+REM Fixed GUIDs for deterministic output
+set PROJECT_GUID={D1570A81-7D95-4F4D-9B0A-8C2E456789AB}
+set SOLUTION_GUID={E2681B92-8E06-5A5E-0C1B-9D3F567890BC}
+set CPP_PROJECT_TYPE={8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}
+
+REM Source subdirectories
+set SUBDIRS=core classes combat commands world systems
+
+REM ============================================================================
+REM Step 1: Create backup of existing files
+REM ============================================================================
+echo [1/7] Creating backup of existing build files...
+
+REM Generate timestamp
+for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value 2^>nul') do set datetime=%%I
+set BACKUP_DIR=backup\%datetime:~0,8%-%datetime:~8,6%
+
+REM Check if any files exist to backup
+set HAS_FILES=0
+if exist "Makefile" set HAS_FILES=1
+if exist "Makefile.mingw" set HAS_FILES=1
+if exist "dystopia.sln" set HAS_FILES=1
+if exist "dystopia.vcxproj" set HAS_FILES=1
+if exist "dystopia.vcxproj.filters" set HAS_FILES=1
+
+if %HAS_FILES%==1 (
+    if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
+    if errorlevel 1 (
+        echo ERROR: Failed to create backup directory %BACKUP_DIR%
+        exit /b 1
+    )
+
+    if exist "Makefile" copy /y "Makefile" "%BACKUP_DIR%\" >nul
+    if exist "Makefile.mingw" copy /y "Makefile.mingw" "%BACKUP_DIR%\" >nul
+    if exist "dystopia.sln" copy /y "dystopia.sln" "%BACKUP_DIR%\" >nul
+    if exist "dystopia.vcxproj" copy /y "dystopia.vcxproj" "%BACKUP_DIR%\" >nul
+    if exist "dystopia.vcxproj.filters" copy /y "dystopia.vcxproj.filters" "%BACKUP_DIR%\" >nul
+
+    echo       Backup created: %BACKUP_DIR%
+) else (
+    echo       No existing files to backup
+)
+
+REM ============================================================================
+REM Step 2: Scan source directories for .c and .h files
+REM ============================================================================
+echo [2/7] Scanning source directories...
+
+REM Initialize file lists
+set CORE_SRC=
+set CLASSES_SRC=
+set COMBAT_SRC=
+set COMMANDS_SRC=
+set WORLD_SRC=
+set SYSTEMS_SRC=
+
+set CORE_HDR=
+set CLASSES_HDR=
+set COMBAT_HDR=
+set COMMANDS_HDR=
+set WORLD_HDR=
+set SYSTEMS_HDR=
+
+REM Scan each subdirectory for .c files (source is in ../src/ relative to game/build/)
+for %%d in (%SUBDIRS%) do (
+    set "FILES_%%d="
+    for %%f in (..\src\%%d\*.c) do (
+        if exist "%%f" (
+            for %%n in (%%~nf) do (
+                if defined FILES_%%d (
+                    set "FILES_%%d=!FILES_%%d! %%n.c"
+                ) else (
+                    set "FILES_%%d=%%n.c"
+                )
+            )
+        )
+    )
+)
+
+REM Copy to named variables
+set "CORE_SRC=!FILES_core!"
+set "CLASSES_SRC=!FILES_classes!"
+set "COMBAT_SRC=!FILES_combat!"
+set "COMMANDS_SRC=!FILES_commands!"
+set "WORLD_SRC=!FILES_world!"
+set "SYSTEMS_SRC=!FILES_systems!"
+
+REM Scan for .h files
+for %%d in (%SUBDIRS%) do (
+    set "HDRS_%%d="
+    for %%f in (..\src\%%d\*.h) do (
+        if exist "%%f" (
+            for %%n in (%%~nf) do (
+                if defined HDRS_%%d (
+                    set "HDRS_%%d=!HDRS_%%d! %%n.h"
+                ) else (
+                    set "HDRS_%%d=%%n.h"
+                )
+            )
+        )
+    )
+)
+
+set "CORE_HDR=!HDRS_core!"
+set "CLASSES_HDR=!HDRS_classes!"
+set "COMBAT_HDR=!HDRS_combat!"
+set "COMMANDS_HDR=!HDRS_commands!"
+set "WORLD_HDR=!HDRS_world!"
+set "SYSTEMS_HDR=!HDRS_systems!"
+
+REM Count files
+set /a TOTAL_C=0
+for %%d in (%SUBDIRS%) do (
+    for %%f in (..\src\%%d\*.c) do (
+        if exist "%%f" set /a TOTAL_C+=1
+    )
+)
+echo       Found %TOTAL_C% source files
+
+REM ============================================================================
+REM Step 3: Generate Linux Makefile
+REM ============================================================================
+echo [3/7] Generating Makefile (Linux GCC)...
+
+(
+echo # Linux/Unix Makefile for Dystopia MUD
+echo # Auto-generated by GenerateProjectFiles.bat
+echo # Run from game/build: make -f Makefile
+echo #
+echo # Parallel compilation: make -j$^(nproc^) -f Makefile
+echo.
+echo CC = gcc
+echo.
+echo # Enable parallel-safe output ^(GNU Make 4.0+^)
+echo MAKEFLAGS += --output-sync=target
+echo.
+echo # Directories ^(relative to game/build/^)
+echo SRC_DIR = ../src
+echo OBJ_DIR = obj
+echo.
+echo # Subdirectories
+echo CORE_DIR     = $^(SRC_DIR^)/core
+echo CLASSES_DIR  = $^(SRC_DIR^)/classes
+echo COMBAT_DIR   = $^(SRC_DIR^)/combat
+echo COMMANDS_DIR = $^(SRC_DIR^)/commands
+echo WORLD_DIR    = $^(SRC_DIR^)/world
+echo SYSTEMS_DIR  = $^(SRC_DIR^)/systems
+echo.
+echo # Include paths ^(so #include "merc.h" works from any source file^)
+echo INCLUDES = -I$^(CORE_DIR^) -I$^(CLASSES_DIR^) -I$^(WORLD_DIR^) -I$^(SYSTEMS_DIR^)
+echo.
+echo # Compiler and linker flags
+echo C_FLAGS = -Wall -O2 $^(INCLUDES^)
+echo L_FLAGS = -lz -lcrypt -lpthread
+echo.
+echo # Source files by directory
+echo CORE_SRC = %CORE_SRC%
+echo CLASSES_SRC = %CLASSES_SRC%
+echo COMBAT_SRC = %COMBAT_SRC%
+echo COMMANDS_SRC = %COMMANDS_SRC%
+echo WORLD_SRC = %WORLD_SRC%
+echo SYSTEMS_SRC = %SYSTEMS_SRC%
+echo.
+echo # Object files with subdirectory paths
+echo CORE_OBJ     = $^(addprefix $^(OBJ_DIR^)/core/,$^(CORE_SRC:.c=.o^)^)
+echo CLASSES_OBJ  = $^(addprefix $^(OBJ_DIR^)/classes/,$^(CLASSES_SRC:.c=.o^)^)
+echo COMBAT_OBJ   = $^(addprefix $^(OBJ_DIR^)/combat/,$^(COMBAT_SRC:.c=.o^)^)
+echo COMMANDS_OBJ = $^(addprefix $^(OBJ_DIR^)/commands/,$^(COMMANDS_SRC:.c=.o^)^)
+echo WORLD_OBJ    = $^(addprefix $^(OBJ_DIR^)/world/,$^(WORLD_SRC:.c=.o^)^)
+echo SYSTEMS_OBJ  = $^(addprefix $^(OBJ_DIR^)/systems/,$^(SYSTEMS_SRC:.c=.o^)^)
+echo.
+echo O_FILES = $^(CORE_OBJ^) $^(CLASSES_OBJ^) $^(COMBAT_OBJ^) $^(COMMANDS_OBJ^) $^(WORLD_OBJ^) $^(SYSTEMS_OBJ^)
+echo.
+echo # Object directory structure
+echo OBJ_DIRS = $^(OBJ_DIR^)/core $^(OBJ_DIR^)/classes $^(OBJ_DIR^)/combat \
+echo            $^(OBJ_DIR^)/commands $^(OBJ_DIR^)/world $^(OBJ_DIR^)/systems
+echo.
+echo # Target executable ^(in game/bin/^)
+echo TARGET = ../bin/dystopia
+echo.
+echo all: $^(OBJ_DIRS^) $^(TARGET^)
+echo.
+echo # Create all object subdirectories
+echo $^(OBJ_DIRS^):
+echo 	mkdir -p $@
+echo.
+echo $^(TARGET^): $^(O_FILES^)
+echo 	$^(CC^) -o $^(TARGET^) $^(O_FILES^) $^(L_FLAGS^)
+echo 	chmod g+w $^(TARGET^)
+echo.
+echo # Pattern rules for each source directory
+echo $^(OBJ_DIR^)/core/%%.o: $^(CORE_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/classes/%%.o: $^(CLASSES_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/combat/%%.o: $^(COMBAT_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/commands/%%.o: $^(COMMANDS_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/world/%%.o: $^(WORLD_DIR^)/%%.c $^(CORE_DIR^)/merc.h $^(WORLD_DIR^)/olc.h
+echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/systems/%%.o: $^(SYSTEMS_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
+echo.
+echo clean:
+echo 	rm -f $^(O_FILES^) $^(TARGET^)
+echo 	rm -rf $^(OBJ_DIR^)
+echo.
+echo .PHONY: clean all
+) > Makefile
+
+REM ============================================================================
+REM Step 4: Generate MinGW Makefile
+REM ============================================================================
+echo [4/7] Generating Makefile.mingw (Windows MinGW)...
+
+(
+echo # MinGW Makefile for Dystopia MUD ^(Windows^)
+echo # Auto-generated by GenerateProjectFiles.bat
+echo # Run from game/build: make -f Makefile.mingw
+echo #
+echo # For easier builds, use: build.bat
+echo.
+echo CC = gcc
+echo.
+echo # Enable parallel-safe output ^(GNU Make 4.0+^)
+echo MAKEFLAGS += --output-sync=target
+echo.
+echo # Directories ^(relative to game/build/^)
+echo SRC_DIR = ../src
+echo OBJ_DIR = obj
+echo.
+echo # Subdirectories
+echo CORE_DIR     = $^(SRC_DIR^)/core
+echo CLASSES_DIR  = $^(SRC_DIR^)/classes
+echo COMBAT_DIR   = $^(SRC_DIR^)/combat
+echo COMMANDS_DIR = $^(SRC_DIR^)/commands
+echo WORLD_DIR    = $^(SRC_DIR^)/world
+echo SYSTEMS_DIR  = $^(SRC_DIR^)/systems
+echo.
+echo # Include paths
+echo INCLUDES = -I$^(CORE_DIR^) -I$^(CLASSES_DIR^) -I$^(WORLD_DIR^) -I$^(SYSTEMS_DIR^)
+echo.
+echo # Compiler and linker flags for Windows
+echo C_FLAGS = -Wall -DWIN32 -DHAVE_ZLIB -O2 -c $^(INCLUDES^)
+echo L_FLAGS = -lws2_32 -lbcrypt -lz
+echo.
+echo # Source files by directory
+echo CORE_SRC = %CORE_SRC%
+echo CLASSES_SRC = %CLASSES_SRC%
+echo COMBAT_SRC = %COMBAT_SRC%
+echo COMMANDS_SRC = %COMMANDS_SRC%
+echo WORLD_SRC = %WORLD_SRC%
+echo SYSTEMS_SRC = %SYSTEMS_SRC%
+echo.
+echo # Object files with subdirectory paths
+echo CORE_OBJ     = $^(addprefix $^(OBJ_DIR^)/core/,$^(CORE_SRC:.c=.o^)^)
+echo CLASSES_OBJ  = $^(addprefix $^(OBJ_DIR^)/classes/,$^(CLASSES_SRC:.c=.o^)^)
+echo COMBAT_OBJ   = $^(addprefix $^(OBJ_DIR^)/combat/,$^(COMBAT_SRC:.c=.o^)^)
+echo COMMANDS_OBJ = $^(addprefix $^(OBJ_DIR^)/commands/,$^(COMMANDS_SRC:.c=.o^)^)
+echo WORLD_OBJ    = $^(addprefix $^(OBJ_DIR^)/world/,$^(WORLD_SRC:.c=.o^)^)
+echo SYSTEMS_OBJ  = $^(addprefix $^(OBJ_DIR^)/systems/,$^(SYSTEMS_SRC:.c=.o^)^)
+echo.
+echo O_FILES = $^(CORE_OBJ^) $^(CLASSES_OBJ^) $^(COMBAT_OBJ^) $^(COMMANDS_OBJ^) $^(WORLD_OBJ^) $^(SYSTEMS_OBJ^)
+echo.
+echo # Object directory structure
+echo OBJ_DIRS = $^(OBJ_DIR^)/core $^(OBJ_DIR^)/classes $^(OBJ_DIR^)/combat \
+echo            $^(OBJ_DIR^)/commands $^(OBJ_DIR^)/world $^(OBJ_DIR^)/systems
+echo.
+echo # Target executable selection ^(in game/bin/^):
+echo # - If dystopia.exe doesn't exist, build dystopia.exe ^(fresh install^)
+echo # - If dystopia.exe exists, build dystopia_new.exe ^(hot-reload update^)
+echo BIN_DIR = ../bin
+echo ifeq ^($^(wildcard $^(BIN_DIR^)/dystopia.exe^),^)
+echo   TARGET = $^(BIN_DIR^)/dystopia.exe
+echo else
+echo   TARGET = $^(BIN_DIR^)/dystopia_new.exe
+echo endif
+echo.
+echo all: $^(OBJ_DIRS^) $^(TARGET^)
+echo.
+echo # Runtime DLL location
+echo ZLIB_DLL = ../lib/win64/bin/zlib1.dll
+echo.
+echo # Explicit targets for when you want to force a specific output
+echo $^(BIN_DIR^)/dystopia.exe: $^(OBJ_DIRS^) $^(O_FILES^)
+echo 	$^(CC^) -o $^(BIN_DIR^)/dystopia.exe $^(O_FILES^) $^(L_FLAGS^)
+echo 	cp -n $^(ZLIB_DLL^) $^(BIN_DIR^)/ 2^>/dev/null ^|^| true
+echo.
+echo $^(BIN_DIR^)/dystopia_new.exe: $^(OBJ_DIRS^) $^(O_FILES^)
+echo 	$^(CC^) -o $^(BIN_DIR^)/dystopia_new.exe $^(O_FILES^) $^(L_FLAGS^)
+echo 	cp -n $^(ZLIB_DLL^) $^(BIN_DIR^)/ 2^>/dev/null ^|^| true
+echo.
+echo # Create all object subdirectories
+echo $^(OBJ_DIRS^):
+echo 	mkdir -p $@
+echo.
+echo # Pattern rules for each source directory
+echo $^(OBJ_DIR^)/core/%%.o: $^(CORE_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/classes/%%.o: $^(CLASSES_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/combat/%%.o: $^(COMBAT_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/commands/%%.o: $^(COMMANDS_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/world/%%.o: $^(WORLD_DIR^)/%%.c $^(CORE_DIR^)/merc.h $^(WORLD_DIR^)/olc.h
+echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/systems/%%.o: $^(SYSTEMS_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
+echo.
+echo clean:
+echo 	rm -f $^(O_FILES^) $^(BIN_DIR^)/dystopia.exe $^(BIN_DIR^)/dystopia_new.exe
+echo 	rm -rf $^(OBJ_DIR^)
+echo.
+echo .PHONY: clean all
+) > Makefile.mingw
+
+REM ============================================================================
+REM Step 5: Generate Visual Studio Solution
+REM ============================================================================
+echo [5/7] Generating dystopia.sln (Visual Studio Solution)...
+
+REM Use a temporary file with specific encoding
+(
+echo Microsoft Visual Studio Solution File, Format Version 12.00
+echo # Visual Studio Version 17
+echo VisualStudioVersion = 17.0.31903.59
+echo MinimumVisualStudioVersion = 10.0.40219.1
+echo Project^("%CPP_PROJECT_TYPE%"^) = "dystopia", "dystopia.vcxproj", "%PROJECT_GUID%"
+echo EndProject
+echo Global
+echo 	GlobalSection^(SolutionConfigurationPlatforms^) = preSolution
+echo 		Debug^|x64 = Debug^|x64
+echo 		Release^|x64 = Release^|x64
+echo 	EndGlobalSection
+echo 	GlobalSection^(ProjectConfigurationPlatforms^) = postSolution
+echo 		%PROJECT_GUID%.Debug^|x64.ActiveCfg = Debug^|x64
+echo 		%PROJECT_GUID%.Debug^|x64.Build.0 = Debug^|x64
+echo 		%PROJECT_GUID%.Release^|x64.ActiveCfg = Release^|x64
+echo 		%PROJECT_GUID%.Release^|x64.Build.0 = Release^|x64
+echo 	EndGlobalSection
+echo 	GlobalSection^(SolutionProperties^) = preSolution
+echo 		HideSolutionNode = FALSE
+echo 	EndGlobalSection
+echo 	GlobalSection^(ExtensibilityGlobals^) = postSolution
+echo 		SolutionGuid = %SOLUTION_GUID%
+echo 	EndGlobalSection
+echo EndGlobal
+) > dystopia.sln
+
+REM ============================================================================
+REM Step 6: Generate Visual Studio Project
+REM ============================================================================
+echo [6/7] Generating dystopia.vcxproj (Visual Studio Project)...
+
+REM Build ClCompile and ClInclude lists
+set VCXPROJ_COMPILE=
+set VCXPROJ_INCLUDE=
+
+for %%d in (%SUBDIRS%) do (
+    for %%f in (..\src\%%d\*.c) do (
+        if exist "%%f" (
+            set "VCXPROJ_COMPILE=!VCXPROJ_COMPILE!    ^<ClCompile Include="%%f" /^>!LF!"
+        )
+    )
+    for %%f in (..\src\%%d\*.h) do (
+        if exist "%%f" (
+            set "VCXPROJ_INCLUDE=!VCXPROJ_INCLUDE!    ^<ClInclude Include="%%f" /^>!LF!"
+        )
+    )
+)
+
+REM Generate the vcxproj file using individual echo statements to avoid escaping issues
+echo ^<?xml version="1.0" encoding="utf-8"?^>> dystopia.vcxproj
+echo ^<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"^>>> dystopia.vcxproj
+echo   ^<ItemGroup Label="ProjectConfigurations"^>>> dystopia.vcxproj
+echo     ^<ProjectConfiguration Include="Debug|x64"^>>> dystopia.vcxproj
+echo       ^<Configuration^>Debug^</Configuration^>>> dystopia.vcxproj
+echo       ^<Platform^>x64^</Platform^>>> dystopia.vcxproj
+echo     ^</ProjectConfiguration^>>> dystopia.vcxproj
+echo     ^<ProjectConfiguration Include="Release|x64"^>>> dystopia.vcxproj
+echo       ^<Configuration^>Release^</Configuration^>>> dystopia.vcxproj
+echo       ^<Platform^>x64^</Platform^>>> dystopia.vcxproj
+echo     ^</ProjectConfiguration^>>> dystopia.vcxproj
+echo   ^</ItemGroup^>>> dystopia.vcxproj
+echo   ^<PropertyGroup Label="Globals"^>>> dystopia.vcxproj
+echo     ^<VCProjectVersion^>16.0^</VCProjectVersion^>>> dystopia.vcxproj
+echo     ^<ProjectGuid^>%PROJECT_GUID%^</ProjectGuid^>>> dystopia.vcxproj
+echo     ^<RootNamespace^>dystopia^</RootNamespace^>>> dystopia.vcxproj
+echo     ^<WindowsTargetPlatformVersion^>10.0^</WindowsTargetPlatformVersion^>>> dystopia.vcxproj
+echo   ^</PropertyGroup^>>> dystopia.vcxproj
+echo   ^<Import Project="$(VCTargetsPath)\Microsoft.Cpp.default.props" /^>>> dystopia.vcxproj
+echo   ^<PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
+echo     ^<ConfigurationType^>Application^</ConfigurationType^>>> dystopia.vcxproj
+echo     ^<PlatformToolset^>v143^</PlatformToolset^>>> dystopia.vcxproj
+echo     ^<CharacterSet^>MultiByte^</CharacterSet^>>> dystopia.vcxproj
+echo   ^</PropertyGroup^>>> dystopia.vcxproj
+echo   ^<PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'"^>>> dystopia.vcxproj
+echo     ^<ConfigurationType^>Application^</ConfigurationType^>>> dystopia.vcxproj
+echo     ^<PlatformToolset^>v143^</PlatformToolset^>>> dystopia.vcxproj
+echo     ^<CharacterSet^>MultiByte^</CharacterSet^>>> dystopia.vcxproj
+echo     ^<WholeProgramOptimization^>true^</WholeProgramOptimization^>>> dystopia.vcxproj
+echo   ^</PropertyGroup^>>> dystopia.vcxproj
+echo   ^<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /^>>> dystopia.vcxproj
+echo   ^<ImportGroup Label="ExtensionSettings"^>>> dystopia.vcxproj
+echo   ^</ImportGroup^>>> dystopia.vcxproj
+echo   ^<ImportGroup Label="PropertySheets"^>>> dystopia.vcxproj
+echo   ^</ImportGroup^>>> dystopia.vcxproj
+echo   ^<PropertyGroup Label="UserMacros" /^>>> dystopia.vcxproj
+echo   ^<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
+echo     ^<OutDir^>$(SolutionDir)..\bin\$(Configuration)\^</OutDir^>>> dystopia.vcxproj
+echo     ^<IntDir^>$(SolutionDir)obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
+echo     ^<TargetName^>dystopia^</TargetName^>>> dystopia.vcxproj
+echo   ^</PropertyGroup^>>> dystopia.vcxproj
+echo   ^<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"^>>> dystopia.vcxproj
+echo     ^<OutDir^>$(SolutionDir)..\bin\$(Configuration)\^</OutDir^>>> dystopia.vcxproj
+echo     ^<IntDir^>$(SolutionDir)obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
+echo     ^<TargetName^>dystopia^</TargetName^>>> dystopia.vcxproj
+echo   ^</PropertyGroup^>>> dystopia.vcxproj
+echo   ^<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
+echo     ^<ClCompile^>>> dystopia.vcxproj
+echo       ^<WarningLevel^>Level3^</WarningLevel^>>> dystopia.vcxproj
+echo       ^<Optimization^>Disabled^</Optimization^>>> dystopia.vcxproj
+echo       ^<PreprocessorDefinitions^>_CRT_SECURE_NO_WARNINGS;WIN32;HAVE_ZLIB;_DEBUG;%%(PreprocessorDefinitions)^</PreprocessorDefinitions^>>> dystopia.vcxproj
+echo       ^<RuntimeLibrary^>MultiThreadedDebugDLL^</RuntimeLibrary^>>> dystopia.vcxproj
+echo       ^<AdditionalIncludeDirectories^>$(ProjectDir)..\src\core;$(ProjectDir)..\src\classes;$(ProjectDir)..\src\world;$(ProjectDir)..\src\systems;%%(AdditionalIncludeDirectories)^</AdditionalIncludeDirectories^>>> dystopia.vcxproj
+echo     ^</ClCompile^>>> dystopia.vcxproj
+echo     ^<Link^>>> dystopia.vcxproj
+echo       ^<SubSystem^>Console^</SubSystem^>>> dystopia.vcxproj
+echo       ^<GenerateDebugInformation^>true^</GenerateDebugInformation^>>> dystopia.vcxproj
+echo       ^<AdditionalDependencies^>ws2_32.lib;bcrypt.lib;zlib.lib;%%(AdditionalDependencies)^</AdditionalDependencies^>>> dystopia.vcxproj
+echo       ^<AdditionalLibraryDirectories^>$(ProjectDir)..\lib\win64\Debug;%%(AdditionalLibraryDirectories)^</AdditionalLibraryDirectories^>>> dystopia.vcxproj
+echo     ^</Link^>>> dystopia.vcxproj
+echo     ^<PostBuildEvent^>>> dystopia.vcxproj
+echo       ^<Command^>del /Q "$(ProjectDir)..\bin\dystopia.exe" 2^&gt;nul ^&amp;^&amp; copy /Y "$(TargetPath)" "$(ProjectDir)..\bin\dystopia.exe" ^|^| copy /Y "$(TargetPath)" "$(ProjectDir)..\bin\dystopia_new.exe"^</Command^>>> dystopia.vcxproj
+echo       ^<Message^>Copying to game\bin\ (dystopia_new.exe if server running, else dystopia.exe)^</Message^>>> dystopia.vcxproj
+echo     ^</PostBuildEvent^>>> dystopia.vcxproj
+echo   ^</ItemDefinitionGroup^>>> dystopia.vcxproj
+echo   ^<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"^>>> dystopia.vcxproj
+echo     ^<ClCompile^>>> dystopia.vcxproj
+echo       ^<WarningLevel^>Level3^</WarningLevel^>>> dystopia.vcxproj
+echo       ^<Optimization^>MaxSpeed^</Optimization^>>> dystopia.vcxproj
+echo       ^<FunctionLevelLinking^>true^</FunctionLevelLinking^>>> dystopia.vcxproj
+echo       ^<IntrinsicFunctions^>true^</IntrinsicFunctions^>>> dystopia.vcxproj
+echo       ^<PreprocessorDefinitions^>_CRT_SECURE_NO_WARNINGS;WIN32;HAVE_ZLIB;NDEBUG;%%(PreprocessorDefinitions)^</PreprocessorDefinitions^>>> dystopia.vcxproj
+echo       ^<RuntimeLibrary^>MultiThreadedDLL^</RuntimeLibrary^>>> dystopia.vcxproj
+echo       ^<AdditionalIncludeDirectories^>$(ProjectDir)..\src\core;$(ProjectDir)..\src\classes;$(ProjectDir)..\src\world;$(ProjectDir)..\src\systems;%%(AdditionalIncludeDirectories)^</AdditionalIncludeDirectories^>>> dystopia.vcxproj
+echo     ^</ClCompile^>>> dystopia.vcxproj
+echo     ^<Link^>>> dystopia.vcxproj
+echo       ^<SubSystem^>Console^</SubSystem^>>> dystopia.vcxproj
+echo       ^<EnableCOMDATFolding^>true^</EnableCOMDATFolding^>>> dystopia.vcxproj
+echo       ^<OptimizeReferences^>true^</OptimizeReferences^>>> dystopia.vcxproj
+echo       ^<GenerateDebugInformation^>true^</GenerateDebugInformation^>>> dystopia.vcxproj
+echo       ^<AdditionalDependencies^>ws2_32.lib;bcrypt.lib;zlib.lib;%%(AdditionalDependencies)^</AdditionalDependencies^>>> dystopia.vcxproj
+echo       ^<AdditionalLibraryDirectories^>$(ProjectDir)..\lib\win64\Release;%%(AdditionalLibraryDirectories)^</AdditionalLibraryDirectories^>>> dystopia.vcxproj
+echo     ^</Link^>>> dystopia.vcxproj
+echo     ^<PostBuildEvent^>>> dystopia.vcxproj
+echo       ^<Command^>del /Q "$(ProjectDir)..\bin\dystopia.exe" 2^&gt;nul ^&amp;^&amp; copy /Y "$(TargetPath)" "$(ProjectDir)..\bin\dystopia.exe" ^|^| copy /Y "$(TargetPath)" "$(ProjectDir)..\bin\dystopia_new.exe"^</Command^>>> dystopia.vcxproj
+echo       ^<Message^>Copying to game\bin\ (dystopia_new.exe if server running, else dystopia.exe)^</Message^>>> dystopia.vcxproj
+echo     ^</PostBuildEvent^>>> dystopia.vcxproj
+echo   ^</ItemDefinitionGroup^>>> dystopia.vcxproj
+echo   ^<ItemGroup^>>> dystopia.vcxproj
+
+REM Add source files
+for %%d in (%SUBDIRS%) do (
+    for %%f in (..\src\%%d\*.c) do (
+        if exist "%%f" (
+            echo     ^<ClCompile Include="%%f" /^>>> dystopia.vcxproj
+        )
+    )
+)
+
+echo   ^</ItemGroup^>>> dystopia.vcxproj
+echo   ^<ItemGroup^>>> dystopia.vcxproj
+
+REM Add header files
+for %%d in (%SUBDIRS%) do (
+    for %%f in (..\src\%%d\*.h) do (
+        if exist "%%f" (
+            echo     ^<ClInclude Include="%%f" /^>>> dystopia.vcxproj
+        )
+    )
+)
+
+echo   ^</ItemGroup^>>> dystopia.vcxproj
+echo   ^<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" /^>>> dystopia.vcxproj
+echo   ^<ImportGroup Label="ExtensionTargets"^>>> dystopia.vcxproj
+echo   ^</ImportGroup^>>> dystopia.vcxproj
+echo ^</Project^>>> dystopia.vcxproj
+
+REM ============================================================================
+REM Step 7: Generate Visual Studio Project Filters
+REM ============================================================================
+echo [7/7] Generating dystopia.vcxproj.filters (Folder Structure)...
+
+REM Fixed GUIDs for each filter (deterministic)
+set FILTER_GUID_SRC={4FC737F1-C7A5-4376-A066-2A32D752A2FF}
+set FILTER_GUID_CORE={93995380-89BD-4B04-88EB-625FBE52EBFB}
+set FILTER_GUID_CLASSES={67DA6AB6-F800-4C08-8B7A-83BB121AAD01}
+set FILTER_GUID_COMBAT={78AB1C84-3B45-4E67-9F2D-3D6789ABCDEF}
+set FILTER_GUID_COMMANDS={89BC2D95-4C56-5F78-0A3E-4E789ABCDEF0}
+set FILTER_GUID_WORLD={9ACD3EA6-5D67-6089-1B4F-5F89ABCDEF01}
+set FILTER_GUID_SYSTEMS={ABDE4FB7-6E78-7190-2C50-609ABCDEF012}
+
+echo ^<?xml version="1.0" encoding="utf-8"?^>> dystopia.vcxproj.filters
+echo ^<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"^>>> dystopia.vcxproj.filters
+echo   ^<ItemGroup^>>> dystopia.vcxproj.filters
+echo     ^<Filter Include="src"^>>> dystopia.vcxproj.filters
+echo       ^<UniqueIdentifier^>%FILTER_GUID_SRC%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
+echo     ^</Filter^>>> dystopia.vcxproj.filters
+echo     ^<Filter Include="src\core"^>>> dystopia.vcxproj.filters
+echo       ^<UniqueIdentifier^>%FILTER_GUID_CORE%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
+echo     ^</Filter^>>> dystopia.vcxproj.filters
+echo     ^<Filter Include="src\classes"^>>> dystopia.vcxproj.filters
+echo       ^<UniqueIdentifier^>%FILTER_GUID_CLASSES%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
+echo     ^</Filter^>>> dystopia.vcxproj.filters
+echo     ^<Filter Include="src\combat"^>>> dystopia.vcxproj.filters
+echo       ^<UniqueIdentifier^>%FILTER_GUID_COMBAT%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
+echo     ^</Filter^>>> dystopia.vcxproj.filters
+echo     ^<Filter Include="src\commands"^>>> dystopia.vcxproj.filters
+echo       ^<UniqueIdentifier^>%FILTER_GUID_COMMANDS%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
+echo     ^</Filter^>>> dystopia.vcxproj.filters
+echo     ^<Filter Include="src\world"^>>> dystopia.vcxproj.filters
+echo       ^<UniqueIdentifier^>%FILTER_GUID_WORLD%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
+echo     ^</Filter^>>> dystopia.vcxproj.filters
+echo     ^<Filter Include="src\systems"^>>> dystopia.vcxproj.filters
+echo       ^<UniqueIdentifier^>%FILTER_GUID_SYSTEMS%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
+echo     ^</Filter^>>> dystopia.vcxproj.filters
+echo   ^</ItemGroup^>>> dystopia.vcxproj.filters
+
+REM Add source files with filters
+echo   ^<ItemGroup^>>> dystopia.vcxproj.filters
+for %%d in (%SUBDIRS%) do (
+    for %%f in (..\src\%%d\*.c) do (
+        if exist "%%f" (
+            echo     ^<ClCompile Include="%%f"^>>> dystopia.vcxproj.filters
+            echo       ^<Filter^>src\%%d^</Filter^>>> dystopia.vcxproj.filters
+            echo     ^</ClCompile^>>> dystopia.vcxproj.filters
+        )
+    )
+)
+echo   ^</ItemGroup^>>> dystopia.vcxproj.filters
+
+REM Add header files with filters
+echo   ^<ItemGroup^>>> dystopia.vcxproj.filters
+for %%d in (%SUBDIRS%) do (
+    for %%f in (..\src\%%d\*.h) do (
+        if exist "%%f" (
+            echo     ^<ClInclude Include="%%f"^>>> dystopia.vcxproj.filters
+            echo       ^<Filter^>src\%%d^</Filter^>>> dystopia.vcxproj.filters
+            echo     ^</ClInclude^>>> dystopia.vcxproj.filters
+        )
+    )
+)
+echo   ^</ItemGroup^>>> dystopia.vcxproj.filters
+echo ^</Project^>>> dystopia.vcxproj.filters
+
+REM ============================================================================
+REM Complete
+REM ============================================================================
+echo.
+echo ============================================================
+echo  Generation Complete!
+echo ============================================================
+echo.
+echo Generated files:
+echo   - Makefile              (Linux GCC)
+echo   - Makefile.mingw        (Windows MinGW)
+echo   - dystopia.sln          (Visual Studio Solution)
+echo   - dystopia.vcxproj      (Visual Studio Project)
+echo   - dystopia.vcxproj.filters (VS Folder Structure)
+echo.
+if %HAS_FILES%==1 (
+    echo Backup location: %BACKUP_DIR%
+    echo.
+)
+echo To build:
+echo   MinGW:  build.bat
+echo   VS IDE: Open dystopia.sln
+echo   Linux:  make -f Makefile
+echo.
+
+endlocal
