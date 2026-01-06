@@ -214,7 +214,7 @@ void do_stuntubes( CHAR_DATA *ch, char *argument )
         return;
     }
     WAIT_STATE( ch,     12);
-    ch->move -= 1000;
+    use_move(ch, 1000);
 
     one_hit(ch,victim,gsn_stuntubes,1);
     one_hit(ch,victim,gsn_stuntubes,1);
@@ -272,8 +272,8 @@ void do_cubeform( CHAR_DATA *ch, char *argument )
     sprintf(buf,"%s the avatar of Lloth",ch->name);
     free_string(ch->morph);
     ch->morph = str_dup(buf);
-    ch->move -= 2000;
-    ch->mana -= 2000;
+    use_move(ch, 2000);
+    use_mana(ch, 2000);
     ch->damroll +=250;
     ch->hitroll +=250;
     return;

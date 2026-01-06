@@ -195,7 +195,7 @@ void do_spiritpower( CHAR_DATA *ch, char *argument )
   SET_BIT(ch->newbits, NEW_POWER);
   ch->damroll += 200;
   ch->hitroll += 200;
-  ch->move -= 25;
+  use_move(ch, 25);
   stc("Your body pulses with spiritual energy.\n\r",ch);
   return;
 }
@@ -288,7 +288,7 @@ void do_chi( CHAR_DATA *ch, char *argument )
   }
   WAIT_STATE(ch, 12);
   ch->chi[CURRENT]++;
-  ch->move -= ((ch->chi[CURRENT] * 20));
+  use_move(ch, ch->chi[CURRENT] * 20);
   return;
 }
 
@@ -574,7 +574,7 @@ void do_cloak( CHAR_DATA *ch, char *argument )
     SET_BIT(ch->newbits, NEW_MONKCLOAK);
     send_to_char("You are protected by the Almighty's cloak.\n\r",ch);
     act("$n is protected by the Almighty's cloak of life.\n\r",ch,NULL,NULL,TO_ROOM);
-    ch->move = ch->move - 1000;
+    use_move(ch, 1000);
     return;
   }
 }
@@ -627,7 +627,7 @@ void do_sacredinvis( CHAR_DATA *ch, char *argument)
     send_to_char( "You slowly fade into a cloak of invisibility.\n\r", ch );
     act("$n slowly fades into a cloak of holy invisibility..",ch,NULL,NULL,TO_ROOM);
     SET_BIT(ch->act, AFF_HIDE);
-    ch->move -= 500;
+    use_move(ch, 500);
   }
   return;
 }
@@ -774,7 +774,7 @@ void do_celestial( CHAR_DATA *ch, char *argument)
   }
   act("$n appears before you through a Celestial portal!\n\r",ch,NULL,NULL,TO_ROOM);
   do_look(ch, "auto");
-  ch->move -= 250;
+  use_move(ch, 250);
   return;
 }
 
@@ -855,7 +855,7 @@ void do_godsbless( CHAR_DATA *ch, char *argument )
   level = 500;
   (*skill_table[sn].spell_fun) ( sn, level, ch, ch );
   WAIT_STATE( ch, 12 );
-  ch->mana = ch->mana - 3000;
+  use_mana(ch, 3000);
   return;
 }
 
@@ -910,7 +910,7 @@ void do_godsfavor( CHAR_DATA *ch, char *argument )
     SET_BIT(ch->newbits, NEW_MONKFAVOR);
     send_to_char("God smiles upon you and you feel strengthened.\n\r",ch);
     act("$n is blessed by the Almighty.",ch,NULL,NULL,TO_ROOM);
-    ch->move = ch->move - 1500;
+    use_move(ch, 1500);
     WAIT_STATE(ch, 4);
     return;
   }
@@ -985,9 +985,8 @@ void do_godsheal( CHAR_DATA *ch, char *argument )
   {
     send_to_char("You are surrounded in a glowing halo of energy.\n\r",ch);
     act("$n is surrounded by a glowing halo, and looks very relaxed.\n\r",ch,NULL,NULL,TO_ROOM);
-    ch->hit += 150;
-    if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
-    ch->mana -= 400;
+    heal_char(ch, 150);
+    use_mana(ch, 400);
     WAIT_STATE(ch,12);
     return;
   }
@@ -995,9 +994,8 @@ void do_godsheal( CHAR_DATA *ch, char *argument )
   {
     send_to_char("You feel a mighty force lay his hands on you.\n\r",ch);
     act("$n is surrounded by a glowing halo, and looks very relaxed.\n\r",ch,NULL,NULL,TO_ROOM);
-    ch->hit += 500;
-    if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
-    ch->mana -= 400;
+    heal_char(ch, 500);
+    use_mana(ch, 400);
     WAIT_STATE(ch,8);
     return;
   }

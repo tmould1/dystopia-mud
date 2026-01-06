@@ -139,8 +139,8 @@ void do_faeriecurse( CHAR_DATA *ch, char *argument )
     level = 50;
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );
   }
-  ch->mana -= 1000;
-  ch->move -= 500;
+  use_mana(ch, 1000);
+  use_move(ch, 500);
   WAIT_STATE(ch, 12);
   return;
 }
@@ -309,7 +309,7 @@ void do_mistwalk(CHAR_DATA *ch, char *argument)
   }
   act("You reform into thin mist and seep into the floor.", ch, NULL, NULL, TO_CHAR);
   act("$n reforms into thin mist and seeps into the floor.", ch, NULL, NULL, TO_ROOM);
-  ch->move -= 250;
+  use_move(ch, 250);
   char_from_room(ch);
   char_to_room(ch, location);
   do_look(ch, "auto");
@@ -402,8 +402,7 @@ void do_shift (CHAR_DATA *ch, char *argument)
     if (ch->pcdata->powers[SHAPE_COUNTER] < 15)
     {
       send_to_char("#CYour wounds mend and close.\n\r#n",ch);
-      ch->hit += UMIN(5000,ch->max_hit*0.1);
-      if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+      heal_char(ch, UMIN(5000,ch->max_hit*0.1));
     }
     sprintf(buf,"%s the huge phase tiger",ch->name);
     free_string(ch->morph);
@@ -429,8 +428,7 @@ void do_shift (CHAR_DATA *ch, char *argument)
     if (ch->pcdata->powers[SHAPE_COUNTER] < 15)
     {
       send_to_char("#CYour wounds mend and close.\n\r#n",ch);
-      ch->hit += UMIN(5000,ch->max_hit*0.1);
-      if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+      heal_char(ch, UMIN(5000,ch->max_hit*0.1));
     }
     sprintf(buf,"%s the horrific hydra",ch->name);
     free_string(ch->morph);
@@ -456,8 +454,7 @@ void do_shift (CHAR_DATA *ch, char *argument)
     if (ch->pcdata->powers[SHAPE_COUNTER] < 15)
     {
       send_to_char("#CYour wounds mend and close.\n\r#n",ch);
-      ch->hit += UMIN(5000,ch->max_hit*0.1);
-      if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+      heal_char(ch, UMIN(5000,ch->max_hit*0.1));
     }
     sprintf(buf,"%s the black bull",ch->name);
     free_string(ch->morph);
@@ -483,8 +480,7 @@ void do_shift (CHAR_DATA *ch, char *argument)
     if (ch->pcdata->powers[SHAPE_COUNTER] < 15)
     {
       send_to_char("#CYour wounds mend and close.\n\r#n",ch);
-      ch->hit += UMIN(5000,ch->max_hit*0.1);
-      if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+      heal_char(ch, UMIN(5000,ch->max_hit*0.1));
     }
     sprintf(buf,"%s the small pixie",ch->name);
     free_string(ch->morph);
@@ -725,7 +721,7 @@ void do_faerieblink(CHAR_DATA *ch, char *argument)
     return;
   }
   WAIT_STATE(ch, 18);
-  ch->mana -= 2500;
+  use_mana(ch, 2500);
   act("You enter limbo, steps back into reality behind $N, and attack.",ch,NULL,victim,TO_CHAR);
   act("$n vanishes and suddenly someone strikes you from behind.",ch,NULL,victim,TO_VICT);
   act("$n vanishes and appear behind $N striking $S in the back.",ch,NULL,victim,TO_NOTVICT);
@@ -912,7 +908,7 @@ void do_charge(CHAR_DATA *ch, char *argument)
     return;
   }
   WAIT_STATE(ch, 18);
-  ch->move -= 2000;
+  use_move(ch, 2000);
   one_hit(ch,victim,gsn_headbutt,1);
   one_hit(ch,victim,gsn_hooves,1);
   one_hit(ch,victim,gsn_hooves,1);

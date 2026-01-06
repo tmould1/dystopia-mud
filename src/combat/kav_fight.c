@@ -983,8 +983,7 @@ void fightaction( CHAR_DATA *ch, CHAR_DATA *victim, int actype, int dtype, int w
 	act( "You leap in the air and stamp on $N's feet.",ch,NULL,victim,TO_CHAR );
 	act( "$n leaps in the air and stamps on your feet.",ch,NULL,victim,TO_VICT );
 	act( "$n leaps in the air and stamps on $N's feet.",ch,NULL,victim,TO_NOTVICT );
-	victim->move -= number_range(25,50);
-	if ( victim->move < 0 ) victim->move = 0;
+	use_move(victim, number_range(25,50));
     	return;
     }
     else if ( actype == 15 )

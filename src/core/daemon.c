@@ -100,9 +100,7 @@ void do_leech(CHAR_DATA *ch, char *argument)
 	  dam = dice(power, power * 2);
 	  if (dam > 300) dam = 300 + (dam / 10);
 	  hurt_person(ch,victim,dam);
-	  ch->hit += dam;
-	  if (ch->hit >= ch->max_hit + 500)
-		ch->hit = ch->max_hit + 500;
+	  heal_char_over(ch, dam, ch->max_hit + 500);
 	  sprintf(buf,"#1You absorb %d hitpoints.#n\n\r",dam);
 	  stc(buf,ch);
 	  sprintf(buf,"#1%s absorbed %d of your hitpoints!#n\n\r",ch->name,dam);
@@ -183,9 +181,7 @@ void do_entomb (CHAR_DATA *ch, char *argument)
       obj->item_type = ITEM_WALL;
     }
 
-    ch->hit += ch->max_hit * 0.1;
-       if (ch->hit > ch->max_hit)
-		ch->hit = ch->max_hit;
+    heal_char(ch, ch->max_hit * 0.1);
     SET_TIMER(ch, TIMER_ENTOMB, 12);
 
     act("$n calls forth sheets of ice, blocking your path in every direction.", ch, NULL, NULL, TO_ROOM);

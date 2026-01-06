@@ -245,7 +245,7 @@ void do_chaosblast(CHAR_DATA *ch, char *argument) {
         act("$n concentrates $s power on you.",ch,NULL,victim,TO_VICT);
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );
     WAIT_STATE( ch, 12 );
-        ch->mana = ch->mana - 750;
+    use_mana(ch, 750);
     return;
 }
 
@@ -356,7 +356,7 @@ void do_drowfire( CHAR_DATA *ch, char *argument ) {
     level = ch->spl[spelltype] * 1.5;
     (*skill_table[sn].spell_fun) ( sn, level, ch, victim );
     WAIT_STATE( ch, 12 );
-	ch->mana = ch->mana - 100;
+    use_mana(ch, 100);
     return;
 }
 void do_heal ( CHAR_DATA *ch, char *argument ) 
@@ -373,9 +373,8 @@ void do_heal ( CHAR_DATA *ch, char *argument )
 		send_to_char("You don't have enough mana.\n\r", ch );
 		return;}
 
-	ch->mana = ch->mana - 750;
-	ch->hit = ch->hit + ch->spl[BLUE_MAGIC]*3;
-	if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+	use_mana(ch, 750);
+	heal_char(ch, ch->spl[BLUE_MAGIC]*3);
 	send_to_char("Lloth heals you.\n\r",ch);
 	act("$n is healed by Lloth.",ch,NULL,NULL,TO_ROOM);
 	WAIT_STATE(ch, 12);
@@ -439,7 +438,7 @@ void do_shadowwalk(CHAR_DATA *ch, char *argument)
 
 	act("You walk into the shadows.", ch, NULL, NULL, TO_CHAR);
 	act("$n walks into the shadows.", ch, NULL, NULL, TO_ROOM);
-	ch->move -= 250;
+	use_move(ch, 250);
 	char_from_room(ch);
 	char_to_room(ch, location);
 	do_look(ch, "auto");	
@@ -745,7 +744,7 @@ void do_darkness(CHAR_DATA *ch, char *argument)
 
 	send_to_char("You summon a globe of darkness.\n\r", ch );
 	act("$n summons a globe of darkness.",ch,NULL,NULL,TO_ROOM);
-	ch->mana -= 500;
+	use_mana(ch, 500);
 	if (IS_SET(ch->extra, TIED_UP)) {
 		REMOVE_BIT(ch->extra, TIED_UP);
 		blah = TRUE;}
@@ -847,7 +846,7 @@ void do_confuse(CHAR_DATA *ch, char *argument) {
 	act("You attempt to confuse $N.",ch,NULL,victim,TO_CHAR);
 	act("$n attempts to confuse $N.",ch,NULL,victim,TO_NOTVICT);
 
-	ch->move -=75;
+	use_move(ch, 75);
 
 	if ( number_percent() > 25 ) {
 	send_to_char("You failed.\n\r", ch );
@@ -881,7 +880,7 @@ void do_earthshatter( CHAR_DATA *ch, char *argument)
 	return;}
 
 	level = ch->spl[PURPLE_MAGIC];
-	ch->mana -= 150;
+	use_mana(ch, 150);
 
 	send_to_char("You summon the power of the underworld, shattering the earth.\n\r", ch );
 	act("$n causes the earth to shatter",ch,NULL,NULL,TO_ROOM);

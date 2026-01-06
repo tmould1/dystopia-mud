@@ -157,7 +157,7 @@ void do_hologramtransfer( CHAR_DATA *ch, char *argument)
     act("$n steps into the air, leaving behind no trace whatsoever.", ch, NULL, victim, TO_ROOM);
     char_from_room(ch);
     char_to_room(ch,victim->in_room);
-    ch->move -= 1000;
+    use_move(ch, 1000);
     act("$n steps out of the air in front of $N.", ch, NULL, victim, TO_NOTVICT);
     act("$n steps out of the air in front of you.", ch, NULL, victim, TO_VICT);
     do_look(ch,"auto");
@@ -393,8 +393,7 @@ void check_samuraiattack(CHAR_DATA *ch, CHAR_DATA *victim)
         break;
       }
       ch->pcdata->powers[SAMURAI_LAST] = 30;
-      ch->hit += number_range(2000, 4000);
-      if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+      heal_char(ch, number_range(2000, 4000));
       act("#GYou feel adrenalin pump through your body, awakening your senses.#n",ch,NULL,victim,TO_CHAR);
       act("#G$n flashes a wicked smile.#n",ch,NULL,victim,TO_VICT);
       break;

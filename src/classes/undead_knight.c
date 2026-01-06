@@ -103,7 +103,7 @@ void do_ride ( CHAR_DATA *ch, char *argument )
   }
   act("$n rides toward you on $n's skeleton steed!\n\r",ch,NULL,NULL,TO_ROOM);
   do_look(ch, "auto");
-  ch->move -= 600;
+  use_move(ch, 600);
   return;
 }
 
@@ -179,11 +179,10 @@ void do_unholyrite (CHAR_DATA *ch, char *argument)
   }
   if (ch->hit < ch->max_hit)
   {
-    ch->hit += number_range(500,1000);
+    heal_char(ch, number_range(500,1000));
     send_to_char("You make a blood sacrifice to the god of Death.\n\r",ch);
   }
-  if (ch->hit > ch->max_hit) ch->hit=ch->max_hit;
-  ch->mana -= 500;
+  use_mana(ch, 500);
   WAIT_STATE(ch,18);
 }
 

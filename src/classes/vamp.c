@@ -286,11 +286,8 @@ stc("You are too exhausted to purify your mind\n\r",ch);
     send_to_char("You purify your mind.\n\r",ch);
 
 WAIT_STATE(ch,30-ch->power[DISC_VAMP_OBEA]);
-ch->move -= 5000;
-ch->hit += hps;
-
-if (ch->hit > ch->max_hit)
-ch->hit = ch->max_hit;
+use_move(ch, 5000);
+heal_char(ch, hps);
 return;
 }
 

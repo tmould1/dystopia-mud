@@ -4774,6 +4774,12 @@ char *	affect_bit_name	args( ( int vector ) );
 char *	extra_bit_name	args( ( int extra_flags ) );
 void	affect_modify	args( ( CHAR_DATA *ch, AFFECT_DATA *paf, bool fAdd, OBJ_DATA *obj ) );
 
+/* Vitals modification with GMCP update */
+void	modify_vitals	args( ( CHAR_DATA *ch, int hp_delta, int mana_delta, int move_delta ) );
+void	heal_char	args( ( CHAR_DATA *ch, int amount ) );
+void	heal_char_over	args( ( CHAR_DATA *ch, int amount, int max_cap ) );
+void	use_mana	args( ( CHAR_DATA *ch, int cost ) );
+void	use_move	args( ( CHAR_DATA *ch, int cost ) );
 
 void    set_learnable_disciplines args( ( CHAR_DATA *ch ) );
 void    update_disc	args( ( CHAR_DATA *ch) );

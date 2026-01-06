@@ -102,9 +102,8 @@ void do_innerpeace( CHAR_DATA *ch, char *argument )
     send_to_char("You don't have enough mana.\n\r",ch);
     return;
   }
-  ch->mana -= 1500;
-  ch->hit += ch->pcdata->powers[ANGEL_PEACE]*500;  
-  if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+  use_mana(ch, 1500);
+  heal_char(ch, ch->pcdata->powers[ANGEL_PEACE]*500);
   act("You feel the cleansing love of God run through your veins, filling you with an inner peace.", ch, NULL, NULL, TO_CHAR);
   act("$n is struck by a ray of pure light, and a blissful smile crosses $s lips.", ch, NULL, NULL, TO_ROOM);
   WAIT_STATE(ch,18);
@@ -339,8 +338,8 @@ void do_gfavor( CHAR_DATA *ch, char *argument )
     sprintf(buf,"%s the angel",ch->name);
     free_string(ch->morph);
     ch->morph = str_dup(buf);
-    ch->move -= 2000;
-    ch->mana -= 2000;
+    use_move(ch, 2000);
+    use_mana(ch, 2000);
     ch->damroll +=400;
     ch->hitroll +=400;
     return;
@@ -392,8 +391,7 @@ void do_forgivness( CHAR_DATA *ch, char *argument )
     send_to_char("They are not ready to seek forgivness, first they must repent.\n\r",ch);
     return;
   }
-  victim->hit += number_range(1000,1500);
-  if (victim->hit > victim->max_hit) victim->hit = victim->max_hit;
+  heal_char(victim, number_range(1000,1500));
   act("You feel the cleansing love of God run through your veins, filling you with an inner peace.", victim, NULL, NULL, TO_CHAR);
   act("$n is struck by a ray of pure light, and a blissful smile crosses $s lips.", victim, NULL, NULL, TO_ROOM);
   send_to_char("You forgive them, and thus God forgives them for their sins.\n\r",ch);
@@ -486,7 +484,7 @@ void do_swoop( CHAR_DATA *ch, char *argument )
   }
   act("You fly up into the sky.", ch, NULL, NULL, TO_CHAR);
   act("$n flies into the sky.", ch, NULL, NULL, TO_ROOM);
-  ch->move -= 500;
+  use_move(ch, 500);
   char_from_room(ch);
   char_to_room(ch, location);
   do_look(ch, "auto");

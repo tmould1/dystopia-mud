@@ -71,7 +71,7 @@ void do_reveal(CHAR_DATA *ch, char *argument)
     }
     send_to_char("You are suddenly very visible.\n\r",ich);
   }
-  ch->mana -= 5000;
+  use_mana(ch, 5000);
   return;
 }
 
@@ -189,7 +189,7 @@ void do_chaosmagic (CHAR_DATA *ch, char *argument)
   else if (random == 12) sn = skill_lookup("dispel magic");
   else sn = 0;
   if (sn  > 0) (*skill_table[sn].spell_fun) (sn,level,ch,victim);
-  ch->mana -= 1500;
+  use_mana(ch, 1500);
   WAIT_STATE(ch,6);
   return;
 }
@@ -254,8 +254,8 @@ void do_chant (CHAR_DATA *ch, char *argument)
     act("You channel lifeforce from the five elements into $N.",ch,NULL,victim,TO_CHAR);
     act("$n channels lifeforce from the five elements into you.",ch,NULL,victim,TO_VICT);
     WAIT_STATE(ch,8);
-    ch->mana -= 1500;
-    victim->hit = UMIN(victim->hit + (magic_power * 1.5), victim->max_hit);
+    use_mana(ch, 1500);
+    heal_char(victim, (int)(magic_power * 1.5));
     return;
   }
   else if (!str_cmp(arg1, "damage"))
@@ -286,7 +286,7 @@ void do_chant (CHAR_DATA *ch, char *argument)
       if (ch->fighting == NULL) set_fighting(ch, victim);
     }
     WAIT_STATE(ch,8);
-    ch->mana -= 1000;
+    use_mana(ch, 1000);
     dam = number_range(red_magic*4, red_magic*5);
     dam += char_damroll(ch);
     dam = cap_dam(ch,victim,dam);
@@ -432,7 +432,7 @@ void do_chant (CHAR_DATA *ch, char *argument)
       af.bitvector = 0;
       affect_to_char(victim, &af);
     }
-    ch->mana -= count * 500;
+    use_mana(ch, count * 500);
     WAIT_STATE(ch,6);
     sprintf(buf1, "You bless $N with the power of the elements.");
     sprintf(buf2, "The power of the five elements fills your body.");
@@ -509,7 +509,7 @@ void do_chant (CHAR_DATA *ch, char *argument)
       af.bitvector = 0;
       affect_to_char(victim, &af);
     }
-    ch->mana -= count * 500;
+    use_mana(ch, count * 500);
     WAIT_STATE(ch,6);
     sprintf(buf1, "You curse $N with the power of the elements.");
     sprintf(buf2, "The power of the five elements wrecks your body.");
@@ -888,7 +888,7 @@ void do_teleport (CHAR_DATA *ch, char *argument)
   }
 	act("You utter a single powerword.", ch, NULL, NULL, TO_CHAR);
 	act("$n utters a strange sounding word and disappers.", ch, NULL, NULL, TO_ROOM);
-	ch->mana -= 250;
+	use_mana(ch, 250);
 	char_from_room(ch);
 	char_to_room(ch, location);
 	do_look(ch, "auto");

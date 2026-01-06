@@ -25,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "gmcp.h"
 
 
 AFFECT_DATA *		affect_free;
@@ -2892,5 +2893,78 @@ OBJ_DATA *get_obj_world2( CHAR_DATA *ch, char *argument )
     }
 
     return NULL;
+}
+
+/*
+ * Centralized vital modification with GMCP update.
+ * Use 0 for any delta you don't want to change.
+ * Positive values add, negative values subtract.
+ */
+void modify_vitals( CHAR_DATA *ch, int hp_delta, int mana_delta, int move_delta )
+{
+    bool changed = FALSE;
+
+    if ( ch == NULL )
+        return;
+
+    if ( hp_delta != 0 )
+    {
+        ch->hit = URANGE( -10, ch->hit + hp_delta, ch->max_hit );
+        changed = TRUE;
+    }
+    if ( mana_delta != 0 )
+    {
+        ch->mana = URANGE( 0, ch->mana + mana_delta, ch->max_mana );
+        changed = TRUE;
+    }
+    if ( move_delta != 0 )
+    {
+        ch->move = URANGE( 0, ch->move + move_delta, ch->max_move );
+        changed = TRUE;
+    }
+
+    /* Send GMCP update if vitals changed and player has GMCP */
+    if ( changed && !IS_NPC(ch) && ch->desc != NULL && ch->desc->gmcp_enabled )
+        gmcp_send_vitals( ch );
+}
+
+/*
+ * Convenience wrapper: heal a character's HP.
+ */
+void heal_char( CHAR_DATA *ch, int amount )
+{
+    modify_vitals( ch, amount, 0, 0 );
+}
+
+/*
+ * Heal a character allowing HP to exceed max_hit up to a specified cap.
+ * Used for abilities like vampiric touch and soul absorb.
+ */
+void heal_char_over( CHAR_DATA *ch, int amount, int max_cap )
+{
+    if ( ch == NULL || amount <= 0 ) return;
+
+    ch->hit += amount;
+    if ( ch->hit > max_cap )
+        ch->hit = max_cap;
+
+    if ( !IS_NPC(ch) && ch->desc != NULL && ch->desc->gmcp_enabled )
+        gmcp_send_vitals( ch );
+}
+
+/*
+ * Convenience wrapper: use mana (subtract from current).
+ */
+void use_mana( CHAR_DATA *ch, int cost )
+{
+    modify_vitals( ch, 0, -cost, 0 );
+}
+
+/*
+ * Convenience wrapper: use move (subtract from current).
+ */
+void use_move( CHAR_DATA *ch, int cost )
+{
+    modify_vitals( ch, 0, 0, -cost );
 }
 

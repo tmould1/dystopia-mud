@@ -3999,7 +3999,7 @@ void do_possession( CHAR_DATA *ch, char *argument )
     if (IS_CLASS(ch, CLASS_VAMPIRE))
         ch->pcdata->condition[COND_THIRST] -= 50;
     else if (IS_CLASS(ch, CLASS_DEMON))
-        ch->move -= 500;
+        use_move(ch, 500);
 
     ch->pcdata->familiar = victim;
     victim->wizard = ch;

@@ -418,8 +418,8 @@ void do_lavablast(CHAR_DATA *ch, char *argument)
     send_to_char( "You aren't fighting anyone.\n\r", ch );
     return;
   }
-  ch->mana -= 1000;
-  ch->move -= 1000;
+  use_mana(ch, 1000);
+  use_move(ch, 1000);
   one_hit(ch,victim,gsn_magma,1);
   one_hit(ch,victim,gsn_magma,1);
   one_hit(ch,victim,gsn_magma,1);
@@ -489,7 +489,7 @@ void do_chaosgate(CHAR_DATA *ch, char *argument)
   }
   act("You open a gate made from pure chaos and steps into it.", ch, NULL, NULL, TO_CHAR);
   act("$n opens a gate of pure chaos and steps into it.", ch, NULL, NULL, TO_ROOM);
-  ch->move -= 1000;
+  use_move(ch, 1000);
   char_from_room(ch);
   char_to_room(ch, location);
   do_look(ch, "auto");
@@ -606,7 +606,7 @@ void do_earthquake(CHAR_DATA *ch, char *argument)
     }
     ich = ich_next;
   }
-  ch->mana -= 1000;
+  use_mana(ch, 1000);
   WAIT_STATE(ch, 12);
   return;
 }
@@ -646,7 +646,7 @@ void do_tornado(CHAR_DATA *ch, char *argument)
     }
     ich = ich_next;
   }
-  ch->mana -= 1500;
+  use_mana(ch, 1500);
   WAIT_STATE(ch, 12);
   return;
 }
@@ -692,8 +692,8 @@ void do_infernal(CHAR_DATA *ch, char *argument)
       one_hit(ch,ich,gsn_fireball,1);
     }  
     ich = ich_next;
-  }  
-  ch->mana -= 2000;
+  }
+  use_mana(ch, 2000);
   WAIT_STATE(ch, 12);
   return;
 }  

@@ -319,7 +319,7 @@ IS_SET(ch->pcdata->powers[1], DPOWER_LEVITATION)))
     {
 	act("$n bursts through the wall of fire.", ch, NULL, NULL, TO_ROOM);
 	send_to_char("You jump through the flames.\n\r", ch);
-	ch->hit -= dice(6, 50);
+	damage(ch, ch, dice(6, 50), TYPE_UNDEFINED);
       stc("The flames sear your flesh.\n\r",ch);
     }
 
@@ -336,19 +336,20 @@ IS_SET(ch->pcdata->powers[1], DPOWER_LEVITATION)))
 	act("$n jumps through the wall of swords.", ch, NULL, NULL, TO_ROOM);
 	send_to_char("You jump through the swords.\n\r", ch);
 	send_to_char("Aaaaaaaaarghhhhhhh! That hurt!\n\r", ch);
-	ch->hit -= dice(6, 70);
+	damage(ch, ch, dice(6, 70), TYPE_UNDEFINED);
     }
 
     if (IS_SET(pexit->exit_info, EX_ASH_WALL) )
     {
 	send_to_char("You scream in agony as the wall of ash rips apart your life force.\n\r", ch);
 	act("$n screams in agony as the wall of ash rips $s life force apart.", ch, NULL, NULL, TO_ROOM);
-	ch->hit /= 2;
-	ch->move /= 2;
+	damage(ch, ch, ch->hit / 2, TYPE_UNDEFINED);
+	use_move(ch, ch->move / 2);
     }
 
 	WAIT_STATE( ch, 1 );
-	if (!IS_SET(ch->mounted, IS_RIDING)) ch->move -= move;
+	if (!IS_SET(ch->mounted, IS_RIDING))
+	    use_move(ch, move);
     }
 
     /* Check for mount message - KaVir */

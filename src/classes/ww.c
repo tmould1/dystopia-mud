@@ -167,7 +167,7 @@ void do_moonbeam( CHAR_DATA *ch, char *argument )
         hurt_person(ch,victim, 1000);  
     if (IS_NEUTRAL(victim))
         hurt_person(ch,victim, 750);
-    ch->mana -= 500;
+    use_mana(ch, 500);
     WAIT_STATE(ch,12);
 	return;
     
@@ -306,8 +306,8 @@ void do_gmotherstouch( CHAR_DATA *ch, char *argument )
     	act("$N is filled with a feeling of warmth.", ch, NULL, victim,TO_CHAR);
 	act("$N is surrounded by a beam of moonlight from $n's touch.", ch, NULL, victim,TO_NOTVICT);
 	act("You are surrounded by a beam of moonlight, and feel restored.", ch, NULL, victim,TO_VICT);
-	victim->hit += 200;
-	ch->mana -= 100;
+	heal_char(victim, 200);
+	use_mana(ch, 100);
 	update_pos(victim);
         WAIT_STATE(ch,16);
 	return;
@@ -324,8 +324,8 @@ void do_gmotherstouch( CHAR_DATA *ch, char *argument )
         act("$N is filled with a feeling of warmth.", ch, NULL, victim,TO_CHAR);
 	act("$N is surrounded by a beam of moonlight from $n's touch.", ch, NULL, victim,TO_NOTVICT);
 	act("You are surrounded by a beam of moonlight, and feel restored.", ch, NULL, victim,TO_VICT);
-	victim->hit += 600;
-	ch->mana -= 300;
+	heal_char(victim, 600);
+	use_mana(ch, 300);
         update_pos(victim);
 	WAIT_STATE(ch,6);
 	return;
@@ -372,8 +372,8 @@ void do_motherstouch( CHAR_DATA *ch, char *argument )
     	act("$N is filled with a feeling of warmth.", ch, NULL, victim,TO_CHAR);
 	act("$N is surrounded by a beam of moonlight from $n's touch.", ch, NULL, victim,TO_NOTVICT);
 	act("You are surrounded by a beam of moonlight, and feel restored.", ch, NULL, victim,TO_VICT);
-        victim->hit += 100;
-        ch->mana -= 50;
+        heal_char(victim, 100);
+        use_mana(ch, 50);
         update_pos(victim);
 	WAIT_STATE(ch,16);
 	return;
@@ -391,8 +391,8 @@ void do_motherstouch( CHAR_DATA *ch, char *argument )
     	act("$N is filled with a feeling of warmth.", ch, NULL, victim,TO_CHAR);
 	act("$N is surrounded by a beam of moonlight from $n's touch.", ch, NULL, victim,TO_NOTVICT);
 	act("You are surrounded by a beam of moonlight, and feel restored.", ch, NULL, victim,TO_VICT);
-	victim->hit += 500;
-	ch->mana -= 250;
+	heal_char(victim, 500);
+	use_mana(ch, 250);
         update_pos(victim);
 	WAIT_STATE(ch,8);
 	return;
@@ -870,11 +870,7 @@ obj->chobj->pcdata->obj_vnum != 0)
     return;
 }
 hpgain = number_range(100,250);
-ch->hit += hpgain;        
-if (ch->hit > ch->max_hit)
-{
-ch->hit = ch->max_hit;
-} 
+heal_char(ch, hpgain);
 sprintf( buf,"You devour %d hp of life from $p.", hpgain );
 act( buf, ch, obj, NULL, TO_CHAR );
 act( "You devour $p.", ch, obj, NULL, TO_CHAR );

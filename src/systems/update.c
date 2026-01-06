@@ -580,10 +580,9 @@ void mobile_update( void )
         }
         if (ch->class == 0 && IS_ITEMAFF(ch, ITEMA_REGENERATE)) update_arti_regen(ch);
       }
-      else 
+      else
       {
-        ch->hit += number_range(1, 5);
-        if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+        heal_char(ch, number_range(1, 5));
         update_pos(ch);
         if (IS_ITEMAFF(ch, ITEMA_REGENERATE) && ch->hit > 0)
         update_arti_regen(ch);
@@ -1417,12 +1416,12 @@ void update_safe_powers(CHAR_DATA *ch)
   if (IS_CLASS(ch, CLASS_WEREWOLF)) cost *= 1.5;
   if (!IS_HEAD(ch,LOST_HEAD) && IS_EXTRA(ch,EXTRA_OSWITCH))
   {
-    if (ch->move >= cost) ch->move -=cost;
+    if (ch->move >= cost) use_move(ch, cost);
     else do_humanform(ch,"");
   }
   if (IS_SET(ch->act, PLR_WIZINVIS))
   {
-    if (ch->move >= cost) ch->move -=cost;
+    if (ch->move >= cost) use_move(ch, cost);
     else
     {
       REMOVE_BIT(ch->act, PLR_WIZINVIS);
@@ -1432,7 +1431,7 @@ void update_safe_powers(CHAR_DATA *ch)
   }
   if (IS_SET(ch->act, AFF_HIDE))
   {
-    if (ch->move >= cost) ch->move -= cost;
+    if (ch->move >= cost) use_move(ch, cost);
     else
     {
       REMOVE_BIT(ch->act, AFF_HIDE);
@@ -1450,15 +1449,12 @@ void update_safe_powers(CHAR_DATA *ch)
         send_to_char("The sinners have payed for their sins, time to rest.\n\r",ch);
       }
       else
-      {
-        ch->move -= cost*2;
-        ch->mana -= cost*2;
-      }
+        modify_vitals(ch, 0, -(cost*2), -(cost*2));
     }
   }
   if (IS_SET(ch->newbits, NEW_DARKNESS))
   {
-    if (ch->mana >= cost) ch->mana -= cost;
+    if (ch->mana >= cost) use_mana(ch, cost);
     else
     {
       REMOVE_BIT(ch->newbits, NEW_DARKNESS);
@@ -1469,7 +1465,7 @@ void update_safe_powers(CHAR_DATA *ch)
   }
   if (IS_AFFECTED(ch, AFF_PEACE))
   {
-    if (ch->mana >= cost) ch->mana -= cost;
+    if (ch->mana >= cost) use_mana(ch, cost);
     else if (!IS_CLASS(ch, CLASS_ANGEL))
     {
       REMOVE_BIT(ch->affected_by, AFF_PEACE);
@@ -1477,7 +1473,7 @@ void update_safe_powers(CHAR_DATA *ch)
       act( "$n looks less imposing.",  ch, NULL, NULL, TO_NOTVICT );
     }
     else
-    {   
+    {
       REMOVE_BIT(ch->affected_by, AFF_PEACE);
       act( "God protects you no longer.",  ch, NULL, NULL, TO_CHAR    );
       act( "$n looks wicked.",  ch, NULL, NULL, TO_NOTVICT );
@@ -1485,7 +1481,7 @@ void update_safe_powers(CHAR_DATA *ch)
   }
   if (IS_AFFECTED(ch,AFF_SHADOWPLANE))
   {
-    if (ch->mana >= cost) ch->mana -= cost;
+    if (ch->mana >= cost) use_mana(ch, cost);
     else
     {
       REMOVE_BIT(ch->affected_by, AFF_SHADOWPLANE);
@@ -1495,7 +1491,7 @@ void update_safe_powers(CHAR_DATA *ch)
   }
   if (IS_AFFECTED(ch,AFF_ETHEREAL))
   {
-    if (ch->mana >= cost) ch->mana -= cost;
+    if (ch->mana >= cost) use_mana(ch, cost);
     else
     {
       REMOVE_BIT(ch->affected_by, AFF_ETHEREAL);
@@ -1615,11 +1611,7 @@ void update_lich(CHAR_DATA *ch)
       werewolf_regen(ch, 1);
   }
   if (ch->position == POS_MEDITATING && ch->mana < ch->max_mana)
-  {
-    ch->mana += number_range(1000,2000);
-    if (ch->mana > ch->max_mana)
-      ch->mana = ch->max_mana;
-  }
+    modify_vitals(ch, 0, number_range(1000, 2000), 0);
   if (IS_SET(ch->pcdata->powers[GOLEMS_SUMMON], HAS_SUMMONED_FIRE) && number_range(1,50) == 4)
   {
     send_to_char("You can summon another fire golem.\n\r",ch);
@@ -1680,10 +1672,7 @@ void update_monk(CHAR_DATA *ch)
     werewolf_regen(ch, 2);
   /* Cloak of Life mantra - extra regen when badly hurt */
   if ( IS_SET(ch->newbits, NEW_MONKCLOAK) && ch->hit < (ch->max_hit / 2) )
-  {
-    ch->hit += number_range(50, 150);
-    if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
-  }
+    heal_char(ch, number_range(50, 150));
   regen_limb(ch);
   return;
 }
@@ -1774,24 +1763,7 @@ void update_highlander(CHAR_DATA *ch)
   if (get_eq_char(ch, WEAR_WIELD) != NULL)
   {
     int wpn = (ch->wpn[1]/3);
-    if ( ch->hit < ch->max_hit)
-    {
-      ch->hit += wpn;
-      if (ch->hit > ch->max_hit)
-        ch->hit = ch->max_hit;
-    }
-    if ( ch->mana < ch->max_mana)
-    {
-      ch->mana += wpn;
-      if (ch->mana > ch->max_mana)
-        ch->mana = ch->max_mana;
-    }
-    if ( ch->move < ch->max_move)
-    {
-      ch->move += wpn;
-      if (ch->move > ch->max_move)
-        ch->move = ch->max_move;
-    }
+    modify_vitals(ch, wpn, wpn, wpn);
   }
   if (ch->fighting == NULL && ch->pcdata->powers[SAMURAI_FOCUS] > 0)
     ch->pcdata->powers[SAMURAI_FOCUS]--;
@@ -1811,11 +1783,7 @@ void update_mage(CHAR_DATA *ch)
       werewolf_regen(ch, 1);
   }
   if (ch->position == POS_MEDITATING && ch->mana < ch->max_mana)
-  {
-    ch->mana += number_range(1000,2000);
-    if (ch->mana > ch->max_mana)
-      ch->mana = ch->max_mana;
-  }
+    modify_vitals(ch, 0, number_range(1000, 2000), 0);
   return;
 }
 
@@ -1883,13 +1851,8 @@ void werewolf_regen( CHAR_DATA *ch, int multiplier )
     mana_gain += number_range(min,max);
     move_gain += number_range(min,max);
   }
-  ch->hit = UMIN (ch->hit+(hit_gain*multiplier), ch->max_hit);
-  ch->mana = UMIN (ch->mana+(mana_gain*multiplier), ch->max_mana);
-  ch->move = UMIN (ch->move+(move_gain*multiplier), ch->max_move);
+  modify_vitals(ch, hit_gain * multiplier, mana_gain * multiplier, move_gain * multiplier);
   update_pos(ch);
-  /* Send GMCP vitals update if enabled */
-  if (ch->desc != NULL && ch->desc->gmcp_enabled)
-    gmcp_send_vitals(ch);
   if ( ch->hit >= ch->max_hit && ch->mana >= ch->max_mana && ch->move >= ch->max_move )
     send_to_char("Your body has completely regenerated itself.\n\r",ch);
   return;

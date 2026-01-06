@@ -269,10 +269,9 @@ void do_reverse( CHAR_DATA *ch, char *argument )
     act("$n's choyoken **- PULVERISES -** you!",ch,NULL,victim,TO_VICT);
     act("$n's choyoken **- PULVERISES -** $N!",ch,NULL,victim,TO_NOTVICT);
     move = (victim->move / 2);
-    victim->move -= move;
-    ch->move += UMIN(10000,move);
-    ch->hit += UMIN(10000,move);
-    ch->mana += UMIN(10000,move);
+    use_move(victim, move);
+    move = UMIN(10000, move);
+    modify_vitals(ch, move, move, move);
     ch->monkcrap = 0;
     return;
   }
@@ -326,10 +325,9 @@ void do_sweep( CHAR_DATA *ch, char *argument )
     act("$n's raptor strike #R**- SIPHONS -**#n you!",ch,NULL,victim,TO_VICT);
     act("$n's raptor strike #R**- SIPHONS -**#n $N!",ch,NULL,victim,TO_NOTVICT);
     mana = (victim->mana / 2);
-    victim->mana -= mana;
-    ch->move += UMIN(10000,mana);
-    ch->hit += UMIN(10000,mana);
-    ch->mana += UMIN(10000,mana);
+    use_mana(victim, mana);
+    mana = UMIN(10000, mana);
+    modify_vitals(ch, mana, mana, mana);
     ch->monkcrap = 0;
     return;
   }

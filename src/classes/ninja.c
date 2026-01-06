@@ -98,7 +98,7 @@ void do_stalk( CHAR_DATA *ch, char *argument)
   act("$n slides into the shadows, stalking someone.", ch, NULL, victim, TO_ROOM);
   char_from_room(ch);
   char_to_room(ch,victim->in_room);
-  ch->move -= 500;
+  use_move(ch, 500);
   act("$n walks out of nowhere behind $N.", ch, NULL, victim, TO_NOTVICT);
   act("$n walks out of nowhere from behind.", ch, NULL, victim, TO_VICT);
   do_look(ch,"scry");
@@ -260,7 +260,7 @@ void do_michi(  CHAR_DATA *ch, char *argument  )
 	send_to_char("You are gifted positive energy while performing the michi.\n\r",ch);
 	act("$n is gifted positives energies while performing the michi.",ch,NULL,NULL,TO_ROOM);
 	ch->rage += 100;
-	ch->move -= 500; 
+	use_move(ch, 500); 
 	WAIT_STATE(ch,12);
 	return;
   }
@@ -306,7 +306,7 @@ void do_kakusu( CHAR_DATA *ch, char *argument )
     {
 	act( "$n disappears into the shadows.", ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You disappear into the shadows.\n\r", ch );
-	ch->move -= 500;
+	use_move(ch, 500);
         SET_BIT(ch->act, AFF_HIDE);
     }
     return;
@@ -343,7 +343,7 @@ void do_kanzuite( CHAR_DATA *ch, char *argument )
     {
 	SET_BIT(ch->act, PLR_HOLYLIGHT);
 	send_to_char( "You're senses increase into incredible proportions.\n\r", ch );
-	ch->move -= 500; 
+	use_move(ch, 500); 
     }
 
     return;
@@ -429,7 +429,7 @@ for ( attempt =  0; attempt < 6; attempt++ )
     	return;
     }
   */  
-    ch->move -= 200;
+    use_move(ch, 200);
 	stop_fighting( ch, TRUE );
 	return;
    }
@@ -502,7 +502,7 @@ void do_bomuzite( CHAR_DATA *ch, char *argument )
 	act("You toss your bomb onto the floor and put $N to sleep.",ch,NULL,victim,TO_CHAR);
 	act("$n tosses a bomb onto the floor.  You feel sleepy.",ch,NULL,victim,TO_VICT);
 	victim->position = POS_SLEEPING;
-	ch->move -= 500;
+	use_move(ch, 500);
 	WAIT_STATE(ch, 1);
 	return;
 	}

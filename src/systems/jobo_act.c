@@ -546,8 +546,7 @@ void do_pkheal(CHAR_DATA *ch, char *argument)
     send_to_char("You cannot focus your mind.\n\r",ch);
     return;
   }
-  ch->hit += UMIN(get_ratio(ch), 2500);
-  if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+  heal_char(ch, UMIN(get_ratio(ch), 2500));
   send_to_char("You release your control and let harmony and peace flow over you.\n\r",ch);
   WAIT_STATE(ch,12);
   return;

@@ -120,7 +120,7 @@ void do_pentagram(CHAR_DATA *ch, char *argument )
   act("$n draws a pentagram on the floor and starts chanting.", ch, NULL, NULL, TO_ROOM);
   act("A pentagram forms under your feet and the world is suddenly a big blurr.", victim, NULL, NULL, TO_CHAR);
   act("A pentagram forms under $n and $e becomes blurry and fades out of existance.", victim, NULL, NULL, TO_ROOM);
-  ch->mana -= 1500;
+  use_mana(ch, 1500);
   char_from_room(victim);
   char_to_room(victim, location);
   do_look(victim, "auto");
@@ -184,8 +184,7 @@ void do_soulsuck(CHAR_DATA *ch, char *argument )
   sprintf(buf,"$n looks at $N and grins.");
   act(buf,ch,NULL,victim,TO_NOTVICT);
   hurt_person(ch,victim,dam);
-  ch->hit += dam;
-  if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+  heal_char(ch, dam);
   if (victim->position > POS_STUNNED)
   {
     if (victim->fighting == NULL) set_fighting(victim, ch);
@@ -301,7 +300,7 @@ void do_earthswallow(CHAR_DATA *ch, char *argument )
     send_to_char("That doesn't seem like a good idea.\n\r",ch);
     return;
   }
-  ch->mana -= 5000;
+  use_mana(ch, 5000);
   act( "$n is swallowed by the earth and disappears.", victim, NULL, NULL, TO_ROOM );
   char_from_room( victim );
   char_to_room( victim, get_room_index(ROOM_VNUM_ALTAR)); 
@@ -414,7 +413,7 @@ void do_creepingdoom(CHAR_DATA *ch, char *argument)
       if (ch->fighting == NULL) set_fighting(ch, ich);
     }
   }
-  ch->mana -= ch->mana/2;
+  use_mana(ch, ch->mana / 2);
   WAIT_STATE(ch, 24);
   return;
 }
@@ -498,9 +497,8 @@ void do_polarity(CHAR_DATA *ch, char *argument)
   if (is_safe(ch, victim)) return;
   dam = number_range(2000,4000);
   dam = UMIN(dam, victim->mana);
-  victim->mana -= dam;
-  ch->hit += dam/2;
-  if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
+  use_mana(victim, dam);
+  heal_char(ch, dam/2);
   send_to_char("You feel your mystical energies being sucked out of your body!!!\n\r",victim);
   send_to_char("You drain their mana and heal yourself with it.\n\r",ch);
   WAIT_STATE(ch,12);
@@ -531,9 +529,8 @@ void do_powertransfer(CHAR_DATA *ch, char *argument)
     return;
   }
   if (has_timer(ch)) return;
-  ch->hit += number_range(7500, 10000);
-  if (ch->hit > ch->max_hit) ch->hit = ch->max_hit;
-  ch->mana -= 5000;
+  heal_char(ch, number_range(7500, 10000));
+  use_mana(ch, 5000);
   send_to_char("You transfer the mystical energies in your body into life energy and heal your wounds.\n\r",ch);
   WAIT_STATE(ch,18);
   return;
@@ -585,7 +582,7 @@ void do_planarstorm(CHAR_DATA *ch, char *argument)
       if (ch->fighting == NULL) set_fighting(ch, ich);
     }
   }
-  ch->mana -= ch->mana/2;
+  use_mana(ch, ch->mana / 2);
   WAIT_STATE(ch, 24);
   return;
 }
@@ -652,7 +649,7 @@ void do_planartravel(CHAR_DATA *ch, char *argument )
   obj->timer = duration;
   if (IS_AFFECTED(victim,AFF_SHADOWPLANE)) obj->extra_flags = ITEM_SHADOWPLANE;
   obj_to_room( obj, victim->in_room );
-  ch->mana -= 500;
+  use_mana(ch, 500);
   act( "$p appears in front of $n.", ch, obj, NULL, TO_ROOM );
   act( "$p appears in front of you.", ch, obj, NULL, TO_CHAR );
   act( "$p appears in front of $n.", victim, obj, NULL, TO_ROOM );

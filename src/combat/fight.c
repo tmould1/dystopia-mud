@@ -141,12 +141,12 @@ void violence_update( void )
       }
     }
    if ( IS_SET(ch->monkstuff, MONK_DEATH) )
-    {  
+    {
       if ( ch->hit > (ch->max_hit /2 ) )
       {
-        ch->hit -=  number_range( 50,200 );
         stc("Your writhe in agony as magical energies tear you asunder.\n\r",ch);
         act("$n writhes in agony as magical forces tear apart $s body.",ch,NULL,NULL,TO_ROOM);
+        damage(ch, ch, number_range(50, 200), TYPE_UNDEFINED);
       }
       else
       {
@@ -158,9 +158,9 @@ void violence_update( void )
         }
         else
         {
-          ch->hit -=  number_range( 50,200 );
           stc("Your writhe in agony as magical energies tear you asunder.\n\r",ch);
           act("$n writhes in agony as magical forces tear apart $s body.",ch,NULL,NULL,TO_ROOM);
+          damage(ch, ch, number_range(50, 200), TYPE_UNDEFINED);
         }
       }
     }
@@ -168,13 +168,12 @@ void violence_update( void )
     {
       if (ch->hit < (ch->max_hit /2 ) && ch->hit > 0)
       {
-        if (ch->hit < ch->max_hit) ch->hit +=  number_range( 200,400 );
-        if ( ch->move < ch->max_move ) ch->move += number_range( 175,400 );
+        modify_vitals(ch, number_range(200, 400), 0, number_range(175, 400));
         stc("Your body emits glowing sparks.\n\r",ch);
         act("$n's body emits glowing sparks and fizzes.",ch,NULL,NULL,TO_ROOM);
       }
       else
-      {  
+      {
         if ( number_range( 1,2 ) == 1 )
         {
            stc("The sparks fizzle and die.\n\r",ch);
@@ -183,10 +182,7 @@ void violence_update( void )
         }
         else
         {
-          if ( ch->hit < ch->max_hit )
-          ch->hit +=  number_range( 200,400 );
-          if ( ch->move < ch->max_move )
-          ch->move += number_range( 175,400 );
+          modify_vitals(ch, number_range(200, 400), 0, number_range(175, 400));
           stc("Your body emits glowing sparks.\n\r",ch);
           act("$n's body emits glowing sparks and fizzes.",ch,NULL,NULL,TO_ROOM);
         }
@@ -2045,7 +2041,7 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt )
       stc("You absorb the natural imbalances of your opponent.\n\r",victim);
       act("$n absorbs the natural imbalances of you attack.",victim,NULL,ch,TO_VICT);
       if ( dam > 2000 ) dam /= 2;
-      victim->hit += dam;
+      heal_char(victim, dam);
       REMOVE_BIT(victim->newbits, NEW_NATURAL);
       return;
     }
@@ -2055,7 +2051,7 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt )
     REMOVE_BIT(victim->newbits, NEW_IRONMIND);
     send_to_char("Your focus your full concentration on the attack,\n\r", victim);
     send_to_char("and absorb the full impact into your system, channeling it into a healing force.\n\r",victim);
-    victim->hit += dam;
+    heal_char(victim, dam);
     dam = 0;
   }
   hurt_person(ch,victim,dam);
@@ -2089,24 +2085,20 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam )
 {
   char buf[MAX_STRING_LENGTH];
 
-  victim->hit -= dam;
+  modify_vitals(victim, -dam, 0, 0);
   if (!IS_NPC(victim) && IS_CLASS(victim, CLASS_ANGEL) && !IS_CLASS(ch, CLASS_ANGEL))
     angel_eye(ch,victim,dam); // check for that eye for an eye.
-  if (!IS_NPC(victim) && victim->level >= LEVEL_IMMORTAL && victim->hit < 1) 
+  if (!IS_NPC(victim) && victim->level >= LEVEL_IMMORTAL && victim->hit < 1)
     victim->hit = 1;
-  if (!IS_NPC(victim) && IS_SET(victim->newbits, NEW_CLOAK) &&victim->hit < 1 )
+  if (!IS_NPC(victim) && IS_SET(victim->newbits, NEW_CLOAK) && victim->hit < 1)
   {
-    victim->hit += UMIN((victim->max_hit * .1), 4000);
+    heal_char(victim, UMIN((victim->max_hit * .1), 4000));
     if (IS_CLASS(victim, CLASS_MONK)) send_to_char("your cloak of life saves your from certain death.\n\r",victim);
     else send_to_char("your cloak of death prevents the destruction of your body.\n\r",victim);
     send_to_char("#0They escape your final blow.#n\n\r",ch);
     REMOVE_BIT(victim->newbits, NEW_CLOAK);
   }
   update_pos( victim );
-
-  /* Send GMCP vitals update to victim if they have GMCP enabled */
-  if (victim->desc != NULL && victim->desc->gmcp_enabled)
-    gmcp_send_vitals(victim);
 
   switch( victim->position )
   {

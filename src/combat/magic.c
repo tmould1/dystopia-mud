@@ -394,7 +394,7 @@ void do_cast( CHAR_DATA *ch, char *argument )
 		send_to_char( "You can't concentrate enough.\n\r", ch );
 		return;
 	    }
-	    ch->move = ch->move - 25;
+	    use_move(ch, 25);
 	}
 	else
 	{
@@ -403,7 +403,7 @@ void do_cast( CHAR_DATA *ch, char *argument )
 		send_to_char( "You can't concentrate enough.\n\r", ch );
 		return;
 	    }
-	    ch->move = ch->move - 50;
+	    use_move(ch, 50);
 	}
     }
 
@@ -583,7 +583,7 @@ void do_cast( CHAR_DATA *ch, char *argument )
     if ( !IS_NPC(ch) && number_percent( ) > ch->pcdata->learned[sn] )
     {
         send_to_char( "You lost your concentration.\n\r", ch );
-        ch->mana -= mana / 2;
+        use_mana(ch, mana / 2);
         improve_spl(ch,skill_table[sn].target,sn);
     }
     else
@@ -592,7 +592,7 @@ void do_cast( CHAR_DATA *ch, char *argument )
         if (IS_ITEMAFF(ch, ITEMA_AFFENTROPY))
         tempentro = 20;
 
-        ch->mana -= mana;
+        use_mana(ch, mana);
         /* Check players ability at spell type for spell power...KaVir */
         if (IS_NPC(ch))
             (*skill_table[sn].spell_fun) ( sn, ch->level, ch, vo );
@@ -1258,7 +1258,7 @@ void spell_cure_critical( int sn, int level, CHAR_DATA *ch, void *vo )
     int heal;
 
     heal = dice(3, 8) + level - 6;
-    victim->hit = UMIN( victim->hit + heal, victim->max_hit );
+    heal_char(victim, heal);
     if( IS_NPC(victim) && victim->hit >= victim->max_hit) victim->hit = victim->max_hit-100;
     update_pos( victim );
     send_to_char( "You feel better!\n\r", victim );
@@ -1276,7 +1276,7 @@ void spell_cure_light( int sn, int level, CHAR_DATA *ch, void *vo )
     int heal;
 
     heal = dice(1, 8) + level / 3;
-    victim->hit = UMIN( victim->hit + heal, victim->max_hit );
+    heal_char(victim, heal);
     if( IS_NPC(victim) && victim->hit >= victim->max_hit) victim->hit = victim->max_hit-100;
     update_pos( victim );
     send_to_char( "You feel better!\n\r", victim );
@@ -1310,7 +1310,7 @@ void spell_cure_serious( int sn, int level, CHAR_DATA *ch, void *vo )
     int heal;
 
     heal = dice(2, 8) + level /2 ;
-    victim->hit = UMIN( victim->hit + heal, victim->max_hit );
+    heal_char(victim, heal);
     if( IS_NPC(victim) && victim->hit >= victim->max_hit) victim->hit = victim->max_hit-100;
     update_pos( victim );
     send_to_char( "You feel better!\n\r", victim );
@@ -1756,9 +1756,7 @@ void spell_energy_drain( int sn, int level, CHAR_DATA *ch, void *vo )
 	{
 	    victim->mana	/= 2;
 	    victim->move	/= 2;
-	    ch->hit		+= dam;
-	    if (ch->hit > (2*ch->max_hit))
-	    	ch->hit = (2 * ch->max_hit);
+	    heal_char_over(ch, dam, 2 * ch->max_hit);
 	}
     }
 
@@ -1785,7 +1783,7 @@ void spell_imp_heal( int sn, int level, CHAR_DATA *ch, void *vo )
   CHAR_DATA *victim = (CHAR_DATA *) vo;
   int random = number_range(1000,1500);
 
-  victim->hit = UMIN( victim->hit + random, victim->max_hit );
+  heal_char(victim, random);
   if( IS_NPC(victim) && victim->hit >= victim->max_hit) victim->hit = victim->max_hit-100;
   update_pos( victim );
   send_to_char( "A warm feeling fills your body.\n\r", victim );
@@ -2209,8 +2207,7 @@ void spell_group_heal( int sn, int level, CHAR_DATA *ch, void *vo )
   {
     if (is_same_group( ich, ch ))
     {
-      ich->hit += number_range(150,250);
-      if (ich->hit > ich->max_hit) ich->hit=ich->max_hit;
+      heal_char(ich, number_range(150,250));
       send_to_char("You feel healed.\n\r",ich);
     }
   }
@@ -2225,7 +2222,7 @@ void spell_heal( int sn, int level, CHAR_DATA *ch, void *vo )
       stc( "You cannot heal other players if your not 4 hours old and is avatar.\n\r", ch);
       return;
     }
-    victim->hit = UMIN( victim->hit + 100, victim->max_hit );
+    heal_char(victim, 100);
     if( IS_NPC(victim) && victim->hit >= victim->max_hit) victim->hit = victim->max_hit-100;
     update_pos( victim );
     send_to_char( "A warm feeling fills your body.\n\r", victim );
@@ -3537,7 +3534,7 @@ void spell_mana( int sn, int level, CHAR_DATA *ch, void *vo)
 	    send_to_char( "You are too exhausted to do that.\n\r", ch );
 	    return;
 	}
-	ch->move = ch->move - 25;
+	use_move(ch, 25);
     }
     else
     {
@@ -3546,7 +3543,7 @@ void spell_mana( int sn, int level, CHAR_DATA *ch, void *vo)
 	    send_to_char( "You are too exhausted to do that.\n\r", ch );
 	    return;
 	}
-	ch->move = ch->move - 50;
+	use_move(ch, 50);
     }
     victim->mana = UMIN( victim->mana + level + 10, victim->max_mana);
     update_pos(ch);
@@ -5596,9 +5593,7 @@ void spell_jailwater( int sn, int level, CHAR_DATA *ch, void *vo )
 	    make_wall(ch->in_room, door, EX_ICE_WALL);
     }
 
-    ch->hit += (ch->hit *3/2);
-       if (ch->hit > ch->max_hit)
-		ch->hit = ch->max_hit;
+    heal_char(ch, ch->hit * 3 / 2);
 
     act("$n calls forth sheets of ice, blocking your path in every direction.", ch, NULL, NULL, TO_ROOM);
     send_to_char("You call forth sheets of ice to entrap your prey.\n\r", ch);
