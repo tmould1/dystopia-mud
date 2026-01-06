@@ -23,18 +23,9 @@ void load_gameconfig()
 
 	if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "r")) == NULL)
 	{
-		// No gameconfig.txt found, let's make one.
-		if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "w")) == NULL)
-		{
-			log_string("Error creating gameconfig.txt");
-			return;
-		}
-		fclose(fp);
-		if ((fp = fopen(mud_path(mud_txt_dir, "gameconfig.txt"), "r")) == NULL)
-		{
-			log_string("Fatal Error: gameconfig.txt not found!");
-			exit(1);
-		}
+		// No gameconfig.txt found, create one with defaults.
+		save_gameconfig();
+		return;
 	}
 
 	while (fgets(line, MSL, fp) != NULL)
