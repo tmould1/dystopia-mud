@@ -1,8 +1,16 @@
-# Executables (in gamedata/)
+# Executables
 gamedata/dystopia
 gamedata/dystopia.exe
 gamedata/dystopia_new.exe
 gamedata/zlib1.dll
+game/bin/Debug/dystopia.exe
+game/bin/Debug/dystopia.ilk
+game/bin/Debug/dystopia.pdb
+game/bin/Release/dystopia.exe
+game/bin/Release/dystopia.pdb
+gamedata/dystopia.ilk
+gamedata/dystopia.pdb
+
 
 # Build artifacts (platform-specific object directories)
 game/build/linux/
@@ -49,10 +57,4 @@ nul
 
 # Local settings
 .claude/settings.local.json
-game/bin/Debug/dystopia.exe
-game/bin/Debug/dystopia.ilk
-game/bin/Debug/dystopia.pdb
-game/bin/Release/dystopia.exe
-game/bin/Release/dystopia.pdb
-gamedata/dystopia.ilk
-gamedata/dystopia.pdb
+
