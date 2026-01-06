@@ -26,7 +26,8 @@ dystopia-mud/
 │   ├── tools/          # Python utilities
 │   └── docs/           # Development documentation
 │
-├── startup.sh          # Server startup script
+├── startup.sh          # Server startup script (Linux)
+├── startup.bat         # Server startup script (Windows)
 └── Dockerfile          # Container definition
 ```
 
@@ -40,7 +41,7 @@ cd game/build
 make -f Makefile clean && make -f Makefile
 ../../gamedata/dystopia &   # Or use ./startup.sh for auto-restart
 ```
-Requires: `build-essential` package (gcc, make) plus `libz-dev`, `libcrypt-dev`, `libpthread` libraries.
+Requires: `build-essential`, `zlib1g-dev`, `libcrypt-dev` packages (libpthread is included in glibc).
 
 ### Windows (MinGW/MSYS2)
 **Preferred**: Use `game\build\build.bat` which handles paths and parallel compilation:

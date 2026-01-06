@@ -83,7 +83,7 @@ A modernized fork of the classic Diku/Merc Dystopia MUD, updated for current com
 
 ```bash
 # Install dependencies
-sudo apt install build-essential zlib1g-dev
+sudo apt install build-essential zlib1g-dev libcrypt-dev
 
 # Generate build files (first time or after adding source files)
 cd game/build
