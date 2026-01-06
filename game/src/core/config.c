@@ -14,7 +14,7 @@ void load_gameconfig()
 
 	game_config.base_xp = 5000;
 	game_config.max_xp_per_kill = 1000000000;
-	game_config.game_name = str_dup("Dystopian Spin-Off");
+	game_config.game_name = str_dup("Dystopia+ Spin-Off");
 	game_config.gui_url = str_dup("");
 	game_config.gui_version = str_dup("1");
 	game_config.banner_left = str_dup("#0<>#n");
