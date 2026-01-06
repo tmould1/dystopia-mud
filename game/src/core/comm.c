@@ -1961,7 +1961,7 @@ void crashrecov (int iSignal)
   char buf [200], buf2[100];
   int pid;
 #ifndef WIN32
-  int iFork;
+  /* Note: fork() return value intentionally unused - we only care about pid */
 #endif
   FILE *fReturn;
   FILE *fCrash;
@@ -1986,7 +1986,7 @@ void crashrecov (int iSignal)
    * Note: fork() is not available on Windows, so skip the core dump logic there
    */
 #ifndef WIN32
-  iFork = fork();
+  (void)fork();  /* Return value intentionally ignored */
   wait(NULL);
   if((pid = getpid()) != proc_pid)
 #else
@@ -2771,7 +2771,7 @@ void nanny( DESCRIPTOR_DATA *d, char *argument )
 
 	if (ch->level > 1)
 	{
-	    sprintf(kav,ch->pcdata->switchname);
+	    sprintf(kav, "%s", ch->pcdata->switchname);
             free_char(d->character);
             d->character = NULL;
             fOld = load_char_obj( d, kav );
