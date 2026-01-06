@@ -13,6 +13,7 @@ log/
 # Runtime artifacts
 crash.txt
 build_log.txt
+area/shutdown.txt
 
 # IDE/Editor
 .vscode/
