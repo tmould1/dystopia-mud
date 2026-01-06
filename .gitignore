@@ -1,8 +1,12 @@
-# Executables (in game/bin/)
-game/bin/
+# Executables (in gamedata/)
+gamedata/dystopia
+gamedata/dystopia.exe
+gamedata/dystopia_new.exe
+gamedata/zlib1.dll
 
-# Build artifacts
-game/build/obj/
+# Build artifacts (platform-specific object directories)
+game/build/linux/
+game/build/win64/
 game/build/logs/
 game/build/backup/
 game/build/build/

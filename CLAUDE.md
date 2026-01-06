@@ -10,7 +10,8 @@ Dystopia MUD is a classic text-based multiplayer game based on the Diku/Merc MUD
 
 ```
 dystopia-mud/
-├── gamedata/           # Runtime data
+├── gamedata/           # Runtime data + executable (deployable package)
+│   ├── dystopia(.exe)  # Server executable (built here for easy deployment)
 │   ├── area/           # Area files (.are), loaded via area.lst
 │   ├── doc/            # Documentation and licenses
 │   ├── log/            # Server logs
@@ -22,28 +23,22 @@ dystopia-mud/
 │   ├── src/            # Source code (organized by subsystem)
 │   ├── lib/            # Libraries (linux/, win64/)
 │   ├── build/          # Build system and IDE configs
-│   ├── bin/            # Compiled binaries
 │   ├── tools/          # Python utilities
 │   └── docs/           # Development documentation
 │
-└── devops/             # Infrastructure
-    ├── aws/            # AWS deployment scripts
-    ├── cloudformation/ # CloudFormation templates
-    ├── .devcontainer/  # Dev container config
-    ├── .github/        # GitHub Actions
-    ├── startup.sh      # Server startup script
-    └── Dockerfile      # Container definition
+├── startup.sh          # Server startup script
+└── Dockerfile          # Container definition
 ```
 
 ## Build Commands
 
-All builds use Makefiles in `game/build/`. Object files are placed in `game/build/obj/`, binaries in `game/bin/`.
+All builds use Makefiles in `game/build/`. Object files are placed in `game/build/obj/`, binaries output to `gamedata/` for easy deployment.
 
 ### Linux (GCC)
 ```bash
 cd game/build
 make -f Makefile clean && make -f Makefile
-../bin/dystopia &   # Or use devops/startup.sh for auto-restart
+../../gamedata/dystopia &   # Or use ./startup.sh for auto-restart
 ```
 Requires: `build-essential` package (gcc, make) plus `libz-dev`, `libcrypt-dev`, `libpthread` libraries.
 
@@ -61,7 +56,7 @@ Or manually:
 cd game/build
 make -f Makefile.mingw clean && make -f Makefile.mingw
 ```
-Produces `game/bin/dystopia_new.exe` (or `dystopia.exe` with install target). The build automatically copies `zlib1.dll` from `game/lib/win64/bin/` to `game/bin/`.
+Produces `gamedata/dystopia_new.exe` (or `dystopia.exe` with install target). The build automatically copies `zlib1.dll` from `game/lib/win64/bin/` to `gamedata/`.
 
 ### Windows (MSVC)
 Open `game/build/dystopia.sln` in Visual Studio, or:
@@ -92,7 +87,7 @@ Object files mirror this structure in `game/build/obj/`.
 - **merc.h** - Master header defining all structures (CHAR_DATA, OBJ_DATA, ROOM_INDEX_DATA, etc.), constants, and function prototypes. Include this in all source files.
 - **compat.h/compat.c** - Windows/POSIX compatibility layer providing threading, crypt, signals, and socket abstractions.
 - **comm.c** - Network I/O, game loop, descriptor handling. Data flow: `Game_loop -> Read_from_descriptor -> Read_from_buffer` and `Game_loop -> Process_Output -> Write_to_descriptor`.
-- **db.c** - Database loading, area file parsing, path management. Initializes `mud_*_dir` paths based on executable location (navigates from `game/bin/` to `gamedata/`).
+- **db.c** - Database loading, area file parsing, path management. Initializes `mud_*_dir` paths based on executable location (executable is in `gamedata/`, data dirs are siblings).
 - **interp.c** - Command interpreter and command table (`cmd_table`).
 - **handler.c** - Object/character manipulation, affect handling.
 

@@ -161,7 +161,7 @@ echo MAKEFLAGS += --output-sync=target
 echo.
 echo # Directories ^(relative to game/build/^)
 echo SRC_DIR = ../src
-echo OBJ_DIR = obj
+echo OBJ_DIR = linux/obj
 echo.
 echo # Subdirectories
 echo CORE_DIR     = $^(SRC_DIR^)/core
@@ -200,8 +200,8 @@ echo # Object directory structure
 echo OBJ_DIRS = $^(OBJ_DIR^)/core $^(OBJ_DIR^)/classes $^(OBJ_DIR^)/combat \
 echo            $^(OBJ_DIR^)/commands $^(OBJ_DIR^)/world $^(OBJ_DIR^)/systems
 echo.
-echo # Target executable ^(in game/bin/^)
-echo TARGET = ../bin/dystopia
+echo # Target executable ^(in gamedata/ for deployment^)
+echo TARGET = ../../gamedata/dystopia
 echo.
 echo all: $^(OBJ_DIRS^) $^(TARGET^)
 echo.
@@ -258,7 +258,7 @@ echo MAKEFLAGS += --output-sync=target
 echo.
 echo # Directories ^(relative to game/build/^)
 echo SRC_DIR = ../src
-echo OBJ_DIR = obj
+echo OBJ_DIR = win64/obj
 echo.
 echo # Subdirectories
 echo CORE_DIR     = $^(SRC_DIR^)/core
@@ -297,10 +297,10 @@ echo # Object directory structure
 echo OBJ_DIRS = $^(OBJ_DIR^)/core $^(OBJ_DIR^)/classes $^(OBJ_DIR^)/combat \
 echo            $^(OBJ_DIR^)/commands $^(OBJ_DIR^)/world $^(OBJ_DIR^)/systems
 echo.
-echo # Target executable selection ^(in game/bin/^):
+echo # Target executable selection ^(in gamedata/ for deployment^):
 echo # - If dystopia.exe doesn't exist, build dystopia.exe ^(fresh install^)
 echo # - If dystopia.exe exists, build dystopia_new.exe ^(hot-reload update^)
-echo BIN_DIR = ../bin
+echo BIN_DIR = ../../gamedata
 echo ifeq ^($^(wildcard $^(BIN_DIR^)/dystopia.exe^),^)
 echo   TARGET = $^(BIN_DIR^)/dystopia.exe
 echo else
@@ -309,7 +309,7 @@ echo endif
 echo.
 echo all: $^(OBJ_DIRS^) $^(TARGET^)
 echo.
-echo # Runtime DLL location
+echo # Runtime DLL location ^(copy to gamedata/^)
 echo ZLIB_DLL = ../lib/win64/bin/zlib1.dll
 echo.
 echo # Explicit targets for when you want to force a specific output
@@ -444,13 +444,13 @@ echo   ^<ImportGroup Label="PropertySheets"^>>> dystopia.vcxproj
 echo   ^</ImportGroup^>>> dystopia.vcxproj
 echo   ^<PropertyGroup Label="UserMacros" /^>>> dystopia.vcxproj
 echo   ^<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
-echo     ^<OutDir^>$(SolutionDir)..\bin\$(Configuration)\^</OutDir^>>> dystopia.vcxproj
-echo     ^<IntDir^>$(SolutionDir)obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
+echo     ^<OutDir^>$(SolutionDir)..\..\gamedata\^</OutDir^>>> dystopia.vcxproj
+echo     ^<IntDir^>$(SolutionDir)win64\obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
 echo     ^<TargetName^>dystopia^</TargetName^>>> dystopia.vcxproj
 echo   ^</PropertyGroup^>>> dystopia.vcxproj
 echo   ^<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"^>>> dystopia.vcxproj
-echo     ^<OutDir^>$(SolutionDir)..\bin\$(Configuration)\^</OutDir^>>> dystopia.vcxproj
-echo     ^<IntDir^>$(SolutionDir)obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
+echo     ^<OutDir^>$(SolutionDir)..\..\gamedata\^</OutDir^>>> dystopia.vcxproj
+echo     ^<IntDir^>$(SolutionDir)win64\obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
 echo     ^<TargetName^>dystopia^</TargetName^>>> dystopia.vcxproj
 echo   ^</PropertyGroup^>>> dystopia.vcxproj
 echo   ^<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
@@ -467,10 +467,6 @@ echo       ^<GenerateDebugInformation^>true^</GenerateDebugInformation^>>> dysto
 echo       ^<AdditionalDependencies^>ws2_32.lib;bcrypt.lib;zlib.lib;%%(AdditionalDependencies)^</AdditionalDependencies^>>> dystopia.vcxproj
 echo       ^<AdditionalLibraryDirectories^>$(ProjectDir)..\lib\win64\Debug;%%(AdditionalLibraryDirectories)^</AdditionalLibraryDirectories^>>> dystopia.vcxproj
 echo     ^</Link^>>> dystopia.vcxproj
-echo     ^<PostBuildEvent^>>> dystopia.vcxproj
-echo       ^<Command^>del /Q "$(ProjectDir)..\bin\dystopia.exe" 2^&gt;nul ^&amp;^&amp; copy /Y "$(TargetPath)" "$(ProjectDir)..\bin\dystopia.exe" ^|^| copy /Y "$(TargetPath)" "$(ProjectDir)..\bin\dystopia_new.exe"^</Command^>>> dystopia.vcxproj
-echo       ^<Message^>Copying to game\bin\ (dystopia_new.exe if server running, else dystopia.exe)^</Message^>>> dystopia.vcxproj
-echo     ^</PostBuildEvent^>>> dystopia.vcxproj
 echo   ^</ItemDefinitionGroup^>>> dystopia.vcxproj
 echo   ^<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"^>>> dystopia.vcxproj
 echo     ^<ClCompile^>>> dystopia.vcxproj
@@ -490,10 +486,6 @@ echo       ^<GenerateDebugInformation^>true^</GenerateDebugInformation^>>> dysto
 echo       ^<AdditionalDependencies^>ws2_32.lib;bcrypt.lib;zlib.lib;%%(AdditionalDependencies)^</AdditionalDependencies^>>> dystopia.vcxproj
 echo       ^<AdditionalLibraryDirectories^>$(ProjectDir)..\lib\win64\Release;%%(AdditionalLibraryDirectories)^</AdditionalLibraryDirectories^>>> dystopia.vcxproj
 echo     ^</Link^>>> dystopia.vcxproj
-echo     ^<PostBuildEvent^>>> dystopia.vcxproj
-echo       ^<Command^>del /Q "$(ProjectDir)..\bin\dystopia.exe" 2^&gt;nul ^&amp;^&amp; copy /Y "$(TargetPath)" "$(ProjectDir)..\bin\dystopia.exe" ^|^| copy /Y "$(TargetPath)" "$(ProjectDir)..\bin\dystopia_new.exe"^</Command^>>> dystopia.vcxproj
-echo       ^<Message^>Copying to game\bin\ (dystopia_new.exe if server running, else dystopia.exe)^</Message^>>> dystopia.vcxproj
-echo     ^</PostBuildEvent^>>> dystopia.vcxproj
 echo   ^</ItemDefinitionGroup^>>> dystopia.vcxproj
 echo   ^<ItemGroup^>>> dystopia.vcxproj
 

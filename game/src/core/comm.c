@@ -116,8 +116,10 @@ const   char    compress_start  [] = { '\0' };
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>  /* TCP_NODELAY */
 #include <sys/socket.h>
 #include <arpa/telnet.h>
+#include "telnet.h"  /* Our extensions: MCCP, GMCP, NAWS, etc. */
 const	char	echo_off_str	[] = { IAC, WILL, TELOPT_ECHO, '\0' };
 const	char	echo_on_str	[] = { IAC, WONT, TELOPT_ECHO, '\0' };
 const	char 	go_ahead_str	[] = { IAC, GA, '\0' };
@@ -1271,7 +1273,7 @@ void new_descriptor( int control )
     DESCRIPTOR_DATA *dnew;
     struct sockaddr_in sock;
     int desc;
-    int size;
+    socklen_t size;
     pthread_attr_t attr;
     pthread_t thread_lookup;
     DUMMY_ARG *dummyarg;

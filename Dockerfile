@@ -28,13 +28,13 @@ COPY . .
 # Open a port, set in comm.c and startup
 EXPOSE 8888
 
-# Build from game/build directory
+# Build from game/build directory (output goes to gamedata/)
 RUN cd game/build && \
     make -f Makefile clean && \
     make -f Makefile && \
-    chmod +x ../../devops/startup.sh
+    chmod +x ../../startup.sh
 
-# Mount points for runtime data
+# Mount points for runtime data (gamedata/ is self-contained deployable)
 VOLUME [    "/dystopia-mud/gamedata/player", \
             "/dystopia-mud/gamedata/area", \
             "/dystopia-mud/gamedata/log", \
@@ -43,4 +43,4 @@ VOLUME [    "/dystopia-mud/gamedata/player", \
             "/dystopia-mud/game/src" \
         ]
 
-ENTRYPOINT ["/bin/bash", "-c", "cd game/build && make -f Makefile && cd ../../devops && ./startup.sh && tail -f /dev/null"]
+ENTRYPOINT ["/bin/bash", "-c", "cd game/build && make -f Makefile && cd ../.. && ./startup.sh && tail -f /dev/null"]

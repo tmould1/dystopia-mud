@@ -11,7 +11,7 @@ MAKEFLAGS += --output-sync=target
 
 # Directories (relative to game/build/)
 SRC_DIR = ../src
-OBJ_DIR = obj
+OBJ_DIR = linux/obj
 
 # Subdirectories
 CORE_DIR     = $(SRC_DIR)/core
@@ -50,8 +50,8 @@ O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) 
 OBJ_DIRS = $(OBJ_DIR)/core $(OBJ_DIR)/classes $(OBJ_DIR)/combat \
            $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems
 
-# Target executable (in game/bin/)
-TARGET = ../bin/dystopia
+# Target executable (in gamedata/ for deployment)
+TARGET = ../../gamedata/dystopia
 
 all: $(OBJ_DIRS) $(TARGET)
 

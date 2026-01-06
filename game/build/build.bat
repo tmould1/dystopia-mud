@@ -28,11 +28,11 @@ if /i "%~1"=="clean" (
 REM Create logs directory if it doesn't exist
 if not exist "logs" mkdir "logs"
 
-REM Create obj directory if it doesn't exist
-if not exist "obj" mkdir "obj"
+REM Create win64/obj directory if it doesn't exist (platform-specific)
+if not exist "win64\obj" mkdir "win64\obj"
 
-REM Create bin directory if it doesn't exist
-if not exist "..\bin" mkdir "..\bin"
+REM Create gamedata directory if it doesn't exist (output location)
+if not exist "..\..\gamedata" mkdir "..\..\gamedata"
 
 REM Detect number of CPU cores for parallel build
 set JOBS=4

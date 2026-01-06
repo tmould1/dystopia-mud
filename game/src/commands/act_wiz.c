@@ -27,6 +27,7 @@
 #include "merc.h"
 #if !defined(WIN32)
 #include <unistd.h>
+#include <fcntl.h>  /* fcntl, F_SETFL, FNDELAY */
 #endif
 
 

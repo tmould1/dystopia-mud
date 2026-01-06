@@ -11,7 +11,7 @@ MAKEFLAGS += --output-sync=target
 
 # Directories (relative to game/build/)
 SRC_DIR = ../src
-OBJ_DIR = obj
+OBJ_DIR = win64/obj
 
 # Subdirectories
 CORE_DIR     = $(SRC_DIR)/core
@@ -50,10 +50,10 @@ O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) 
 OBJ_DIRS = $(OBJ_DIR)/core $(OBJ_DIR)/classes $(OBJ_DIR)/combat \
            $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems
 
-# Target executable selection (in game/bin/):
+# Target executable selection (in gamedata/ for deployment):
 # - If dystopia.exe doesn't exist, build dystopia.exe (fresh install)
 # - If dystopia.exe exists, build dystopia_new.exe (hot-reload update)
-BIN_DIR = ../bin
+BIN_DIR = ../../gamedata
 ifeq ($(wildcard $(BIN_DIR)/dystopia.exe),)
   TARGET = $(BIN_DIR)/dystopia.exe
 else
@@ -62,7 +62,7 @@ endif
 
 all: $(OBJ_DIRS) $(TARGET)
 
-# Runtime DLL location
+# Runtime DLL location (copy to gamedata/)
 ZLIB_DLL = ../lib/win64/bin/zlib1.dll
 
 # Explicit targets for when you want to force a specific output

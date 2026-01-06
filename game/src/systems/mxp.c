@@ -10,6 +10,7 @@
  * metals and gems apply to weapons and armor.
  */
 
+#include <string.h>
 #include "../core/merc.h"
 #include "telnet.h"
 #include "mxp.h"

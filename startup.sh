@@ -9,13 +9,18 @@ if [ "$1" != "" ]; then
   port="$1"
 fi
 
-# Get the directory where this script lives (devops/)
+# Get the directory where this script lives
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Define paths relative to project root
-GAMEDATA_DIR="$PROJECT_ROOT/gamedata"
-GAME_BIN="$PROJECT_ROOT/game/bin"
+# Define paths - gamedata is relative to script location
+# Script can be in project root or in gamedata/ itself
+if [ -d "$SCRIPT_DIR/gamedata" ]; then
+  # Script is in project root
+  GAMEDATA_DIR="$SCRIPT_DIR/gamedata"
+else
+  # Script might be in gamedata/
+  GAMEDATA_DIR="$SCRIPT_DIR"
+fi
 
 # Set limits.
 # nohup
@@ -40,8 +45,8 @@ while true; do
     ((index++))
   done
 
-  # Run the MUD (executable is in game/bin/)
-  "$GAME_BIN/dystopia" "$port" >& "$logfile"
+  # Run the MUD (executable is in gamedata/)
+  "$GAMEDATA_DIR/dystopia" "$port" >& "$logfile"
 
   # Restart, giving old connections a chance to die.
   if [ -e "$GAMEDATA_DIR/area/shutdown.txt" ]; then

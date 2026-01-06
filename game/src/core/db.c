@@ -98,8 +98,11 @@ void mud_init_paths(const char *exe_path)
     }
 #endif
 
-    /* Base dir is where the executable lives (game/bin/) */
-    /* Limit to 450 chars to guarantee room for subdirs + filenames */
+    /* Base dir is where the executable lives (gamedata/)
+     * Limit to 450 chars to guarantee room for subdirs + filenames
+     * The executable is now placed directly in gamedata/, so all
+     * data directories are siblings of the executable.
+     */
     {
         size_t max_base = 450;
         size_t len = strlen(exe_dir);
@@ -108,27 +111,11 @@ void mud_init_paths(const char *exe_path)
         mud_base_dir[len] = '\0';
     }
 
-    /* Navigate from game/bin/ up to project root, then into gamedata/
-     * Structure: project_root/game/bin/dystopia -> project_root/gamedata/
-     * Go up 2 levels (from bin to game to root) then into gamedata
-     */
-    snprintf(gamedata_dir, sizeof(gamedata_dir), "%.400s%s..%s..%sgamedata",
-             mud_base_dir, PATH_SEPARATOR, PATH_SEPARATOR, PATH_SEPARATOR);
+    /* gamedata_dir is the same as mud_base_dir since exe is in gamedata/ */
+    strncpy(gamedata_dir, mud_base_dir, MUD_PATH_MAX - 1);
+    gamedata_dir[MUD_PATH_MAX - 1] = '\0';
 
-    /* Resolve gamedata_dir to absolute path */
-#if defined(WIN32)
-    if (_fullpath(abs_path, gamedata_dir, MUD_PATH_MAX) != NULL) {
-        strncpy(gamedata_dir, abs_path, MUD_PATH_MAX - 1);
-        gamedata_dir[MUD_PATH_MAX - 1] = '\0';
-    }
-#else
-    if (realpath(gamedata_dir, abs_path) != NULL) {
-        strncpy(gamedata_dir, abs_path, MUD_PATH_MAX - 1);
-        gamedata_dir[MUD_PATH_MAX - 1] = '\0';
-    }
-#endif
-
-    /* Set up all subdirectories relative to gamedata */
+    /* Set up all subdirectories relative to gamedata (exe location) */
     snprintf(mud_area_dir, sizeof(mud_area_dir), "%.450s%sarea", gamedata_dir, PATH_SEPARATOR);
     snprintf(mud_player_dir, sizeof(mud_player_dir), "%.450s%splayer%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR);
     snprintf(mud_backup_dir, sizeof(mud_backup_dir), "%.450s%splayer%sbackup%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR, PATH_SEPARATOR);
@@ -138,7 +125,6 @@ void mud_init_paths(const char *exe_path)
 
     fprintf(stderr, "MUD paths initialized:\n");
     fprintf(stderr, "  Base:     %s\n", mud_base_dir);
-    fprintf(stderr, "  Gamedata: %s\n", gamedata_dir);
     fprintf(stderr, "  Area:     %s\n", mud_area_dir);
     fprintf(stderr, "  Player:   %s\n", mud_player_dir);
     fprintf(stderr, "  Backup:   %s\n", mud_backup_dir);
