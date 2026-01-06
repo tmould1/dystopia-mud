@@ -1,46 +1,39 @@
-# Executables
-dystopia
-dystopia.exe
-dystopia_new.exe
+# Executables (in game/bin/)
+game/bin/
 
 # Build artifacts
-build/obj/
-build/logs/
-build/backup/
-bin/
+game/build/obj/
+game/build/logs/
+game/build/backup/
+game/build/build/
 
 # Runtime logs
-log/
+gamedata/log/
 
 # Runtime artifacts
 crash.txt
 build_log.txt
-area/shutdown.txt
+build_output.txt
+gamedata/area/shutdown.txt
 
-# IDE/Editor
-.vscode/
+# IDE/Editor (in game/build/)
+game/build/.vscode/
+game/build/.vs/
+game/build/dystopia.sln
+game/build/dystopia.vcxproj
+game/build/dystopia.vcxproj.filters
+game/build/dystopia.vcxproj.user
 .idea/
-.vs/
-build/dystopia.sln
-build/dystopia.vcxproj
-build/dystopia.vcxproj.filters
-build/dystopia.vcxproj.user
-
 
 # Player data (sensitive)
-player/
+gamedata/player/
 
-# Windows DLLs (should be installed separately)
+# Windows DLLs (except bundled ones in lib/)
 *.dll
+!game/lib/**/*.dll
 
-# zlib headers bundled for Windows build
-src/zconf.h
-src/zlib.h
-src/zlib.lib
-build_output.txt
-
-# Runtime data files (auto-created on first launch if missing)
-txt/
+# Runtime data files
+gamedata/txt/
 
 # Python cache
 __pycache__/
