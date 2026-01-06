@@ -49,3 +49,10 @@ nul
 
 # Local settings
 .claude/settings.local.json
+game/bin/Debug/dystopia.exe
+game/bin/Debug/dystopia.ilk
+game/bin/Debug/dystopia.pdb
+game/bin/Release/dystopia.exe
+game/bin/Release/dystopia.pdb
+gamedata/dystopia.ilk
+gamedata/dystopia.pdb
