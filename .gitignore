@@ -6,6 +6,8 @@ dystopia_new.exe
 # Build artifacts
 build/obj/
 build/logs/
+build/backup/
+bin/
 
 # Runtime logs
 log/
@@ -19,6 +21,11 @@ area/shutdown.txt
 .vscode/
 .idea/
 .vs/
+build/dystopia.sln
+build/dystopia.vcxproj
+build/dystopia.vcxproj.filters
+build/dystopia.vcxproj.user
+
 
 # Player data (sensitive)
 player/
