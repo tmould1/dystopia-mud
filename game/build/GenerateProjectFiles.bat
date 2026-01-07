@@ -443,15 +443,18 @@ echo   ^</ImportGroup^>>> dystopia.vcxproj
 echo   ^<ImportGroup Label="PropertySheets"^>>> dystopia.vcxproj
 echo   ^</ImportGroup^>>> dystopia.vcxproj
 echo   ^<PropertyGroup Label="UserMacros" /^>>> dystopia.vcxproj
+echo   ^<!-- Hot-reload support: build dystopia_new.exe if dystopia.exe is running --^>>> dystopia.vcxproj
 echo   ^<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
 echo     ^<OutDir^>$(SolutionDir)..\..\gamedata\^</OutDir^>>> dystopia.vcxproj
 echo     ^<IntDir^>$(SolutionDir)win64\obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
-echo     ^<TargetName^>dystopia^</TargetName^>>> dystopia.vcxproj
+echo     ^<TargetName Condition="!Exists('$(OutDir)dystopia.exe')"^>dystopia^</TargetName^>>> dystopia.vcxproj
+echo     ^<TargetName Condition="Exists('$(OutDir)dystopia.exe')"^>dystopia_new^</TargetName^>>> dystopia.vcxproj
 echo   ^</PropertyGroup^>>> dystopia.vcxproj
 echo   ^<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"^>>> dystopia.vcxproj
 echo     ^<OutDir^>$(SolutionDir)..\..\gamedata\^</OutDir^>>> dystopia.vcxproj
 echo     ^<IntDir^>$(SolutionDir)win64\obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
-echo     ^<TargetName^>dystopia^</TargetName^>>> dystopia.vcxproj
+echo     ^<TargetName Condition="!Exists('$(OutDir)dystopia.exe')"^>dystopia^</TargetName^>>> dystopia.vcxproj
+echo     ^<TargetName Condition="Exists('$(OutDir)dystopia.exe')"^>dystopia_new^</TargetName^>>> dystopia.vcxproj
 echo   ^</PropertyGroup^>>> dystopia.vcxproj
 echo   ^<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
 echo     ^<ClCompile^>>> dystopia.vcxproj

@@ -405,12 +405,15 @@ DIR_SOMEWHERE
 #define CON_GET_NEW_SEX			 6
 #define CON_GET_NEW_CLASS		 7
 #define CON_GET_NEW_VT102                8
-#define CON_GET_NEW_ANSI                 9 
+#define CON_GET_NEW_ANSI                 9
 #define CON_READ_MOTD			 10
 #define CON_NOT_PLAYING			 11
 #define CON_EDITING			 12
 #define CON_COPYOVER_RECOVER    13
+/* Values 14-18 reserved for CON_NOTE_* in board.h */
 #define CON_PFILE             20
+#define CON_GET_NEW_GMCP        21
+#define CON_GET_NEW_MXP         22
 
 
 /*
@@ -1927,6 +1930,9 @@ extern char *scale[SCALE_COLS];
 #define PLR_ACID               67108864
 #define PLR_BRIEF4            134217728
 #define PLR_AMBI              268435456   // Can use both hands well.
+#define PLR_XTERM             536870912   // Full xterm-256 color support
+#define PLR_PREFER_GMCP      1073741824   // User prefers GMCP enabled
+#define PLR_PREFER_MXP       2147483648U  // User prefers MXP enabled
 
 /*New bits for playrs (Infidel)*/
 #define NEW_SLAM       1

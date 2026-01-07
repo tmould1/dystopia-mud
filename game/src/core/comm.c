@@ -3090,20 +3090,87 @@ OUT OUT OUT */
 	    return;
 	}
 	write_to_buffer( d, echo_on_str, 0 );
-	write_to_buffer( d, " Do you wish to use ANSI color (y/n)? ", 0);
+	write_to_buffer( d, "\n\r Choose your color mode:\n\r", 0 );
+	write_to_buffer( d, "   [N]one  - Plain text, no colors\n\r", 0 );
+	write_to_buffer( d, "   [A]NSI  - Standard 16 colors (works with most clients)\n\r", 0 );
+	write_to_buffer( d, "   [X]term - Full 256 colors (modern clients only)\n\r", 0 );
+	write_to_buffer( d, " Your choice (N/A/X)? ", 0 );
 	d->connected = CON_GET_NEW_ANSI;
 	break;
 
     case CON_GET_NEW_ANSI:
 	switch ( argument[0] )
 	{
-	case 'y': case 'Y': SET_BIT(ch->act,PLR_ANSI);    break;
-	case 'n': case 'N': break;
+	case 'x': case 'X':
+	    SET_BIT(ch->act, PLR_ANSI);
+	    SET_BIT(ch->act, PLR_XTERM);
+	    break;
+	case 'a': case 'A':
+	    SET_BIT(ch->act, PLR_ANSI);
+	    break;
+	case 'n': case 'N':
+	    break;
 	default:
-	    write_to_buffer( d, " Do you wish to use ANSI (y/n)? ", 0 );
+	    write_to_buffer( d, " Please choose [N]one, [A]NSI, or [X]term: ", 0 );
 	    return;
 	}
+	/* Ask about GMCP - show auto-detection status */
+	if (d->gmcp_enabled)
+	    write_to_buffer( d, " GMCP detected! Keep enabled for game data sync (Y/n)? ", 0 );
+	else
+	    write_to_buffer( d, " Enable GMCP for enhanced client features (y/n)? ", 0 );
+	d->connected = CON_GET_NEW_GMCP;
+	break;
 
+    case CON_GET_NEW_GMCP:
+	switch ( argument[0] )
+	{
+	case 'y': case 'Y':
+	    SET_BIT(ch->act, PLR_PREFER_GMCP);
+	    /* If client didn't auto-negotiate, try to enable now */
+	    if (!d->gmcp_enabled)
+		gmcp_init(d);
+	    break;
+	case 'n': case 'N':
+	    REMOVE_BIT(ch->act, PLR_PREFER_GMCP);
+	    d->gmcp_enabled = FALSE;
+	    break;
+	default:
+	    if (d->gmcp_enabled)
+		write_to_buffer( d, " GMCP detected! Keep enabled (Y/n)? ", 0 );
+	    else
+		write_to_buffer( d, " Enable GMCP (y/n)? ", 0 );
+	    return;
+	}
+	/* Ask about MXP - show auto-detection status */
+	if (d->mxp_enabled)
+	    write_to_buffer( d, " MXP detected! Keep enabled for clickable links (Y/n)? ", 0 );
+	else
+	    write_to_buffer( d, " Enable MXP for clickable links (y/n)? ", 0 );
+	d->connected = CON_GET_NEW_MXP;
+	break;
+
+    case CON_GET_NEW_MXP:
+	switch ( argument[0] )
+	{
+	case 'y': case 'Y':
+	    SET_BIT(ch->act, PLR_PREFER_MXP);
+	    /* If client didn't auto-negotiate, try to enable now */
+	    if (!d->mxp_enabled)
+		mxpStart(d);
+	    break;
+	case 'n': case 'N':
+	    REMOVE_BIT(ch->act, PLR_PREFER_MXP);
+	    d->mxp_enabled = FALSE;
+	    break;
+	default:
+	    if (d->mxp_enabled)
+		write_to_buffer( d, " MXP detected! Keep enabled (Y/n)? ", 0 );
+	    else
+		write_to_buffer( d, " Enable MXP (y/n)? ", 0 );
+	    return;
+	}
+	/* Character creation finalization */
 	ch->pcdata->perm_str=number_range(10,16);
         ch->pcdata->perm_int=number_range(10,16);
         ch->pcdata->perm_wis=number_range(10,16);
@@ -3124,6 +3191,21 @@ OUT OUT OUT */
 	char_list	= ch;
 	d->connected	= CON_PLAYING;
 
+	/* Apply saved protocol preferences for returning players */
+	if (ch->level > 0)
+	{
+	    /* GMCP preference handling */
+	    if (IS_SET(ch->act, PLR_PREFER_GMCP) && !d->gmcp_enabled)
+		gmcp_init(d);
+	    else if (!IS_SET(ch->act, PLR_PREFER_GMCP) && d->gmcp_enabled)
+		d->gmcp_enabled = FALSE;
+
+	    /* MXP preference handling */
+	    if (IS_SET(ch->act, PLR_PREFER_MXP) && !d->mxp_enabled)
+		mxpStart(d);
+	    else if (!IS_SET(ch->act, PLR_PREFER_MXP) && d->mxp_enabled)
+		d->mxp_enabled = FALSE;
+	}
 
     if( IS_CLASS(ch, CLASS_WEREWOLF))
     {
