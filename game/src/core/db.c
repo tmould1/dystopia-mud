@@ -2220,23 +2220,29 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA *pMobIndex )
 	mob->practice   = mob->level * (number_range(10,20)/10);
 
 
-     /* Random Forge Objects */
+    /* Random Forge Objects */
+    {
+        OBJ_DATA *obj = NULL;
+        int roll = number_percent();
 
-  if (number_percent() < 2)
-  {
+        /* Metals have tiered drop rates: copper 4%, iron 2%, steel 1%, adamantite 0.4% */
+        if (roll <= 4)
+            obj = create_object(get_obj_index(30049), 0);       /* copper */
+        else if (roll <= 6)
+            obj = create_object(get_obj_index(30050), 0);       /* iron */
+        else if (roll <= 7)
+            obj = create_object(get_obj_index(30051), 0);       /* steel */
+        else if (roll == 8 && number_range(1, 5) == 1)
+            obj = create_object(get_obj_index(30052), 0);       /* adamantite (0.4%) */
+        /* Gems and hilts: 2% chance each, randomly selected */
+        else if (roll <= 10)
+            obj = create_object(get_obj_index(number_range(30053, 30062)), 0);  /* gems */
+        else if (roll <= 12)
+            obj = create_object(get_obj_index(number_range(30063, 30071)), 0);  /* hilts */
 
-	OBJ_DATA *obj;
-	obj = create_object( get_obj_index( number_range( 30049,30071 ) ), 0 );
-	if( obj->pIndexData->vnum == 30052 ){
-	   if (number_range(1,5) == 2)
-		obj_to_char(obj,mob);
-           else
-                extract_obj(obj);
-	}
-	else
-	    obj_to_char(obj,mob);
-
-  }
+        if (obj != NULL)
+            obj_to_char(obj, mob);
+    }
     /*
      * Insert in list.
      */

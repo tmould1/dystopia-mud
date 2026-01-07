@@ -630,24 +630,111 @@ Also help on: #GCHANGES OLDCHANGES TICK WIZLIST CREDITS#n
               #GMCCP MCCP ARENA#n
 ~
 -1 FORGE~
-#GForging rare metals onto your equipment gives extra hitroll and damroll#n
 
-* copper = 3/3, iron = 6/6, steel = 9/9, adamantite = 12/12
- 
-#GForging hilts onto weapons gives strange effects, depending on what spell the weapon had already.#n
-#GShould a weapon not have any spell to begin with, the effect will be :#n
+      #x208/\#x214/\#x220/\#n  #x220T H E   F O R G E#n  #x220/\#x214/\#x208/\#n
 
-* ivory = curse       ebony  = blind   crystal   = dispel evil    marble    = drain
-* gold  = lightning   bronze = acid    sandstone = fire           limestone = poison
+#x250Enhance your weapons and armor by forging materials onto them.#n
 
-#GForging equipment with gemstones will _replace_ the old spell affect and set the follwing instead :#n
+#x208-------------------#x214[ #x220MATERIALS #x214]#x208-------------------#n
+  #x248METALS#n   - Add hitroll and damroll      (#x245help metal#n)
+  #x213GEMS#n     - Add spell effects            (#x245help gem#n)
+  #x136HILTS#n    - Add spell effects to weapons (#x245help hilt#n)
 
-* diamond = sanctuary   emerald = acid shield   sapphire = ice shield         ruby     = fire shield
-* jade    = protection  pearl   = invis         topaz    = lightning shield   amethyst = fly
-* onyx    = sneak       opal    = pass door     lazuli   = detect invis
+#x208-------------------#x214[ #x220STACKING #x214]#x208-------------------#n
+#x250Items can have #x220one of each type#x250 applied:#n
+  Weapon: #x248metal#n + #x213gem#n + #x136hilt#n
+  Armor:  #x248metal#n + #x213gem#n
 
-syntax : forge <gem/metal/hilt> <item>
+#x208-------------------#x214[ #x220SYNTAX #x214]#x208-------------------#n
+  #x214forge#n <material> <item>
 
+#x208-------------------#x214[ #x220EXAMPLES #x214]#x208-------------------#n
+  #x214forge copper sword#n     #x245+3/+3 hitroll/damroll#n
+  #x214forge diamond armor#n    #x245sanctuary spell effect#n
+  #x214forge gold blade#n       #x245lightning spell to weapon#n
+
+#x208-------------------#x214[ #x220ACQUISITION #x214]#x208-------------------#n
+#x250Materials drop randomly from mobs (#x2202%#x250 chance per spawn).#n
+
+#x245See also:#n #x248METAL#n #x213GEM#n #x136HILT#n
+~
+
+-1 METAL METALS~
+
+        #x240[#x244=#x248=#x252=#n  #x252M E T A L S#n  #x252=#x248=#x244=#x240]#n
+
+#x250Forge metal slabs onto weapons or armor for permanent stat bonuses.#n
+
+#x240-------------------#x248[ #x252METAL STATS #x248]#x240-------------------#n
+  #x208Metal#n          #x248Hitroll#n    #x248Damroll#n
+  #x166copper#n           +3         +3
+  #x245iron#n             +6         +6
+  #x252steel#n            +9         +9
+  #x051adamantite#n       +12        +12
+
+#x240-------------------#x248[ #x252RARITY #x248]#x240-------------------#n
+  #x166copper#n #x245(common)#n #x240>>#n #x245iron#n #x240>>#n #x252steel#n #x240>>#n #x051adamantite#n #x208(rare)#n
+  #x250Better metals are rarer to find.#n
+
+#x240-------------------#x248[ #x252SYNTAX #x248]#x240-------------------#n
+  #x248forge#n <metal> <item>
+
+#x245See also:#n #x214FORGE#n #x213GEM#n #x136HILT#n
+~
+
+-1 GEM GEMS GEMSTONE~
+
+    #x201*#x207*#x213*#x219*#x225*#n  #7G E M S T O N E S#n  #x225*#x219*#x213*#x207*#x201*#n
+
+#x250Forge gemstones onto weapons or armor to add spell effects.#n
+#x196Warning:#n Forging a gem #x208replaces#n any existing spell effect.
+
+#x201-----------------#x213[ #7SPELL EFFECTS #x213]#x201-----------------#n
+  #x231diamond#n       #7sanctuary#n
+  #x046emerald#n       #x040acid shield#n
+  #x039sapphire#n      #x051ice shield#n
+  #x196ruby#n          #x208fire shield#n
+  #x220topaz#n         #x226lightning shield#n
+  #x034jade#n          #x040protection#n
+  #x255pearl#n         #x245invisibility#n
+  #x135amethyst#n      #x141fly#n
+  #x236onyx#n          #x240sneak#n
+  #x189opal#n          #x195pass door#n
+  #x027lazuli#n        #x033detect invis#n
+
+#x201-----------------#x213[ #7SPECIAL #x213]#x201-----------------#n
+  #x034Jade#n grants a stronger effect to #x196evil#n characters.
+
+#x201-----------------#x213[ #7SYNTAX #x213]#x201-----------------#n
+  #x213forge#n <gem> <item>
+
+#x245See also:#n #x214FORGE#n #x248METAL#n #x136HILT#n
+~
+
+-1 HILT HILTS~
+
+      #x094|#x130|#x136|#x172|#n  #x172H I L T S#n  #x172|#x136|#x130|#x094|#n
+
+#x250Forge hilts onto #x172weapons only#x250 to add spell effects on hit.#n
+
+#x094-------------------#x136[ #x172SPELL EFFECTS #x136]#x094-------------------#n
+  #x250Hilt#n           #x172Effect#n
+  #x245limestone#n      #x034poison#n
+  #x220gold#n           #x226lightning#n
+  #x215sandstone#n      #x208fire#n
+  #x255marble#n         #x161drain#n
+  #x051crystal#n        #7dispel evil#n
+  #x231ivory#n          #x135curse#n
+  #x236ebony#n          #x240blind#n
+  #x166bronze#n         #x040acid#n
+
+#x094-------------------#x136[ #x172RESTRICTION #x136]#x094-------------------#n
+  #x196Hilts cannot be added to armor.#n
+
+#x094-------------------#x136[ #x172SYNTAX #x136]#x094-------------------#n
+  #x136forge#n <hilt> <weapon>
+
+#x245See also:#n #x214FORGE#n #x248METAL#n #x213GEM#n
 ~
 
 0 QUESTKEY~
