@@ -42,9 +42,13 @@ forge lazuli <item>
 
 ## Special Cases
 
-### Jade and Evil Alignment
+### Jade and Alignment
 
-Jade has a special interaction with evil-aligned characters, granting a stronger effect.
+Jade adapts its protection based on the forger's alignment:
+- **Good/Neutral characters**: Protection from evil (spell ID 7)
+- **Evil characters**: Protection from good (spell ID 139)
+
+This ensures the wearer gets protection against their opposing alignment.
 
 ## Technical Details
 

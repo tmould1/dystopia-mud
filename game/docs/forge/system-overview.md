@@ -107,24 +107,44 @@ Hilts can only be applied to `ITEM_WEAPON` types.
 
 ## Material Distribution
 
-Random mob spawns in `create_mobile()` (db.c):
+Random mob spawns in `create_mobile()` (db.c) use tiered drop rates:
 
 ```c
-if (number_percent() < 2)  // 2% chance
+/* Random Forge Objects */
 {
-    obj = create_object(get_obj_index(number_range(30049, 30071)), 0);
+    OBJ_DATA *obj = NULL;
+    int roll = number_percent();
 
-    // Adamantite has extra rarity check
-    if (obj->pIndexData->vnum == 30052) {
-        if (number_range(1,5) == 2)  // 20% of 2% = 0.4%
-            obj_to_char(obj, mob);
-        else
-            extract_obj(obj);
-    }
-    else
+    /* Metals have tiered drop rates */
+    if (roll <= 4)
+        obj = create_object(get_obj_index(30049), 0);       /* copper: 4% */
+    else if (roll <= 6)
+        obj = create_object(get_obj_index(30050), 0);       /* iron: 2% */
+    else if (roll <= 7)
+        obj = create_object(get_obj_index(30051), 0);       /* steel: 1% */
+    else if (roll == 8 && number_range(1, 5) == 1)
+        obj = create_object(get_obj_index(30052), 0);       /* adamantite: 0.4% */
+    /* Gems and hilts: 2% chance each */
+    else if (roll <= 10)
+        obj = create_object(get_obj_index(number_range(30053, 30062)), 0);  /* gems */
+    else if (roll <= 12)
+        obj = create_object(get_obj_index(number_range(30063, 30071)), 0);  /* hilts */
+
+    if (obj != NULL)
         obj_to_char(obj, mob);
 }
 ```
+
+### Drop Rate Summary
+
+| Material | Drop Rate |
+|----------|-----------|
+| Copper | 4% |
+| Iron | 2% |
+| Steel | 1% |
+| Adamantite | 0.4% |
+| Gems (random) | 2% |
+| Hilts (random) | 2% |
 
 ## Validation Rules
 

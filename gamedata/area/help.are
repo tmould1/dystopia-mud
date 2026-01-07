@@ -703,7 +703,7 @@ Also help on: #GCHANGES OLDCHANGES TICK WIZLIST CREDITS#n
   #x027lazuli#n        #x033detect invis#n
 
 #x201-----------------#x213[ #7SPECIAL #x213]#x201-----------------#n
-  #x034Jade#n grants a stronger effect to #x196evil#n characters.
+  #x034Jade#n adapts to alignment: protects from #x196evil#n or #7good#n.
 
 #x201-----------------#x213[ #7SYNTAX #x213]#x201-----------------#n
   #x213forge#n <gem> <item>

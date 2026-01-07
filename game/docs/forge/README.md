@@ -28,10 +28,18 @@ A fully forged weapon could have: steel + emerald + gold hilt
 
 ## Material Acquisition
 
-Forging materials drop randomly from mobs:
-- **2% chance** per mob spawn to carry a forging material
-- **Adamantite is rarer** - only 0.4% effective drop rate
-- Kill mobs and loot their corpses to collect materials
+Forging materials drop randomly from mobs. Better metals are rarer:
+
+| Material | Drop Rate |
+|----------|-----------|
+| Copper | 4% |
+| Iron | 2% |
+| Steel | 1% |
+| Adamantite | 0.4% |
+| Gems | 2% |
+| Hilts | 2% |
+
+Kill mobs and loot their corpses to collect materials.
 
 ## Quick Reference
 
