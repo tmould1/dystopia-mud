@@ -4565,6 +4565,21 @@ void do_config( CHAR_DATA *ch, char *argument )
 	    ? ""
 	    : "[-tell     ] You can't use 'tell'.\n\r"
 	    , ch );
+
+	send_to_char(  IS_SET(ch->act, PLR_PREFER_GMCP)
+	    ? "[+GMCP     ] GMCP protocol preferred (auto-enabled if client supports).\n\r"
+	    : "[-gmcp     ] GMCP protocol not preferred.\n\r"
+	    , ch );
+
+	send_to_char(  IS_SET(ch->act, PLR_PREFER_MXP)
+	    ? "[+MXP      ] MXP protocol preferred (auto-enabled if client supports).\n\r"
+	    : "[-mxp      ] MXP protocol not preferred.\n\r"
+	    , ch );
+
+	send_to_char(  IS_SET(ch->act, PLR_XTERM)
+	    ? "[+XTERM    ] Xterm 256-color mode enabled.\n\r"
+	    : "[-xterm    ] Xterm 256-color mode disabled.\n\r"
+	    , ch );
     }
     else
     {
@@ -4590,6 +4605,9 @@ void do_config( CHAR_DATA *ch, char *argument )
         else if ( !str_cmp( arg+1, "brief4"    ) ) bit = PLR_BRIEF4;
         else if ( !str_cmp( arg+1, "prompt"   ) ) bit = PLR_PROMPT;
 	else if ( !str_cmp( arg+1, "telnetga" ) ) bit = PLR_TELNET_GA;
+	else if ( !str_cmp( arg+1, "gmcp"     ) ) bit = PLR_PREFER_GMCP;
+	else if ( !str_cmp( arg+1, "mxp"      ) ) bit = PLR_PREFER_MXP;
+	else if ( !str_cmp( arg+1, "xterm"    ) ) bit = PLR_XTERM;
 	else
 	{
 	    send_to_char( "Config which option?\n\r", ch );

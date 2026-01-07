@@ -1226,7 +1226,7 @@ char *mxp_exit_link(EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_tex
     }
 
     snprintf(outbuf, MXP_BUF_MAX_LEN,
-        "<SEND href=\"%s\" hint=\"%s\">%s</SEND>",
+        MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
         cmd, escaped_hint, display_text);
 
     return outbuf;

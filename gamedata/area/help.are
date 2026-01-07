@@ -164,13 +164,17 @@ QuestMakers : None
        
 -1 MOTD~
 #n
-Please read the following help files before playing the game :
+#x245Welcome to Dystopia!#n
 
-RULES, POLICY, FORGE, BRIEF, NEWBIE, CLASS and PROTOCOLS
+New players: Type '#Rhelp tutorial#n' for a quick start guide.
+Returning players: Type '#Rhelp dystopiaplus#n' for dystopia-specific features.
 
-It is very important that you read help on WHO, PARADOX and PARADOXSTATS
+Please read the following help files:
+  RULES, POLICY, FORGE, BRIEF, NEWBIE, CLASS and PROTOCOLS
 
-Thanks, enjoy the game.
+Important: Read help on WHO, PARADOX and PARADOXSTATS
+
+Thanks, enjoy the game!
 
 ~
 
@@ -4009,6 +4013,61 @@ This code is between 000 and 255.
 
 ~
 
+-1 TUTORIAL~
+Welcome to Dystopia! This help guides new players through the basics.
+
+#x245GETTING STARTED:#n
+  Type '#Rlook#n' to see your surroundings
+  Use compass directions (#Rnorth#n, #Rsouth#n, #Reast#n, #Rwest#n, #Rup#n, #Rdown#n) to move
+  Type '#Rscore#n' to see your character stats
+  Type '#Requipment#n' to see what you're wearing
+  Type '#Rinventory#n' to see what you're carrying
+
+#x245COMMUNICATION:#n
+  '#Rsay#n <message>' - talk to people in your room
+  '#Rtell#n <player> <message>' - private message
+  '#Rnewbiechat#n <message>' - ask questions on the newbie channel
+
+#x245COMBAT:#n
+  '#Rconsider#n <target>' - gauge how tough an enemy is
+  '#Rkill#n <target>' - attack an enemy
+  '#Rflee#n' - escape from combat
+
+For more help, type '#Rhelp#n <topic>' or ask on newbiechat!
+
+See '#Rhelp dystopiaplus#n' for Dystopia-specific features like classes, quests, and forging.
+~
+
+-1 DYSTOPIAPLUS DYSTOPIA+~
+#x245Dystopia Plus - Enhanced Features#n
+
+This help covers features unique to this Dystopia server:
+
+#x245CLASS SYSTEM:#n
+  Use '#Rclasself#n' to choose your class (Vampire, Werewolf, Demon, etc.)
+  Each class has unique powers and progression
+  Type '#Rhelp classes#n' for the full list
+
+#x245UPGRADE CLASSES:#n
+  Base classes can upgrade to more powerful forms
+  Requirements: 50K hp, 35K mana/move, 40K quest points, generation 1
+  Type '#Rhelp upgrade#n' for details
+
+#x245FORGE SYSTEM:#n
+  Enhance weapons and armor with metals, gems, and hilts
+  Find materials on defeated enemies
+  Type '#Rhelp forge#n' for details
+
+#x245QUEST SYSTEM:#n
+  Complete quests to earn quest points
+  Quest points unlock upgrades and special items
+  Type '#Rhelp quest#n' for details
+
+#x245PK SYSTEM:#n
+  Player killing is allowed but has consequences
+  Paradox penalties apply for excessive PKing
+  Type '#Rhelp paradox#n' for rules
+~
 
 0 $~
 

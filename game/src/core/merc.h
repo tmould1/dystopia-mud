@@ -414,6 +414,7 @@ DIR_SOMEWHERE
 #define CON_PFILE             20
 #define CON_GET_NEW_GMCP        21
 #define CON_GET_NEW_MXP         22
+#define CON_GET_NEW_EXPLEVEL    23
 
 
 /*
@@ -2466,6 +2467,7 @@ struct pc_data
     int			comm;
     int                 security;       /* OLC - Builder security */
     int			bounty;
+    sh_int		explevel;       /* FTUE: 0=never MUD, 1=MUD not Dystopia, 2=veteran */
 };
 
 

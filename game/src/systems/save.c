@@ -321,7 +321,6 @@ power[43]);
       ch->gifts[18], ch->gifts[19], ch->gifts[20] );
     fprintf( fp, "Garou1        %d\n", ch->garou1 );
     fprintf( fp, "Garou2        %d\n", ch->garou2 );
-    fprintf( fp, "Explevel     %d\n",   ch->explevel            );
     fprintf( fp, "Expgained    %d\n",   ch->expgained           );
     fprintf( fp, "Exp          %d\n",   ch->exp                 );
     fprintf( fp, "Act          %d\n",   ch->act                 );
@@ -1713,7 +1712,6 @@ void fread_char( CHAR_DATA *ch, FILE *fp )
 		return;
 	    KEY( "Exhaustion",  ch->pcdata->exhaustion, fread_number( fp ) );
 	    KEY( "Exp",         ch->exp,                fread_number( fp ) );
-	    KEY( "Explevel",    ch->explevel,           fread_number( fp ) );
 	    KEY( "Expgained",   ch->expgained,          fread_number( fp ) );
 	    KEY( "Extra",       ch->extra,              fread_number( fp ) );
 	    break;

@@ -2995,15 +2995,7 @@ OUT OUT OUT */
 	}
 	ch->embraced=NULL; 
         ch->embracing=NULL;
-        if (multicheck(ch))
-        {
-          send_to_char("\n\r#R====#0[#y**#0]#R====  #GWARNING  #R====#0[#y**#0]#R====#n\n\r",ch);
-          send_to_char("You have connected from the same\n\r",ch);
-          send_to_char("IP as someone who is already on the\n\r",ch);
-          send_to_char("mud. Multiplaying is illegal, and\n\r",ch);
-          send_to_char("your actions will be monitored.\n\r",ch);
-          send_to_char("#R====#0[#y**#0]#R====  #GWARNING  #R====#0[#y**#0]#R====#n\n\r",ch);
-        }
+        multicheck(ch);
 	break;
 
 
@@ -3090,6 +3082,24 @@ OUT OUT OUT */
 	    return;
 	}
 	write_to_buffer( d, echo_on_str, 0 );
+	write_to_buffer( d, "\n\r What is your experience level?\n\r", 0 );
+	write_to_buffer( d, "   [1] Never played a MUD before\n\r", 0 );
+	write_to_buffer( d, "   [2] Played MUDs, but new to Dystopia\n\r", 0 );
+	write_to_buffer( d, "   [3] Dystopia veteran\n\r", 0 );
+	write_to_buffer( d, " Your choice (1/2/3)? ", 0 );
+	d->connected = CON_GET_NEW_EXPLEVEL;
+	break;
+
+    case CON_GET_NEW_EXPLEVEL:
+	switch ( argument[0] )
+	{
+	case '1': ch->pcdata->explevel = 0; break;  /* Never MUD'd */
+	case '2': ch->pcdata->explevel = 1; break;  /* MUD experience */
+	case '3': ch->pcdata->explevel = 2; break;  /* Dystopia veteran */
+	default:
+	    write_to_buffer( d, " Please choose 1, 2, or 3: ", 0 );
+	    return;
+	}
 	write_to_buffer( d, "\n\r Choose your color mode:\n\r", 0 );
 	write_to_buffer( d, "   [N]one  - Plain text, no colors\n\r", 0 );
 	write_to_buffer( d, "   [A]NSI  - Standard 16 colors (works with most clients)\n\r", 0 );
@@ -3114,62 +3124,11 @@ OUT OUT OUT */
 	    write_to_buffer( d, " Please choose [N]one, [A]NSI, or [X]term: ", 0 );
 	    return;
 	}
-	/* Ask about GMCP - show auto-detection status */
+	/* Auto-detect GMCP/MXP - enable silently if client negotiated them */
 	if (d->gmcp_enabled)
-	    write_to_buffer( d, " GMCP detected! Keep enabled for game data sync (Y/n)? ", 0 );
-	else
-	    write_to_buffer( d, " Enable GMCP for enhanced client features (y/n)? ", 0 );
-	d->connected = CON_GET_NEW_GMCP;
-	break;
-
-    case CON_GET_NEW_GMCP:
-	switch ( argument[0] )
-	{
-	case 'y': case 'Y':
 	    SET_BIT(ch->act, PLR_PREFER_GMCP);
-	    /* If client didn't auto-negotiate, try to enable now */
-	    if (!d->gmcp_enabled)
-		gmcp_init(d);
-	    break;
-	case 'n': case 'N':
-	    REMOVE_BIT(ch->act, PLR_PREFER_GMCP);
-	    d->gmcp_enabled = FALSE;
-	    break;
-	default:
-	    if (d->gmcp_enabled)
-		write_to_buffer( d, " GMCP detected! Keep enabled (Y/n)? ", 0 );
-	    else
-		write_to_buffer( d, " Enable GMCP (y/n)? ", 0 );
-	    return;
-	}
-	/* Ask about MXP - show auto-detection status */
 	if (d->mxp_enabled)
-	    write_to_buffer( d, " MXP detected! Keep enabled for clickable links (Y/n)? ", 0 );
-	else
-	    write_to_buffer( d, " Enable MXP for clickable links (y/n)? ", 0 );
-	d->connected = CON_GET_NEW_MXP;
-	break;
-
-    case CON_GET_NEW_MXP:
-	switch ( argument[0] )
-	{
-	case 'y': case 'Y':
 	    SET_BIT(ch->act, PLR_PREFER_MXP);
-	    /* If client didn't auto-negotiate, try to enable now */
-	    if (!d->mxp_enabled)
-		mxpStart(d);
-	    break;
-	case 'n': case 'N':
-	    REMOVE_BIT(ch->act, PLR_PREFER_MXP);
-	    d->mxp_enabled = FALSE;
-	    break;
-	default:
-	    if (d->mxp_enabled)
-		write_to_buffer( d, " MXP detected! Keep enabled (Y/n)? ", 0 );
-	    else
-		write_to_buffer( d, " Enable MXP (y/n)? ", 0 );
-	    return;
-	}
 	/* Character creation finalization */
 	ch->pcdata->perm_str=number_range(10,16);
         ch->pcdata->perm_int=number_range(10,16);
@@ -3186,7 +3145,6 @@ OUT OUT OUT */
 	break;
 
     case CON_READ_MOTD:
-	write_to_buffer( d,     "\n\r#3**#6Welcome to #RXXXXXXXXX #3**\n\r#3**#6Where #1Death#6 is a part of #7Life#3**\n\r", 0 );
 	ch->next	= char_list;
 	char_list	= ch;
 	d->connected	= CON_PLAYING;
@@ -3229,6 +3187,11 @@ OUT OUT OUT */
 	    ch->challenged = NULL;
 	    ch->level	= 1;
             ch->generation = 6;
+	    /* Default config options for new players */
+	    SET_BIT(ch->act, PLR_AUTOEXIT);
+	    SET_BIT(ch->act, PLR_AUTOLOOT);
+	    SET_BIT(ch->act, PLR_AUTOSAC);
+	    SET_BIT(ch->act, PLR_TELNET_GA);
             ch->stance[19] = -1;
             ch->stance[20] = -1;
             ch->stance[21] = -1;
@@ -3240,9 +3203,113 @@ OUT OUT OUT */
 	    ch->move	= ch->max_move;
             ch->special = 0;
 	    set_switchname(ch, ch->name);
+	    /* Starting room based on experience level (all start at school for now) */
 	    char_to_room( ch, get_room_index( ROOM_VNUM_SCHOOL ) );
+	    do_newbiepack(ch,"");
+	    clear_stats(ch);
+
+	    /* Announce entry */
+	    players_logged++;
+	    sprintf(buf,"#7A #Rnew player#7 named #2%s #7enters #R%s.#n", ch->name, game_config.game_name );
+	    enter_info(buf);
+	    act( "$n has entered the game.", ch, NULL, NULL, TO_ROOM );
+
+	    /* Show board, then room */
+	    do_board(ch,"");
 	    do_look( ch, "auto" );
-            do_newbiepack(ch,"");
+
+	    /* Silently equip newbie gear (shows effect messages in nice spot) */
+	    {
+		OBJ_DATA *nobj, *nobj_next;
+		bool equipped;
+		/* Loop until nothing more can be equipped (handles dual slots like rings) */
+		do {
+		    equipped = FALSE;
+		    for ( nobj = ch->carrying; nobj != NULL; nobj = nobj_next )
+		    {
+			nobj_next = nobj->next_content;
+			if ( nobj->wear_loc == WEAR_NONE && can_see_obj( ch, nobj ) )
+			{
+			    /* Check finger slots */
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_FINGER) ) {
+				if ( get_eq_char(ch, WEAR_FINGER_L) == NULL ) {
+				    equip_char(ch, nobj, WEAR_FINGER_L); equipped = TRUE; continue;
+				} else if ( get_eq_char(ch, WEAR_FINGER_R) == NULL ) {
+				    equip_char(ch, nobj, WEAR_FINGER_R); equipped = TRUE; continue;
+				}
+			    }
+			    /* Check neck slots */
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_NECK) ) {
+				if ( get_eq_char(ch, WEAR_NECK_1) == NULL ) {
+				    equip_char(ch, nobj, WEAR_NECK_1); equipped = TRUE; continue;
+				} else if ( get_eq_char(ch, WEAR_NECK_2) == NULL ) {
+				    equip_char(ch, nobj, WEAR_NECK_2); equipped = TRUE; continue;
+				}
+			    }
+			    /* Check wrist slots */
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_WRIST) ) {
+				if ( get_eq_char(ch, WEAR_WRIST_L) == NULL ) {
+				    equip_char(ch, nobj, WEAR_WRIST_L); equipped = TRUE; continue;
+				} else if ( get_eq_char(ch, WEAR_WRIST_R) == NULL ) {
+				    equip_char(ch, nobj, WEAR_WRIST_R); equipped = TRUE; continue;
+				}
+			    }
+			    /* Check hand slots (wield/hold) */
+			    if ( CAN_WEAR(nobj, ITEM_WIELD) || CAN_WEAR(nobj, ITEM_HOLD) ) {
+				if ( get_eq_char(ch, WEAR_WIELD) == NULL ) {
+				    equip_char(ch, nobj, WEAR_WIELD); equipped = TRUE; continue;
+				} else if ( get_eq_char(ch, WEAR_HOLD) == NULL ) {
+				    equip_char(ch, nobj, WEAR_HOLD); equipped = TRUE; continue;
+				}
+			    }
+			    /* Single slots */
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_HEAD) && get_eq_char(ch, WEAR_HEAD) == NULL ) {
+				equip_char(ch, nobj, WEAR_HEAD); equipped = TRUE; continue;
+			    }
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_BODY) && get_eq_char(ch, WEAR_BODY) == NULL ) {
+				equip_char(ch, nobj, WEAR_BODY); equipped = TRUE; continue;
+			    }
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_LEGS) && get_eq_char(ch, WEAR_LEGS) == NULL ) {
+				equip_char(ch, nobj, WEAR_LEGS); equipped = TRUE; continue;
+			    }
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_FEET) && get_eq_char(ch, WEAR_FEET) == NULL ) {
+				equip_char(ch, nobj, WEAR_FEET); equipped = TRUE; continue;
+			    }
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_HANDS) && get_eq_char(ch, WEAR_HANDS) == NULL ) {
+				equip_char(ch, nobj, WEAR_HANDS); equipped = TRUE; continue;
+			    }
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_ARMS) && get_eq_char(ch, WEAR_ARMS) == NULL ) {
+				equip_char(ch, nobj, WEAR_ARMS); equipped = TRUE; continue;
+			    }
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_ABOUT) && get_eq_char(ch, WEAR_ABOUT) == NULL ) {
+				equip_char(ch, nobj, WEAR_ABOUT); equipped = TRUE; continue;
+			    }
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_WAIST) && get_eq_char(ch, WEAR_WAIST) == NULL ) {
+				equip_char(ch, nobj, WEAR_WAIST); equipped = TRUE; continue;
+			    }
+			    if ( nobj->item_type == ITEM_LIGHT && get_eq_char(ch, WEAR_LIGHT) == NULL ) {
+				equip_char(ch, nobj, WEAR_LIGHT); equipped = TRUE; continue;
+			    }
+			    if ( CAN_WEAR(nobj, ITEM_WEAR_FACE) && get_eq_char(ch, WEAR_FACE) == NULL ) {
+				equip_char(ch, nobj, WEAR_FACE); equipped = TRUE; continue;
+			    }
+			}
+		    }
+		} while (equipped);
+	    }
+
+	    /* Room program greeting */
+	    room_text(ch,">ENTER<");
+
+	    /* Experience-appropriate welcome hint */
+	    if (ch->pcdata->explevel == 0)
+		send_to_char("\n\r#GTip:#n Type '#Rhelp tutorial#n' for a beginner's guide!\n\r", ch);
+	    else if (ch->pcdata->explevel == 1)
+		send_to_char("\n\r#GTip:#n Type '#Rhelp dystopiaplus#n' for Dystopia-specific features!\n\r", ch);
+
+	    /* Send initial GMCP data */
+	    gmcp_send_char_data(ch);
+	    break;
 	}
 	else if (!IS_NPC(ch) && ch->pcdata->obj_vnum != 0)
 	{
@@ -3271,14 +3338,11 @@ OUT OUT OUT */
 	/* Send initial GMCP data now that character is fully loaded */
 	gmcp_send_char_data(ch);
 
-        players_logged++;
-	sprintf(buf,"#7A #Rnew player#7 named #2%s #7enters #R%s.#n", ch->name, game_config.game_name );
-	enter_info(buf);
 	ch->fight_timer = 0;
-    ch->pcdata->revision = CURRENT_REVISION;
+	ch->pcdata->revision = CURRENT_REVISION;
 	act( "$n has entered the game.", ch, NULL, NULL, TO_ROOM );
-        clear_stats(ch);
-        do_wear(ch, "all");
+	clear_stats(ch);
+
   if ( !IS_NPC(ch) )
   {
     for ( obj = ch->carrying; obj != NULL; obj = obj->next_content )
@@ -3365,15 +3429,7 @@ OUT OUT OUT */
 
 	ch->embraced=NULL;
         ch->embracing=NULL;
-        if (multicheck(ch))
-        {
-          send_to_char("\n\r#R====#0[#y**#0]#R====  #GWARNING  #R====#0[#y**#0]#R====#n\n\r",ch);
-          send_to_char("You have connected from the same\n\r",ch);
-          send_to_char("IP as someone who is already on the\n\r",ch);
-          send_to_char("mud. Multiplaying is illegal, and\n\r",ch);
-          send_to_char("your actions will be monitored.\n\r",ch);
-          send_to_char("#R====#0[#y**#0]#R====  #GWARNING  #R====#0[#y**#0]#R====#n\n\r",ch);
-        }
+        multicheck(ch);
         /* Send initial GMCP data if enabled */
         if (d->gmcp_enabled)
             gmcp_send_char_data(ch);

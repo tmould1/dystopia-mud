@@ -330,6 +330,25 @@ void get_obj( CHAR_DATA *ch, OBJ_DATA *obj, OBJ_DATA *container )
 
 
 
+/* Silent object loading helper for newbie pack - creates object without messages */
+static void silent_oload( CHAR_DATA *ch, int vnum )
+{
+    OBJ_INDEX_DATA *pObjIndex;
+    OBJ_DATA *obj;
+
+    if ( ( pObjIndex = get_obj_index( vnum ) ) == NULL )
+	return;
+
+    obj = create_object( pObjIndex, 0 );
+    if ( CAN_WEAR(obj, ITEM_TAKE) )
+	obj_to_char( obj, ch );
+    else
+	obj_to_room( obj, ch->in_room );
+
+    if (obj->questmaker != NULL) free_string(obj->questmaker);
+    obj->questmaker = str_dup(ch->name);
+}
+
 void do_newbiepack( CHAR_DATA *ch, char *argument )
 {
 	int character_level = ch->level;
@@ -337,26 +356,25 @@ void do_newbiepack( CHAR_DATA *ch, char *argument )
 
 	ch->level = 12;
 	ch->trust = 12;
-	do_oload(ch,"30333");
-	do_oload(ch,"30334");
-	do_oload(ch,"30335");
-	do_oload(ch,"30336");
-	do_oload(ch,"30337");
-	do_oload(ch,"30338");
-	do_oload(ch,"30339");
-	do_oload(ch,"30339");
-	do_oload(ch,"30340");
-	do_oload(ch,"30340");
-	do_oload(ch,"30342");
-	do_oload(ch,"30342");
-	do_oload(ch,"30343");
-	do_oload(ch,"30343");
-	do_oload(ch,"2622");
-	do_oload(ch,"2204");
-	
+	silent_oload(ch, 30333);
+	silent_oload(ch, 30334);
+	silent_oload(ch, 30335);
+	silent_oload(ch, 30336);
+	silent_oload(ch, 30337);
+	silent_oload(ch, 30338);
+	silent_oload(ch, 30339);
+	silent_oload(ch, 30339);
+	silent_oload(ch, 30340);
+	silent_oload(ch, 30340);
+	silent_oload(ch, 30342);
+	silent_oload(ch, 30342);
+	silent_oload(ch, 30343);
+	silent_oload(ch, 30343);
+	silent_oload(ch, 2622);
+	silent_oload(ch, 2204);
+
 	ch->level = character_level;
 	ch->trust = character_trust;
-	send_to_char("You have created a newbie pack. Don't forget to equip items!\n\r",ch);
 	return;
 }
 
