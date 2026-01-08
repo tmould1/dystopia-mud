@@ -237,7 +237,7 @@ void clearshit(CHAR_DATA *ch)
   ch->spectype                        = 0;
   ch->specpower                       = 0;
   ch->mounted                         = 0;
-  ch->home                            = 3001;
+  ch->home                            = ROOM_VNUM_SCHOOL;
   ch->vampgen_a                       = 0;
   ch->paradox[0]                      = 0;    /* Total paradox */
   ch->paradox[1]                      = 0;    /* Current Paradox */

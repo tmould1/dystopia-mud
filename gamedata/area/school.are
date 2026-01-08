@@ -30,7 +30,7 @@ Perhaps now would be a good time to flee from him!!!  If you don't flee, you
 would really suffer the consequences.
 ~
 67 8 0 S
-3 20 -99 1d1+50 1d1+0
+10 0 100 0d0+0 1d1+0
 0 0
 0 0 0
 #3702
@@ -635,6 +635,28 @@ Q
 (null)~
 (null)~
 0 0
+#3720
+lantern academy~
+an academy lantern~
+An academy lantern lies here, glowing softly.~
+~
+1 65 24577
+0 0 -1 0
+1 0 0
+E
+lantern~
+This simple brass lantern glows with a soft, steady light. It never seems
+to run out of fuel - a gift from the Academy to help new adventurers find
+their way through dark places.
+~
+Q
+(null)~
+(null)~
+(null)~
+(null)~
+(null)~
+(null)~
+0 0
 #0
 
 
@@ -642,16 +664,23 @@ Q
 #ROOMDATA
 #3700
 Entrance to Mud School~
-This is the entrance to the Merc Mud School.  Go north to go through mud
-school.  If you have been here before and want to go directly to the arena,
-go south.
+You stand in the entrance hall of Dystopia's Training Academy. Soft light
+filters through crystalline windows, illuminating three clearly marked paths.
+
+A weathered signpost points the way:
+  NORTH - Section 1: New to MUDs (basic commands and navigation)
+  EAST  - Section 2: New to Dystopia (classes, upgrades, and game systems)
+  SOUTH - Combat Arena (practice fighting in a safe environment)
+  DOWN  - Return to Midgaard Temple
+
+The Spirit of the Academy hovers nearby, ready to assist newcomers.
 ~
-0 12 0
+0 1032 0
 T
 >ENTER<~
-The spirit says 'Welcome to mud school, $n!'
-The spirit says 'If you need any help, just ask.'
-The spirit says 'I can give you EQUIPMENT or tell you about AREAS to explore!'~
+The spirit says 'Welcome to Dystopia, $n!'
+The spirit says 'I can give you EQUIPMENT for your journey or tell you about AREAS to explore.'
+The spirit says 'Go NORTH to learn basic MUD commands, or EAST if you already know the basics.'~
 copy~
 all~
 1048576 0 3721
@@ -676,19 +705,22 @@ all~
 T
 |help*~
 The spirit says 'I can help you with EQUIPMENT for your journey, or give DIRECTIONS to beginner areas!'
+The spirit says 'Go NORTH for Section 1 (basic MUD commands) or EAST for Section 2 (Dystopia systems).'
 The spirit says 'Try asking: "equipment" or "areas" or "where should I go?"'~
 copy~
 all~
 1048576 0 3721
 T
 &where*go*~
-The spirit says 'First you should go north through mud school.'.~
+The spirit says 'If you are new to MUDs, go NORTH for Section 1 to learn the basics.'
+The spirit says 'If you already know MUD commands, go EAST for Section 2 to learn Dystopia systems.'
+The spirit says 'Or go SOUTH to the Combat Arena to practice fighting!'~
 copy~
 all~
 1048576 0 3721
 T
 &what*do*~
-The spirit says 'Just go north and follow the signs!'.~
+The spirit says 'Go NORTH for basic commands, EAST for Dystopia systems, or SOUTH to fight!'~
 copy~
 all~
 1048576 0 3721
@@ -895,12 +927,17 @@ copy~
 all~
 1048576 0 3721
 D0
-You see the doorway into the Mud School Building.
+You see Section 1 ahead - basic MUD commands and navigation.
 ~
 ~
 0 0 3757
+D1
+You see Section 2 - Dystopia-specific game systems.
+~
+~
+0 0 3713
 D2
-You see the one way door into the Arena of Mud School.
+You see the one way door into the Combat Arena.
 ~
 door~
 3 -1 3744
@@ -911,33 +948,36 @@ You see the Temple of Midgaard.
 0 0 3001
 S
 #3701
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  The exits are west and south.  A small plaque is on the
-wall.
+Movement Basics~
+You are in a bright training room with arrows painted on the floor pointing
+in various directions. The walls display diagrams showing the six cardinal
+directions used in MUDs.
+
+A sign on the wall explains movement commands. Type 'LOOK SIGN' to read it.
 ~
-0 12 0
+0 1032 0
 E
 plaque~
-This zone (Mud School) is created by Hatchet for any Merc Mud.
-Copyright 1992, 1993.
+Dystopia MUD - Training Academy
+Based on the classic Merc/Diku codebase.
 ~
 E
 sign~
-Equipment check time!  Type 'EQUIPMENT' to see your current equipment.  Right
-now, you have just a vest, a shield, and a weapon.  As you go through Mud
-School you will acquire a complete set of equipment.
+MOVEMENT BASICS
 
-To pick up items on the ground as you see them, type 'GET item'.
-To wear a piece of armor, type 'WEAR item'.
-To hold a light source, type 'HOLD item'.
-To wield a weapon, type 'WIELD weapon'.
-To wear, hold, and wield everything you have, type 'WEAR ALL'.
-To stop using a piece of equipment, type 'REMOVE item'.
-Finally, to see the items in your inventory, type 'INVENTORY'.
+In MUDs, you move by typing direction commands:
+  NORTH (or N)  - Move north      SOUTH (or S)  - Move south
+  EAST  (or E)  - Move east       WEST  (or W)  - Move west
+  UP    (or U)  - Move up         DOWN  (or D)  - Move down
 
-When you are ready to continue, go west.
+Useful commands:
+  EXITS   - See obvious exits from the current room
+  LOOK    - Look at your surroundings
+  LOOK <object> - Examine something specific (like 'LOOK SIGN' to read signs!)
+  SCAN    - Look into adjacent rooms
+
+Try typing 'EXITS' to see where you can go from here.
+Continue WEST to practice directions, or type 'RECALL' to return.
 ~
 D2
 You see a path into another room.
@@ -951,25 +991,29 @@ You see a path into another room.
 0 -1 3702
 S
 #3702
-The Center Room~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  Exits lead in ALL directions.
+Direction Practice Room~
+You stand in the center of a hexagonal practice chamber. Exits lead in all
+six directions - north, south, east, west, up, and down. The floor has a
+compass rose inlaid in brass, and glowing arrows point toward each exit.
+
+A sign on the wall provides instructions.
 ~
-0 12 0
+0 1032 0
 E
 sign~
-This is the direction practicing room.  The directions you can go in any
-room are: north, south, east, west, up, or down.  Of course, not all rooms
-have all exits available.
+DIRECTION PRACTICE
 
-To see the obvious exits in a room, type 'EXITS'.
+This room has exits in ALL six directions. Try moving in each one!
 
-Sometimes doors are closed, or locked, or secret.  Then you have to notice
-clues in the room description, or try going into that direction and seeing
-if you bump into a door.
+Commands to try:
+  EXITS       - See which directions you can go
+  LOOK NORTH  - Peek into a room before entering (works for any direction)
+  SCAN        - See creatures in adjacent rooms
 
-Try going into each direction from here.  When you are done, go NORTH.
+Sometimes doors are closed or locked. Try 'OPEN <direction>' or 'UNLOCK <dir>'.
+Secret doors may be hidden - read room descriptions carefully!
+
+Practice moving around, then go NORTH when ready to continue.
 ~
 D0
 You see the room north that will lead you to the next section.
@@ -1003,17 +1047,29 @@ You see a room.
 0 0 3707
 S
 #3703
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  Exits lead north and south.
+Communication Chamber~
+You enter a room designed like an amphitheater, with curved walls that seem
+to amplify sound. Speech bubbles are painted on the walls, demonstrating
+different ways players communicate in Dystopia.
+
+A detailed sign explains the communication commands.
 ~
-0 12 0
+0 1032 0
 E
 sign~
-Since you are here, let us have another lesson.  You can see the statistics on
-yourself by typing 'SCORE'.  Do that right now.  At higher levels, 'SCORE'
-gives you more information.
+COMMUNICATION
+
+Talking to others is essential in a MUD. Here are the basic commands:
+
+  SAY <message>    - Speak to everyone in the room
+  TELL <name> <msg>- Send a private message to someone online
+  NEWBIE <message> - Ask for help on the newbie channel (recommended!)
+
+Finding other players:
+  WHO              - See who is online
+  WHOIS <name>     - Get info about a specific player
+
+Try typing 'WHO' to see who else is playing, then continue NORTH.
 ~
 D0
 You see the next station ahead.
@@ -1027,15 +1083,16 @@ You see the central room.
 0 0 3702
 S
 #3704
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  The only exit is east.
+West Practice Room~
+You are in a small alcove west of the main practice chamber. The walls are
+decorated with a mural of a sunset over western mountains.
+
+A small sign reads: "Go EAST to return to the Direction Practice Room."
 ~
-0 12 0
+0 1032 0
 E
 sign~
-Just go east to the central room.
+You've successfully moved WEST! Now go EAST to return to the practice room.
 ~
 D1
 You see the central room.
@@ -1044,15 +1101,16 @@ You see the central room.
 0 0 3702
 S
 #3705
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  The only exit is north.
+South Practice Room~
+You are in a small alcove south of the main practice chamber. The walls
+show a mural of tropical beaches and palm trees swaying in the breeze.
+
+A small sign reads: "Go NORTH to return to the Direction Practice Room."
 ~
-0 12 0
+0 1032 0
 E
 sign~
-Just go north to the central room.
+You've successfully moved SOUTH! Now go NORTH to return to the practice room.
 ~
 D0
 You see the central room.
@@ -1061,15 +1119,16 @@ You see the central room.
 0 0 3702
 S
 #3707
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  The only exit is up.
+Lower Practice Room~
+You are in a basement alcove below the main practice chamber. The low ceiling
+has glowing crystals embedded in it, and the walls depict underground caves.
+
+A small sign reads: "Go UP to return to the Direction Practice Room."
 ~
 0 12 0
 E
 sign~
-Just go up to the central room.
+You've successfully moved DOWN! Now go UP to return to the practice room.
 ~
 D4
 You see the central room.
@@ -1078,15 +1137,16 @@ You see the central room.
 0 0 3702
 S
 #3708
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  The only exit is down.
+Upper Practice Room~
+You are in a raised alcove above the main practice chamber. Large windows
+let in sunlight, and the walls show murals of clouds and flying creatures.
+
+A small sign reads: "Go DOWN to return to the Direction Practice Room."
 ~
 0 12 0
 E
 sign~
-Just go down to the central room.
+You've successfully moved UP! Now go DOWN to return to the practice room.
 ~
 D5
 You see the central room.
@@ -1095,31 +1155,39 @@ You see the central room.
 0 0 3702
 S
 #3709
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  Exits reach west and down.
+Combat Introduction~
+You enter a reinforced training room with padded walls. The faint sounds of
+combat echo from below. Warning signs are posted around a trapdoor in the
+floor, and scratches on the walls hint at previous training sessions.
+
+A large instructional sign dominates one wall.
 ~
 0 12 0
 E
 sign~
-Welcome to combat training.
+COMBAT BASICS
 
-The first lesson is knowing whom to fight.  Use the command 'CONSIDER' to
-consider killing a monster.  Avoid fighting monsters that will kill you
-easily.
+Before fighting, ALWAYS use 'CONSIDER <target>' to gauge their strength!
 
-The second lesson is running away.  There is a monster in the room down.
-He is too strong for you to kill, but he won't kill you.  So go 'DOWN' from
-here, then 'CONSIDER' him, then 'KILL' him.  After a while, type 'FLEE' to
-escape from him.
+Basic combat commands:
+  KILL <target>   - Attack a creature or player
+  FLEE            - Run away from combat (may fail!)
+  WIMPY <hp>      - Auto-flee when your HP drops below this amount
 
-You can also set your character to flee automatically with the 'WIMPY' command.
-Type 'HELP WIMPY' to find out more about 'WIMPY'.
+Practice exercise (recommended):
+1. Go DOWN into the cage below
+2. Type 'CONSIDER BLOB' to see how tough it is
+3. Type 'KILL BLOB' to start fighting
+4. Type 'FLEE' to escape before you die!
 
-After you flee, you will be back in this room.  When you are ready to go on
-to the next station, go 'WEST'.
+The blob won't kill you, but it's too strong to defeat yet.
+After practicing, go WEST to continue the tutorial.
 ~
+D2
+You see the Communication Chamber.
+~
+~
+0 0 3703
 D3
 You see the next station of Mud School.
 ~
@@ -1133,14 +1201,26 @@ You see a cage.
 S
 #3710
 The Blob Cage~
-You are in a smelly cage.  Strangely, the walls are still clean!
-You see a sign here.  The only exit is up.
+You drop into a reinforced cage with thick iron bars. The air is damp and
+smells of something unpleasant. A gelatinous creature oozes around the
+confined space. The only way out is UP.
+
+A battered sign hangs on the wall.
 ~
 0 8 0
 E
 sign~
-Remember, don't fight the blob to the finish!  Just type 'KILL BLOB', then
-when you are fighting, type 'FLEE', until you flee and are out of here.
+FLEE PRACTICE
+
+This blob is too strong for you to kill - that's the point!
+
+Instructions:
+1. Type 'KILL BLOB' to engage it
+2. Watch your health drop (that's normal)
+3. Type 'FLEE' to escape!
+
+If FLEE fails, keep trying - it doesn't always work on the first attempt.
+Once you escape, go UP and then WEST to continue.
 ~
 D4
 You see a safe room up.
@@ -1149,17 +1229,29 @@ You see a safe room up.
 0 0 3709
 S
 #3711
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.
+Combat Practice Entrance~
+You stand at the top of a spiral staircase leading down to a series of cages.
+The sounds of restless creatures drift up from below. Weapon racks line the
+walls, and a large trophy case displays items won from previous battles.
+
+An instructional sign is posted by the stairs.
 ~
 0 12 0
 E
 sign~
-Welcome to the next station.  Here, you will actually fight real monsters,
-without fleeing!  Kill every mob, since they hold some equipment you need.
-To start, go down.
+REAL COMBAT PRACTICE
+
+Now it's time to fight monsters you can actually defeat! Go DOWN to the
+Cage Room where training creatures are held.
+
+After killing a monster:
+  GET ALL CORPSE   - Loot items from the corpse
+  WEAR ALL         - Equip any new gear you found
+  SACRIFICE CORPSE - Dispose of the corpse (gives you gold)
+
+Between fights, use REST or SLEEP to recover hit points faster.
+
+Go DOWN when ready to start fighting!
 ~
 D1
 You see the next station of Mud School.
@@ -1174,49 +1266,33 @@ You see the combat hall.
 S
 #3712
 The Cage Room~
-You are in the cage room.  All around are 4 cages.  Light fluoresces off the
-ceiling in soft white tones.  Of course, there is a big sign on the wall.
-Exits lead into the cardinal directions plus down.
+You stand in a circular combat training room. Several practice creatures are
+chained here, waiting to be fought. A spiral staircase leads back UP, while
+another passage leads DOWN to the next section.
+
+A large instructional sign hangs in the center.
 ~
 0 12 0
 E
 sign~
-Welcome to the cage room.  The adepts of mud school have captured some
-monsters for you to kill.  In the four cages are four monsters of various
-types.  Kill them all!
+COMBAT PRACTICE
 
-After you kill each monster, get all of the equipment from their corpses
-with the command 'GET ALL CORPSE'.  You can then use the command 'WEAR ALL'
-to wear your newly won equipment.
+Several monsters are chained here for combat practice. Fight them to gain
+experience and loot!
 
-When you are done with the corpse, 'SACRIFICE CORPSE' to give it to your God.
-God will reward you for this.
+Combat Tips:
+  - Use 'CONSIDER <target>' before fighting
+  - Type 'KILL <monster>' to attack
+  - After killing: GET ALL CORPSE, WEAR ALL, SACRIFICE CORPSE
+  - REST or SLEEP between fights to heal
 
-Between combat, you may need to rest or sleep to regenerate hit points.
-You can 'REST' to regenerate hit points, or you can 'SLEEP'.  'SLEEP' will
-refresh you faster than 'REST', but you will be less aware of your
-surroundings.
+When done practicing, go UP to return or DOWN to continue the tutorial.
 ~
-D0
-You see the aggressive monster inside!
+D4
+You see the Combat Practice Entrance.
 ~
 ~
-0 -1 3713
-D1
-You see the unmodified monster inside!
-~
-~
-0 -1 3716
-D2
-You see the wimpy monster inside!
-~
-~
-0 -1 3715
-D3
-You see the aggressive wimpy monster inside!
-~
-~
-0 -1 3714
+0 0 3711
 D5
 You see the next station below.
 ~
@@ -1224,91 +1300,199 @@ You see the next station below.
 0 -1 3717
 S
 #3713
-A Cage~
-You are in a cage.  Blood and gore are everywhere.  The keepers must be lax
-in the upkeep here!  There is a sign on the wall.  The only exit is south.
-~
-0 8 0
-E
-sign~
-There is an aggressive monster in this room.  Kill him and get out of here
-fast!  Remember to loot and sacrifice the corpse.
-~
-D2
-You see the Cage Room.
-~
-~
-0 -1 3712
-S
-#3714
-A Cage~
-You are in a cage.  Blood and gore are everywhere.  The keepers must be lax
-in the upkeep here!  There is a sign on the wall.  The only exit is east.
-~
-0 8 0
-E
-sign~
-There is a wimpy, aggressive monster in this room.  Kill him and get out of
-here fast!  Remember to loot and sacrifice the corpse.
-~
-D1
-You see the Cage Room.
-~
-~
-0 -1 3712
-S
-#3715
-A Cage~
-You are in a cage.  Blood and gore are everywhere.  The keepers must be lax
-in the upkeep here!  There is a sign on the wall.  The only exit is north.
-~
-0 8 0
-E
-sign~
-There is a wimpy monster in this room.  Kill him and get out of here fast!
-Remember to loot and sacrifice the corpse.
-~
-D0
-You see the Cage Room.
-~
-~
-0 -1 3712
-S
-#3716
-A Cage~
-You are in a cage.  Blood and gore are everywhere.  The keepers must be lax
-in the upkeep here!  There is a sign on the wall.  The only exit is west.
-~
-0 8 0
-E
-sign~
-There is a monster in this room.  Kill him and get out of here fast!
-Remember to loot and sacrifice the corpse.
-~
-D3
-You see the Cage Room.
-~
-~
-0 -1 3712
-S
-#3717
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  Find your own exit here.
+Section 2: Class Selection~
+You enter a grand hall lined with statues representing Dystopia's many classes.
+Each statue depicts a different path of power - from blood-drinking Vampires to
+shapeshifting Werewolves, from spell-weaving Mages to honorable Samurai.
+
+Glowing portals shimmer between the statues, and a detailed sign explains
+the class system.
 ~
 0 12 0
 E
 sign~
-By now, you must be hungry and thirsty.  Time to buy groceries!
-To the south is a store.  Inside the store, you can use these commands:
+CHOOSING YOUR CLASS
 
-    BUY    Buy an item
-    LIST   List what is for sale
+In Dystopia, you must select a class to gain powers and abilities.
 
-After buying some food and drink, you can 'EAT' and 'DRINK' it.
+Before you can choose a class, you must first become an avatar:
+  1. Gain experience by fighting in the Arena (go SOUTH from the entrance)
+  2. Type 'TRAIN AVATAR' once you meet the prerequisites
+  3. Type 'CLASSSELF <class>' to become that class
 
-After that, find the next exit yourself.
+Available starting classes:
+  VAMPIRE    - Undead blood drinkers with dark powers
+  WEREWOLF   - Shapeshifters with primal fury
+  DEMON      - Fiends from the abyss
+  MAGE       - Masters of arcane magic
+  NINJA      - Stealthy assassins
+  MONK       - Martial arts masters
+  DROW       - Dark elves with spider powers
+
+Type 'HELP CLASS' for a thorough overview, or 'HELP <class>' for details on a specific class.
+Continue SOUTH to learn about upgrades, or WEST to return to the entrance.
+~
+D2
+You see the Upgrade Paths room to the south.
+~
+~
+0 0 3714
+D3
+You see the Academy Entrance to the west.
+~
+~
+0 0 3700
+S
+#3714
+Upgrade Paths~
+This chamber displays a massive family tree of power, showing how each class
+can evolve into more powerful forms. Branching lines connect base classes to
+their advanced upgrades, with requirements listed beside each transformation.
+
+A detailed sign explains the upgrade system.
+~
+0 12 0
+E
+sign~
+CLASS UPGRADES
+
+Each base class can upgrade to a more powerful form once you've mastered it.
+
+Upgrade Paths:
+  Demon      --> Tanar'ri
+  Vampire    --> Undead Knight
+  Werewolf   --> Shapeshifter
+  Monk       --> Angel
+  Ninja      --> Samurai
+  Drow       --> Spider Droid
+  Battlemage --> Lich
+
+Requirements include reaching high HP, Mana, and Move totals, accumulating
+Quest Points (QP), and reaching Generation 1. The upgrade ritual takes place
+at the Temple Altar of Midgaard.
+
+Type 'HELP UPGRADE' for detailed requirements.
+Continue SOUTH to learn about quests, or NORTH to return to class selection.
+~
+D0
+You see the Class Selection room to the north.
+~
+~
+0 0 3713
+D2
+You see the Quest System room to the south.
+~
+~
+0 0 3715
+S
+#3715
+Quest System~
+You enter a room decorated like an adventurer's guild hall. A large quest
+board dominates one wall, covered with notices and bounties. Maps and trophies
+from past adventures decorate the space.
+
+A sign explains how quests work in Dystopia.
+~
+0 12 0
+E
+sign~
+THE QUEST SYSTEM
+
+Quest Points (QP) are earned through quests and spent on item customization.
+
+GETTING QUESTS:
+  1. Find a Quest Machine (there's one EAST of the Temple of Midgaard)
+  2. CAST 'QUEST' at the machine to create a quest card (costs primal)
+  3. COMPLETE <card> to see the 4 items you need to find
+  4. Hunt for those items throughout the world
+  5. COMPLETE <card> <item> to submit each item to your card
+  6. Turn in completed cards for QP rewards
+
+SPENDING QP - ITEM CUSTOMIZATION:
+  QUEST               - View customization costs and options
+  QUEST CREATE <type> - Create a new item (weapon, armor, light, etc.)
+  QUEST <item> <stat> - Add bonuses like STR, HP, hitroll to items
+
+Example costs:
+  Weapon: 50 QP    Armor: 20 QP    +1 Stat: 20 QP
+  +1 HP/Mana: 5 QP    +1 Hitroll: 30 QP    Spell: 50 QP
+
+Type 'HELP QUEST' for more details.
+Continue SOUTH to learn about PK and Paradox.
+~
+D0
+You see the Upgrade Paths room to the north.
+~
+~
+0 0 3714
+D2
+You see the PK and Paradox room to the south.
+~
+~
+0 0 3716
+S
+#3716
+PK and Paradox~
+This room has a somber atmosphere. One half is bathed in red light depicting
+scenes of player combat, while the other half shows the consequences of
+unchecked violence - the dreaded Paradox state.
+
+Warning signs and detailed explanations cover the walls.
+~
+0 12 0
+E
+sign~
+PLAYER KILLING (PK) AND PARADOX
+
+Dystopia allows player vs player combat, but with consequences!
+
+PK BASICS:
+  - You must be an Avatar (level 3+) to engage in PK
+  - Type 'KILL <player>' to attack another player
+  - Safe rooms (like this school) prevent combat
+  - Decapitating a player is the ultimate victory
+
+PARADOX:
+  Paradox punishes you for decapping players outside your power range.
+  Each player has a "powerscore" based on HP, skills, and upgrades.
+  - Decap someone too weak? You gain a paradox counter
+  - Get 3 counters? You get "paradoxed" (morted + lose 10% max HP)
+  - Remove counters by decapping players within your range
+
+Type 'HELP PARADOX' for detailed mechanics.
+
+SECTION 2 COMPLETE!
+You now know the basics of Dystopia's unique systems.
+Type 'RECALL' to return to the Academy Entrance.
+~
+D0
+You see the Quest System room to the north.
+~
+~
+0 0 3715
+S
+#3717
+Supplies and Sustenance~
+You enter a musty storage room. A closed shop lies to the SOUTH - though it
+appears to be under renovation. A closed door leads EAST, and stairs lead UP
+to the Cage Room.
+
+A sign on the wall provides guidance.
+~
+0 12 0
+E
+sign~
+SUPPLIES AND LIGHT
+
+The shop to the SOUTH is currently closed, but the adept there will give
+you a free lantern if you need one for the dark room ahead.
+
+You'll need light to see in dark places! When you get your lantern:
+  HOLD LANTERN  - Hold the lantern to provide light
+  EQUIPMENT     - Check what you're holding/wearing
+
+Continue EAST to learn about doors and keys (type 'OPEN EAST' first).
+Go UP to return to the Cage Room for more combat practice.
 ~
 D1
 You see the next station of Mud School.
@@ -1327,21 +1511,32 @@ You see the Cage room.
 0 -1 3712
 S
 #3718
-The Store in Mud School~
-You are in a cramped room.  Stacked neatly on shelves everywhere are items
-and packages.  Light fluoresces off the ceiling in soft white tones.  Of
-course, there is a sign on the wall.  The only exit is north.
+Academy Supply Shop~
+You enter what was once a cozy shop, now mostly empty. Dusty shelves line the
+walls, and cobwebs hang in the corners. An adept stands behind a worn wooden
+counter, looking apologetic. A faded "CLOSED" sign hangs in the window.
+
+The only exit is NORTH.
 ~
 0 8 0
+T
+>ENTER<~
+The adept says 'Ah, welcome $n! Sorry, the shop is closed for renovations.'
+The adept says 'But if you need a lantern for the dark room ahead, I have one to spare!'
+The adept gives $n $p.~
+The adept says 'Ah, welcome $n! Sorry, the shop is closed for renovations.'
+The adept says 'But if you need a lantern for the dark room ahead, I have one to spare!'
+The adept gives you $p.~
+all~
+1048608 3720 3717
 E
 sign~
-The sign reads:
+SHOP CLOSED
 
-   Buy   - Buy something from the storekeeper.
-   List  - The storekeeper will tell you what's for sale.
-   Value - The storekeeper will tell you how much he will give to you for
-           that item.
-   Sell  - Sell that item to the storekeeper.
+The Academy Supply Shop is currently closed for renovations.
+The adept here can still give you a free lantern if you need light.
+
+Go NORTH when you're ready to continue.
 ~
 D0
 You see the only exit out of here.
@@ -1350,20 +1545,32 @@ You see the only exit out of here.
 0 0 3717
 S
 #3719
-A Room in Mud School~
-You are in a square white room.  The walls are all blank, with no windows.
-Light fluoresces off the ceiling in soft white tones.  Of course, there is a
-sign on the wall.  The exits are north and west, with a door to the east.
+Keys and Locks~
+You stand in a room with three exits. A sturdy door blocks the way EAST,
+secured with a heavy lock. A dark passage leads NORTH, and the way WEST
+returns to the previous area.
+
+A sign explains how to deal with locked doors.
 ~
 0 12 0
 E
 sign~
-North of you is a dark room.  I hope you still have the lantern!  If not,
-you have to back to the store and buy one.
+DOORS, LOCKS, AND KEYS
 
-In the room is a monster with a key that you need.  After killing the
-monster and getting the key, come back here, UNLOCK EAST, OPEN EAST,
-and continue east.
+Some doors require keys to open. To proceed EAST, you'll need to:
+
+1. Go NORTH into the dark room
+2. Kill the creature there and GET the KEY from its corpse
+3. Return here (go SOUTH)
+4. Type: UNLOCK EAST
+5. Type: OPEN EAST
+6. Then go EAST to continue!
+
+Door commands:
+  OPEN <direction>   - Open a closed door
+  CLOSE <direction>  - Close an open door
+  UNLOCK <direction> - Unlock a door (requires the right key)
+  LOCK <direction>   - Lock a door
 ~
 D0
 You see a darkened room inside.
@@ -1371,21 +1578,21 @@ You see a darkened room inside.
 ~
 0 0 3720
 D1
-You see the next station of Mud School.
+You see the Section 1 Complete room (requires key).
 ~
 door~
 39 3714 3721
 D3
-You see the room you just came from.
+You see the Supplies room.
 ~
-door~
-3 -1 3717
+~
+0 0 3717
 S
 #3720
 The Darkened Room~
-This room was purposefully darkened so that you would need to hold on to a
-light source to go through.  The walls are, of course, blank, and white.
-The only exit is south.
+Without a light source, you would barely see anything in this pitch-black room.
+With light, you can make out rough stone walls and a creature lurking in the
+shadows. The only exit is SOUTH.
 ~
 0 9 0
 D2
@@ -1395,40 +1602,55 @@ You see the room that you have come from.
 0 0 3719
 S
 #3721
-The End of Mud School!~
-This is a very bright room, with a marble pedestal in the center.  Behind
-the pedestal stands a person cloaked in Silver.  Tapestries flow from every
-wall, and you feel very happy to be here right now.  There is a big sign here.
-The only exit is on the other side of the gate north of you.
+Section 1 Complete!~
+Congratulations! You've reached the end of Section 1. Bright light fills this
+ceremonial chamber, and a marble pedestal displays the diploma beast - your
+final training challenge. Tapestries depicting legendary heroes line the walls.
+
+A gate to the NORTH leads to the Combat Arena. A passage EAST leads to Section 2.
+The way WEST returns to the previous room.
 ~
 0 8 0
 E
 sign~
-You have graduated from Mud School!  Get your diploma.  Go 'NORTH' from here
-to visit our arena.  There are plenty of low-level monsters, but DON'T attack
-other players.
+CONGRATULATIONS - SECTION 1 COMPLETE!
 
-If you want to go directly back to the temple at any time, type 'RECALL'.
+You've learned the basics of MUD gameplay:
+  - Movement and navigation
+  - Communication with other players
+  - Combat, looting, and fleeing
+  - Shopping and item management
+  - Doors, locks, and keys
 
-After you raise to level two, you can 'SAVE' your character.  Your character
-will be automatically SAVE'd every few minutes.
+WHAT'S NEXT?
 
-If you need more help during the game, type 'HELP'.  If you see something
-wrong or have comments, use 'BUG', 'IDEA', or 'TYPO' to report them.
+  NORTH - Combat Arena (practice fighting safely)
+  EAST  - Section 2: New to Dystopia (classes, upgrades, game systems)
+  WEST  - Return to Keys and Locks room
+  RECALL - Return to the Academy Entrance
 
-May your visit here be ... mercenary.
+Useful commands: HELP, BUG, IDEA, TYPO, SAVE
 ~
 D0
 You see the Arena ahead.
 ~
 gate~
 3 -1 3722
+D1
+You see Section 2: Class Selection.
+~
+~
+0 0 3713
+D3
+You see the Keys and Locks room.
+~
+~
+0 0 3719
 S
 #3722
 South Wall of Arena~
-You are in the Arena.  Remember, if you wish to get out of this Arena, just
-go up.  Ceilings can barely be seen in this huge Arena.  You feel as if you are
-being watched by some divine being.
+You are in the Combat Arena, a safe place to practice fighting. Training
+creatures wander freely here. Go UP at any time to reach the safe room.
 ~
 0 8 0
 D0
@@ -1734,16 +1956,28 @@ You see the EXIT.
 S
 #3734
 Center of Arena~
-You are in the Arena.  Remember, if you wish to get out of this Arena, just
-go up.  Ceilings can barely be seen in this huge Arena.  You feel as if you are
-being watched by some divine being.  There is a BIG SIGN here.
+You stand in the center of the Combat Arena, a vast training ground where
+new adventurers hone their skills. Creatures roam the arena freely - perfect
+for combat practice. Go UP at any time to reach the safe room and exit.
+
+A grate in the floor leads DOWN to the Dungeon. There is a BIG SIGN here.
 ~
 0 8 0
 E
 sign~
-Those with high bravery or low senses of cautiousness might wish to go below
-to the Dungeon.  However, know that there are aggressive monsters down there,
-and there is no quick escape back out of here when you are in the dungeon.
+COMBAT ARENA
+
+This arena is a safe place to practice fighting. The creatures here respawn,
+so don't worry about running out of targets!
+
+Tips:
+  - Go UP from anywhere to reach the safe room
+  - Use CONSIDER before engaging new creatures
+  - REST or SLEEP to recover between fights
+  - Type 'RECALL' to return to the Academy Entrance
+
+WARNING: The Dungeon below (DOWN through the grate) has aggressive monsters
+that will attack you on sight! Only enter when you feel ready.
 ~
 D0
 ~
@@ -2082,10 +2316,11 @@ You see the EXIT.
 S
 #3748
 The Center of the Dungeon~
-You are in the center of a large room.  A faint light from above shows that
-the floors are all covered with slime.  A feeling of dread comes over you as
-you notice that this is NOT a great place to go.  Exits go in all directions.
-Of special note is the one that brings you back up!!!
+You stand in the heart of the Training Dungeon. Slime coats the floor and
+the air is thick with danger. Aggressive creatures lurk in the shadows of
+every corridor - they WILL attack you on sight!
+
+The grate above (UP) leads back to the safety of the Arena.
 ~
 0 8 0
 D0
@@ -2271,22 +2506,34 @@ You see the south wall.
 0 0 3755
 S
 #3757
-A Room in Mud School~
-You are in a room in Mud School.  Pastels cover these walls, due to Hatchet's
-mood for the day.  To the west is Furey's Training Room, and to the east is
-Hatchet's Guild Room.  North of you is the next Station of Mud School.
-There is a sign on the wall (type 'LOOK SIGN' to read it).
+Section 1: Training Lobby~
+You have entered Section 1 of the Training Academy. This bright lobby connects
+to several important training areas. Soft light illuminates instructional
+banners hanging from the walls.
+
+A signpost indicates:
+  NORTH - Continue tutorial (Movement Basics)
+  WEST  - Furey's Training Room (train your attributes)
+  EAST  - Hatchet's Guild Room (practice skills and spells)
+  SOUTH - Return to Academy Entrance
+
+There is a detailed sign on the wall (type 'LOOK SIGN' to read it).
 ~
-0 0 1
+0 12 0
 E
 sign~
-To find out your attributes, type 'score'.  You can improve your attributes
-in Furey's Training Room to the west.  You can practice your skills and spells
-in Hatchet's Guild Room to the east.  You can continue through mud school by
-going north.
+SECTION 1: NEW TO MUDS
 
-If you are a new character, you should go 'WEST' from here, train your
-abilities, and then come back here and go 'NORTH'.
+This section teaches you the basic commands needed to play any MUD:
+  - Moving around and looking at things
+  - Communicating with other players
+  - Picking up and using items
+  - Basic combat
+
+Type 'SCORE' to see your character's attributes.
+
+Go WEST to train your stats, EAST to practice skills, or NORTH to continue.
+Type 'RECALL' at any time to return to the Academy Entrance.
 ~
 D0
 You see the next station of Mud School.
@@ -2311,18 +2558,31 @@ You see Furey's Training Room.  Go there to train your attributes.
 S
 #3758
 Furey's Training Room~
-You are in Furey's Training Room.  Around you are all sorts of physical
-and mental training tools.  The whole room is filled with magic, holiness, 
-and sweat.  There is a sign on the wall.
+You enter a well-equipped training facility. Weights, balance beams, and
+meditation cushions are arranged around the room. An adept trainer stands
+ready to help you improve your core attributes.
+
+A detailed sign explains the training system.
 ~
-0 0 1
+0 12 0
 E
 sign~
-Welcome to Furey's Training Room.  Here you can train your attributes.  To 
-train an attribute, you need enough practices.  To find out how many practice
-sessions you have, type 'train' while you are in this room.  To train for a 
-specific attribute, type 'train <attr>' where attr is the first 3 letters of
-the attribute you want increased.  Type 'help train' for more information.
+ATTRIBUTE TRAINING
+
+Here you can permanently increase your character's attributes using practices.
+
+Commands:
+  TRAIN         - See your current stats and available practices
+  TRAIN <stat>  - Train a specific attribute (str, int, wis, dex, con)
+
+Stats explanation:
+  STR (Strength)     - Physical damage, carrying capacity
+  INT (Intelligence) - Mana pool, spell power
+  WIS (Wisdom)       - Mana regeneration, skill learning
+  DEX (Dexterity)    - Dodge chance, attack speed
+  CON (Constitution) - Hit points, resistance
+
+Type 'HELP TRAIN' for more information. Go EAST when done.
 ~
 D1
 You see the room you came from, and the room you should go to.
@@ -2332,19 +2592,29 @@ You see the room you came from, and the room you should go to.
 S
 #3759
 Hatchet's Guild Room~
-You are in a room filled with weapons, books, and many combat dummies, some
-cut and stabbed many times, others burnt to a crisp.  The room is filled with
-sweat and an aura of magic.  There is a sign on the wall.
+You enter a practice hall filled with weapon racks, spellbooks, and battered
+training dummies. Scorch marks and sword cuts cover every surface. A priest
+stands ready to help you learn new skills.
+
+A sign details the practice system.
 ~
-0 0 1
+0 12 0
 E
 sign~
-Welcome to Hatchet's Guild Room.  Here you will learn your skills and spells.
-To find out what skills and spells you can practice and how many practice
-sessions you have, type 'practice'.  To practice the specific skill, type
-'practice <skill>', where 'skill' is the skill or spell you wish to practice.
-Practicing increases the amount you know of that skill or spell, up to a
-certain maximum.  When you have practiced all you wish to practice, go west.
+SKILL AND SPELL PRACTICE
+
+Here you can learn and improve your skills and spells using practice sessions.
+
+Commands:
+  PRACTICE          - See all available skills/spells and your proficiency
+  PRACTICE <skill>  - Practice a specific skill or spell
+
+Tips:
+  - Higher proficiency means better success rate and damage
+  - Different classes have different skills available
+  - You gain practice sessions when you level up
+
+Practice what you can, then go WEST to continue the tutorial.
 ~
 D3
 You see the room you came from and the room you should go to.
@@ -2353,9 +2623,13 @@ You see the room you came from and the room you should go to.
 0 0 3757
 S
 #3760
-A Safe Room~
-You are in a safe room, away from all the mean rabbits and snails of the Arena.
-You can rest here, and go up to go back to the Temple of Midgaard.
+Arena Safe Room~
+You emerge into a peaceful sanctuary above the Arena. Soft cushions and
+healing springs line the walls, offering respite from combat. This room
+is protected - no fighting is allowed here.
+
+Go UP to reach the Temple of Midgaard, or DOWN to return to the Arena.
+Type 'RECALL' to return to the Academy Entrance.
 ~
 0 12 0
 D4
@@ -2363,6 +2637,11 @@ You see the Temple of Midgaard.
 ~
 ~
 0 0 3001
+D5
+You see the Combat Arena below.
+~
+~
+0 0 3722
 S
 #0
 
@@ -2380,18 +2659,6 @@ M 0 3721 1 3700
 M 0 3700 1 3701
 M 0 3701 1 3710
 M 0 3707 1 3712
-M 0 3704 1 3713
-E 0 3707 0 7
-E 0 3712 0 13
-M 0 3705 1 3714
-E 0 3708 0 8
-E 0 3713 0 14
-M 0 3703 1 3715
-E 0 3706 0 6
-E 0 3711 0 12
-M 0 3702 1 3716
-E 0 3705 0 3
-E 0 3705 0 4
 M 0 3717 1 3718
 G 0 3138 0
 G 0 3031 0

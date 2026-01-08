@@ -3203,8 +3203,14 @@ OUT OUT OUT */
 	    ch->move	= ch->max_move;
             ch->special = 0;
 	    set_switchname(ch, ch->name);
-	    /* Starting room based on experience level (all start at school for now) */
-	    char_to_room( ch, get_room_index( ROOM_VNUM_SCHOOL ) );
+	    ch->home = ROOM_VNUM_SCHOOL;  /* Set recall point to school entrance */
+	    /* Starting room based on experience level */
+	    if (ch->pcdata->explevel == 0)
+		char_to_room( ch, get_room_index( ROOM_VNUM_SCHOOL_SEC1 ) );
+	    else if (ch->pcdata->explevel == 1)
+		char_to_room( ch, get_room_index( ROOM_VNUM_SCHOOL_SEC2 ) );
+	    else
+		char_to_room( ch, get_room_index( ROOM_VNUM_SCHOOL ) );
 	    do_newbiepack(ch,"");
 	    clear_stats(ch);
 

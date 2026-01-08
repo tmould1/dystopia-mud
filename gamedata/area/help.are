@@ -1294,62 +1294,59 @@ For information on the MOUNT spell, type 'help mountspell'.
 
 
 0 QUESTS~
-Quest Makers (and occasionally higher levels) can set quests for one or 
-more players to participate in.  The rewards for such quests can be in 
-the form of specially modified equipment.  A number of quest points-worth 
-will be allocated depending on the difficulty of the quest, using the 
-following guidelines for point costs (QP's = Quest Points):
+#LIMMORTAL-RUN QUESTS:#n
+Quest Makers (and higher immortals) can run special quests for players.
+Rewards may include specially modified equipment with bonus QP allowances.
 
-Stats (Str/Dex/Int/Wis/Con): 20 QP's per +1, max allowed is +3 per stat.
-Hp/Mana/Move: 5 QP per +1, max allowed is +25 on each.
-Hitroll/Damroll: 30 QP's per +1, max allowed is +5 on each.
-Ac: 10 QP's per -1, max allowed is -25.
+#LQP COSTS FOR QUEST REWARDS:#n
+  Stats (Str/Dex/Int/Wis/Con): 20 QP per +1, max +3 each
+  HP/Mana/Move:               5 QP per +1, max +25 each
+  Hitroll/Damroll:            30 QP per +1, max +5 each
+  AC:                         10 QP per -1, max -25
 
-Once a certain affect (str, hitroll, ac, etc) is selected, it cannot be 
-chosen again for that item even if you didn't select the maximum allowed 
-amount.  Choosing to have penalties on an item will not decrease its 
-cost, although some Quest Makers may allow extra points if you select a 
-few disadvantages on the item.
+Once an affect is added to an item, it cannot be chosen again even if
+you didn't take the maximum. Penalties don't reduce cost.
 
-For more information, type 'quest'.
+For information on earning QP through quest cards, see 'help quest'.
 ~
 
 
 
-0 QUEST TOKEN~
-Syntax: quest <field> <value>
+0 TOKEN~
 Syntax: token <value>
 
-QUEST will allow you to spend any quest points you might have.  For a 
-list of the cost (in quest points), type 'quest'.
+Creates a quest token worth the specified amount of Quest Points (1-50).
+You must have at least that many QP available. Tokens can be traded or
+given to other players, who can eat them to gain the QP.
 
-TOKEN will allow you to create a quest token, with the value of the token 
-set to the value specified.  The tokens value must be within 1 and 50, 
-and it cannot be greater than the number of quest points you currently 
-have.
-
-For information on the QUEST spell, type 'help questspell'.
+For information on earning and spending QP, see 'help quest'.
 ~
 
 
 
 0 QUESTCARD COMPLETE RECHARGE~
-Syntax: complete card
-Syntax: complete card <object>
-Syntax: recharge card machine
+Syntax: complete <card>
+Syntax: complete <card> <object>
+Syntax: recharge <card> machine
 
-A quest card requires 4 objects to complete.  To find out what 4 objects 
-you need, type 'complete card'.  When you find these items, you should 
-type 'complete card <object>'.  Once you have completed all 4 items on 
-the card you will be told that you have completed the card.  Then you 
-should go and find the dark crypt, where there is a machine, and type 
-'recharge card machine'.  You will receive a quest token reward, which 
-you should eat, and the card will be recharged with 4 new items to find.
+#LCREATING QUEST CARDS:#n
+Practice the 'quest' spell, train primal energy (1-100), then cast 'quest'.
+The spell uses your primal to create a card - more primal = harder items.
 
-HINT:  Vallandar's tomb can be found by going 2 south, 7 east, 2 north 
-from recall.  Once you have found that area, you should look for the 
-guardian and solve his riddle, enter the portal he creates, and you'll be 
-in the dark crypt.
+#LUSING QUEST CARDS:#n
+Each card requires 4 specific objects to complete.
+  complete card            - See which 4 items you need
+  complete card <object>   - Submit an item to the card (consumes item)
+
+#LTURNING IN COMPLETED CARDS:#n
+Once all 4 items are submitted, take the card to a recharge machine:
+  recharge card machine    - Receive QP reward and recharge card
+
+#LMACHINE LOCATIONS:#n
+  Quest Machine: EAST of Temple of Midgaard
+  Dark Crypt: Vallandar's Tomb (2s, 7e, 2n from recall, solve riddle)
+
+See also: QUEST
 ~
 
 
@@ -3892,16 +3889,28 @@ and Human to become perfect instruments of stealth and assassination.#n
   Lv #x2456#n Circle       Backstab while fighting            #x245circle [target]#n
 ~
 
-0 QUEST~
-To Quest prac the quest spell, then train primal the amount 
-you want to quest for. If you want to get a 10 point token 
-then train 10 primal once you have trained yer primal cast quest.
-You will then get a card type complete card to see what you get.
-after you complete the card ask someone how to do the rest. :P
+0 QUEST QUESTSPELL~
+The quest system lets you earn Quest Points (QP) to customize equipment.
 
-The max on cards are 100 point.
+#LGETTING QUEST CARDS:#n
+  1. Find a Quest Machine (there's one EAST of the Temple of Midgaard)
+  2. Practice the 'quest' spell, then train primal energy (1-100 points)
+  3. Cast 'quest' at the machine - uses your primal to create a card
+  4. Type 'complete card' to see the 4 items you need to find
+  5. Hunt those items throughout the world
+  6. Type 'complete card <item>' to submit each item
+  7. Once complete, 'recharge card machine' for QP reward
 
-Also help QUESTS.
+#LSPENDING QP - ITEM CUSTOMIZATION:#n
+  quest                     - View customization costs
+  quest create <type>       - Create weapon, armor, light, etc.
+  quest <item> <property>   - Add stats, spells, or other bonuses
+
+#LEXAMPLE COSTS:#n
+  Create weapon: 50 QP    Create armor: 20 QP    +1 Stat: 20 QP
+  +1 HP/Mana: 5 QP        +1 Hitroll: 30 QP      Spell effect: 50 QP
+
+See also: QUESTCARD, TOKEN
 ~
 
 0 MONK MONKS~

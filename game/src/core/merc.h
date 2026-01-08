@@ -1589,6 +1589,8 @@ extern char *scale[SCALE_COLS];
 #define ROOM_VNUM_TEMPLE	   3005
 #define ROOM_VNUM_ALTAR		   3054
 #define ROOM_VNUM_SCHOOL	   3700
+#define ROOM_VNUM_SCHOOL_SEC1	   3701  /* Section 1: New to MUDs */
+#define ROOM_VNUM_SCHOOL_SEC2	   3713  /* Section 2: New to Dystopia */
 #define ROOM_VNUM_HELL		  93420
 #define ROOM_VNUM_CRYPT		  30001
 #define ROOM_VNUM_DISCONNECTION	  3
