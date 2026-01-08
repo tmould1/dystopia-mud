@@ -24,6 +24,7 @@ Only avatars with trust 3-12 can engage in PvP combat.
 | [Bounty](bounty.md) | Place QP bounties on players | [act_comm.c](../../src/commands/act_comm.c) |
 | [Ragnarok](ragnarok.md) | Global PvP event mode | [jobo_act.c](../../src/systems/jobo_act.c) |
 | [Protections](protections.md) | Safe rooms, peace effects, newbie protection | [fight.c](../../src/combat/fight.c) |
+| [Paradox](paradox.md) | Anti-griefing punishment for unfair kills | [act_wiz.c](../../src/commands/act_wiz.c) |
 
 ## PK Scoring
 
