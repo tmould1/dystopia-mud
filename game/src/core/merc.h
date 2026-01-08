@@ -4440,6 +4440,7 @@ extern char mud_base_dir[MUD_PATH_MAX];    /* Base directory (parent of area/) *
 extern char mud_area_dir[MUD_PATH_MAX];    /* Area files directory */
 extern char mud_player_dir[MUD_PATH_MAX];  /* Player save files */
 extern char mud_backup_dir[MUD_PATH_MAX];  /* Backup directory */
+extern char mud_store_dir[MUD_PATH_MAX];   /* Player store/vault files */
 extern char mud_txt_dir[MUD_PATH_MAX];     /* Text files (logs, etc) */
 extern char mud_log_dir[MUD_PATH_MAX];     /* Log files */
 extern char mud_notes_dir[MUD_PATH_MAX];   /* Notes/boards directory */

@@ -38,6 +38,7 @@ char mud_base_dir[MUD_PATH_MAX]   = "";
 char mud_area_dir[MUD_PATH_MAX]   = "";
 char mud_player_dir[MUD_PATH_MAX] = "";
 char mud_backup_dir[MUD_PATH_MAX] = "";
+char mud_store_dir[MUD_PATH_MAX]  = "";
 char mud_txt_dir[MUD_PATH_MAX]    = "";
 char mud_log_dir[MUD_PATH_MAX]    = "";
 char mud_notes_dir[MUD_PATH_MAX]  = "";
@@ -119,6 +120,7 @@ void mud_init_paths(const char *exe_path)
     snprintf(mud_area_dir, sizeof(mud_area_dir), "%.450s%sarea", gamedata_dir, PATH_SEPARATOR);
     snprintf(mud_player_dir, sizeof(mud_player_dir), "%.450s%splayer%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR);
     snprintf(mud_backup_dir, sizeof(mud_backup_dir), "%.450s%splayer%sbackup%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR, PATH_SEPARATOR);
+    snprintf(mud_store_dir, sizeof(mud_store_dir), "%.450s%splayer%sstore%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR, PATH_SEPARATOR);
     snprintf(mud_txt_dir, sizeof(mud_txt_dir), "%.450s%stxt", gamedata_dir, PATH_SEPARATOR);
     snprintf(mud_log_dir, sizeof(mud_log_dir), "%.450s%slog", gamedata_dir, PATH_SEPARATOR);
     snprintf(mud_notes_dir, sizeof(mud_notes_dir), "%.450s%snotes%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR);
@@ -126,6 +128,7 @@ void mud_init_paths(const char *exe_path)
     /* Ensure runtime directories exist */
     ensure_directory(mud_player_dir);
     ensure_directory(mud_backup_dir);
+    ensure_directory(mud_store_dir);
     ensure_directory(mud_txt_dir);
     ensure_directory(mud_log_dir);
     ensure_directory(mud_notes_dir);
