@@ -453,10 +453,13 @@ brief4 -> Toggle message on exp modifiers, discipline points and class points.
 
 #R*#n First kill some mobs in the newbie arena (located south of where you start, that's
   up and south from recall), when you have 2K hps, you can train avatar and use
-  the selfclass command to gain a class.
+  the selfclass command to gain a class. The SPIRIT in Mud School knows directions
+  to beginner areas like the Smurf Village, Gnome Village, Shire, and Dwarven Drop-off.
 #R*#n After getting a class, you should get a little buffer from killing mobs in newbie
   arena, then move on to either Elemental Canyon or The Black Dragons Lair.
   The Lair can be found 2 south, 6 east, 2 south and down from recall.
+  The spirit also knows these directions, and Vladd's EXECUTIONER in the Temple
+  knows about even more challenging areas like Draconia, Moria, and Thalos.
 #R*#n During the first 4 hours of play you cannot be attacked by other players, and should
   use this time to get stronger, remember to get all your class powers, read the
   help file on your class and do the best you can.
@@ -471,30 +474,6 @@ brief4 -> Toggle message on exp modifiers, discipline points and class points.
     subject, if there isn't we could use one, and your welcome to write it and mail it the staff.
 
 Good luck, and all that :)
-
-~
-
-1 MULTIPLAYING PLAYERSHARING~
-Multiplaying and playersharing is strictly forbidden, the rules
-are as this (and don't try and find loopholes, I'll just wipe you).
-
-* No more than 1 char can connect via 1 ip, so local networks
-  don't work, unless you have more than one ip available.
-* Going linkdead to trade items from one char to another is not
-  allowed, it still counts as multiplaying.
-* Having more than one person controlling a character on the mud
-  is called playersharing and it not allowed.
-* No transfering of items and/or qps from one char to another
-  that you own, read HELP RULES on how I deal with people who
-  think they found a loophole.
-* If an immortal tells you to stop multiplaying, you will stop
-  instantly, there will only be given one warning, next time
-  ANYONE multiplays from that ip, ALL chars from that ip will
-  be deleted.
-
-Don't argue, if an imm tells you that your multiplaying, then
-you are. We don't give a shit if it's your mother that controls
-the other character.
 
 ~
 
