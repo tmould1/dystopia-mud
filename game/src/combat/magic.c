@@ -3808,7 +3808,7 @@ void spell_voodoo( int sn, int level, CHAR_DATA *ch, void *vo )
 	return;
     }
 
-    sprintf(part2,obj->name);
+    sprintf(part2, "%s", obj->name);
 
     if ( str_cmp(part1,part2) )
     {

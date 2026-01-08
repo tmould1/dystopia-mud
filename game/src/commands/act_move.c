@@ -2232,7 +2232,7 @@ void do_disciplines(CHAR_DATA *ch, char *argument)
 	&& strlen(discipline[loop]) != 0
 	&& ch->power[loop] >= 0 )
 	{
-	    sprintf(buf2, discipline[loop]);
+	    sprintf(buf2, "%s", discipline[loop]);
 	    buf2[0] = UPPER(buf2[0]);
 
 	    sprintf(buf,"     %-14s: %-2d",

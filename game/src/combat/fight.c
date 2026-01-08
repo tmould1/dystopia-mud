@@ -5133,7 +5133,7 @@ void crack_head( CHAR_DATA *ch, OBJ_DATA *obj, char *argument )
   {
     if ( ( pMobIndex = get_mob_index( 30002 ) ) == NULL ) return;
     victim = create_mobile( pMobIndex );
-    sprintf( buf, capitalize(arg2) );
+    sprintf( buf, "%s", capitalize(arg2) );
     free_string( victim->short_descr );
     victim->short_descr = str_dup( buf );
     char_to_room(victim,ch->in_room);
@@ -5179,7 +5179,7 @@ void do_voodoo( CHAR_DATA *ch, char *argument )
     send_to_char( "Not on NPC's.\n\r", ch );
     return;
   }
-  sprintf(part2,obj->name);
+  sprintf(part2, "%s", obj->name);
   sprintf(part1,"%s voodoo doll",victim->name);
   if ( str_cmp(part1,part2) )
   {

@@ -173,7 +173,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 
 		sprintf(modified_field, "Base XP");
 		sprintf(old_value, "%d", game_config.base_xp);
-		sprintf(new_value, arg2);
+		sprintf(new_value, "%s", arg2);
 		game_config.base_xp = atoi(new_value);
 	}
 	else if (!str_cmp(arg, "max_xp_per_kill"))
@@ -189,7 +189,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 
 		sprintf(modified_field, "Max XP per kill");
 		sprintf(old_value, "%d", game_config.max_xp_per_kill);
-		sprintf(new_value, arg2);
+		sprintf(new_value, "%s", arg2);
 		game_config.max_xp_per_kill = atoi(new_value);
 	}
 	else if (!str_cmp(arg, "game_name"))
@@ -205,7 +205,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 
 		sprintf(modified_field, "Game Name");
 		sprintf(old_value, "%s", game_config.game_name);
-		sprintf(new_value, arg2);
+		sprintf(new_value, "%s", arg2);
 		free_string(game_config.game_name);
 		game_config.game_name = str_dup(new_value);
 	}
@@ -222,7 +222,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 
 		sprintf(modified_field, "GUI URL");
 		sprintf(old_value, "%s", game_config.gui_url);
-		sprintf(new_value, arg2);
+		sprintf(new_value, "%s", arg2);
 		free_string(game_config.gui_url);
 		game_config.gui_url = str_dup(new_value);
 	}
@@ -239,7 +239,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 
 		sprintf(modified_field, "GUI Version");
 		sprintf(old_value, "%s", game_config.gui_version);
-		sprintf(new_value, arg2);
+		sprintf(new_value, "%s", arg2);
 		free_string(game_config.gui_version);
 		game_config.gui_version = str_dup(new_value);
 	}
@@ -256,7 +256,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 
 		sprintf(modified_field, "Banner Left Endcap");
 		sprintf(old_value, "%s", game_config.banner_left);
-		sprintf(new_value, arg2);
+		sprintf(new_value, "%s", arg2);
 		free_string(game_config.banner_left);
 		game_config.banner_left = str_dup(new_value);
 	}
@@ -273,7 +273,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 
 		sprintf(modified_field, "Banner Right Endcap");
 		sprintf(old_value, "%s", game_config.banner_right);
-		sprintf(new_value, arg2);
+		sprintf(new_value, "%s", arg2);
 		free_string(game_config.banner_right);
 		game_config.banner_right = str_dup(new_value);
 	}
@@ -290,7 +290,7 @@ void do_gameconfig(CHAR_DATA *ch, char *argument)
 
 		sprintf(modified_field, "Banner Fill");
 		sprintf(old_value, "%s", game_config.banner_fill);
-		sprintf(new_value, arg2);
+		sprintf(new_value, "%s", arg2);
 		free_string(game_config.banner_fill);
 		game_config.banner_fill = str_dup(new_value);
 	}

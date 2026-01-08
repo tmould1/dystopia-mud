@@ -137,7 +137,7 @@ void save_char_obj_backup( CHAR_DATA *ch )
 	    sprintf(buf,"%s Last logged in on %s.\n\r", chlevel, ch->lasttime);
 	else
 	    sprintf(buf,"%s New player logged in on %s.\n\r", chlevel, ch->createtime);
-	fprintf( fp, buf);
+	fprintf( fp, "%s", buf);
     }
     fflush( fp );
     fclose( fp );

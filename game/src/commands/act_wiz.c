@@ -1993,9 +1993,9 @@ void do_ostat( CHAR_DATA *ch, char *argument )
     }
 
     if (obj->questmaker != NULL && strlen(obj->questmaker) > 1)
-	sprintf(nm1,obj->questmaker); else sprintf(nm1,"None");
+	sprintf(nm1, "%s", obj->questmaker); else sprintf(nm1,"None");
     if (obj->questowner != NULL && strlen(obj->questowner) > 1)
-	sprintf(nm2,obj->questowner); else sprintf(nm2,"None");
+	sprintf(nm2, "%s", obj->questowner); else sprintf(nm2,"None");
 
     sprintf( buf, "Name: %s.\n\r",
 	obj->name );
@@ -2758,7 +2758,7 @@ void do_preturn( CHAR_DATA *ch, char *argument )
     if (IS_NPC(ch)) {send_to_char("Huh?\n\r",ch);return;}
 
     if (ch->pload == NULL) {send_to_char("Huh?\n\r",ch);return;}
-    sprintf(arg,ch->pload);
+    sprintf(arg, "%s", ch->pload);
     if (strlen(arg) < 3 || strlen(arg) > 8) 
 	{send_to_char("Huh?\n\r",ch);return;}
 
@@ -6472,7 +6472,6 @@ void do_hreload( CHAR_DATA *ch, char *argument )
     char buf[MAX_STRING_LENGTH];
     const char *helpfile;
     FILE *fp;
-    bool found = FALSE;
 
     argument = one_argument( argument, arg );
 
@@ -6497,7 +6496,7 @@ void do_hreload( CHAR_DATA *ch, char *argument )
     }
     else
     {
-        found = read_entry( ch, fp, helpfile, arg );
+        (void)read_entry( ch, fp, helpfile, arg );
         fclose( fp );
     }
 
