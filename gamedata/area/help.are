@@ -741,22 +741,6 @@ Also help on: #GCHANGES OLDCHANGES TICK WIZLIST CREDITS#n
 #x245See also:#n #x214FORGE#n #x248METAL#n #x213GEM#n
 ~
 
-0 QUESTKEY~
-From now on ill put a #yQuest#RKey#n in game every day.
-Keep them they are very valueable.
-
-Do not keep them in containers, store chars, or in other ways keep them from other
-players if they cap you!!
-
-If i find you breaking ANY of those rules ill punish you.
-
-1  Questkey      1000qp
-7  Questkey      1 generation
-15 Questkey      1 artifact affect on a pice of your eq
-
-Dracknuur.
-~
-
 0 ARENA~
 
 The rules in the arena are simple :
@@ -1344,7 +1328,8 @@ Once all 4 items are submitted, take the card to a recharge machine:
 
 #LMACHINE LOCATIONS:#n
   Quest Machine: EAST of Temple of Midgaard
-  Dark Crypt: Vallandar's Tomb (2s, 7e, 2n from recall, solve riddle)
+  Dark Crypt: Within Vallandar's Tomb 
+     (from recall: 2s, 7e, 2n. Find guardian, solve riddle)
 
 See also: QUEST
 ~
@@ -1475,16 +1460,6 @@ slightly more skilled than another master wizard, and so on.
 ~
 
 
-
-0 GODLESS~
-By typing this, you will no longer be affected by most god commands, 
-including restore, force, slay, mset, transfer, deny, freeze, etc.  You 
-can toggle your godless flag on and off at will, and everyone in the mud 
-is informed each time you do this.
-~
-
-
-
 0 HOME~
 To set your recall point, enter the desired room and type 'home here'.  
 From that point on you will recall to that point rather than the Temple 
@@ -1501,7 +1476,7 @@ most autonomous monster actions, hp/mana/move regeneration, spell duration,
 weather, and area resetting.
 
 
-f these timers, the hp/mana/move regeneration timer is popularly called the
+Of these timers, the hp/mana/move regeneration timer is popularly called the
 'tick'.  Ticks on this mud average 30 seconds of real time, but the actual
 amount varies randomly from 15 seconds to 45 seconds.
 
