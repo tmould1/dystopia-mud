@@ -12,7 +12,9 @@ Stances are combat styles that provide various bonuses. Each stance must be trai
 
 Stances are stored in an array with specific indices for each stance type.
 
-## Normal Stances (Indices 1-10)
+## Basic Stances (Indices 1-5)
+
+Available immediately with no prerequisites.
 
 | Index | Stance | Category | Primary Benefit |
 |-------|--------|----------|-----------------|
@@ -21,21 +23,133 @@ Stances are stored in an array with specific indices for each stance type.
 | 3 | Crab | Defensive | Damage resistance |
 | 4 | Mongoose | Defensive | Dodge bonus (+level * 0.25) |
 | 5 | Bull | Offensive | Damage bonus |
-| 6 | Mantis | Balanced | Parry bonus, extra attacks |
-| 7 | Dragon | Balanced | Damage bonus + resistance |
-| 8 | Tiger | Offensive | Damage bonus, extra attacks |
-| 9 | Monkey | Offensive | Percentage damage bonus |
-| 10 | Swallow | Defensive | Dodge bonus, resistance |
 
-## Super Stances (Indices 13-17)
+## Advanced Stances (Indices 6-10)
 
-| Index | Stance | Power Level |
-|-------|--------|-------------|
-| 13 | SS1 | Basic super stance |
-| 14 | SS2 | Enhanced |
-| 15 | SS3 | Advanced |
-| 16 | SS4 | Expert |
-| 17 | SS5 | Master |
+**Location:** `do_stance()` in [kav_fight.c:616-651](../../src/combat/kav_fight.c#L616-L651)
+
+Each advanced stance requires two basic stances at level 200.
+
+| Index | Stance | Prerequisites | Category | Primary Benefit |
+|-------|--------|---------------|----------|-----------------|
+| 6 | Mantis | Crane 200, Viper 200 | Balanced | Parry bonus, extra attacks |
+| 7 | Dragon | Bull 200, Crab 200 | Balanced | Damage bonus + resistance |
+| 8 | Tiger | Bull 200, Viper 200 | Offensive | Damage bonus, extra attacks |
+| 9 | Monkey | Crane 200, Mongoose 200 | Offensive | Percentage damage bonus |
+| 10 | Swallow | Crab 200, Mongoose 200 | Defensive | Dodge bonus, resistance |
+
+### Stance Prerequisite Tree
+
+```
+        Viper ----+---- Crane
+          |    \  |  /    |
+          |     Mantis    |
+          |               |
+        Tiger   Monkey    |
+          |       |       |
+          +---+---+       |
+              |           |
+        Bull -+- Crab     |
+          |    \ |  /     |
+          |    Dragon     |
+          |               |
+          +---Swallow-----+
+                |
+             Mongoose
+```
+
+## Wolf Stance (Index 11)
+
+**Location:** [kav_fight.c:682-690](../../src/combat/kav_fight.c#L682-L690)
+
+Special werewolf-only stance requiring all five advanced stances at 200 plus `DISC_WERE_WOLF > 4`.
+
+| Prerequisite | Required Level |
+|--------------|----------------|
+| Tiger | 200 |
+| Swallow | 200 |
+| Mantis | 200 |
+| Dragon | 200 |
+| Monkey | 200 |
+| DISC_WERE_WOLF | > 4 |
+
+### Wolf Stance Benefits
+
+Wolf stance is essentially the ultimate stance, combining multiple benefits:
+
+| Benefit | Effect | Location |
+|---------|--------|----------|
+| Extra Attacks | +2 attacks (50% chance) | [fight.c:987](../../src/combat/fight.c#L987) |
+| Damage Bonus | +dam * (level/100) when level > 100 | [fight.c:4344-4345](../../src/combat/fight.c#L4344-L4345) |
+| Damcap Bonus | +250 to max damage | [fight.c:1873](../../src/combat/fight.c#L1873) |
+| Bypass | Bypasses parry/dodge powers | [fight.c:1752](../../src/combat/fight.c#L1752) |
+
+Wolf stance provides:
+- **+2 extra attacks** (same as superstance SPEED, better than Tiger/Viper/Mantis which give +1)
+- **Damage multiplier** (same formula as Bull/Dragon/Tiger)
+- **+250 damcap** (same as Dragon, better than Bull/Tiger at +200)
+- **Bypass ability** (ignores enemy parry/dodge stance powers)
+
+## Super Stances (Indices 19-23)
+
+**Location:** `do_setstance()` in [jobo_act.c:653-852](../../src/systems/jobo_act.c#L653-L852)
+
+Super stances are customizable advanced stances with selectable powers.
+
+### Prerequisites
+
+**Location:** [jobo_act.c:675-680](../../src/systems/jobo_act.c#L675-L680)
+
+To unlock super stances, you must first max (level 200) all five advanced normal stances:
+- Tiger
+- Swallow
+- Monkey
+- Mantis
+- Dragon
+
+Additionally, each super stance requires the previous one to be maxed:
+
+**Location:** [jobo_act.c:693-697](../../src/systems/jobo_act.c#L693-L697)
+
+| Stance | Index | Prerequisite | Power Limits |
+|--------|-------|--------------|--------------|
+| SS1 | 19 | 5 normal stances at 200 | 3 lesser |
+| SS2 | 20 | SS1 at 200 | 4 lesser, 1 greater |
+| SS3 | 21 | SS2 at 200 | 4 lesser, 2 greater |
+| SS4 | 22 | SS3 at 200 | 4 lesser, 4 greater, 1 supreme |
+| SS5 | 23 | SS4 at 200 | 4 lesser, 4 greater, 2 supreme |
+
+### Superstance Powers
+
+Powers are selected via `setstance` command and stored in `ch->stance[18]` as bit flags.
+
+**Tiered Powers** (lesser/greater/supreme):
+
+| Power | Lesser Cost | Greater Cost | Supreme Cost |
+|-------|-------------|--------------|--------------|
+| DAMAGE | 20M exp | 40M exp | 60M exp |
+| RESIST | 20M exp | 40M exp | 60M exp |
+| DAMCAP | 20M exp | 40M exp | 60M exp |
+| REV_DAMCAP | 20M exp | 40M exp | 60M exp |
+
+**Flat Powers** (cost escalates: 20M, 40M, 60M, 80M):
+
+| Power | Effect |
+|-------|--------|
+| SPEED | Increase fighting speed |
+| PARRY | Increase parry ability |
+| DODGE | Increase dodge ability |
+| BYPASS | Bypass opponent's parry/dodge powers |
+
+### Minimum/Maximum Costs
+
+| Stance | Min Cost | Max Cost |
+|--------|----------|----------|
+| SS1 | 40M exp | 240M exp |
+| SS2 | 80M exp | 280M exp |
+| SS3 | 120M exp | 300M exp |
+| SS4 | 160M exp | 360M exp |
+| SS5 | 200M exp | 380M exp |
 
 ## Stance Effects in Combat
 
@@ -186,3 +300,4 @@ Called after successful attacks in combat. Stance experience increases based on:
 |----------|----------|---------|
 | `improve_stance()` | [fight.c](../../src/combat/fight.c) | Train stance in combat |
 | `do_level()` | [clan.c:34-199](../../src/systems/clan.c#L34-L199) | Display stance levels |
+| `do_setstance()` | [jobo_act.c:653-852](../../src/systems/jobo_act.c#L653-L852) | Configure super stance powers |
