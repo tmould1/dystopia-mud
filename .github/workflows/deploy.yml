@@ -1,66 +1,69 @@
-name: Build and Deploy
+name: Build and Package
 
 on:
   workflow_dispatch: {}
 
-env:
-  applicationfolder: src
-  packagepath: dystopia.tar
-  AWS_REGION: us-east-2
-  S3BUCKET: dystopiadeploystack-webappdeploymentbucket-1cb8cgtryq6p9	
-
-
 jobs:
-  build:
-    name: Build and Package
-    runs-on: ubuntu-20.04
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v2
-        id: checkout
-        name: Checkout Repository
-
-      - uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
-          role-session-name: GitHub-Action-Role
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: chmod
-        run: chmod -R +x ./.github
-
-      - name: Build Dystopia
-        id: build
-        working-directory: ${{ env.applicationfolder }}
-        run: make merc
-
-      - name: Tar Dystopia
-        id: package
-        working-directory: ${{ env.applicationfolder }}
-        run: tar cvf dystopia.tar ../
-
-      - name: Upload Artifact to s3
-        id: upload
-        working-directory: ${{ env.applicationfolder }}
-        run: aws s3 cp ${{ env.packagepath }} s3://${{ env.S3BUCKET }}/
-        
-  deploy:
-    needs: build
+  build-linux:
+    name: Build (Linux)
     runs-on: ubuntu-latest
-    environment: Dev
-    permissions:
-      id-token: write
-      contents: read
     steps:
-    - uses: actions/checkout@v2
-    - uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
-        role-session-name: GitHub-Action-Role
-        aws-region: ${{ env.AWS_REGION }}
-    - run: |
-        echo "Deploying branch ${{ env.GITHUB_REF }} to ${{ github.event.inputs.environment }}"
-        commit_hash=`git rev-parse HEAD`
-        aws deploy create-deployment --application-name CodeDeployAppNameWithASG --deployment-group-name DystopiaDeployGroup --github-location repository=$GITHUB_REPOSITORY,commitId=$commit_hash --ignore-application-stop-failures
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential zlib1g-dev libcrypt-dev
+
+      - name: Generate Makefiles
+        run: |
+          cd game/build
+          chmod +x GenerateProjectFiles.sh
+          bash GenerateProjectFiles.sh
+
+      - name: Build
+        run: |
+          cd game/build
+          make -j$(nproc) -f Makefile
+
+      - name: Package gamedata
+        run: tar -czvf dystopia-linux.tar.gz gamedata/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dystopia-linux
+          path: dystopia-linux.tar.gz
+
+  build-windows:
+    name: Build (Windows)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-zlib make
+
+      - name: Generate Makefiles
+        run: |
+          cd game/build
+          bash GenerateProjectFiles.sh
+
+      - name: Build
+        run: |
+          cd game/build
+          make -j$(nproc) -f Makefile.mingw dystopia.exe
+
+      - name: Package gamedata
+        shell: pwsh
+        run: Compress-Archive -Path gamedata -DestinationPath dystopia-windows.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dystopia-windows
+          path: dystopia-windows.zip
