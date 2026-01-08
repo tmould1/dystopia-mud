@@ -56,7 +56,7 @@ jobs:
       - name: Build
         run: |
           cd game/build
-          make -j$(nproc) -f Makefile.mingw dystopia.exe
+          make -j$(nproc) -f Makefile.mingw
 
       - name: Package gamedata
         shell: pwsh
