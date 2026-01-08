@@ -742,7 +742,9 @@ The spirit says 'The SMURF village - easy creatures for new adventurers'
 The spirit says 'The GNOME village - good for learning combat'
 The spirit says 'The SHIRE - peaceful hobbits to practice on'
 The spirit says 'The DWARVEN drop-off centre - useful supplies'
-The spirit says 'Just ask about any area and I will give you directions!'~
+The spirit says 'Just ask about any area and I will give you directions!'
+The spirit says 'For harder areas: ELEMENTAL CANYON or BLACK DRAGON lair.'
+The spirit says 'The EXECUTIONER in the Temple knows even more dangerous places!'~
 copy~
 all~
 1048576 0 3721
@@ -923,6 +925,22 @@ T
 The spirit says 'To get to the dwarven drop-off centre from recall,'
 The spirit says 'Go 2 south, 6 east, 1 down, then go south.'
 The spirit says 'I also know directions to: ARENA, SMURF village, GNOME village, SHIRE.'~
+copy~
+all~
+1048576 0 3721
+T
+|canyon*elemental*~
+The spirit says 'To get to Elemental Canyon from recall,'
+The spirit says 'Go 2 south, 6 east, 4 south, 2 east, south, 2 east, down, south.'
+The spirit says 'For harder areas, ask the EXECUTIONER in the Temple below.'~
+copy~
+all~
+1048576 0 3721
+T
+|dragon*lair*black*~
+The spirit says 'To get to the Black Dragon Lair from recall,'
+The spirit says 'Go 2 south, 6 east, 2 south, and then down.'
+The spirit says 'For other challenging areas, ask the EXECUTIONER in the Temple.'~
 copy~
 all~
 1048576 0 3721

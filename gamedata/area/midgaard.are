@@ -2255,6 +2255,72 @@ You see the entrance to Mud School.
 ~
 ~
 0 0 3700
+T
+>ENTER<~
+The executioner glances at you with cold eyes.
+The executioner says 'Welcome to the Temple, mortal. Behave yourself here.'
+The executioner says 'I enforce the law. Those who grief newbies or break PK rules face my axe.'
+The executioner says 'If you seek adventure, ask me about AREAS beyond the mud school.'~
+copy~
+all~
+1048576 0 3011
+T
+|areas*adventure*~
+The executioner says 'Looking for a challenge? I know of several dangerous places:'
+The executioner says 'The CANYON of elementals to the east, the black DRAGON lair underground,'
+The executioner says 'The mines of MORIA, the towers of DRACONIA, or the ruins of THALOS.'
+The executioner says 'Ask me about any of these if you dare.'~
+copy~
+all~
+1048576 0 3011
+T
+|canyon*elemental*~
+The executioner says 'To reach Elemental Canyon from here,'
+The executioner says 'Go 2 south, 6 east, 4 south, 2 east, south, 2 east, down, south.'
+The executioner says 'The elementals await those brave enough to face them.'~
+copy~
+all~
+1048576 0 3011
+T
+|dragon*lair*black*~
+The executioner says 'The Black Dragon Lair is a dangerous place for the bold.'
+The executioner says 'From here, go 2 south, 6 east, 2 south, and then down.'
+The executioner says 'You will find the entrance to the dragon domain.'~
+copy~
+all~
+1048576 0 3011
+T
+|moria*mines*~
+The executioner says 'The Mines of Moria are east of the city.'
+The executioner says 'Exit through the East Gate and follow the trail north around the walls.'
+The executioner says 'You will reach the hills where the mine entrance awaits.'~
+copy~
+all~
+1048576 0 3011
+T
+|draconia*tower*~
+The executioner says 'Draconia lies to the west, through the forest.'
+The executioner says 'Exit through the West Gate and travel through the woods.'
+The executioner says 'The dragon towers will become visible as you approach.'~
+copy~
+all~
+1048576 0 3011
+T
+|thalos*ruins*~
+The executioner says 'Thalos is a ruined city far to the east.'
+The executioner says 'Travel east across the plains, then through the Dwarf Forest.'
+The executioner says 'The ancient gates of Thalos await at the forest end.'~
+copy~
+all~
+1048576 0 3011
+T
+|pk*rules*kill*~
+The executioner says 'The rules are simple: newbies are protected for their first 4 hours.'
+The executioner says 'Attack them during that time, and you answer to ME.'
+The executioner says 'Read HELP RULES and HELP POLICY if you value your head.'~
+copy~
+all~
+1048576 0 3011
 S
 #3002
 Cleric's Inner Sanctum~
