@@ -1303,7 +1303,7 @@ S
 Section 2: Class Selection~
 You enter a grand hall lined with statues representing Dystopia's many classes.
 Each statue depicts a different path of power - from blood-drinking Vampires to
-shapeshifting Werewolves, from spell-weaving Mages to honorable Samurai.
+shapeshifting Werewolves, from spell-weaving mages to the Lloth-serving drow.
 
 Glowing portals shimmer between the statues, and a detailed sign explains
 the class system.
@@ -1464,6 +1464,7 @@ Type 'HELP PARADOX' for detailed mechanics.
 SECTION 2 COMPLETE!
 You now know the basics of Dystopia's unique systems.
 Type 'RECALL' to return to the Academy Entrance.
+Type 'HOME' to set a different recall room.
 ~
 D0
 You see the Quest System room to the north.
