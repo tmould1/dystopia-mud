@@ -123,6 +123,13 @@ void mud_init_paths(const char *exe_path)
     snprintf(mud_log_dir, sizeof(mud_log_dir), "%.450s%slog", gamedata_dir, PATH_SEPARATOR);
     snprintf(mud_notes_dir, sizeof(mud_notes_dir), "%.450s%snotes%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR);
 
+    /* Ensure runtime directories exist */
+    ensure_directory(mud_player_dir);
+    ensure_directory(mud_backup_dir);
+    ensure_directory(mud_txt_dir);
+    ensure_directory(mud_log_dir);
+    ensure_directory(mud_notes_dir);
+
     /* Log path initialization - uses log_string() to write to both stderr and log file */
     log_string("MUD paths initialized:");
     {

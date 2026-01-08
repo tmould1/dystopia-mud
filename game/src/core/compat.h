@@ -101,6 +101,9 @@ LONG WINAPI win32_exception_filter(EXCEPTION_POINTERS *ExceptionInfo);
  * ============================================ */
 #define unlink(path)  _unlink(path)
 
+/* Create directory if it doesn't exist (returns 0 on success or if exists) */
+int ensure_directory(const char *path);
+
 /* ============================================
  * SECTION 7: Network Functions
  * ============================================ */
@@ -158,6 +161,9 @@ int win32_gettimeofday(struct timeval *tp, struct timezone *tzp);
 
 /* Platform-independent socket write - on Unix just use write() */
 #define socket_write(fd, buf, len) write(fd, buf, len)
+
+/* Create directory if it doesn't exist (returns 0 on success or if exists) */
+int ensure_directory(const char *path);
 
 #endif /* WIN32 */
 

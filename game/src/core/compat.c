@@ -308,4 +308,36 @@ void win32_setup_crash_handler(void)
     SetUnhandledExceptionFilter(win32_exception_filter);
 }
 
+/* ============================================
+ * SECTION 6: Directory Functions
+ * Create directory if it doesn't exist
+ * ============================================ */
+
+int ensure_directory(const char *path)
+{
+    DWORD attrs = GetFileAttributesA(path);
+    if (attrs != INVALID_FILE_ATTRIBUTES) {
+        /* Path exists - check if it's a directory */
+        return (attrs & FILE_ATTRIBUTE_DIRECTORY) ? 0 : -1;
+    }
+    /* Create the directory */
+    return _mkdir(path) == 0 ? 0 : -1;
+}
+
+#else /* !WIN32 - Unix/Linux implementation */
+
+#include <sys/stat.h>
+#include <errno.h>
+
+int ensure_directory(const char *path)
+{
+    struct stat st;
+    if (stat(path, &st) == 0) {
+        /* Path exists - check if it's a directory */
+        return S_ISDIR(st.st_mode) ? 0 : -1;
+    }
+    /* Create the directory with rwxr-xr-x permissions */
+    return mkdir(path, 0755) == 0 ? 0 : -1;
+}
+
 #endif /* WIN32 */
