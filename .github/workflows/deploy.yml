@@ -1,7 +1,15 @@
-name: Build and Package
+name: Build and Deploy
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to AWS after build'
+        type: boolean
+        default: false
+
+env:
+  AWS_REGION: us-east-1
 
 jobs:
   build-linux:
@@ -67,3 +75,109 @@ jobs:
         with:
           name: dystopia-windows
           path: dystopia-windows.zip
+
+  deploy:
+    name: Deploy to AWS
+    needs: build-linux
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.deploy == 'true' }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dystopia-linux
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get deployment config from SSM
+        id: ssm
+        run: |
+          BUCKET=$(aws ssm get-parameter --name /mudder/deployment-bucket --query 'Parameter.Value' --output text)
+          APP_NAME=$(aws ssm get-parameter --name /mudder/codedeploy-application --query 'Parameter.Value' --output text)
+          DEPLOY_GROUP=$(aws ssm get-parameter --name /mudder/codedeploy-deployment-group --query 'Parameter.Value' --output text)
+          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+          echo "deploy_group=$DEPLOY_GROUP" >> $GITHUB_OUTPUT
+          echo "Deployment bucket: $BUCKET"
+          echo "CodeDeploy app: $APP_NAME"
+          echo "Deployment group: $DEPLOY_GROUP"
+
+      - name: Extract and prepare deployment package
+        run: |
+          # Extract the build artifact
+          tar -xzvf dystopia-linux.tar.gz
+
+          # Create deployment package structure
+          mkdir -p deploy-package/bin
+          mkdir -p deploy-package/aws/scripts
+
+          # Copy the binary
+          cp gamedata/dystopia deploy-package/bin/
+
+          # Copy area files (world data - needed for game to run)
+          cp -r gamedata/area deploy-package/
+
+          # Copy doc/license files
+          cp -r gamedata/doc deploy-package/
+
+          # Copy txt files (config files like motd, help, etc.)
+          cp -r gamedata/txt deploy-package/
+
+          # Copy CodeDeploy configuration
+          cp appspec.yml deploy-package/
+          cp aws/scripts/*.sh deploy-package/aws/scripts/
+          chmod +x deploy-package/aws/scripts/*.sh
+
+          # List contents for verification
+          echo "Deployment package contents:"
+          find deploy-package -type f | head -50
+          echo "..."
+          echo "Total files: $(find deploy-package -type f | wc -l)"
+
+          # Create the deployment archive
+          cd deploy-package
+          zip -r ../deployment.zip .
+
+          echo "Deployment package created: deployment.zip"
+          ls -la ../deployment.zip
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp deployment.zip s3://${{ steps.ssm.outputs.bucket }}/deployments/deployment-${{ github.sha }}.zip
+          echo "Uploaded to: s3://${{ steps.ssm.outputs.bucket }}/deployments/deployment-${{ github.sha }}.zip"
+
+      - name: Create CodeDeploy deployment
+        id: deploy
+        run: |
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
+            --application-name ${{ steps.ssm.outputs.app_name }} \
+            --deployment-group-name ${{ steps.ssm.outputs.deploy_group }} \
+            --s3-location bucket=${{ steps.ssm.outputs.bucket }},key=deployments/deployment-${{ github.sha }}.zip,bundleType=zip \
+            --description "Deployment from GitHub commit ${{ github.sha }}" \
+            --query 'deploymentId' \
+            --output text)
+          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
+          echo "Created deployment: $DEPLOYMENT_ID"
+
+      - name: Wait for deployment to complete
+        run: |
+          echo "Waiting for deployment ${{ steps.deploy.outputs.deployment_id }} to complete..."
+          aws deploy wait deployment-successful --deployment-id ${{ steps.deploy.outputs.deployment_id }}
+          echo "Deployment completed successfully!"
+
+      - name: Get deployment status
+        if: always()
+        run: |
+          aws deploy get-deployment --deployment-id ${{ steps.deploy.outputs.deployment_id }} --query 'deploymentInfo.status' --output text

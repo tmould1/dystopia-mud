@@ -1,12 +1,15 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Cloudformation for provisioning services required to setup the CI/CD using GitHub actions and CodeDeploy. 
-**WARNING** This template creates EC2,VPC and related resources. You will be billed for the AWS resources used if you create a stack from this template'
+Description: >-
+  CloudFormation for Dystopia MUD server with CI/CD via GitHub Actions and CodeDeploy.
+  Includes EFS for persistent game data and SSM Parameter Store for configuration.
+  **WARNING** This template creates EC2, EFS, VPC and related resources. You will be billed for the AWS resources used.
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: "VPC Configurations"
+          default: "VPC Configuration"
         Parameters:
           - VpcCIDR
           - PublicSubnet1CIDR
@@ -14,165 +17,115 @@ Metadata:
           - PrivateSubnet1CIDR
           - PrivateSubnet2CIDR
       - Label:
-          default: "Server configurations"
+          default: "Server Configuration"
         Parameters:
-          - ImageId
           - InstanceType
+          - KeyName
+          - SSHLocation
+          - GamePort
       - Label:
-          default: "Github configurations"
+          default: "GitHub Configuration"
         Parameters:
           - GithubRepoName
-          - ThumbprintList             
+          - ThumbprintList
+
 Parameters:
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
     Type: AWS::EC2::KeyPair::KeyName
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
+
   InstanceType:
-    Description: WebServer EC2 instance type
+    Description: EC2 instance type for the MUD server
     Type: String
     Default: t3.small
-    AllowedValues: [t2.nano, t2.micro, t2.small, t2.medium, t2.large, t2.xlarge, t2.2xlarge,
-      t3.nano, t3.micro, t3.small, t3.medium, t3.large, t3.xlarge, t3.2xlarge,
-      m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge, m4.10xlarge,
-      m5.large, m5.xlarge, m5.2xlarge, m5.4xlarge,
-      c5.large, c5.xlarge, c5.2xlarge, c5.4xlarge, c5.9xlarge,
-      g3.8xlarge,
-      r5.large, r5.xlarge, r5.2xlarge, r5.4xlarge, r3.12xlarge,
-      i3.xlarge, i3.2xlarge, i3.4xlarge, i3.8xlarge,
-      d2.xlarge, d2.2xlarge, d2.4xlarge, d2.8xlarge]
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t3.nano
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
     ConstraintDescription: must be a valid EC2 instance type.
+
   SSHLocation:
-    Description: The IP address range that can be used to SSH to the EC2 instances
+    Description: The IP address range that can be used to SSH to the EC2 instance
     Type: String
     MinLength: 9
     MaxLength: 18
     Default: 0.0.0.0/0
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  GamePort:
+    Description: The port the MUD server listens on
+    Type: Number
+    Default: 8888
+    MinValue: 1024
+    MaxValue: 65535
+
   LatestAmiId:
-    Type:  'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+    Description: Latest Amazon Linux 2 AMI
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
   VpcCIDR:
-    Description: Please enter the IP range (CIDR notation) for this VPC
+    Description: IP range (CIDR notation) for this VPC
     Type: String
     Default: 10.192.0.0/16
 
   PublicSubnet1CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Description: IP range for the public subnet in the first Availability Zone
     Type: String
     Default: 10.192.10.0/24
 
   PublicSubnet2CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
+    Description: IP range for the public subnet in the second Availability Zone
     Type: String
     Default: 10.192.11.0/24
 
   PrivateSubnet1CIDR:
-    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Description: IP range for the private subnet in the first Availability Zone
     Type: String
     Default: 10.192.20.0/24
 
   PrivateSubnet2CIDR:
-    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Description: IP range for the private subnet in the second Availability Zone
     Type: String
     Default: 10.192.21.0/24
 
-  ImageId:
-    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-    Description: The Amazon EC2 Linux instance Amazon Machine Image (AMI), which designates the configuration of the new instance.
-  InstanceType:
-    Type: String
-    Default: t2.micro
-    Description: The type of Amazon EC2 Linux instances that will be launched for this project.
   ThumbprintList:
-    Type: String 
+    Description: SHA1 thumbprint of GitHub OIDC provider certificate
+    Type: String
     Default: 6938fd4d98bab03faadb97b34396831e3780aea1
-    Description: A thumbprint of an Open ID Connector is a SHA1 hash of the public certificate of the host
+
   GithubRepoName:
-    Type: String 
-    Description: GitHub repository name Ex-TestUser/TestCodeDeploy
+    Description: GitHub repository name (e.g., owner/repo-name)
+    Type: String
 
 Resources:
-  EC2Instance:
-    Type: AWS::EC2::Instance
-    Properties:
-      InstanceType: !Ref 'InstanceType'
-      SecurityGroups: [!Ref 'InstanceSecurityGroup']
-      KeyName: !Ref 'KeyName'
-      ImageId: !Ref 'LatestAmiId'
-      UserData:
-        "Fn::Base64":
-          !Sub |
-              #!/bin/bash
-
-              ls -la mudder/
-              useradd -r mudder
-              chown -R mudder:mudder /usr/local/mudder
-              ls -l /usr/local/mudder
-              cd /usr/local/mudder
-              mkdir bin
-
-              echo "[Unit]
-              Description=Dystopia Mud Server
-              After=syslog.target network.target
-
-              [Service]
-              Type=forking
-              User=mudder
-              Group=mudder
-
-
-              ExecStart=/usr/local/mudder/bin/dystopia start
-              ExecStop=/usr/local/mudder/bin/dystopia stop
-
-              RestartSec=10
-              Restart=always
-              [Install]
-
-              # firewall-cmd --zone=public --permanent --add-port=8888/tcp
-              # firewall-cmd --reload
-              cd /usr/local/mudder/bin && chmod +x dystopia
-              systemctl daemon-reload
-              systemctl start mudder.service
-              systemctl enable mudder.service
-              systemctl status mudder.service
-              
-              yum install ruby -y
-              wget https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
-              chmod +x ./install
-              ./install auto
-              cd /tmp
-              yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-              systemctl enable amazon-ssm-agent
-              systemctl start amazon-ssm-agent
-
-  
-  InstanceSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: allow access to Server from internet
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 8888
-        ToPort: 8888
-        CidrIp: 0.0.0.0/0
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: !Ref 'SSHLocation'
-
+  #============================================================================
+  # VPC and Networking
+  #============================================================================
   VPC:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: !Ref VpcCIDR
       EnableDnsSupport: true
       EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: MudderVPC
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MudderIGW
 
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -184,7 +137,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [0, !GetAZs ""]
       CidrBlock: !Ref PublicSubnet1CIDR
       MapPublicIpOnLaunch: true
       Tags:
@@ -195,18 +148,18 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+      AvailabilityZone: !Select [1, !GetAZs ""]
       CidrBlock: !Ref PublicSubnet2CIDR
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value:  Public Subnet (AZ2)
+          Value: Public Subnet (AZ2)
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+      AvailabilityZone: !Select [0, !GetAZs ""]
       CidrBlock: !Ref PrivateSubnet1CIDR
       MapPublicIpOnLaunch: false
       Tags:
@@ -217,7 +170,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+      AvailabilityZone: !Select [1, !GetAZs ""]
       CidrBlock: !Ref PrivateSubnet2CIDR
       MapPublicIpOnLaunch: false
       Tags:
@@ -240,6 +193,9 @@ Resources:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Public Routes
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
@@ -261,11 +217,13 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet2
 
-
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Private Routes (AZ1)
 
   DefaultPrivateRoute1:
     Type: AWS::EC2::Route
@@ -284,6 +242,9 @@ Resources:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Private Routes (AZ2)
 
   DefaultPrivateRoute2:
     Type: AWS::EC2::Route
@@ -298,168 +259,409 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
+  #============================================================================
+  # Security Groups
+  #============================================================================
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for MUD server
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref GamePort
+          ToPort: !Ref GamePort
+          CidrIp: 0.0.0.0/0
+          Description: MUD game port
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHLocation
+          Description: SSH access
+      Tags:
+        - Key: Name
+          Value: MudderInstanceSG
+
+  EFSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for EFS mount targets
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          SourceSecurityGroupId: !Ref InstanceSecurityGroup
+          Description: NFS from EC2 instances
+      Tags:
+        - Key: Name
+          Value: MudderEFSSG
+
+  #============================================================================
+  # EFS (Elastic File System) for Persistent Game Data
+  #============================================================================
+  GameDataFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      Encrypted: true
+      PerformanceMode: generalPurpose
+      ThroughputMode: bursting
+      BackupPolicy:
+        Status: ENABLED
+      FileSystemTags:
+        - Key: Name
+          Value: MudderGameData
+
+  EFSMountTarget1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref GameDataFileSystem
+      SubnetId: !Ref PublicSubnet1
+      SecurityGroups:
+        - !Ref EFSSecurityGroup
+
+  EFSMountTarget2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref GameDataFileSystem
+      SubnetId: !Ref PublicSubnet2
+      SecurityGroups:
+        - !Ref EFSSecurityGroup
+
+  #============================================================================
+  # SSM Parameter Store (Configuration)
+  #============================================================================
+  SSMDeploymentBucket:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mudder/deployment-bucket
+      Type: String
+      Value: !Ref WebappDeploymentBucket
+      Description: S3 bucket for deployment artifacts
+
+  SSMGamePort:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mudder/game-port
+      Type: String
+      Value: !Ref GamePort
+      Description: MUD server port
+
+  SSMEFSFileSystemId:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mudder/efs-filesystem-id
+      Type: String
+      Value: !Ref GameDataFileSystem
+      Description: EFS filesystem ID for game data
+
+  SSMCodeDeployApp:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mudder/codedeploy-application
+      Type: String
+      Value: !Ref WebappApplication
+      Description: CodeDeploy application name
+
+  SSMCodeDeployGroup:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mudder/codedeploy-deployment-group
+      Type: String
+      Value: !Ref WebappDeploymentGroup
+      Description: CodeDeploy deployment group name
+
+  SSMAWSRegion:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mudder/aws-region
+      Type: String
+      Value: !Ref AWS::Region
+      Description: AWS region for the deployment
+
+  #============================================================================
+  # IAM Roles and Policies
+  #============================================================================
   WebappRole:
     Type: AWS::IAM::Role
     Properties:
-      Path: "/"
-      RoleName: WebappRole
+      RoleName: MudderEC2Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          -
-            Effect: "Allow"
+          - Effect: Allow
             Principal:
-              Service:
-                - "ec2.amazonaws.com"
-                - "codedeploy.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess
       Policies:
-        -
-          PolicyName: "allow-webapp-deployment-bucket-policy"
+        - PolicyName: MudderS3Access
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              -
-                Effect: "Allow"
-                Action: 
-                - "s3:getObject"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
                 Resource: !Sub arn:${AWS::Partition}:s3:::${WebappDeploymentBucket}/*
+        - PolicyName: MudderSSMParameterAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/mudder/*
+
+  WebappInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref WebappRole
+
   IDCProvider:
-      Type: AWS::IAM::OIDCProvider
-      Properties:
-          Url: "https://token.actions.githubusercontent.com"
-          ClientIdList:
-            - "sts.amazonaws.com"
-          ThumbprintList:
-             - !Ref ThumbprintList 
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - !Ref ThumbprintList
+
   GitHubIAMRole:
-      Type: AWS::IAM::Role
-      Properties:
-          Path: "/"
-          RoleName: CodeDeployRoleforGitHub
-          AssumeRolePolicyDocument:
-             Statement:
-               - Effect: Allow
-                 Action: sts:AssumeRoleWithWebIdentity
-                 Principal:
-                   Federated: !Ref IDCProvider
-                 Condition:
-                   StringLike:
-                     token.actions.githubusercontent.com:sub: !Sub repo:${GithubRepoName}:*
-          MaxSessionDuration: 3600
-          Description: "Github Actions role"
-          Policies:
-          
-          - PolicyName: 'CodeDeployRoleforGitHub-policy'
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MudderGitHubActionsRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Ref IDCProvider
+            Condition:
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GithubRepoName}:*
+      MaxSessionDuration: 3600
+      Description: GitHub Actions role for MUD deployments
+      Policies:
+        - PolicyName: MudderGitHubActionsPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
               - Effect: Allow
                 Action:
-                - 'codedeploy:Get*'
-                - 'codedeploy:Batch*'
-                - 'codedeploy:CreateDeployment'
-                - 'codedeploy:RegisterApplicationRevision'
-                - 'codedeploy:List*'
+                  - codedeploy:Get*
+                  - codedeploy:Batch*
+                  - codedeploy:CreateDeployment
+                  - codedeploy:RegisterApplicationRevision
+                  - codedeploy:List*
                 Resource:
-                  - !Sub 'arn:${AWS::Partition}:codedeploy:*:${AWS::AccountId}:*'
+                  - !Sub arn:${AWS::Partition}:codedeploy:${AWS::Region}:${AWS::AccountId}:*
               - Effect: Allow
                 Action:
-                - 's3:putObject'
-                Resource: !Sub arn:${AWS::Partition}:s3:::${WebappDeploymentBucket}/*                  
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource: !Sub arn:${AWS::Partition}:s3:::${WebappDeploymentBucket}/*
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/mudder/*
 
-  WebappApplication:
-    Type: AWS::CodeDeploy::Application
+  CodeDeployRole:
+    Type: AWS::IAM::Role
     Properties:
-      ApplicationName: CodeDeployAppNameWithASG
-  WebappDeploymentGroup:
-    Type: AWS::CodeDeploy::DeploymentGroup
-    Properties:
-      ApplicationName: !Ref WebappApplication
-      ServiceRoleArn: !GetAtt CodeDeployRole.Arn
-      DeploymentConfigName: CodeDeployDefault.OneAtATime
-      DeploymentGroupName: CodeDeployGroupName
-      AutoRollbackConfiguration:
-          Enabled: true
-          Events:
-            - DEPLOYMENT_FAILURE
-            - DEPLOYMENT_STOP_ON_REQUEST
+      RoleName: MudderCodeDeployRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
 
+  #============================================================================
+  # S3 Bucket for Deployment Artifacts
+  #============================================================================
   WebappDeploymentBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256   
+              SSEAlgorithm: AES256
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-  CodeDeployRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          -
-            Effect: "Allow"
-            Principal:
-              Service:
-                - "codedeploy.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      Path: "/"
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
-      Policies:
-        -
-          PolicyName: allow-autoscaling
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              -
-                Effect: Allow
-                Action:
-                  - ec2:RunInstances
-                  - ec2:CreateTags
-                  - iam:PassRole
-                Resource:
-                  - !Sub 'arn:${AWS::Partition}:codedeploy:*:${AWS::AccountId}:*'
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Name
+          Value: MudderDeploymentBucket
 
-  WebappInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
+  #============================================================================
+  # CodeDeploy Application and Deployment Group
+  #============================================================================
+  WebappApplication:
+    Type: AWS::CodeDeploy::Application
     Properties:
-      Roles:
-        - Ref: WebappRole
+      ApplicationName: MudderApplication
+      ComputePlatform: Server
+
+  WebappDeploymentGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref WebappApplication
+      DeploymentGroupName: MudderDeploymentGroup
+      ServiceRoleArn: !GetAtt CodeDeployRole.Arn
+      DeploymentConfigName: CodeDeployDefault.OneAtATime
+      Ec2TagFilters:
+        - Key: Application
+          Value: MudderServer
+          Type: KEY_AND_VALUE
+      AutoRollbackConfiguration:
+        Enabled: true
+        Events:
+          - DEPLOYMENT_FAILURE
+          - DEPLOYMENT_STOP_ON_REQUEST
+
+  #============================================================================
+  # EC2 Instance
+  #============================================================================
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    DependsOn:
+      - EFSMountTarget1
+    Properties:
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref PublicSubnet1
+      SecurityGroupIds:
+        - !Ref InstanceSecurityGroup
+      KeyName: !Ref KeyName
+      ImageId: !Ref LatestAmiId
+      IamInstanceProfile: !Ref WebappInstanceProfile
+      Tags:
+        - Key: Name
+          Value: MudderServer
+        - Key: Application
+          Value: MudderServer
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -ex
+
+          # Log all output
+          exec > >(tee /var/log/user-data.log) 2>&1
+
+          echo "Starting MUD server setup..."
+
+          # Update system and install dependencies
+          yum update -y
+          yum install -y ruby wget amazon-efs-utils jq nc
+
+          # Install CodeDeploy agent
+          cd /tmp
+          wget https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
+          chmod +x ./install
+          ./install auto
+          systemctl enable codedeploy-agent
+          systemctl start codedeploy-agent
+
+          # Create mudder user and directories
+          useradd -r -s /sbin/nologin mudder || true
+          mkdir -p /usr/local/mudder/bin
+          mkdir -p /usr/local/mudder/gamedata
+
+          # Mount EFS for persistent game data
+          EFS_ID="${GameDataFileSystem}"
+          echo "${!EFS_ID}:/ /usr/local/mudder/gamedata efs _netdev,tls,iam 0 0" >> /etc/fstab
+          mount -a
+
+          # Create persistent directories on EFS (if they don't exist)
+          mkdir -p /usr/local/mudder/gamedata/area
+          mkdir -p /usr/local/mudder/gamedata/player/backup
+          mkdir -p /usr/local/mudder/gamedata/player/store
+          mkdir -p /usr/local/mudder/gamedata/notes
+          mkdir -p /usr/local/mudder/gamedata/log
+          mkdir -p /usr/local/mudder/gamedata/txt
+          mkdir -p /usr/local/mudder/gamedata/doc
+
+          # Set ownership
+          chown -R mudder:mudder /usr/local/mudder
+
+          # Create systemd service file
+          cat > /etc/systemd/system/mudder.service << 'EOF'
+          [Unit]
+          Description=Dystopia MUD Server
+          After=syslog.target network.target remote-fs.target
+          Requires=remote-fs.target
+
+          [Service]
+          Type=simple
+          User=mudder
+          Group=mudder
+          WorkingDirectory=/usr/local/mudder/gamedata
+          ExecStart=/usr/local/mudder/gamedata/dystopia ${GamePort}
+          ExecStop=/bin/kill -TERM $MAINPID
+          Restart=on-failure
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          systemctl daemon-reload
+          systemctl enable mudder.service
+
+          echo "MUD server setup complete. Waiting for CodeDeploy to deploy the binary."
 
 Outputs:
+  DeploymentBucket:
+    Description: S3 bucket for deployment artifacts
+    Value: !Ref WebappDeploymentBucket
+    Export:
+      Name: MudderDeploymentBucket
+
+  ApplicationName:
+    Description: CodeDeploy application name
+    Value: !Ref WebappApplication
 
   DeploymentGroup:
-    Description: Webapp Deployment Group
+    Description: CodeDeploy deployment group
     Value: !Ref WebappDeploymentGroup
-  DeploymentBucket:
-    Description: Deployment bucket
-    Value: !Ref WebappDeploymentBucket
-  ApplicationName:
-    Description: CodeDeploy Application name
-    Value: !Ref WebappApplication
-  GithubIAMRoleArn:
-    Description: IAM role for GitHub
+
+  GitHubIAMRoleArn:
+    Description: IAM role ARN for GitHub Actions (add as repository secret AWS_OIDC_ROLE_ARN)
     Value: !GetAtt GitHubIAMRole.Arn
+    Export:
+      Name: MudderGitHubRoleArn
+
+  EFSFileSystemId:
+    Description: EFS filesystem ID for game data
+    Value: !Ref GameDataFileSystem
+    Export:
+      Name: MudderEFSFileSystemId
+
   InstanceId:
-    Description: InstanceId of the newly created EC2 instance
-    Value: !Ref 'EC2Instance'
-  AZ:
-    Description: Availability Zone of the newly created EC2 instance
-    Value: !GetAtt [EC2Instance, AvailabilityZone]
-  PublicDNS:
-    Description: Public DNSName of the newly created EC2 instance
-    Value: !GetAtt [EC2Instance, PublicDnsName]
+    Description: EC2 instance ID
+    Value: !Ref EC2Instance
+
   PublicIP:
-    Description: Public IP address of the newly created EC2 instance
-    Value: !GetAtt [EC2Instance, PublicIp]
+    Description: Public IP address of the MUD server
+    Value: !GetAtt EC2Instance.PublicIp
+
+  PublicDNS:
+    Description: Public DNS name of the MUD server
+    Value: !GetAtt EC2Instance.PublicDnsName
+
+  GameConnectionString:
+    Description: How to connect to the MUD
+    Value: !Sub "telnet ${EC2Instance.PublicIp} ${GamePort}"

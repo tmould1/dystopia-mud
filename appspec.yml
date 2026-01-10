@@ -1,0 +1,67 @@
+version: 0.0
+os: linux
+
+files:
+  - source: bin/dystopia
+    destination: /usr/local/mudder/bin/
+  - source: area
+    destination: /usr/local/mudder/gamedata/area/
+  - source: doc
+    destination: /usr/local/mudder/gamedata/doc/
+  - source: txt
+    destination: /usr/local/mudder/gamedata/txt/
+
+file_exists_behavior: OVERWRITE
+
+permissions:
+  - object: /usr/local/mudder/bin/dystopia
+    owner: mudder
+    group: mudder
+    mode: 755
+  - object: /usr/local/mudder/gamedata/area
+    owner: mudder
+    group: mudder
+    mode: 755
+    type:
+      - directory
+      - file
+  - object: /usr/local/mudder/gamedata/doc
+    owner: mudder
+    group: mudder
+    mode: 755
+    type:
+      - directory
+      - file
+  - object: /usr/local/mudder/gamedata/txt
+    owner: mudder
+    group: mudder
+    mode: 755
+    type:
+      - directory
+      - file
+
+hooks:
+  ApplicationStop:
+    - location: aws/scripts/application-stop.sh
+      timeout: 120
+      runas: root
+
+  BeforeInstall:
+    - location: aws/scripts/before-install.sh
+      timeout: 300
+      runas: root
+
+  AfterInstall:
+    - location: aws/scripts/after-install.sh
+      timeout: 300
+      runas: root
+
+  ApplicationStart:
+    - location: aws/scripts/application-start.sh
+      timeout: 120
+      runas: root
+
+  ValidateService:
+    - location: aws/scripts/validate-service.sh
+      timeout: 300
+      runas: root
