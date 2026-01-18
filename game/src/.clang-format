@@ -13,3 +13,6 @@ AllowShortLoopsOnASingleLine: true
 SortIncludes: false
 AlignConsecutiveMacros: true
 AlignEscapedNewlines: Left
+AlignOperands: DontAlign
+AlignAfterOpenBracket: DontAlign
+ContinuationIndentWidth: 4
