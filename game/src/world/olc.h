@@ -227,11 +227,10 @@ DECLARE_OLC_FUN( medit_value2		);
 				|| strstr( Area->builders, "All" ) )	    \
 				&& !IS_EXTRA( ch, EXTRA_OSWITCH )	\
 				&& !IS_HEAD(ch, LOST_HEAD)		\
-				&& !IS_EXTRA(ch, EXTRA_SWITCH) ) 
+				&& !IS_EXTRA(ch, EXTRA_SWITCH) )
 
 
-
-#define TOGGLE_BIT(var, bit)    ((var) ^= (bit))
+/* TOGGLE_BIT is now defined in merc.h */
 
 /* Return pointers to what is being edited. */
 #define EDIT_MOB(Ch, Mob)	( Mob = (MOB_INDEX_DATA *)Ch->desc->pEdit )
