@@ -3166,6 +3166,12 @@ DECLARE_DO_FUN( jope_pdeath );
 DECLARE_DO_FUN( jope_mkill );
 DECLARE_DO_FUN( jope_mdeath );
 
+/* Shop Commands */
+DECLARE_DO_FUN( do_buy );
+DECLARE_DO_FUN( do_sell );
+DECLARE_DO_FUN( do_list );
+DECLARE_DO_FUN( do_value );
+
 /* New Commands */
 DECLARE_DO_FUN( do_affects );
 DECLARE_DO_FUN( do_chands );
@@ -4783,6 +4789,10 @@ extern const struct flag_type wear_loc_flags[];
 extern const struct flag_type weapon_flags[];
 extern const struct flag_type container_flags[];
 extern const struct flag_type liquid_flags[];
+
+/* Flag utility functions (defined in bit.c) */
+char *flag_string args( ( const struct flag_type *flag_table, int bits ) );
+int flag_value args( ( const struct flag_type *flag_table, char *argument ) );
 
 /* NOTE: This file only includes two examples! write your own! */
 

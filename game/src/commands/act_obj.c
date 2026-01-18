@@ -2137,6 +2137,51 @@ void do_steal( CHAR_DATA *ch, char *argument ) {
 /*
  * Shopping commands.
  */
+static void shop_not_interested( CHAR_DATA *keeper, OBJ_DATA *obj ) {
+	SHOP_DATA *pShop;
+	char buf[MAX_STRING_LENGTH];
+	char types[MAX_STRING_LENGTH];
+	int itype;
+	int count = 0;
+
+	pShop = keeper->pIndexData->pShop;
+	if ( pShop == NULL ) {
+		sprintf( buf, "I'm not interested in %s.", obj->short_descr );
+		do_say( keeper, buf );
+		return;
+	}
+
+	/* General store (buy_type[0] == 0) buys anything, so rejection means duplicate */
+	if ( pShop->buy_type[0] == 0 ) {
+		sprintf( buf, "I've already got %s and don't need another.", obj->short_descr );
+		do_say( keeper, buf );
+		return;
+	}
+
+	/* Build list of what shop buys */
+	types[0] = '\0';
+	for ( itype = 0; itype < MAX_TRADE; itype++ ) {
+		char *name;
+		if ( pShop->buy_type[itype] == 0 )
+			break;
+		name = flag_string( type_flags, pShop->buy_type[itype] );
+		while ( *name == ' ' ) name++; /* skip leading space from flag_string */
+		if ( count > 0 )
+			strcat( types, ", " );
+		strcat( types, name );
+		count++;
+	}
+
+	if ( count == 0 ) {
+		sprintf( buf, "I'm not buying anything right now." );
+	} else if ( count == 1 ) {
+		sprintf( buf, "I'm only interested in %s.", types );
+	} else {
+		sprintf( buf, "I only deal in %s.", types );
+	}
+	do_say( keeper, buf );
+}
+
 CHAR_DATA *find_keeper( CHAR_DATA *ch ) {
 	CHAR_DATA *keeper;
 	SHOP_DATA *pShop;
@@ -2194,10 +2239,15 @@ int get_cost( CHAR_DATA *keeper, OBJ_DATA *obj, bool fBuy ) {
 		int itype;
 
 		cost = 0;
-		for ( itype = 0; itype < MAX_TRADE; itype++ ) {
-			if ( obj->item_type == pShop->buy_type[itype] ) {
-				cost = obj->cost * pShop->profit_sell / 100;
-				break;
+		/* buy_type[0] == 0 means shop buys anything (general store) */
+		if ( pShop->buy_type[0] == 0 ) {
+			cost = obj->cost * pShop->profit_sell / 100;
+		} else {
+			for ( itype = 0; itype < MAX_TRADE; itype++ ) {
+				if ( obj->item_type == pShop->buy_type[itype] ) {
+					cost = obj->cost * pShop->profit_sell / 100;
+					break;
+				}
 			}
 		}
 
@@ -2213,6 +2263,195 @@ int get_cost( CHAR_DATA *keeper, OBJ_DATA *obj, bool fBuy ) {
 		cost = cost * obj->value[2] / obj->value[1];
 
 	return cost;
+}
+
+void do_list( CHAR_DATA *ch, char *argument ) {
+	char buf[MAX_STRING_LENGTH];
+	CHAR_DATA *keeper;
+	OBJ_DATA *obj;
+	int cost;
+	bool found;
+
+	if ( ( keeper = find_keeper( ch ) ) == NULL )
+		return;
+
+	found = FALSE;
+	for ( obj = keeper->carrying; obj; obj = obj->next_content ) {
+		if ( obj->wear_loc != WEAR_NONE )
+			continue;
+
+		if ( !can_see_obj( ch, obj ) )
+			continue;
+
+		if ( argument[0] != '\0' && !is_name( argument, obj->name ) )
+			continue;
+
+		cost = get_cost( keeper, obj, TRUE );
+		if ( cost <= 0 )
+			continue;
+
+		if ( !found ) {
+			found = TRUE;
+			send_to_char( "[Cost    ] Item\n\r", ch );
+		}
+
+		sprintf( buf, "[%7d] %s.\n\r", cost, obj->short_descr );
+		send_to_char( buf, ch );
+	}
+
+	if ( !found ) {
+		if ( argument[0] == '\0' )
+			send_to_char( "You can't buy anything here.\n\r", ch );
+		else
+			send_to_char( "You can't buy that here.\n\r", ch );
+	}
+
+	return;
+}
+
+void do_buy( CHAR_DATA *ch, char *argument ) {
+	char arg[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	CHAR_DATA *keeper;
+	OBJ_DATA *obj;
+	int cost;
+
+	one_argument( argument, arg );
+
+	if ( arg[0] == '\0' ) {
+		send_to_char( "Buy what?\n\r", ch );
+		return;
+	}
+
+	if ( ( keeper = find_keeper( ch ) ) == NULL )
+		return;
+
+	obj = NULL;
+	for ( obj = keeper->carrying; obj; obj = obj->next_content ) {
+		if ( obj->wear_loc != WEAR_NONE )
+			continue;
+		if ( !can_see_obj( ch, obj ) )
+			continue;
+		if ( is_name( arg, obj->name ) )
+			break;
+	}
+
+	if ( obj == NULL ) {
+		sprintf( buf, "I don't sell that -- try 'list'." );
+		do_say( keeper, buf );
+		return;
+	}
+
+	cost = get_cost( keeper, obj, TRUE );
+	if ( cost <= 0 ) {
+		sprintf( buf, "I don't sell that -- try 'list'." );
+		do_say( keeper, buf );
+		return;
+	}
+
+	if ( ch->gold < cost ) {
+		sprintf( buf, "You can't afford to buy %s.", obj->short_descr );
+		do_say( keeper, buf );
+		return;
+	}
+
+	if ( ch->carry_number + 1 > can_carry_n( ch ) ) {
+		send_to_char( "You can't carry that many items.\n\r", ch );
+		return;
+	}
+
+	if ( ch->carry_weight + get_obj_weight( obj ) > can_carry_w( ch ) ) {
+		send_to_char( "You can't carry that much weight.\n\r", ch );
+		return;
+	}
+
+	act( "$n buys $p.", ch, obj, NULL, TO_ROOM );
+	sprintf( buf, "You buy %s for %d gold.\n\r", obj->short_descr, cost );
+	send_to_char( buf, ch );
+	ch->gold -= cost;
+
+	obj_from_char( obj );
+	obj_to_char( obj, ch );
+
+	return;
+}
+
+void do_sell( CHAR_DATA *ch, char *argument ) {
+	char arg[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	CHAR_DATA *keeper;
+	OBJ_DATA *obj;
+	int cost;
+
+	one_argument( argument, arg );
+
+	if ( arg[0] == '\0' ) {
+		send_to_char( "Sell what?\n\r", ch );
+		return;
+	}
+
+	if ( ( keeper = find_keeper( ch ) ) == NULL )
+		return;
+
+	if ( ( obj = get_obj_carry( ch, arg ) ) == NULL ) {
+		send_to_char( "You don't have that item.\n\r", ch );
+		return;
+	}
+
+	if ( !can_drop_obj( ch, obj ) ) {
+		send_to_char( "You can't let go of it.\n\r", ch );
+		return;
+	}
+
+	cost = get_cost( keeper, obj, FALSE );
+	if ( cost <= 0 ) {
+		shop_not_interested( keeper, obj );
+		return;
+	}
+
+	act( "$n sells $p.", ch, obj, NULL, TO_ROOM );
+	sprintf( buf, "You sell %s for %d gold.\n\r", obj->short_descr, cost );
+	send_to_char( buf, ch );
+	ch->gold += cost;
+
+	obj_from_char( obj );
+	obj_to_char( obj, keeper );
+
+	return;
+}
+
+void do_value( CHAR_DATA *ch, char *argument ) {
+	char arg[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	CHAR_DATA *keeper;
+	OBJ_DATA *obj;
+	int cost;
+
+	one_argument( argument, arg );
+
+	if ( arg[0] == '\0' ) {
+		send_to_char( "Value what?\n\r", ch );
+		return;
+	}
+
+	if ( ( keeper = find_keeper( ch ) ) == NULL )
+		return;
+
+	if ( ( obj = get_obj_carry( ch, arg ) ) == NULL ) {
+		send_to_char( "You don't have that item.\n\r", ch );
+		return;
+	}
+
+	cost = get_cost( keeper, obj, FALSE );
+	if ( cost <= 0 ) {
+		shop_not_interested( keeper, obj );
+		return;
+	}
+
+	sprintf( buf, "I'd give you %d gold for %s.", cost, obj->short_descr );
+	do_say( keeper, buf );
+
+	return;
 }
 
 void do_activate( CHAR_DATA *ch, char *argument ) {

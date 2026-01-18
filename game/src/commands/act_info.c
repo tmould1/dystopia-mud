@@ -1979,8 +1979,8 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 	send_to_char( buf, ch );
 
 	sprintf( buf,
-		"#R[#nYou have scored #C%d#n exp#R]\n\r",
-		ch->exp );
+		"#R[#nYou have scored #C%d#n exp#R][#nYou have #C%d#n gold coins#R]\n\r",
+		ch->exp, ch->gold );
 	send_to_char( buf, ch );
 
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) ) {
