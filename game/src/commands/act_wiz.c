@@ -6937,7 +6937,7 @@ void copyover_recover ()
 
 		/* Re-negotiate protocols FIRST, before any text output */
 		/* MUSHclient and some clients only accept WILL offers at connection start */
-		retell_mccp(d);
+		retell_protocols(d);
 
 		/* Write something, and check if it goes error-free */
 		if (!write_to_descriptor_2(desc, "\n\r <*>             The world spins             <*>\n\r",0))

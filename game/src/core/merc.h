@@ -4719,7 +4719,7 @@ bool    has_bad_chars   args( ( CHAR_DATA *ch, char *argument ) );
 void    check_leaderboard  args( ( CHAR_DATA *ch ));
 void    update_top_board   args( ( CHAR_DATA *ch ));
 void    crashrecov      args( (int) );
-void    retell_mccp   args( ( DESCRIPTOR_DATA *d ));
+void    retell_protocols   args( ( DESCRIPTOR_DATA *d ));
 
 /* handler.c */
 
