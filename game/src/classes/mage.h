@@ -1,4 +1,3 @@
 /* mage bits */
 
-#define PINVOKE                 0
-
+#define PINVOKE 0
