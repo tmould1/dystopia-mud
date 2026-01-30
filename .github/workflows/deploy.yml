@@ -44,27 +44,19 @@ jobs:
   build-windows:
     name: Build (Windows)
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-zlib make
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-      - name: Generate Makefiles
-        run: |
-          cd game/build
-          bash GenerateProjectFiles.sh
+      - name: Generate Project Files
+        shell: cmd
+        run: game\build\GenerateProjectFiles.bat
 
       - name: Build
-        run: |
-          cd game/build
-          make -j$(nproc) -f Makefile.mingw
+        shell: cmd
+        run: msbuild game\build\dystopia.vcxproj /p:Configuration=Release /p:Platform=x64
 
       - name: Package gamedata
         shell: pwsh

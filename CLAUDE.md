@@ -41,21 +41,29 @@ When source files are added, removed, or renamed, regenerate the build files usi
 
 **Windows** (`GenerateProjectFiles.bat`):
 ```cmd
-cd game\build
-GenerateProjectFiles.bat
+Find absolute path to GenerateProjectFiles.bat
+use 'cmd.exe /c ' with that path to invoke
 ```
-Generates all 5 build files: `Makefile`, `Makefile.mingw`, `dystopia.sln`, `dystopia.vcxproj`, and `dystopia.vcxproj.filters`. Backs up existing files to `game/build/backup/`.
+Generates all 4 build files: `Makefile`, `dystopia.sln`, `dystopia.vcxproj`, and `dystopia.vcxproj.filters`. Backs up existing files to `game/build/backup/`.
 
 **Linux** (`GenerateProjectFiles.sh`):
 ```bash
 cd game
 ./build/GenerateProjectFiles.sh
 ```
-Generates `Makefile` and `Makefile.mingw` only (run from `game/` directory). For Visual Studio files, use the `.bat` on Windows. Backs up existing files to `game/build/backup/`.
+Generates `Makefile` only (run from `game/` directory). For Visual Studio files, use the `.bat` on Windows. Backs up existing files to `game/build/backup/`.
 
 Both scripts scan all subdirectories under `game/src/` (core, classes, combat, commands, world, systems, db) for `.c` and `.h` files.
 
 ### Linux (GCC)
+**Preferred**: Use `game/build/build.sh` which handles parallel compilation and logging:
+```bash
+cd game/build
+./build.sh              # Build with parallel compilation
+./build.sh clean        # Remove build artifacts
+```
+
+Or manually:
 ```bash
 cd game/build
 make -f Makefile clean && make -f Makefile
@@ -63,27 +71,16 @@ make -f Makefile clean && make -f Makefile
 ```
 Requires: `build-essential`, `zlib1g-dev`, `libcrypt-dev` packages (libpthread is included in glibc).
 
-### Windows (MinGW/MSYS2)
-**Preferred**: Use `game\build\build.bat` which handles paths and parallel compilation:
-```cmd
-cd game\build
-build.bat clean   # Clean build artifacts
-build.bat         # Build with parallel jobs
-build.bat install # Build dystopia.exe (fresh install)
-```
-
-Or manually:
-```bash
-cd game/build
-make -f Makefile.mingw clean && make -f Makefile.mingw
-```
-Produces `gamedata/dystopia_new.exe` (or `dystopia.exe` with install target). The build automatically copies `zlib1.dll` from `game/lib/win64/bin/` to `gamedata/`.
-
 ### Windows (MSVC)
-Open `game/build/dystopia.sln` in Visual Studio, or:
+**Preferred**: Use `game\build\build.bat` which handles MSBuild discovery, parallel compilation, and logging:
+```cmd
+cmd.exe /c "d:\Github\Dystopia\dystopia-mud\game\build\build.bat"
+```
+
+Or open `game/build/dystopia.sln` in Visual Studio, or:
 ```cmd
 cd game\build
-msbuild dystopia.vcxproj /p:Configuration=Release
+msbuild dystopia.vcxproj /p:Configuration=Release /p:Platform=x64
 ```
 
 ## Source Directory Structure
