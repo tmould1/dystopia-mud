@@ -16,8 +16,6 @@
 extern char mud_db_dir[MUD_PATH_MAX];
 extern HELP_DATA *first_help;
 extern HELP_DATA *last_help;
-extern HELP_DATA *help_first;
-extern HELP_DATA *help_last;
 extern char *help_greeting;
 extern int top_help;
 extern TOP_BOARD top_board[MAX_TOP_PLAYERS + 1];

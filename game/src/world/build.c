@@ -28,6 +28,7 @@
 #include <unistd.h>
 #endif
 #include "merc.h"
+#include "../db/db_game.h"
 
 extern int top_ed;
 
@@ -918,72 +919,6 @@ void do_help( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 
-/*
- * Help editor							-Thoric
- *
-void do_hedit( CHAR_DATA *ch, char *argument )
-{
-	HELP_DATA *pHelp;
-
-	if ( !ch->desc )
-	{
-	send_to_char( "You have no descriptor.\n\r", ch );
-	return;
-	}
-
-	switch( ch->substate )
-	{
-	default:
-	  break;
-	case SUB_HELP_EDIT:
-	  if ( (pHelp = ch->dest_buf) == NULL )
-	  {
-		bug( "hedit: sub_help_edit: NULL ch->dest_buf", 0 );
-		stop_editing( ch );
-		return;
-	  }
-	  STRFREE( pHelp->text );
-	  pHelp->text = copy_buffer( ch );
-	  stop_editing( ch );
-	  return;
-	}
-	if ( (pHelp = get_help( ch, argument )) == NULL )
-	{
-	char argnew[MAX_INPUT_LENGTH];
-	int lev;
-
-	if ( isdigit(argument[0]) )
-	{
-		lev = number_argument( argument, argnew );
-		argument = argnew;
-	}
-	else
-		lev = get_trust(ch);
-	CREATE( pHelp, HELP_DATA, 1 );
-	pHelp->keyword = STRALLOC( strupper(argument) );
-	pHelp->text    = STRALLOC( "" );
-	pHelp->level   = lev;
-	add_help( pHelp );
-	}
-	ch->substate = SUB_HELP_EDIT;
-	ch->dest_buf = pHelp;
-	start_editing( ch, pHelp->text );
-}
-*/
-/*
- * Stupid leading space muncher fix				-Thoric
- */
-char *help_fix( char *text ) {
-	char *fixed;
-
-	if ( !text )
-		return "";
-	fixed = strip_cr( text );
-	if ( fixed[0] == ' ' )
-		fixed[0] = '.';
-	return fixed;
-}
-
 void do_hset( CHAR_DATA *ch, char *argument ) {
 	HELP_DATA *pHelp;
 	char arg1[MAX_INPUT_LENGTH];
@@ -1000,28 +935,7 @@ void do_hset( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( arg1, "save" ) ) {
-		FILE *fpout;
-		const char *help_file = mud_path( mud_area_dir, "help.are" );
-		const char *help_bak = mud_path( mud_area_dir, "help.are.bak" );
-
-		rename( help_file, help_bak );
-		fclose( fpReserve );
-		if ( ( fpout = fopen( help_file, "w" ) ) == NULL ) {
-			bug( "hset save: fopen", 0 );
-			perror( help_file );
-			fpReserve = fopen( NULL_FILE, "r" );
-			return;
-		}
-
-		fprintf( fpout, "#HELPS\n\n" );
-		for ( pHelp = first_help; pHelp; pHelp = pHelp->next )
-			fprintf( fpout, "%d %s~\n%s~\n\n",
-				pHelp->level, pHelp->keyword,
-				help_fix( pHelp->text ) );
-
-		fprintf( fpout, "0 $~\n\n\n#$\n" );
-		fclose( fpout );
-		fpReserve = fopen( NULL_FILE, "r" );
+		db_game_save_helps();
 		send_to_char( "Saved.\n\r", ch );
 		return;
 	}

@@ -3070,9 +3070,6 @@ extern const struct social_type social_table[];
 /*
  * Global variables.
  */
-extern HELP_DATA *help_first;
-extern HELP_DATA *help_last;
-
 extern SHOP_DATA *shop_first;
 
 extern HELP_DATA *first_help;

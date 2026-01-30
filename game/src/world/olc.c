@@ -1320,8 +1320,16 @@ void do_hedit( CHAR_DATA *ch, char *argument ) {
 		ch->desc->editor = ED_HELP;
 		return;
 	} else {
-		send_to_char( "Hedit mode entered, no default command or help to edit.\n\r", ch );
-		ch->desc->editor = ED_HELP;
+		HELP_DATA *pHelp = get_help( ch, arg1 );
+		if ( pHelp ) {
+			ch->desc->pEdit = (void *) pHelp;
+			ch->desc->editor = ED_HELP;
+			send_to_char( "Editing help: ", ch );
+			send_to_char( pHelp->keyword, ch );
+			send_to_char( "\n\rType 'done' to finish, 'commands' for help editor commands.\n\r", ch );
+		} else {
+			send_to_char( "No help entry found for that keyword.\n\r", ch );
+		}
 		return;
 	}
 }

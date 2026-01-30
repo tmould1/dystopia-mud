@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_game.h"
 #if !defined( WIN32 )
 #include <unistd.h>
 #include <fcntl.h> /* fcntl, F_SETFL, FNDELAY */
@@ -5641,110 +5642,12 @@ void do_release( CHAR_DATA *ch, char *argument ) {
 
 /* Removed: do_contraception - xsocial system removed */
 
-/*----------------------------------------------------------------
- * functions for RELOAD command.  --Zarniwoop@Dutch Mountains  (4-28-97)
- * Snippet intended for Merc 2.0, 2.1 and 2.2
- *
- * ready to go, except for two things:
- * 1. make the usual modifications for do_reload (merc.h, interp.c)
- * 2. in merc.h, after the declaration of help_first, declare help_last
- *    so it is global.
- *
- * Bugs, comments: remmelt@kosterix.icce.rug.nl
- */
-bool free_helps( CHAR_DATA *ch, char *arg ) {
-	char buf[MAX_STRING_LENGTH];
-	HELP_DATA *h, *h_next;
-	HELP_DATA *prev = NULL;
-	bool found = FALSE;
-
-	prev = help_first;
-	for ( h = help_first; h; h = h_next ) {
-		h_next = h->next;
-
-		if ( !str_cmp( h->keyword, arg ) ) {
-			free_string( h->keyword );
-			free_string( h->text );
-			if ( h == help_first )
-				help_first = h->next;
-			else
-				prev->next = h->next;
-			if ( h == help_last )
-				help_last = prev;
-			free_mem( h, sizeof( *h ) );
-			found = TRUE;
-		}
-		prev = h;
-	}
-
-	if ( !found ) {
-		sprintf( buf, "Help entry %s not found.\n\r", arg );
-		send_to_char( buf, ch );
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-bool read_entry( CHAR_DATA *ch, FILE *fp, const char *filename, char *arg ) {
-	char buf[MAX_STRING_LENGTH];
-	HELP_DATA *new;
-	char *test_keyword = 0;
-	char *test_text = 0;
-	int test_level = 0;
-
-	if ( fread_letter( fp ) != '#' ) {
-		sprintf( buf, "read_entry: # not in %s.\n\r", filename );
-		send_to_char( buf, ch );
-		return FALSE;
-	}
-
-	fread_word( fp ); /* read the word HELPS */
-
-	new = alloc_mem( sizeof( *new ) );
-	new->next = NULL;
-
-	for ( ;; ) {
-		test_level = fread_number( fp );
-		test_keyword = fread_string( fp );
-
-		if ( !str_cmp( test_keyword, "$" ) ) /* end of file */
-		{
-			free_string( test_keyword );
-			free_string( test_text );
-			free_mem( new, sizeof( *new ) );
-			return FALSE;
-		}
-
-		test_text = fread_string( fp );
-
-		if ( !str_cmp( test_keyword, arg ) ) /* match */
-		{
-			new->keyword = test_keyword;
-			new->level = test_level;
-			new->text = test_text;
-
-			if ( help_last )
-				help_last->next = new;
-			help_last = new;
-
-			sprintf( buf, "entry %s updated.\n\r", new->keyword );
-			send_to_char( buf, ch );
-			return TRUE;
-		} else {
-			free_string( test_keyword );
-			free_string( test_text );
-		}
-	}
-
-	return FALSE;
-}
-
 void do_hreload( CHAR_DATA *ch, char *argument ) {
 	char arg[MAX_INPUT_LENGTH];
+	char keyword_saved[MAX_INPUT_LENGTH];
 	char buf[MAX_STRING_LENGTH];
-	const char *helpfile;
-	FILE *fp;
+	HELP_DATA *h, *h_next;
+	bool found = FALSE;
 
 	argument = one_argument( argument, arg );
 
@@ -5753,24 +5656,34 @@ void do_hreload( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	/* remove help entry from the list */
-	if ( !free_helps( ch, arg ) )
-		return;
-
-	/* here we go */
-	fclose( fpReserve );
-
-	helpfile = mud_path( mud_area_dir, "help.are" );
-	if ( ( fp = fopen( helpfile, "r" ) ) == NULL ) {
-		sprintf( buf, "do_reload: couldn't open %s.\n\r", helpfile );
-		send_to_char( buf, ch );
-	} else {
-		(void) read_entry( ch, fp, helpfile, arg );
-		fclose( fp );
+	/* Remove existing help entry from in-memory list */
+	keyword_saved[0] = '\0';
+	for ( h = first_help; h; h = h_next ) {
+		h_next = h->next;
+		if ( is_name( arg, h->keyword ) ) {
+			snprintf( keyword_saved, sizeof( keyword_saved ), "%s", h->keyword );
+			UNLINK( h, first_help, last_help, next, prev );
+			free_string( h->keyword );
+			free_string( h->text );
+			free_mem( h, sizeof( *h ) );
+			found = TRUE;
+		}
 	}
 
-	fpReserve = fopen( NULL_FILE, "r" );
-	return;
+	if ( !found ) {
+		snprintf( buf, sizeof( buf ), "Help entry %s not found.\n\r", arg );
+		send_to_char( buf, ch );
+		return;
+	}
+
+	/* Reload entry from help.db using the exact keyword we removed */
+	if ( db_game_reload_help( keyword_saved ) ) {
+		snprintf( buf, sizeof( buf ), "Entry %s reloaded.\n\r", keyword_saved );
+		send_to_char( buf, ch );
+	} else {
+		snprintf( buf, sizeof( buf ), "Entry %s not found in database.\n\r", keyword_saved );
+		send_to_char( buf, ch );
+	}
 }
 
 void do_resetpassword( CHAR_DATA *ch, char *argument ) {

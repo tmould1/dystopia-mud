@@ -154,9 +154,6 @@ void mud_init_paths( const char *exe_path ) {
 /*
  * Globals.
  */
-HELP_DATA *help_first;
-HELP_DATA *help_last;
-
 SHOP_DATA *shop_first;
 SHOP_DATA *shop_last;
 DUMMY_ARG *dummy_free;

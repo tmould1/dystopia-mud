@@ -3111,7 +3111,7 @@ HEDIT( hedit_keyword ) {
 	EDIT_HELP( ch, pHelp );
 
 	if ( !is_number( argument ) ) {
-		for ( tHelp = help_first; tHelp != NULL; tHelp = tHelp->next ) {
+		for ( tHelp = first_help; tHelp != NULL; tHelp = tHelp->next ) {
 			if ( is_name( argument, tHelp->keyword ) ) {
 				send_to_char( "{b That keyword already exits.{x\n\r", ch );
 				return FALSE;
@@ -3142,40 +3142,19 @@ HEDIT( hedit_text ) {
 /* kill a help */
 HEDIT( hedit_delete ) {
 	extern int top_help;
-	extern HELP_DATA *help_last;
 	HELP_DATA *target;
-	HELP_DATA *previous;
-
-	previous = NULL;
 
 	if ( argument[0] == '\0' ) {
 		send_to_char( "{r Synatx: Hedit delete 'keyword'{x\n\r", ch );
 		return FALSE;
 	}
-	for ( target = help_first; target != NULL; target = target->next ) {
+	for ( target = first_help; target != NULL; target = target->next ) {
 		if ( is_name( argument, target->keyword ) ) {
-			if ( target == help_first ) {
-				previous = target->next;
-				help_first = previous;
-				top_help--;
-				send_to_char( "{rHelp removed.{x\n\r", ch );
-				return TRUE;
-			} else if ( target == help_last ) {
-				previous->next = NULL;
-				help_last = previous;
-				top_help--;
-				send_to_char( "{rHelp removed.{x\n\r", ch );
-				return TRUE;
-			}
-
-			else {
-				previous->next = target->next;
-				top_help--;
-				send_to_char( "{rHelp removed.{x\n\r", ch );
-				return TRUE;
-			}
+			UNLINK( target, first_help, last_help, next, prev );
+			top_help--;
+			send_to_char( "{rHelp removed.{x\n\r", ch );
+			return TRUE;
 		}
-		previous = target; /* set previous to last target */
 	}
 	send_to_char( " {rNo Help with that keyword found to delete!{x\n\r", ch );
 	return FALSE;
@@ -3189,7 +3168,7 @@ HEDIT( hedit_change ) {
 		send_to_char( " Syntax: Hedit change 'keyword'\n\r", ch );
 		return FALSE;
 	}
-	for ( tHelp = help_first; tHelp != NULL; tHelp = tHelp->next ) {
+	for ( tHelp = first_help; tHelp != NULL; tHelp = tHelp->next ) {
 		if ( is_name( argument, tHelp->keyword ) ) {
 			send_to_char( " Help found, Entering String editor\n\r", ch );
 
@@ -3215,7 +3194,7 @@ HEDIT( hedit_index ) {
 	buf[0] = '\0';
 	output[0] = '\0';
 
-	for ( pHelp = help_first; pHelp != NULL; pHelp = pHelp->next ) {
+	for ( pHelp = first_help; pHelp != NULL; pHelp = pHelp->next ) {
 		level = ( pHelp->level < 0 ) ? -1 * pHelp->level - 1 : pHelp->level;
 
 		if ( level > get_trust( ch ) )
@@ -3233,7 +3212,7 @@ HEDIT( hedit_index ) {
 /* create a new help */
 HEDIT( hedit_create ) {
 	extern int top_help;
-	extern HELP_DATA *help_last;
+	extern HELP_DATA *last_help;
 	HELP_DATA *pHelp;
 	HELP_DATA *tHelp;
 
@@ -3242,7 +3221,7 @@ HEDIT( hedit_create ) {
 		return FALSE;
 	}
 
-	for ( tHelp = help_first; tHelp != NULL; tHelp = tHelp->next ) {
+	for ( tHelp = first_help; tHelp != NULL; tHelp = tHelp->next ) {
 		if ( is_name( argument, tHelp->keyword ) ) {
 			send_to_char( "{b That Help already exits.{x\n\r", ch );
 			return FALSE;
@@ -3253,13 +3232,7 @@ HEDIT( hedit_create ) {
 	pHelp = new_help();
 	pHelp->level = 0;
 	pHelp->keyword = str_dup( argument );
-	if ( help_first == NULL )
-		help_first = pHelp;
-	if ( help_last != NULL )
-		help_last->next = pHelp;
-
-	help_last = pHelp;
-	pHelp->next = NULL;
+	add_help( pHelp );
 	top_help++;
 
 	pHelp->text = str_dup( " " );
