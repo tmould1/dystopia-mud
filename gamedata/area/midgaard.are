@@ -2237,24 +2237,6 @@ This entire world has been integrated, modified, debugged, and enhanced by
 Hatchet, Kahn, and Furey of MERC Industries to be run by any MERC Mud.
 1992 December 17
 ~
-D0
-At the northern end of the temple hall is a statue and a huge altar.
-~
-~
-0 -1 3054
-D1
-~
-~
-16387 0 12
-D2
-~
-~
-0 0 3005
-D4
-You see the entrance to Mud School.
-~
-~
-0 0 3700
 T
 >ENTER<~
 The executioner glances at you with cold eyes.
@@ -2321,6 +2303,24 @@ The executioner says 'Read HELP RULES and HELP POLICY if you value your head.'~
 copy~
 all~
 1048576 0 3011
+D0
+At the northern end of the temple hall is a statue and a huge altar.
+~
+~
+0 -1 3054
+D1
+~
+~
+16387 0 12
+D2
+~
+~
+0 0 3005
+D4
+You see the entrance to Mud School.
+~
+~
+0 0 3700
 S
 #3002
 Cleric's Inner Sanctum~

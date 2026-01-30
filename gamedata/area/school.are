@@ -1538,6 +1538,15 @@ counter, looking apologetic. A faded "CLOSED" sign hangs in the window.
 The only exit is NORTH.
 ~
 0 8 0
+E
+sign~
+SHOP CLOSED
+
+The Academy Supply Shop is currently closed for renovations.
+The adept here can still give you a free lantern if you need light.
+
+Go NORTH when you're ready to continue.
+~
 T
 >ENTER<~
 The adept says 'Ah, welcome $n! Sorry, the shop is closed for renovations.'
@@ -1548,15 +1557,6 @@ The adept says 'But if you need a lantern for the dark room ahead, I have one to
 The adept gives you $p.~
 all~
 1048608 3720 3717
-E
-sign~
-SHOP CLOSED
-
-The Academy Supply Shop is currently closed for renovations.
-The adept here can still give you a free lantern if you need light.
-
-Go NORTH when you're ready to continue.
-~
 D0
 You see the only exit out of here.
 ~
