@@ -39,6 +39,7 @@ game/build/dystopia.vcxproj.user
 
 # Player data (sensitive)
 gamedata/player/
+gamedata/db/players/
 
 # Windows DLLs (except bundled ones in lib/)
 *.dll
@@ -58,4 +59,7 @@ nul
 # Local settings
 .claude/settings.local.json
 
-gamedata/notes/Immortal
+gamedata/notes/
+
+# Debug symbols
+gamedata/dystopia_new.pdb
