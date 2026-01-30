@@ -20,21 +20,24 @@ COMBAT_DIR   = $(SRC_DIR)/combat
 COMMANDS_DIR = $(SRC_DIR)/commands
 WORLD_DIR    = $(SRC_DIR)/world
 SYSTEMS_DIR  = $(SRC_DIR)/systems
+DB_DIR       = $(SRC_DIR)/db
 
 # Include paths (so #include "merc.h" works from any source file)
-INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR)
+INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR) -I$(DB_DIR)
 
 # Compiler and linker flags
 C_FLAGS = -Wall -O2 $(INCLUDES)
-L_FLAGS = -lz -lcrypt -lpthread
+SQLITE_FLAGS = -w -O2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DEFAULT_MEMSTATUS=0 $(INCLUDES)
+L_FLAGS = -lz -lcrypt -lpthread -ldl
 
 # Source files by directory
 CORE_SRC = comm.c compat.c config.c const.c db.c handler.c interp.c mem.c nanny.c output.c prompt.c string.c
-CLASSES_SRC = angel.c daemon.c demon.c drow.c lich.c mage.c monk.c monk2.c ninja.c samurai.c shapeshifter.c spiderdroid.c tanarri.c undead_knight.c vamp.c ww.c
+CLASSES_SRC = angel.c clan.c daemon.c demon.c drow.c lich.c mage.c monk.c monk2.c ninja.c samurai.c shapeshifter.c spiderdroid.c tanarri.c undead_knight.c vamp.c ww.c
 COMBAT_SRC = arena.c fight.c jobo_fight.c kav_fight.c magic.c special.c
 COMMANDS_SRC = act_comm.c act_info.c act_map.c act_move.c act_obj.c act_wiz.c jobo_wiz.c kav_info.c kav_wiz.c socials.c wizutil.c
 WORLD_SRC = build.c olc.c olc_act.c olc_save.c
-SYSTEMS_SRC = bit.c board.c clan.c gmcp.c jobo_act.c jobo_data.c jobo_king.c jobo_util.c jope.c mccp.c mssp.c mxp.c naws.c save.c update.c upgrade.c
+SYSTEMS_SRC = bit.c board.c gmcp.c jobo_act.c jobo_data.c jobo_king.c jobo_util.c jope.c mccp.c mssp.c mxp.c naws.c save.c update.c upgrade.c
+DB_SRC = db_sql.c sqlite3.c
 
 # Object files with subdirectory paths
 CORE_OBJ     = $(addprefix $(OBJ_DIR)/core/,$(CORE_SRC:.c=.o))
@@ -43,12 +46,13 @@ COMBAT_OBJ   = $(addprefix $(OBJ_DIR)/combat/,$(COMBAT_SRC:.c=.o))
 COMMANDS_OBJ = $(addprefix $(OBJ_DIR)/commands/,$(COMMANDS_SRC:.c=.o))
 WORLD_OBJ    = $(addprefix $(OBJ_DIR)/world/,$(WORLD_SRC:.c=.o))
 SYSTEMS_OBJ  = $(addprefix $(OBJ_DIR)/systems/,$(SYSTEMS_SRC:.c=.o))
+DB_OBJ       = $(addprefix $(OBJ_DIR)/db/,$(DB_SRC:.c=.o))
 
-O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ)
+O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ) $(DB_OBJ)
 
 # Object directory structure
 OBJ_DIRS = $(OBJ_DIR)/core $(OBJ_DIR)/classes $(OBJ_DIR)/combat \
-           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems
+           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems $(OBJ_DIR)/db
 
 # Target executable (in gamedata/ for deployment)
 TARGET = ../../gamedata/dystopia
@@ -80,6 +84,13 @@ $(OBJ_DIR)/world/%.o: $(WORLD_DIR)/%.c $(CORE_DIR)/merc.h $(WORLD_DIR)/olc.h
 	$(CC) -c $(C_FLAGS) $< -o $@
 
 $(OBJ_DIR)/systems/%.o: $(SYSTEMS_DIR)/%.c $(CORE_DIR)/merc.h
+	$(CC) -c $(C_FLAGS) $< -o $@
+
+# SQLite amalgamation uses special flags (suppress warnings, disable threading)
+$(OBJ_DIR)/db/sqlite3.o: $(DB_DIR)/sqlite3.c
+	$(CC) -c $(SQLITE_FLAGS) $< -o $@
+
+$(OBJ_DIR)/db/%.o: $(DB_DIR)/%.c $(CORE_DIR)/merc.h $(DB_DIR)/db_sql.h
 	$(CC) -c $(C_FLAGS) $< -o $@
 
 clean:

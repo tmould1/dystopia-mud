@@ -97,7 +97,7 @@ game/src/
 ├── combat/     - Combat systems (fight.c, kav_fight.c, magic.c, arena.c)
 ├── commands/   - Player/admin commands (act_*.c, socials.c, wizutil.c)
 ├── world/      - OLC/building (olc.c, olc_act.c, olc_save.c, build.c)
-├── systems/    - Game subsystems (update.c, save.c, clan.c, board.c, etc.)
+├── systems/    - Game subsystems (update.c, save.c, board.c, etc.)
 └── db/         - SQLite database layer (db_sql.h, sqlite3 amalgamation)
 ```
 
@@ -129,6 +129,7 @@ Each class has its own source file with powers and abilities:
 - `tanarri.c` - Tanarri
 - `undead_knight.c` - Undead Knights
 - `spiderdroid.c` - Spider Droids
+- `clan.c` - Vampire clan system
 
 ### Combat Systems (game/src/combat/)
 - **fight.c, kav_fight.c, jobo_fight.c** - Combat system
@@ -139,7 +140,6 @@ Each class has its own source file with powers and abilities:
 ### Game Systems (game/src/systems/)
 - **update.c** - Game tick updates (regeneration, weather, etc.)
 - **save.c** - Player file persistence
-- **clan.c** - Clan system
 - **board.c** - Message boards
 - **mccp.c** - MUD Client Compression Protocol
 
