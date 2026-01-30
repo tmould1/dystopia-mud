@@ -3077,7 +3077,6 @@ extern HELP_DATA *last_help;
 extern BAN_DATA *ban_list;
 extern CHAR_DATA *char_list;
 extern DESCRIPTOR_DATA *descriptor_list;
-extern NOTE_DATA *note_list;
 extern OBJ_DATA *object_list;
 
 extern ROOM_INDEX_DATA *room_list;
@@ -4198,9 +4197,8 @@ char *crypt args( ( const char *key, const char *salt ) );
 
 /* Base directory paths - initialized at startup */
 extern char mud_base_dir[MUD_PATH_MAX];	  /* Base directory (gamedata/) */
-extern char mud_txt_dir[MUD_PATH_MAX];	  /* Text files (config, etc) */
+extern char mud_run_dir[MUD_PATH_MAX];	  /* Runtime files (copyover, crash, shutdown) */
 extern char mud_log_dir[MUD_PATH_MAX];	  /* Log files */
-extern char mud_notes_dir[MUD_PATH_MAX];  /* Notes/boards directory */
 
 /* Path building function - returns static buffer, use immediately or copy */
 char *mud_path( const char *dir, const char *filename );
@@ -4208,15 +4206,13 @@ char *mud_path( const char *dir, const char *filename );
 /* Initialize all paths based on executable location or current directory */
 void mud_init_paths( const char *exe_path );
 
-#define BAN_LIST		mud_path( mud_txt_dir, "ban.txt" )
-#define BUG_FILE		mud_path( mud_txt_dir, "bugs.txt" )
-#define SHUTDOWN_FILE	mud_path( mud_txt_dir, "shutdown.txt" )
-#define CRASH_TEMP_FILE mud_path( mud_txt_dir, "crashtmp.txt" )
-#define COPYOVER_FILE	mud_path( mud_txt_dir, "copyover.data" )
+#define SHUTDOWN_FILE	mud_path( mud_run_dir, "shutdown.txt" )
+#define CRASH_TEMP_FILE mud_path( mud_run_dir, "crashtmp.txt" )
+#define COPYOVER_FILE	mud_path( mud_run_dir, "copyover.data" )
 
 /* Windows socket info file for copyover (WSADuplicateSocket data) */
 #if defined( WIN32 )
-#define COPYOVER_SOCKET_FILE mud_path( mud_txt_dir, "copyover_socket.dat" )
+#define COPYOVER_SOCKET_FILE mud_path( mud_run_dir, "copyover_socket.dat" )
 #endif
 
 /* Executable file for copyover/crash recovery */
@@ -4335,9 +4331,7 @@ void divide6_to_char args( ( CHAR_DATA * ch ) );
 void stc args( ( const char *txt, CHAR_DATA *ch ) );
 void cent_to_char args( ( char *txt, CHAR_DATA *ch ) );
 
-#define DISABLED_FILE "disabled.txt" /* disabled commands */
-
-/* prototypes from db.c */
+/* prototypes from interp.c */
 void load_disabled args( (void) );
 void save_disabled args( (void) );
 
@@ -4356,11 +4350,6 @@ char *get_roomtext args( ( const char *name, ROOMTEXT_DATA *rt ) );
 MID *get_mob_index args( ( int vnum ) );
 OID *get_obj_index args( ( int vnum ) );
 RID *get_room_index args( ( int vnum ) );
-char fread_letter args( ( FILE * fp ) );
-int fread_number args( ( FILE * fp ) );
-char *fread_string args( ( FILE * fp ) );
-void fread_to_eol args( ( FILE * fp ) );
-char *fread_word args( ( FILE * fp ) );
 void *alloc_mem args( ( int sMem ) );
 void *alloc_perm args( ( int sMem ) );
 void free_mem args( ( void *pMem, int sMem ) );

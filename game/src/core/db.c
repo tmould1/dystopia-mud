@@ -30,9 +30,8 @@
  * Path management - allows executable to run from any directory
  */
 char mud_base_dir[MUD_PATH_MAX] = "";
-char mud_txt_dir[MUD_PATH_MAX] = "";
+char mud_run_dir[MUD_PATH_MAX] = "";
 char mud_log_dir[MUD_PATH_MAX] = "";
-char mud_notes_dir[MUD_PATH_MAX] = "";
 
 /* Build a path from directory and filename - uses rotating static buffers */
 char *mud_path( const char *dir, const char *filename ) {
@@ -106,14 +105,12 @@ void mud_init_paths( const char *exe_path ) {
 	gamedata_dir[MUD_PATH_MAX - 1] = '\0';
 
 	/* Set up all subdirectories relative to gamedata (exe location) */
-	snprintf( mud_txt_dir, sizeof( mud_txt_dir ), "%.450s%stxt", gamedata_dir, PATH_SEPARATOR );
+	snprintf( mud_run_dir, sizeof( mud_run_dir ), "%.450s%srun", gamedata_dir, PATH_SEPARATOR );
 	snprintf( mud_log_dir, sizeof( mud_log_dir ), "%.450s%slog", gamedata_dir, PATH_SEPARATOR );
-	snprintf( mud_notes_dir, sizeof( mud_notes_dir ), "%.450s%snotes%s", gamedata_dir, PATH_SEPARATOR, PATH_SEPARATOR );
 
 	/* Ensure runtime directories exist */
-	ensure_directory( mud_txt_dir );
+	ensure_directory( mud_run_dir );
 	ensure_directory( mud_log_dir );
-	ensure_directory( mud_notes_dir );
 
 	/* Initialize SQLite database directories */
 	db_sql_init();
@@ -125,11 +122,9 @@ void mud_init_paths( const char *exe_path ) {
 		char buf[MAX_STRING_LENGTH];
 		snprintf( buf, sizeof( buf ), "  Base:     %s", mud_base_dir );
 		log_string( buf );
-		snprintf( buf, sizeof( buf ), "  Txt:      %s", mud_txt_dir );
+		snprintf( buf, sizeof( buf ), "  Run:      %s", mud_run_dir );
 		log_string( buf );
 		snprintf( buf, sizeof( buf ), "  Log:      %s", mud_log_dir );
-		log_string( buf );
-		snprintf( buf, sizeof( buf ), "  Notes:    %s", mud_notes_dir );
 		log_string( buf );
 	}
 }
@@ -324,8 +319,6 @@ int sAllocPerm;
  * Semi-locals.
  */
 bool fBootDb;
-FILE *fpArea;
-char strArea[MAX_INPUT_LENGTH];
 
 /*
  * Local booting procedures.
@@ -1401,221 +1394,6 @@ ROOM_INDEX_DATA *get_room_index( int vnum ) {
 }
 
 /*
- * Read a letter from a file.
- */
-char fread_letter( FILE *fp ) {
-	char c;
-
-	do {
-		c = getc( fp );
-	} while ( isspace( c ) );
-
-	return c;
-}
-
-/*
- * Read a number from a file.
- */
-int fread_number( FILE *fp ) {
-	int number;
-	bool sign;
-	char *ptr;
-	int c;
-
-	ptr = top_string + sizeof( char * );
-
-	do {
-		c = getc( fp );
-		*ptr = c;
-	} while ( isspace( c ) );
-
-	number = 0;
-
-	sign = FALSE;
-	if ( c == '+' ) {
-		c = getc( fp );
-		*ptr = c;
-	} else if ( c == '-' ) {
-		sign = TRUE;
-		c = getc( fp );
-		*ptr = c;
-	}
-
-	if ( !isdigit( c ) ) {
-		bug( "Fread_number: bad format.", 0 );
-		exit( 1 );
-	}
-
-	while ( isdigit( c ) ) {
-		number = number * 10 + c - '0';
-		c = getc( fp );
-		*ptr = c;
-	}
-
-	if ( sign )
-		number = 0 - number;
-
-	if ( c == '|' )
-		number += fread_number( fp );
-	else if ( c != ' ' )
-		ungetc( c, fp );
-
-	return number;
-}
-
-/*
- * Read and allocate space for a string from a file.
- * These strings are read-only and shared.
- * Strings are hashed:
- *   each string prepended with hash pointer to prev string,
- *   hash code is simply the string length.
- * This function takes 40% to 50% of boot-up time.
- */
-char *fread_string( FILE *fp ) {
-	char *plast;
-	int c;
-
-	plast = top_string + sizeof( char * );
-	if ( plast > &string_space[MAX_STRING - MAX_STRING_LENGTH] ) {
-		bug( "Fread_string: MAX_STRING %d exceeded.", MAX_STRING );
-		exit( 1 );
-	}
-
-	/*
-	 * Skip blanks.
-	 * Read first char.
-	 */
-	do {
-		c = getc( fp );
-	} while ( isspace( c ) );
-
-	if ( ( *plast++ = c ) == '~' )
-		return &str_empty[0];
-
-	for ( ;; ) {
-		/*
-		 * Back off the char type lookup,
-		 *   it was too dirty for portability.
-		 *   -- Furey
-		 */
-		c = getc( fp );
-		*plast = c;
-		switch ( c ) {
-		default:
-			plast++;
-			break;
-
-		case EOF:
-			bug( "Fread_string: EOF", 0 );
-			exit( 1 );
-			break;
-
-		case '\n':
-			plast++;
-			*plast++ = '\r';
-			break;
-
-		case '\r':
-			break;
-
-		case '~':
-			plast++;
-			{
-				union {
-					char *pc;
-					char rgc[sizeof( char * )];
-				} u1;
-				int ic;
-				int iHash;
-				char *pHash;
-				char *pHashPrev;
-				char *pString;
-
-				plast[-1] = '\0';
-				iHash = (int) UMIN( MAX_KEY_HASH - 1, plast - 1 - top_string );
-				for ( pHash = string_hash[iHash]; pHash; pHash = pHashPrev ) {
-					for ( ic = 0; ic < sizeof( char * ); ic++ )
-						u1.rgc[ic] = pHash[ic];
-					pHashPrev = u1.pc;
-					pHash += sizeof( char * );
-
-					if ( top_string[sizeof( char * )] == pHash[0] && !strcmp( top_string + sizeof( char * ) + 1, pHash + 1 ) )
-						return pHash;
-				}
-
-				if ( fBootDb ) {
-					pString = top_string;
-					top_string = plast;
-					u1.pc = string_hash[iHash];
-					for ( ic = 0; ic < sizeof( char * ); ic++ )
-						pString[ic] = u1.rgc[ic];
-					string_hash[iHash] = pString;
-
-					nAllocString += 1;
-					sAllocString += (int) ( top_string - pString );
-					return pString + sizeof( char * );
-				} else {
-					return str_dup( top_string + sizeof( char * ) );
-				}
-			}
-		}
-	}
-}
-
-/*
- * Read to end of line (for comments).
- */
-void fread_to_eol( FILE *fp ) {
-	char c;
-
-	do {
-		c = getc( fp );
-	} while ( c != '\n' && c != '\r' );
-
-	do {
-		c = getc( fp );
-	} while ( c == '\n' || c == '\r' );
-
-	ungetc( c, fp );
-	return;
-}
-
-/*
- * Read one word (into static buffer).
- */
-char *fread_word( FILE *fp ) {
-	static char word[MAX_INPUT_LENGTH];
-	char *pword;
-	char cEnd;
-
-	do {
-		cEnd = getc( fp );
-	} while ( isspace( cEnd ) );
-
-	if ( cEnd == '\'' || cEnd == '"' ) {
-		pword = word;
-	} else {
-		word[0] = cEnd;
-		pword = word + 1;
-		cEnd = ' ';
-	}
-
-	for ( ; pword < word + MAX_INPUT_LENGTH; pword++ ) {
-		*pword = getc( fp );
-		if ( cEnd == ' ' ? isspace( *pword ) : *pword == cEnd ) {
-			if ( cEnd == ' ' )
-				ungetc( *pword, fp );
-			*pword = '\0';
-			return word;
-		}
-	}
-
-	bug( "Fread_word: word too long.", 0 );
-	exit( 1 );
-	return NULL;
-}
-
-/*
  * Allocate some ordinary memory,
  *   with the expectation of freeing it someday.
  */
@@ -2244,44 +2022,12 @@ void append_file( CHAR_DATA *ch, char *file, char *str ) {
  */
 void bug( const char *str, int param ) {
 	char buf[MAX_STRING_LENGTH];
-	FILE *fp;
-
-	if ( fpArea != NULL ) {
-		int iLine;
-		int iChar;
-
-		if ( fpArea == stdin ) {
-			iLine = 0;
-		} else {
-			iChar = ftell( fpArea );
-			fseek( fpArea, 0, 0 );
-			for ( iLine = 0; ftell( fpArea ) < iChar; iLine++ ) {
-				while ( getc( fpArea ) != '\n' );
-			}
-			fseek( fpArea, iChar, 0 );
-		}
-
-		sprintf( buf, "[*****] FILE: %s LINE: %d", strArea, iLine );
-		log_string( buf );
-
-		if ( ( fp = fopen( SHUTDOWN_FILE, "a" ) ) != NULL ) {
-			fprintf( fp, "[*****] %s\n", buf );
-			fclose( fp );
-		}
-	}
 
 	strcpy( buf, "[*****] BUG: " );
 	sprintf( buf + strlen( buf ), str, param );
 	log_string( buf );
 
-	fclose( fpReserve );
-	if ( ( fp = fopen( BUG_FILE, "a" ) ) != NULL ) {
-		fprintf( fp, "%s\n", buf );
-		fclose( fp );
-	}
-	fpReserve = fopen( NULL_FILE, "r" );
-
-	return;
+	db_game_append_bug( 0, "SYSTEM", buf );
 }
 
 /*

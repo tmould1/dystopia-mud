@@ -262,7 +262,7 @@ extern int control;
 
 /* Path functions from db.c - use these instead of hardcoded paths */
 #define MUD_PATH_MAX 512
-extern char mud_txt_dir[MUD_PATH_MAX];
+extern char mud_run_dir[MUD_PATH_MAX];
 extern char mud_log_dir[MUD_PATH_MAX];
 char *mud_path( const char *dir, const char *filename );
 
@@ -278,7 +278,7 @@ LONG WINAPI win32_exception_filter( EXCEPTION_POINTERS *ExceptionInfo ) {
 	dump_last_command();
 
 	/* Create crash marker file using proper path */
-	crash_file = mud_path( mud_txt_dir, "crash.txt" );
+	crash_file = mud_path( mud_run_dir, "crash.txt" );
 	fp = fopen( crash_file, "w" );
 	if ( fp ) {
 		fprintf( fp, "Crash detected at %ld\n", (long) time( NULL ) );

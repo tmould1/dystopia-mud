@@ -23,6 +23,7 @@
 #include <time.h>
 #include "merc.h"
 #include "gmcp.h"
+#include "../db/db_game.h"
 
 extern GAMECONFIG_DATA game_config;
 
@@ -1177,7 +1178,13 @@ void do_emote( CHAR_DATA *ch, char *argument ) {
 /* Removed: do_xemote - xsocial system removed */
 
 void do_bug( CHAR_DATA *ch, char *argument ) {
-	append_file( ch, BUG_FILE, argument );
+	if ( IS_NPC( ch ) || argument[0] == '\0' )
+		return;
+
+	db_game_append_bug(
+		ch->in_room ? ch->in_room->vnum : 0,
+		ch->name,
+		argument );
 	send_to_char( "Ok.  Thanks.\n\r", ch );
 	return;
 }

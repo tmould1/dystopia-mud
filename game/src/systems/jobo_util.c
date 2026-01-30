@@ -504,7 +504,7 @@ void dump_last_command() {
 	char buf[MAX_STRING_LENGTH];
 	const char *crash_file;
 
-	crash_file = mud_path( mud_txt_dir, "crash.txt" );
+	crash_file = mud_path( mud_run_dir, "crash.txt" );
 	fp = fopen( crash_file, "a" );
 	if ( fp ) {
 		fprintf( fp, "Last command typed : %s\n", last_command );

@@ -22,6 +22,11 @@ extern TOP_BOARD top_board[MAX_TOP_PLAYERS + 1];
 extern LEADER_BOARD leader_board;
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
+extern BOARD_DATA boards[];
+extern BAN_DATA *ban_list;
+extern DISABLED_DATA *disabled_first;
+extern const struct cmd_type cmd_table[];
+extern time_t current_time;
 
 /* Cached database connections */
 static sqlite3 *help_db = NULL;
@@ -71,6 +76,38 @@ static const char *GAME_SCHEMA_SQL =
 	"  req_move   INTEGER NOT NULL DEFAULT 0,"
 	"  req_mana   INTEGER NOT NULL DEFAULT 0,"
 	"  req_qps    INTEGER NOT NULL DEFAULT 0"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS notes ("
+	"  id         INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  board_idx  INTEGER NOT NULL,"
+	"  sender     TEXT NOT NULL,"
+	"  date       TEXT NOT NULL,"
+	"  date_stamp INTEGER NOT NULL,"
+	"  expire     INTEGER NOT NULL,"
+	"  to_list    TEXT NOT NULL,"
+	"  subject    TEXT NOT NULL,"
+	"  text       TEXT NOT NULL DEFAULT ''"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS bugs ("
+	"  id         INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  room_vnum  INTEGER NOT NULL DEFAULT 0,"
+	"  player     TEXT NOT NULL DEFAULT '',"
+	"  message    TEXT NOT NULL,"
+	"  timestamp  INTEGER NOT NULL"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS bans ("
+	"  id         INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  name       TEXT NOT NULL,"
+	"  reason     TEXT NOT NULL DEFAULT ''"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS disabled_commands ("
+	"  command_name TEXT PRIMARY KEY,"
+	"  level        INTEGER NOT NULL,"
+	"  disabled_by  TEXT NOT NULL"
 	");";
 
 
@@ -555,5 +592,279 @@ void db_game_save_kingdoms( void ) {
 	}
 
 	sqlite3_finalize( stmt );
+	db_commit( game_db );
+}
+
+
+/*
+ * Board notes (game.db)
+ * One row per note, keyed by board_idx + date_stamp.
+ */
+void db_game_load_notes( int board_idx ) {
+	sqlite3_stmt *del_stmt, *stmt;
+	NOTE_DATA *last = NULL;
+
+	if ( !game_db )
+		return;
+
+	/* Delete expired notes from DB */
+	if ( sqlite3_prepare_v2( game_db,
+			"DELETE FROM notes WHERE board_idx=? AND expire<?",
+			-1, &del_stmt, NULL ) == SQLITE_OK ) {
+		sqlite3_bind_int( del_stmt, 1, board_idx );
+		sqlite3_bind_int64( del_stmt, 2, (sqlite3_int64)current_time );
+		sqlite3_step( del_stmt );
+		sqlite3_finalize( del_stmt );
+	}
+
+	/* Load remaining notes */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT sender, date, date_stamp, expire, to_list, subject, text "
+			"FROM notes WHERE board_idx=? ORDER BY date_stamp ASC",
+			-1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	sqlite3_bind_int( stmt, 1, board_idx );
+	boards[board_idx].note_first = NULL;
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		NOTE_DATA *pnote = alloc_perm( sizeof( NOTE_DATA ) );
+		pnote->sender     = str_dup( col_text( stmt, 0 ) );
+		pnote->date       = str_dup( col_text( stmt, 1 ) );
+		pnote->date_stamp = (time_t)sqlite3_column_int64( stmt, 2 );
+		pnote->expire     = (time_t)sqlite3_column_int64( stmt, 3 );
+		pnote->to_list    = str_dup( col_text( stmt, 4 ) );
+		pnote->subject    = str_dup( col_text( stmt, 5 ) );
+		pnote->text       = str_dup( col_text( stmt, 6 ) );
+		pnote->next       = NULL;
+
+		if ( !boards[board_idx].note_first )
+			boards[board_idx].note_first = pnote;
+		else
+			last->next = pnote;
+		last = pnote;
+	}
+
+	sqlite3_finalize( stmt );
+}
+
+void db_game_save_board_notes( int board_idx ) {
+	sqlite3_stmt *del_stmt, *ins_stmt;
+	NOTE_DATA *note;
+
+	if ( !game_db )
+		return;
+
+	db_begin( game_db );
+
+	/* Delete all notes for this board */
+	if ( sqlite3_prepare_v2( game_db,
+			"DELETE FROM notes WHERE board_idx=?",
+			-1, &del_stmt, NULL ) == SQLITE_OK ) {
+		sqlite3_bind_int( del_stmt, 1, board_idx );
+		sqlite3_step( del_stmt );
+		sqlite3_finalize( del_stmt );
+	}
+
+	/* Re-insert all current notes */
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO notes (board_idx, sender, date, date_stamp, expire, "
+			"to_list, subject, text) VALUES (?,?,?,?,?,?,?,?)",
+			-1, &ins_stmt, NULL ) != SQLITE_OK ) {
+		db_rollback( game_db );
+		return;
+	}
+
+	for ( note = boards[board_idx].note_first; note; note = note->next ) {
+		sqlite3_reset( ins_stmt );
+		sqlite3_bind_int( ins_stmt, 1, board_idx );
+		sqlite3_bind_text( ins_stmt, 2, note->sender, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( ins_stmt, 3, note->date, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_int64( ins_stmt, 4, (sqlite3_int64)note->date_stamp );
+		sqlite3_bind_int64( ins_stmt, 5, (sqlite3_int64)note->expire );
+		sqlite3_bind_text( ins_stmt, 6, note->to_list, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( ins_stmt, 7, note->subject, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( ins_stmt, 8, note->text, -1, SQLITE_TRANSIENT );
+		sqlite3_step( ins_stmt );
+	}
+
+	sqlite3_finalize( ins_stmt );
+	db_commit( game_db );
+}
+
+void db_game_append_note( int board_idx, NOTE_DATA *note ) {
+	sqlite3_stmt *stmt;
+	const char *sql =
+		"INSERT INTO notes (board_idx, sender, date, date_stamp, expire, "
+		"to_list, subject, text) VALUES (?,?,?,?,?,?,?,?)";
+
+	if ( !game_db )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	sqlite3_bind_int( stmt, 1, board_idx );
+	sqlite3_bind_text( stmt, 2, note->sender, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 3, note->date, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_int64( stmt, 4, (sqlite3_int64)note->date_stamp );
+	sqlite3_bind_int64( stmt, 5, (sqlite3_int64)note->expire );
+	sqlite3_bind_text( stmt, 6, note->to_list, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 7, note->subject, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 8, note->text, -1, SQLITE_TRANSIENT );
+	sqlite3_step( stmt );
+	sqlite3_finalize( stmt );
+}
+
+
+/*
+ * Bug reports (game.db)
+ * Append-only log of player bug reports and system bugs.
+ */
+void db_game_append_bug( int room_vnum, const char *player, const char *message ) {
+	sqlite3_stmt *stmt;
+	const char *sql =
+		"INSERT INTO bugs (room_vnum, player, message, timestamp) VALUES (?,?,?,?)";
+
+	if ( !game_db )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	sqlite3_bind_int( stmt, 1, room_vnum );
+	sqlite3_bind_text( stmt, 2, player, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 3, message, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_int64( stmt, 4, (sqlite3_int64)current_time );
+	sqlite3_step( stmt );
+	sqlite3_finalize( stmt );
+}
+
+
+/*
+ * Bans (game.db)
+ * Site bans with optional reason.
+ */
+void db_game_load_bans( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT name, reason FROM bans ORDER BY id";
+
+	if ( !game_db )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	ban_list = NULL;
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		BAN_DATA *p = alloc_mem( sizeof( BAN_DATA ) );
+		p->name   = str_dup( col_text( stmt, 0 ) );
+		p->reason = str_dup( col_text( stmt, 1 ) );
+		p->next   = ban_list;
+		ban_list  = p;
+	}
+
+	sqlite3_finalize( stmt );
+}
+
+void db_game_save_bans( void ) {
+	sqlite3_stmt *stmt;
+	BAN_DATA *p;
+
+	if ( !game_db )
+		return;
+
+	db_begin( game_db );
+	sqlite3_exec( game_db, "DELETE FROM bans", NULL, NULL, NULL );
+
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO bans (name, reason) VALUES (?,?)",
+			-1, &stmt, NULL ) != SQLITE_OK ) {
+		db_rollback( game_db );
+		return;
+	}
+
+	for ( p = ban_list; p; p = p->next ) {
+		sqlite3_reset( stmt );
+		sqlite3_bind_text( stmt, 1, p->name, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, 2, p->reason, -1, SQLITE_TRANSIENT );
+		sqlite3_step( stmt );
+	}
+
+	sqlite3_finalize( stmt );
+	db_commit( game_db );
+}
+
+
+/*
+ * Disabled commands (game.db)
+ * Commands that have been disabled by admins.
+ */
+void db_game_load_disabled( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT command_name, level, disabled_by FROM disabled_commands";
+	int i;
+
+	if ( !game_db )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	disabled_first = NULL;
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		const char *name = col_text( stmt, 0 );
+		DISABLED_DATA *p;
+
+		for ( i = 0; cmd_table[i].name[0]; i++ )
+			if ( !str_cmp( cmd_table[i].name, name ) )
+				break;
+
+		if ( !cmd_table[i].name[0] )
+			continue;
+
+		p = alloc_mem( sizeof( DISABLED_DATA ) );
+		p->command     = &cmd_table[i];
+		p->level       = (sh_int)sqlite3_column_int( stmt, 1 );
+		p->disabled_by = str_dup( col_text( stmt, 2 ) );
+		p->next        = disabled_first;
+		disabled_first = p;
+	}
+
+	sqlite3_finalize( stmt );
+}
+
+void db_game_save_disabled( void ) {
+	sqlite3_stmt *stmt;
+	DISABLED_DATA *p;
+
+	if ( !game_db )
+		return;
+
+	db_begin( game_db );
+	sqlite3_exec( game_db, "DELETE FROM disabled_commands", NULL, NULL, NULL );
+
+	if ( disabled_first ) {
+		if ( sqlite3_prepare_v2( game_db,
+				"INSERT INTO disabled_commands (command_name, level, disabled_by) "
+				"VALUES (?,?,?)",
+				-1, &stmt, NULL ) != SQLITE_OK ) {
+			db_rollback( game_db );
+			return;
+		}
+
+		for ( p = disabled_first; p; p = p->next ) {
+			sqlite3_reset( stmt );
+			sqlite3_bind_text( stmt, 1, p->command->name, -1, SQLITE_TRANSIENT );
+			sqlite3_bind_int( stmt, 2, p->level );
+			sqlite3_bind_text( stmt, 3, p->disabled_by, -1, SQLITE_TRANSIENT );
+			sqlite3_step( stmt );
+		}
+
+		sqlite3_finalize( stmt );
+	}
+
 	db_commit( game_db );
 }

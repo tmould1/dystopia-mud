@@ -44,7 +44,7 @@ gamedata/db/players/
 !game/lib/**/*.dll
 
 # Runtime data files
-gamedata/txt/
+gamedata/run/
 
 # Python cache
 __pycache__/

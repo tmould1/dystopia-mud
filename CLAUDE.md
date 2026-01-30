@@ -15,9 +15,8 @@ dystopia-mud/
 │   ├── area/           # Area files (.are), loaded via area.lst
 │   ├── doc/            # Documentation and licenses
 │   ├── log/            # Server logs
-│   ├── notes/          # Player notes
 │   ├── player/         # Player save files
-│   └── txt/            # Config/text files (motd, help, etc.)
+│   └── run/            # Runtime files (copyover, crash, shutdown)
 │
 ├── game/               # Development
 │   ├── src/            # Source code (organized by subsystem)

@@ -21,11 +21,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#if !defined( WIN32 )
-#include <unistd.h> /* unlink() */
-#endif
 #include "merc.h"
 #include "garou.h"
+#include "../db/db_game.h"
 
 bool check_social args( ( CHAR_DATA * ch, char *command,
 	char *argument ) );
@@ -235,7 +233,6 @@ BAN_DATA *ban_list;
 
 pthread_mutex_t memory_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-#define END_MARKER "END" /* for load_disabled() and save_disabled()*/
 
 /*
  * Command table.
@@ -2006,122 +2003,20 @@ bool check_disabled( const struct cmd_type *command ) {
 	return FALSE;
 }
 
-/* Load disabled commands */
+/* Load disabled commands from SQLite */
 void load_disabled() {
-	FILE *fp;
-	DISABLED_DATA *p;
-	char *name;
-	int i;
-
-	disabled_first = NULL;
-
-	fp = fopen( DISABLED_FILE, "r" );
-
-	if ( !fp ) /* No disabled file.. no disabled commands : */
-		return;
-
-	name = fread_word( fp );
-
-	while ( str_cmp( name, END_MARKER ) ) /* as long as name is NOT END_MARKER :) */
-	{
-		/* Find the command in the table */
-		for ( i = 0; cmd_table[i].name[0]; i++ )
-			if ( !str_cmp( cmd_table[i].name, name ) )
-				break;
-
-		if ( !cmd_table[i].name[0] ) /* command does not exist? */
-		{
-			bug( "Skipping uknown command in " DISABLED_FILE " file.", 0 );
-			fread_number( fp ); /* level */
-			fread_word( fp );	/* disabled_by */
-		} else					/* add new disabled command */
-		{
-			p = alloc_mem( sizeof( DISABLED_DATA ) );
-			p->command = &cmd_table[i];
-			p->level = fread_number( fp );
-			p->disabled_by = str_dup( fread_word( fp ) );
-			p->next = disabled_first;
-
-			disabled_first = p;
-		}
-
-		name = fread_word( fp );
-	}
-
-	fclose( fp );
+	db_game_load_disabled();
 }
 
-/* Save disabled commands */
+/* Save disabled commands to SQLite */
 void save_disabled() {
-	FILE *fp;
-	DISABLED_DATA *p;
-
-	if ( !disabled_first ) /* delete file if no commands are disabled */
-	{
-		unlink( DISABLED_FILE );
-		return;
-	}
-
-	fp = fopen( DISABLED_FILE, "w" );
-
-	if ( !fp ) {
-		bug( "Could not open " DISABLED_FILE " for writing", 0 );
-		return;
-	}
-
-	for ( p = disabled_first; p; p = p->next )
-		fprintf( fp, "%s %d %s\n", p->command->name, p->level, p->disabled_by );
-
-	fprintf( fp, "%s\n", END_MARKER );
-
-	fclose( fp );
+	db_game_save_disabled();
 }
 
 void load_bans() {
-	FILE *fp;
-	BAN_DATA *p;
-	char *name;
-
-	ban_list = NULL;
-	fp = fopen( BAN_LIST, "r" );
-
-	if ( !fp ) return;
-
-	name = fread_word( fp );
-
-	while ( str_cmp( name, END_MARKER ) ) {
-		p = alloc_mem( sizeof( BAN_DATA ) );
-		p->name = str_dup( name );
-		p->reason = fread_string( fp );
-		p->next = ban_list;
-		ban_list = p;
-		name = fread_word( fp );
-	}
-
-	fclose( fp );
+	db_game_load_bans();
 }
 
 void save_bans() {
-	FILE *fp;
-	BAN_DATA *p;
-
-	if ( !ban_list ) {
-		unlink( BAN_LIST );
-		return;
-	}
-
-	fp = fopen( BAN_LIST, "w" );
-
-	if ( !fp ) {
-		bug( "could not open ban.txt", 0 );
-		return;
-	}
-	for ( p = ban_list; p; p = p->next ) {
-		fprintf( fp, "%s\n", p->name );
-		fprintf( fp, "%s~\n", p->reason );
-	}
-
-	fprintf( fp, "%s\n", END_MARKER );
-
-	fclose( fp );
+	db_game_save_bans();
 }

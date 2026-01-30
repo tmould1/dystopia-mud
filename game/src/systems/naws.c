@@ -11,11 +11,6 @@
  */
 
 #include "merc.h"
-#if !defined( WIN32 )
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
-#endif
 #include <stdio.h>
 #include <string.h>
 #include "telnet.h"

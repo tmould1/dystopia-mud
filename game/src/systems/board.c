@@ -22,6 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_game.h"
 
 /*
 
@@ -76,6 +77,7 @@ long last_note_stamp = 0; /* To generate unique timestamps on notes */
 #define BOARD_NOTFOUND -1
 
 static bool next_board( CHAR_DATA *ch );
+int board_number( const BOARD_DATA *board );
 
 /* recycle a note */
 void free_note( NOTE_DATA *note ) {
@@ -117,22 +119,9 @@ NOTE_DATA *new_note() {
 	return note;
 }
 
-/* append this note to the given file */
-static void append_note( FILE *fp, NOTE_DATA *note ) {
-	fprintf( fp, "Sender  %s~\n", note->sender );
-	fprintf( fp, "Date    %s~\n", note->date );
-	fprintf( fp, "Stamp   %lld\n", (long long) note->date_stamp );
-	fprintf( fp, "Expire  %lld\n", (long long) note->expire );
-	fprintf( fp, "To      %s~\n", note->to_list );
-	fprintf( fp, "Subject %s~\n", note->subject );
-	fprintf( fp, "Text\n%s~\n\n", note->text );
-}
-
 /* Save a note in a given board */
 void finish_note( BOARD_DATA *board, NOTE_DATA *note ) {
-	FILE *fp;
 	NOTE_DATA *p;
-	char filename[MUD_PATH_MAX];
 
 	/* The following is done in order to generate unique date_stamps */
 
@@ -151,19 +140,8 @@ void finish_note( BOARD_DATA *board, NOTE_DATA *note ) {
 	} else /* nope. empty list. */
 		board->note_first = note;
 
-	/* append note to note file */
-
-	snprintf( filename, sizeof( filename ), "%s%s", NOTE_DIR, board->short_name );
-
-	fp = fopen( filename, "a" );
-	if ( !fp ) {
-		bug( "Could not open one of the note files in append mode", 0 );
-		board->changed = TRUE; /* set it to TRUE hope it will be OK later? */
-		return;
-	}
-
-	append_note( fp, note );
-	fclose( fp );
+	/* Persist note to SQLite */
+	db_game_append_note( board_number( board ), note );
 }
 
 /* Find the number of a board */
@@ -220,23 +198,7 @@ static NOTE_DATA *find_note( CHAR_DATA *ch, BOARD_DATA *board, int num ) {
 
 /* save a single board */
 static void save_board( BOARD_DATA *board ) {
-	FILE *fp;
-	char filename[MUD_PATH_MAX];
-	char buf[MUD_PATH_MAX + 32];
-	NOTE_DATA *note;
-
-	snprintf( filename, sizeof( filename ), "%s%s", NOTE_DIR, board->short_name );
-
-	fp = fopen( filename, "w" );
-	if ( !fp ) {
-		snprintf( buf, sizeof( buf ), "Error writing to: %s", filename );
-		bug( buf, 0 );
-	} else {
-		for ( note = board->note_first; note; note = note->next )
-			append_note( fp, note );
-
-		fclose( fp );
-	}
+	db_game_save_board_notes( board_number( board ) );
 }
 
 /* Show one not to a character */
@@ -264,98 +226,9 @@ void save_notes() {
 			save_board( &boards[i] );
 }
 
-/* Load a single board */
+/* Load a single board from SQLite */
 static void load_board( BOARD_DATA *board ) {
-	FILE *fp, *fp_archive;
-	NOTE_DATA *last_note;
-	char filename[MUD_PATH_MAX];
-
-	snprintf( filename, sizeof( filename ), "%s%s", NOTE_DIR, board->short_name );
-
-	fp = fopen( filename, "r" );
-
-	/* Silently return */
-	if ( !fp )
-		return;
-
-	/* Start note fetching. copy of db.c:load_notes() */
-
-	last_note = NULL;
-
-	for ( ;; ) {
-		NOTE_DATA *pnote;
-		char letter;
-
-		do {
-			letter = getc( fp );
-			if ( feof( fp ) ) {
-				fclose( fp );
-				return;
-			}
-		} while ( isspace( letter ) );
-		ungetc( letter, fp );
-
-		pnote = alloc_perm( sizeof( *pnote ) );
-
-		if ( str_cmp( fread_word( fp ), "sender" ) )
-			break;
-		pnote->sender = fread_string( fp );
-
-		if ( str_cmp( fread_word( fp ), "date" ) )
-			break;
-		pnote->date = fread_string( fp );
-
-		if ( str_cmp( fread_word( fp ), "stamp" ) )
-			break;
-		pnote->date_stamp = fread_number( fp );
-
-		if ( str_cmp( fread_word( fp ), "expire" ) )
-			break;
-		pnote->expire = fread_number( fp );
-
-		if ( str_cmp( fread_word( fp ), "to" ) )
-			break;
-		pnote->to_list = fread_string( fp );
-
-		if ( str_cmp( fread_word( fp ), "subject" ) )
-			break;
-		pnote->subject = fread_string( fp );
-
-		if ( str_cmp( fread_word( fp ), "text" ) )
-			break;
-		pnote->text = fread_string( fp );
-
-		pnote->next = NULL; /* jic */
-
-		/* Should this note be archived right now ? */
-
-		if ( pnote->expire < current_time ) {
-			char archive_name[MUD_PATH_MAX + 8];
-
-			snprintf( archive_name, sizeof( archive_name ), "%s%s.old", NOTE_DIR, board->short_name );
-			fp_archive = fopen( archive_name, "a" );
-			if ( !fp_archive )
-				bug( "Could not open archive boards for writing", 0 );
-			else {
-				append_note( fp_archive, pnote );
-				fclose( fp_archive ); /* it might be more efficient to close this later */
-			}
-
-			free_note( pnote );
-			board->changed = TRUE;
-			continue;
-		}
-
-		if ( board->note_first == NULL )
-			board->note_first = pnote;
-		else
-			last_note->next = pnote;
-
-		last_note = pnote;
-	}
-
-	bug( "Load_notes: bad key word.", 0 );
-	return; /* just return */
+	db_game_load_notes( board_number( board ) );
 }
 
 /* Initialize structures. Load all boards. */
