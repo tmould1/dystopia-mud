@@ -22,6 +22,8 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_sql.h"
+#include "../db/db_game.h"
 
 /*
  * Path management - allows executable to run from any directory
@@ -122,6 +124,9 @@ void mud_init_paths( const char *exe_path ) {
 	ensure_directory( mud_txt_dir );
 	ensure_directory( mud_log_dir );
 	ensure_directory( mud_notes_dir );
+
+	/* Initialize SQLite database directory */
+	db_sql_init();
 
 	/* Log path initialization - uses log_string() to write to both stderr and log file */
 	log_string( "MUD paths initialized:" );
@@ -346,7 +351,6 @@ char strArea[MAX_INPUT_LENGTH];
 void init_mm args( (void) );
 
 void load_area args( ( FILE * fp ) );
-void load_helps args( ( FILE * fp ) );
 void load_mobiles args( ( FILE * fp ) );
 void load_objects args( ( FILE * fp ) );
 void load_resets args( ( FILE * fp ) );
@@ -364,7 +368,6 @@ void reset_area args( ( AREA_DATA * pArea ) );
  * Big mama top level function.
  */
 void boot_db( bool fCopyOver ) {
-	char buf[MAX_STRING_LENGTH];
 
 	/*
 	 * Init some data space stuff.
@@ -440,76 +443,36 @@ void boot_db( bool fCopyOver ) {
 	}
 
 	/*
-	 * Read in all the area files.
+	 * Initialize game databases and load help entries.
+	 * Must happen before area loading since help_greeting is needed early.
+	 */
+	db_game_init();
+	db_game_load_helps();
+
+	/*
+	 * Load all areas from SQLite .db files in gamedata/db/areas/.
+	 * Phase 1: Load area definitions (mobiles, objects, rooms).
+	 * Phase 2: Link resets, shops, specials (may reference cross-area vnums).
 	 */
 	{
-		FILE *fpList;
+		char **area_files;
+		int area_count, i;
 
-		if ( ( fpList = fopen( AREA_LIST, "r" ) ) == NULL ) {
-			perror( AREA_LIST );
+		area_count = db_sql_scan_areas( &area_files );
+		if ( area_count <= 0 ) {
+			bug( "Boot_db: no area .db files found.", 0 );
 			exit( 1 );
 		}
 
-		for ( ;; ) {
-			strcpy( strArea, fread_word( fpList ) );
-			if ( strArea[0] == '$' )
-				break;
-
-			if ( strArea[0] == '-' ) {
-				fpArea = stdin;
-			} else {
-				sprintf( buf, "loading %s", strArea );
-				log_string( buf );
-				if ( ( fpArea = fopen( mud_path( mud_area_dir, strArea ), "r" ) ) == NULL ) {
-					perror( strArea );
-					exit( 1 );
-				}
-			}
-
-			for ( ;; ) {
-				char *word;
-
-				if ( fread_letter( fpArea ) != '#' ) {
-					bug( "Boot_db: # not found.", 0 );
-					exit( 1 );
-				}
-
-				word = fread_word( fpArea );
-
-				if ( word[0] == '$' )
-					break;
-				else if ( !str_cmp( word, "AREA" ) )
-					load_area( fpArea );
-				else if ( !str_cmp( word, "HELPS" ) )
-					load_helps( fpArea );
-				else if ( !str_cmp( word, "MOBILES" ) )
-					load_mobiles( fpArea );
-				else if ( !str_cmp( word, "OBJECTS" ) )
-					load_objects( fpArea );
-				else if ( !str_cmp( word, "RESETS" ) )
-					load_resets( fpArea );
-				else if ( !str_cmp( word, "ROOMS" ) )
-					load_rooms( fpArea );
-				else if ( !str_cmp( word, "SHOPS" ) )
-					load_shops( fpArea );
-				else if ( !str_cmp( word, "SPECIALS" ) )
-					load_specials( fpArea );
-				else if ( !str_cmp( word, "AREADATA" ) ) /* OLC */
-					new_load_area( fpArea );
-				else if ( !str_cmp( word, "ROOMDATA" ) ) /* OLC 1.1b */
-					new_load_rooms( fpArea );
-
-				else {
-					bug( "Boot_db: bad section name.", 0 );
-					exit( 1 );
-				}
-			}
-
-			if ( fpArea != stdin )
-				fclose( fpArea );
-			fpArea = NULL;
+		for ( i = 0; i < area_count; i++ ) {
+			db_sql_load_area( area_files[i] );
 		}
-		fclose( fpList );
+
+		for ( i = 0; i < area_count; i++ ) {
+			db_sql_link_area( area_files[i] );
+		}
+
+		db_sql_free_scan( area_files, area_count );
 	}
 
 	/*
@@ -523,7 +486,6 @@ void boot_db( bool fCopyOver ) {
 		fBootDb = FALSE;
 		area_update();
 		calculate_all_area_difficulties();
-		load_hidden_areas();
 		load_bans();
 		load_topboard();
 		load_leaderboard();
@@ -684,69 +646,6 @@ void new_load_area( FILE *fp ) {
 }
 
 /*
- * Load hidden areas list from hidden.lst
- */
-void load_hidden_areas( void ) {
-	FILE *fp;
-	char *filename;
-	AREA_DATA *pArea;
-
-	if ( ( fp = fopen( HIDDEN_LIST, "r" ) ) == NULL )
-		return; /* File doesn't exist yet - that's OK */
-
-	for ( ;; ) {
-		filename = fread_word( fp );
-		if ( filename[0] == '$' )
-			break;
-
-		/* Find area by filename and mark hidden */
-		for ( pArea = area_first; pArea; pArea = pArea->next ) {
-			if ( !str_cmp( pArea->filename, filename ) ) {
-				pArea->is_hidden = TRUE;
-				break;
-			}
-		}
-	}
-	fclose( fp );
-}
-
-/*
- * Save hidden areas list to hidden.lst
- */
-void save_hidden_areas( void ) {
-	FILE *fp;
-	AREA_DATA *pArea;
-	bool found = FALSE;
-
-	/* Check if any areas are hidden */
-	for ( pArea = area_first; pArea; pArea = pArea->next ) {
-		if ( pArea->is_hidden ) {
-			found = TRUE;
-			break;
-		}
-	}
-
-	/* If no hidden areas, remove file */
-	if ( !found ) {
-		unlink( HIDDEN_LIST );
-		return;
-	}
-
-	if ( ( fp = fopen( HIDDEN_LIST, "wb" ) ) == NULL ) {
-		bug( "save_hidden_areas: fopen", 0 );
-		return;
-	}
-
-	for ( pArea = area_first; pArea; pArea = pArea->next ) {
-		if ( pArea->is_hidden )
-			fprintf( fp, "%s\n", pArea->filename );
-	}
-
-	fprintf( fp, "$\n" );
-	fclose( fp );
-}
-
-/*
  * Sets vnum range for area using OLC protection features.
  */
 void assign_area_vnum( int vnum ) {
@@ -816,33 +715,6 @@ void add_help( HELP_DATA *pHelp ) {
 		LINK( pHelp, first_help, last_help, next, prev );
 
 	top_help++;
-}
-
-/*
- * Load a help section.
- */
-void load_helps( FILE *fp ) {
-	HELP_DATA *pHelp;
-
-	for ( ;; ) {
-		CREATE( pHelp, HELP_DATA, 1 );
-		pHelp->level = fread_number( fp );
-		pHelp->keyword = fread_string( fp );
-		if ( pHelp->keyword[0] == '$' )
-			break;
-		pHelp->text = fread_string( fp );
-		if ( pHelp->keyword[0] == '\0' ) {
-			STRFREE( pHelp->text );
-			STRFREE( pHelp->keyword );
-			DISPOSE( pHelp );
-			continue;
-		}
-
-		if ( !str_cmp( pHelp->keyword, "greeting" ) )
-			help_greeting = pHelp->text;
-		add_help( pHelp );
-	}
-	return;
 }
 
 /*

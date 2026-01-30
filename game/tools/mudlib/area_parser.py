@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from .models import (
-    Area, Room, Exit, Mobile, Object, ObjectAffect, Reset, Shop
+    Area, Room, Exit, Mobile, Object, ObjectAffect, Reset, Shop,
+    ExtraDescription, RoomText
 )
 
 
@@ -226,7 +227,7 @@ def parse_objects(lines: List[str], start_idx: int, area: Area) -> int:
                 level=level,
             )
 
-            # Parse optional extras (A for affects, E for extra desc, Q for quest)
+            # Parse optional extras (A for affects, E for extra desc, Q for powers)
             while idx < len(lines):
                 extra_line = lines[idx].strip()
 
@@ -241,17 +242,24 @@ def parse_objects(lines: List[str], start_idx: int, area: Area) -> int:
                             obj.affects.append(ObjectAffect(apply_type, modifier))
                         idx += 1
                 elif extra_line == 'E':
-                    # Extra description
+                    # Extra description: keyword~ then description~
                     idx += 1
-                    _, idx = read_tilde_string(lines, idx)  # keyword
-                    _, idx = read_tilde_string(lines, idx)  # description
+                    ed_keyword, idx = read_tilde_string(lines, idx)
+                    ed_desc, idx = read_tilde_string(lines, idx)
+                    obj.extra_descs.append(ExtraDescription(ed_keyword, ed_desc))
                 elif extra_line == 'Q':
-                    # Quest data - skip it
+                    # Power strings: 6 tilde-terminated strings + spectype specpower
                     idx += 1
-                    while idx < len(lines):
-                        q_line = lines[idx].strip()
-                        if q_line.startswith('#') or q_line in ('A', 'E', 'Q'):
-                            break
+                    obj.chpoweron, idx = read_tilde_string(lines, idx)
+                    obj.chpoweroff, idx = read_tilde_string(lines, idx)
+                    obj.chpoweruse, idx = read_tilde_string(lines, idx)
+                    obj.victpoweron, idx = read_tilde_string(lines, idx)
+                    obj.victpoweroff, idx = read_tilde_string(lines, idx)
+                    obj.victpoweruse, idx = read_tilde_string(lines, idx)
+                    if idx < len(lines):
+                        qparts = lines[idx].strip().split()
+                        obj.spectype = int(qparts[0]) if len(qparts) > 0 else 0
+                        obj.specpower = int(qparts[1]) if len(qparts) > 1 else 0
                         idx += 1
                 elif extra_line.startswith('#') or not extra_line:
                     break
@@ -340,7 +348,7 @@ def parse_rooms(lines: List[str], start_idx: int, area: Area) -> int:
             room_name = strip_color_codes(room_name)
 
             # Read room description (tilde-terminated)
-            _, idx = read_tilde_string(lines, idx)
+            room_desc, idx = read_tilde_string(lines, idx)
 
             # Read room flags line: area_num room_flags sector_type
             sector_type = 0
@@ -356,7 +364,7 @@ def parse_rooms(lines: List[str], start_idx: int, area: Area) -> int:
                         pass
                 idx += 1
 
-            room = Room(vnum, room_name, sector_type, room_flags)
+            room = Room(vnum, room_name, room_desc, sector_type, room_flags)
 
             # Parse room extras (E, D, T, S markers)
             while idx < len(lines):
@@ -367,10 +375,11 @@ def parse_rooms(lines: List[str], start_idx: int, area: Area) -> int:
                     break
 
                 # Extra description
-                elif marker.startswith('E'):
+                elif marker.startswith('E') and (len(marker) == 1 or not marker[1:].isdigit()):
                     idx += 1
-                    _, idx = read_tilde_string(lines, idx)  # keyword
-                    _, idx = read_tilde_string(lines, idx)  # description
+                    ed_keyword, idx = read_tilde_string(lines, idx)
+                    ed_desc, idx = read_tilde_string(lines, idx)
+                    room.extra_descs.append(ExtraDescription(ed_keyword, ed_desc))
 
                 # Door/Exit
                 elif marker.startswith('D'):
@@ -381,8 +390,8 @@ def parse_rooms(lines: List[str], start_idx: int, area: Area) -> int:
                         continue
 
                     idx += 1
-                    _, idx = read_tilde_string(lines, idx)  # exit description
-                    _, idx = read_tilde_string(lines, idx)  # keywords
+                    exit_desc, idx = read_tilde_string(lines, idx)
+                    exit_keyword, idx = read_tilde_string(lines, idx)
 
                     # Lock flags, key vnum, destination vnum
                     if idx < len(lines):
@@ -399,23 +408,35 @@ def parse_rooms(lines: List[str], start_idx: int, area: Area) -> int:
                                     destination_vnum=dest_vnum,
                                     is_door=(lock_flags > 0),
                                     door_flags=lock_flags,
-                                    key_vnum=key_vnum
+                                    key_vnum=key_vnum,
+                                    description=exit_desc,
+                                    keyword=exit_keyword,
                                 )
                                 room.exits[direction] = exit_obj
                             except ValueError:
                                 pass
                         idx += 1
 
-                # Roomtext trigger
+                # Roomtext trigger: 4 strings + 3 numbers
                 elif marker.startswith('T'):
                     idx += 1
-                    while idx < len(lines):
-                        tline = lines[idx].strip()
-                        if tline in ('S', 'E') or tline.startswith('D') or tline.startswith('T'):
-                            break
-                        if tline.startswith('#') and len(tline) > 1:
-                            break
+                    rt_input, idx = read_tilde_string(lines, idx)
+                    rt_output, idx = read_tilde_string(lines, idx)
+                    rt_choutput, idx = read_tilde_string(lines, idx)
+                    rt_name, idx = read_tilde_string(lines, idx)
+                    rt_type = 0
+                    rt_power = 0
+                    rt_mob = 0
+                    if idx < len(lines):
+                        rtparts = lines[idx].strip().split()
+                        rt_type = int(rtparts[0]) if len(rtparts) > 0 else 0
+                        rt_power = int(rtparts[1]) if len(rtparts) > 1 else 0
+                        rt_mob = int(rtparts[2]) if len(rtparts) > 2 else 0
                         idx += 1
+                    room.room_texts.append(RoomText(
+                        rt_input, rt_output, rt_choutput, rt_name,
+                        rt_type, rt_power, rt_mob
+                    ))
 
                 else:
                     idx += 1
@@ -470,6 +491,34 @@ def parse_shops(lines: List[str], start_idx: int, area: Area) -> int:
     return idx
 
 
+def parse_specials(lines: List[str], start_idx: int, area: Area) -> int:
+    """Parse #SPECIALS section and add to area."""
+    idx = start_idx
+
+    while idx < len(lines):
+        line = lines[idx].strip()
+
+        if line == 'S' or line.startswith('#'):
+            break
+
+        if not line or line.startswith('*'):
+            idx += 1
+            continue
+
+        parts = line.split()
+        if len(parts) >= 3 and parts[0] == 'M':
+            try:
+                mob_vnum = int(parts[1])
+                spec_fun = parts[2]
+                area.specials[mob_vnum] = spec_fun
+            except ValueError:
+                pass
+
+        idx += 1
+
+    return idx
+
+
 def parse_area_file(filepath: Path) -> Optional[Area]:
     """Parse a single .are file and return an Area object."""
     try:
@@ -492,6 +541,10 @@ def parse_area_file(filepath: Path) -> Optional[Area]:
             name = ""
             lvnum = 0
             uvnum = 0
+            builders = ""
+            security = 3
+            recall = 0
+            area_flags = 0
             while idx < len(lines):
                 aline = lines[idx].strip()
                 if aline == 'End':
@@ -508,13 +561,35 @@ def parse_area_file(filepath: Path) -> Optional[Area]:
                     if len(parts) >= 3:
                         lvnum = int(parts[1])
                         uvnum = int(parts[2])
+                elif aline.startswith('Builders'):
+                    b_part = aline[8:].strip()
+                    if b_part.endswith('~'):
+                        builders = b_part[:-1].strip()
+                    else:
+                        builders = b_part
+                elif aline.startswith('Security'):
+                    parts = aline.split()
+                    if len(parts) >= 2:
+                        security = int(parts[1])
+                elif aline.startswith('Recall'):
+                    parts = aline.split()
+                    if len(parts) >= 2:
+                        recall = int(parts[1])
+                elif aline.startswith('Flags'):
+                    parts = aline.split()
+                    if len(parts) >= 2:
+                        area_flags = int(parts[1])
                 idx += 1
 
             area = Area(
                 name=strip_color_codes(name),
                 filename=filepath.name,
                 lvnum=lvnum,
-                uvnum=uvnum
+                uvnum=uvnum,
+                builders=builders,
+                security=security,
+                recall=recall,
+                area_flags=area_flags,
             )
             continue
 
@@ -551,6 +626,13 @@ def parse_area_file(filepath: Path) -> Optional[Area]:
             if area is None:
                 area = Area(name=filepath.stem, filename=filepath.name)
             idx = parse_shops(lines, idx + 1, area)
+            continue
+
+        # Parse #SPECIALS section
+        if line == '#SPECIALS':
+            if area is None:
+                area = Area(name=filepath.stem, filename=filepath.name)
+            idx = parse_specials(lines, idx + 1, area)
             continue
 
         idx += 1

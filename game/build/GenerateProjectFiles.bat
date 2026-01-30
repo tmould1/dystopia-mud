@@ -29,7 +29,7 @@ set SOLUTION_GUID={E2681B92-8E06-5A5E-0C1B-9D3F567890BC}
 set CPP_PROJECT_TYPE={8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}
 
 REM Source subdirectories
-set SUBDIRS=core classes combat commands world systems
+set SUBDIRS=core classes combat commands world systems db
 
 REM ============================================================================
 REM Step 1: Create backup of existing files
@@ -78,6 +78,7 @@ set COMBAT_SRC=
 set COMMANDS_SRC=
 set WORLD_SRC=
 set SYSTEMS_SRC=
+set DB_SRC=
 
 set CORE_HDR=
 set CLASSES_HDR=
@@ -85,6 +86,7 @@ set COMBAT_HDR=
 set COMMANDS_HDR=
 set WORLD_HDR=
 set SYSTEMS_HDR=
+set DB_HDR=
 
 REM Scan each subdirectory for .c files (source is in ../src/ relative to game/build/)
 for %%d in (%SUBDIRS%) do (
@@ -109,6 +111,7 @@ set "COMBAT_SRC=!FILES_combat!"
 set "COMMANDS_SRC=!FILES_commands!"
 set "WORLD_SRC=!FILES_world!"
 set "SYSTEMS_SRC=!FILES_systems!"
+set "DB_SRC=!FILES_db!"
 
 REM Scan for .h files
 for %%d in (%SUBDIRS%) do (
@@ -132,6 +135,7 @@ set "COMBAT_HDR=!HDRS_combat!"
 set "COMMANDS_HDR=!HDRS_commands!"
 set "WORLD_HDR=!HDRS_world!"
 set "SYSTEMS_HDR=!HDRS_systems!"
+set "DB_HDR=!HDRS_db!"
 
 REM Count files
 set /a TOTAL_C=0
@@ -170,13 +174,15 @@ echo COMBAT_DIR   = $^(SRC_DIR^)/combat
 echo COMMANDS_DIR = $^(SRC_DIR^)/commands
 echo WORLD_DIR    = $^(SRC_DIR^)/world
 echo SYSTEMS_DIR  = $^(SRC_DIR^)/systems
+echo DB_DIR       = $^(SRC_DIR^)/db
 echo.
 echo # Include paths ^(so #include "merc.h" works from any source file^)
-echo INCLUDES = -I$^(CORE_DIR^) -I$^(CLASSES_DIR^) -I$^(WORLD_DIR^) -I$^(SYSTEMS_DIR^)
+echo INCLUDES = -I$^(CORE_DIR^) -I$^(CLASSES_DIR^) -I$^(WORLD_DIR^) -I$^(SYSTEMS_DIR^) -I$^(DB_DIR^)
 echo.
 echo # Compiler and linker flags
 echo C_FLAGS = -Wall -O2 $^(INCLUDES^)
-echo L_FLAGS = -lz -lcrypt -lpthread
+echo SQLITE_FLAGS = -w -O2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DEFAULT_MEMSTATUS=0 $^(INCLUDES^)
+echo L_FLAGS = -lz -lcrypt -lpthread -ldl
 echo.
 echo # Source files by directory
 echo CORE_SRC = %CORE_SRC%
@@ -185,6 +191,7 @@ echo COMBAT_SRC = %COMBAT_SRC%
 echo COMMANDS_SRC = %COMMANDS_SRC%
 echo WORLD_SRC = %WORLD_SRC%
 echo SYSTEMS_SRC = %SYSTEMS_SRC%
+echo DB_SRC = %DB_SRC%
 echo.
 echo # Object files with subdirectory paths
 echo CORE_OBJ     = $^(addprefix $^(OBJ_DIR^)/core/,$^(CORE_SRC:.c=.o^)^)
@@ -193,12 +200,13 @@ echo COMBAT_OBJ   = $^(addprefix $^(OBJ_DIR^)/combat/,$^(COMBAT_SRC:.c=.o^)^)
 echo COMMANDS_OBJ = $^(addprefix $^(OBJ_DIR^)/commands/,$^(COMMANDS_SRC:.c=.o^)^)
 echo WORLD_OBJ    = $^(addprefix $^(OBJ_DIR^)/world/,$^(WORLD_SRC:.c=.o^)^)
 echo SYSTEMS_OBJ  = $^(addprefix $^(OBJ_DIR^)/systems/,$^(SYSTEMS_SRC:.c=.o^)^)
+echo DB_OBJ       = $^(addprefix $^(OBJ_DIR^)/db/,$^(DB_SRC:.c=.o^)^)
 echo.
-echo O_FILES = $^(CORE_OBJ^) $^(CLASSES_OBJ^) $^(COMBAT_OBJ^) $^(COMMANDS_OBJ^) $^(WORLD_OBJ^) $^(SYSTEMS_OBJ^)
+echo O_FILES = $^(CORE_OBJ^) $^(CLASSES_OBJ^) $^(COMBAT_OBJ^) $^(COMMANDS_OBJ^) $^(WORLD_OBJ^) $^(SYSTEMS_OBJ^) $^(DB_OBJ^)
 echo.
 echo # Object directory structure
 echo OBJ_DIRS = $^(OBJ_DIR^)/core $^(OBJ_DIR^)/classes $^(OBJ_DIR^)/combat \
-echo            $^(OBJ_DIR^)/commands $^(OBJ_DIR^)/world $^(OBJ_DIR^)/systems
+echo            $^(OBJ_DIR^)/commands $^(OBJ_DIR^)/world $^(OBJ_DIR^)/systems $^(OBJ_DIR^)/db
 echo.
 echo # Target executable ^(in gamedata/ for deployment^)
 echo TARGET = ../../gamedata/dystopia
@@ -230,6 +238,13 @@ echo $^(OBJ_DIR^)/world/%%.o: $^(WORLD_DIR^)/%%.c $^(CORE_DIR^)/merc.h $^(WORLD_
 echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
 echo.
 echo $^(OBJ_DIR^)/systems/%%.o: $^(SYSTEMS_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
+echo.
+echo # SQLite amalgamation uses special flags ^(suppress warnings, disable threading^)
+echo $^(OBJ_DIR^)/db/sqlite3.o: $^(DB_DIR^)/sqlite3.c
+echo 	$^(CC^) -c $^(SQLITE_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/db/%%.o: $^(DB_DIR^)/%%.c $^(CORE_DIR^)/merc.h $^(DB_DIR^)/db_sql.h
 echo 	$^(CC^) -c $^(C_FLAGS^) $^< -o $@
 echo.
 echo clean:
@@ -267,12 +282,14 @@ echo COMBAT_DIR   = $^(SRC_DIR^)/combat
 echo COMMANDS_DIR = $^(SRC_DIR^)/commands
 echo WORLD_DIR    = $^(SRC_DIR^)/world
 echo SYSTEMS_DIR  = $^(SRC_DIR^)/systems
+echo DB_DIR       = $^(SRC_DIR^)/db
 echo.
 echo # Include paths
-echo INCLUDES = -I$^(CORE_DIR^) -I$^(CLASSES_DIR^) -I$^(WORLD_DIR^) -I$^(SYSTEMS_DIR^)
+echo INCLUDES = -I$^(CORE_DIR^) -I$^(CLASSES_DIR^) -I$^(WORLD_DIR^) -I$^(SYSTEMS_DIR^) -I$^(DB_DIR^)
 echo.
 echo # Compiler and linker flags for Windows
 echo C_FLAGS = -Wall -DWIN32 -DHAVE_ZLIB -O2 -c $^(INCLUDES^)
+echo SQLITE_FLAGS = -w -DWIN32 -DHAVE_ZLIB -O2 -c -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DEFAULT_MEMSTATUS=0 $^(INCLUDES^)
 echo L_FLAGS = -lws2_32 -lbcrypt -lz
 echo.
 echo # Source files by directory
@@ -282,6 +299,7 @@ echo COMBAT_SRC = %COMBAT_SRC%
 echo COMMANDS_SRC = %COMMANDS_SRC%
 echo WORLD_SRC = %WORLD_SRC%
 echo SYSTEMS_SRC = %SYSTEMS_SRC%
+echo DB_SRC = %DB_SRC%
 echo.
 echo # Object files with subdirectory paths
 echo CORE_OBJ     = $^(addprefix $^(OBJ_DIR^)/core/,$^(CORE_SRC:.c=.o^)^)
@@ -290,12 +308,13 @@ echo COMBAT_OBJ   = $^(addprefix $^(OBJ_DIR^)/combat/,$^(COMBAT_SRC:.c=.o^)^)
 echo COMMANDS_OBJ = $^(addprefix $^(OBJ_DIR^)/commands/,$^(COMMANDS_SRC:.c=.o^)^)
 echo WORLD_OBJ    = $^(addprefix $^(OBJ_DIR^)/world/,$^(WORLD_SRC:.c=.o^)^)
 echo SYSTEMS_OBJ  = $^(addprefix $^(OBJ_DIR^)/systems/,$^(SYSTEMS_SRC:.c=.o^)^)
+echo DB_OBJ       = $^(addprefix $^(OBJ_DIR^)/db/,$^(DB_SRC:.c=.o^)^)
 echo.
-echo O_FILES = $^(CORE_OBJ^) $^(CLASSES_OBJ^) $^(COMBAT_OBJ^) $^(COMMANDS_OBJ^) $^(WORLD_OBJ^) $^(SYSTEMS_OBJ^)
+echo O_FILES = $^(CORE_OBJ^) $^(CLASSES_OBJ^) $^(COMBAT_OBJ^) $^(COMMANDS_OBJ^) $^(WORLD_OBJ^) $^(SYSTEMS_OBJ^) $^(DB_OBJ^)
 echo.
 echo # Object directory structure
 echo OBJ_DIRS = $^(OBJ_DIR^)/core $^(OBJ_DIR^)/classes $^(OBJ_DIR^)/combat \
-echo            $^(OBJ_DIR^)/commands $^(OBJ_DIR^)/world $^(OBJ_DIR^)/systems
+echo            $^(OBJ_DIR^)/commands $^(OBJ_DIR^)/world $^(OBJ_DIR^)/systems $^(OBJ_DIR^)/db
 echo.
 echo # Target executable selection ^(in gamedata/ for deployment^):
 echo # - If dystopia.exe doesn't exist, build dystopia.exe ^(fresh install^)
@@ -342,6 +361,13 @@ echo $^(OBJ_DIR^)/world/%%.o: $^(WORLD_DIR^)/%%.c $^(CORE_DIR^)/merc.h $^(WORLD_
 echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
 echo.
 echo $^(OBJ_DIR^)/systems/%%.o: $^(SYSTEMS_DIR^)/%%.c $^(CORE_DIR^)/merc.h
+echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
+echo.
+echo # SQLite amalgamation uses special flags ^(suppress warnings, disable threading^)
+echo $^(OBJ_DIR^)/db/sqlite3.o: $^(DB_DIR^)/sqlite3.c
+echo 	$^(CC^) $^(SQLITE_FLAGS^) $^< -o $@
+echo.
+echo $^(OBJ_DIR^)/db/%%.o: $^(DB_DIR^)/%%.c $^(CORE_DIR^)/merc.h $^(DB_DIR^)/db_sql.h
 echo 	$^(CC^) $^(C_FLAGS^) $^< -o $@
 echo.
 echo clean:
@@ -443,6 +469,8 @@ echo   ^</ImportGroup^>>> dystopia.vcxproj
 echo   ^<ImportGroup Label="PropertySheets"^>>> dystopia.vcxproj
 echo   ^</ImportGroup^>>> dystopia.vcxproj
 echo   ^<PropertyGroup Label="UserMacros" /^>>> dystopia.vcxproj
+REM Temporarily disable delayed expansion so ! characters are output literally
+setlocal disabledelayedexpansion
 echo   ^<!-- Hot-reload support: build dystopia_new.exe if dystopia.exe is running --^>>> dystopia.vcxproj
 echo   ^<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
 echo     ^<OutDir^>$(SolutionDir)..\..\gamedata\^</OutDir^>>> dystopia.vcxproj
@@ -455,6 +483,7 @@ echo     ^<OutDir^>$(SolutionDir)..\..\gamedata\^</OutDir^>>> dystopia.vcxproj
 echo     ^<IntDir^>$(SolutionDir)win64\obj\$(Configuration)\^</IntDir^>>> dystopia.vcxproj
 echo     ^<TargetName Condition="!Exists('$(OutDir)dystopia.exe')"^>dystopia^</TargetName^>>> dystopia.vcxproj
 echo     ^<TargetName Condition="Exists('$(OutDir)dystopia.exe')"^>dystopia_new^</TargetName^>>> dystopia.vcxproj
+endlocal
 echo   ^</PropertyGroup^>>> dystopia.vcxproj
 echo   ^<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"^>>> dystopia.vcxproj
 echo     ^<ClCompile^>>> dystopia.vcxproj
@@ -462,7 +491,7 @@ echo       ^<WarningLevel^>Level3^</WarningLevel^>>> dystopia.vcxproj
 echo       ^<Optimization^>Disabled^</Optimization^>>> dystopia.vcxproj
 echo       ^<PreprocessorDefinitions^>_CRT_SECURE_NO_WARNINGS;WIN32;HAVE_ZLIB;_DEBUG;%%(PreprocessorDefinitions)^</PreprocessorDefinitions^>>> dystopia.vcxproj
 echo       ^<RuntimeLibrary^>MultiThreadedDebugDLL^</RuntimeLibrary^>>> dystopia.vcxproj
-echo       ^<AdditionalIncludeDirectories^>$(ProjectDir)..\src\core;$(ProjectDir)..\src\classes;$(ProjectDir)..\src\world;$(ProjectDir)..\src\systems;%%(AdditionalIncludeDirectories)^</AdditionalIncludeDirectories^>>> dystopia.vcxproj
+echo       ^<AdditionalIncludeDirectories^>$(ProjectDir)..\src\core;$(ProjectDir)..\src\classes;$(ProjectDir)..\src\world;$(ProjectDir)..\src\systems;$(ProjectDir)..\src\db;%%(AdditionalIncludeDirectories)^</AdditionalIncludeDirectories^>>> dystopia.vcxproj
 echo     ^</ClCompile^>>> dystopia.vcxproj
 echo     ^<Link^>>> dystopia.vcxproj
 echo       ^<SubSystem^>Console^</SubSystem^>>> dystopia.vcxproj
@@ -479,7 +508,7 @@ echo       ^<FunctionLevelLinking^>true^</FunctionLevelLinking^>>> dystopia.vcxp
 echo       ^<IntrinsicFunctions^>true^</IntrinsicFunctions^>>> dystopia.vcxproj
 echo       ^<PreprocessorDefinitions^>_CRT_SECURE_NO_WARNINGS;WIN32;HAVE_ZLIB;NDEBUG;%%(PreprocessorDefinitions)^</PreprocessorDefinitions^>>> dystopia.vcxproj
 echo       ^<RuntimeLibrary^>MultiThreadedDLL^</RuntimeLibrary^>>> dystopia.vcxproj
-echo       ^<AdditionalIncludeDirectories^>$(ProjectDir)..\src\core;$(ProjectDir)..\src\classes;$(ProjectDir)..\src\world;$(ProjectDir)..\src\systems;%%(AdditionalIncludeDirectories)^</AdditionalIncludeDirectories^>>> dystopia.vcxproj
+echo       ^<AdditionalIncludeDirectories^>$(ProjectDir)..\src\core;$(ProjectDir)..\src\classes;$(ProjectDir)..\src\world;$(ProjectDir)..\src\systems;$(ProjectDir)..\src\db;%%(AdditionalIncludeDirectories)^</AdditionalIncludeDirectories^>>> dystopia.vcxproj
 echo     ^</ClCompile^>>> dystopia.vcxproj
 echo     ^<Link^>>> dystopia.vcxproj
 echo       ^<SubSystem^>Console^</SubSystem^>>> dystopia.vcxproj
@@ -492,11 +521,20 @@ echo     ^</Link^>>> dystopia.vcxproj
 echo   ^</ItemDefinitionGroup^>>> dystopia.vcxproj
 echo   ^<ItemGroup^>>> dystopia.vcxproj
 
-REM Add source files
+REM Add source files (with special handling for sqlite3.c)
 for %%d in (%SUBDIRS%) do (
     for %%f in (..\src\%%d\*.c) do (
         if exist "%%f" (
-            echo     ^<ClCompile Include="%%f" /^>>> dystopia.vcxproj
+            for %%n in (%%~nf) do (
+                if /i "%%n"=="sqlite3" (
+                    echo     ^<ClCompile Include="%%f"^>>> dystopia.vcxproj
+                    echo       ^<PreprocessorDefinitions^>SQLITE_THREADSAFE=0;SQLITE_OMIT_LOAD_EXTENSION;SQLITE_DEFAULT_MEMSTATUS=0;%%(PreprocessorDefinitions^)^</PreprocessorDefinitions^>>> dystopia.vcxproj
+                    echo       ^<WarningLevel^>TurnOffAllWarnings^</WarningLevel^>>> dystopia.vcxproj
+                    echo     ^</ClCompile^>>> dystopia.vcxproj
+                ) else (
+                    echo     ^<ClCompile Include="%%f" /^>>> dystopia.vcxproj
+                )
+            )
         )
     )
 )
@@ -532,6 +570,7 @@ set FILTER_GUID_COMBAT={78AB1C84-3B45-4E67-9F2D-3D6789ABCDEF}
 set FILTER_GUID_COMMANDS={89BC2D95-4C56-5F78-0A3E-4E789ABCDEF0}
 set FILTER_GUID_WORLD={9ACD3EA6-5D67-6089-1B4F-5F89ABCDEF01}
 set FILTER_GUID_SYSTEMS={ABDE4FB7-6E78-7190-2C50-609ABCDEF012}
+set FILTER_GUID_DB={BCEF50C8-7F89-8201-3D61-71ABCDEF0123}
 
 echo ^<?xml version="1.0" encoding="utf-8"?^>> dystopia.vcxproj.filters
 echo ^<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"^>>> dystopia.vcxproj.filters
@@ -556,6 +595,9 @@ echo       ^<UniqueIdentifier^>%FILTER_GUID_WORLD%^</UniqueIdentifier^>>> dystop
 echo     ^</Filter^>>> dystopia.vcxproj.filters
 echo     ^<Filter Include="src\systems"^>>> dystopia.vcxproj.filters
 echo       ^<UniqueIdentifier^>%FILTER_GUID_SYSTEMS%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
+echo     ^</Filter^>>> dystopia.vcxproj.filters
+echo     ^<Filter Include="src\db"^>>> dystopia.vcxproj.filters
+echo       ^<UniqueIdentifier^>%FILTER_GUID_DB%^</UniqueIdentifier^>>> dystopia.vcxproj.filters
 echo     ^</Filter^>>> dystopia.vcxproj.filters
 echo   ^</ItemGroup^>>> dystopia.vcxproj.filters
 

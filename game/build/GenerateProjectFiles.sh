@@ -21,7 +21,7 @@ echo ""
 cd "$(dirname "$0")"
 
 # Source subdirectories
-SUBDIRS="core classes combat commands world systems"
+SUBDIRS="core classes combat commands world systems db"
 
 # ============================================================================
 # Step 1: Create backup of existing files
@@ -112,13 +112,15 @@ COMBAT_DIR   = $(SRC_DIR)/combat
 COMMANDS_DIR = $(SRC_DIR)/commands
 WORLD_DIR    = $(SRC_DIR)/world
 SYSTEMS_DIR  = $(SRC_DIR)/systems
+DB_DIR       = $(SRC_DIR)/db
 
 # Include paths (so #include "merc.h" works from any source file)
-INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR)
+INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR) -I$(DB_DIR)
 
 # Compiler and linker flags
 C_FLAGS = -Wall -O2 $(INCLUDES)
-L_FLAGS = -lz -lcrypt -lpthread
+SQLITE_FLAGS = -w -O2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DEFAULT_MEMSTATUS=0 $(INCLUDES)
+L_FLAGS = -lz -lcrypt -lpthread -ldl
 
 MAKEFILE_HEADER
 
@@ -130,6 +132,7 @@ echo "COMBAT_SRC = ${SRC_FILES[combat]}" >> build/Makefile
 echo "COMMANDS_SRC = ${SRC_FILES[commands]}" >> build/Makefile
 echo "WORLD_SRC = ${SRC_FILES[world]}" >> build/Makefile
 echo "SYSTEMS_SRC = ${SRC_FILES[systems]}" >> build/Makefile
+echo "DB_SRC = ${SRC_FILES[db]}" >> build/Makefile
 
 cat >> build/Makefile << 'MAKEFILE_FOOTER'
 
@@ -140,12 +143,13 @@ COMBAT_OBJ   = $(addprefix $(OBJ_DIR)/combat/,$(COMBAT_SRC:.c=.o))
 COMMANDS_OBJ = $(addprefix $(OBJ_DIR)/commands/,$(COMMANDS_SRC:.c=.o))
 WORLD_OBJ    = $(addprefix $(OBJ_DIR)/world/,$(WORLD_SRC:.c=.o))
 SYSTEMS_OBJ  = $(addprefix $(OBJ_DIR)/systems/,$(SYSTEMS_SRC:.c=.o))
+DB_OBJ       = $(addprefix $(OBJ_DIR)/db/,$(DB_SRC:.c=.o))
 
-O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ)
+O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ) $(DB_OBJ)
 
 # Object directory structure
 OBJ_DIRS = $(OBJ_DIR)/core $(OBJ_DIR)/classes $(OBJ_DIR)/combat \
-           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems
+           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems $(OBJ_DIR)/db
 
 # Target executable (in gamedata/ for deployment)
 TARGET = ../../gamedata/dystopia
@@ -177,6 +181,13 @@ $(OBJ_DIR)/world/%.o: $(WORLD_DIR)/%.c $(CORE_DIR)/merc.h $(WORLD_DIR)/olc.h
 	$(CC) -c $(C_FLAGS) $< -o $@
 
 $(OBJ_DIR)/systems/%.o: $(SYSTEMS_DIR)/%.c $(CORE_DIR)/merc.h
+	$(CC) -c $(C_FLAGS) $< -o $@
+
+# SQLite amalgamation uses special flags (suppress warnings, disable threading)
+$(OBJ_DIR)/db/sqlite3.o: $(DB_DIR)/sqlite3.c
+	$(CC) -c $(SQLITE_FLAGS) $< -o $@
+
+$(OBJ_DIR)/db/%.o: $(DB_DIR)/%.c $(CORE_DIR)/merc.h $(DB_DIR)/db_sql.h
 	$(CC) -c $(C_FLAGS) $< -o $@
 
 clean:
@@ -214,12 +225,14 @@ COMBAT_DIR   = $(SRC_DIR)/combat
 COMMANDS_DIR = $(SRC_DIR)/commands
 WORLD_DIR    = $(SRC_DIR)/world
 SYSTEMS_DIR  = $(SRC_DIR)/systems
+DB_DIR       = $(SRC_DIR)/db
 
 # Include paths
-INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR)
+INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR) -I$(DB_DIR)
 
 # Compiler and linker flags for Windows
 C_FLAGS = -Wall -DWIN32 -DHAVE_ZLIB -O2 -c $(INCLUDES)
+SQLITE_FLAGS = -w -DWIN32 -DHAVE_ZLIB -O2 -c -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DEFAULT_MEMSTATUS=0 $(INCLUDES)
 L_FLAGS = -lws2_32 -lbcrypt -lz
 
 MAKEFILE_HEADER
@@ -232,6 +245,7 @@ echo "COMBAT_SRC = ${SRC_FILES[combat]}" >> build/Makefile.mingw
 echo "COMMANDS_SRC = ${SRC_FILES[commands]}" >> build/Makefile.mingw
 echo "WORLD_SRC = ${SRC_FILES[world]}" >> build/Makefile.mingw
 echo "SYSTEMS_SRC = ${SRC_FILES[systems]}" >> build/Makefile.mingw
+echo "DB_SRC = ${SRC_FILES[db]}" >> build/Makefile.mingw
 
 cat >> build/Makefile.mingw << 'MAKEFILE_FOOTER'
 
@@ -242,12 +256,13 @@ COMBAT_OBJ   = $(addprefix $(OBJ_DIR)/combat/,$(COMBAT_SRC:.c=.o))
 COMMANDS_OBJ = $(addprefix $(OBJ_DIR)/commands/,$(COMMANDS_SRC:.c=.o))
 WORLD_OBJ    = $(addprefix $(OBJ_DIR)/world/,$(WORLD_SRC:.c=.o))
 SYSTEMS_OBJ  = $(addprefix $(OBJ_DIR)/systems/,$(SYSTEMS_SRC:.c=.o))
+DB_OBJ       = $(addprefix $(OBJ_DIR)/db/,$(DB_SRC:.c=.o))
 
-O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ)
+O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ) $(DB_OBJ)
 
 # Object directory structure
 OBJ_DIRS = $(OBJ_DIR)/core $(OBJ_DIR)/classes $(OBJ_DIR)/combat \
-           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems
+           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems $(OBJ_DIR)/db
 
 # Target executable selection (in gamedata/ for deployment):
 # - If dystopia.exe doesn't exist, build dystopia.exe (fresh install)
@@ -294,6 +309,13 @@ $(OBJ_DIR)/world/%.o: $(WORLD_DIR)/%.c $(CORE_DIR)/merc.h $(WORLD_DIR)/olc.h
 	$(CC) $(C_FLAGS) $< -o $@
 
 $(OBJ_DIR)/systems/%.o: $(SYSTEMS_DIR)/%.c $(CORE_DIR)/merc.h
+	$(CC) $(C_FLAGS) $< -o $@
+
+# SQLite amalgamation uses special flags (suppress warnings, disable threading)
+$(OBJ_DIR)/db/sqlite3.o: $(DB_DIR)/sqlite3.c
+	$(CC) $(SQLITE_FLAGS) $< -o $@
+
+$(OBJ_DIR)/db/%.o: $(DB_DIR)/%.c $(CORE_DIR)/merc.h $(DB_DIR)/db_sql.h
 	$(CC) $(C_FLAGS) $< -o $@
 
 clean:

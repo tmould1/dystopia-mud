@@ -4,13 +4,12 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_game.h"
 
 GAMECONFIG_DATA game_config;
 
 void load_gameconfig() {
-	FILE *fp;
-	char line[MSL];
-
+	/* Set defaults first */
 	game_config.base_xp = 5000;
 	game_config.max_xp_per_kill = 1000000000;
 	game_config.game_name = str_dup( "Dystopia+ Spin-Off" );
@@ -20,81 +19,12 @@ void load_gameconfig() {
 	game_config.banner_right = str_dup( "#0<>#n" );
 	game_config.banner_fill = str_dup( "#0==#n" );
 
-	if ( ( fp = fopen( mud_path( mud_txt_dir, "gameconfig.txt" ), "r" ) ) == NULL ) {
-		// No gameconfig.txt found, create one with defaults.
-		save_gameconfig();
-		return;
-	}
-
-	while ( fgets( line, MSL, fp ) != NULL ) {
-		if ( line[0] == '\0' )
-			continue;
-
-		// Format will be <variable>: <value>
-		char *variable = strtok( line, ":" );
-		char *value = strtok( NULL, ":" );
-
-		// The value could have spaces in front of it, so, we need to remove them.
-		while ( value[0] == ' ' ) {
-			value++;
-		}
-
-		// If we are processing a string, we need to remove any newline and/or carriage return characters at the end.
-		if ( value != NULL ) {
-			value[strcspn( value, "\r\n" )] = 0;
-		}
-
-		if ( variable == NULL || value == NULL ) {
-			log_string( "Error reading gameconfig.txt" );
-			continue;
-		}
-
-		if ( !str_cmp( variable, "base_xp" ) ) {
-			game_config.base_xp = atoi( value );
-		} else if ( !str_cmp( variable, "max_xp_per_kill" ) ) {
-			game_config.max_xp_per_kill = atoi( value );
-		} else if ( !str_cmp( variable, "game_name" ) ) {
-			game_config.game_name = str_dup( value );
-		} else if ( !str_cmp( variable, "gui_url" ) ) {
-			free_string( game_config.gui_url );
-			game_config.gui_url = str_dup( value );
-		} else if ( !str_cmp( variable, "gui_version" ) ) {
-			free_string( game_config.gui_version );
-			game_config.gui_version = str_dup( value );
-		} else if ( !str_cmp( variable, "banner_left" ) ) {
-			free_string( game_config.banner_left );
-			game_config.banner_left = str_dup( value );
-		} else if ( !str_cmp( variable, "banner_right" ) ) {
-			free_string( game_config.banner_right );
-			game_config.banner_right = str_dup( value );
-		} else if ( !str_cmp( variable, "banner_fill" ) ) {
-			free_string( game_config.banner_fill );
-			game_config.banner_fill = str_dup( value );
-		} else {
-			log_string( "Unknown variable in gameconfig.txt" );
-		}
-	}
-	fclose( fp );
+	/* Load from game.db (overwrites defaults for any keys present) */
+	db_game_load_gameconfig();
 }
 
 void save_gameconfig() {
-	FILE *fp;
-
-	if ( ( fp = fopen( mud_path( mud_txt_dir, "gameconfig.txt" ), "w" ) ) == NULL ) {
-		log_string( "Error writing to gameconfig.txt" );
-		return;
-	}
-
-	fprintf( fp, "base_xp: %d\n", game_config.base_xp );
-	fprintf( fp, "max_xp_per_kill: %d\n", game_config.max_xp_per_kill );
-	fprintf( fp, "game_name: %s\n", game_config.game_name );
-	fprintf( fp, "gui_url: %s\n", game_config.gui_url );
-	fprintf( fp, "gui_version: %s\n", game_config.gui_version );
-	fprintf( fp, "banner_left: %s\n", game_config.banner_left );
-	fprintf( fp, "banner_right: %s\n", game_config.banner_right );
-	fprintf( fp, "banner_fill: %s\n", game_config.banner_fill );
-
-	fclose( fp );
+	db_game_save_gameconfig();
 }
 
 void do_gameconfig( CHAR_DATA *ch, char *argument ) {

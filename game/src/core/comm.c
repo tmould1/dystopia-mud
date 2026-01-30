@@ -52,6 +52,7 @@
 #endif
 
 #include "merc.h"
+#include "../db/db_game.h"
 
 #if defined( WIN32 )
 #include <sys/timeb.h> /*for _ftime(), uses _timeb struct*/
@@ -398,8 +399,9 @@ int main( int argc, char **argv ) {
 #endif
 
 	/*
-	 * That's all, folks.
+	 * Clean up database connections and shut down.
 	 */
+	db_game_close();
 	log_string( "Normal termination of game." );
 	exit( 0 );
 	return 0;

@@ -29,6 +29,7 @@
 #include <unistd.h>
 #endif
 #include "merc.h"
+#include "../db/db_game.h"
 
 LEADER_BOARD leader_board;
 TOP_BOARD top_board[MAX_TOP_PLAYERS + 1];
@@ -37,30 +38,14 @@ void sort_top_board args( (void) );
 
 void load_topboard() {
 	int i;
-	FILE *fp;
 
-	if ( ( fp = fopen( mud_path( mud_txt_dir, "topboard.txt" ), "r" ) ) == NULL ) {
-		log_string( "Warning: topboard.txt not found, creating empty one." );
-		/* Create an empty topboard file */
-		if ( ( fp = fopen( mud_path( mud_txt_dir, "topboard.txt" ), "w" ) ) != NULL ) {
-			int j;
-			for ( j = 1; j <= MAX_TOP_PLAYERS; j++ )
-				fprintf( fp, "Empty~\n0\n" );
-			fclose( fp );
-			fp = fopen( mud_path( mud_txt_dir, "topboard.txt" ), "r" );
-		}
-		if ( fp == NULL ) {
-			log_string( "Error: Cannot create topboard.txt!" );
-			exit( 1 );
-		}
-	}
 	top_board[0].name = " ";
 	top_board[0].pkscore = 0;
 	for ( i = 1; i <= MAX_TOP_PLAYERS; i++ ) {
-		top_board[i].name = fread_string( fp );
-		top_board[i].pkscore = fread_number( fp );
+		top_board[i].name = str_dup( "Empty" );
+		top_board[i].pkscore = 0;
 	}
-	fclose( fp );
+	db_game_load_topboard();
 }
 
 void update_top_board( CHAR_DATA *ch ) {
@@ -122,74 +107,29 @@ void sort_top_board() {
 }
 
 void save_topboard() {
-	FILE *fp;
-	int i;
-
-	if ( ( fp = fopen( mud_path( mud_txt_dir, "topboard.txt" ), "w" ) ) == NULL ) {
-		log_string( "Error writing to topboard.txt" );
-		return;
-	}
-	for ( i = 1; i <= MAX_TOP_PLAYERS; i++ ) {
-		fprintf( fp, "%s~\n", top_board[i].name );
-		fprintf( fp, "%d\n", top_board[i].pkscore );
-	}
-	fclose( fp );
+	db_game_save_topboard();
 }
 
 void load_leaderboard() {
-	FILE *fp;
-
-	if ( ( fp = fopen( mud_path( mud_txt_dir, "leader.txt" ), "r" ) ) == NULL ) {
-		log_string( "Warning: leader.txt not found, creating empty one." );
-		if ( ( fp = fopen( mud_path( mud_txt_dir, "leader.txt" ), "w" ) ) != NULL ) {
-			fprintf( fp, "Nobody~\n0\nNobody~\n0\nNobody~\n0\nNobody~\n0\nNobody~\n0\nNobody~\n0\nNobody~\n0\n" );
-			fclose( fp );
-			fp = fopen( mud_path( mud_txt_dir, "leader.txt" ), "r" );
-		}
-		if ( fp == NULL ) {
-			log_string( "Error: Cannot create leader.txt!" );
-			exit( 1 );
-		}
-	}
-	leader_board.bestpk_name = fread_string( fp );
-	leader_board.bestpk_number = fread_number( fp );
-	leader_board.pk_name = fread_string( fp );
-	leader_board.pk_number = fread_number( fp );
-	leader_board.pd_name = fread_string( fp );
-	leader_board.pd_number = fread_number( fp );
-	leader_board.mk_name = fread_string( fp );
-	leader_board.mk_number = fread_number( fp );
-	leader_board.md_name = fread_string( fp );
-	leader_board.md_number = fread_number( fp );
-	leader_board.tt_name = fread_string( fp );
-	leader_board.tt_number = fread_number( fp );
-	leader_board.qc_name = fread_string( fp );
-	leader_board.qc_number = fread_number( fp );
-	fclose( fp );
+	leader_board.bestpk_name = str_dup( "Nobody" );
+	leader_board.bestpk_number = 0;
+	leader_board.pk_name = str_dup( "Nobody" );
+	leader_board.pk_number = 0;
+	leader_board.pd_name = str_dup( "Nobody" );
+	leader_board.pd_number = 0;
+	leader_board.mk_name = str_dup( "Nobody" );
+	leader_board.mk_number = 0;
+	leader_board.md_name = str_dup( "Nobody" );
+	leader_board.md_number = 0;
+	leader_board.tt_name = str_dup( "Nobody" );
+	leader_board.tt_number = 0;
+	leader_board.qc_name = str_dup( "Nobody" );
+	leader_board.qc_number = 0;
+	db_game_load_leaderboard();
 }
 
 void save_leaderboard() {
-	FILE *fp;
-
-	if ( ( fp = fopen( mud_path( mud_txt_dir, "leader.txt" ), "w" ) ) == NULL ) {
-		log_string( "Error writing to leader.txt" );
-		return;
-	}
-	fprintf( fp, "%s~\n", leader_board.bestpk_name );
-	fprintf( fp, "%d\n", leader_board.bestpk_number );
-	fprintf( fp, "%s~\n", leader_board.pk_name );
-	fprintf( fp, "%d\n", leader_board.pk_number );
-	fprintf( fp, "%s~\n", leader_board.pd_name );
-	fprintf( fp, "%d\n", leader_board.pd_number );
-	fprintf( fp, "%s~\n", leader_board.mk_name );
-	fprintf( fp, "%d\n", leader_board.mk_number );
-	fprintf( fp, "%s~\n", leader_board.md_name );
-	fprintf( fp, "%d\n", leader_board.md_number );
-	fprintf( fp, "%s~\n", leader_board.tt_name );
-	fprintf( fp, "%d\n", leader_board.tt_number );
-	fprintf( fp, "%s~\n", leader_board.qc_name );
-	fprintf( fp, "%d\n", leader_board.qc_number );
-	fclose( fp );
+	db_game_save_leaderboard();
 }
 
 void do_leader( CHAR_DATA *ch, char *argument ) {

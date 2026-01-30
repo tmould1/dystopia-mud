@@ -114,6 +114,11 @@ DECLARE_OLC_FUN( hedit_delete );
 HELP_DATA *new_help_data args( (void) );
 
 /*
+ * Save Prototypes (olc_save.c)
+ */
+void save_area args( ( AREA_DATA *pArea ) );
+
+/*
  * Area Editor Prototypes
  */
 DECLARE_OLC_FUN( aedit_show );

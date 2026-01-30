@@ -37,7 +37,7 @@ COMBAT_SRC = arena.c fight.c jobo_fight.c kav_fight.c magic.c special.c
 COMMANDS_SRC = act_comm.c act_info.c act_map.c act_move.c act_obj.c act_wiz.c jobo_wiz.c kav_info.c kav_wiz.c socials.c wizutil.c
 WORLD_SRC = build.c olc.c olc_act.c olc_save.c
 SYSTEMS_SRC = bit.c board.c gmcp.c jobo_act.c jobo_data.c jobo_king.c jobo_util.c jope.c mccp.c mssp.c mxp.c naws.c save.c update.c upgrade.c
-DB_SRC = db_sql.c sqlite3.c
+DB_SRC = db_game.c db_sql.c sqlite3.c
 
 # Object files with subdirectory paths
 CORE_OBJ     = $(addprefix $(OBJ_DIR)/core/,$(CORE_SRC:.c=.o))

@@ -25,36 +25,18 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_game.h"
 
 KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 
 void imm_kset args( ( CHAR_DATA * ch, char *argument ) );
 
 void save_kingdoms() {
-	int i;
-	FILE *fp;
-
-	if ( ( fp = fopen( mud_path( mud_txt_dir, "kingdoms.txt" ), "w" ) ) == NULL ) {
-		log_string( "Error writing to kingdoms.txt" );
-		return;
-	}
-	for ( i = 1; i <= MAX_KINGDOM; i++ ) {
-		fprintf( fp, "%s~\n", kingdom_table[i].name );
-		fprintf( fp, "%s~\n", kingdom_table[i].whoname );
-		fprintf( fp, "%s~\n", kingdom_table[i].leader );
-		fprintf( fp, "%s~\n", kingdom_table[i].general );
-		fprintf( fp, "%d %d %d\n",
-			kingdom_table[i].kills, kingdom_table[i].deaths, kingdom_table[i].qps );
-		fprintf( fp, "%d %d %d %d\n",
-			kingdom_table[i].req_hit, kingdom_table[i].req_move,
-			kingdom_table[i].req_mana, kingdom_table[i].req_qps );
-	}
-	fclose( fp );
+	db_game_save_kingdoms();
 }
 
 void load_kingdoms() {
 	int i;
-	FILE *fp;
 
 	kingdom_table[0].name = "";
 	kingdom_table[0].whoname = "";
@@ -68,34 +50,20 @@ void load_kingdoms() {
 	kingdom_table[0].req_mana = 0;
 	kingdom_table[0].req_qps = 0;
 
-	if ( ( fp = fopen( mud_path( mud_txt_dir, "kingdoms.txt" ), "r" ) ) == NULL ) {
-		log_string( "Warning: kingdoms.txt not found, creating empty one." );
-		if ( ( fp = fopen( mud_path( mud_txt_dir, "kingdoms.txt" ), "w" ) ) != NULL ) {
-			int j;
-			for ( j = 1; j <= MAX_KINGDOM; j++ )
-				fprintf( fp, "None~\nNone~\nNone~\nNone~\n0 0 0\n0 0 0 0\n" );
-			fclose( fp );
-			fp = fopen( mud_path( mud_txt_dir, "kingdoms.txt" ), "r" );
-		}
-		if ( fp == NULL ) {
-			log_string( "Error: Cannot create kingdoms.txt!" );
-			exit( 1 );
-		}
-	}
 	for ( i = 1; i <= MAX_KINGDOM; i++ ) {
-		kingdom_table[i].name = fread_string( fp );
-		kingdom_table[i].whoname = fread_string( fp );
-		kingdom_table[i].leader = fread_string( fp );
-		kingdom_table[i].general = fread_string( fp );
-		kingdom_table[i].kills = fread_number( fp );
-		kingdom_table[i].deaths = fread_number( fp );
-		kingdom_table[i].qps = fread_number( fp );
-		kingdom_table[i].req_hit = fread_number( fp );
-		kingdom_table[i].req_move = fread_number( fp );
-		kingdom_table[i].req_mana = fread_number( fp );
-		kingdom_table[i].req_qps = fread_number( fp );
+		kingdom_table[i].name = str_dup( "None" );
+		kingdom_table[i].whoname = str_dup( "None" );
+		kingdom_table[i].leader = str_dup( "None" );
+		kingdom_table[i].general = str_dup( "None" );
+		kingdom_table[i].kills = 0;
+		kingdom_table[i].deaths = 0;
+		kingdom_table[i].qps = 0;
+		kingdom_table[i].req_hit = 0;
+		kingdom_table[i].req_move = 0;
+		kingdom_table[i].req_mana = 0;
+		kingdom_table[i].req_qps = 0;
 	}
-	fclose( fp );
+	db_game_load_kingdoms();
 }
 
 void do_kingdoms( CHAR_DATA *ch, char *argument ) {

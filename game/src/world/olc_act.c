@@ -502,7 +502,7 @@ bool aedit_hidden( CHAR_DATA *ch, char *argument ) {
 	else
 		send_to_char( "Area is now visible in the areas list.\n\r", ch );
 
-	save_hidden_areas();
+	save_area( pArea );
 	return TRUE;
 }
 

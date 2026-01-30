@@ -433,6 +433,25 @@ APPLY_TYPES = {
 
 
 @dataclass
+class ExtraDescription:
+    """An extra description on an object or room."""
+    keyword: str
+    description: str
+
+
+@dataclass
+class RoomText:
+    """A room text trigger."""
+    input: str
+    output: str
+    choutput: str
+    name: str
+    type: int = 0
+    power: int = 0
+    mob: int = 0
+
+
+@dataclass
 class Exit:
     """Represents an exit from a room."""
     direction: int
@@ -440,6 +459,8 @@ class Exit:
     is_door: bool = False
     door_flags: int = 0
     key_vnum: int = -1
+    description: str = ""
+    keyword: str = ""
     one_way: bool = False  # Set during analysis
     warped: bool = False   # Set during coordinate assignment
 
@@ -457,9 +478,12 @@ class Room:
     """Represents a room in an area."""
     vnum: int
     name: str
+    description: str = ""
     sector_type: int = 0
     room_flags: int = 0
     exits: Dict[int, Exit] = field(default_factory=dict)
+    extra_descs: List['ExtraDescription'] = field(default_factory=list)
+    room_texts: List['RoomText'] = field(default_factory=list)
     coords: Optional[Tuple[int, int, int]] = None
     dead_end: bool = False
 
@@ -506,6 +530,15 @@ class Object:
     cost: int = 0
     level: int = 0
     affects: List[ObjectAffect] = field(default_factory=list)
+    extra_descs: List['ExtraDescription'] = field(default_factory=list)
+    chpoweron: str = ""
+    chpoweroff: str = ""
+    chpoweruse: str = ""
+    victpoweron: str = ""
+    victpoweroff: str = ""
+    victpoweruse: str = ""
+    spectype: int = 0
+    specpower: int = 0
 
     def to_dict(self) -> dict:
         return {
@@ -610,11 +643,16 @@ class Area:
     filename: str
     lvnum: int = 0  # Low vnum
     uvnum: int = 0  # High vnum
+    builders: str = ""
+    security: int = 3
+    recall: int = 0
+    area_flags: int = 0
     rooms: Dict[int, Room] = field(default_factory=dict)
     mobiles: Dict[int, Mobile] = field(default_factory=dict)
     objects: Dict[int, Object] = field(default_factory=dict)
     resets: List[Reset] = field(default_factory=list)
     shops: List[Shop] = field(default_factory=list)
+    specials: Dict[int, str] = field(default_factory=dict)  # mob_vnum -> spec_fun_name
 
     def to_dict(self) -> dict:
         return {

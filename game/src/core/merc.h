@@ -192,8 +192,6 @@ void load_leaderboard args( (void) );
 void save_leaderboard args( (void) );
 void load_bans args( (void) );
 void save_bans args( (void) );
-void load_hidden_areas args( (void) );
-void save_hidden_areas args( (void) );
 void load_kingdoms args( (void) );
 void save_kingdoms args( (void) );
 
@@ -4180,7 +4178,6 @@ char *crypt args( ( const char *key, const char *salt ) );
 /*
  * Data files used by the server.
  *
- * AREA_LIST contains a list of areas to boot.
  * All files are read in completely at bootup.
  * Most output files (bug, idea, typo, shutdown) are append-only.
  *
@@ -4223,8 +4220,6 @@ void mud_init_paths( const char *exe_path );
 #define BACKUP_DIR mud_backup_dir
 #define AREA_DIR   mud_area_dir
 
-#define AREA_LIST		mud_path( mud_area_dir, "area.lst" )
-#define HIDDEN_LIST		mud_path( mud_area_dir, "hidden.lst" )
 #define BAN_LIST		mud_path( mud_txt_dir, "ban.txt" )
 #define BUG_FILE		mud_path( mud_txt_dir, "bugs.txt" )
 #define SHUTDOWN_FILE	mud_path( mud_area_dir, "shutdown.txt" )
