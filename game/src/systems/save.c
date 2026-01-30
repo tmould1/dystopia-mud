@@ -61,12 +61,13 @@ void save_char_obj_backup( CHAR_DATA *ch ) {
 	/* Ensure the main .db is up-to-date */
 	db_player_save( ch );
 
-	/* Copy the .db file to store/ directory */
+	/* Copy the .db file to backup/ directory under db/players/ */
 	snprintf( src, sizeof( src ), "%s%splayers%s%s.db",
 		mud_db_dir, PATH_SEPARATOR, PATH_SEPARATOR,
 		capitalize( ch->pcdata->switchname ) );
-	snprintf( dst, sizeof( dst ), "%sstore/%s.db",
-		PLAYER_DIR, capitalize( ch->pcdata->switchname ) );
+	snprintf( dst, sizeof( dst ), "%s%splayers%sbackup%s%s.db",
+		mud_db_dir, PATH_SEPARATOR, PATH_SEPARATOR, PATH_SEPARATOR,
+		capitalize( ch->pcdata->switchname ) );
 
 	fin = fopen( src, "rb" );
 	if ( !fin )

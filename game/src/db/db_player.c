@@ -354,11 +354,18 @@ static void load_short_array( const char *data, sh_int *arr, int count ) {
  * Initialize player database directory. Called from boot_db().
  */
 void db_player_init( void ) {
+	char backup_dir[MUD_PATH_MAX];
+
 	if ( snprintf( mud_db_players_dir, sizeof( mud_db_players_dir ), "%s%splayers",
 			mud_db_dir, PATH_SEPARATOR ) >= (int)sizeof( mud_db_players_dir ) ) {
 		bug( "db_player_init: path truncated.", 0 );
 	}
 	ensure_directory( mud_db_players_dir );
+
+	/* Ensure backup subdirectory exists */
+	snprintf( backup_dir, sizeof( backup_dir ), "%s%sbackup",
+		mud_db_players_dir, PATH_SEPARATOR );
+	ensure_directory( backup_dir );
 }
 
 

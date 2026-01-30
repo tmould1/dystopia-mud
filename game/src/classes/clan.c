@@ -22,6 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_player.h"
 
 /*
  * Local functions.
@@ -3745,21 +3746,8 @@ void do_web( CHAR_DATA *ch, char *argument ) {
 }
 
 bool char_exists( bool backup, char *argument ) {
-	FILE *fp;
-	char buf[MAX_STRING_LENGTH];
-	bool found = FALSE;
-
-	fclose( fpReserve );
-	if ( backup )
-		sprintf( buf, "%sbackup/%s", PLAYER_DIR, capitalize( argument ) );
-	else
-		sprintf( buf, "%s%s", PLAYER_DIR, capitalize( argument ) );
-	if ( ( fp = fopen( buf, "r" ) ) != NULL ) {
-		found = TRUE;
-		fclose( fp );
-	}
-	fpReserve = fopen( NULL_FILE, "r" );
-	return found;
+	(void) backup; /* No longer relevant - single .db per player */
+	return db_player_exists( argument );
 }
 
 void do_mitsukeru( CHAR_DATA *ch, char *argument ) {

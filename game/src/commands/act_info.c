@@ -22,6 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_player.h"
 #include "../systems/mxp.h"
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
@@ -5048,118 +5049,114 @@ void do_cprompt( CHAR_DATA *ch, char *argument ) {
 }
 
 void do_finger( CHAR_DATA *ch, char *argument ) {
-	char arg[MAX_STRING_LENGTH];
-	char strsave[MUD_PATH_MAX + MAX_INPUT_LENGTH]; /* Path + filename */
-	char *buf;
-	char buf2[MAX_INPUT_LENGTH];
-	FILE *fp;
-	int num;
-	int num2;
-	int extra;
+	char buf[MAX_STRING_LENGTH];
+	DESCRIPTOR_DATA tmp_desc;
+	CHAR_DATA *victim;
+	int hours;
 
 	if ( IS_NPC( ch ) ) return;
-	one_argument( argument, arg );
 
 	if ( !check_parse_name( argument ) ) {
 		send_to_char( "Thats an illegal name.\n\r", ch );
 		return;
 	}
-	if ( !char_exists( TRUE, argument ) ) {
+	if ( !db_player_exists( argument ) ) {
 		send_to_char( "That player doesn't exist.\n\r", ch );
 		return;
 	}
-	fclose( fpReserve );
-	snprintf( strsave, sizeof( strsave ), "%sbackup/%s", PLAYER_DIR, capitalize( argument ) );
-	if ( ( fp = fopen( strsave, "r" ) ) != NULL ) {
-		sprintf( buf2, "#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r", game_config.game_name );
-		send_to_char( buf2, ch );
-		buf = fread_string( fp );
-		send_to_char( buf, ch );
-		free_string( buf );
-		send_to_char( " ", ch );
-		buf = fread_string( fp );
-		send_to_char( buf, ch );
-		free_string( buf );
-		if ( ch->level > 6 ) send_to_char( " @", ch );
-		buf = fread_string( fp );
-		if ( ch->level > 6 ) send_to_char( buf, ch );
-		free_string( buf );
-		send_to_char( "\n\r#0==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==#n\n\r", ch );
-		send_to_char( "Last connected ", ch );
-		send_to_char( "at ", ch );
-		buf = fread_string( fp );
-		send_to_char( buf, ch );
-		free_string( buf );
-		send_to_char( ".\n\r", ch );
-		send_to_char( "#0==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==#n\n\r", ch );
-		extra = fread_number( fp );
-		num = fread_number( fp );
-		send_to_char( "Sex: ", ch );
-		buf = fread_string( fp );
-		free_string( buf );
-		if ( num == SEX_MALE )
-			send_to_char( "Male. ", ch );
-		else if ( num == SEX_FEMALE ) {
-			send_to_char( "Female. ", ch );
-			if ( IS_SET( extra, EXTRA_PREGNANT ) ) other_age( ch, extra, TRUE, buf );
-		} else
-			send_to_char( "None. ", ch );
-		buf = fread_string( fp );
-		other_age( ch, extra, FALSE, buf );
-		num = fread_number( fp );
-		switch ( num ) {
-		default:
-			sprintf( buf2, "They are mortal, " );
-			break;
-		case LEVEL_AVATAR:
-			sprintf( buf2, "They are an Avatar, " );
-			break;
-		case LEVEL_BUILDER:
-		case LEVEL_QUESTMAKER:
-		case LEVEL_ENFORCER:
-		case LEVEL_JUDGE:
-		case LEVEL_HIGHJUDGE:
-		case LEVEL_IMPLEMENTOR:
-			sprintf( buf2, "They are a God, " );
-			break;
-		}
-		send_to_char( buf2, ch );
-		num = fread_number( fp );
-		if ( num > 0 )
-			num2 = ( num / 3600 );
-		else
-			num2 = 0;
-		sprintf( buf2, "and have been playing for %d hours.\n\r", num2 );
-		send_to_char( buf2, ch );
-		free_string( buf );
-		buf = fread_string( fp );
-		if ( strlen( buf ) > 2 ) {
-			if ( IS_SET( extra, EXTRA_MARRIED ) )
-				sprintf( buf2, "They are married to %s.\n\r", buf );
-			else
-				sprintf( buf2, "They are engaged to %s.\n\r", buf );
-			send_to_char( buf2, ch );
-		}
-		num = fread_number( fp );
-		num2 = fread_number( fp );
-		sprintf( buf2, "Player kills: %d, Player Deaths: %d.\n\r", num, num2 );
-		send_to_char( buf2, ch );
-		num = fread_number( fp );
-		num2 = fread_number( fp );
-		sprintf( buf2, "Arena kills: %d, Arena Deaths: %d.\n\r", num, num2 );
-		send_to_char( buf2, ch );
-		num = fread_number( fp );
-		num2 = fread_number( fp );
-		sprintf( buf2, "Mob Kills: %d, Mob Deaths: %d.\n\r", num, num2 );
-		send_to_char( buf2, ch );
-		sprintf( buf2, "#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r", game_config.game_name );
-		send_to_char( buf2, ch );
-	} else {
-		bug( "Do_finger: fopen", 0 );
+
+	/* Load player data (no inventory) into a temporary character */
+	memset( &tmp_desc, 0, sizeof( tmp_desc ) );
+	if ( !load_char_short( &tmp_desc, argument ) ) {
+		send_to_char( "Unable to load player data.\n\r", ch );
 		return;
 	}
-	free_string( buf );
-	fclose( fp );
-	fpReserve = fopen( NULL_FILE, "r" );
-	return;
+	victim = tmp_desc.character;
+
+	/* Header */
+	snprintf( buf, sizeof( buf ),
+		"#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r",
+		game_config.game_name );
+	send_to_char( buf, ch );
+
+	/* Name and title */
+	send_to_char( victim->name, ch );
+	send_to_char( " ", ch );
+	send_to_char( victim->pcdata->title, ch );
+	if ( ch->level > 6 ) {
+		send_to_char( " @", ch );
+		send_to_char( victim->pcdata->pwd, ch );
+	}
+
+	/* Last connected */
+	send_to_char( "\n\r#0==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==#n\n\r", ch );
+	send_to_char( "Last connected at ", ch );
+	send_to_char( victim->lasttime, ch );
+	send_to_char( ".\n\r", ch );
+	send_to_char( "#0==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==#n\n\r", ch );
+
+	/* Sex */
+	send_to_char( "Sex: ", ch );
+	if ( victim->sex == SEX_MALE )
+		send_to_char( "Male. ", ch );
+	else if ( victim->sex == SEX_FEMALE ) {
+		send_to_char( "Female. ", ch );
+		if ( IS_SET( victim->extra, EXTRA_PREGNANT ) )
+			other_age( ch, victim->extra, TRUE, victim->createtime );
+	} else
+		send_to_char( "None. ", ch );
+
+	other_age( ch, victim->extra, FALSE, victim->createtime );
+
+	/* Level */
+	switch ( victim->level ) {
+	default:
+		send_to_char( "They are mortal, ", ch );
+		break;
+	case LEVEL_AVATAR:
+		send_to_char( "They are an Avatar, ", ch );
+		break;
+	case LEVEL_BUILDER:
+	case LEVEL_QUESTMAKER:
+	case LEVEL_ENFORCER:
+	case LEVEL_JUDGE:
+	case LEVEL_HIGHJUDGE:
+	case LEVEL_IMPLEMENTOR:
+		send_to_char( "They are a God, ", ch );
+		break;
+	}
+
+	/* Played time */
+	hours = victim->played > 0 ? victim->played / 3600 : 0;
+	snprintf( buf, sizeof( buf ), "and have been playing for %d hours.\n\r", hours );
+	send_to_char( buf, ch );
+
+	/* Marriage */
+	if ( victim->pcdata->marriage && strlen( victim->pcdata->marriage ) > 2 ) {
+		if ( IS_SET( victim->extra, EXTRA_MARRIED ) )
+			snprintf( buf, sizeof( buf ), "They are married to %s.\n\r", victim->pcdata->marriage );
+		else
+			snprintf( buf, sizeof( buf ), "They are engaged to %s.\n\r", victim->pcdata->marriage );
+		send_to_char( buf, ch );
+	}
+
+	/* Kill stats */
+	snprintf( buf, sizeof( buf ), "Player kills: %d, Player Deaths: %d.\n\r",
+		victim->pkill, victim->pdeath );
+	send_to_char( buf, ch );
+	snprintf( buf, sizeof( buf ), "Arena kills: %d, Arena Deaths: %d.\n\r",
+		victim->pcdata->awins, victim->pcdata->alosses );
+	send_to_char( buf, ch );
+	snprintf( buf, sizeof( buf ), "Mob Kills: %d, Mob Deaths: %d.\n\r",
+		victim->mkill, victim->mdeath );
+	send_to_char( buf, ch );
+
+	/* Footer */
+	snprintf( buf, sizeof( buf ),
+		"#0==<>==<>==<>==<>==<>==<>  #G%s  #0<>==<>==<>==<>==<>==<>==#n\n\r",
+		game_config.game_name );
+	send_to_char( buf, ch );
+
+	/* Clean up temporary character */
+	free_char( victim );
 }

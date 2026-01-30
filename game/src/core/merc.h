@@ -4197,12 +4197,8 @@ char *crypt args( ( const char *key, const char *salt ) );
 #endif
 
 /* Base directory paths - initialized at startup */
-extern char mud_base_dir[MUD_PATH_MAX];	  /* Base directory (parent of area/) */
-extern char mud_area_dir[MUD_PATH_MAX];	  /* Area files directory */
-extern char mud_player_dir[MUD_PATH_MAX]; /* Player save files */
-extern char mud_backup_dir[MUD_PATH_MAX]; /* Backup directory */
-extern char mud_store_dir[MUD_PATH_MAX];  /* Player store/vault files */
-extern char mud_txt_dir[MUD_PATH_MAX];	  /* Text files (logs, etc) */
+extern char mud_base_dir[MUD_PATH_MAX];	  /* Base directory (gamedata/) */
+extern char mud_txt_dir[MUD_PATH_MAX];	  /* Text files (config, etc) */
 extern char mud_log_dir[MUD_PATH_MAX];	  /* Log files */
 extern char mud_notes_dir[MUD_PATH_MAX];  /* Notes/boards directory */
 
@@ -4212,14 +4208,9 @@ char *mud_path( const char *dir, const char *filename );
 /* Initialize all paths based on executable location or current directory */
 void mud_init_paths( const char *exe_path );
 
-/* Compatibility macros - these now use the initialized path variables */
-#define PLAYER_DIR mud_player_dir
-#define BACKUP_DIR mud_backup_dir
-#define AREA_DIR   mud_area_dir
-
 #define BAN_LIST		mud_path( mud_txt_dir, "ban.txt" )
 #define BUG_FILE		mud_path( mud_txt_dir, "bugs.txt" )
-#define SHUTDOWN_FILE	mud_path( mud_area_dir, "shutdown.txt" )
+#define SHUTDOWN_FILE	mud_path( mud_txt_dir, "shutdown.txt" )
 #define CRASH_TEMP_FILE mud_path( mud_txt_dir, "crashtmp.txt" )
 #define COPYOVER_FILE	mud_path( mud_txt_dir, "copyover.data" )
 

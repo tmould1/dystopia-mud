@@ -26,7 +26,6 @@ gamedata/log/
 crash.txt
 build_log.txt
 build_output.txt
-gamedata/area/shutdown.txt
 
 # IDE/Editor (in game/build/)
 game/build/.vscode/
@@ -38,7 +37,6 @@ game/build/dystopia.vcxproj.user
 .idea/
 
 # Player data (sensitive)
-gamedata/player/
 gamedata/db/players/
 
 # Windows DLLs (except bundled ones in lib/)
