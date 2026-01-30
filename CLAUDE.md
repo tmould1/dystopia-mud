@@ -35,6 +35,26 @@ dystopia-mud/
 
 All builds use Makefiles in `game/build/`. Object files are placed in `game/build/obj/`, binaries output to `gamedata/` for easy deployment.
 
+### Regenerating Build Files
+
+When source files are added, removed, or renamed, regenerate the build files using the appropriate script:
+
+**Windows** (`GenerateProjectFiles.bat`):
+```cmd
+cd game\build
+GenerateProjectFiles.bat
+```
+Generates all 5 build files: `Makefile`, `Makefile.mingw`, `dystopia.sln`, `dystopia.vcxproj`, and `dystopia.vcxproj.filters`. Backs up existing files to `game/build/backup/`.
+
+**Linux** (`GenerateProjectFiles.sh`):
+```bash
+cd game
+./build/GenerateProjectFiles.sh
+```
+Generates `Makefile` and `Makefile.mingw` only (run from `game/` directory). For Visual Studio files, use the `.bat` on Windows. Backs up existing files to `game/build/backup/`.
+
+Both scripts scan all subdirectories under `game/src/` (core, classes, combat, commands, world, systems, db) for `.c` and `.h` files.
+
 ### Linux (GCC)
 ```bash
 cd game/build
@@ -77,7 +97,8 @@ game/src/
 ├── combat/     - Combat systems (fight.c, kav_fight.c, magic.c, arena.c)
 ├── commands/   - Player/admin commands (act_*.c, socials.c, wizutil.c)
 ├── world/      - OLC/building (olc.c, olc_act.c, olc_save.c, build.c)
-└── systems/    - Game subsystems (update.c, save.c, clan.c, board.c, etc.)
+├── systems/    - Game subsystems (update.c, save.c, clan.c, board.c, etc.)
+└── db/         - SQLite database layer (db_sql.h, sqlite3 amalgamation)
 ```
 
 Object files mirror this structure in `game/build/obj/`.
