@@ -5,15 +5,7 @@
  *  kingdoms) stored in gamedata/db/game/.
  ***************************************************************************/
 
-/*
- * sqlite3.h must be included BEFORE merc.h because merc.h defines
- * single-letter macros (N, Z) that collide with SQLite API parameter names.
- */
-#include "sqlite3.h"
-#include "../core/merc.h"
-#undef N    /* merc.h: #define N 8192  - conflicts with sqlite3 API */
-#undef Z    /* merc.h: #define Z 33554432 - conflicts with sqlite3 API */
-
+#include "db_util.h"
 #include "db_game.h"
 
 #include <stdio.h>
@@ -82,15 +74,6 @@ static const char *GAME_SCHEMA_SQL =
 	"  req_mana   INTEGER NOT NULL DEFAULT 0,"
 	"  req_qps    INTEGER NOT NULL DEFAULT 0"
 	");";
-
-
-/*
- * Helper: safe string from sqlite column (returns "" for NULL).
- */
-static const char *col_text( sqlite3_stmt *stmt, int col ) {
-	const char *val = (const char *)sqlite3_column_text( stmt, col );
-	return val ? val : "";
-}
 
 
 /*
@@ -213,11 +196,11 @@ void db_game_save_helps( void ) {
 	if ( !help_db )
 		return;
 
-	sqlite3_exec( help_db, "BEGIN TRANSACTION", NULL, NULL, NULL );
+	db_begin( help_db );
 	sqlite3_exec( help_db, "DELETE FROM helps", NULL, NULL, NULL );
 
 	if ( sqlite3_prepare_v2( help_db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
-		sqlite3_exec( help_db, "ROLLBACK", NULL, NULL, NULL );
+		db_rollback( help_db );
 		return;
 	}
 
@@ -230,7 +213,45 @@ void db_game_save_helps( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	sqlite3_exec( help_db, "COMMIT", NULL, NULL, NULL );
+	db_commit( help_db );
+}
+
+
+/*
+ * Reload a single help entry from help.db by keyword.
+ * Returns TRUE if the entry was found and loaded.
+ */
+bool db_game_reload_help( const char *keyword ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT level, keyword, text FROM helps WHERE keyword=?";
+	bool found = FALSE;
+
+	if ( !help_db )
+		return FALSE;
+
+	if ( sqlite3_prepare_v2( help_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return FALSE;
+
+	sqlite3_bind_text( stmt, 1, keyword, -1, SQLITE_TRANSIENT );
+
+	if ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		HELP_DATA *pHelp;
+
+		CREATE( pHelp, HELP_DATA, 1 );
+		pHelp->level   = (sh_int)sqlite3_column_int( stmt, 0 );
+		pHelp->keyword = str_dup( col_text( stmt, 1 ) );
+		pHelp->text    = str_dup( col_text( stmt, 2 ) );
+		pHelp->area    = NULL;
+
+		if ( !str_cmp( pHelp->keyword, "greeting" ) )
+			help_greeting = pHelp->text;
+
+		add_help( pHelp );
+		found = TRUE;
+	}
+
+	sqlite3_finalize( stmt );
+	return found;
 }
 
 
@@ -291,7 +312,7 @@ void db_game_save_gameconfig( void ) {
 	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 
-	sqlite3_exec( game_db, "BEGIN TRANSACTION", NULL, NULL, NULL );
+	db_begin( game_db );
 
 #define SAVE_INT( k, v ) \
 	sqlite3_reset( stmt ); \
@@ -319,7 +340,7 @@ void db_game_save_gameconfig( void ) {
 #undef SAVE_STR
 
 	sqlite3_finalize( stmt );
-	sqlite3_exec( game_db, "COMMIT", NULL, NULL, NULL );
+	db_commit( game_db );
 }
 
 
@@ -360,7 +381,7 @@ void db_game_save_topboard( void ) {
 	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 
-	sqlite3_exec( game_db, "BEGIN TRANSACTION", NULL, NULL, NULL );
+	db_begin( game_db );
 
 	for ( i = 1; i <= MAX_TOP_PLAYERS; i++ ) {
 		sqlite3_reset( stmt );
@@ -371,7 +392,7 @@ void db_game_save_topboard( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	sqlite3_exec( game_db, "COMMIT", NULL, NULL, NULL );
+	db_commit( game_db );
 }
 
 
@@ -438,7 +459,7 @@ void db_game_save_leaderboard( void ) {
 	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 
-	sqlite3_exec( game_db, "BEGIN TRANSACTION", NULL, NULL, NULL );
+	db_begin( game_db );
 
 #define SAVE_LB( cat, n, v ) \
 	sqlite3_reset( stmt ); \
@@ -458,7 +479,7 @@ void db_game_save_leaderboard( void ) {
 #undef SAVE_LB
 
 	sqlite3_finalize( stmt );
-	sqlite3_exec( game_db, "COMMIT", NULL, NULL, NULL );
+	db_commit( game_db );
 }
 
 
@@ -516,7 +537,7 @@ void db_game_save_kingdoms( void ) {
 	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 
-	sqlite3_exec( game_db, "BEGIN TRANSACTION", NULL, NULL, NULL );
+	db_begin( game_db );
 
 	for ( i = 1; i <= MAX_KINGDOM; i++ ) {
 		sqlite3_reset( stmt );
@@ -536,5 +557,5 @@ void db_game_save_kingdoms( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	sqlite3_exec( game_db, "COMMIT", NULL, NULL, NULL );
+	db_commit( game_db );
 }

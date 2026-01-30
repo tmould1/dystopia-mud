@@ -299,5 +299,5 @@ Called after successful attacks in combat. Stance experience increases based on:
 | Function | Location | Purpose |
 |----------|----------|---------|
 | `improve_stance()` | [fight.c](../../src/combat/fight.c) | Train stance in combat |
-| `do_level()` | [clan.c:34-199](../../src/systems/clan.c#L34-L199) | Display stance levels |
+| `do_level()` | [clan.c:34-199](../../src/classes/clan.c#L34-L199) | Display stance levels |
 | `do_setstance()` | [jobo_act.c:653-852](../../src/systems/jobo_act.c#L653-L852) | Configure super stance powers |

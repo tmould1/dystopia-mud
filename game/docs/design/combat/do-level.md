@@ -4,7 +4,7 @@ This document details the `level` command which displays a player's combat profi
 
 ## Location
 
-**Function:** `do_level()` in [clan.c:34-199](../../src/systems/clan.c#L34-L199)
+**Function:** `do_level()` in [clan.c:34-199](../../src/classes/clan.c#L34-L199)
 
 ## Overview
 

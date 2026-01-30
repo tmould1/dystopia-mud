@@ -19,6 +19,7 @@ void db_game_close( void );
 /* Help entries (help.db) */
 void db_game_load_helps( void );
 void db_game_save_helps( void );
+bool db_game_reload_help( const char *keyword );
 
 /* Game config (game.db) */
 void db_game_load_gameconfig( void );

@@ -6,15 +6,7 @@
  *  in gamedata/db/areas/.
  ***************************************************************************/
 
-/*
- * sqlite3.h must be included BEFORE merc.h because merc.h defines
- * single-letter macros (N, Z) that collide with SQLite API parameter names.
- */
-#include "sqlite3.h"
-#include "../core/merc.h"
-#undef N    /* merc.h: #define N 8192  - conflicts with sqlite3 API */
-#undef Z    /* merc.h: #define Z 33554432 - conflicts with sqlite3 API */
-
+#include "db_util.h"
 #include "db_sql.h"
 
 #include <stdio.h>
@@ -188,15 +180,6 @@ static void db_sql_path( const char *area_filename, char *buf, size_t bufsize ) 
 		bug( "db_sql_path: path truncated for '%s'.", 0 );
 	}
 }
-
-/*
- * Helper: safe string from sqlite column (returns "" for NULL).
- */
-static const char *col_text( sqlite3_stmt *stmt, int col ) {
-	const char *val = (const char *)sqlite3_column_text( stmt, col );
-	return val ? val : "";
-}
-
 
 /*
  * Initialize the db directory path. Called from mud_init_paths().
@@ -1004,14 +987,6 @@ void db_sql_link_area( const char *area_filename ) {
  * Save helpers - insert data from in-memory structures into SQLite.
  */
 
-static void sql_bind_text_or_null( sqlite3_stmt *stmt, int col, const char *val ) {
-	if ( val && val[0] != '\0' )
-		sqlite3_bind_text( stmt, col, val, -1, SQLITE_TRANSIENT );
-	else
-		sqlite3_bind_null( stmt, col );
-}
-
-
 static void sql_save_mobiles( sqlite3 *db, AREA_DATA *pArea ) {
 	sqlite3_stmt *stmt;
 	const char *sql =
@@ -1108,12 +1083,12 @@ static void sql_save_objects( sqlite3 *db, AREA_DATA *pArea ) {
 		sqlite3_bind_int( stmt, 11, pObjIndex->value[3] );
 		sqlite3_bind_int( stmt, 12, pObjIndex->weight );
 		sqlite3_bind_int( stmt, 13, pObjIndex->cost );
-		sql_bind_text_or_null( stmt, 14, pObjIndex->chpoweron );
-		sql_bind_text_or_null( stmt, 15, pObjIndex->chpoweroff );
-		sql_bind_text_or_null( stmt, 16, pObjIndex->chpoweruse );
-		sql_bind_text_or_null( stmt, 17, pObjIndex->victpoweron );
-		sql_bind_text_or_null( stmt, 18, pObjIndex->victpoweroff );
-		sql_bind_text_or_null( stmt, 19, pObjIndex->victpoweruse );
+		db_bind_text_or_null( stmt, 14, pObjIndex->chpoweron );
+		db_bind_text_or_null( stmt, 15, pObjIndex->chpoweroff );
+		db_bind_text_or_null( stmt, 16, pObjIndex->chpoweruse );
+		db_bind_text_or_null( stmt, 17, pObjIndex->victpoweron );
+		db_bind_text_or_null( stmt, 18, pObjIndex->victpoweroff );
+		db_bind_text_or_null( stmt, 19, pObjIndex->victpoweruse );
 		sqlite3_bind_int( stmt, 20, pObjIndex->spectype );
 		sqlite3_bind_int( stmt, 21, pObjIndex->specpower );
 		sqlite3_step( stmt );
@@ -1350,7 +1325,6 @@ static void sql_save_specials( sqlite3 *db, AREA_DATA *pArea ) {
  */
 void db_sql_save_area( AREA_DATA *pArea ) {
 	sqlite3 *db;
-	char *errmsg = NULL;
 
 	if ( mud_db_dir[0] == '\0' )
 		return;
@@ -1360,8 +1334,7 @@ void db_sql_save_area( AREA_DATA *pArea ) {
 		return;
 
 	/* Begin transaction */
-	sqlite3_exec( db, "BEGIN TRANSACTION", NULL, NULL, &errmsg );
-	if ( errmsg ) { sqlite3_free( errmsg ); errmsg = NULL; }
+	db_begin( db );
 
 	/* Delete all existing data */
 	sqlite3_exec( db, "DELETE FROM specials", NULL, NULL, NULL );
@@ -1406,8 +1379,7 @@ void db_sql_save_area( AREA_DATA *pArea ) {
 	sql_save_specials( db, pArea );
 
 	/* Commit transaction */
-	sqlite3_exec( db, "COMMIT", NULL, NULL, &errmsg );
-	if ( errmsg ) { sqlite3_free( errmsg ); errmsg = NULL; }
+	db_commit( db );
 
 	sqlite3_close( db );
 }

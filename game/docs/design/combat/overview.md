@@ -19,7 +19,7 @@ Called each game tick to process all active fights. For each character in combat
 
 | System | Purpose | Key File |
 |--------|---------|----------|
-| [do_level Command](do-level.md) | Display weapon/stance/spell levels | [clan.c](../../src/systems/clan.c) |
+| [do_level Command](do-level.md) | Display weapon/stance/spell levels | [clan.c](../../src/classes/clan.c) |
 | [Damage Calculation](damage-calculation.md) | How damage is computed | [fight.c](../../src/combat/fight.c) |
 | [Defense Mechanics](defense.md) | Parry, dodge, armor class | [fight.c](../../src/combat/fight.c) |
 | [Stance System](stances.md) | Combat stances and bonuses | [fight.c](../../src/combat/fight.c) |

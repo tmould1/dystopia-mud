@@ -4398,6 +4398,7 @@ void log_string args( ( const char *str ) );
 void tail_chain args( (void) );
 
 void add_help args( ( HELP_DATA * pHelp ) );
+HELP_DATA *get_help args( ( CHAR_DATA *ch, char *argument ) );
 char *strupper args( ( const char *str ) );
 /*
 RID *	make_room	args( ( int vnum ) );

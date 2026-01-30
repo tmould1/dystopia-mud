@@ -4,7 +4,7 @@
 
 Vampires are undead creatures of the night who survive by feeding on the blood of the living. They possess a wide array of supernatural disciplines and exist within a hierarchical generation system.
 
-**Source Files**: `src/classes/vamp.c` (4200+ lines), `src/systems/clan.c` (fangs, claws, age ranks), `src/systems/update.c` (sunlight, feeding loop)
+**Source Files**: `src/classes/vamp.c` (4200+ lines), `src/classes/clan.c` (fangs, claws, age ranks), `src/systems/update.c` (sunlight, feeding loop)
 **Class Constant**: `CLASS_VAMPIRE` (8)
 
 ## Core Mechanics

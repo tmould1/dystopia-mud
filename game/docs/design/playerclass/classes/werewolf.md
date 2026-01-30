@@ -4,7 +4,7 @@
 
 Werewolves (Garou) are shapechangers who draw power from primal totem spirits and the moon. They use Gnosis as their spiritual resource and can transform into a devastating war form when their rage builds. This is a **base class** that upgrades to Shapeshifter.
 
-**Source Files**: `src/classes/ww.c`, `src/classes/garou.h`, `src/systems/clan.c` (transform functions)
+**Source Files**: `src/classes/ww.c`, `src/classes/garou.h`, `src/classes/clan.c` (transform functions)
 **Class Constant**: `CLASS_WEREWOLF` (4)
 **Upgrades To**: Shapeshifter
 
