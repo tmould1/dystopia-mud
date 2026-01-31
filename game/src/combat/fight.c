@@ -2837,10 +2837,10 @@ void make_corpse( CHAR_DATA *ch ) {
 	}
 	if ( IS_SET( ch->extra, EXTRA_ZOMBIE ) )
 		SET_BIT( corpse->quest, QUEST_ZOMBIE );
-	sprintf( buf, corpse->short_descr, name );
+	snprintf( buf, sizeof(buf), corpse->short_descr, name );
 	free_string( corpse->short_descr );
 	corpse->short_descr = str_dup( buf );
-	sprintf( buf, corpse->description, name );
+	snprintf( buf, sizeof(buf), corpse->description, name );
 	free_string( corpse->description );
 	corpse->description = str_dup( buf );
 	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
@@ -3305,7 +3305,7 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 		{
 			"hits", "slices", "stabs", "slashes", "whips", "claws",
 			"blasts", "pounds", "crushes", "greps", "bites", "pierces", "sucks" };
-	char buf1[512], buf2[512], buf3[512];
+	char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
 	const char *vs;
 	const char *vp;
 	const char *attack;

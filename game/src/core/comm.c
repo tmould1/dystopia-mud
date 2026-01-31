@@ -1685,13 +1685,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		d->outtop = 2;
 	}
 
-	while ( *txt != '\0' && i++ < length ) {
-		/* Check for buffer space before processing */
-		if ( ptr >= output_end ) {
-			bug( "write_to_buffer: output buffer overflow, truncating", 0 );
-			break;
-		}
-
+	while ( *txt != '\0' && i++ < length && ptr != NULL && ptr < output_end ) {
 		if ( *txt != '#' ) {
 			*ptr++ = *txt++;
 			continue;
@@ -1724,8 +1718,12 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 
 		/* Check color lookup table */
 		if ( ( ansi = lookup_color( *txt ) ) != NULL ) {
-			while ( *ansi && ptr < output_end )
-				*ptr++ = *ansi++;
+			char *new_ptr = buf_append_safe( ptr, ansi, output, sizeof(output), 20 );
+			if ( new_ptr == NULL ) {
+				bug( "write_to_buffer: color lookup overflow, truncating", 0 );
+				break; /* Exit while loop */
+			}
+			ptr = new_ptr;
 			txt++;
 			continue;
 		}
@@ -1734,8 +1732,15 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		switch ( *txt ) {
 		case 's': /* Random color */
 			ansi = random_colors[number_range( 0, NUM_RANDOM_COLORS - 1 )];
-			while ( *ansi && ptr < output_end )
-				*ptr++ = *ansi++;
+			{
+				char *new_ptr = buf_append_safe( ptr, ansi, output, sizeof(output), 20 );
+				if ( new_ptr == NULL ) {
+					bug( "write_to_buffer: random color overflow, truncating", 0 );
+					ptr = NULL; /* Signal to exit main loop */
+				} else {
+					ptr = new_ptr;
+				}
+			}
 			txt++;
 			break;
 		case 'x': /* 256-color: #x### */
@@ -1809,15 +1814,37 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 	}
 
 	/* Terminate with reset color (we reserved space for this) */
-	if ( ptr + 4 < output + sizeof(output) ) {
+	/* Handle case where ptr might be invalid */
+	if ( ptr == NULL || ptr < output || ptr >= output + sizeof(output) ) {
+		/* Buffer overflow - find last valid position */
+		bug( "write_to_buffer: buffer overflow detected, truncating", 0 );
+		/* Scan backwards to find null terminator or use safe fallback */
+		ptr = output;
+		while ( *ptr != '\0' && ptr < output + sizeof(output) - 5 ) {
+			ptr++;
+		}
+		if ( ptr >= output + sizeof(output) - 5 ) {
+			ptr = output + sizeof(output) - 5;
+		}
+	}
+
+	/* Add ANSI reset sequence only if there's definitely room */
+	if ( ptr >= output && ptr + 5 <= output + sizeof(output) ) {
 		*ptr++ = '\033';
 		*ptr++ = '[';
 		*ptr++ = '0';
 		*ptr++ = 'm';
+		*ptr = '\0';
+	} else {
+		/* No room for reset, just null terminate */
+		if ( ptr >= output && ptr < output + sizeof(output) ) {
+			*ptr = '\0';
+		} else {
+			output[sizeof(output) - 1] = '\0';
+		}
 	}
-	*ptr = '\0';
 
-	length = (int) strlen( output );
+	length = (int) strlen( output ); /* Use strlen for safety */
 
 	/* Expand the buffer as needed */
 	while ( d->outtop + length >= d->outsize ) {

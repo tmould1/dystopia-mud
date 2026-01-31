@@ -637,6 +637,12 @@ void kavitem( const char *format, CHAR_DATA *ch, const void *arg1, const void *a
 		point = buf;
 		str = format;
 		while ( *str != '\0' ) {
+			/* Check for buffer overflow using helper */
+			if ( !buf_has_space( point, buf, MAX_STRING_LENGTH, 1, 10 ) ) {
+				bug( "kavitem: buffer overflow, truncating message", 0 );
+				break;
+			}
+
 			if ( *str != '$' ) {
 				*point++ = *str++;
 				continue;
@@ -671,7 +677,9 @@ void kavitem( const char *format, CHAR_DATA *ch, const void *arg1, const void *a
 					break;
 
 				case 'o':
-					if ( obj1 != NULL ) sprintf( kav, "%s's", obj1->short_descr );
+					if ( obj1 != NULL ) {
+						snprintf( kav, sizeof(kav), "%s's", obj1->short_descr );
+					}
 					i = can_see_obj( to, obj1 )
 						? ( ( obj1->chobj != NULL && obj1->chobj == to )
 								  ? "your"
@@ -682,12 +690,19 @@ void kavitem( const char *format, CHAR_DATA *ch, const void *arg1, const void *a
 			}
 
 			++str;
-			while ( ( *point = *i ) != '\0' )
-				++point, ++i;
+			/* Copy replacement string with bounds checking using helper */
+			point = buf_append_safe( point, i, buf, MAX_STRING_LENGTH, 10 );
+			if ( point == NULL ) {
+				bug( "kavitem: replacement string overflow", 0 );
+				break;
+			}
 		}
 
-		*point++ = '\n';
-		*point++ = '\r';
+		/* Safely add newline using helper */
+		if ( buf_has_space( point, buf, MAX_STRING_LENGTH, 2, 0 ) && point != NULL ) {
+			*point++ = '\n';
+			*point++ = '\r';
+		}
 		buf[0] = UPPER( buf[0] );
 		write_to_buffer( to->desc, buf, (int) ( point - buf ) );
 	}

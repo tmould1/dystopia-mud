@@ -1496,6 +1496,7 @@ void *alloc_perm( int sMem ) {
  */
 char *str_dup( const char *str ) {
 	char *str_new;
+	size_t len;
 
 	if ( str[0] == '\0' ) {
 		return &str_empty[0];
@@ -1503,8 +1504,17 @@ char *str_dup( const char *str ) {
 	if ( str >= string_space && str < top_string ) {
 		return (char *) str;
 	}
-	str_new = alloc_mem( (int) strlen( str ) + 1 );
-	strcpy( str_new, str );
+
+	len = strlen( str );
+	/* Check if string is too large for alloc_mem (max is 32704 bytes) */
+	if ( len >= 32704 ) {
+		bug( "str_dup: string too large (%d bytes), truncating to 32700", (int)len );
+		len = 32700; /* Leave room for null terminator */
+	}
+
+	str_new = alloc_mem( (int) len + 1 );
+	strncpy( str_new, str, len );
+	str_new[len] = '\0';
 	return str_new;
 }
 
