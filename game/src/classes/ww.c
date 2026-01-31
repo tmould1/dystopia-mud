@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 void do_tribe( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
@@ -50,11 +51,11 @@ void do_klaive( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( 60 > ch->practice ) {
+	if ( acfg("werewolf.klaive.primal_cost") > ch->practice ) {
 		send_to_char( "It costs 60 points of primal to create a Lesser Klaive.\n\r", ch );
 		return;
 	}
-	ch->practice -= 60;
+	ch->practice -= acfg("werewolf.klaive.primal_cost");
 	obj = create_object( get_obj_index( OBJ_VNUM_LKLAIVE ), 0 );
 	SET_BIT( obj->quest, QUEST_RELIC );
 	obj->value[1] = 30;
@@ -76,7 +77,7 @@ void do_sclaws( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < 5 ) {
+	if ( ch->power[DISC_WERE_LUNA] < acfg("werewolf.sclaws.level_req") ) {
 		send_to_char( "You need level 5 in Luna to use Silver Claws.\n\r", ch );
 		return;
 	}
@@ -110,12 +111,12 @@ void do_moonbeam( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < 8 ) {
+	if ( ch->power[DISC_WERE_LUNA] < acfg("werewolf.moonbeam.level_req") ) {
 		send_to_char( "You need to obtain level 8 in Luna to use Moonbeam.\n\r", ch );
 		return;
 	}
 
-	if ( ch->mana < 500 ) {
+	if ( ch->mana < acfg("werewolf.moonbeam.mana_cost") ) {
 		send_to_char( "You do not have enough energy to summon a Moonbeam.\n\r", ch );
 		return;
 	}
@@ -139,13 +140,13 @@ void do_moonbeam( CHAR_DATA *ch, char *argument ) {
 	act( "$N is struck by a deadly beam of moonlight from $n.", ch, NULL, victim, TO_NOTVICT );
 	act( "You are struck by a deadly beam of moonlight!", ch, NULL, victim, TO_VICT );
 	if ( IS_GOOD( victim ) )
-		hurt_person( ch, victim, 500 );
+		hurt_person( ch, victim, acfg("werewolf.moonbeam.damage_good") );
 	if ( IS_EVIL( victim ) )
-		hurt_person( ch, victim, 1000 );
+		hurt_person( ch, victim, acfg("werewolf.moonbeam.damage_evil") );
 	if ( IS_NEUTRAL( victim ) )
-		hurt_person( ch, victim, 750 );
-	use_mana( ch, 500 );
-	WAIT_STATE( ch, 12 );
+		hurt_person( ch, victim, acfg("werewolf.moonbeam.damage_neutral") );
+	use_mana( ch, acfg("werewolf.moonbeam.mana_cost") );
+	WAIT_STATE( ch, acfg("werewolf.moonbeam.cooldown") );
 	return;
 }
 
@@ -162,7 +163,7 @@ void do_moongate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < 6 ) {
+	if ( ch->power[DISC_WERE_LUNA] < acfg("werewolf.moongate.level_req") ) {
 		send_to_char( "You need to obtain level 6 Luna to use moongate.\n\r", ch );
 		return;
 	}
@@ -194,7 +195,7 @@ void do_moongate( CHAR_DATA *ch, char *argument ) {
 	obj = create_object( get_obj_index( OBJ_VNUM_GATE2 ), 0 );
 	obj->value[0] = victim->in_room->vnum;
 	obj->value[3] = ch->in_room->vnum;
-	obj->timer = 5;
+	obj->timer = acfg("werewolf.moongate.gate_timer");
 	if ( IS_AFFECTED( ch, AFF_SHADOWPLANE ) )
 		obj->extra_flags = ITEM_SHADOWPLANE;
 	obj_to_room( obj, ch->in_room );
@@ -202,7 +203,7 @@ void do_moongate( CHAR_DATA *ch, char *argument ) {
 	obj = create_object( get_obj_index( OBJ_VNUM_GATE2 ), 0 );
 	obj->value[0] = ch->in_room->vnum;
 	obj->value[3] = victim->in_room->vnum;
-	obj->timer = 5;
+	obj->timer = acfg("werewolf.moongate.gate_timer");
 	if ( IS_AFFECTED( victim, AFF_SHADOWPLANE ) )
 		obj->extra_flags = ITEM_SHADOWPLANE;
 	obj_to_room( obj, victim->in_room );
@@ -229,7 +230,7 @@ void do_gmotherstouch( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < 4 ) {
+	if ( ch->power[DISC_WERE_LUNA] < acfg("werewolf.gmotherstouch.level_req") ) {
 		send_to_char( "You need to obtain level 4 in Luna to use Grandmother's Touch.\n\r", ch );
 		return;
 	}
@@ -244,7 +245,7 @@ void do_gmotherstouch( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < 100 && ch->fighting != NULL ) {
+	if ( ch->mana < acfg("werewolf.gmotherstouch.mana_cost_combat") && ch->fighting != NULL ) {
 		send_to_char( "You do not have enough energy to summon the Grandmother's Touch.\n\r", ch );
 		return;
 	}
@@ -253,14 +254,14 @@ void do_gmotherstouch( CHAR_DATA *ch, char *argument ) {
 		act( "$N is filled with a feeling of warmth.", ch, NULL, victim, TO_CHAR );
 		act( "$N is surrounded by a beam of moonlight from $n's touch.", ch, NULL, victim, TO_NOTVICT );
 		act( "You are surrounded by a beam of moonlight, and feel restored.", ch, NULL, victim, TO_VICT );
-		heal_char( victim, 200 );
-		use_mana( ch, 100 );
+		heal_char( victim, acfg("werewolf.gmotherstouch.heal_combat") );
+		use_mana( ch, acfg("werewolf.gmotherstouch.mana_cost_combat") );
 		update_pos( victim );
-		WAIT_STATE( ch, 16 );
+		WAIT_STATE( ch, acfg("werewolf.gmotherstouch.cooldown_combat") );
 		return;
 	}
 
-	if ( ch->mana < 300 && ch->fighting == NULL ) {
+	if ( ch->mana < acfg("werewolf.gmotherstouch.mana_cost_noncombat") && ch->fighting == NULL ) {
 		send_to_char( "You do not have enough energy to summon the Grandmother's Touch.\n\r", ch );
 		return;
 	}
@@ -269,10 +270,10 @@ void do_gmotherstouch( CHAR_DATA *ch, char *argument ) {
 		act( "$N is filled with a feeling of warmth.", ch, NULL, victim, TO_CHAR );
 		act( "$N is surrounded by a beam of moonlight from $n's touch.", ch, NULL, victim, TO_NOTVICT );
 		act( "You are surrounded by a beam of moonlight, and feel restored.", ch, NULL, victim, TO_VICT );
-		heal_char( victim, 600 );
-		use_mana( ch, 300 );
+		heal_char( victim, acfg("werewolf.gmotherstouch.heal_noncombat") );
+		use_mana( ch, acfg("werewolf.gmotherstouch.mana_cost_noncombat") );
 		update_pos( victim );
-		WAIT_STATE( ch, 6 );
+		WAIT_STATE( ch, acfg("werewolf.gmotherstouch.cooldown_noncombat") );
 		return;
 	}
 }
@@ -286,7 +287,7 @@ void do_motherstouch( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) )
 		return;
 
-	if ( ch->power[DISC_WERE_LUNA] < 3 ) {
+	if ( ch->power[DISC_WERE_LUNA] < acfg("werewolf.motherstouch.level_req") ) {
 		send_to_char( "You need to obtain level 3 in Luna to use Mother's Touch.\n\r", ch );
 		return;
 	}
@@ -301,7 +302,7 @@ void do_motherstouch( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < 50 && ch->fighting != NULL ) {
+	if ( ch->mana < acfg("werewolf.motherstouch.mana_cost_combat") && ch->fighting != NULL ) {
 		send_to_char( "You don't have enough energy to use Mother's Touch.\n\r", ch );
 		return;
 	}
@@ -310,14 +311,14 @@ void do_motherstouch( CHAR_DATA *ch, char *argument ) {
 		act( "$N is filled with a feeling of warmth.", ch, NULL, victim, TO_CHAR );
 		act( "$N is surrounded by a beam of moonlight from $n's touch.", ch, NULL, victim, TO_NOTVICT );
 		act( "You are surrounded by a beam of moonlight, and feel restored.", ch, NULL, victim, TO_VICT );
-		heal_char( victim, 100 );
-		use_mana( ch, 50 );
+		heal_char( victim, acfg("werewolf.motherstouch.heal_combat") );
+		use_mana( ch, acfg("werewolf.motherstouch.mana_cost_combat") );
 		update_pos( victim );
-		WAIT_STATE( ch, 16 );
+		WAIT_STATE( ch, acfg("werewolf.motherstouch.cooldown_combat") );
 		return;
 	}
 
-	if ( ch->mana < 250 && ch->fighting == NULL ) {
+	if ( ch->mana < acfg("werewolf.motherstouch.mana_cost_noncombat") && ch->fighting == NULL ) {
 		send_to_char( "You don't have enough energy to use Mother's Touch.\n\r", ch );
 		return;
 	}
@@ -326,10 +327,10 @@ void do_motherstouch( CHAR_DATA *ch, char *argument ) {
 		act( "$N is filled with a feeling of warmth.", ch, NULL, victim, TO_CHAR );
 		act( "$N is surrounded by a beam of moonlight from $n's touch.", ch, NULL, victim, TO_NOTVICT );
 		act( "You are surrounded by a beam of moonlight, and feel restored.", ch, NULL, victim, TO_VICT );
-		heal_char( victim, 500 );
-		use_mana( ch, 250 );
+		heal_char( victim, acfg("werewolf.motherstouch.heal_noncombat") );
+		use_mana( ch, acfg("werewolf.motherstouch.mana_cost_noncombat") );
 		update_pos( victim );
-		WAIT_STATE( ch, 8 );
+		WAIT_STATE( ch, acfg("werewolf.motherstouch.cooldown_noncombat") );
 		return;
 	}
 }
@@ -343,7 +344,7 @@ void do_flameclaws( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "What?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_LUNA] < 1 ) {
+	if ( ch->power[DISC_WERE_LUNA] < acfg("werewolf.flameclaws.level_req") ) {
 		send_to_char( "You need to obtain level 1 in luna to use flame claws.\n\r", ch );
 		return;
 	}
@@ -378,7 +379,7 @@ void do_moonarmour( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < 2 ) {
+	if ( ch->power[DISC_WERE_LUNA] < acfg("werewolf.moonarmour.level_req") ) {
 		send_to_char( "You must attain level 2 in Luna before you can create moon armour.\n\r", ch );
 		return;
 	}
@@ -416,7 +417,7 @@ void do_moonarmour( CHAR_DATA *ch, char *argument ) {
 		do_moonarmour( ch, "" );
 		return;
 	}
-	if ( ch->practice < 60 ) {
+	if ( ch->practice < acfg("werewolf.moonarmour.primal_cost") ) {
 		send_to_char( "It costs 60 primal to create a piece of moon armour\n\r", ch );
 		return;
 	}
@@ -425,7 +426,7 @@ void do_moonarmour( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Missing object, please inform Jobo.\n\r", ch );
 		return;
 	}
-	ch->practice -= 60;
+	ch->practice -= acfg("werewolf.moonarmour.primal_cost");
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
@@ -440,7 +441,7 @@ void do_rend( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_BOAR] < 7 ) {
+	if ( ch->power[DISC_WERE_BOAR] < acfg("werewolf.rend.level_req") ) {
 		send_to_char( "You need Boar 7 to Rend equipment.\n\r", ch );
 		return;
 	}
@@ -462,18 +463,18 @@ void do_skin( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_BEAR] < 7 ) {
+	if ( ch->power[DISC_WERE_BEAR] < acfg("werewolf.skin.level_req") ) {
 		send_to_char( "You need Bear 7 to toughen your skin.\n\r", ch );
 		return;
 	}
 	if ( !IS_SET( ch->newbits, NEW_SKIN ) ) {
 		send_to_char( "Your skin hardens.\n\r", ch );
-		ch->armor -= 100;
+		ch->armor -= acfg("werewolf.skin.armor_bonus");
 		SET_BIT( ch->newbits, NEW_SKIN );
 		return;
 	} else if ( IS_SET( ch->newbits, NEW_SKIN ) ) {
 		send_to_char( "Your skin softens.\n\r", ch );
-		ch->armor += 100;
+		ch->armor += acfg("werewolf.skin.armor_bonus");
 		REMOVE_BIT( ch->newbits, NEW_SKIN );
 		return;
 	}
@@ -486,7 +487,7 @@ void do_jawlock( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < 8 ) {
+	if ( ch->power[DISC_WERE_RAPT] < acfg("werewolf.jawlock.level_req") ) {
 		send_to_char( "You need Raptor 8 to use locked jaw.\n\r", ch );
 		return;
 	}
@@ -508,7 +509,7 @@ void do_perception( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < 3 ) {
+	if ( ch->power[DISC_WERE_RAPT] < acfg("werewolf.perception.level_req") ) {
 		send_to_char( "You need Raptor 3 to heighten your Perception.\n\r", ch );
 		return;
 	}
@@ -532,7 +533,7 @@ void do_roar( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You let out an insane BeeF-powered ROAR!!!!!!!!\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_BEAR] < 6 ) {
+	if ( ch->power[DISC_WERE_BEAR] < acfg("werewolf.roar.level_req") ) {
 		send_to_char( "You need bear 6 to roar.\n\r", ch );
 		return;
 	}
@@ -549,13 +550,13 @@ void do_roar( CHAR_DATA *ch, char *argument ) {
 			victim->name );
 		send_to_char( buf, ch );
 		do_flee( victim, "" );
-		WAIT_STATE( ch, 18 );
+		WAIT_STATE( ch, acfg("werewolf.roar.cooldown_success") );
 		return;
 	} else {
 		stc( "You roar loudly.\n\r", ch );
 		stc( "Nothing happens.\n\r", ch );
 		act( "$n roars loudly.", ch, NULL, NULL, TO_ROOM );
-		WAIT_STATE( ch, 12 );
+		WAIT_STATE( ch, acfg("werewolf.roar.cooldown_fail") );
 		return;
 	}
 }
@@ -596,7 +597,7 @@ void do_slam( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_BEAR] < 8 ) {
+	if ( ch->power[DISC_WERE_BEAR] < acfg("werewolf.slam.level_req") ) {
 		send_to_char( "You need Bear 8 to attempt to shoulder slam.\n\r", ch );
 		return;
 	}
@@ -621,7 +622,7 @@ void do_shred( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < 7 ) {
+	if ( ch->power[DISC_WERE_RAPT] < acfg("werewolf.shred.level_req") ) {
 		send_to_char( "You need Raptor 7 to Shred.\n\r", ch );
 		return;
 	}
@@ -658,7 +659,7 @@ void do_shred( CHAR_DATA *ch, char *argument ) {
 	}
 	do_shadowplane( ch, "" );
 	if ( is_safe( ch, victim ) ) return;
-	WAIT_STATE( ch, 24 );
+	WAIT_STATE( ch, acfg("werewolf.shred.cooldown") );
 
 	one_hit( ch, victim, gsn_shred, 1 );
 	one_hit( ch, victim, gsn_shred, 1 );
@@ -683,7 +684,7 @@ void do_talons( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < 10 && !IS_SET( ch->itemaffect, ITEMA_TALON ) ) {
+	if ( ch->power[DISC_WERE_RAPT] < acfg("werewolf.talons.level_req") && !IS_SET( ch->itemaffect, ITEMA_TALON ) ) {
 		send_to_char( "You need level 10 Raptor to use talons.\n\r", ch );
 		return;
 	}

@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 /*
  * Local functions.
@@ -98,7 +99,7 @@ void do_warps( CHAR_DATA *ch, char *argument ) {
 
 void do_obtain( CHAR_DATA *ch, char *argument ) {
 	int newwarp = 0;
-	int warpnum = number_range( 1, 18 );
+	int warpnum = number_range( 1, acfg("demon.obtain.max_warps") );
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -107,13 +108,13 @@ void do_obtain( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->pcdata->stats[DEMON_TOTAL] < 15000 ||
-		ch->pcdata->stats[DEMON_CURRENT] < 15000 ) {
+	if ( ch->pcdata->stats[DEMON_TOTAL] < acfg("demon.obtain.demon_points_cost") ||
+		ch->pcdata->stats[DEMON_CURRENT] < acfg("demon.obtain.demon_points_cost") ) {
 		send_to_char( "You need 15000 demon points to obtain a new warp!\n\r", ch );
 		return;
 	}
 
-	if ( ch->warpcount >= 18 ) {
+	if ( ch->warpcount >= acfg("demon.obtain.max_warps") ) {
 		send_to_char( "You have already obtained as many warps as possible.\n\r", ch );
 		return;
 	}
@@ -161,7 +162,7 @@ void do_obtain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	SET_BIT( ch->warp, newwarp );
-	ch->pcdata->stats[DEMON_CURRENT] -= 15000;
+	ch->pcdata->stats[DEMON_CURRENT] -= acfg("demon.obtain.demon_points_cost");
 	ch->warpcount += 1;
 	send_to_char( "You have obtained a new warp!\n\r", ch );
 	save_char_obj( ch );
@@ -226,94 +227,94 @@ void do_inpart( CHAR_DATA *ch, char *argument ) {
 
 	if ( !str_cmp( arg2, "fangs" ) ) {
 		inpart = DEM_FANGS;
-		cost = 2500;
+		cost = acfg("demon.inpart.cost.fangs");
 	} else if ( !str_cmp( arg2, "immolate" ) ) {
 		inpart = DEM_IMMOLATE;
-		cost = 2500;
+		cost = acfg("demon.inpart.cost.immolate");
 	} else if ( !str_cmp( arg2, "inferno" ) ) {
 		inpart = DEM_INFERNO;
-		cost = 20000;
+		cost = acfg("demon.inpart.cost.inferno");
 	} else if ( !str_cmp( arg2, "caust" ) ) {
 		inpart = DEM_CAUST;
-		cost = 3000;
+		cost = acfg("demon.inpart.cost.caust");
 	} else if ( !str_cmp( arg2, "freezeweapon" ) ) {
 		inpart = DEM_FREEZEWEAPON;
-		cost = 3000;
+		cost = acfg("demon.inpart.cost.freezeweapon");
 	} else if ( !str_cmp( arg2, "unnerve" ) ) {
 		inpart = DEM_UNNERVE;
-		cost = 5000;
+		cost = acfg("demon.inpart.cost.unnerve");
 	} else if ( !str_cmp( arg2, "entomb" ) ) {
 		inpart = DEM_ENTOMB;
-		cost = 20000;
+		cost = acfg("demon.inpart.cost.entomb");
 	} else if ( !str_cmp( arg2, "claws" ) ) {
 		inpart = DEM_CLAWS;
-		cost = 2500;
+		cost = acfg("demon.inpart.cost.claws");
 	} else if ( !str_cmp( arg2, "horns" ) ) {
 		inpart = DEM_HORNS;
-		cost = 2500;
+		cost = acfg("demon.inpart.cost.horns");
 	} else if ( !str_cmp( arg2, "demonform" ) ) {
 		inpart = DEM_FORM;
-		cost = 25000;
+		cost = acfg("demon.inpart.cost.demonform");
 	} else if ( !str_cmp( arg2, "tail" ) ) {
 		inpart = DEM_TAIL;
-		cost = 5000;
+		cost = acfg("demon.inpart.cost.tail");
 	} else if ( !str_cmp( arg2, "hooves" ) ) {
 		inpart = DEM_HOOVES;
-		cost = 1500;
+		cost = acfg("demon.inpart.cost.hooves");
 	} else if ( !str_cmp( arg2, "shield" ) ) {
 		inpart = DEM_SHIELD;
-		cost = 20000;
+		cost = acfg("demon.inpart.cost.shield");
 	} else if ( !str_cmp( arg2, "nightsight" ) ) {
 		inpart = DEM_EYES;
-		cost = 3000;
+		cost = acfg("demon.inpart.cost.nightsight");
 	} else if ( !str_cmp( arg2, "wings" ) ) {
 		inpart = DEM_WINGS;
-		cost = 1000;
+		cost = acfg("demon.inpart.cost.wings");
 	} else if ( !str_cmp( arg2, "might" ) ) {
 		inpart = DEM_MIGHT;
-		cost = 7500;
+		cost = acfg("demon.inpart.cost.might");
 	} else if ( !str_cmp( arg2, "toughness" ) ) {
 		inpart = DEM_TOUGH;
-		cost = 7500;
+		cost = acfg("demon.inpart.cost.toughness");
 	} else if ( !str_cmp( arg2, "speed" ) ) {
 		inpart = DEM_SPEED;
-		cost = 7500;
+		cost = acfg("demon.inpart.cost.speed");
 	} else if ( !str_cmp( arg2, "travel" ) ) {
 		inpart = DEM_TRAVEL;
-		cost = 1500;
+		cost = acfg("demon.inpart.cost.travel");
 	} else if ( !str_cmp( arg2, "scry" ) ) {
 		inpart = DEM_SCRY;
-		cost = 7500;
+		cost = acfg("demon.inpart.cost.scry");
 	} else if ( !str_cmp( arg2, "move" ) ) {
 		inpart = DEM_MOVE;
-		cost = 500;
+		cost = acfg("demon.inpart.cost.move");
 	} else if ( !str_cmp( arg2, "leap" ) ) {
 		inpart = DEM_LEAP;
-		cost = 500;
+		cost = acfg("demon.inpart.cost.leap");
 	} else if ( !str_cmp( arg2, "magic" ) ) {
 		inpart = DEM_MAGIC;
-		cost = 1000;
+		cost = acfg("demon.inpart.cost.magic");
 	} else if ( !str_cmp( arg2, "truesight" ) ) {
 		inpart = DEM_TRUESIGHT;
-		cost = 7500;
+		cost = acfg("demon.inpart.cost.truesight");
 	} else if ( !str_cmp( arg2, "graft" ) ) {
 		inpart = DEM_GRAFT;
-		cost = 20000;
+		cost = acfg("demon.inpart.cost.graft");
 	} else if ( !str_cmp( arg2, "leech" ) ) {
 		inpart = DEM_LEECH;
-		cost = 15000;
+		cost = acfg("demon.inpart.cost.leech");
 	} else if ( !str_cmp( arg2, "blink" ) ) {
 		inpart = DEM_BLINK;
-		cost = 15000;
+		cost = acfg("demon.inpart.cost.blink");
 	} else if ( !str_cmp( arg2, "lifespan" ) ) {
 		inpart = DEM_LIFESPAN;
-		cost = 100;
+		cost = acfg("demon.inpart.cost.lifespan");
 	} else {
 		do_inpart( ch, "" );
 		return;
 	}
 
-	if ( !( victim == ch ) ) cost *= 25;
+	if ( !( victim == ch ) ) cost *= acfg("demon.inpart.other_multiplier");
 
 	if ( IS_DEMPOWER( victim, inpart ) ) {
 		send_to_char( "They have already got that power.\n\r", ch );
@@ -331,14 +332,14 @@ void do_inpart( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( !IS_CLASS( victim, CLASS_DEMON ) && ch->practice < 100 ) {
+	if ( !IS_CLASS( victim, CLASS_DEMON ) && ch->practice < acfg("demon.inpart.nonclass_primal_cost") ) {
 		stc( "Victim does not have 100 primal.\n\r", ch );
 		return;
 	}
 
 	SET_BIT( victim->pcdata->powers[DPOWER_FLAGS], inpart );
 	ch->pcdata->stats[DEMON_CURRENT] -= cost;
-	if ( !IS_CLASS( victim, CLASS_DEMON ) ) ch->practice -= 100;
+	if ( !IS_CLASS( victim, CLASS_DEMON ) ) ch->practice -= acfg("demon.inpart.nonclass_primal_cost");
 	if ( victim != ch ) send_to_char( "You have been granted a demonic gift from your patron!\n\r", victim );
 	send_to_char( "Ok.\n\r", ch );
 	if ( victim != ch ) save_char_obj( ch );
@@ -394,7 +395,7 @@ void do_demonarmour( CHAR_DATA *ch, char *argument ) {
 		do_demonarmour( ch, "" );
 		return;
 	}
-	if ( ch->practice < 60 ) {
+	if ( ch->practice < acfg("demon.demonarmour.primal_cost") ) {
 		send_to_char( "It costs 60 points of primal to create a piece of demon armour.\n\r", ch );
 		return;
 	}
@@ -403,7 +404,7 @@ void do_demonarmour( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Missing object, please inform Jobo.\n\r", ch );
 		return;
 	}
-	ch->practice -= 60;
+	ch->practice -= acfg("demon.demonarmour.primal_cost");
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
@@ -487,7 +488,7 @@ void do_horns( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->power[DISC_DAEM_ATTA] < 4 ) {
+	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->power[DISC_DAEM_ATTA] < acfg("demon.horns.level_req") ) {
 		if ( !IS_DEMPOWER( ch, DEM_HORNS ) && IS_CLASS( ch, CLASS_DEMON ) ) {
 			send_to_char( "You haven't been granted the gift of horns or attack is below level 4.\n\r", ch );
 			return;
@@ -578,7 +579,7 @@ void do_wings( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( !IS_DEMPOWER( ch, DEM_WINGS ) && ch->power[DISC_DAEM_ATTA] < 5 && IS_CLASS( ch, CLASS_DEMON ) ) {
+	if ( !IS_DEMPOWER( ch, DEM_WINGS ) && ch->power[DISC_DAEM_ATTA] < acfg("demon.wings.level_req") && IS_CLASS( ch, CLASS_DEMON ) ) {
 		send_to_char( "You haven't been granted the gift of wings.\n\r", ch );
 		return;
 	}
@@ -839,7 +840,7 @@ void do_cone( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	if ( ch->mana < 100 ) {
+	if ( ch->mana < acfg("demon.cone.mana_cost") ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
@@ -851,8 +852,8 @@ void do_cone( CHAR_DATA *ch, char *argument ) {
 	act( "You Blast $N with a cone of fire.", ch, NULL, victim, TO_CHAR );
 	act( "$n Blasts you with a cone of fire.", ch, NULL, victim, TO_VICT );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
-	WAIT_STATE( ch, 10 );
-	ch->mana = ch->mana - 100;
+	WAIT_STATE( ch, acfg("demon.cone.cooldown") );
+	ch->mana = ch->mana - acfg("demon.cone.mana_cost");
 	return;
 }
 
@@ -867,11 +868,11 @@ void do_dstake( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( 60 > ch->practice ) {
+	if ( acfg("demon.dstake.primal_cost") > ch->practice ) {
 		send_to_char( "It costs 60 points of primal to create a stake.\n\r", ch );
 		return;
 	}
-	ch->practice -= 60;
+	ch->practice -= acfg("demon.dstake.primal_cost");
 	obj = create_object( get_obj_index( OBJ_VNUM_STAKE ), 0 );
 	if ( IS_SET( obj->quest, QUEST_ARTIFACT ) )
 		REMOVE_BIT( obj->quest, QUEST_ARTIFACT );

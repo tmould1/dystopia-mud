@@ -25,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 void do_spiritform( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
@@ -32,7 +33,7 @@ void do_spiritform( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_PEACE] < 2 ) {
+	if ( ch->pcdata->powers[ANGEL_PEACE] < acfg("angel.spiritform.level_req") ) {
 		send_to_char( "Your not peaceful enough.\n\r", ch );
 		return;
 	}
@@ -55,7 +56,7 @@ void do_gpeace( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_PEACE] < 1 ) {
+	if ( ch->pcdata->powers[ANGEL_PEACE] < acfg("angel.gpeace.level_req") ) {
 		send_to_char( "Your not peaceful enough.\n\r", ch );
 		return;
 	}
@@ -78,19 +79,19 @@ void do_innerpeace( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_PEACE] < 3 ) {
+	if ( ch->pcdata->powers[ANGEL_PEACE] < acfg("angel.innerpeace.level_req") ) {
 		send_to_char( "Your not peaceful enough.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < 1500 ) {
+	if ( ch->mana < acfg("angel.innerpeace.mana_cost") ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	use_mana( ch, 1500 );
-	heal_char( ch, ch->pcdata->powers[ANGEL_PEACE] * 500 );
+	use_mana( ch, acfg("angel.innerpeace.mana_cost") );
+	heal_char( ch, ch->pcdata->powers[ANGEL_PEACE] * acfg("angel.innerpeace.heal_multiplier") );
 	act( "You feel the cleansing love of God run through your veins, filling you with an inner peace.", ch, NULL, NULL, TO_CHAR );
 	act( "$n is struck by a ray of pure light, and a blissful smile crosses $s lips.", ch, NULL, NULL, TO_ROOM );
-	WAIT_STATE( ch, 18 );
+	WAIT_STATE( ch, acfg("angel.innerpeace.cooldown") );
 	return;
 }
 
@@ -100,7 +101,7 @@ void do_houseofgod( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_PEACE] < 5 ) {
+	if ( ch->pcdata->powers[ANGEL_PEACE] < acfg("angel.houseofgod.level_req") ) {
 		send_to_char( "Your not peaceful enough.\n\r", ch );
 		return;
 	}
@@ -109,13 +110,13 @@ void do_houseofgod( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "It is not the time for peace yet, God wants you to fight.\n\r", ch );
 		return;
 	}
-	ch->pcdata->powers[ANGEL_PEACE_COUNTER] = 50;
+	ch->pcdata->powers[ANGEL_PEACE_COUNTER] = acfg("angel.houseofgod.peace_counter");
 	ch->level = 12;
 	do_peace( ch, "" );
 	ch->level = 3;
 	act( "You call for God to transfer the pain of these mortals to yourself.", ch, NULL, NULL, TO_CHAR );
 	act( "$n says '#yLet not these followers of God suffer, let their pain be mine instead#n'.", ch, NULL, NULL, TO_ROOM );
-	WAIT_STATE( ch, 24 );
+	WAIT_STATE( ch, acfg("angel.houseofgod.cooldown") );
 	return;
 }
 
@@ -125,7 +126,7 @@ void do_angelicaura( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_HARMONY] < 2 ) {
+	if ( ch->pcdata->powers[ANGEL_HARMONY] < acfg("angel.angelicaura.level_req") ) {
 		send_to_char( "Your not in contact with your inner harmonies.\n\r", ch );
 		return;
 	}
@@ -155,7 +156,7 @@ void do_gbanish( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_HARMONY] < 3 ) {
+	if ( ch->pcdata->powers[ANGEL_HARMONY] < acfg("angel.gbanish.level_req") ) {
 		send_to_char( "Your not in contact with your inner harmonies.\n\r", ch );
 		return;
 	}
@@ -177,11 +178,11 @@ void do_gbanish( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( victim->alignment > 0 )
-		dam = 500;
+		dam = acfg("angel.gbanish.dam_good");
 	else if ( victim->alignment > -500 )
-		dam = 1000;
+		dam = acfg("angel.gbanish.dam_neutral");
 	else
-		dam = 1500;
+		dam = acfg("angel.gbanish.dam_evil");
 	sprintf( buf, "Your call for God to banish $N and $S is hurt [%d]", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
 	sprintf( buf, "$n calls for God to banish you, and it hurts BAD! [%d]", dam );
@@ -205,7 +206,7 @@ void do_gbanish( CHAR_DATA *ch, char *argument ) {
 		if ( victim->fighting == NULL ) set_fighting( victim, ch );
 		if ( ch->fighting == NULL ) set_fighting( ch, victim );
 	}
-	WAIT_STATE( ch, 18 );
+	WAIT_STATE( ch, acfg("angel.gbanish.cooldown") );
 	return;
 }
 
@@ -221,7 +222,7 @@ void do_harmony( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_HARMONY] < 5 ) {
+	if ( ch->pcdata->powers[ANGEL_HARMONY] < acfg("angel.harmony.level_req") ) {
 		send_to_char( "Your not in contact with your inner harmonies.\n\r", ch );
 		return;
 	}
@@ -232,7 +233,7 @@ void do_harmony( CHAR_DATA *ch, char *argument ) {
 	level = number_range( 100, 200 );
 	sn = skill_lookup( "spirit kiss" );
 	if ( sn > 0 ) ( *skill_table[sn].spell_fun )( sn, level, ch, victim );
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("angel.harmony.cooldown") );
 	return;
 }
 
@@ -242,7 +243,7 @@ void do_gsenses( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_LOVE] < 1 ) {
+	if ( ch->pcdata->powers[ANGEL_LOVE] < acfg("angel.gsenses.level_req") ) {
 		send_to_char( "God does not love you enough to grant you sight.\n\r", ch );
 		return;
 	}
@@ -264,7 +265,7 @@ void do_gfavor( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_LOVE] < 2 ) {
+	if ( ch->pcdata->powers[ANGEL_LOVE] < acfg("angel.gfavor.level_req") ) {
 		send_to_char( "God does not love you enough to grant his divine favor.\n\r", ch );
 		return;
 	}
@@ -274,13 +275,13 @@ void do_gfavor( CHAR_DATA *ch, char *argument ) {
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		act( "$n turns into a human.", ch, NULL, NULL, TO_ROOM );
 		send_to_char( "You turn into your normal form.\n\r", ch );
-		ch->damroll -= 400;
-		ch->hitroll -= 400;
+		ch->damroll -= acfg("angel.gfavor.damroll_bonus");
+		ch->hitroll -= acfg("angel.gfavor.hitroll_bonus");
 		free_string( ch->morph );
 		ch->morph = str_dup( "" );
 		return;
 	}
-	if ( ch->move < 2000 || ch->mana < 2000 ) {
+	if ( ch->move < acfg("angel.gfavor.move_cost") || ch->mana < acfg("angel.gfavor.mana_cost") ) {
 		send_to_char( "You need 2000 mana and 2000 move to make yourself a true angel.\n\r", ch );
 		return;
 	} else {
@@ -291,10 +292,10 @@ void do_gfavor( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "%s the angel", ch->name );
 		free_string( ch->morph );
 		ch->morph = str_dup( buf );
-		use_move( ch, 2000 );
-		use_mana( ch, 2000 );
-		ch->damroll += 400;
-		ch->hitroll += 400;
+		use_move( ch, acfg("angel.gfavor.move_cost") );
+		use_mana( ch, acfg("angel.gfavor.mana_cost") );
+		ch->damroll += acfg("angel.gfavor.damroll_bonus");
+		ch->hitroll += acfg("angel.gfavor.hitroll_bonus");
 		return;
 	}
 	return;
@@ -311,7 +312,7 @@ void do_forgivness( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_LOVE] < 3 ) {
+	if ( ch->pcdata->powers[ANGEL_LOVE] < acfg("angel.forgivness.level_req") ) {
 		send_to_char( "Your are not loving enough.\n\r", ch );
 		return;
 	}
@@ -336,11 +337,11 @@ void do_forgivness( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "They are not ready to seek forgivness, first they must repent.\n\r", ch );
 		return;
 	}
-	heal_char( victim, number_range( 1000, 1500 ) );
+	heal_char( victim, number_range( acfg("angel.forgivness.heal_min"), acfg("angel.forgivness.heal_max") ) );
 	act( "You feel the cleansing love of God run through your veins, filling you with an inner peace.", victim, NULL, NULL, TO_CHAR );
 	act( "$n is struck by a ray of pure light, and a blissful smile crosses $s lips.", victim, NULL, NULL, TO_ROOM );
 	send_to_char( "You forgive them, and thus God forgives them for their sins.\n\r", ch );
-	WAIT_STATE( ch, 16 );
+	WAIT_STATE( ch, acfg("angel.forgivness.cooldown") );
 	return;
 }
 
@@ -352,7 +353,7 @@ void do_martyr( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_LOVE] < 5 ) {
+	if ( ch->pcdata->powers[ANGEL_LOVE] < acfg("angel.martyr.level_req") ) {
 		send_to_char( "Your love for mortals are not strong enough.\n\r", ch );
 		return;
 	}
@@ -370,7 +371,7 @@ void do_martyr( CHAR_DATA *ch, char *argument ) {
 	ch->hit = 1;
 	ch->move = 1;
 	ch->mana = 1;
-	WAIT_STATE( ch, 6 );
+	WAIT_STATE( ch, acfg("angel.martyr.cooldown") );
 	return;
 }
 
@@ -385,7 +386,7 @@ void do_swoop( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_JUSTICE] < 1 ) {
+	if ( ch->pcdata->powers[ANGEL_JUSTICE] < acfg("angel.swoop.level_req") ) {
 		send_to_char( "You haven't learned to fly yet.\n\r", ch );
 		return;
 	}
@@ -410,13 +411,13 @@ void do_swoop( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	location = victim->in_room;
-	if ( ch->move < 500 ) {
+	if ( ch->move < acfg("angel.swoop.move_cost") ) {
 		send_to_char( "You don't have the move to fly that far.\n\r", ch );
 		return;
 	}
 	act( "You fly up into the sky.", ch, NULL, NULL, TO_CHAR );
 	act( "$n flies into the sky.", ch, NULL, NULL, TO_ROOM );
-	use_move( ch, 500 );
+	use_move( ch, acfg("angel.swoop.move_cost") );
 	char_from_room( ch );
 	char_to_room( ch, location );
 	do_look( ch, "auto" );
@@ -431,14 +432,14 @@ void do_touchofgod( CHAR_DATA *ch, char *argument ) {
 	int dam;
 
 	argument = one_argument( argument, arg );
-	dam = number_range( 100, 200 );
+	dam = number_range( acfg("angel.touchofgod.dam_min"), acfg("angel.touchofgod.dam_max") );
 
 	if ( IS_NPC( ch ) ) return;
 	if ( !IS_CLASS( ch, CLASS_ANGEL ) ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_JUSTICE] < 4 ) {
+	if ( ch->pcdata->powers[ANGEL_JUSTICE] < acfg("angel.touchofgod.level_req") ) {
 		send_to_char( "You cannot channel the will of God yet.\n\r", ch );
 		return;
 	}
@@ -455,7 +456,7 @@ void do_touchofgod( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "That doesn't seem like a good idea.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, 18 );
+	WAIT_STATE( ch, acfg("angel.touchofgod.cooldown") );
 	hurt_person( ch, victim, dam );
 	act( "You grab $N by the forehead and channel God's justice into $S body.", ch, NULL, victim, TO_CHAR );
 	act( "$n grabs you by your forehead and sends a prayer to God, DAMN THAT HURT.", ch, NULL, victim, TO_VICT );
@@ -476,7 +477,7 @@ void do_awings( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_JUSTICE] < 1 ) {
+	if ( ch->pcdata->powers[ANGEL_JUSTICE] < acfg("angel.awings.level_req") ) {
 		send_to_char( "Your don't have wings yet.\n\r", ch );
 		return;
 	}
@@ -498,7 +499,7 @@ void do_halo( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_JUSTICE] < 2 ) {
+	if ( ch->pcdata->powers[ANGEL_JUSTICE] < acfg("angel.halo.level_req") ) {
 		send_to_char( "You haven't gotten your halo yet.\n\r", ch );
 		return;
 	}
@@ -525,7 +526,7 @@ void do_sinsofthepast( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[ANGEL_JUSTICE] < 3 ) {
+	if ( ch->pcdata->powers[ANGEL_JUSTICE] < acfg("angel.sinsofthepast.level_req") ) {
 		send_to_char( "Your not ready to punish the sinners.\n\r", ch );
 		return;
 	}
@@ -552,7 +553,7 @@ void do_sinsofthepast( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_AFFECTED( victim, AFF_POISON ) ) SET_BIT( victim->affected_by, AFF_POISON );
 	send_to_char( "#CGod's fury upon them for they have truly sinned!!!#n\n\r", ch );
 	one_hit( ch, victim, gsn_wrathofgod, 1 );
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("angel.sinsofthepast.cooldown") );
 	return;
 }
 

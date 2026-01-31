@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 void do_vampirearmor( CHAR_DATA *ch, char *argument ) {
 	OBJ_INDEX_DATA *pObjIndex;
@@ -39,7 +40,7 @@ void do_vampirearmor( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->practice < 60 ) {
+	if ( ch->practice < acfg("vampire.vampirearmor.practice_cost") ) {
 		send_to_char( "It costs 60 points of primal to create vampire equipment.\n\r", ch );
 		return;
 	}
@@ -82,7 +83,7 @@ void do_vampirearmor( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->practice -= 60;
+	ch->practice -= acfg("vampire.vampirearmor.practice_cost");
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
@@ -104,7 +105,7 @@ void do_preserve( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_NECR] < 2 ) {
+	if ( ch->power[DISC_VAMP_NECR] < acfg("vampire.preserve.level_req") ) {
 		stc( "You must obtain level 2 Necromancy to use Preserve.\n\r", ch );
 		return;
 	}
@@ -139,7 +140,7 @@ void do_spiritguard( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_NECR] < 4 ) {
+	if ( ch->power[DISC_VAMP_NECR] < acfg("vampire.spiritguard.level_req") ) {
 		stc( "You must obtain level 4 Necromancy to use Spirit Guardian.\n\r", ch );
 		return;
 	}
@@ -171,7 +172,7 @@ void do_spiritgate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_NECR] < 3 ) {
+	if ( ch->power[DISC_VAMP_NECR] < acfg("vampire.spiritgate.level_req") ) {
 		stc( "You must obtain level 3 Necromancy to use SpiritGate.\n\r", ch );
 		return;
 	}
@@ -181,7 +182,7 @@ void do_spiritgate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->pcdata->condition[COND_THIRST] < 66 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("vampire.spiritgate.blood_cost_check") ) {
 		stc( "You do not have enough blood.\n\r", ch );
 		return;
 	}
@@ -211,7 +212,7 @@ void do_spiritgate( CHAR_DATA *ch, char *argument ) {
 	char_to_room( ch, get_room_index( obj->in_room->vnum ) );
 	act( "You step through a spirit gate and appear before $p.", ch, obj, NULL, TO_CHAR );
 	act( "$n steps out of a spirit gate in front of $p.", ch, obj, NULL, TO_ROOM );
-	ch->pcdata->condition[COND_THIRST] -= 65;
+	ch->pcdata->condition[COND_THIRST] -= acfg("vampire.spiritgate.blood_cost");
 	return;
 }
 
@@ -223,7 +224,7 @@ void do_purification( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( !IS_CLASS( ch, CLASS_VAMPIRE ) || ch->power[DISC_VAMP_OBEA] < 7 ) {
+	if ( !IS_CLASS( ch, CLASS_VAMPIRE ) || ch->power[DISC_VAMP_OBEA] < acfg("vampire.purification.level_req") ) {
 		stc( "Only the pure in heart can use purification!\n\r", ch );
 		return;
 	}
@@ -251,7 +252,7 @@ void do_purification( CHAR_DATA *ch, char *argument ) {
 		stc( "Only the pure in heart can use purification!\n\r", ch );
 		return;
 	}
-	if ( ch->move < 5000 ) {
+	if ( ch->move < acfg("vampire.purification.move_cost") ) {
 		stc( "You are too exhausted to purify your mind\n\r", ch );
 		return;
 	}
@@ -259,8 +260,8 @@ void do_purification( CHAR_DATA *ch, char *argument ) {
 	act( "A bright halo glows above $n's head.", ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You purify your mind.\n\r", ch );
 
-	WAIT_STATE( ch, 30 - ch->power[DISC_VAMP_OBEA] );
-	use_move( ch, 5000 );
+	WAIT_STATE( ch, acfg("vampire.purification.cooldown_base") - ch->power[DISC_VAMP_OBEA] );
+	use_move( ch, acfg("vampire.purification.move_cost") );
 	heal_char( ch, hps );
 	return;
 }
@@ -280,7 +281,7 @@ void do_scream( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_MELP] < 1 ) {
+	if ( ch->power[DISC_VAMP_MELP] < acfg("vampire.scream.level_req") ) {
 		stc( "You must obtain level 1 Melpominee to use Scream.\n\r", ch );
 		return;
 	}
@@ -290,7 +291,7 @@ void do_scream( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->pcdata->condition[COND_THIRST] < 50 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("vampire.scream.blood_cost_check") ) {
 		stc( "You have insufficient blood.\n\r", ch );
 		return;
 	}
@@ -372,7 +373,7 @@ void do_testemb( CHAR_DATA *ch, char *argument ) {
 	sprintf( buf,
 		"You leap toward %s baring your fangs.\n\r", victim->name );
 	send_to_char( buf, ch );
-	WAIT_STATE( ch, 15 );
+	WAIT_STATE( ch, acfg("vampire.testemb.cooldown") );
 
 	sprintf( buf,
 		"You sink your teeth into their throat.\n\r" );
@@ -399,7 +400,7 @@ void do_conceal( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBFU] < 5 ) {
+	if ( ch->power[DISC_VAMP_OBFU] < acfg("vampire.conceal.level_req") ) {
 		send_to_char( "You need obfuscate 5 to conceal items.\n\r", ch );
 		return;
 	}
@@ -443,7 +444,7 @@ void do_fear( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DAIM] < 2 ) {
+	if ( ch->power[DISC_VAMP_DAIM] < acfg("vampire.fear.level_req") ) {
 		stc( "You must obtain level 2 Daimoinon to use Fear.\n\r", ch );
 		return;
 	}
@@ -466,7 +467,7 @@ void do_fear( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	WAIT_STATE( ch, 16 );
+	WAIT_STATE( ch, acfg("vampire.fear.cooldown") );
 
 	if ( IS_NPC( victim ) ) {
 		act( "You bare your fangs and growl at $N.", ch, NULL, victim, TO_CHAR );
@@ -477,8 +478,8 @@ void do_fear( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !IS_NPC( victim ) ) {
-		if ( ch->power[DISC_VAMP_DAIM] < 5 ) {
-			if ( number_range( 1, 4 ) != 2 ) {
+		if ( ch->power[DISC_VAMP_DAIM] < acfg("vampire.fear.pc_level_req") ) {
+			if ( number_range( 1, acfg("vampire.fear.pc_fail_range") ) != 2 ) {
 				act( "You bare your fangs and growl at $N, but nothing happens.", ch, NULL, victim, TO_CHAR );
 				act( "$n bares $s fangs and growls at you.", ch, NULL, victim, TO_VICT );
 				act( "$n bares $s fangs and growls at $N, but nothing happens.", ch, NULL, victim, TO_NOTVICT );
@@ -513,7 +514,7 @@ void do_vtwist( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DAIM] < 5 ) {
+	if ( ch->power[DISC_VAMP_DAIM] < acfg("vampire.vtwist.level_req") ) {
 		send_to_char( "You must obtain level 5 Daimoinon to use Twist.\n\r", ch );
 		return;
 	}
@@ -570,7 +571,7 @@ void do_dub( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBFU] < 4 ) {
+	if ( ch->power[DISC_VAMP_OBFU] < acfg("vampire.dub.level_req") ) {
 		send_to_char( "You need obfuscate 4 to dub items.\n\r", ch );
 		return;
 	}
@@ -606,7 +607,7 @@ void do_sharpen( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_QUIE] < 7 ) {
+	if ( ch->power[DISC_VAMP_QUIE] < acfg("vampire.sharpen.level_req") ) {
 		send_to_char( "You need Quetius 7 to sharpen.\n\r", ch );
 		return;
 	}
@@ -660,7 +661,7 @@ void do_gourge( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_THAU] < 8 ) {
+	if ( ch->power[DISC_VAMP_THAU] < acfg("vampire.gourge.level_req") ) {
 		send_to_char( "You need Thaumaturgy 8 to Gourge.\n\r", ch );
 		return;
 	}
@@ -681,7 +682,7 @@ void do_gourge( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You cannot gourge a person.\n\r", ch );
 		return;
 	}
-	if ( victim->level > 30 ) {
+	if ( victim->level > acfg("vampire.gourge.mob_level_max") ) {
 		send_to_char(
 			"Only small creatures are defenceless enough to be gourged on.\n\r", ch );
 		return;
@@ -692,14 +693,14 @@ void do_gourge( CHAR_DATA *ch, char *argument ) {
 	sprintf( buf,
 		"You leap toward %s baring your fangs.\n\r", victim->name );
 	send_to_char( buf, ch );
-	WAIT_STATE( ch, 15 );
+	WAIT_STATE( ch, acfg("vampire.gourge.cooldown") );
 
 	send_to_char(
 		"You rip their throat out and gourge on the blood.\n\r", ch );
 	sprintf( buf,
 		"%s rips %s's throat out, gourging on all of their blood.", ch->name, victim->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	ch->pcdata->condition[COND_THIRST] += number_range( 100, 200 );
+	ch->pcdata->condition[COND_THIRST] += number_range( acfg("vampire.gourge.blood_gain_min"), acfg("vampire.gourge.blood_gain_max") );
 	if ( ch->pcdata->condition[COND_THIRST] >= 1000 /
 			ch->generation ) {
 		send_to_char( "Your bloodlust is sated.\n\r", ch );
@@ -730,7 +731,7 @@ void do_bloodwater( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_NECR] < 5 ) {
+	if ( ch->power[DISC_VAMP_NECR] < acfg("vampire.bloodwater.level_req") ) {
 		send_to_char(
 			"You need at least level 5 Necromancy to use Blood Water.\n\r", ch );
 		return;
@@ -750,19 +751,19 @@ void do_bloodwater( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( is_safe( ch, victim ) ) return;
-	if ( IS_NPC( victim ) ) dam = 2000;
-	if ( !IS_NPC( victim ) ) dam = number_range( 300, 600 );
+	if ( IS_NPC( victim ) ) dam = acfg("vampire.bloodwater.damage_npc");
+	if ( !IS_NPC( victim ) ) dam = number_range( acfg("vampire.bloodwater.damage_pc_min"), acfg("vampire.bloodwater.damage_pc_max") );
 	if ( victim != NULL ) set_fighting( ch, victim );
 	act( "$N screams in agony as you turn his blood to water.", ch, NULL, victim, TO_CHAR );
 	act( "$N screams in agony as $n turns his blood to water.", ch, NULL, victim, TO_NOTVICT );
 	act( "You scream in agony as $n turns your blood to water.", ch, NULL, victim, TO_VICT );
 	if ( !IS_CLASS( victim, CLASS_VAMPIRE ) ) hurt_person( ch, victim, dam );
-	if ( !IS_CLASS( victim, CLASS_VAMPIRE ) ) WAIT_STATE( ch, 12 );
+	if ( !IS_CLASS( victim, CLASS_VAMPIRE ) ) WAIT_STATE( ch, acfg("vampire.bloodwater.cooldown_nonvamp") );
 	if ( IS_CLASS( victim, CLASS_VAMPIRE ) ) {
-		WAIT_STATE( ch, 6 );
-		victim->pcdata->condition[COND_THIRST] -= 150;
+		WAIT_STATE( ch, acfg("vampire.bloodwater.cooldown_vamp") );
+		victim->pcdata->condition[COND_THIRST] -= acfg("vampire.bloodwater.vamp_blood_drain");
 	}
-	if ( number_range( 1, 4 ) == 2 && victim->hit > 100 ) {
+	if ( number_range( 1, acfg("vampire.bloodwater.chain_chance_denom") ) == 2 && victim->hit > acfg("vampire.bloodwater.chain_victim_min_hp") ) {
 		act( "Your eyes flare red as your lust for blood takes over.", ch, NULL, NULL, TO_CHAR );
 		act( "$n growls in lust.", ch, NULL, NULL, TO_ROOM );
 		do_bloodwater( ch, arg1 );
@@ -783,16 +784,16 @@ void do_spew( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( IS_CLASS( ch, CLASS_VAMPIRE ) &&
-		ch->power[DISC_VAMP_THAU] < 6 ) {
+		ch->power[DISC_VAMP_THAU] < acfg("vampire.spew.level_req") ) {
 		send_to_char(
 			"You need level 6 Thaumaturgy to use this power.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < 20 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("vampire.spew.blood_cost_check") ) {
 		send_to_char( "You need 20 blood to spew.\n\r", ch );
 		return;
 	}
-	ch->pcdata->condition[COND_THIRST] -= number_range( 18, 22 );
+	ch->pcdata->condition[COND_THIRST] -= number_range( acfg("vampire.spew.blood_cost_min"), acfg("vampire.spew.blood_cost_max") );
 
 	if ( IS_SET( ch->in_room->room_flags, ROOM_SAFE ) ) {
 		send_to_char( "You cannot do that here.\n\r", ch );
@@ -806,7 +807,7 @@ void do_spew( CHAR_DATA *ch, char *argument ) {
 
 	level = ch->power[DISC_VAMP_THAU];
 	( *skill_table[sn].spell_fun )( sn, level, ch, NULL );
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("vampire.spew.cooldown") );
 	return;
 }
 
@@ -821,16 +822,16 @@ void do_vampdarkness( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < 6 ) {
+	if ( ch->power[DISC_VAMP_QUIE] < acfg("vampire.vampdarkness.level_req") ) {
 		send_to_char( "You require level 6 Quietus to use Darkness of Death.\n\r", ch );
 		return;
 	}
 
-	if ( ch->pcdata->condition[COND_THIRST] < 300 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("vampire.vampdarkness.blood_cost") ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
-	ch->pcdata->condition[COND_THIRST] -= 300;
+	ch->pcdata->condition[COND_THIRST] -= acfg("vampire.vampdarkness.blood_cost");
 	SET_BIT( inroom->room_flags, ROOM_DARK );
 	sprintf( buf, "A look of concentration passes over %s's face.",
 		ch->name );

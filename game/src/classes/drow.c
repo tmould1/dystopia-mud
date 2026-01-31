@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 /*
  * Local functions.
@@ -120,64 +121,64 @@ void do_grant( CHAR_DATA *ch, char *argument ) {
 
 	if ( !str_cmp( arg2, "drowfire" ) ) {
 		inpart = DPOWER_DROWFIRE;
-		cost = 2500;
+		cost = acfg("drow.grant.drowfire_cost");
 	} else if ( !str_cmp( arg2, "darkness" ) ) {
 		inpart = DPOWER_DARKNESS;
-		cost = 7500;
+		cost = acfg("drow.grant.darkness_cost");
 	} else if ( !str_cmp( arg2, "drowsight" ) ) {
 		inpart = DPOWER_DROWSIGHT;
-		cost = 5000;
+		cost = acfg("drow.grant.drowsight_cost");
 	} else if ( !str_cmp( arg2, "spiderarms" ) ) {
 		inpart = DPOWER_ARMS;
-		cost = 25000;
+		cost = acfg("drow.grant.spiderarms_cost");
 	} else if ( !str_cmp( arg2, "web" ) ) {
 		inpart = DPOWER_WEB;
-		cost = 5000;
+		cost = acfg("drow.grant.web_cost");
 	} else if ( !str_cmp( arg2, "spiderform" ) ) {
 		inpart = DPOWER_SPIDERFORM;
-		cost = 25000;
+		cost = acfg("drow.grant.spiderform_cost");
 	} else if ( !str_cmp( arg2, "drowhate" ) ) {
 		inpart = DPOWER_DROWHATE;
-		cost = 20000;
+		cost = acfg("drow.grant.drowhate_cost");
 	} else if ( !str_cmp( arg2, "drowshield" ) ) {
 		inpart = DPOWER_DROWSHIELD;
-		cost = 5000;
+		cost = acfg("drow.grant.drowshield_cost");
 	} else if ( !str_cmp( arg2, "levitation" ) ) {
 		inpart = DPOWER_LEVITATION;
-		cost = 1000;
+		cost = acfg("drow.grant.levitation_cost");
 	} else if ( !str_cmp( arg2, "shadowwalk" ) ) {
 		inpart = DPOWER_SHADOWWALK;
-		cost = 10000;
+		cost = acfg("drow.grant.shadowwalk_cost");
 	} else if ( !str_cmp( arg2, "garotte" ) ) {
 		inpart = DPOWER_GAROTTE;
-		cost = 5000;
+		cost = acfg("drow.grant.garotte_cost");
 	} else if ( !str_cmp( arg2, "dgarotte" ) ) {
 		inpart = DPOWER_DGAROTTE;
-		cost = 2500;
+		cost = acfg("drow.grant.dgarotte_cost");
 	} else if ( !str_cmp( arg2, "drowpoison" ) ) {
 		inpart = DPOWER_DROWPOISON;
-		cost = 2500;
+		cost = acfg("drow.grant.drowpoison_cost");
 	} else if ( !str_cmp( arg2, "glamour" ) ) {
 		inpart = DPOWER_GLAMOUR;
-		cost = 5000;
+		cost = acfg("drow.grant.glamour_cost");
 	} else if ( !str_cmp( arg2, "confuse" ) ) {
 		inpart = DPOWER_CONFUSE;
-		cost = 2500;
+		cost = acfg("drow.grant.confuse_cost");
 	} else if ( !str_cmp( arg2, "earthshatter" ) ) {
 		inpart = DPOWER_EARTHSHATTER;
-		cost = 7500;
+		cost = acfg("drow.grant.earthshatter_cost");
 	} else if ( !str_cmp( arg2, "speed" ) ) {
 		inpart = DPOWER_SPEED;
-		cost = 7500;
+		cost = acfg("drow.grant.speed_cost");
 	} else if ( !str_cmp( arg2, "toughskin" ) ) {
 		inpart = DPOWER_TOUGHSKIN;
-		cost = 7500;
+		cost = acfg("drow.grant.toughskin_cost");
 	} else if ( !str_cmp( arg2, "darktendrils" ) ) {
 		inpart = DPOWER_DARKTENDRILS;
-		cost = 25000;
+		cost = acfg("drow.grant.darktendrils_cost");
 	} else if ( !str_cmp( arg2, "fightdance" ) ) {
 		inpart = DPOWER_FIGHTDANCE;
-		cost = 10000;
+		cost = acfg("drow.grant.fightdance_cost");
 	} else {
 		send_to_char( "Syntax: Grant <person> <power>\n\r", ch );
 		send_to_char( "#pDrowfire #0(#r2500#0)#n,  #pDarkness #0(#r7500#0)#n,  #pDrowpoison #0(#r2500#0)#n.\n\r", ch );
@@ -190,7 +191,7 @@ void do_grant( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Warrior (0), Mage (0), Cleric (0).\n\r", ch );
 		return;
 	}
-	if ( !( ch == victim ) ) cost *= 5;
+	if ( !( ch == victim ) ) cost *= acfg("drow.grant.other_multiplier");
 
 	if ( IS_SET( victim->pcdata->powers[1], inpart ) ) {
 		send_to_char( "They have already got that power.\n\r", ch );
@@ -236,7 +237,7 @@ void do_chaosblast( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	if ( ch->mana < 750 ) {
+	if ( ch->mana < acfg("drow.chaosblast.mana_cost") ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
@@ -247,8 +248,8 @@ void do_chaosblast( CHAR_DATA *ch, char *argument ) {
 	act( "You concentrate your power on $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n concentrates $s power on you.", ch, NULL, victim, TO_VICT );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
-	WAIT_STATE( ch, 12 );
-	use_mana( ch, 750 );
+	WAIT_STATE( ch, acfg("drow.chaosblast.cooldown") );
+	use_mana( ch, acfg("drow.chaosblast.mana_cost") );
 	return;
 }
 
@@ -307,7 +308,7 @@ void do_drowcreate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->practice < 60 ) {
+	if ( ch->practice < acfg("drow.drowcreate.primal_cost") ) {
 		send_to_char( "It costs 60 points of primal to create a piece of drow armour.\n\r", ch );
 		return;
 	}
@@ -317,7 +318,7 @@ void do_drowcreate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->practice -= 60;
+	ch->practice -= acfg("drow.drowcreate.primal_cost");
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
@@ -354,7 +355,7 @@ void do_drowfire( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < 100 ) {
+	if ( ch->mana < acfg("drow.drowfire.mana_cost") ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
@@ -363,8 +364,8 @@ void do_drowfire( CHAR_DATA *ch, char *argument ) {
 	spelltype = skill_table[sn].target;
 	level = (int) ( ch->spl[spelltype] * 1.5 );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
-	WAIT_STATE( ch, 12 );
-	use_mana( ch, 100 );
+	WAIT_STATE( ch, acfg("drow.drowfire.cooldown") );
+	use_mana( ch, acfg("drow.drowfire.mana_cost") );
 	return;
 }
 void do_heal( CHAR_DATA *ch, char *argument ) {
@@ -375,16 +376,16 @@ void do_heal( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < 750 ) {
+	if ( ch->mana < acfg("drow.heal.mana_cost") ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	use_mana( ch, 750 );
+	use_mana( ch, acfg("drow.heal.mana_cost") );
 	heal_char( ch, ch->spl[BLUE_MAGIC] * 3 );
 	send_to_char( "Lloth heals you.\n\r", ch );
 	act( "$n is healed by Lloth.", ch, NULL, NULL, TO_ROOM );
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("drow.heal.cooldown") );
 	return;
 }
 
@@ -428,7 +429,7 @@ void do_shadowwalk( CHAR_DATA *ch, char *argument ) {
 	}
 	location = victim->in_room;
 
-	if ( ch->move < 250 ) {
+	if ( ch->move < acfg("drow.shadowwalk.move_cost") ) {
 		send_to_char( "You are too tired to go shadowwalking.\n\r", ch );
 		return;
 	}
@@ -443,7 +444,7 @@ void do_shadowwalk( CHAR_DATA *ch, char *argument ) {
 
 	act( "You walk into the shadows.", ch, NULL, NULL, TO_CHAR );
 	act( "$n walks into the shadows.", ch, NULL, NULL, TO_ROOM );
-	use_move( ch, 250 );
+	use_move( ch, acfg("drow.shadowwalk.move_cost") );
 	char_from_room( ch );
 	char_to_room( ch, location );
 	do_look( ch, "auto" );
@@ -534,13 +535,13 @@ void do_spiderform( CHAR_DATA *ch, char *argument ) {
 		stc( "You return to your normal form.\n\r", ch );
 		free_string( ch->morph );
 		ch->morph = str_dup( "" );
-		ch->hitroll -= 400;
-		ch->damroll -= 400;
-		ch->armor += 1000;
+		ch->hitroll -= acfg("drow.spiderform.hitroll_bonus");
+		ch->damroll -= acfg("drow.spiderform.damroll_bonus");
+		ch->armor += acfg("drow.spiderform.armor_bonus");
 		REMOVE_BIT( ch->newbits, NEW_DFORM );
 		REMOVE_BIT( ch->newbits, THIRD_HAND );
 		REMOVE_BIT( ch->newbits, FOURTH_HAND );
-		WAIT_STATE( ch, 7 );
+		WAIT_STATE( ch, acfg("drow.spiderform.revert_cooldown") );
 		return;
 	}
 
@@ -551,9 +552,9 @@ void do_spiderform( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "%s the giant mylochar", ch->name );
 		free_string( ch->morph );
 		ch->morph = str_dup( buf );
-		ch->hitroll += 400;
-		ch->damroll += 400;
-		ch->armor -= 1000;
+		ch->hitroll += acfg("drow.spiderform.hitroll_bonus");
+		ch->damroll += acfg("drow.spiderform.damroll_bonus");
+		ch->armor -= acfg("drow.spiderform.armor_bonus");
 		SET_BIT( ch->newbits, NEW_DFORM );
 		SET_BIT( ch->newbits, THIRD_HAND );
 		SET_BIT( ch->newbits, FOURTH_HAND );
@@ -727,14 +728,14 @@ void do_darkness( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < 500 ) {
+	if ( ch->mana < acfg("drow.darkness.mana_cost") ) {
 		send_to_char( "You don't have enough mana to summon the darkness.\n\r", ch );
 		return;
 	}
 
 	send_to_char( "You summon a globe of darkness.\n\r", ch );
 	act( "$n summons a globe of darkness.", ch, NULL, NULL, TO_ROOM );
-	use_mana( ch, 500 );
+	use_mana( ch, acfg("drow.darkness.mana_cost") );
 	if ( IS_SET( ch->extra, TIED_UP ) ) {
 		REMOVE_BIT( ch->extra, TIED_UP );
 		blah = TRUE;
@@ -830,7 +831,7 @@ void do_confuse( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->move < 75 ) {
+	if ( ch->move < acfg("drow.confuse.move_cost") ) {
 		send_to_char( "You need 75 move to confuse your opponent.\n\r", ch );
 		return;
 	}
@@ -839,16 +840,16 @@ void do_confuse( CHAR_DATA *ch, char *argument ) {
 	act( "You attempt to confuse $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n attempts to confuse $N.", ch, NULL, victim, TO_NOTVICT );
 
-	use_move( ch, 75 );
+	use_move( ch, acfg("drow.confuse.move_cost") );
 
-	if ( number_percent() > 25 ) {
+	if ( number_percent() > acfg("drow.confuse.fail_threshold") ) {
 		send_to_char( "You failed.\n\r", ch );
 		return;
 	}
 
 	else {
 		do_flee( victim, "" );
-		WAIT_STATE( ch, 16 );
+		WAIT_STATE( ch, acfg("drow.confuse.cooldown") );
 		return;
 	}
 
@@ -868,13 +869,13 @@ void do_earthshatter( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < 150 ) {
+	if ( ch->mana < acfg("drow.earthshatter.mana_cost") ) {
 		send_to_char( "You need more mana.\n\r", ch );
 		return;
 	}
 
 	level = ch->spl[PURPLE_MAGIC];
-	use_mana( ch, 150 );
+	use_mana( ch, acfg("drow.earthshatter.mana_cost") );
 
 	send_to_char( "You summon the power of the underworld, shattering the earth.\n\r", ch );
 	act( "$n causes the earth to shatter", ch, NULL, NULL, TO_ROOM );
@@ -889,6 +890,6 @@ void do_earthshatter( CHAR_DATA *ch, char *argument ) {
 			dam /= 2;
 		damage( ch, vch, dam, skill_lookup( "earthquake" ) );
 	}
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("drow.earthshatter.cooldown") );
 	return;
 }

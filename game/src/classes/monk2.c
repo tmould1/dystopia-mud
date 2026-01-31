@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 int dambonus args( ( CHAR_DATA * ch, CHAR_DATA *victim, int dam, int stance ) );
 

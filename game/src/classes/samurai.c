@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 void check_samuraiattack args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
 
@@ -31,18 +32,18 @@ void do_katana( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( 250 > ch->practice ) {
+	if ( acfg("samurai.katana.primal_cost") > ch->practice ) {
 		send_to_char( "It costs 250 points of primal to create a Katana.\n\r", ch );
 		return;
 	}
-	ch->practice -= 250;
+	ch->practice -= acfg("samurai.katana.primal_cost");
 	obj = create_object( get_obj_index( 33176 ), 50 );
 	SET_BIT( obj->quest, QUEST_RELIC );
 	obj->condition = 100;
 	obj->toughness = 100;
 	obj->resistance = 1;
-	obj->value[1] = 65;
-	obj->value[2] = 115;
+	obj->value[1] = acfg("samurai.katana.weapon_dice_count");
+	obj->value[2] = acfg("samurai.katana.weapon_dice_size");
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
 	act( "A katana flashes into existance.", ch, NULL, NULL, TO_CHAR );
@@ -56,7 +57,7 @@ void do_bladespin( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->wpn[3] < 1000 || ch->wpn[0] < 1000 || ch->wpn[1] < 1000 ) {
+	if ( ch->wpn[3] < acfg("samurai.bladespin.wpn_skill_req") || ch->wpn[0] < acfg("samurai.bladespin.wpn_skill_req") || ch->wpn[1] < acfg("samurai.bladespin.wpn_skill_req") ) {
 		stc( "You are not a true samurai yet.\n\r", ch );
 		return;
 	}
@@ -99,7 +100,7 @@ void do_hologramtransfer( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->move < 1000 ) {
+	if ( ch->move < acfg("samurai.hologramtransfer.move_cost") ) {
 		stc( "The path escapes your senses as you loose control over your inner energies.\n\r", ch );
 		return;
 	}
@@ -134,7 +135,7 @@ void do_hologramtransfer( CHAR_DATA *ch, char *argument ) {
 	act( "$n steps into the air, leaving behind no trace whatsoever.", ch, NULL, victim, TO_ROOM );
 	char_from_room( ch );
 	char_to_room( ch, victim->in_room );
-	use_move( ch, 1000 );
+	use_move( ch, acfg("samurai.hologramtransfer.move_cost") );
 	act( "$n steps out of the air in front of $N.", ch, NULL, victim, TO_NOTVICT );
 	act( "$n steps out of the air in front of you.", ch, NULL, victim, TO_VICT );
 	do_look( ch, "auto" );
@@ -153,7 +154,7 @@ void do_focus( CHAR_DATA *ch, char *argument ) {
 	}
 	ch->pcdata->powers[SAMURAI_FOCUS] -= number_range( 1, ch->pcdata->powers[SAMURAI_FOCUS] );
 	send_to_char( "You focus your control, letting the battle slow to a halt.\n\r", ch );
-	WAIT_STATE( ch, 8 );
+	WAIT_STATE( ch, acfg("samurai.focus.cooldown") );
 	return;
 }
 
@@ -169,7 +170,7 @@ void do_slide( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need to learn that combo first.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[SAMURAI_FOCUS] > 40 ) {
+	if ( ch->pcdata->powers[SAMURAI_FOCUS] > acfg("samurai.slide.focus_max") ) {
 		send_to_char( "You are to exhausted.\n\r", ch );
 		return;
 	}
@@ -177,13 +178,13 @@ void do_slide( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	ch->pcdata->powers[SAMURAI_FOCUS] += 1;
+	ch->pcdata->powers[SAMURAI_FOCUS] += acfg("samurai.slide.focus_cost");
 	act( "$n slides into a better fighting position, hitting $N while $e passes.", ch, NULL, victim, TO_NOTVICT );
 	act( "You slide into a better fighting position, hitting $N while you pass $E.", ch, NULL, victim, TO_CHAR );
 	act( "$n moves past you, lightning fast and strikes you before you can react.", ch, NULL, victim, TO_VICT );
 	one_hit( ch, victim, gsn_lightningslash, 1 );
 	check_samuraiattack( ch, victim );
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("samurai.slide.cooldown") );
 	return;
 }
 
@@ -199,7 +200,7 @@ void do_sidestep( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need to learn that combo first.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[SAMURAI_FOCUS] > 40 ) {
+	if ( ch->pcdata->powers[SAMURAI_FOCUS] > acfg("samurai.sidestep.focus_max") ) {
 		send_to_char( "You are to exhausted.\n\r", ch );
 		return;
 	}
@@ -207,13 +208,13 @@ void do_sidestep( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	ch->pcdata->powers[SAMURAI_FOCUS] += 2;
+	ch->pcdata->powers[SAMURAI_FOCUS] += acfg("samurai.sidestep.focus_cost");
 	act( "$n sidesteps $N's attack and scores a hit.", ch, NULL, victim, TO_NOTVICT );
 	act( "You sidestep $N's attack, and scores a counterattack before $E can react.", ch, NULL, victim, TO_CHAR );
 	act( "$n sidesteps your feeble attempt to get near $m and strikes back at you.", ch, NULL, victim, TO_VICT );
 	one_hit( ch, victim, gsn_lightningslash, 1 );
 	check_samuraiattack( ch, victim );
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("samurai.sidestep.cooldown") );
 	return;
 }
 
@@ -229,7 +230,7 @@ void do_block( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need to learn that combo first.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[SAMURAI_FOCUS] > 40 ) {
+	if ( ch->pcdata->powers[SAMURAI_FOCUS] > acfg("samurai.block.focus_max") ) {
 		send_to_char( "You are to exhausted.\n\r", ch );
 		return;
 	}
@@ -237,13 +238,13 @@ void do_block( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	ch->pcdata->powers[SAMURAI_FOCUS] += 4;
+	ch->pcdata->powers[SAMURAI_FOCUS] += acfg("samurai.block.focus_cost");
 	act( "$n blocks $N's simpleminded attack and strikes back with a perfect attack.", ch, NULL, victim, TO_NOTVICT );
 	act( "You block $N's simple attack and return with one of your own design.", ch, NULL, victim, TO_CHAR );
 	act( "$n blocks your attack, and strikes back before you get a chance to react.", ch, NULL, victim, TO_VICT );
 	one_hit( ch, victim, gsn_lightningslash, 1 );
 	check_samuraiattack( ch, victim );
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("samurai.block.cooldown") );
 	return;
 }
 
@@ -259,7 +260,7 @@ void do_countermove( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need to learn that combo first.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[SAMURAI_FOCUS] > 40 ) {
+	if ( ch->pcdata->powers[SAMURAI_FOCUS] > acfg("samurai.countermove.focus_max") ) {
 		send_to_char( "You are to exhausted.\n\r", ch );
 		return;
 	}
@@ -267,19 +268,19 @@ void do_countermove( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	ch->pcdata->powers[SAMURAI_FOCUS] += 8;
+	ch->pcdata->powers[SAMURAI_FOCUS] += acfg("samurai.countermove.focus_cost");
 	act( "$n strikes out at $N before $E can even get a weapon out to defend $Mself.", ch, NULL, victim, TO_NOTVICT );
 	act( "You cut $N with a lightning fast attack.", ch, NULL, victim, TO_CHAR );
 	act( "$n attacks with a flurry of lightning fast attacks, one of them scores a hit.", ch, NULL, victim, TO_VICT );
 	one_hit( ch, victim, gsn_lightningslash, 1 );
 	check_samuraiattack( ch, victim );
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("samurai.countermove.cooldown") );
 	return;
 }
 
 void check_samuraiattack( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	if ( !IS_CLASS( ch, CLASS_SAMURAI ) ) return;
-	if ( !victim || victim->hit < 1000 ) return;
+	if ( !victim || victim->hit < acfg("samurai.combo.victim_min_hp") ) return;
 
 	switch ( ch->pcdata->powers[SAMURAI_FOCUS] ) {
 	default:
@@ -301,7 +302,7 @@ void check_samuraiattack( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			break;
 		}
 		ch->pcdata->powers[SAMURAI_LAST] = 15;
-		if ( number_range( 1, 3 ) == 2 ) {
+		if ( number_range( 1, acfg("samurai.combo_15.fail_range_max") ) == 2 ) {
 			send_to_char( "You fail your attempt to disarm.\n\r", ch );
 			break;
 		}
@@ -317,7 +318,7 @@ void check_samuraiattack( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		ch->pcdata->powers[SAMURAI_LAST] = 20;
 		act( "#GYour hit $N on a central nerve, paralysing $M.#n", ch, NULL, victim, TO_CHAR );
 		act( "#G$n's attack paralyses you, you cannot move.#n", ch, NULL, victim, TO_VICT );
-		WAIT_STATE( victim, 24 );
+		WAIT_STATE( victim, acfg("samurai.combo_20.victim_cooldown") );
 		break;
 	case 25:
 		if ( ch->pcdata->powers[SAMURAI_LAST] == 25 ) {
@@ -325,7 +326,7 @@ void check_samuraiattack( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			break;
 		}
 		ch->pcdata->powers[SAMURAI_LAST] = 25;
-		if ( number_range( 1, 3 ) == 2 ) {
+		if ( number_range( 1, acfg("samurai.combo_25.fail_range_max") ) == 2 ) {
 			send_to_char( "You fail your attempt to hurl.\n\r", ch );
 			break;
 		}
@@ -339,7 +340,7 @@ void check_samuraiattack( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			break;
 		}
 		ch->pcdata->powers[SAMURAI_LAST] = 30;
-		heal_char( ch, number_range( 2000, 4000 ) );
+		heal_char( ch, number_range( acfg("samurai.combo_30.heal_min"), acfg("samurai.combo_30.heal_max") ) );
 		act( "#GYou feel adrenalin pump through your body, awakening your senses.#n", ch, NULL, victim, TO_CHAR );
 		act( "#G$n flashes a wicked smile.#n", ch, NULL, victim, TO_VICT );
 		break;
@@ -363,7 +364,7 @@ void check_samuraiattack( CHAR_DATA *ch, CHAR_DATA *victim ) {
 void do_martial( CHAR_DATA *ch, char *argument ) {
 	char arg[MAX_INPUT_LENGTH];
 	char buf[MAX_STRING_LENGTH];
-	int cost = 150000000; // 150 million for each combo.
+	int cost = acfg("samurai.martial.exp_cost");
 
 	one_argument( argument, arg );
 

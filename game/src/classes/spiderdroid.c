@@ -25,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 void do_implant( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_INPUT_LENGTH];
@@ -42,9 +43,9 @@ void do_implant( CHAR_DATA *ch, char *argument ) {
 
 	if ( arg1[0] == '\0' && arg2[0] == '\0' ) {
 		sprintf( buf, "Current implant levels: #pFace: %d, Legs: %d, Body: %d.#n\n\r",
-			UMIN( ch->pcdata->powers[CYBORG_FACE], 5 ),
-			UMIN( ch->pcdata->powers[CYBORG_LIMBS], 5 ),
-			UMIN( ch->pcdata->powers[CYBORG_BODY], 6 ) );
+			UMIN( ch->pcdata->powers[CYBORG_FACE], acfg("spiderdroid.implant.face_max") ),
+			UMIN( ch->pcdata->powers[CYBORG_LIMBS], acfg("spiderdroid.implant.legs_max") ),
+			UMIN( ch->pcdata->powers[CYBORG_BODY], acfg("spiderdroid.implant.body_max") ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -99,9 +100,9 @@ void do_implant( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		sprintf( buf, "Current implant levels: #pFace: %d, Legs: %d, Body: %d.#n\n\r",
-			UMIN( ch->pcdata->powers[CYBORG_FACE], 5 ),
-			UMIN( ch->pcdata->powers[CYBORG_LIMBS], 5 ),
-			UMIN( ch->pcdata->powers[CYBORG_BODY], 6 ) );
+			UMIN( ch->pcdata->powers[CYBORG_FACE], acfg("spiderdroid.implant.face_max") ),
+			UMIN( ch->pcdata->powers[CYBORG_LIMBS], acfg("spiderdroid.implant.legs_max") ),
+			UMIN( ch->pcdata->powers[CYBORG_BODY], acfg("spiderdroid.implant.body_max") ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -112,31 +113,31 @@ void do_implant( CHAR_DATA *ch, char *argument ) {
 
 		if ( !str_cmp( arg1, "face" ) ) {
 			implant = CYBORG_FACE;
-			max = 5;
+			max = acfg("spiderdroid.implant.face_max");
 		} else if ( !str_cmp( arg1, "legs" ) ) {
 			implant = CYBORG_LIMBS;
-			max = 5;
+			max = acfg("spiderdroid.implant.legs_max");
 		} else if ( !str_cmp( arg1, "body" ) ) {
 			implant = CYBORG_BODY;
-			max = 6;
+			max = acfg("spiderdroid.implant.body_max");
 		} else {
 			send_to_char( "Implants are face, legs, and body.\n\r", ch );
 			return;
 		}
 		if ( ( ch->pcdata->powers[implant] == 1 ) )
-			cost = 25000;
+			cost = acfg("spiderdroid.implant.cost_level1");
 		else if ( ( ch->pcdata->powers[implant] == 2 ) )
-			cost = 50000;
+			cost = acfg("spiderdroid.implant.cost_level2");
 		else if ( ( ch->pcdata->powers[implant] == 3 ) )
-			cost = 100000;
+			cost = acfg("spiderdroid.implant.cost_level3");
 		else if ( ( ch->pcdata->powers[implant] == 4 ) )
-			cost = 200000;
+			cost = acfg("spiderdroid.implant.cost_level4");
 		else if ( ( ch->pcdata->powers[implant] == 5 ) )
-			cost = 400000;
+			cost = acfg("spiderdroid.implant.cost_level5");
 		else if ( ( ch->pcdata->powers[implant] == 6 ) )
 			cost = 800000;
 		else
-			cost = 12500;
+			cost = acfg("spiderdroid.implant.cost_level0");
 		arg1[0] = UPPER( arg1[0] );
 		if ( ( ch->pcdata->powers[implant] >= max ) ) {
 			sprintf( buf, "You already have all implants on your %s.\n\r", arg1 );
@@ -183,12 +184,12 @@ void do_stuntubes( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->pcdata->powers[CYBORG_BODY] < 5 || ch->pcdata->powers[CYBORG_LIMBS] < 5 ) {
+	if ( ch->pcdata->powers[CYBORG_BODY] < acfg("spiderdroid.stuntubes.body_level_req") || ch->pcdata->powers[CYBORG_LIMBS] < acfg("spiderdroid.stuntubes.legs_level_req") ) {
 		send_to_char( "You need level 5 implants on your legs and body to use this.\n\r", ch );
 		return;
 	}
 
-	if ( ch->move < 1000 ) {
+	if ( ch->move < acfg("spiderdroid.stuntubes.move_cost") ) {
 		stc( "You need 1000 move to do that.\n\r", ch );
 		return;
 	}
@@ -197,8 +198,8 @@ void do_stuntubes( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, 12 );
-	use_move( ch, 1000 );
+	WAIT_STATE( ch, acfg("spiderdroid.stuntubes.cooldown") );
+	use_move( ch, acfg("spiderdroid.stuntubes.move_cost") );
 
 	one_hit( ch, victim, gsn_stuntubes, 1 );
 	one_hit( ch, victim, gsn_stuntubes, 1 );
@@ -220,7 +221,7 @@ void do_cubeform( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->pcdata->powers[CYBORG_BODY] < 5 ) {
+	if ( ch->pcdata->powers[CYBORG_BODY] < acfg("spiderdroid.cubeform.body_level_req") ) {
 		send_to_char( "You must have level 5 body.\n\r", ch );
 		return;
 	}
@@ -230,14 +231,14 @@ void do_cubeform( CHAR_DATA *ch, char *argument ) {
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		act( "$n turns into a spider droid.", ch, NULL, NULL, TO_ROOM );
 		send_to_char( "You turn into your normal form.\n\r", ch );
-		ch->damroll -= 250;
-		ch->hitroll -= 250;
+		ch->damroll -= acfg("spiderdroid.cubeform.damroll_bonus");
+		ch->hitroll -= acfg("spiderdroid.cubeform.hitroll_bonus");
 		free_string( ch->morph );
 		ch->morph = str_dup( "" );
 		return;
 	}
 
-	if ( ch->move < 2000 || ch->mana < 2000 ) {
+	if ( ch->move < acfg("spiderdroid.cubeform.move_cost") || ch->mana < acfg("spiderdroid.cubeform.mana_cost") ) {
 		send_to_char( "You need 2000 mana and 2000 move to make yourself an avatar of Lloth.\n\r", ch );
 		return;
 	}
@@ -250,10 +251,10 @@ void do_cubeform( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "%s the avatar of Lloth", ch->name );
 		free_string( ch->morph );
 		ch->morph = str_dup( buf );
-		use_move( ch, 2000 );
-		use_mana( ch, 2000 );
-		ch->damroll += 250;
-		ch->hitroll += 250;
+		use_move( ch, acfg("spiderdroid.cubeform.move_cost") );
+		use_mana( ch, acfg("spiderdroid.cubeform.mana_cost") );
+		ch->damroll += acfg("spiderdroid.cubeform.damroll_bonus");
+		ch->hitroll += acfg("spiderdroid.cubeform.hitroll_bonus");
 		return;
 	}
 	return;
@@ -267,7 +268,7 @@ void do_infravision( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->pcdata->powers[CYBORG_FACE] < 1 ) {
+	if ( ch->pcdata->powers[CYBORG_FACE] < acfg("spiderdroid.infravision.face_level_req") ) {
 		send_to_char( "You need at least 1 implant on your face to use your unholy sight.\n\r", ch );
 		return;
 	}
@@ -351,7 +352,7 @@ void do_dridereq( CHAR_DATA *ch, char *argument ) {
 		do_dridereq( ch, "" );
 		return;
 	}
-	if ( ch->practice < 150 ) {
+	if ( ch->practice < acfg("spiderdroid.dridereq.primal_cost") ) {
 		send_to_char( "It costs 150 points of primal to create a piece of drider armour.\n\r", ch );
 		return;
 	}
@@ -359,7 +360,7 @@ void do_dridereq( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Missing object, please inform Dracknuur.\n\r", ch );
 		return;
 	}
-	ch->practice -= 150;
+	ch->practice -= acfg("spiderdroid.dridereq.primal_cost");
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );

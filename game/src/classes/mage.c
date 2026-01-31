@@ -25,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 
 void do_reveal( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *ich;
@@ -34,7 +35,7 @@ void do_reveal( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?!?.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < 5000 ) {
+	if ( ch->mana < acfg("mage.reveal.mana_cost") ) {
 		send_to_char( "You don't have the mystical energies to do this.\n\r", ch );
 		return;
 	}
@@ -62,7 +63,7 @@ void do_reveal( CHAR_DATA *ch, char *argument ) {
 		}
 		send_to_char( "You are suddenly very visible.\n\r", ich );
 	}
-	use_mana( ch, 5000 );
+	use_mana( ch, acfg("mage.reveal.mana_cost") );
 	return;
 }
 
@@ -84,7 +85,7 @@ void do_magearmor( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Please specify which piece of mage armor you wish to make: Dagger Staff Ring Collar Robe Cap Leggings Boots Gloves Sleeves Cape Belt Bracer Mask.\n\r", ch );
 		return;
 	}
-	if ( ch->practice < 60 ) {
+	if ( ch->practice < acfg("mage.magearmor.practice_cost") ) {
 		send_to_char( "It costs 60 points of primal to create mage equipment.\n\r", ch );
 		return;
 	}
@@ -127,7 +128,7 @@ void do_magearmor( CHAR_DATA *ch, char *argument ) {
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
-	ch->practice -= 60;
+	ch->practice -= acfg("mage.magearmor.practice_cost");
 	act( "$p appears in your hands.", ch, obj, NULL, TO_CHAR );
 	act( "$p appears in $n's hands.", ch, obj, NULL, TO_ROOM );
 	return;
@@ -150,7 +151,7 @@ void do_chaosmagic( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Not yet, not yet.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < 1500 ) {
+	if ( ch->mana < acfg("mage.chaosmagic.mana_cost") ) {
 		send_to_char( "You need more mana.\n\r", ch );
 		return;
 	}
@@ -194,8 +195,8 @@ void do_chaosmagic( CHAR_DATA *ch, char *argument ) {
 	else
 		sn = 0;
 	if ( sn > 0 ) ( *skill_table[sn].spell_fun )( sn, level, ch, victim );
-	use_mana( ch, 1500 );
-	WAIT_STATE( ch, 6 );
+	use_mana( ch, acfg("mage.chaosmagic.mana_cost") );
+	WAIT_STATE( ch, acfg("mage.chaosmagic.cooldown") );
 	return;
 }
 
@@ -245,15 +246,15 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "They are not here.\n\r", ch );
 			return;
 		}
-		if ( ch->mana < 1500 ) {
+		if ( ch->mana < acfg("mage.chant_heal.mana_cost") ) {
 			send_to_char( "You need 1500 mana.\n\r", ch );
 			return;
 		}
 		act( "$n channels lifeforce from the five elements into $N.", ch, NULL, victim, TO_NOTVICT );
 		act( "You channel lifeforce from the five elements into $N.", ch, NULL, victim, TO_CHAR );
 		act( "$n channels lifeforce from the five elements into you.", ch, NULL, victim, TO_VICT );
-		WAIT_STATE( ch, 8 );
-		use_mana( ch, 1500 );
+		WAIT_STATE( ch, acfg("mage.chant_heal.cooldown") );
+		use_mana( ch, acfg("mage.chant_heal.mana_cost") );
 		heal_char( victim, (int) ( magic_power * 1.5 ) );
 		return;
 	} else if ( !str_cmp( arg1, "damage" ) ) {
@@ -263,7 +264,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "They are not here.\n\r", ch );
 			return;
 		}
-		if ( ch->mana < 1000 ) {
+		if ( ch->mana < acfg("mage.chant_damage.mana_cost") ) {
 			send_to_char( "You need 1000 mana.\n\r", ch );
 			return;
 		}
@@ -279,14 +280,14 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			if ( victim->fighting == NULL ) set_fighting( victim, ch );
 			if ( ch->fighting == NULL ) set_fighting( ch, victim );
 		}
-		WAIT_STATE( ch, 8 );
-		use_mana( ch, 1000 );
+		WAIT_STATE( ch, acfg("mage.chant_damage.cooldown") );
+		use_mana( ch, acfg("mage.chant_damage.mana_cost") );
 		dam = number_range( red_magic * 4, red_magic * 5 );
 		dam += char_damroll( ch );
 		dam = cap_dam( ch, victim, dam );
 		if ( !IS_NPC( victim ) ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
-			if ( dam > 1000 ) dam = number_range( 950, 1050 );
+			if ( dam > acfg("mage.chant_damage.pvp_dam_cap") ) dam = number_range( acfg("mage.chant_damage.pvp_cap_range_low"), acfg("mage.chant_damage.pvp_cap_range_high") );
 		}
 		sprintf( buf1, "$n calls for the forces of #Rhell#n to destroy $N [#C%d#n]", dam );
 		sprintf( buf2, "You call for the forces of #Rhell#n to destroy $N [#C%d#n]", dam );
@@ -301,7 +302,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 		dam = cap_dam( ch, victim, dam );
 		if ( !IS_NPC( victim ) ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
-			if ( dam > 1000 ) dam = number_range( 950, 1050 );
+			if ( dam > acfg("mage.chant_damage.pvp_dam_cap") ) dam = number_range( acfg("mage.chant_damage.pvp_cap_range_low"), acfg("mage.chant_damage.pvp_cap_range_high") );
 		}
 		sprintf( buf1, "$n summons a supernatural #Lstorm#n to strike $N with lightning [#C%d#n]", dam );
 		sprintf( buf2, "You summon a supernatural #Lstorm#n to strike $N with lightning [#C%d#n]", dam );
@@ -316,7 +317,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 		dam = cap_dam( ch, victim, dam );
 		if ( !IS_NPC( victim ) ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
-			if ( dam > 1000 ) dam = number_range( 950, 1050 );
+			if ( dam > acfg("mage.chant_damage.pvp_dam_cap") ) dam = number_range( acfg("mage.chant_damage.pvp_cap_range_low"), acfg("mage.chant_damage.pvp_cap_range_high") );
 		}
 		sprintf( buf1, "$n calls for #Gthorns#n to grow from the earth and pierce $N [#C%d#n]", dam );
 		sprintf( buf2, "You call for #Gthorns#n to grow from the earth and pierce $N [#C%d#n]", dam );
@@ -331,7 +332,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 		dam = cap_dam( ch, victim, dam );
 		if ( !IS_NPC( victim ) ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
-			if ( dam > 1000 ) dam = number_range( 950, 1050 );
+			if ( dam > acfg("mage.chant_damage.pvp_dam_cap") ) dam = number_range( acfg("mage.chant_damage.pvp_cap_range_low"), acfg("mage.chant_damage.pvp_cap_range_high") );
 		}
 		sprintf( buf1, "$n calls on the powers of the #punderdark#n to shatter $N's bones [#C%d#n]", dam );
 		sprintf( buf2, "You call on the powers of the #punderdark#n to shatter $N's bones [#C%d#n]", dam );
@@ -346,7 +347,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 		dam = cap_dam( ch, victim, dam );
 		if ( !IS_NPC( victim ) ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
-			if ( dam > 1000 ) dam = number_range( 950, 1050 );
+			if ( dam > acfg("mage.chant_damage.pvp_dam_cap") ) dam = number_range( acfg("mage.chant_damage.pvp_cap_range_low"), acfg("mage.chant_damage.pvp_cap_range_high") );
 		}
 		sprintf( buf1, "$n spews forth a shower of #yacid#n striking $N [#C%d#n]", dam );
 		sprintf( buf2, "you spew forth a shower of #yacid#n striking $N [#C%d#n]", dam );
@@ -361,7 +362,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "They are not here.\n\r", ch );
 			return;
 		}
-		if ( ch->mana < 2500 ) {
+		if ( ch->mana < acfg("mage.chant_bless.mana_cost") ) {
 			send_to_char( "You need 2500 mana.\n\r", ch );
 			return;
 		}
@@ -432,7 +433,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			affect_to_char( victim, &af );
 		}
 		use_mana( ch, count * 500 );
-		WAIT_STATE( ch, 6 );
+		WAIT_STATE( ch, acfg("mage.chant_bless.cooldown") );
 		sprintf( buf1, "You bless $N with the power of the elements." );
 		sprintf( buf2, "The power of the five elements fills your body." );
 		act( buf1, ch, NULL, victim, TO_CHAR );
@@ -443,7 +444,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "They are not here.\n\r", ch );
 			return;
 		}
-		if ( ch->mana < 2500 ) {
+		if ( ch->mana < acfg("mage.chant_curse.mana_cost") ) {
 			send_to_char( "You need 2500 mana.\n\r", ch );
 			return;
 		}
@@ -518,7 +519,7 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			affect_to_char( victim, &af );
 		}
 		use_mana( ch, count * 500 );
-		WAIT_STATE( ch, 6 );
+		WAIT_STATE( ch, acfg("mage.chant_curse.cooldown") );
 		sprintf( buf1, "You curse $N with the power of the elements." );
 		sprintf( buf2, "The power of the five elements wrecks your body." );
 		act( buf1, ch, NULL, victim, TO_CHAR );
@@ -537,11 +538,11 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_STRING_LENGTH];
 	char arg2[MAX_STRING_LENGTH];
 	char buf[MAX_STRING_LENGTH];
-	int shieldcost = 25;
-	int steelshieldcost = 5;
-	int beastcost = 10;
-	int illusioncost = 5;
-	int defshieldcost = 5;
+	int shieldcost = acfg("mage.invoke_mageshield.practice_cost");
+	int steelshieldcost = acfg("mage.invoke_steelshield.practice_cost");
+	int beastcost = acfg("mage.invoke_beast.practice_cost");
+	int illusioncost = acfg("mage.invoke_illusions.practice_cost");
+	int defshieldcost = acfg("mage.invoke_deflector.practice_cost");
 
 	argument = one_argument( argument, arg1 );
 	strcpy( arg2, argument );
@@ -577,8 +578,8 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg1, "learn" ) ) {
-		int cost = ( ch->pcdata->powers[PINVOKE] + 1 ) * 20;
-		if ( ch->pcdata->powers[PINVOKE] >= 10 ) {
+		int cost = ( ch->pcdata->powers[PINVOKE] + 1 ) * acfg("mage.invoke_learn.cost_multiplier");
+		if ( ch->pcdata->powers[PINVOKE] >= acfg("mage.invoke_learn.max_level") ) {
 			send_to_char( "You have already gained all the known invokes.\n\r", ch );
 			return;
 		} else if ( cost > ch->practice ) {
@@ -591,7 +592,7 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 		}
 		return;
 	} else if ( !str_cmp( arg1, "steelshield" ) ) {
-		if ( ch->pcdata->powers[PINVOKE] < 6 ) {
+		if ( ch->pcdata->powers[PINVOKE] < acfg("mage.invoke_steelshield.level_req") ) {
 			send_to_char( "You don't have that invoke yet.\n\r", ch );
 			return;
 		}
@@ -608,7 +609,7 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	} else if ( !str_cmp( arg1, "beast" ) ) {
-		if ( ch->pcdata->powers[PINVOKE] < 9 ) {
+		if ( ch->pcdata->powers[PINVOKE] < acfg("mage.invoke_beast.level_req") ) {
 			send_to_char( "You don't have that invoke yet.\n\r", ch );
 			return;
 		}
@@ -625,7 +626,7 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	} else if ( !str_cmp( arg1, "illusions" ) ) {
-		if ( ch->pcdata->powers[PINVOKE] < 8 ) {
+		if ( ch->pcdata->powers[PINVOKE] < acfg("mage.invoke_illusions.level_req") ) {
 			send_to_char( "You don't have that invoke yet.\n\r", ch );
 			return;
 		}
@@ -643,7 +644,7 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 		}
 		return;
 	} else if ( !str_cmp( arg1, "deflector" ) ) {
-		if ( ch->pcdata->powers[PINVOKE] < 5 ) {
+		if ( ch->pcdata->powers[PINVOKE] < acfg("mage.invoke_deflector.level_req") ) {
 			send_to_char( "You don't have that invoke yet.\n\r", ch );
 			return;
 		}
@@ -660,7 +661,7 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	} else if ( !str_cmp( arg1, "mageshield" ) || !str_cmp( arg1, "shield" ) ) {
-		if ( ch->pcdata->powers[PINVOKE] < 2 ) {
+		if ( ch->pcdata->powers[PINVOKE] < acfg("mage.invoke_mageshield.level_req") ) {
 			send_to_char( "You don't have that invoke yet.\n\r", ch );
 			return;
 		}
@@ -680,7 +681,7 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 		}
 	} else if ( !str_cmp( arg1, "all" ) ) {
 		int totalcost = 0;
-		if ( ch->pcdata->powers[PINVOKE] < 9 ) {
+		if ( ch->pcdata->powers[PINVOKE] < acfg("mage.invoke_all.level_req") ) {
 			send_to_char( "You don't have all invokes, so theres no point in invoking them all.\n\r", ch );
 			return;
 		}
@@ -750,13 +751,13 @@ void do_discharge( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[PINVOKE] < 4 ) /* 4 is just a test */
+	if ( ch->pcdata->powers[PINVOKE] < acfg("mage.discharge.level_req") ) /* 4 is just a test */
 	{
 		send_to_char( "You don't have that invoke yet.\n\r", ch );
 		return;
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		magic_power += 100;
+		magic_power += acfg("mage.discharge.entropy_bonus");
 	if ( IS_ITEMAFF( ch, ITEMA_MAGESHIELD ) ) {
 		REMOVE_BIT( ch->itemaffect, ITEMA_MAGESHIELD );
 		for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
@@ -798,7 +799,7 @@ void do_teleport( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[PINVOKE] < 1 ) /* 1 is just a test */
+	if ( ch->pcdata->powers[PINVOKE] < acfg("mage.teleport.level_req") ) /* 1 is just a test */
 	{
 		send_to_char( "You don't have that invoke yet.\n\r", ch );
 		return;
@@ -820,13 +821,13 @@ void do_teleport( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	location = victim->in_room;
-	if ( ch->mana < 250 ) {
+	if ( ch->mana < acfg("mage.teleport.mana_cost") ) {
 		send_to_char( "You don't have the mana to cast teleport.\n\r", ch );
 		return;
 	}
 	act( "You utter a single powerword.", ch, NULL, NULL, TO_CHAR );
 	act( "$n utters a strange sounding word and disappers.", ch, NULL, NULL, TO_ROOM );
-	use_mana( ch, 250 );
+	use_mana( ch, acfg("mage.teleport.mana_cost") );
 	char_from_room( ch );
 	char_to_room( ch, location );
 	do_look( ch, "auto" );

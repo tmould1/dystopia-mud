@@ -22,6 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
 #include "../db/db_player.h"
 
 /*
@@ -227,7 +228,7 @@ void do_smother( CHAR_DATA *ch, char *argument ) {
 		act( "You try to smother the flames around $N but fail!", ch, NULL, victim, TO_CHAR );
 		act( "$n tries to smother the flames around you but fails!", ch, NULL, victim, TO_VICT );
 		act( "$n tries to smother the flames around $N but fails!", ch, NULL, victim, TO_NOTVICT );
-		if ( number_percent() > 98 && !IS_AFFECTED( ch, AFF_FLAMING ) ) {
+		if ( number_percent() > acfg("clan.smother.spark_chance") && !IS_AFFECTED( ch, AFF_FLAMING ) ) {
 			act( "A spark of flame from $N's body sets you on fire!", ch, NULL, victim, TO_CHAR );
 			act( "A spark of flame from your body sets $n on fire!", ch, NULL, victim, TO_VICT );
 			act( "A spark of flame from $N's body sets $n on fire!", ch, NULL, victim, TO_NOTVICT );
@@ -289,7 +290,7 @@ void do_coil( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_SERP] < 8 ) {
+	if ( ch->power[DISC_VAMP_SERP] < acfg("clan.coil.level_req") ) {
 		send_to_char( "You require level 8 Serpentis to use Body Coil.\n\r", ch );
 		return;
 	}
@@ -311,12 +312,12 @@ void do_tide( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_THAU] < 5 ) {
+	if ( ch->power[DISC_VAMP_THAU] < acfg("clan.tide.level_req") ) {
 		send_to_char( "You require level 5 Thaumaturgy to use Tide of Vitae.\n\r", ch );
 		return;
 	}
 
-	if ( ch->practice < 10 ) {
+	if ( ch->practice < acfg("clan.tide.primal_cost") ) {
 		send_to_char( "You require at least 10 primal to use Tide of Vitae.\n\r", ch );
 		return;
 	}
@@ -326,7 +327,7 @@ void do_tide( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	SET_BIT( ch->newbits, NEW_TIDE );
-	ch->practice -= 10;
+	ch->practice -= acfg("clan.tide.primal_cost");
 	send_to_char( "You feel a tide of vitae rush over you.\n\r", ch );
 }
 
@@ -338,7 +339,7 @@ void do_flash( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < 9 ) {
+	if ( ch->power[DISC_VAMP_QUIE] < acfg("clan.flash.level_req") ) {
 		send_to_char( "You require level 9 Quietus to use Flashing Speed.\n\r", ch );
 		return;
 	}
@@ -346,13 +347,13 @@ void do_flash( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You are already moving swiftly.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < 200 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("clan.flash.blood_cost") ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
 	SET_BIT( ch->extra, EXTRA_FLASH );
-	ch->power[DISC_VAMP_CELE] += 2;
-	ch->pcdata->condition[COND_THIRST] -= 200;
+	ch->power[DISC_VAMP_CELE] += acfg("clan.flash.cele_bonus");
+	ch->pcdata->condition[COND_THIRST] -= acfg("clan.flash.blood_cost");
 	sprintf( buf, "%s starts moving with lightening speed.", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You start moving with lightening speed.\n\r", ch );
@@ -368,7 +369,7 @@ void do_death( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < 5 ) {
+	if ( ch->power[DISC_VAMP_QUIE] < acfg("clan.death.level_req") ) {
 		send_to_char( "You require level 5 Quietus to use Silence of Death.\n\r", ch );
 		return;
 	}
@@ -383,12 +384,12 @@ void do_death( CHAR_DATA *ch, char *argument ) {
 		SET_RTIMER( ch->in_room, RTIMER_SILENCE, 0 );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < 300 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("clan.death.blood_cost") ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
-	ch->pcdata->condition[COND_THIRST] -= 300;
-	SET_RTIMER( inroom, RTIMER_SILENCE, 10 );
+	ch->pcdata->condition[COND_THIRST] -= acfg("clan.death.blood_cost");
+	SET_RTIMER( inroom, RTIMER_SILENCE, acfg("clan.death.silence_duration") );
 	sprintf( buf, "A look of concentration passes over %s's face.\n\r", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "A look of concentration passes over your face.\n\r", ch );
@@ -404,11 +405,11 @@ void do_acid( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DOMI] < 4 ) {
+	if ( ch->power[DISC_VAMP_DOMI] < acfg("clan.acid.level_req") ) {
 		send_to_char( "You require level 9 Vicissitude to use Acid Blood.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < 500 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("clan.acid.blood_req") ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
@@ -437,7 +438,7 @@ void do_forget( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DOMI] < 8 ) {
+	if ( ch->power[DISC_VAMP_DOMI] < acfg("clan.forget.level_req") ) {
 		send_to_char( "You must obtain at least level 8 in Dominate to use Forgetful Mind.\n\r", ch );
 		return;
 	}
@@ -463,12 +464,12 @@ void do_forget( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You can only use Forgetful Mind on Avatar's or lower.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < 250 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("clan.forget.blood_cost") ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
 
-	if ( ch->practice < 25 ) {
+	if ( ch->practice < acfg("clan.forget.primal_cost") ) {
 		send_to_char( "You need 25 primal to use Forgetful Mind.\n\r", ch );
 		return;
 	}
@@ -476,11 +477,11 @@ void do_forget( CHAR_DATA *ch, char *argument ) {
 	act( "You close your eyes and concentrate on $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n closes $s eyes and concentrates on you.", ch, NULL, victim, TO_VICT );
 	act( "$n closes $s eyes and cencentrates on $N.", ch, NULL, victim, TO_NOTVICT );
-	ch->pcdata->condition[COND_THIRST] -= 250;
-	ch->practice -= 25;
-	WAIT_STATE( ch, 12 );
+	ch->pcdata->condition[COND_THIRST] -= acfg("clan.forget.blood_cost");
+	ch->practice -= acfg("clan.forget.primal_cost");
+	WAIT_STATE( ch, acfg("clan.forget.cooldown") );
 
-	if ( number_percent() > 10 ) {
+	if ( number_percent() > acfg("clan.forget.success_chance") ) {
 		send_to_char( "You failed.\n\r", ch );
 		return;
 	}
@@ -586,7 +587,7 @@ void do_rot( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_VICI] < 2 ) {
+	if ( ch->power[DISC_VAMP_VICI] < acfg("clan.rot.level_req") ) {
 		send_to_char( "You must obtain at level 2 in Thanatosis to use Putrefaction.\n\r", ch );
 		return;
 	}
@@ -620,8 +621,8 @@ void do_rot( CHAR_DATA *ch, char *argument ) {
 	act( "You close your eyes and concentrate on $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n closes $s eyes and concentrates on you.", ch, NULL, victim, TO_VICT );
 	act( "$n closes $s eyes and cencentrates on $N.", ch, NULL, victim, TO_NOTVICT );
-	WAIT_STATE( ch, 12 );
-	if ( number_percent() < 50 ) {
+	WAIT_STATE( ch, acfg("clan.rot.cooldown") );
+	if ( number_percent() < acfg("clan.rot.success_chance") ) {
 		send_to_char( "You failed.\n\r", ch );
 		return;
 	}
@@ -642,7 +643,7 @@ void do_dragon( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_VICI] < 8 ) {
+	if ( ch->power[DISC_VAMP_VICI] < acfg("clan.dragon.level_req") ) {
 		send_to_char( "You must have at least level 8 Vicissitude to use Dragon Breath.\n\r", ch );
 		return;
 	}
@@ -654,18 +655,18 @@ void do_dragon( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You must be in Dragonform to use Dragonbreath.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < 6 ) {
+	if ( ch->pcdata->condition[COND_THIRST] < acfg("clan.dragon.blood_cost") ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, 12 );
+	WAIT_STATE( ch, acfg("clan.dragon.cooldown") );
 	if ( !IS_NPC( victim ) ) {
 		dam = ch->power[DISC_VAMP_VICI] * 50;
 	}
 	if ( IS_NPC( victim ) ) {
 		dam = ch->power[DISC_VAMP_VICI] * 200;
 	}
-	ch->pcdata->condition[COND_THIRST] -= 6;
+	ch->pcdata->condition[COND_THIRST] -= acfg("clan.dragon.blood_cost");
 	if ( ( !IS_NPC( victim ) ) && IS_CLASS( victim, CLASS_VAMPIRE ) ) {
 		dam = (int) ( dam * 1.5 );
 	}
@@ -694,7 +695,7 @@ void do_awe( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_PRES] < 1 ) {
+	if ( ch->power[DISC_VAMP_PRES] < acfg("clan.awe.level_req") ) {
 		send_to_char( "You must obtain at least level 1 in Presence to you Awe.\n\r", ch );
 		return;
 	}
@@ -721,7 +722,7 @@ void do_plasma( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_VICI] < 5 ) {
+	if ( ch->power[DISC_VAMP_VICI] < acfg("clan.plasma.level_req") ) {
 		send_to_char( "You must obtain at least level 5 in Vicissitude to use Plasma Form.\n\r", ch );
 		return;
 	}
@@ -774,7 +775,7 @@ void do_taste( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_THAU] < 1 ) {
+	if ( ch->power[DISC_VAMP_THAU] < acfg("clan.taste.level_req") ) {
 		send_to_char( "You must obtain at least level 1 in Thaumaturgy to use Taste of Blood.\n\r", ch );
 		return;
 	}
@@ -886,7 +887,7 @@ void do_shadowstep( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_OBTE] < 4 ) {
+	if ( ch->power[DISC_VAMP_OBTE] < acfg("clan.shadowstep.level_req") ) {
 		send_to_char( "You must obtain at least level 4 in Obtenebration to use this power.\n\r", ch );
 		return;
 	}
@@ -958,7 +959,7 @@ void do_earthmeld( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_PROT] < 4 ) {
+	if ( ch->power[DISC_VAMP_PROT] < acfg("clan.earthmeld.level_req") ) {
 		send_to_char( "You must obtain at least level 4 Protean to use Earthmeld.\n\r", ch );
 		return;
 	}
@@ -1003,7 +1004,7 @@ void do_serenity( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "huh?.\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_ANIM] < 2 ) {
+	if ( ch->power[DISC_VAMP_ANIM] < acfg("clan.serenity.level_req") ) {
 		send_to_char( "You must obtain at least level 2 in Animalism to use Song of Serenity.\n\r", ch );
 		return;
 	}
