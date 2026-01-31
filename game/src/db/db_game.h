@@ -58,4 +58,8 @@ void db_game_save_disabled( void );
 void db_game_load_balance( void );
 void db_game_save_balance( void );
 
+/* Ability config (game.db) */
+void db_game_load_ability_config( void );
+void db_game_save_ability_config( void );
+
 #endif /* DB_GAME_H */

@@ -461,6 +461,7 @@ void boot_db( bool fCopyOver ) {
 		load_disabled();
 		load_gameconfig();
 		load_balance();
+		load_ability_config();
 	}
 
 	if ( fCopyOver )

@@ -7,6 +7,7 @@
 
 #include "db_util.h"
 #include "db_game.h"
+#include "../core/ability_config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -114,6 +115,11 @@ static const char *GAME_SCHEMA_SQL =
 	"CREATE TABLE IF NOT EXISTS balance_config ("
 	"  key   TEXT PRIMARY KEY,"
 	"  value TEXT NOT NULL"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS ability_config ("
+	"  key   TEXT PRIMARY KEY,"
+	"  value INTEGER NOT NULL"
 	");";
 
 
@@ -934,6 +940,70 @@ void db_game_save_balance( void ) {
 		snprintf( buf, sizeof( buf ), "%d", *balance_map[i].field );
 		sqlite3_bind_text( stmt, 1, balance_map[i].key, -1, SQLITE_STATIC );
 		sqlite3_bind_text( stmt, 2, buf, -1, SQLITE_TRANSIENT );
+		sqlite3_step( stmt );
+	}
+
+	sqlite3_finalize( stmt );
+	db_commit( game_db );
+}
+
+
+/*
+ * Ability config (game.db)
+ * Per-ability balance constants.  Uses the acfg_table defined in
+ * ability_config.c to iterate all entries.
+ */
+void db_game_load_ability_config( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT key, value FROM ability_config";
+	char buf[MAX_STRING_LENGTH];
+	int count = 0;
+
+	if ( !game_db )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		const char *key = col_text( stmt, 0 );
+		int val         = sqlite3_column_int( stmt, 1 );
+
+		if ( acfg_set( key, val ) )
+			count++;
+	}
+
+	sqlite3_finalize( stmt );
+
+	if ( count > 0 ) {
+		snprintf( buf, sizeof( buf ),
+			"  Loaded %d ability config overrides from game.db", count );
+		log_string( buf );
+	}
+}
+
+void db_game_save_ability_config( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "INSERT OR REPLACE INTO ability_config (key, value) VALUES (?,?)";
+	int i, total;
+
+	if ( !game_db )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	db_begin( game_db );
+
+	/* Only save values that differ from defaults */
+	total = acfg_count();
+	for ( i = 0; i < total; i++ ) {
+		acfg_entry_t *e = acfg_find_by_index( i );
+		if ( !e || e->value == e->default_value )
+			continue;
+		sqlite3_reset( stmt );
+		sqlite3_bind_text( stmt, 1, e->key, -1, SQLITE_STATIC );
+		sqlite3_bind_int( stmt, 2, e->value );
 		sqlite3_step( stmt );
 	}
 

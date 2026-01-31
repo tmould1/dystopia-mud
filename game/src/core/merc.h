@@ -203,6 +203,9 @@ void save_gameconfig args( (void) );
 void load_balance args( (void) );
 void save_balance args( (void) );
 
+void load_ability_config args( (void) );
+void save_ability_config args( (void) );
+
 /*
  * Godwars Game Parameters
  * By Rotain
@@ -4104,6 +4107,7 @@ DECLARE_DO_FUN( do_relearn );
 
 DECLARE_DO_FUN( do_gameconfig );
 DECLARE_DO_FUN( do_balance );
+DECLARE_DO_FUN( do_ability );
 
 /*
 
