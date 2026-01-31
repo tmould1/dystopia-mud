@@ -35,10 +35,6 @@ REM Step 1: Create backup of existing files
 REM ============================================================================
 echo [1/6] Creating backup of existing build files...
 
-REM Generate timestamp
-for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value 2^>nul') do set datetime=%%I
-set BACKUP_DIR=backup\%datetime:~0,8%-%datetime:~8,6%
-
 REM Check if any files exist to backup
 set HAS_FILES=0
 if exist "Makefile" set HAS_FILES=1
@@ -47,18 +43,21 @@ if exist "dystopia.vcxproj" set HAS_FILES=1
 if exist "dystopia.vcxproj.filters" set HAS_FILES=1
 
 if %HAS_FILES%==1 (
-    if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
+    REM Generate timestamp using PowerShell (more reliable across environments)
+    for /f "delims=" %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set TIMESTAMP=%%I
+    if not defined TIMESTAMP set TIMESTAMP=backup
+    set BACKUP_DIR=backup\!TIMESTAMP!
+
+    if not exist "!BACKUP_DIR!" mkdir "!BACKUP_DIR!"
     if errorlevel 1 (
-        echo ERROR: Failed to create backup directory %BACKUP_DIR%
-        exit /b 1
+        echo WARNING: Failed to create backup directory, continuing without backup
+    ) else (
+        if exist "Makefile" copy /y "Makefile" "!BACKUP_DIR!\" >nul
+        if exist "dystopia.sln" copy /y "dystopia.sln" "!BACKUP_DIR!\" >nul
+        if exist "dystopia.vcxproj" copy /y "dystopia.vcxproj" "!BACKUP_DIR!\" >nul
+        if exist "dystopia.vcxproj.filters" copy /y "dystopia.vcxproj.filters" "!BACKUP_DIR!\" >nul
+        echo       Backup created: !BACKUP_DIR!
     )
-
-    if exist "Makefile" copy /y "Makefile" "%BACKUP_DIR%\" >nul
-    if exist "dystopia.sln" copy /y "dystopia.sln" "%BACKUP_DIR%\" >nul
-    if exist "dystopia.vcxproj" copy /y "dystopia.vcxproj" "%BACKUP_DIR%\" >nul
-    if exist "dystopia.vcxproj.filters" copy /y "dystopia.vcxproj.filters" "%BACKUP_DIR%\" >nul
-
-    echo       Backup created: %BACKUP_DIR%
 ) else (
     echo       No existing files to backup
 )
@@ -516,8 +515,8 @@ echo   - dystopia.sln          (Visual Studio Solution)
 echo   - dystopia.vcxproj      (Visual Studio Project)
 echo   - dystopia.vcxproj.filters (VS Folder Structure)
 echo.
-if %HAS_FILES%==1 (
-    echo Backup location: %BACKUP_DIR%
+if %HAS_FILES%==1 if defined BACKUP_DIR (
+    echo Backup location: !BACKUP_DIR!
     echo.
 )
 echo To build:
