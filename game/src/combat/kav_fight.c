@@ -29,7 +29,7 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	int dice1;
 	int dice2;
 	int trapper;
-	int max_skl = 200;
+	int max_skl = balance.wpn_cap_default;
 
 	dice1 = number_percent();
 	dice2 = number_percent();
@@ -37,23 +37,23 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	if ( IS_NPC( ch ) ) return;
 
 	if ( IS_CLASS( ch, CLASS_DROW ) && ( IS_SET( ch->special, SPC_DROW_WAR ) || ch->generation < 3 ) )
-		max_skl = 300;
+		max_skl = balance.wpn_cap_drow;
 	else if ( ch->class == CLASS_WEREWOLF )
-		max_skl = 350;
+		max_skl = balance.wpn_cap_werewolf;
 	else if ( ch->class == CLASS_MONK )
-		max_skl = 800;
+		max_skl = balance.wpn_cap_monk;
 	else if ( IS_CLASS( ch, CLASS_ANGEL ) )
-		max_skl = 500;
+		max_skl = balance.wpn_cap_angel;
 	else if ( IS_CLASS( ch, CLASS_LICH ) )
-		max_skl = 350;
+		max_skl = balance.wpn_cap_lich;
 	else if ( IS_CLASS( ch, CLASS_DROID ) && ( ch->pcdata->powers[CYBORG_LIMBS] > 3 ) )
-		max_skl = 450;
+		max_skl = balance.wpn_cap_droid;
 	else if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) )
-		max_skl = UMAX( 200, ch->pcdata->powers[WEAPONSKILL] * 50 );
+		max_skl = UMAX( balance.wpn_cap_default, ch->pcdata->powers[WEAPONSKILL] * 50 );
 	else if ( IS_CLASS( ch, CLASS_SAMURAI ) )
-		max_skl = 1000;
+		max_skl = balance.wpn_cap_samurai;
 	else if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) || IS_CLASS( ch, CLASS_TANARRI ) )
-		max_skl = 400;
+		max_skl = balance.wpn_cap_shape;
 
 	if ( right_hand == 1 )
 		wield = get_eq_char( ch, WEAR_WIELD );
@@ -74,12 +74,12 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	dtype -= 1000;
 
 	if ( ch->generation == 2 )
-		max_skl += (int) ( max_skl * 0.1 );
+		max_skl += max_skl * balance.wpn_gen2_bonus / 100;
 	else if ( ch->generation == 1 )
-		max_skl += (int) ( max_skl * 0.2 );
-	if ( max_skl > 1100 ) max_skl = 1100;
+		max_skl += max_skl * balance.wpn_gen1_bonus / 100;
+	if ( max_skl > balance.wpn_cap_hard_cap ) max_skl = balance.wpn_cap_hard_cap;
 
-	if ( ch->level < 3 && ch->class != CLASS_MONK && ch->class != CLASS_WEREWOLF ) max_skl = 200;
+	if ( ch->level < 3 && ch->class != CLASS_MONK && ch->class != CLASS_WEREWOLF ) max_skl = balance.wpn_cap_low_level;
 	if ( ch->wpn[dtype] >= max_skl ) return;
 	trapper = ch->wpn[dtype];
 	if ( ( dice1 > ch->wpn[dtype] || dice2 > ch->wpn[dtype] ) || ( dice1 >= 99 || dice2 >= 99 ) )

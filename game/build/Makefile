@@ -31,7 +31,7 @@ SQLITE_FLAGS = -w -O2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLIT
 L_FLAGS = -lz -lcrypt -lpthread -ldl
 
 # Source files by directory
-CORE_SRC = comm.c compat.c config.c const.c db.c handler.c interp.c mem.c nanny.c output.c prompt.c string.c
+CORE_SRC = balance.c comm.c compat.c config.c const.c db.c handler.c interp.c mem.c nanny.c output.c prompt.c string.c
 CLASSES_SRC = angel.c clan.c daemon.c demon.c drow.c lich.c mage.c monk.c monk2.c ninja.c samurai.c shapeshifter.c spiderdroid.c tanarri.c undead_knight.c vamp.c ww.c
 COMBAT_SRC = arena.c fight.c jobo_fight.c kav_fight.c magic.c special.c
 COMMANDS_SRC = act_comm.c act_info.c act_map.c act_move.c act_obj.c act_wiz.c jobo_wiz.c kav_info.c kav_wiz.c socials.c wizutil.c

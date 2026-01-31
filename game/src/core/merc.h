@@ -198,6 +198,9 @@ void save_kingdoms args( (void) );
 void load_gameconfig args( (void) );
 void save_gameconfig args( (void) );
 
+void load_balance args( (void) );
+void save_balance args( (void) );
+
 /*
  * Godwars Game Parameters
  * By Rotain
@@ -340,6 +343,100 @@ typedef struct config_data {
 	char *banner_right; /* Right banner endcap, e.g. "#0<>#n" */
 	char *banner_fill;	/* Banner fill pattern, e.g. "#0==#n" */
 } GAMECONFIG_DATA;
+
+typedef struct balance_data {
+	/* Global combat */
+	int   base_damcap;
+	int   builder_damcap;
+	int   pvp_damage_divisor;
+	int   sleep_damage_multiplier;
+
+	/* Upgrade level bonuses */
+	int   upgrade_damcap_per_level;
+	int   upgrade_dmg[5];           /* damage % per level (x100) */
+
+	/* Generation bonuses (indices 0-4) */
+	int   gen_damcap[5];
+
+	/* Per-class damage caps (additive bonus to base) */
+	int   damcap_mage;
+	int   damcap_mage_beast;
+	int   damcap_tanarri_per_rank;
+	int   damcap_lich_base;
+	int   damcap_lich_lore;
+	int   damcap_angel_per_power;
+	int   damcap_shape_base;
+	int   damcap_shape_tiger;
+	int   damcap_shape_hydra;
+	int   damcap_shape_bull;
+	int   damcap_shape_faerie;
+	int   damcap_drow_base;
+	int   damcap_drow_hate;
+	int   damcap_drow_form;
+	int   damcap_demon_base;
+	int   damcap_demon_soul_mult;
+	int   damcap_demon_soul_cap;
+	int   damcap_demon_hell;
+	int   damcap_demon_power_mult;
+	int   damcap_droid_per_limb;
+	int   damcap_monk_combat_mult;
+	int   damcap_monk_chi_mult;
+	int   damcap_vamp_rage_mult;
+	int   damcap_vamp_pote_mult;
+	int   damcap_vamp_trueblood;
+	int   damcap_vamp_lamagra;
+	int   damcap_vamp_methuselah;
+	int   damcap_vamp_elder;
+	int   damcap_vamp_ancilla;
+	int   damcap_ninja_rage_mult;
+	int   damcap_ninja_chikyu_high;
+	int   damcap_ninja_chikyu_low;
+	int   damcap_ww_rage_mult;
+	int   damcap_ww_high_rage;
+	int   damcap_ww_pain;
+	int   damcap_uk_wpn_mult;
+	int   damcap_samurai_per_wpn;
+	int   damcap_samurai_base;
+	int   damcap_artifact;
+
+	/* Stance damcap bonuses */
+	int   damcap_stance_bull;
+	int   damcap_stance_dragon;
+	int   damcap_stance_wolf;
+	int   damcap_stance_tiger;
+	int   damcap_superstance[3];     /* levels 3,2,1 */
+	int   damcap_rev_superstance[3]; /* victim reduction 3,2,1 */
+	int   damcap_stance_crab;
+	int   damcap_stance_dragon_def;
+	int   damcap_stance_swallow;
+	int   damcap_vamp_fort_mult;
+
+	/* Weapon skill caps per class */
+	int   wpn_cap_default;
+	int   wpn_cap_drow;
+	int   wpn_cap_werewolf;
+	int   wpn_cap_monk;
+	int   wpn_cap_angel;
+	int   wpn_cap_lich;
+	int   wpn_cap_droid;
+	int   wpn_cap_samurai;
+	int   wpn_cap_shape;
+	int   wpn_cap_hard_cap;
+	int   wpn_cap_low_level;
+	int   wpn_gen2_bonus;
+	int   wpn_gen1_bonus;
+
+	/* Damage multipliers (percentage x100, e.g. 150 = 1.5x) */
+	int   dmg_mult_tanarri_might;
+	int   dmg_mult_demon_might;
+	int   dmg_mult_uk_vs_shape;
+	int   dmg_mult_demon_strongarms;
+	int   dmg_mult_ninja_belt[10];
+
+	/* Weapon skill damage formula */
+	int   wpn_dam_skill_cap;
+	int   wpn_dam_divisor;
+} BALANCE_DATA;
 
 /*
  * Directions.
@@ -3096,6 +3193,7 @@ extern char bug_buf[];
 extern time_t current_time;
 extern time_t boot_time;
 extern bool fLogAll;
+extern BALANCE_DATA balance;
 extern FILE *fpReserve;
 extern KILL_DATA kill_table[];
 extern char log_buf[];
@@ -4000,6 +4098,7 @@ DECLARE_DO_FUN( do_servant );
 DECLARE_DO_FUN( do_relearn );
 
 DECLARE_DO_FUN( do_gameconfig );
+DECLARE_DO_FUN( do_balance );
 
 /*
 

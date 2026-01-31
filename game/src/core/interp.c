@@ -1173,6 +1173,7 @@ const struct cmd_type cmd_table[] =
 		 * Configuration commands.
 		 */
 		{ "gameconfig", do_gameconfig, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
+		{ "balance",    do_balance,    POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 
 		/*
 		 * End of list.

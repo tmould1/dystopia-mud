@@ -1210,8 +1210,8 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	 * Bonuses.
 	 */
 	dam += char_damroll( ch );
-	if ( !IS_AWAKE( victim ) ) dam *= 2;
-	if ( !IS_NPC( ch ) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12 ) dam = dam + ( dam * ( UMIN( 350, ( ch->wpn[dt - 1000] + 1 ) ) / 60 ) );
+	if ( !IS_AWAKE( victim ) ) dam *= balance.sleep_damage_multiplier;
+	if ( !IS_NPC( ch ) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12 ) dam = dam + ( dam * ( UMIN( balance.wpn_dam_skill_cap, ( ch->wpn[dt - 1000] + 1 ) ) / balance.wpn_dam_divisor ) );
 
 	/* Other Resistances */
 
@@ -1221,23 +1221,15 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	}
 
 	/* damage reduction */
-	if ( !IS_NPC( ch ) && !IS_NPC( victim ) ) dam /= 2;				   /* slow down pk */
+	if ( !IS_NPC( ch ) && !IS_NPC( victim ) ) dam /= balance.pvp_damage_divisor; /* slow down pk */
 	if ( IS_NPC( ch ) && dam > 2000 ) dam = 2000 + ( dam - 2000 ) / 2; /* mob damage >2000 halved */
 	if ( dam <= 0 ) dam = 5;
 
 	/* up that damage */
 	if ( !IS_NPC( ch ) ) {
-		if ( ch->pcdata->upgrade_level == 1 )
-			dam = (int) ( dam * 1.05 );
-		else if ( ch->pcdata->upgrade_level == 2 )
-			dam = (int) ( dam * 1.10 );
-		else if ( ch->pcdata->upgrade_level == 3 )
-			dam = (int) ( dam * 1.15 );
-		else if ( ch->pcdata->upgrade_level == 4 )
-			dam = (int) ( dam * 1.20 );
-		else if ( ch->pcdata->upgrade_level == 5 )
-			dam = (int) ( dam * 1.25 );
-		/* 5% extra damage per level */
+		int ulvl = ch->pcdata->upgrade_level;
+		if ( ulvl >= 1 && ulvl <= 5 )
+			dam = dam * balance.upgrade_dmg[ulvl - 1] / 100;
 	}
 
 	/*
@@ -1247,7 +1239,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 		dam *= ( 1 + ch->power[DISC_VAMP_POTE] / 15 );
 
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_TANARRI ) ) {
-		if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT ) ) dam = (int) ( dam * 1.5 );
+		if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT ) ) dam = dam * balance.dmg_mult_tanarri_might / 100;
 	}
 
 	/*
@@ -1256,36 +1248,19 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_ANGEL ) ) dam *= ( 1 + ch->pcdata->powers[ANGEL_JUSTICE] / 10 );
 
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) && IS_DEMPOWER( ch, DEM_MIGHT ) )
-		dam = (int) ( dam * 1.1 );
-	if ( !IS_NPC( ch ) && !IS_NPC( victim ) && IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) && IS_CLASS( victim, CLASS_SHAPESHIFTER ) ) dam = (int) ( dam * 1.2 );
+		dam = dam * balance.dmg_mult_demon_might / 100;
+	if ( !IS_NPC( ch ) && !IS_NPC( victim ) && IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) && IS_CLASS( victim, CLASS_SHAPESHIFTER ) ) dam = dam * balance.dmg_mult_uk_vs_shape / 100;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MAGE ) ) {
 		if ( dt == gsn_mageshield && ch->pcdata->powers[PINVOKE] > 6 ) dam = (int) ( dam * 1.4 );
 		if ( dt == gsn_mageshield && ch->pcdata->powers[PINVOKE] > 9 ) dam = (int) ( dam * 1.4 );
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_NINJA ) ) {
-		if ( ch->pcdata->rank == BELT_ONE )
-			dam = (int) ( dam * 1.1 );
-		else if ( ch->pcdata->rank == BELT_TWO )
-			dam = (int) ( dam * 1.2 );
-		else if ( ch->pcdata->rank == BELT_THREE )
-			dam = (int) ( dam * 1.3 );
-		else if ( ch->pcdata->rank == BELT_FOUR )
-			dam = (int) ( dam * 1.4 );
-		else if ( ch->pcdata->rank == BELT_FIVE )
-			dam = (int) ( dam * 1.5 );
-		else if ( ch->pcdata->rank == BELT_SIX )
-			dam = (int) ( dam * 1.6 );
-		else if ( ch->pcdata->rank == BELT_SEVEN )
-			dam = (int) ( dam * 1.7 );
-		else if ( ch->pcdata->rank == BELT_EIGHT )
-			dam = (int) ( dam * 1.8 );
-		else if ( ch->pcdata->rank == BELT_NINE )
-			dam = (int) ( dam * 1.9 );
-		else if ( ch->pcdata->rank == BELT_TEN )
-			dam = (int) ( dam * 2.0 );
+		int belt = ch->pcdata->rank;
+		if ( belt >= BELT_ONE && belt <= BELT_TEN )
+			dam = dam * balance.dmg_mult_ninja_belt[belt - BELT_ONE] / 100;
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_STRONGARMS ) )
-		dam = (int) ( dam * 1.2 );
+		dam = dam * balance.dmg_mult_demon_strongarms / 100;
 
 	if ( IS_NPC( victim ) ) {
 
@@ -1610,135 +1585,131 @@ bool can_bypass( CHAR_DATA *ch, CHAR_DATA *victim ) {
 }
 
 void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
-	int max_dam = 1000;
+	int max_dam = balance.base_damcap;
 	int i = 0;
 
 	if ( !IS_NPC( ch ) ) {
-		if ( ch->pcdata->upgrade_level > 0 ) max_dam += ch->pcdata->upgrade_level * 500;
-		if ( ch->generation == 1 ) max_dam += 250;
-		if ( ch->generation == 2 ) max_dam += 200;
-		if ( ch->generation == 3 ) max_dam += 150;
-		if ( ch->generation == 4 ) max_dam += 100;
-		if ( ch->generation == 5 ) max_dam += 50;
+		if ( ch->pcdata->upgrade_level > 0 ) max_dam += ch->pcdata->upgrade_level * balance.upgrade_damcap_per_level;
+		if ( ch->generation >= 1 && ch->generation <= 5 ) max_dam += balance.gen_damcap[ch->generation - 1];
 		if ( IS_CLASS( ch, CLASS_MAGE ) ) {
-			if ( IS_ITEMAFF( ch, ITEMA_BEAST ) ) max_dam += 750;
-			max_dam += 500;
+			if ( IS_ITEMAFF( ch, ITEMA_BEAST ) ) max_dam += balance.damcap_mage_beast;
+			max_dam += balance.damcap_mage;
 		}
 		if ( IS_CLASS( ch, CLASS_TANARRI ) ) {
 			if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT ) ) max_dam += 500;
-			max_dam += ch->pcdata->rank * 375; /* max rank is 6 btw */
+			max_dam += ch->pcdata->rank * balance.damcap_tanarri_per_rank;
 		}
 		if ( IS_CLASS( ch, CLASS_LICH ) ) {
-			max_dam += 450;
-			if ( ch->pcdata->powers[CON_LORE] > 4 ) max_dam += 350;
-			if ( ch->pcdata->powers[DEATH_LORE] > 4 ) max_dam += 350;
-			if ( ch->pcdata->powers[LIFE_LORE] > 4 ) max_dam += 350;
-			if ( ch->pcdata->powers[NECROMANTIC] > 4 ) max_dam += 350;
-			if ( ch->pcdata->powers[CHAOS_MAGIC] > 4 ) max_dam += 350;
+			max_dam += balance.damcap_lich_base;
+			if ( ch->pcdata->powers[CON_LORE] > 4 ) max_dam += balance.damcap_lich_lore;
+			if ( ch->pcdata->powers[DEATH_LORE] > 4 ) max_dam += balance.damcap_lich_lore;
+			if ( ch->pcdata->powers[LIFE_LORE] > 4 ) max_dam += balance.damcap_lich_lore;
+			if ( ch->pcdata->powers[NECROMANTIC] > 4 ) max_dam += balance.damcap_lich_lore;
+			if ( ch->pcdata->powers[CHAOS_MAGIC] > 4 ) max_dam += balance.damcap_lich_lore;
 		}
 		if ( IS_CLASS( ch, CLASS_ANGEL ) ) {
-			max_dam += ch->pcdata->powers[ANGEL_JUSTICE] * 125;
-			max_dam += ch->pcdata->powers[ANGEL_PEACE] * 125;
-			max_dam += ch->pcdata->powers[ANGEL_HARMONY] * 125;
-			max_dam += ch->pcdata->powers[ANGEL_LOVE] * 125;
+			max_dam += ch->pcdata->powers[ANGEL_JUSTICE] * balance.damcap_angel_per_power;
+			max_dam += ch->pcdata->powers[ANGEL_PEACE] * balance.damcap_angel_per_power;
+			max_dam += ch->pcdata->powers[ANGEL_HARMONY] * balance.damcap_angel_per_power;
+			max_dam += ch->pcdata->powers[ANGEL_LOVE] * balance.damcap_angel_per_power;
 		}
 		if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) {
-			max_dam += 800;
+			max_dam += balance.damcap_shape_base;
 			if ( ch->pcdata->powers[SHAPE_FORM] == TIGER_FORM )
-				max_dam += ch->pcdata->powers[TIGER_LEVEL] * 325;
+				max_dam += ch->pcdata->powers[TIGER_LEVEL] * balance.damcap_shape_tiger;
 			else if ( ch->pcdata->powers[SHAPE_FORM] == HYDRA_FORM )
-				max_dam += ch->pcdata->powers[HYDRA_LEVEL] * 350;
+				max_dam += ch->pcdata->powers[HYDRA_LEVEL] * balance.damcap_shape_hydra;
 			else if ( ch->pcdata->powers[SHAPE_FORM] == BULL_FORM )
-				max_dam += ch->pcdata->powers[BULL_LEVEL] * 300;
+				max_dam += ch->pcdata->powers[BULL_LEVEL] * balance.damcap_shape_bull;
 			else if ( ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM )
-				max_dam += ch->pcdata->powers[FAERIE_LEVEL] * 275;
+				max_dam += ch->pcdata->powers[FAERIE_LEVEL] * balance.damcap_shape_faerie;
 		}
 		if ( IS_CLASS( ch, CLASS_DROW ) ) {
-			max_dam += 500;
-			if ( IS_SET( ch->newbits, NEW_DROWHATE ) ) max_dam += 650;
-			if ( IS_SET( ch->newbits, NEW_DFORM ) ) max_dam += 650;
+			max_dam += balance.damcap_drow_base;
+			if ( IS_SET( ch->newbits, NEW_DROWHATE ) ) max_dam += balance.damcap_drow_hate;
+			if ( IS_SET( ch->newbits, NEW_DFORM ) ) max_dam += balance.damcap_drow_form;
 		}
 		if ( IS_CLASS( ch, CLASS_DEMON ) && ch->in_room != NULL ) {
 			max_dam += ch->power[DISC_DAEM_ATTA] * 50;
-			max_dam += 500;
-			if ( ch->pcdata->souls > 0 ) max_dam += UMIN( 350, 70 * ch->pcdata->souls );
-			if ( ch->in_room->vnum >= 93420 && ch->in_room->vnum <= 93426 ) max_dam += 6000;
-			max_dam += ( ch->pcdata->stats[DEMON_POWER] * 2 );
+			max_dam += balance.damcap_demon_base;
+			if ( ch->pcdata->souls > 0 ) max_dam += UMIN( balance.damcap_demon_soul_cap, balance.damcap_demon_soul_mult * ch->pcdata->souls );
+			if ( ch->in_room->vnum >= 93420 && ch->in_room->vnum <= 93426 ) max_dam += balance.damcap_demon_hell;
+			max_dam += ( ch->pcdata->stats[DEMON_POWER] * balance.damcap_demon_power_mult );
 		}
 		if ( IS_CLASS( ch, CLASS_DROID ) ) {
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 0 ) max_dam += 450;
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 1 ) max_dam += 450;
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 2 ) max_dam += 450;
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 3 ) max_dam += 450;
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 4 ) max_dam += 450;
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 0 ) max_dam += balance.damcap_droid_per_limb;
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 1 ) max_dam += balance.damcap_droid_per_limb;
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 2 ) max_dam += balance.damcap_droid_per_limb;
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 3 ) max_dam += balance.damcap_droid_per_limb;
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 4 ) max_dam += balance.damcap_droid_per_limb;
 		}
 		if ( IS_CLASS( ch, CLASS_MONK ) ) {
-			max_dam += ( ch->monkab[COMBAT] * 100 );
-			if ( ch->chi[CURRENT] > 0 ) max_dam += ch->chi[CURRENT] * 200;
+			max_dam += ( ch->monkab[COMBAT] * balance.damcap_monk_combat_mult );
+			if ( ch->chi[CURRENT] > 0 ) max_dam += ch->chi[CURRENT] * balance.damcap_monk_chi_mult;
 		}
 		if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-			max_dam += ( ch->rage * 5 );
+			max_dam += ( ch->rage * balance.damcap_vamp_rage_mult );
 			if ( ch->power[DISC_VAMP_POTE] > 0 )
-				max_dam += ( ch->power[DISC_VAMP_POTE] * 50 );
+				max_dam += ( ch->power[DISC_VAMP_POTE] * balance.damcap_vamp_pote_mult );
 			if ( ch->pcdata->rank == AGE_TRUEBLOOD )
-				max_dam += 600;
+				max_dam += balance.damcap_vamp_trueblood;
 			else if ( ch->pcdata->rank == AGE_LA_MAGRA )
-				max_dam += 500;
+				max_dam += balance.damcap_vamp_lamagra;
 			else if ( ch->pcdata->rank == AGE_METHUSELAH )
-				max_dam += 400;
+				max_dam += balance.damcap_vamp_methuselah;
 			else if ( ch->pcdata->rank == AGE_ELDER )
-				max_dam += 250;
+				max_dam += balance.damcap_vamp_elder;
 			else if ( ch->pcdata->rank == AGE_ANCILLA )
-				max_dam += 100;
+				max_dam += balance.damcap_vamp_ancilla;
 		}
 		if ( IS_CLASS( ch, CLASS_NINJA ) ) {
-			max_dam += ( ch->rage * 4 );
+			max_dam += ( ch->rage * balance.damcap_ninja_rage_mult );
 			if ( ch->pcdata->powers[NPOWER_CHIKYU] >= 6 && ch->pcdata->powers[HARA_KIRI] > 0 )
-				max_dam += 500;
+				max_dam += balance.damcap_ninja_chikyu_high;
 			if ( ch->pcdata->powers[NPOWER_CHIKYU] >= 2 )
-				max_dam += 500;
+				max_dam += balance.damcap_ninja_chikyu_low;
 		}
 		if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 			if ( ch->rage > 99 ) {
-				max_dam += ch->rage;
-				max_dam += 400;
+				max_dam += ch->rage * balance.damcap_ww_rage_mult;
+				max_dam += balance.damcap_ww_high_rage;
 			}
-			if ( ch->power[DISC_WERE_PAIN] > 9 ) max_dam += 750;
+			if ( ch->power[DISC_WERE_PAIN] > 9 ) max_dam += balance.damcap_ww_pain;
 		}
 		if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) )
-			max_dam += ch->pcdata->powers[WEAPONSKILL] * 275;
+			max_dam += ch->pcdata->powers[WEAPONSKILL] * balance.damcap_uk_wpn_mult;
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && ( get_eq_char( ch, WEAR_WIELD ) != NULL ) ) {
 			for ( i = 0; i < 13; i++ )
-				if ( ch->wpn[i] >= 1000 ) max_dam += 175;
-			max_dam += 375;
+				if ( ch->wpn[i] >= 1000 ) max_dam += balance.damcap_samurai_per_wpn;
+			max_dam += balance.damcap_samurai_base;
 		}
 	}
-	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += 500;
+	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += balance.damcap_artifact;
 
 	if ( IS_NPC( victim ) || victim->stance[0] != STANCE_MONKEY ) {
 		if ( ch->stance[0] == STANCE_BULL )
-			max_dam += 200;
+			max_dam += balance.damcap_stance_bull;
 		else if ( ch->stance[0] == STANCE_DRAGON )
-			max_dam += 250;
+			max_dam += balance.damcap_stance_dragon;
 		else if ( ch->stance[0] == STANCE_WOLF )
-			max_dam += 250;
+			max_dam += balance.damcap_stance_wolf;
 		else if ( ch->stance[0] == STANCE_TIGER )
-			max_dam += 200;
+			max_dam += balance.damcap_stance_tiger;
 		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_3 ) )
-			max_dam += 550;
+			max_dam += balance.damcap_superstance[0];
 		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_2 ) )
-			max_dam += 400;
+			max_dam += balance.damcap_superstance[1];
 		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_1 ) )
-			max_dam += 250;
+			max_dam += balance.damcap_superstance[2];
 	}
 
 	if ( !IS_NPC( victim ) && ch->stance[0] != STANCE_MONKEY ) {
 		if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_3 ) )
-			max_dam -= 550;
+			max_dam -= balance.damcap_rev_superstance[0];
 		else if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_2 ) )
-			max_dam -= 400;
+			max_dam -= balance.damcap_rev_superstance[1];
 		else if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_1 ) )
-			max_dam -= 250;
+			max_dam -= balance.damcap_rev_superstance[2];
 	}
 
 	/* Max Dam Reductions */
@@ -1752,21 +1723,20 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			max_dam += ( 250 - silver_tol );
 		/* Vampies */
 		if ( !IS_NPC( ch ) && ( IS_CLASS( victim, CLASS_VAMPIRE ) ) )
-			max_dam -= ( victim->power[DISC_VAMP_FORT] * 50 );
+			max_dam -= ( victim->power[DISC_VAMP_FORT] * balance.damcap_vamp_fort_mult );
 		if ( IS_NPC( ch ) || ch->stance[0] != STANCE_MONKEY ) {
 			if ( victim->stance[0] == STANCE_CRAB )
-				max_dam -= 250;
+				max_dam -= balance.damcap_stance_crab;
 			else if ( victim->stance[0] == STANCE_DRAGON )
-				max_dam -= 250;
+				max_dam -= balance.damcap_stance_dragon_def;
 			else if ( victim->stance[0] == STANCE_SWALLOW )
-				max_dam -= 250;
+				max_dam -= balance.damcap_stance_swallow;
 		}
 		if ( IS_CLASS( victim, CLASS_DEMON ) && ( victim->in_room->vnum >= 93420 && victim->in_room->vnum <= 93426 ) )
 			max_dam = (int) ( max_dam * 0.5 );
 	}
 
-	if ( ch->level >= LEVEL_BUILDER ) max_dam = 30000;
-	//  if (ch->level >= LEVEL_BUILDER && !IS_NPC(ch)) max_dam = 100000; // Det er pisse irreterende Thomas.. jeg kan intet teste mod mobs, de doer automatisk. DIE!
+	if ( ch->level >= LEVEL_BUILDER ) max_dam = balance.builder_damcap;
 	ch->damcap[DAM_CAP] = max_dam;
 	ch->damcap[DAM_CHANGE] = 0;
 	return;

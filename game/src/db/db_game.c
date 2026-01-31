@@ -22,6 +22,7 @@ extern TOP_BOARD top_board[MAX_TOP_PLAYERS + 1];
 extern LEADER_BOARD leader_board;
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
+extern BALANCE_DATA balance;
 extern BOARD_DATA boards[];
 extern BAN_DATA *ban_list;
 extern DISABLED_DATA *disabled_first;
@@ -108,6 +109,11 @@ static const char *GAME_SCHEMA_SQL =
 	"  command_name TEXT PRIMARY KEY,"
 	"  level        INTEGER NOT NULL,"
 	"  disabled_by  TEXT NOT NULL"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS balance_config ("
+	"  key   TEXT PRIMARY KEY,"
+	"  value TEXT NOT NULL"
 	");";
 
 
@@ -866,5 +872,71 @@ void db_game_save_disabled( void ) {
 		sqlite3_finalize( stmt );
 	}
 
+	db_commit( game_db );
+}
+
+
+/*
+ * Balance config (game.db)
+ * Key-value pairs for combat balance tuning constants.
+ *
+ * Uses the balance_map defined in balance.c to iterate all fields.
+ */
+typedef struct balance_entry {
+	const char *key;
+	int        *field;
+} balance_entry_t;
+
+extern balance_entry_t balance_map[];
+
+void db_game_load_balance( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT key, value FROM balance_config";
+	int i;
+
+	if ( !game_db )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		const char *key = col_text( stmt, 0 );
+		const char *val = col_text( stmt, 1 );
+
+		for ( i = 0; balance_map[i].key != NULL; i++ ) {
+			if ( !str_cmp( key, balance_map[i].key ) ) {
+				*balance_map[i].field = atoi( val );
+				break;
+			}
+		}
+	}
+
+	sqlite3_finalize( stmt );
+}
+
+void db_game_save_balance( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "INSERT OR REPLACE INTO balance_config (key, value) VALUES (?,?)";
+	char buf[64];
+	int i;
+
+	if ( !game_db )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	db_begin( game_db );
+
+	for ( i = 0; balance_map[i].key != NULL; i++ ) {
+		sqlite3_reset( stmt );
+		snprintf( buf, sizeof( buf ), "%d", *balance_map[i].field );
+		sqlite3_bind_text( stmt, 1, balance_map[i].key, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 2, buf, -1, SQLITE_TRANSIENT );
+		sqlite3_step( stmt );
+	}
+
+	sqlite3_finalize( stmt );
 	db_commit( game_db );
 }
