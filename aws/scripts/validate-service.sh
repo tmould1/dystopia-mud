@@ -6,8 +6,9 @@ echo "=== ValidateService: Checking MUD server health ==="
 MAX_ATTEMPTS=10
 SLEEP_TIME=3
 
-# Get AWS region from instance metadata
-REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
+# Get AWS region from instance metadata (IMDSv2 requires a token)
+TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+REGION=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region)
 
 # Get the game port from SSM Parameter Store
 GAME_PORT=$(aws ssm get-parameter --name /mudder/game-port --query 'Parameter.Value' --output text --region "$REGION")
