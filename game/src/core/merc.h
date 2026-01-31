@@ -1069,43 +1069,11 @@ struct kill_data {
 #define ITEMA_ILLUSIONS	   134217728 /* Mage dodge/parry */
 #define ITEMA_BEAST		   268435456 /* Mage extra attacks */
 
-#define NO_COLOUR ""		  /* Blank */
-#define GREY	  "[0;1;30m" /* Dark Grey */
-#define D_RED	  "[0;0;31m" /* Dark Red */
-#define L_RED	  "[0;1;31m" /* Light Red */
-#define D_GREEN	  "[0;0;32m" /* Dark Green */
-#define L_GREEN	  "[0;1;32m" /* Light Green */
-#define BROWN	  "[0;0;33m" /* Brown */
-#define YELLOW	  "[0;1;33m" /* Yellow */
-#define D_BLUE	  "[0;0;34m" /* Dark Blue */
-#define L_BLUE	  "[0;1;34m" /* Light Blue */
-#define MAGENTA	  "[0;0;35m" /* Magenta */
-#define PINK	  "[0;1;35m" /* Pink */
-#define D_CYAN	  "[0;0;36m" /* Dark Cyan */
-#define L_CYAN	  "[0;1;36m" /* Light Cyan */
-#define NORMAL	  "[0;0;37m" /* Light Grey */
-#define WHITE	  "[0;0;38m" /* White */
-
-#define ADD_COLOUR( _player, _str, _col )                               \
-	{                                                                   \
-		char swh_temp[255];                                             \
-		if ( !IS_NPC( _player ) && IS_SET( _player->act, PLR_ANSI ) ) { \
-			swh_temp[0] = '\0';                                         \
-			strcpy( swh_temp, _col );                                   \
-			strcat( swh_temp, _str );                                   \
-			strcat( swh_temp, NORMAL );                                 \
-			strcpy( _str, swh_temp );                                   \
-		}                                                               \
-	}
-
-#define SCALE_COLS 4
-
-#define COL_SCALE( _swh_str, _swh_ch, _swh_curr, _swh_max )                                                                            \
-	ADD_COLOUR( _swh_ch, _swh_str,                                                                                                     \
-		( _swh_curr < 1 ) ? L_RED : ( _swh_curr < _swh_max ) ? scale[( SCALE_COLS * _swh_curr ) / ( ( _swh_max > 0 ) ? _swh_max : 1 )] \
-															 : L_CYAN )
-
-extern char *scale[SCALE_COLS];
+/*
+ * Color is now handled entirely through # codes in write_to_buffer().
+ * Use col_scale_code(current, max) for dynamic color scaling.
+ * See "help color" in-game for the full code table.
+ */
 
 /*
  * Bits for 'vampire'.
@@ -2886,8 +2854,6 @@ extern sh_int gsn_multiplearms;
 #define REMOVE_BIT( var, bit ) ( ( var ) &= ~( bit ) )
 #define TOGGLE_BIT( var, bit ) ( ( var ) ^= ( bit ) )
 
-#define COLOUR( ch, color, bit ) ( ADD_COLOUR( ( ch ), ( bit ), ( color ) ); )
-
 /*
  * Memory allocation macros.
  */
@@ -4421,6 +4387,7 @@ void write_to_buffer args( ( DESCRIPTOR_DATA * d, const char *txt,
 	int length ) );
 bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
 bool process_output args( ( DESCRIPTOR_DATA * d, bool fPrompt ) );
+const char *col_scale_code args( ( int current, int max ) );
 void send_to_char args( ( const char *txt, CHAR_DATA *ch ) );
 void act args( ( const char *format, CHAR_DATA *ch,
 	const void *arg1, const void *arg2, int type ) );

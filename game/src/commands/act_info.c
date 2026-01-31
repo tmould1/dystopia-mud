@@ -1287,24 +1287,23 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 				ch->in_room->description ? ch->in_room->description : "" );
 			send_to_char( buf, ch );
 			if ( ch->in_room->blood == 1000 )
-				snprintf( buf, sizeof( buf ), "You notice that the room is completely drenched in blood.\n\r" );
+				snprintf( buf, sizeof( buf ), "#1You notice that the room is completely drenched in blood.#n\n\r" );
 			else if ( ch->in_room->blood > 750 )
-				snprintf( buf, sizeof( buf ), "You notice that there is a very large amount of blood around the room.\n\r" );
+				snprintf( buf, sizeof( buf ), "#1You notice that there is a very large amount of blood around the room.#n\n\r" );
 			else if ( ch->in_room->blood > 500 )
-				snprintf( buf, sizeof( buf ), "You notice that there is a large quantity of blood around the room.\n\r" );
+				snprintf( buf, sizeof( buf ), "#RYou notice that there is a large quantity of blood around the room.#n\n\r" );
 			else if ( ch->in_room->blood > 250 )
-				snprintf( buf, sizeof( buf ), "You notice a fair amount of blood on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "#RYou notice a fair amount of blood on the floor.#n\n\r" );
 			else if ( ch->in_room->blood > 100 )
-				snprintf( buf, sizeof( buf ), "You notice several blood stains on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "#RYou notice several blood stains on the floor.#n\n\r" );
 			else if ( ch->in_room->blood > 50 )
-				snprintf( buf, sizeof( buf ), "You notice a few blood stains on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "#RYou notice a few blood stains on the floor.#n\n\r" );
 			else if ( ch->in_room->blood > 25 )
-				snprintf( buf, sizeof( buf ), "You notice a couple of blood stains on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "#RYou notice a couple of blood stains on the floor.#n\n\r" );
 			else if ( ch->in_room->blood > 0 )
-				snprintf( buf, sizeof( buf ), "You notice a few drops of blood on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "#RYou notice a few drops of blood on the floor.#n\n\r" );
 			else
-				snprintf( buf, sizeof( buf ), "You notice nothing special in the room.\n\r" );
-			ADD_COLOUR( ch, buf, L_RED );
+				snprintf( buf, sizeof( buf ), "#RYou notice nothing special in the room.#n\n\r" );
 			if ( ch->in_room->blood > 0 ) send_to_char( buf, ch );
 		}
 		if ( IS_SET( ch->in_room->room_flags, ROOM_FLAMING ) )
@@ -3521,21 +3520,14 @@ void do_report( CHAR_DATA *ch, char *argument ) {
 	char mmana_str[MAX_INPUT_LENGTH];
 	char mmove_str[MAX_INPUT_LENGTH];
 	char exp_str[MAX_INPUT_LENGTH];
-	sprintf( hit_str, "%d", ch->hit );
-	COL_SCALE( hit_str, ch, ch->hit, ch->max_hit );
-	sprintf( mana_str, "%d", ch->mana );
-	COL_SCALE( mana_str, ch, ch->mana, ch->max_mana );
-	sprintf( move_str, "%d", ch->move );
-	COL_SCALE( move_str, ch, ch->move, ch->max_move );
-	sprintf( exp_str, "%d", ch->exp );
-	COL_SCALE( exp_str, ch, ch->exp, 1000 );
-	sprintf( mhit_str, "%d", ch->max_hit );
-	ADD_COLOUR( ch, mhit_str, L_CYAN );
-	sprintf( mmana_str, "%d", ch->max_mana );
-	ADD_COLOUR( ch, mmana_str, L_CYAN );
-	sprintf( mmove_str, "%d", ch->max_move );
-	ADD_COLOUR( ch, mmove_str, L_CYAN );
-	sprintf( buf,
+	snprintf( hit_str, sizeof( hit_str ), "%s%d#n", col_scale_code( ch->hit, ch->max_hit ), ch->hit );
+	snprintf( mana_str, sizeof( mana_str ), "%s%d#n", col_scale_code( ch->mana, ch->max_mana ), ch->mana );
+	snprintf( move_str, sizeof( move_str ), "%s%d#n", col_scale_code( ch->move, ch->max_move ), ch->move );
+	snprintf( exp_str, sizeof( exp_str ), "%s%d#n", col_scale_code( ch->exp, 1000 ), ch->exp );
+	snprintf( mhit_str, sizeof( mhit_str ), "#C%d#n", ch->max_hit );
+	snprintf( mmana_str, sizeof( mmana_str ), "#C%d#n", ch->max_mana );
+	snprintf( mmove_str, sizeof( mmove_str ), "#C%d#n", ch->max_move );
+	snprintf( buf, sizeof( buf ),
 		"You report: %s/%s hp %s/%s mana %s/%s mv %s xp.\n\r",
 		hit_str, mhit_str,
 		mana_str, mmana_str,
@@ -3550,29 +3542,22 @@ void do_report( CHAR_DATA *ch, char *argument ) {
 		if ( vch == ch ) continue;
 		if ( vch->in_room == NULL ) continue;
 		if ( vch->in_room != ch->in_room ) continue;
-		sprintf( hit_str, "%d", ch->hit );
-		COL_SCALE( hit_str, vch, ch->hit, ch->max_hit );
-		sprintf( mana_str, "%d", ch->mana );
-		COL_SCALE( mana_str, vch, ch->mana, ch->max_mana );
-		sprintf( move_str, "%d", ch->move );
-		COL_SCALE( move_str, vch, ch->move, ch->max_move );
-		sprintf( exp_str, "%d", ch->exp );
-		COL_SCALE( exp_str, vch, ch->exp, 1000 );
-		sprintf( mhit_str, "%d", ch->max_hit );
-		ADD_COLOUR( vch, mhit_str, L_CYAN );
-		sprintf( mmana_str, "%d", ch->max_mana );
-		ADD_COLOUR( vch, mmana_str, L_CYAN );
-		sprintf( mmove_str, "%d", ch->max_move );
-		ADD_COLOUR( vch, mmove_str, L_CYAN );
+		snprintf( hit_str, sizeof( hit_str ), "%s%d#n", col_scale_code( ch->hit, ch->max_hit ), ch->hit );
+		snprintf( mana_str, sizeof( mana_str ), "%s%d#n", col_scale_code( ch->mana, ch->max_mana ), ch->mana );
+		snprintf( move_str, sizeof( move_str ), "%s%d#n", col_scale_code( ch->move, ch->max_move ), ch->move );
+		snprintf( exp_str, sizeof( exp_str ), "%s%d#n", col_scale_code( ch->exp, 1000 ), ch->exp );
+		snprintf( mhit_str, sizeof( mhit_str ), "#C%d#n", ch->max_hit );
+		snprintf( mmana_str, sizeof( mmana_str ), "#C%d#n", ch->max_mana );
+		snprintf( mmove_str, sizeof( mmove_str ), "#C%d#n", ch->max_move );
 		if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_POLYMORPH ) )
-			sprintf( buf, "%s reports: %s/%s hp %s/%s mana %s/%s mv %s xp.\n\r",
+			snprintf( buf, sizeof( buf ), "%s reports: %s/%s hp %s/%s mana %s/%s mv %s xp.\n\r",
 				ch->morph,
 				hit_str, mhit_str,
 				mana_str, mmana_str,
 				move_str, mmove_str,
 				exp_str );
 		else
-			sprintf( buf, "%s reports: %s/%s hp %s/%s mana %s/%s mv %s xp.\n\r",
+			snprintf( buf, sizeof( buf ), "%s reports: %s/%s hp %s/%s mana %s/%s mv %s xp.\n\r",
 				IS_NPC( ch ) ? capitalize( ch->short_descr ) : ch->name,
 				hit_str, mhit_str,
 				mana_str, mmana_str,

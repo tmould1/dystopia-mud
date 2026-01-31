@@ -169,13 +169,15 @@ time_t current_time; /* Time of this pulse		*/
 time_t boot_time;	 /* Time of server boot		*/
 int arena;
 
-/* Colour scale char list - Calamar */
+/* Colour scale - returns # color code based on current/max ratio */
+#define NUM_SCALE_CODES 4
 
-char *scale[SCALE_COLS] = {
-	L_RED,
-	L_BLUE,
-	L_GREEN,
-	YELLOW };
+const char *col_scale_code( int current, int max ) {
+	static const char *codes[NUM_SCALE_CODES] = { "#R", "#L", "#G", "#y" };
+	if ( current < 1 ) return "#R";
+	if ( current >= max ) return "#C";
+	return codes[( NUM_SCALE_CODES * current ) / ( max > 0 ? max : 1 )];
+}
 
 void game_loop args( ( int control ) );
 int init_socket args( ( int port ) );
@@ -1524,60 +1526,40 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 			char mana_str[MAX_INPUT_LENGTH];
 			char move_str[MAX_INPUT_LENGTH];
 			char exp_str[MAX_INPUT_LENGTH];
+			char tmp_str[MAX_INPUT_LENGTH];
 
 			ch = d->character;
 			if ( IS_HEAD( ch, LOST_HEAD ) || IS_EXTRA( ch, EXTRA_OSWITCH ) ) {
-				add_commas_to_number( ch->exp, exp_str, sizeof( exp_str ) );
-				COL_SCALE( exp_str, ch, ch->exp, 10000000 );
-				sprintf( buf, "#7<[#4%sX#7] [#3?#1H #3?#6M #3?#2V#7]>#n ", exp_str );
+				add_commas_to_number( ch->exp, tmp_str, sizeof( tmp_str ) );
+				snprintf( exp_str, sizeof( exp_str ), "%s%s#n", col_scale_code( ch->exp, 10000000 ), tmp_str );
+				snprintf( buf, sizeof( buf ), "#7<[#L%sX#7] [#y?#RH #y?#CM #y?#GV#7]>#n ", exp_str );
 			} else if ( ch->position == POS_FIGHTING ) {
 				victim = ch->fighting;
 				if ( victim == NULL ) {
-					sprintf( cond, "NA" );
-					ADD_COLOUR( ch, cond, L_RED );
-
+					snprintf( cond, sizeof( cond ), "#RNA#n" );
 				} else if ( ( victim->hit * 100 / victim->max_hit ) < 25 ) {
-					sprintf( cond, "Awful" );
-					ADD_COLOUR( ch, cond, L_RED );
+					snprintf( cond, sizeof( cond ), "#RAwful#n" );
 				} else if ( ( victim->hit * 100 / victim->max_hit ) < 50 ) {
-					sprintf( cond, "Poor" );
-					ADD_COLOUR( ch, cond, L_BLUE );
+					snprintf( cond, sizeof( cond ), "#LPoor#n" );
 				} else if ( ( victim->hit * 100 / victim->max_hit ) < 75 ) {
-					sprintf( cond, "Fair" );
-					ADD_COLOUR( ch, cond, L_GREEN );
+					snprintf( cond, sizeof( cond ), "#GFair#n" );
 				} else if ( ( victim->hit * 100 / victim->max_hit ) < 100 ) {
-					sprintf( cond, "Good" );
-					ADD_COLOUR( ch, cond, YELLOW );
-				} else if ( ( victim->hit * 100 / victim->max_hit ) >= 100 ) {
-					sprintf( cond, "Perfect" );
-					ADD_COLOUR( ch, cond, L_CYAN );
+					snprintf( cond, sizeof( cond ), "#yGood#n" );
+				} else {
+					snprintf( cond, sizeof( cond ), "#CPerfect#n" );
 				}
-				sprintf( hit_str, "%d", ch->hit );
-				COL_SCALE( hit_str, ch, ch->hit, ch->max_hit );
-				sprintf( mana_str, "%d", ch->mana );
-				COL_SCALE( mana_str, ch, ch->mana, ch->max_mana );
-				sprintf( move_str, "%d", ch->move );
-				COL_SCALE( move_str, ch, ch->move, ch->max_move );
-				/*
-				sprintf( buf, "[%s] <%shp %sm %smv> ", cond, hit_str, mana_str, move_str );
-				*/
-				sprintf( buf, "#7<[%s] [%sH %sM %sV]> ", cond,
+				snprintf( hit_str, sizeof( hit_str ), "%s%d#n", col_scale_code( ch->hit, ch->max_hit ), ch->hit );
+				snprintf( mana_str, sizeof( mana_str ), "%s%d#n", col_scale_code( ch->mana, ch->max_mana ), ch->mana );
+				snprintf( move_str, sizeof( move_str ), "%s%d#n", col_scale_code( ch->move, ch->max_move ), ch->move );
+				snprintf( buf, sizeof( buf ), "#7<[%s] [%sH %sM %sV]> ", cond,
 					hit_str, mana_str, move_str );
 			} else {
-				sprintf( hit_str, "%d", ch->hit );
-				COL_SCALE( hit_str, ch, ch->hit, ch->max_hit );
-				sprintf( mana_str, "%d", ch->mana );
-				COL_SCALE( mana_str, ch, ch->mana, ch->max_mana );
-				sprintf( move_str, "%d", ch->move );
-				COL_SCALE( move_str, ch, ch->move, ch->max_move );
-				// sprintf(exp_str, "%d", ch->exp);
-				add_commas_to_number( ch->exp, exp_str, sizeof( exp_str ) );
-				COL_SCALE( exp_str, ch, ch->exp, 10000000 );
-				/*
-				sprintf( buf, "[%s exp] <%shp %sm %smv> ",exp_str, hit_str, mana_str, move_str );
-				sprintf( buf, "<[%sX] [%sH %sM %sV]> ",exp_str, hit_str, mana_str, move_str );
-				*/
-				sprintf( buf, "#7<[%s] [%sH %sM %sV]> ", exp_str, hit_str, mana_str, move_str );
+				snprintf( hit_str, sizeof( hit_str ), "%s%d#n", col_scale_code( ch->hit, ch->max_hit ), ch->hit );
+				snprintf( mana_str, sizeof( mana_str ), "%s%d#n", col_scale_code( ch->mana, ch->max_mana ), ch->mana );
+				snprintf( move_str, sizeof( move_str ), "%s%d#n", col_scale_code( ch->move, ch->max_move ), ch->move );
+				add_commas_to_number( ch->exp, tmp_str, sizeof( tmp_str ) );
+				snprintf( exp_str, sizeof( exp_str ), "%s%s#n", col_scale_code( ch->exp, 10000000 ), tmp_str );
+				snprintf( buf, sizeof( buf ), "#7<[%s] [%sH %sM %sV]> ", exp_str, hit_str, mana_str, move_str );
 			}
 			write_to_buffer( d, buf, 0 );
 		}
@@ -1676,6 +1658,8 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 	char *output_end;
 	int i = 0;
 	const char *ansi;
+	CHAR_DATA *wch = d->character ? ( d->original ? d->original : d->character ) : NULL;
+	bool use_ansi = ( !wch || IS_NPC( wch ) || IS_SET( wch->act, PLR_ANSI ) );
 
 	/* clear the output buffer, and set the pointer */
 	output[0] = '\0';
@@ -1730,12 +1714,14 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 
 		/* Check color lookup table */
 		if ( ( ansi = lookup_color( *txt ) ) != NULL ) {
-			char *new_ptr = buf_append_safe( ptr, ansi, output, sizeof(output), 20 );
-			if ( new_ptr == NULL ) {
-				bug( "write_to_buffer: color lookup overflow, truncating", 0 );
-				break; /* Exit while loop */
+			if ( use_ansi ) {
+				char *new_ptr = buf_append_safe( ptr, ansi, output, sizeof(output), 20 );
+				if ( new_ptr == NULL ) {
+					bug( "write_to_buffer: color lookup overflow, truncating", 0 );
+					break; /* Exit while loop */
+				}
+				ptr = new_ptr;
 			}
-			ptr = new_ptr;
 			txt++;
 			continue;
 		}
@@ -1743,37 +1729,42 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		/* Handle special codes not in the table */
 		switch ( *txt ) {
 		case 's': /* Random color */
-			ansi = random_colors[number_range( 0, NUM_RANDOM_COLORS - 1 )];
-			{
-				char *new_ptr = buf_append_safe( ptr, ansi, output, sizeof(output), 20 );
-				if ( new_ptr == NULL ) {
-					bug( "write_to_buffer: random color overflow, truncating", 0 );
-					ptr = NULL; /* Signal to exit main loop */
-				} else {
-					ptr = new_ptr;
+			if ( use_ansi ) {
+				ansi = random_colors[number_range( 0, NUM_RANDOM_COLORS - 1 )];
+				{
+					char *new_ptr = buf_append_safe( ptr, ansi, output, sizeof(output), 20 );
+					if ( new_ptr == NULL ) {
+						bug( "write_to_buffer: random color overflow, truncating", 0 );
+						ptr = NULL; /* Signal to exit main loop */
+					} else {
+						ptr = new_ptr;
+					}
 				}
 			}
 			txt++;
 			break;
 		case 'x': /* 256-color: #x### */
 			if ( isdigit( txt[1] ) && isdigit( txt[2] ) && isdigit( txt[3] ) ) {
-				/* Need 14 bytes for ANSI sequence */
-				if ( ptr + 14 < output_end ) {
-					*ptr++ = '\033';
-					*ptr++ = '[';
-					*ptr++ = '0';
-					*ptr++ = ';';
-					*ptr++ = '3';
-					*ptr++ = '8';
-					*ptr++ = ';';
-					*ptr++ = '5';
-					*ptr++ = ';';
-					*ptr++ = txt[1];
-					*ptr++ = txt[2];
-					*ptr++ = txt[3];
-					*ptr++ = 'm';
+				if ( use_ansi ) {
+					/* Need 14 bytes for ANSI sequence */
+					if ( ptr + 14 < output_end ) {
+						*ptr++ = '\033';
+						*ptr++ = '[';
+						*ptr++ = '0';
+						*ptr++ = ';';
+						*ptr++ = '3';
+						*ptr++ = '8';
+						*ptr++ = ';';
+						*ptr++ = '5';
+						*ptr++ = ';';
+						*ptr++ = txt[1];
+						*ptr++ = txt[2];
+						*ptr++ = txt[3];
+						*ptr++ = 'm';
+					}
 				}
 				txt += 4;
+				i += 3; /* Account for 3 extra digit bytes consumed beyond #x */
 			} else {
 				txt++;
 			}
@@ -1840,8 +1831,8 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		}
 	}
 
-	/* Add ANSI reset sequence only if there's definitely room */
-	if ( ptr >= output && ptr + 5 <= output + sizeof(output) ) {
+	/* Add ANSI reset sequence only if ANSI enabled and there's room */
+	if ( use_ansi && ptr >= output && ptr + 5 <= output + sizeof(output) ) {
 		*ptr++ = '\033';
 		*ptr++ = '[';
 		*ptr++ = '0';
@@ -1868,7 +1859,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 			return;
 		}
 		obuf = alloc_mem( 2 * d->outsize );
-		strncpy( obuf, d->outbuf, d->outtop );
+		memcpy( obuf, d->outbuf, d->outtop );
 		free_mem( d->outbuf, d->outsize );
 		d->outbuf = obuf;
 		d->outsize *= 2;

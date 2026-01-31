@@ -3733,7 +3733,6 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
  */
 void disarm( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	OBJ_DATA *obj;
-	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) && victim->level > 2 && number_percent() > 10 )
 		return;
@@ -3743,15 +3742,9 @@ void disarm( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) == NULL ) || obj->item_type != ITEM_WEAPON )
 			return;
 	}
-	snprintf( buf, sizeof( buf ), "$n disarms you!" );
-	ADD_COLOUR( ch, buf, WHITE );
-	act( buf, ch, NULL, victim, TO_VICT );
-	snprintf( buf, sizeof( buf ), "You disarm $N!" );
-	ADD_COLOUR( ch, buf, WHITE );
-	act( buf, ch, NULL, victim, TO_CHAR );
-	snprintf( buf, sizeof( buf ), "$n disarms $N!" );
-	ADD_COLOUR( ch, buf, WHITE );
-	act( buf, ch, NULL, victim, TO_NOTVICT );
+	act( "#C$n disarms you!#n", ch, NULL, victim, TO_VICT );
+	act( "#CYou disarm $N!#n", ch, NULL, victim, TO_CHAR );
+	act( "#C$n disarms $N!#n", ch, NULL, victim, TO_NOTVICT );
 	obj_from_char( obj );
 	if ( IS_SET( obj->extra_flags, ITEM_LOYAL ) && ( !IS_NPC( victim ) ) ) {
 		act( "$p leaps back into your hand!", victim, obj, NULL, TO_CHAR );
@@ -3770,7 +3763,6 @@ void disarm( CHAR_DATA *ch, CHAR_DATA *victim ) {
  * Caller must check for successful attack.
  */
 void trip( CHAR_DATA *ch, CHAR_DATA *victim ) {
-	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_AFFECTED( victim, AFF_FLYING ) ) return;
 	if ( IS_NPC( ch ) && victim->level > 2 && number_percent() > 5 ) return;
@@ -3785,15 +3777,9 @@ void trip( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			return;
 	}
 	if ( victim->wait == 0 ) {
-		snprintf( buf, sizeof( buf ), "$n trips you and you go down!" );
-		ADD_COLOUR( ch, buf, WHITE );
-		act( buf, ch, NULL, victim, TO_VICT );
-		snprintf( buf, sizeof( buf ), "You trip $N and $E goes down!" );
-		ADD_COLOUR( ch, buf, WHITE );
-		act( buf, ch, NULL, victim, TO_CHAR );
-		snprintf( buf, sizeof( buf ), "$n trips $N and $E goes down!" );
-		ADD_COLOUR( ch, buf, WHITE );
-		act( buf, ch, NULL, victim, TO_NOTVICT );
+		act( "#C$n trips you and you go down!#n", ch, NULL, victim, TO_VICT );
+		act( "#CYou trip $N and $E goes down!#n", ch, NULL, victim, TO_CHAR );
+		act( "#C$n trips $N and $E goes down!#n", ch, NULL, victim, TO_NOTVICT );
 		WAIT_STATE( victim, 2 * PULSE_VIOLENCE );
 		victim->position = POS_RESTING;
 	}

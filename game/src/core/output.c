@@ -325,6 +325,10 @@ void act( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2,
 			*point++ = '\n';
 			*point++ = '\r';
 		}
+		/* NUL-terminate for safety (write_to_buffer uses explicit length,
+		 * but this prevents overread if the length/counter ever mismatch) */
+		if ( point != NULL && point < buf + MAX_STRING_LENGTH )
+			*point = '\0';
 
 		if ( is_fam ) {
 			if ( to->in_room != ch->in_room && familiar != NULL &&
@@ -549,6 +553,10 @@ void act2( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2
 			*point++ = '\n';
 			*point++ = '\r';
 		}
+		/* NUL-terminate for safety (write_to_buffer uses explicit length,
+		 * but this prevents overread if the length/counter ever mismatch) */
+		if ( point != NULL && point < buf + MAX_STRING_LENGTH )
+			*point = '\0';
 
 		if ( is_fam ) {
 			if ( to->in_room != ch->in_room && familiar != NULL &&

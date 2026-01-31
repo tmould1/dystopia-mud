@@ -6,33 +6,7 @@
 #include "merc.h"
 
 void bust_a_header( DESCRIPTOR_DATA *d ) {
-	char class[16];	  /* Class name: "Werewolf" is longest (8 chars) */
-	char class2[48];  /* "Name the Class" format */
-	char header[128]; /* ANSI escape sequence header */
-	char header1[64]; /* "Name the Class  Align:1234" */
-	char blanklin[8];
-	CHAR_DATA *ch;
-	char cls[32]; /* Color code + " " + NORMAL - needs space for ANSI sequences */
-	sprintf( cls, " " );
-
-	ch = d->character;
-	if ( ch == NULL ) return;
-	ADD_COLOUR( ch, cls, NORMAL );
-
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) )
-		sprintf( class, "Vampire" );
-	else if ( IS_CLASS( ch, CLASS_DEMON ) )
-		sprintf( class, "Demon" );
-	else if ( IS_CLASS( ch, CLASS_WEREWOLF ) )
-		sprintf( class, "Werewolf" );
-	else
-		sprintf( class, "Classless" );
-	sprintf( class2, "%s the %s", ch->name, class );
-	sprintf( blanklin, " " );
-	sprintf( header1, "%-30s Align:%-4d", class2, ch->alignment );
-	sprintf( header,
-		"\0337\033[1;1H\033[1;44m\033[1;37m%-79s%s\0338", header1, cls );
-	send_to_char( header, ch );
+	/* Disabled - header bar no longer used */
 	return;
 }
 /*
@@ -82,245 +56,212 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 			i = " ";
 			break;
 		case 'h':
-			sprintf( buf2, "%d", ch->hit );
-			COL_SCALE( buf2, ch, ch->hit, ch->max_hit );
+			snprintf( buf2, sizeof(buf2), "%s%d#n", col_scale_code(ch->hit, ch->max_hit), ch->hit );
 			i = buf2;
 			break;
 		case 'H':
-			sprintf( buf2, "%d", ch->max_hit );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof(buf2), "#C%d#n", ch->max_hit );
 			i = buf2;
 			break;
 		case 'm':
-			sprintf( buf2, "%d", ch->mana );
-			COL_SCALE( buf2, ch, ch->mana, ch->max_mana );
+			snprintf( buf2, sizeof(buf2), "%s%d#n", col_scale_code(ch->mana, ch->max_mana), ch->mana );
 			i = buf2;
 			break;
 		case 'M':
-			sprintf( buf2, "%d", ch->max_mana );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof(buf2), "#C%d#n", ch->max_mana );
 			i = buf2;
 			break;
 		case 'v':
-			sprintf( buf2, "%d", ch->move );
-			COL_SCALE( buf2, ch, ch->move, ch->max_move );
+			snprintf( buf2, sizeof(buf2), "%s%d#n", col_scale_code(ch->move, ch->max_move), ch->move );
 			i = buf2;
 			break;
 		case 'V':
-			sprintf( buf2, "%d", ch->max_move );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof(buf2), "#C%d#n", ch->max_move );
 			i = buf2;
 			break;
-		case 'x':
-			add_commas_to_number( ch->exp, buf2, sizeof( buf2 ) );
-			COL_SCALE( buf2, ch, ch->exp, 10000000 );
+		case 'x': {
+			char xp_tmp[32];
+			add_commas_to_number( ch->exp, xp_tmp, sizeof( xp_tmp ) );
+			snprintf( buf2, sizeof( buf2 ), "%s%s#n", col_scale_code( ch->exp, 10000000 ), xp_tmp );
 			i = buf2;
 			break;
+		}
 		case 'g':
-			sprintf( buf2, "%d", ch->gold );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof(buf2), "#C%d#n", ch->gold );
 			i = buf2;
 			break;
 		case 'q':
-			sprintf( buf2, "%d", ch->pcdata->quest );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof(buf2), "#C%d#n", ch->pcdata->quest );
 			i = buf2;
 			break;
 		case 'f':
 			if ( ( victim = ch->fighting ) == NULL ) {
-				sprintf( buf2, "N/A" );
-				ADD_COLOUR( ch, buf2, L_CYAN );
+				snprintf( buf2, sizeof( buf2 ), "#CN/A#n" );
 			} else {
 				if ( ( victim->hit * 100 / victim->max_hit ) < 25 ) {
-					sprintf( buf2, "Awful" );
-					ADD_COLOUR( ch, buf2, L_RED );
+					snprintf( buf2, sizeof( buf2 ), "#RAwful#n" );
 				} else if ( ( victim->hit * 100 / victim->max_hit ) < 50 ) {
-					sprintf( buf2, "Poor" );
-					ADD_COLOUR( ch, buf2, L_BLUE );
+					snprintf( buf2, sizeof( buf2 ), "#LPoor#n" );
 				} else if ( ( victim->hit * 100 / victim->max_hit ) < 75 ) {
-					sprintf( buf2, "Fair" );
-					ADD_COLOUR( ch, buf2, L_GREEN );
+					snprintf( buf2, sizeof( buf2 ), "#GFair#n" );
 				} else if ( ( victim->hit * 100 / victim->max_hit ) < 100 ) {
-					sprintf( buf2, "Good" );
-					ADD_COLOUR( ch, buf2, YELLOW );
-				} else if ( ( victim->hit * 100 / victim->max_hit ) >= 100 ) {
-					sprintf( buf2, "Perfect" );
-					ADD_COLOUR( ch, buf2, L_CYAN );
+					snprintf( buf2, sizeof( buf2 ), "#yGood#n" );
+				} else {
+					snprintf( buf2, sizeof( buf2 ), "#CPerfect#n" );
 				}
 			}
 			i = buf2;
 			break;
 		case 'F':
 			if ( ( victim = ch->fighting ) == NULL ) {
-				sprintf( buf2, "N/A" );
-				ADD_COLOUR( ch, buf2, L_CYAN );
+				snprintf( buf2, sizeof( buf2 ), "#CN/A#n" );
 			} else if ( ( tank = victim->fighting ) == NULL ) {
-				sprintf( buf2, "N/A" );
-				ADD_COLOUR( ch, buf2, L_CYAN );
+				snprintf( buf2, sizeof( buf2 ), "#CN/A#n" );
 			} else {
 				if ( ( tank->hit * 100 / tank->max_hit ) < 25 ) {
-					sprintf( buf2, "Awful" );
-					ADD_COLOUR( ch, buf2, L_RED );
+					snprintf( buf2, sizeof( buf2 ), "#RAwful#n" );
 				} else if ( ( tank->hit * 100 / tank->max_hit ) < 50 ) {
-					sprintf( buf2, "Poor" );
-					ADD_COLOUR( ch, buf2, L_BLUE );
+					snprintf( buf2, sizeof( buf2 ), "#LPoor#n" );
 				} else if ( ( tank->hit * 100 / tank->max_hit ) < 75 ) {
-					sprintf( buf2, "Fair" );
-					ADD_COLOUR( ch, buf2, L_GREEN );
+					snprintf( buf2, sizeof( buf2 ), "#GFair#n" );
 				} else if ( ( tank->hit * 100 / tank->max_hit ) < 100 ) {
-					sprintf( buf2, "Good" );
-					ADD_COLOUR( ch, buf2, YELLOW );
-				} else if ( ( tank->hit * 100 / tank->max_hit ) >= 100 ) {
-					sprintf( buf2, "Perfect" );
-					ADD_COLOUR( ch, buf2, L_CYAN );
+					snprintf( buf2, sizeof( buf2 ), "#yGood#n" );
+				} else {
+					snprintf( buf2, sizeof( buf2 ), "#CPerfect#n" );
 				}
 			}
 			i = buf2;
 			break;
 		case 'n':
 			if ( ( victim = ch->fighting ) == NULL )
-				sprintf( buf2, "N/A" );
+				snprintf( buf2, sizeof( buf2 ), "N/A" );
 			else {
 				if ( IS_AFFECTED( victim, AFF_POLYMORPH ) )
-					strcpy( buf2, victim->morph );
+					snprintf( buf2, sizeof( buf2 ), "%s", victim->morph );
 				else if ( IS_NPC( victim ) )
-					strcpy( buf2, victim->short_descr );
+					snprintf( buf2, sizeof( buf2 ), "%s", victim->short_descr );
 				else
-					strcpy( buf2, victim->name );
+					snprintf( buf2, sizeof( buf2 ), "%s", victim->name );
 				buf2[0] = UPPER( buf2[0] );
 			}
 			i = buf2;
 			break;
 		case 'N':
 			if ( ( victim = ch->fighting ) == NULL )
-				sprintf( buf2, "N/A" );
+				snprintf( buf2, sizeof( buf2 ), "N/A" );
 			else if ( ( tank = victim->fighting ) == NULL )
-				sprintf( buf2, "N/A" );
+				snprintf( buf2, sizeof( buf2 ), "N/A" );
 			else {
 				if ( ch == tank )
-					sprintf( buf2, "You" );
+					snprintf( buf2, sizeof( buf2 ), "You" );
 				else if ( IS_AFFECTED( tank, AFF_POLYMORPH ) )
-					strcpy( buf2, tank->morph );
+					snprintf( buf2, sizeof( buf2 ), "%s", tank->morph );
 				else if ( IS_NPC( victim ) )
-					strcpy( buf2, tank->short_descr );
+					snprintf( buf2, sizeof( buf2 ), "%s", tank->short_descr );
 				else
-					strcpy( buf2, tank->name );
+					snprintf( buf2, sizeof( buf2 ), "%s", tank->name );
 				buf2[0] = UPPER( buf2[0] );
 			}
 			i = buf2;
 			break;
 		case 'a':
-			sprintf( buf2, "%s", IS_GOOD( ch ) ? "good" : IS_EVIL( ch ) ? "evil"
-																		: "neutral" );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof( buf2 ), "#C%s#n", IS_GOOD( ch ) ? "good" : IS_EVIL( ch ) ? "evil"
+																							   : "neutral" );
 			i = buf2;
 			break;
 		case 'A':
-			sprintf( buf2, "%d", ch->alignment );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof( buf2 ), "#C%d#n", ch->alignment );
 			i = buf2;
 			break;
 		case 't':
-			sprintf( buf2, "%d", ch->fight_timer );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof( buf2 ), "#C%d#n", ch->fight_timer );
 			i = buf2;
 			break;
 		case 'k':
 			if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) && !IS_NPC( ch ) ) {
-				sprintf( buf2, "%d", ch->pcdata->powers[SHAPE_COUNTER] );
-				ADD_COLOUR( ch, buf2, L_CYAN );
+				snprintf( buf2, sizeof( buf2 ), "#C%d#n", ch->pcdata->powers[SHAPE_COUNTER] );
 				i = buf2;
 				break;
 			} else if ( IS_CLASS( ch, CLASS_SAMURAI ) && !IS_NPC( ch ) ) {
-				sprintf( buf2, "%d", ch->pcdata->powers[SAMURAI_FOCUS] );
+				snprintf( buf2, sizeof( buf2 ), "%d", ch->pcdata->powers[SAMURAI_FOCUS] );
 				i = buf2;
 				break;
 			} else {
-				sprintf( buf2, " " );
+				snprintf( buf2, sizeof( buf2 ), " " );
 				i = buf2;
 				break;
 			}
 		case 'r':
 			if ( ch->in_room )
-				sprintf( buf2, "%s", ch->in_room->name );
+				snprintf( buf2, sizeof( buf2 ), "#C%s#n", ch->in_room->name );
 			else
-				sprintf( buf2, " " );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+				snprintf( buf2, sizeof( buf2 ), " " );
 			i = buf2;
 			break;
 		case 'R':
 			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) ) ) {
-				sprintf( buf2, "%d", ch->rage );
-				ADD_COLOUR( ch, buf2, D_RED );
+				snprintf( buf2, sizeof( buf2 ), "#r%d#n", ch->rage );
 			} else
-				sprintf( buf2, "0" );
+				snprintf( buf2, sizeof( buf2 ), "0" );
 			i = buf2;
 			break;
 		case 'b':
-			sprintf( buf2, "%d", ch->beast );
-			ADD_COLOUR( ch, buf2, L_CYAN );
+			snprintf( buf2, sizeof( buf2 ), "#C%d#n", ch->beast );
 			i = buf2;
 			break;
 		case 'B':
 			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-				sprintf( buf2, "%d", ch->pcdata->condition[COND_THIRST] );
-				ADD_COLOUR( ch, buf2, D_RED );
+				snprintf( buf2, sizeof( buf2 ), "#r%d#n", ch->pcdata->condition[COND_THIRST] );
 			} else if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) {
-				sprintf( buf2, "%d", ch->pcdata->condition[COND_FULL] );
-				ADD_COLOUR( ch, buf2, D_RED );
+				snprintf( buf2, sizeof( buf2 ), "#r%d#n", ch->pcdata->condition[COND_FULL] );
 			} else
-				sprintf( buf2, "0" );
+				snprintf( buf2, sizeof( buf2 ), "0" );
 			i = buf2;
 			break;
 		case 'c':
-			sprintf( buf2, "%d", char_ac( ch ) );
+			snprintf( buf2, sizeof( buf2 ), "%d", char_ac( ch ) );
 			i = buf2;
 			break;
 		case 'p':
-			sprintf( buf2, "%d", char_hitroll( ch ) );
-			COL_SCALE( buf2, ch, char_hitroll( ch ), 200 );
+			snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( char_hitroll( ch ), 200 ), char_hitroll( ch ) );
 			i = buf2;
 			break;
 		case 'P':
-			sprintf( buf2, "%d", char_damroll( ch ) );
-			COL_SCALE( buf2, ch, char_damroll( ch ), 200 );
+			snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( char_damroll( ch ), 200 ), char_damroll( ch ) );
 			i = buf2;
 			break;
 		case 's':
-
 			if ( !IS_NPC( ch ) && ch->pcdata->stage[2] + 25 >= ch->pcdata->stage[1] && ch->pcdata->stage[1] > 0 ) {
-				sprintf( buf2, "yes" );
-				ADD_COLOUR( ch, buf2, WHITE );
+				snprintf( buf2, sizeof( buf2 ), "#Cyes#n" );
 			} else
-				sprintf( buf2, "no" );
+				snprintf( buf2, sizeof( buf2 ), "no" );
 			i = buf2;
 			break;
 		case 'O':
 			if ( ( victim = ch->pcdata->partner ) == NULL )
-				sprintf( buf2, "no" );
+				snprintf( buf2, sizeof( buf2 ), "no" );
 			else if ( !IS_NPC( victim ) && victim != NULL && victim->pcdata->stage[1] > 0 && victim->pcdata->stage[2] + 25 >= victim->pcdata->stage[1] ) {
-				sprintf( buf2, "yes" );
-				ADD_COLOUR( ch, buf2, WHITE );
+				snprintf( buf2, sizeof( buf2 ), "#Cyes#n" );
 			} else
-				sprintf( buf2, "no" );
+				snprintf( buf2, sizeof( buf2 ), "no" );
 			i = buf2;
 			break;
 		case 'l':
 			if ( ( victim = ch->pcdata->partner ) == NULL )
-				sprintf( buf2, "Nobody" );
+				snprintf( buf2, sizeof( buf2 ), "Nobody" );
 			else {
 				if ( IS_AFFECTED( victim, AFF_POLYMORPH ) )
-					strcpy( buf2, victim->morph );
+					snprintf( buf2, sizeof( buf2 ), "%s", victim->morph );
 				else if ( IS_NPC( victim ) )
-					strcpy( buf2, victim->short_descr );
+					snprintf( buf2, sizeof( buf2 ), "%s", victim->short_descr );
 				else
-					strcpy( buf2, victim->name );
+					snprintf( buf2, sizeof( buf2 ), "%s", victim->name );
 				buf2[0] = UPPER( buf2[0] );
 			}
 			i = buf2;
 			break;
 		case '%':
-			sprintf( buf2, "%%" );
+			snprintf( buf2, sizeof( buf2 ), "%%" );
 			i = buf2;
 			break;
 		}

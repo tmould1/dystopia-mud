@@ -73,6 +73,7 @@ DECLARE_DO_FUN( do_board );
 
 #define BOLD	 "#7"
 #define NO_COLOR "#n"
-#define GREEN	 "#2"
-#define RED		 "#1"
-#define BLUE	 "#4"
+#define GREEN	 "#G"
+#define RED		 "#R"
+#define BLUE	 "#L"
+#define YELLOW	 "#y"

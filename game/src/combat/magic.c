@@ -171,7 +171,7 @@ int slot_lookup( int slot ) {
 void say_spell( CHAR_DATA *ch, int sn ) {
 	char buf[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];
-	char colour[MAX_STRING_LENGTH];
+	/* colour buffer removed - using inline # codes now */
 	/*  CHAR_DATA *rch; */
 	char *pName;
 	int iSyl;
@@ -231,40 +231,20 @@ void say_spell( CHAR_DATA *ch, int sn ) {
 	snprintf( buf2, sizeof( buf2 ), "$n utters the words, '%s'.", buf );
 	snprintf( buf, sizeof( buf ), "$n utters the words, '%s'.", skill_table[sn].name );
 	if ( skill_table[sn].target == 0 ) {
-		snprintf( colour, sizeof( colour ), "$n's eyes glow bright purple for a moment." );
-		ADD_COLOUR( ch, colour, MAGENTA );
-		act( colour, ch, NULL, NULL, TO_ROOM );
-		snprintf( colour, sizeof( colour ), "Your eyes glow bright purple for a moment." );
-		ADD_COLOUR( ch, colour, MAGENTA );
-		act( colour, ch, NULL, NULL, TO_CHAR );
+		act( "#p$n's eyes glow bright purple for a moment.#n", ch, NULL, NULL, TO_ROOM );
+		act( "#pYour eyes glow bright purple for a moment.#n", ch, NULL, NULL, TO_CHAR );
 	} else if ( skill_table[sn].target == 1 ) {
-		snprintf( colour, sizeof( colour ), "$n's eyes glow bright red for a moment." );
-		ADD_COLOUR( ch, colour, L_RED );
-		act( colour, ch, NULL, NULL, TO_ROOM );
-		snprintf( colour, sizeof( colour ), "Your eyes glow bright red for a moment." );
-		ADD_COLOUR( ch, colour, L_RED );
-		act( colour, ch, NULL, NULL, TO_CHAR );
+		act( "#R$n's eyes glow bright red for a moment.#n", ch, NULL, NULL, TO_ROOM );
+		act( "#RYour eyes glow bright red for a moment.#n", ch, NULL, NULL, TO_CHAR );
 	} else if ( skill_table[sn].target == 2 ) {
-		snprintf( colour, sizeof( colour ), "$n's eyes glow bright blue for a moment." );
-		ADD_COLOUR( ch, colour, L_BLUE );
-		act( colour, ch, NULL, NULL, TO_ROOM );
-		snprintf( colour, sizeof( colour ), "Your eyes glow bright blue for a moment." );
-		ADD_COLOUR( ch, colour, L_BLUE );
-		act( colour, ch, NULL, NULL, TO_CHAR );
+		act( "#L$n's eyes glow bright blue for a moment.#n", ch, NULL, NULL, TO_ROOM );
+		act( "#LYour eyes glow bright blue for a moment.#n", ch, NULL, NULL, TO_CHAR );
 	} else if ( skill_table[sn].target == 3 ) {
-		snprintf( colour, sizeof( colour ), "$n's eyes glow bright green for a moment." );
-		ADD_COLOUR( ch, colour, L_GREEN );
-		act( colour, ch, NULL, NULL, TO_ROOM );
-		snprintf( colour, sizeof( colour ), "Your eyes glow bright green for a moment." );
-		ADD_COLOUR( ch, colour, L_GREEN );
-		act( colour, ch, NULL, NULL, TO_CHAR );
+		act( "#G$n's eyes glow bright green for a moment.#n", ch, NULL, NULL, TO_ROOM );
+		act( "#GYour eyes glow bright green for a moment.#n", ch, NULL, NULL, TO_CHAR );
 	} else if ( skill_table[sn].target == 4 ) {
-		snprintf( colour, sizeof( colour ), "$n's eyes glow bright yellow for a moment." );
-		ADD_COLOUR( ch, colour, YELLOW );
-		act( colour, ch, NULL, NULL, TO_ROOM );
-		snprintf( colour, sizeof( colour ), "Your eyes glow bright yellow for a moment." );
-		ADD_COLOUR( ch, colour, YELLOW );
-		act( colour, ch, NULL, NULL, TO_CHAR );
+		act( "#y$n's eyes glow bright yellow for a moment.#n", ch, NULL, NULL, TO_ROOM );
+		act( "#yYour eyes glow bright yellow for a moment.#n", ch, NULL, NULL, TO_CHAR );
 	}
 	return;
 }
