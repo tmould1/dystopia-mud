@@ -4,12 +4,12 @@ os: linux
 files:
   - source: bin/dystopia
     destination: /usr/local/mudder/bin/
-  - source: area
-    destination: /usr/local/mudder/gamedata/area/
+  - source: db/areas
+    destination: /usr/local/mudder/gamedata/db/areas/
+  - source: db/game/base_help.db
+    destination: /usr/local/mudder/gamedata/db/game/
   - source: doc
     destination: /usr/local/mudder/gamedata/doc/
-  - source: txt
-    destination: /usr/local/mudder/gamedata/txt/
 
 file_exists_behavior: OVERWRITE
 
@@ -18,7 +18,14 @@ permissions:
     owner: mudder
     group: mudder
     mode: 755
-  - object: /usr/local/mudder/gamedata/area
+  - object: /usr/local/mudder/gamedata/db/areas
+    owner: mudder
+    group: mudder
+    mode: 755
+    type:
+      - directory
+      - file
+  - object: /usr/local/mudder/gamedata/db/game
     owner: mudder
     group: mudder
     mode: 755
@@ -26,13 +33,6 @@ permissions:
       - directory
       - file
   - object: /usr/local/mudder/gamedata/doc
-    owner: mudder
-    group: mudder
-    mode: 755
-    type:
-      - directory
-      - file
-  - object: /usr/local/mudder/gamedata/txt
     owner: mudder
     group: mudder
     mode: 755

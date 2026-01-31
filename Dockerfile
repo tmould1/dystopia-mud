@@ -35,11 +35,10 @@ RUN cd game/build && \
     chmod +x ../../startup.sh
 
 # Mount points for runtime data (gamedata/ is self-contained deployable)
-VOLUME [    "/dystopia-mud/gamedata/player", \
-            "/dystopia-mud/gamedata/area", \
+VOLUME [    "/dystopia-mud/gamedata/db/players", \
+            "/dystopia-mud/gamedata/db/game", \
+            "/dystopia-mud/gamedata/db/areas", \
             "/dystopia-mud/gamedata/log", \
-            "/dystopia-mud/gamedata/notes", \
-            "/dystopia-mud/gamedata/txt", \
             "/dystopia-mud/game/src" \
         ]
 

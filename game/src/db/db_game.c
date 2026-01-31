@@ -1,8 +1,8 @@
 /***************************************************************************
  *  db_game.c - SQLite persistence for global game data
  *
- *  Manages help.db (help entries) and game.db (config, leaderboards,
- *  kingdoms) stored in gamedata/db/game/.
+ *  Manages base_help.db + live_help.db (help entries) and game.db
+ *  (config, leaderboards, kingdoms) stored in gamedata/db/game/.
  ***************************************************************************/
 
 #include "db_util.h"
@@ -31,7 +31,8 @@ extern const struct cmd_type cmd_table[];
 extern time_t current_time;
 
 /* Cached database connections */
-static sqlite3 *help_db = NULL;
+static sqlite3 *base_help_db = NULL;
+static sqlite3 *live_help_db = NULL;
 static sqlite3 *game_db = NULL;
 
 /* Directory for game databases */
@@ -137,17 +138,27 @@ void db_game_init( void ) {
 	}
 	ensure_directory( mud_db_game_dir );
 
-	/* Open help.db */
-	if ( snprintf( path, sizeof( path ), "%s%shelp.db",
+	/* Open base_help.db (read-only, deployed with each release) */
+	if ( snprintf( path, sizeof( path ), "%s%sbase_help.db",
 			mud_db_game_dir, PATH_SEPARATOR ) >= (int)sizeof( path ) ) {
-		bug( "db_game_init: help.db path truncated.", 0 );
+		bug( "db_game_init: base_help.db path truncated.", 0 );
 	}
-	if ( sqlite3_open( path, &help_db ) != SQLITE_OK ) {
-		bug( "db_game_init: cannot open help.db", 0 );
-		help_db = NULL;
+	if ( sqlite3_open_v2( path, &base_help_db, SQLITE_OPEN_READONLY, NULL ) != SQLITE_OK ) {
+		bug( "db_game_init: cannot open base_help.db", 0 );
+		base_help_db = NULL;
+	}
+
+	/* Open live_help.db (read-write, preserved on server for runtime changes) */
+	if ( snprintf( path, sizeof( path ), "%s%slive_help.db",
+			mud_db_game_dir, PATH_SEPARATOR ) >= (int)sizeof( path ) ) {
+		bug( "db_game_init: live_help.db path truncated.", 0 );
+	}
+	if ( sqlite3_open( path, &live_help_db ) != SQLITE_OK ) {
+		bug( "db_game_init: cannot open live_help.db", 0 );
+		live_help_db = NULL;
 	} else {
-		if ( sqlite3_exec( help_db, HELP_SCHEMA_SQL, NULL, NULL, &errmsg ) != SQLITE_OK ) {
-			bug( "db_game_init: help schema error", 0 );
+		if ( sqlite3_exec( live_help_db, HELP_SCHEMA_SQL, NULL, NULL, &errmsg ) != SQLITE_OK ) {
+			bug( "db_game_init: live_help schema error", 0 );
 			if ( errmsg ) sqlite3_free( errmsg );
 			errmsg = NULL;
 		}
@@ -175,9 +186,13 @@ void db_game_init( void ) {
  * Close game database connections.
  */
 void db_game_close( void ) {
-	if ( help_db ) {
-		sqlite3_close( help_db );
-		help_db = NULL;
+	if ( base_help_db ) {
+		sqlite3_close( base_help_db );
+		base_help_db = NULL;
+	}
+	if ( live_help_db ) {
+		sqlite3_close( live_help_db );
+		live_help_db = NULL;
 	}
 	if ( game_db ) {
 		sqlite3_close( game_db );
@@ -187,19 +202,19 @@ void db_game_close( void ) {
 
 
 /*
- * Load all help entries from help.db into the in-memory linked lists.
+ * Load help entries from a single SQLite database into in-memory lists.
+ * Returns the number of entries loaded.
  */
-void db_game_load_helps( void ) {
+static int load_helps_from_db( sqlite3 *db ) {
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT level, keyword, text FROM helps ORDER BY id";
-	char buf[MAX_STRING_LENGTH];
 	int count = 0;
 
-	if ( !help_db )
-		return;
+	if ( !db )
+		return 0;
 
-	if ( sqlite3_prepare_v2( help_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
-		return;
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return 0;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 		HELP_DATA *pHelp;
@@ -225,29 +240,46 @@ void db_game_load_helps( void ) {
 	}
 
 	sqlite3_finalize( stmt );
+	return count;
+}
 
-	snprintf( buf, sizeof( buf ), "  Loaded %d help entries from help.db", count );
+/*
+ * Load all help entries from base_help.db and live_help.db.
+ * Base helps are loaded first, then live helps override (via add_help).
+ */
+void db_game_load_helps( void ) {
+	char buf[256];
+	int base_count, live_count;
+
+	log_string( "  Loading base help entries..." );
+	base_count = load_helps_from_db( base_help_db );
+	log_string( "  Loading live help entries..." );
+	live_count = load_helps_from_db( live_help_db );
+
+	snprintf( buf, sizeof( buf ),
+		"  Loaded %d base + %d live help entries", base_count, live_count );
 	log_string( buf );
 }
 
 
 /*
- * Save all help entries to help.db.
- * Deletes existing data and re-inserts from in-memory lists.
+ * Save all help entries to live_help.db.
+ * Runtime changes (hedit, hset) are persisted to the live database.
+ * base_help.db is never modified at runtime.
  */
 void db_game_save_helps( void ) {
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT INTO helps (level, keyword, text) VALUES (?,?,?)";
 	HELP_DATA *pHelp;
 
-	if ( !help_db )
+	if ( !live_help_db )
 		return;
 
-	db_begin( help_db );
-	sqlite3_exec( help_db, "DELETE FROM helps", NULL, NULL, NULL );
+	db_begin( live_help_db );
+	sqlite3_exec( live_help_db, "DELETE FROM helps", NULL, NULL, NULL );
 
-	if ( sqlite3_prepare_v2( help_db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
-		db_rollback( help_db );
+	if ( sqlite3_prepare_v2( live_help_db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		db_rollback( live_help_db );
 		return;
 	}
 
@@ -260,45 +292,51 @@ void db_game_save_helps( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	db_commit( help_db );
+	db_commit( live_help_db );
 }
 
 
 /*
- * Reload a single help entry from help.db by keyword.
+ * Reload a single help entry by keyword.
+ * Checks live_help.db first, then falls back to base_help.db.
  * Returns TRUE if the entry was found and loaded.
  */
 bool db_game_reload_help( const char *keyword ) {
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT level, keyword, text FROM helps WHERE keyword=?";
-	bool found = FALSE;
+	sqlite3 *dbs[] = { live_help_db, base_help_db };
+	int i;
 
-	if ( !help_db )
-		return FALSE;
+	for ( i = 0; i < 2; i++ ) {
+		if ( !dbs[i] )
+			continue;
 
-	if ( sqlite3_prepare_v2( help_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
-		return FALSE;
+		if ( sqlite3_prepare_v2( dbs[i], sql, -1, &stmt, NULL ) != SQLITE_OK )
+			continue;
 
-	sqlite3_bind_text( stmt, 1, keyword, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, 1, keyword, -1, SQLITE_TRANSIENT );
 
-	if ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		HELP_DATA *pHelp;
+		if ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+			HELP_DATA *pHelp;
 
-		CREATE( pHelp, HELP_DATA, 1 );
-		pHelp->level   = (sh_int)sqlite3_column_int( stmt, 0 );
-		pHelp->keyword = str_dup( col_text( stmt, 1 ) );
-		pHelp->text    = str_dup( col_text( stmt, 2 ) );
-		pHelp->area    = NULL;
+			CREATE( pHelp, HELP_DATA, 1 );
+			pHelp->level   = (sh_int)sqlite3_column_int( stmt, 0 );
+			pHelp->keyword = str_dup( col_text( stmt, 1 ) );
+			pHelp->text    = str_dup( col_text( stmt, 2 ) );
+			pHelp->area    = NULL;
 
-		if ( !str_cmp( pHelp->keyword, "greeting" ) )
-			help_greeting = pHelp->text;
+			if ( !str_cmp( pHelp->keyword, "greeting" ) )
+				help_greeting = pHelp->text;
 
-		add_help( pHelp );
-		found = TRUE;
+			add_help( pHelp );
+			sqlite3_finalize( stmt );
+			return TRUE;
+		}
+
+		sqlite3_finalize( stmt );
 	}
 
-	sqlite3_finalize( stmt );
-	return found;
+	return FALSE;
 }
 
 

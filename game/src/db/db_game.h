@@ -1,9 +1,12 @@
 /***************************************************************************
  *  db_game.h - SQLite persistence for global game data
  *
- *  Manages help.db (help entries) and game.db (config, leaderboards,
- *  kingdoms, notes, bugs, bans, disabled commands) stored in
- *  gamedata/db/game/.
+ *  Manages base_help.db + live_help.db (help entries) and game.db
+ *  (config, leaderboards, kingdoms, notes, bugs, bans, disabled commands)
+ *  stored in gamedata/db/game/.
+ *
+ *  base_help.db is deployed read-only with each release.
+ *  live_help.db holds runtime additions/overrides (preserved on server).
  ***************************************************************************/
 
 #ifndef DB_GAME_H
@@ -17,7 +20,7 @@ void db_game_init( void );
 /* Close game database connections */
 void db_game_close( void );
 
-/* Help entries (help.db) */
+/* Help entries (base_help.db + live_help.db) */
 void db_game_load_helps( void );
 void db_game_save_helps( void );
 bool db_game_reload_help( const char *keyword );

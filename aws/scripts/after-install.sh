@@ -23,7 +23,7 @@ echo "Binary installed at: /usr/local/mudder/bin/dystopia"
 
 # Create symlink in gamedata directory
 # The MUD binary uses argv[0] to locate data directories relative to itself
-# By creating a symlink in gamedata/, the binary finds area/, player/, etc. as siblings
+# By creating a symlink in gamedata/, the binary finds db/, log/, etc. as siblings
 cd /usr/local/mudder/gamedata
 
 if [ -L dystopia ]; then
@@ -37,18 +37,19 @@ chown -h mudder:mudder dystopia
 
 # Ensure all required directories exist on EFS
 echo "Ensuring game data directories exist..."
-mkdir -p /usr/local/mudder/gamedata/area
-mkdir -p /usr/local/mudder/gamedata/player/backup
-mkdir -p /usr/local/mudder/gamedata/player/store
-mkdir -p /usr/local/mudder/gamedata/notes
+mkdir -p /usr/local/mudder/gamedata/db/areas
+mkdir -p /usr/local/mudder/gamedata/db/game
+mkdir -p /usr/local/mudder/gamedata/db/players/backup
 mkdir -p /usr/local/mudder/gamedata/log
-mkdir -p /usr/local/mudder/gamedata/txt
 mkdir -p /usr/local/mudder/gamedata/doc
+mkdir -p /usr/local/mudder/gamedata/run
 
 # Set ownership of all gamedata (preserving EFS data)
 chown -R mudder:mudder /usr/local/mudder/gamedata
 
 echo "Game data directory structure:"
 ls -la /usr/local/mudder/gamedata/
+echo "Database directories:"
+ls -la /usr/local/mudder/gamedata/db/
 
 echo "=== AfterInstall: Complete ==="

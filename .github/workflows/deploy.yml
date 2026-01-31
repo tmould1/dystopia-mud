@@ -113,19 +113,23 @@ jobs:
 
           # Create deployment package structure
           mkdir -p deploy-package/bin
+          mkdir -p deploy-package/db/areas
+          mkdir -p deploy-package/db/game
           mkdir -p deploy-package/aws/scripts
 
           # Copy the binary
           cp gamedata/dystopia deploy-package/bin/
 
-          # Copy area files (world data - needed for game to run)
-          cp -r gamedata/area deploy-package/
+          # Copy area SQLite databases (world data)
+          cp gamedata/db/areas/*.db deploy-package/db/areas/
 
-          # Copy doc/license files
-          cp -r gamedata/doc deploy-package/
+          # Copy base help database (deployed read-only each release)
+          cp gamedata/db/game/base_help.db deploy-package/db/game/
 
-          # Copy txt files (config files like motd, help, etc.)
-          cp -r gamedata/txt deploy-package/
+          # Copy doc/license files if present
+          if [ -d gamedata/doc ]; then
+            cp -r gamedata/doc deploy-package/
+          fi
 
           # Copy CodeDeploy configuration
           cp appspec.yml deploy-package/

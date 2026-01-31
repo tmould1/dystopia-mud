@@ -586,13 +586,12 @@ Resources:
           mount -a
 
           # Create persistent directories on EFS (if they don't exist)
-          mkdir -p /usr/local/mudder/gamedata/area
-          mkdir -p /usr/local/mudder/gamedata/player/backup
-          mkdir -p /usr/local/mudder/gamedata/player/store
-          mkdir -p /usr/local/mudder/gamedata/notes
+          mkdir -p /usr/local/mudder/gamedata/db/areas
+          mkdir -p /usr/local/mudder/gamedata/db/game
+          mkdir -p /usr/local/mudder/gamedata/db/players/backup
           mkdir -p /usr/local/mudder/gamedata/log
-          mkdir -p /usr/local/mudder/gamedata/txt
           mkdir -p /usr/local/mudder/gamedata/doc
+          mkdir -p /usr/local/mudder/gamedata/run
 
           # Set ownership
           chown -R mudder:mudder /usr/local/mudder
