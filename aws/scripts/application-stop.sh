@@ -1,28 +1,17 @@
 #!/bin/bash
 set -x
 
-echo "=== ApplicationStop: Stopping MUD server ==="
+echo "=== ApplicationStop: Preparing for deployment ==="
 
-# Check if service exists and is running
+# Do NOT stop the running server. The new binary and data files will be
+# deployed in-place, and an admin can run 'copyover' in-game to pick up
+# the changes without disconnecting players.
+
 if systemctl is-active --quiet mudder; then
-    echo "Stopping mudder service..."
-    systemctl stop mudder
-
-    # Wait for the service to fully stop (give players time to save)
-    echo "Waiting for service to stop..."
-    sleep 5
-
-    # Verify it stopped
-    if systemctl is-active --quiet mudder; then
-        echo "WARNING: Service did not stop cleanly, sending SIGKILL..."
-        systemctl kill mudder
-        sleep 2
-    fi
-
-    echo "Mudder service stopped"
+    echo "Mudder service is running - will continue running during deployment"
+    echo "New files will be picked up on next copyover"
 else
     echo "Mudder service is not running (or not installed yet)"
 fi
 
-# Always exit successfully - we don't want to fail deployment if service wasn't running
 exit 0
