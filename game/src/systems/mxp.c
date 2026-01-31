@@ -120,9 +120,15 @@ static void mxp_strip_colors( char *dest, const char *src, size_t maxlen ) {
 		if ( *src == '#' && *( src + 1 ) != '\0' ) {
 			src++; /* Skip the # */
 			/* ## and #- are literal characters */
-			if ( *src == '#' || *src == '-' )
+			if ( *src == '#' || *src == '-' ) {
 				dest[i++] = *src;
-			src++; /* Skip the color code character */
+				src++;
+			} else if ( *src == 'x' && isdigit( src[1] ) && isdigit( src[2] ) && isdigit( src[3] ) ) {
+				/* #x### - 256-color code: skip 'x' and 3 digits */
+				src += 4;
+			} else {
+				src++; /* Skip single-char color code */
+			}
 			continue;
 		}
 		dest[i++] = *src++;

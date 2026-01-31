@@ -501,7 +501,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	unarmed = 0;
 	if ( IS_SET( ch->flag2, VAMP_OBJMASK ) ) {
 		act( "You return to your normal form.", ch, NULL, NULL, TO_CHAR );
-		sprintf( buf, "%s reforms as %s.\n\r", ch->morph, ch->name );
+		snprintf( buf, sizeof( buf ), "%s reforms as %s.\n\r", ch->morph, ch->name );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		free_string( ch->morph );
 		free_string( ch->objdesc );
@@ -1873,8 +1873,8 @@ void angel_eye( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		if ( new_dam >= victim->hit ) new_dam = victim->hit - 1;
 		if ( new_dam < 10 ) new_dam = 10;
 		hurt_person( victim, ch, new_dam );
-		sprintf( buf, "God's justice strikes you HARD [#C%d#n]", new_dam );
-		sprintf( buf2, "The sinner dares to lay hands on you, God's wrath on the sinner [#C%d#n]", new_dam );
+		snprintf( buf, sizeof( buf ), "God's justice strikes you HARD [#C%d#n]", new_dam );
+		snprintf( buf2, sizeof( buf2 ), "The sinner dares to lay hands on you, God's wrath on the sinner [#C%d#n]", new_dam );
 		act( buf, victim, NULL, ch, TO_VICT );
 		act( buf2, victim, NULL, ch, TO_CHAR );
 	}
@@ -1955,7 +1955,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 						ch->pcdata->stats[DEMON_TOTAL] += victim->level * 2;
 					} else
 						ch->pcdata->stats[DROW_POWER] += victim->level * 2;
-					sprintf( buf, "You gain #y(#C%d#y)#n class points.\n\r", victim->level * 2 );
+					snprintf( buf, sizeof( buf ), "You gain #y(#C%d#y)#n class points.\n\r", victim->level * 2 );
 					if ( !IS_SET( ch->act, PLR_BRIEF4 ) ) send_to_char( buf, ch );
 				}
 			}
@@ -1969,7 +1969,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		}
 		raw_kill( victim );
 		if ( !IS_NPC( ch ) && !IS_NPC( victim ) && victim->pcdata->bounty > 0 ) {
-			sprintf( buf, "You recive a %d QP bounty, for killing %s.\n\r",
+			snprintf( buf, sizeof( buf ), "You recive a %d QP bounty, for killing %s.\n\r",
 				victim->pcdata->bounty, victim->name );
 			send_to_char( buf, ch );
 			ch->pcdata->quest += victim->pcdata->bounty;
@@ -2955,18 +2955,18 @@ void make_part( CHAR_DATA *ch, char *argument ) {
 		}
 		if ( vnum == OBJ_VNUM_SPILT_BLOOD ) obj->timer = 2;
 		if ( !IS_NPC( ch ) ) {
-			sprintf( buf, obj->name, name );
+			snprintf( buf, sizeof( buf ), obj->name, name );
 			free_string( obj->name );
 			obj->name = str_dup( buf );
 		} else {
-			sprintf( buf, obj->name, "mob" );
+			snprintf( buf, sizeof( buf ), obj->name, "mob" );
 			free_string( obj->name );
 			obj->name = str_dup( buf );
 		}
-		sprintf( buf, obj->short_descr, name );
+		snprintf( buf, sizeof( buf ), obj->short_descr, name );
 		free_string( obj->short_descr );
 		obj->short_descr = str_dup( buf );
-		sprintf( buf, obj->description, name );
+		snprintf( buf, sizeof( buf ), obj->description, name );
 		free_string( obj->description );
 		obj->description = str_dup( buf );
 		if ( IS_AFFECTED( ch, AFF_SHADOWPLANE ) )
@@ -3088,7 +3088,7 @@ void behead( CHAR_DATA *victim ) {
 	victim->fight_timer = 0;
 	SET_BIT( victim->loc_hp[0], LOST_HEAD );
 	SET_BIT( victim->affected_by, AFF_POLYMORPH );
-	sprintf( buf, "the severed head of %s", victim->name );
+	snprintf( buf, sizeof( buf ), "the severed head of %s", victim->name );
 	free_string( victim->morph );
 	victim->morph = str_dup( buf );
 	do_call( victim, "all" );
@@ -3099,7 +3099,7 @@ void behead( CHAR_DATA *victim ) {
 void group_gain( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	char buf[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];
-	char formatted_xp[20]; /* Number with commas: "2,147,483,647" (14 chars) */
+	char formatted_xp[32]; /* Number with commas: "2,147,483,647" (14 chars) */
 	CHAR_DATA *gch;
 	CHAR_DATA *mount;
 	int xp;
@@ -3131,7 +3131,7 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( !is_same_group( gch, ch ) ) continue;
 		xp = xp_compute( gch, victim ) * 2;
 
-		sprintf( buf2, "#RExp modifiers  #G:" );
+		snprintf( buf2, sizeof( buf2 ), "#RExp modifiers  #G:" );
 		if ( ( IS_EVIL( gch ) && IS_GOOD( victim ) ) || ( IS_GOOD( gch ) && IS_EVIL( victim ) ) ) {
 			xp_modifier += 25;
 			strcat( buf2, " #Calignment#n" );
@@ -3179,7 +3179,7 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( !IS_SET( gch->act, PLR_BRIEF4 ) )
 			send_to_char( buf2, gch );
 
-		sprintf( buf2, "#RTotal modifier #G:#n %d percent bonus\n\r", xp_modifier - 100 );
+		snprintf( buf2, sizeof( buf2 ), "#RTotal modifier #G:#n %d percent bonus\n\r", xp_modifier - 100 );
 
 		if ( !IS_SET( gch->act, PLR_BRIEF4 ) )
 			send_to_char( buf2, gch );
@@ -3200,10 +3200,10 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		}
 
 		formatted_xp[0] = '\0';
-		add_commas_to_number( xp, formatted_xp );
+		add_commas_to_number( xp, formatted_xp, sizeof( formatted_xp ) );
 
 		// Character printout
-		sprintf( buf, "You receive %s experience points.\n\r", formatted_xp );
+		snprintf( buf, sizeof( buf ), "You receive %s experience points.\n\r", formatted_xp );
 		send_to_char( buf, gch );
 
 		if ( ( mount = gch->mount ) != NULL )
@@ -3369,30 +3369,30 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 		punct = ( dam <= 250 ) ? ' ' : ' ';
 		if ( dt == TYPE_HIT && !IS_NPC( ch ) && !IS_VAMPAFF( ch, VAM_CLAWS ) ) {
 			if ( dam == 0 ) {
-				sprintf( buf1, "$n%s $N%c[%d]", vp, punct, dam );
-				sprintf( buf2, "You%s $N%c[%d]", vs, punct, dam );
-				sprintf( buf3, "$n%s you%c", vp, punct );
+				snprintf( buf1, sizeof( buf1 ), "$n%s $N%c[%d]", vp, punct, dam );
+				snprintf( buf2, sizeof( buf2 ), "You%s $N%c[%d]", vs, punct, dam );
+				snprintf( buf3, sizeof( buf3 ), "$n%s you%c", vp, punct );
 			} else {
-				sprintf( buf1, "$n hits $N%s%c[%d]", vp, punct, dam );
-				sprintf( buf2, "You hit $N%s%c[%d]", vs, punct, dam );
-				sprintf( buf3, "$n hits you%s%c[%d]", vp, punct, dam );
+				snprintf( buf1, sizeof( buf1 ), "$n hits $N%s%c[%d]", vp, punct, dam );
+				snprintf( buf2, sizeof( buf2 ), "You hit $N%s%c[%d]", vs, punct, dam );
+				snprintf( buf3, sizeof( buf3 ), "$n hits you%s%c[%d]", vp, punct, dam );
 				critical = TRUE;
 			}
 		} else if ( dt == TYPE_HIT && !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_MONKFLAME ) ) {
 			if ( dam >= 1 ) {
 				if ( !IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-					sprintf( buf1, "$n's flaming hands hit $N%s%c[%d]", vp, punct, dam );
-					sprintf( buf2, "Your flaming hands hit $N%s%c[%d]", vs, punct, dam );
-					sprintf( buf3, "$n's flaming hands hit you%s%c[%d]", vp, punct, dam );
+					snprintf( buf1, sizeof( buf1 ), "$n's flaming hands hit $N%s%c[%d]", vp, punct, dam );
+					snprintf( buf2, sizeof( buf2 ), "Your flaming hands hit $N%s%c[%d]", vs, punct, dam );
+					snprintf( buf3, sizeof( buf3 ), "$n's flaming hands hit you%s%c[%d]", vp, punct, dam );
 				} else {
-					sprintf( buf1, "$n's flaming claws hit $N%s%c[%d]", vp, punct, dam );
-					sprintf( buf2, "Your flaming claws hit $N%s%c[%d]", vs, punct, dam );
-					sprintf( buf3, "$n's flaming claws hit you%s%c[%d]", vp, punct, dam );
+					snprintf( buf1, sizeof( buf1 ), "$n's flaming claws hit $N%s%c[%d]", vp, punct, dam );
+					snprintf( buf2, sizeof( buf2 ), "Your flaming claws hit $N%s%c[%d]", vs, punct, dam );
+					snprintf( buf3, sizeof( buf3 ), "$n's flaming claws hit you%s%c[%d]", vp, punct, dam );
 				}
 			} else {
-				sprintf( buf1, "$n's hit%s $N%c[%d]", vp, punct, dam );
-				sprintf( buf2, "Your hit%s $N%c[%d]", vs, punct, dam );
-				sprintf( buf3, "$n hit%s you%c[%d]", vp, punct, dam );
+				snprintf( buf1, sizeof( buf1 ), "$n's hit%s $N%c[%d]", vp, punct, dam );
+				snprintf( buf2, sizeof( buf2 ), "Your hit%s $N%c[%d]", vs, punct, dam );
+				snprintf( buf3, sizeof( buf3 ), "$n hit%s you%c[%d]", vp, punct, dam );
 				critical = TRUE;
 			}
 		} else {
@@ -3411,26 +3411,26 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 				attack2 = attack_table2[0];
 			}
 			if ( dam == 0 ) {
-				sprintf( buf1, "$n's %s%s $N%c[%d]", attack, vp, punct, dam );
-				sprintf( buf2, "Your %s%s $N%c[%d]", attack, vp, punct, dam );
-				sprintf( buf3, "$n's %s%s you%c[%d]", attack, vp, punct, dam );
+				snprintf( buf1, sizeof( buf1 ), "$n's %s%s $N%c[%d]", attack, vp, punct, dam );
+				snprintf( buf2, sizeof( buf2 ), "Your %s%s $N%c[%d]", attack, vp, punct, dam );
+				snprintf( buf3, sizeof( buf3 ), "$n's %s%s you%c[%d]", attack, vp, punct, dam );
 			} else if ( IS_SET( ch->newbits, NEW_MONKFLAME ) && ( dam == 0 ) ) {
-				sprintf( buf1, "$n's flaming %s%s $N%c[%d]", attack2, vp, punct, dam );
-				sprintf( buf2, "Your flaming %s%s $N%c[%d]", attack, vp, punct, dam );
-				sprintf( buf3, "$n's flaming %s%s you%c[%d]", attack2, vp, punct, dam );
+				snprintf( buf1, sizeof( buf1 ), "$n's flaming %s%s $N%c[%d]", attack2, vp, punct, dam );
+				snprintf( buf2, sizeof( buf2 ), "Your flaming %s%s $N%c[%d]", attack, vp, punct, dam );
+				snprintf( buf3, sizeof( buf3 ), "$n's flaming %s%s you%c[%d]", attack2, vp, punct, dam );
 			} else {
 				if ( dt >= 0 && dt < MAX_SKILL ) {
-					sprintf( buf1, "$n's %s strikes $N%s%c[%d]", attack2, vp, punct, dam );
-					sprintf( buf2, "Your %s strikes $N%s%c[%d]", attack, vp, punct, dam );
-					sprintf( buf3, "$n's %s strikes you%s%c[%d]", attack2, vp, punct, dam );
+					snprintf( buf1, sizeof( buf1 ), "$n's %s strikes $N%s%c[%d]", attack2, vp, punct, dam );
+					snprintf( buf2, sizeof( buf2 ), "Your %s strikes $N%s%c[%d]", attack, vp, punct, dam );
+					snprintf( buf3, sizeof( buf3 ), "$n's %s strikes you%s%c[%d]", attack2, vp, punct, dam );
 				} else if ( IS_SET( ch->newbits, NEW_MONKFLAME ) ) {
-					sprintf( buf1, "$n's flaming %s hits $N%s%c[%d]", attack2, vp, punct, dam );
-					sprintf( buf2, "Your flaming %s hits $N%s%c[%d]", attack, vp, punct, dam );
-					sprintf( buf3, "$n's flaming %s hits you%s%c[%d]", attack2, vp, punct, dam );
+					snprintf( buf1, sizeof( buf1 ), "$n's flaming %s hits $N%s%c[%d]", attack2, vp, punct, dam );
+					snprintf( buf2, sizeof( buf2 ), "Your flaming %s hits $N%s%c[%d]", attack, vp, punct, dam );
+					snprintf( buf3, sizeof( buf3 ), "$n's flaming %s hits you%s%c[%d]", attack2, vp, punct, dam );
 				} else {
-					sprintf( buf1, "$n %s $N%s%c[%d]", attack2, vp, punct, dam );
-					sprintf( buf2, "You %s $N%s%c[%d]", attack, vp, punct, dam );
-					sprintf( buf3, "$n %s you%s%c[%d]", attack2, vp, punct, dam );
+					snprintf( buf1, sizeof( buf1 ), "$n %s $N%s%c[%d]", attack2, vp, punct, dam );
+					snprintf( buf2, sizeof( buf2 ), "You %s $N%s%c[%d]", attack, vp, punct, dam );
+					snprintf( buf3, sizeof( buf3 ), "$n %s you%s%c[%d]", attack2, vp, punct, dam );
 					critical = TRUE;
 				}
 			}
@@ -3743,13 +3743,13 @@ void disarm( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) == NULL ) || obj->item_type != ITEM_WEAPON )
 			return;
 	}
-	sprintf( buf, "$n disarms you!" );
+	snprintf( buf, sizeof( buf ), "$n disarms you!" );
 	ADD_COLOUR( ch, buf, WHITE );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "You disarm $N!" );
+	snprintf( buf, sizeof( buf ), "You disarm $N!" );
 	ADD_COLOUR( ch, buf, WHITE );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n disarms $N!" );
+	snprintf( buf, sizeof( buf ), "$n disarms $N!" );
 	ADD_COLOUR( ch, buf, WHITE );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 	obj_from_char( obj );
@@ -3785,13 +3785,13 @@ void trip( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			return;
 	}
 	if ( victim->wait == 0 ) {
-		sprintf( buf, "$n trips you and you go down!" );
+		snprintf( buf, sizeof( buf ), "$n trips you and you go down!" );
 		ADD_COLOUR( ch, buf, WHITE );
 		act( buf, ch, NULL, victim, TO_VICT );
-		sprintf( buf, "You trip $N and $E goes down!" );
+		snprintf( buf, sizeof( buf ), "You trip $N and $E goes down!" );
 		ADD_COLOUR( ch, buf, WHITE );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n trips $N and $E goes down!" );
+		snprintf( buf, sizeof( buf ), "$n trips $N and $E goes down!" );
 		ADD_COLOUR( ch, buf, WHITE );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
 		WAIT_STATE( victim, 2 * PULSE_VIOLENCE );
@@ -3938,39 +3938,39 @@ void do_flee( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 	if ( IS_CLASS( victim, CLASS_VAMPIRE ) && IS_SET( victim->newbits, NEW_COIL ) && number_percent() > 30 ) {
-		sprintf( buf, "Not with %s coiled around you!", victim->name );
+		snprintf( buf, sizeof( buf ), "Not with %s coiled around you!", victim->name );
 		send_to_char( buf, ch );
 		act( "$n cant escape with $N coiled around them.", ch, NULL, victim, TO_ROOM );
 		return;
 	}
 	if ( !IS_NPC( victim ) ) {
 		if ( IS_CLASS( victim, CLASS_TANARRI ) && IS_SET( victim->pcdata->powers[TANARRI_POWER], TANARRI_TENDRILS ) && number_percent() > 30 ) {
-			sprintf( buf, "%s spews a shower of tendrils at you, preventing your escape!", victim->name );
+			snprintf( buf, sizeof( buf ), "%s spews a shower of tendrils at you, preventing your escape!", victim->name );
 			send_to_char( buf, ch );
 			act( "$n tries to run, but $N spews forth a shower of tendrils, preventing $n from running.", ch, NULL, victim, TO_ROOM );
 			return;
 		}
 	}
 	if ( IS_CLASS( victim, CLASS_MAGE ) && IS_ITEMAFF( victim, ITEMA_ILLUSIONS ) && number_percent() > 30 ) {
-		sprintf( buf, "Theres to many of %s to escape!", victim->name );
+		snprintf( buf, sizeof( buf ), "Theres to many of %s to escape!", victim->name );
 		send_to_char( buf, ch );
 		act( "$n cant escape with $N blocking his way.", ch, NULL, victim, TO_ROOM );
 		return;
 	}
 	if ( IS_CLASS( victim, CLASS_MONK ) && IS_SET( victim->newbits, NEW_JAWLOCK ) && number_percent() > 30 ) {
-		sprintf( buf, "Not with god holding you!\n\r" );
+		snprintf( buf, sizeof( buf ), "Not with god holding you!\n\r" );
 		send_to_char( buf, ch );
 		act( "$n cant escape god's mighty hold!", ch, NULL, victim, TO_ROOM );
 		return;
 	}
 	if ( IS_CLASS( victim, CLASS_WEREWOLF ) && IS_SET( victim->newbits, NEW_JAWLOCK ) && number_percent() > 30 ) {
-		sprintf( buf, "Not with %s's jaws clamped on your neck!", victim->name );
+		snprintf( buf, sizeof( buf ), "Not with %s's jaws clamped on your neck!", victim->name );
 		send_to_char( buf, ch );
 		act( "$n cant escape $N's clamped jaws!", ch, NULL, victim, TO_ROOM );
 		return;
 	}
 	if ( IS_CLASS( victim, CLASS_UNDEAD_KNIGHT ) && IS_SET( victim->pcdata->powers[AURAS], BOG_AURA ) && number_percent() > 30 ) {
-		sprintf( buf, "Your stuck in the swamp surrounding %s!", victim->name );
+		snprintf( buf, sizeof( buf ), "Your stuck in the swamp surrounding %s!", victim->name );
 		send_to_char( buf, ch );
 		act( "$n is stuck in the swamp!", ch, NULL, victim, TO_ROOM );
 		return;
@@ -4435,27 +4435,27 @@ void do_hurl( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 	if ( door == 0 ) {
-		sprintf( direction, "north" );
+		snprintf( direction, sizeof( direction ), "north" );
 		rev_dir = 2;
 	}
 	if ( door == 1 ) {
-		sprintf( direction, "east" );
+		snprintf( direction, sizeof( direction ), "east" );
 		rev_dir = 3;
 	}
 	if ( door == 2 ) {
-		sprintf( direction, "south" );
+		snprintf( direction, sizeof( direction ), "south" );
 		rev_dir = 0;
 	}
 	if ( door == 3 ) {
-		sprintf( direction, "west" );
+		snprintf( direction, sizeof( direction ), "west" );
 		rev_dir = 1;
 	}
 	if ( ( pexit = ch->in_room->exit[door] ) == NULL || ( to_room = pexit->to_room ) == NULL ) {
-		sprintf( buf, "$n hurls $N into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "$n hurls $N into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "You hurl $N into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "You hurl $N into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n hurls you into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "$n hurls you into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
 		dam = number_range( ch->level, ( ch->level * 4 ) );
 		victim->hit = victim->hit - dam;
@@ -4470,11 +4470,11 @@ void do_hurl( CHAR_DATA *ch, char *argument ) {
 	}
 	pexit = victim->in_room->exit[door];
 	if ( IS_SET( pexit->exit_info, EX_PRISMATIC_WALL ) ) {
-		sprintf( buf, "$n hurls $N into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "$n hurls $N into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "You hurl $N into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "You hurl $N into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n hurls you into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "$n hurls you into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
 		dam = number_range( ch->level, ( ch->level * 4 ) );
 		victim->hit = victim->hit - dam;
@@ -4492,26 +4492,26 @@ void do_hurl( CHAR_DATA *ch, char *argument ) {
 			REMOVE_BIT( pexit->exit_info, EX_LOCKED );
 		if ( IS_SET( pexit->exit_info, EX_CLOSED ) )
 			REMOVE_BIT( pexit->exit_info, EX_CLOSED );
-		sprintf( buf, "$n hoists $N in the air and hurls $M %s.", direction );
+		snprintf( buf, sizeof( buf ), "$n hoists $N in the air and hurls $M %s.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "You hoist $N in the air and hurl $M %s.", direction );
+		snprintf( buf, sizeof( buf ), "You hoist $N in the air and hurl $M %s.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n hurls you %s, smashing you through the %s.", direction, pexit->keyword );
+		snprintf( buf, sizeof( buf ), "$n hurls you %s, smashing you through the %s.", direction, pexit->keyword );
 		act( buf, ch, NULL, victim, TO_VICT );
-		sprintf( buf, "There is a loud crash as $n smashes through the $d." );
+		snprintf( buf, sizeof( buf ), "There is a loud crash as $n smashes through the $d." );
 		act( buf, victim, NULL, pexit->keyword, TO_ROOM );
 		if ( ( to_room = pexit->to_room ) != NULL && ( pexit_rev = to_room->exit[rev_dir] ) != NULL && pexit_rev->to_room == ch->in_room && pexit_rev->keyword != NULL ) {
 			if ( IS_SET( pexit_rev->exit_info, EX_LOCKED ) )
 				REMOVE_BIT( pexit_rev->exit_info, EX_LOCKED );
 			if ( IS_SET( pexit_rev->exit_info, EX_CLOSED ) )
 				REMOVE_BIT( pexit_rev->exit_info, EX_CLOSED );
-			if ( door == 0 ) sprintf( direction, "south" );
-			if ( door == 1 ) sprintf( direction, "west" );
-			if ( door == 2 ) sprintf( direction, "north" );
-			if ( door == 3 ) sprintf( direction, "east" );
+			if ( door == 0 ) snprintf( direction, sizeof( direction ), "south" );
+			if ( door == 1 ) snprintf( direction, sizeof( direction ), "west" );
+			if ( door == 2 ) snprintf( direction, sizeof( direction ), "north" );
+			if ( door == 3 ) snprintf( direction, sizeof( direction ), "east" );
 			char_from_room( victim );
 			char_to_room( victim, to_room );
-			sprintf( buf, "$n comes smashing in through the %s $d.", direction );
+			snprintf( buf, sizeof( buf ), "$n comes smashing in through the %s $d.", direction );
 			act( buf, victim, NULL, pexit->keyword, TO_ROOM );
 			dam = number_range( ch->level, ( ch->level * 6 ) );
 			victim->hit = victim->hit - dam;
@@ -4524,19 +4524,19 @@ void do_hurl( CHAR_DATA *ch, char *argument ) {
 			}
 		}
 	} else {
-		sprintf( buf, "$n hurls $N %s.", direction );
+		snprintf( buf, sizeof( buf ), "$n hurls $N %s.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "You hurl $N %s.", direction );
+		snprintf( buf, sizeof( buf ), "You hurl $N %s.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n hurls you %s.", direction );
+		snprintf( buf, sizeof( buf ), "$n hurls you %s.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
-		if ( door == 0 ) sprintf( direction, "south" );
-		if ( door == 1 ) sprintf( direction, "west" );
-		if ( door == 2 ) sprintf( direction, "north" );
-		if ( door == 3 ) sprintf( direction, "east" );
+		if ( door == 0 ) snprintf( direction, sizeof( direction ), "south" );
+		if ( door == 1 ) snprintf( direction, sizeof( direction ), "west" );
+		if ( door == 2 ) snprintf( direction, sizeof( direction ), "north" );
+		if ( door == 3 ) snprintf( direction, sizeof( direction ), "east" );
 		char_from_room( victim );
 		char_to_room( victim, to_room );
-		sprintf( buf, "$n comes flying in from the %s.", direction );
+		snprintf( buf, sizeof( buf ), "$n comes flying in from the %s.", direction );
 		act( buf, victim, NULL, NULL, TO_ROOM );
 		dam = number_range( ch->level, ( ch->level * 2 ) );
 		victim->hit = victim->hit - dam;
@@ -4673,7 +4673,7 @@ void do_decapitate( CHAR_DATA *ch, char *argument ) {
 		players_decap++;
 		ch->pcdata->mean_paradox_counter++;
 		ch->pcdata->bounty += number_range( 60, 120 );
-		sprintf( buf, "#P%s #owas torn to pieces by #R%s #c(#0Paradox Counter#c)#n", victim->name, ch->name );
+		snprintf( buf, sizeof( buf ), "#P%s #owas torn to pieces by #R%s #c(#0Paradox Counter#c)#n", victim->name, ch->name );
 		death_info( buf );
 		if ( ch->pcdata->mean_paradox_counter > 2 ) {
 			ch->pcdata->mean_paradox_counter = 0;
@@ -4683,7 +4683,7 @@ void do_decapitate( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( victim->pcdata->bounty > 0 ) {
-		sprintf( buf, "You recive a %d QP bounty, for killing %s.\n\r", victim->pcdata->bounty, victim->name );
+		snprintf( buf, sizeof( buf ), "You recive a %d QP bounty, for killing %s.\n\r", victim->pcdata->bounty, victim->name );
 		send_to_char( buf, ch );
 		ch->pcdata->quest += victim->pcdata->bounty;
 		victim->pcdata->bounty = 0;
@@ -4729,7 +4729,7 @@ void do_decapitate( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_CLASS( victim, CLASS_NINJA ) ) victim->rage = 0;
 	victim->level = 2;
 	decap_message( ch, victim );
-	sprintf( log_buf, "%s decapitated by %s at %d.",
+	snprintf( log_buf, MAX_STRING_LENGTH, "%s decapitated by %s at %d.",
 		victim->pcdata->switchname, ch->pcdata->switchname, victim->in_room->vnum );
 	log_string( log_buf );
 	players_decap++;
@@ -4767,57 +4767,57 @@ void decap_message( CHAR_DATA *ch, CHAR_DATA *victim ) {
 
 	if ( unarmed ) {
 		if ( victim->sex == SEX_MALE )
-			sprintf( buf, "#P%s #ygot his head torn off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot his head torn off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else if ( victim->sex == SEX_FEMALE )
-			sprintf( buf, "#P%s #ygot her head torn off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot her head torn off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else
-			sprintf( buf, "#P%s #ygot its head torn off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot its head torn off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 	} else if ( obj->value[3] == 1 ) {
 		if ( victim->sex == SEX_MALE )
-			sprintf( buf, "#P%s #ygot his head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot his head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else if ( victim->sex == SEX_FEMALE )
-			sprintf( buf, "#P%s #ygot her head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot her head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else
-			sprintf( buf, "#P%s #ygot its head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot its head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 	} else if ( obj->value[3] == 2 ) {
 		if ( victim->sex == SEX_MALE )
-			sprintf( buf, "#P%s #ygot his heart stabbed through by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot his heart stabbed through by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else if ( victim->sex == SEX_FEMALE )
-			sprintf( buf, "#P%s #ygot her heart stabbed through by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot her heart stabbed through by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else
-			sprintf( buf, "#P%s #ygot its heart stabbed through by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot its heart stabbed through by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 	} else if ( obj->value[3] == 3 ) {
 		if ( victim->sex == SEX_MALE )
-			sprintf( buf, "#P%s #ygot his head slashed off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot his head slashed off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else if ( victim->sex == SEX_FEMALE )
-			sprintf( buf, "#P%s #ygot her head slashed off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot her head slashed off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else
-			sprintf( buf, "#P%s #ygot its head slashed off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot its head slashed off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 	} else if ( obj->value[3] == 4 )
-		sprintf( buf, "#P%s #ygot strangled by #R%s", victim->pcdata->switchname, ch->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#P%s #ygot strangled by #R%s", victim->pcdata->switchname, ch->pcdata->switchname );
 	else if ( obj->value[3] == 5 )
-		sprintf( buf, "#R%s #yruns a clawed hand through #P%s #yand pulls out the heart#n", ch->pcdata->switchname, victim->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#R%s #yruns a clawed hand through #P%s #yand pulls out the heart#n", ch->pcdata->switchname, victim->pcdata->switchname );
 	else if ( obj->value[3] == 6 )
-		sprintf( buf, "#R%s #yshoots #P%s #yseveral times and spits on the corpse#n", ch->pcdata->switchname, victim->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#R%s #yshoots #P%s #yseveral times and spits on the corpse#n", ch->pcdata->switchname, victim->pcdata->switchname );
 	else if ( obj->value[3] == 7 )
-		sprintf( buf, "#R%s #ypounds #P%s #yon the head and the skull caves in#n", ch->pcdata->switchname, victim->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#R%s #ypounds #P%s #yon the head and the skull caves in#n", ch->pcdata->switchname, victim->pcdata->switchname );
 	else if ( obj->value[3] == 8 )
-		sprintf( buf, "#R%s #ycrushes #P%s #yto a bloody pulp#n", ch->pcdata->switchname, victim->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#R%s #ycrushes #P%s #yto a bloody pulp#n", ch->pcdata->switchname, victim->pcdata->switchname );
 	else if ( obj->value[3] == 9 )
-		sprintf( buf, "#P%s #yhas been grepped by #R%s#y, that's just mean!#n", victim->pcdata->switchname, ch->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#P%s #yhas been grepped by #R%s#y, that's just mean!#n", victim->pcdata->switchname, ch->pcdata->switchname );
 	else if ( obj->value[3] == 10 )
-		sprintf( buf, "#P%s #ywas bitten to death by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#P%s #ywas bitten to death by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 	else if ( obj->value[3] == 11 )
-		sprintf( buf, "#R%s #yhas punctured the lungs of #P%s#y, what a meanie!#n", ch->pcdata->switchname, victim->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#R%s #yhas punctured the lungs of #P%s#y, what a meanie!#n", ch->pcdata->switchname, victim->pcdata->switchname );
 	else if ( obj->value[3] == 12 )
-		sprintf( buf, "#R%s #ygrabs #P%s #yby the head and sucks the brain out#n", ch->pcdata->switchname, victim->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "#R%s #ygrabs #P%s #yby the head and sucks the brain out#n", ch->pcdata->switchname, victim->pcdata->switchname );
 	else {
 		if ( victim->sex == SEX_MALE )
-			sprintf( buf, "#P%s #ygot his head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot his head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else if ( victim->sex == SEX_FEMALE )
-			sprintf( buf, "#P%s #ygot her head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot her head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 		else
-			sprintf( buf, "#P%s #ygot its head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "#P%s #ygot its head sliced off by #R%s#n", victim->pcdata->switchname, ch->pcdata->switchname );
 	}
 	death_info( buf );
 	return;
@@ -4858,7 +4858,7 @@ void crack_head( CHAR_DATA *ch, OBJ_DATA *obj, char *argument ) {
 
 	char arg1[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 
 	argument = one_argument( argument, arg1 );
 	argument = one_argument( argument, arg2 );
@@ -4866,7 +4866,7 @@ void crack_head( CHAR_DATA *ch, OBJ_DATA *obj, char *argument ) {
 		victim = obj->chobj;
 		make_part( victim, "cracked_head" );
 		make_part( victim, "brain" );
-		sprintf( buf, "the quivering brain of %s", victim->name );
+		snprintf( buf, sizeof( buf ), "the quivering brain of %s", victim->name );
 		free_string( victim->morph );
 		victim->morph = str_dup( buf );
 		return;
@@ -4881,7 +4881,7 @@ void crack_head( CHAR_DATA *ch, OBJ_DATA *obj, char *argument ) {
 	} else {
 		if ( ( pMobIndex = get_mob_index( 30002 ) ) == NULL ) return;
 		victim = create_mobile( pMobIndex );
-		sprintf( buf, "%s", capitalize( arg2 ) );
+		snprintf( buf, sizeof( buf ), "%s", capitalize( arg2 ) );
 		free_string( victim->short_descr );
 		victim->short_descr = str_dup( buf );
 		char_to_room( victim, ch->in_room );
@@ -4900,7 +4900,7 @@ void do_voodoo( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 	char arg1[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char part1[MAX_INPUT_LENGTH];
 	char part2[MAX_INPUT_LENGTH];
 
@@ -4922,10 +4922,10 @@ void do_voodoo( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Not on NPC's.\n\r", ch );
 		return;
 	}
-	sprintf( part2, "%s", obj->name );
-	sprintf( part1, "%s voodoo doll", victim->name );
+	snprintf( part2, sizeof( part2 ), "%s", obj->name );
+	snprintf( part1, sizeof( part1 ), "%s voodoo doll", victim->name );
 	if ( str_cmp( part1, part2 ) ) {
-		sprintf( buf, "But you are holding %s, not %s!\n\r", obj->short_descr, victim->name );
+		snprintf( buf, sizeof( buf ), "But you are holding %s, not %s!\n\r", obj->short_descr, victim->name );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -5203,52 +5203,52 @@ void do_autostance( CHAR_DATA *ch, char *argument ) {
 }
 
 void autodrop( CHAR_DATA *ch ) {
-	char buf[MAX_INPUT_LENGTH];
-	char buf2[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	char buf2[MAX_STRING_LENGTH];
 	char stancename[10];
 
 	if ( IS_NPC( ch ) ) return;
 	if ( ch->stance[MONK_AUTODROP] == STANCE_NONE ) return;
 	if ( ch->stance[MONK_AUTODROP] == STANCE_VIPER )
-		sprintf( stancename, "viper" );
+		snprintf( stancename, sizeof( stancename ), "viper" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_CRANE )
-		sprintf( stancename, "crane" );
+		snprintf( stancename, sizeof( stancename ), "crane" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_CRAB )
-		sprintf( stancename, "crab" );
+		snprintf( stancename, sizeof( stancename ), "crab" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_MONGOOSE )
-		sprintf( stancename, "mongoose" );
+		snprintf( stancename, sizeof( stancename ), "mongoose" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_BULL )
-		sprintf( stancename, "bull" );
+		snprintf( stancename, sizeof( stancename ), "bull" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_MANTIS )
-		sprintf( stancename, "mantis" );
+		snprintf( stancename, sizeof( stancename ), "mantis" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_DRAGON )
-		sprintf( stancename, "dragon" );
+		snprintf( stancename, sizeof( stancename ), "dragon" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_TIGER )
-		sprintf( stancename, "tiger" );
+		snprintf( stancename, sizeof( stancename ), "tiger" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_MONKEY )
-		sprintf( stancename, "monkey" );
+		snprintf( stancename, sizeof( stancename ), "monkey" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_SWALLOW )
-		sprintf( stancename, "swallow" );
+		snprintf( stancename, sizeof( stancename ), "swallow" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS1 )
-		sprintf( stancename, "ss1" );
+		snprintf( stancename, sizeof( stancename ), "ss1" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS2 )
-		sprintf( stancename, "ss2" );
+		snprintf( stancename, sizeof( stancename ), "ss2" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS3 )
-		sprintf( stancename, "ss3" );
+		snprintf( stancename, sizeof( stancename ), "ss3" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS4 )
-		sprintf( stancename, "ss4" );
+		snprintf( stancename, sizeof( stancename ), "ss4" );
 	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS5 )
-		sprintf( stancename, "ss5" );
+		snprintf( stancename, sizeof( stancename ), "ss5" );
 	else if ( ch->stance[MONK_AUTODROP] )
-		sprintf( stancename, "wolf" );
+		snprintf( stancename, sizeof( stancename ), "wolf" );
 	else
 		return;
 	if ( ch->stance[0] < 1 ) {
 		ch->stance[0] = ch->stance[MONK_AUTODROP];
 		;
-		sprintf( buf, "#7You autodrop into the #3%s#7 stance.", stancename );
+		snprintf( buf, sizeof( buf ), "#7You autodrop into the #3%s#7 stance.", stancename );
 		act( buf, ch, NULL, NULL, TO_CHAR );
-		sprintf( buf2, "#7$n autodrops into the #3%s#7 stance.", stancename );
+		snprintf( buf2, sizeof( buf2 ), "#7$n autodrops into the #3%s#7 stance.", stancename );
 		act( buf2, ch, NULL, NULL, TO_ROOM );
 	}
 }
@@ -5276,7 +5276,7 @@ void ragnarokdecap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	victim->level = 2;
 	dropinvis( ch );
 	players_decap++;
-	sprintf( buf, "%s was beheaded by %s, the ragnarok continues", victim->name, ch->name );
+	snprintf( buf, sizeof( buf ), "%s was beheaded by %s, the ragnarok continues", victim->name, ch->name );
 	do_info( ch, buf );
 	send_to_char( "YOU HAVE BEEN KILLED!!!!\n\r", victim );
 	do_call( victim, "all" );

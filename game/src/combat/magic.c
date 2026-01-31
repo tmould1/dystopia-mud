@@ -34,7 +34,7 @@ void improve_spl args( ( CHAR_DATA * ch, int dtype, int sn ) );
  */
 
 void improve_spl( CHAR_DATA *ch, int dtype, int sn ) {
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char bufskill[32]; /* Max is "possesing lich knowledge of" (27 chars) */
 	char buftype[16];  /* Max is "orange" (6 chars) */
 	int dice1;
@@ -44,21 +44,21 @@ void improve_spl( CHAR_DATA *ch, int dtype, int sn ) {
 	dice2 = number_percent();
 
 	if ( dtype == 0 )
-		sprintf( buftype, "purple" );
+		snprintf( buftype, sizeof( buftype ), "purple" );
 	else if ( dtype == 1 )
-		sprintf( buftype, "red" );
+		snprintf( buftype, sizeof( buftype ), "red" );
 	else if ( dtype == 2 )
-		sprintf( buftype, "blue" );
+		snprintf( buftype, sizeof( buftype ), "blue" );
 	else if ( dtype == 3 )
-		sprintf( buftype, "green" );
+		snprintf( buftype, sizeof( buftype ), "green" );
 	else if ( dtype == 4 )
-		sprintf( buftype, "yellow" );
+		snprintf( buftype, sizeof( buftype ), "yellow" );
 	else if ( dtype == 5 )
-		sprintf( buftype, "orange" );
+		snprintf( buftype, sizeof( buftype ), "orange" );
 	else if ( dtype == 6 )
-		sprintf( buftype, "indigo" );
+		snprintf( buftype, sizeof( buftype ), "indigo" );
 	else if ( dtype == 7 )
-		sprintf( buftype, "violet" );
+		snprintf( buftype, sizeof( buftype ), "violet" );
 	else
 		return;
 
@@ -75,30 +75,30 @@ void improve_spl( CHAR_DATA *ch, int dtype, int sn ) {
 		return;
 
 	if ( ch->spl[dtype] == 1 )
-		sprintf( bufskill, "an apprentice of" );
+		snprintf( bufskill, sizeof( bufskill ), "an apprentice of" );
 	else if ( ch->spl[dtype] == 26 )
-		sprintf( bufskill, "a student at" );
+		snprintf( bufskill, sizeof( bufskill ), "a student at" );
 	else if ( ch->spl[dtype] == 51 )
-		sprintf( bufskill, "a scholar at" );
+		snprintf( bufskill, sizeof( bufskill ), "a scholar at" );
 	else if ( ch->spl[dtype] == 76 )
-		sprintf( bufskill, "a magus at" );
+		snprintf( bufskill, sizeof( bufskill ), "a magus at" );
 	else if ( ch->spl[dtype] == 101 )
-		sprintf( bufskill, "an adept at" );
+		snprintf( bufskill, sizeof( bufskill ), "an adept at" );
 	else if ( ch->spl[dtype] == 126 )
-		sprintf( bufskill, "a mage at" );
+		snprintf( bufskill, sizeof( bufskill ), "a mage at" );
 	else if ( ch->spl[dtype] == 151 )
-		sprintf( bufskill, "a warlock at" );
+		snprintf( bufskill, sizeof( bufskill ), "a warlock at" );
 	else if ( ch->spl[dtype] == 176 )
-		sprintf( bufskill, "a master wizard at" );
+		snprintf( bufskill, sizeof( bufskill ), "a master wizard at" );
 	else if ( ch->spl[dtype] == 200 )
-		sprintf( bufskill, "a grand sorcerer at" );
+		snprintf( bufskill, sizeof( bufskill ), "a grand sorcerer at" );
 	else if ( ch->spl[dtype] == 240 )
-		sprintf( bufskill, "the complete master of" );
+		snprintf( bufskill, sizeof( bufskill ), "the complete master of" );
 	else if ( ch->spl[dtype] == 300 )
-		sprintf( bufskill, "possesing lich knowledge of" );
+		snprintf( bufskill, sizeof( bufskill ), "possesing lich knowledge of" );
 	else
 		return;
-	sprintf( buf, "#GYou are now %s %s magic.\n\r#n", bufskill, buftype );
+	snprintf( buf, sizeof( buf ), "#GYou are now %s %s magic.\n\r#n", bufskill, buftype );
 	send_to_char( buf, ch );
 	return;
 }
@@ -228,41 +228,41 @@ void say_spell( CHAR_DATA *ch, int sn ) {
 			length = 1;
 	}
 
-	sprintf( buf2, "$n utters the words, '%s'.", buf );
-	sprintf( buf, "$n utters the words, '%s'.", skill_table[sn].name );
+	snprintf( buf2, sizeof( buf2 ), "$n utters the words, '%s'.", buf );
+	snprintf( buf, sizeof( buf ), "$n utters the words, '%s'.", skill_table[sn].name );
 	if ( skill_table[sn].target == 0 ) {
-		sprintf( colour, "$n's eyes glow bright purple for a moment." );
+		snprintf( colour, sizeof( colour ), "$n's eyes glow bright purple for a moment." );
 		ADD_COLOUR( ch, colour, MAGENTA );
 		act( colour, ch, NULL, NULL, TO_ROOM );
-		sprintf( colour, "Your eyes glow bright purple for a moment." );
+		snprintf( colour, sizeof( colour ), "Your eyes glow bright purple for a moment." );
 		ADD_COLOUR( ch, colour, MAGENTA );
 		act( colour, ch, NULL, NULL, TO_CHAR );
 	} else if ( skill_table[sn].target == 1 ) {
-		sprintf( colour, "$n's eyes glow bright red for a moment." );
+		snprintf( colour, sizeof( colour ), "$n's eyes glow bright red for a moment." );
 		ADD_COLOUR( ch, colour, L_RED );
 		act( colour, ch, NULL, NULL, TO_ROOM );
-		sprintf( colour, "Your eyes glow bright red for a moment." );
+		snprintf( colour, sizeof( colour ), "Your eyes glow bright red for a moment." );
 		ADD_COLOUR( ch, colour, L_RED );
 		act( colour, ch, NULL, NULL, TO_CHAR );
 	} else if ( skill_table[sn].target == 2 ) {
-		sprintf( colour, "$n's eyes glow bright blue for a moment." );
+		snprintf( colour, sizeof( colour ), "$n's eyes glow bright blue for a moment." );
 		ADD_COLOUR( ch, colour, L_BLUE );
 		act( colour, ch, NULL, NULL, TO_ROOM );
-		sprintf( colour, "Your eyes glow bright blue for a moment." );
+		snprintf( colour, sizeof( colour ), "Your eyes glow bright blue for a moment." );
 		ADD_COLOUR( ch, colour, L_BLUE );
 		act( colour, ch, NULL, NULL, TO_CHAR );
 	} else if ( skill_table[sn].target == 3 ) {
-		sprintf( colour, "$n's eyes glow bright green for a moment." );
+		snprintf( colour, sizeof( colour ), "$n's eyes glow bright green for a moment." );
 		ADD_COLOUR( ch, colour, L_GREEN );
 		act( colour, ch, NULL, NULL, TO_ROOM );
-		sprintf( colour, "Your eyes glow bright green for a moment." );
+		snprintf( colour, sizeof( colour ), "Your eyes glow bright green for a moment." );
 		ADD_COLOUR( ch, colour, L_GREEN );
 		act( colour, ch, NULL, NULL, TO_CHAR );
 	} else if ( skill_table[sn].target == 4 ) {
-		sprintf( colour, "$n's eyes glow bright yellow for a moment." );
+		snprintf( colour, sizeof( colour ), "$n's eyes glow bright yellow for a moment." );
 		ADD_COLOUR( ch, colour, YELLOW );
 		act( colour, ch, NULL, NULL, TO_ROOM );
-		sprintf( colour, "Your eyes glow bright yellow for a moment." );
+		snprintf( colour, sizeof( colour ), "Your eyes glow bright yellow for a moment." );
 		ADD_COLOUR( ch, colour, YELLOW );
 		act( colour, ch, NULL, NULL, TO_CHAR );
 	}
@@ -718,7 +718,7 @@ void spell_bless( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_blindness( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
 	AFFECT_DATA af;
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_AFFECTED( victim, AFF_BLIND ) || ( saves_spell( level, victim ) && !IS_CLASS( ch, CLASS_MONK ) ) )
 		return;
@@ -731,9 +731,9 @@ void spell_blindness( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	affect_to_char( victim, &af );
 	send_to_char( "You are blinded!\n\r", victim );
 	if ( !IS_NPC( victim ) )
-		sprintf( buf, "%s is blinded!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is blinded!\n\r", victim->name );
 	else
-		sprintf( buf, "%s is blinded!\n\r", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "%s is blinded!\n\r", victim->short_descr );
 	send_to_char( buf, ch );
 	return;
 }
@@ -1032,7 +1032,7 @@ void spell_create_water( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		if ( !is_name( "water", obj->name ) ) {
 			char buf[MAX_STRING_LENGTH];
 
-			sprintf( buf, "%s water", obj->name );
+			snprintf( buf, sizeof( buf ), "%s water", obj->name );
 			free_string( obj->name );
 			obj->name = str_dup( buf );
 		}
@@ -1624,10 +1624,10 @@ void spell_tendrils( int sn, int level, CHAR_DATA *ch, void *vo )
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
 	AFFECT_DATA af;
 	char buf[MAX_STRING_LENGTH];
-	sprintf(buf,
+	snprintf( buf, sizeof( buf ),
 	"A look of concentration passes over your face.\n\r");
 	send_to_char(buf,ch);
-	sprintf(buf,
+	snprintf( buf, sizeof( buf ),
 	"A look of concentration passes over %s's face.\n\r",ch->name);
 
 	act(buf,ch,NULL,NULL,TO_ROOM);
@@ -1922,7 +1922,7 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	if ( fMxp )
 		send_to_char( MXP_SECURE_LINE MXP_FRAME_OPEN MXP_LOCK_LOCKED "\n\r", ch );
 
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Object '%s' is type %s, extra flags %s.\n\rWeight is %d, value is %d.\n\r",
 
 		obj->name,
@@ -1933,18 +1933,18 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	send_to_char( buf, ch );
 
 	if ( obj->points > 0 && obj->item_type != ITEM_QUEST && obj->item_type != ITEM_PAGE ) {
-		sprintf( buf, "Quest point value is %d.\n\r", obj->points );
+		snprintf( buf, sizeof( buf ), "Quest point value is %d.\n\r", obj->points );
 		send_to_char( buf, ch );
 	}
 	if ( obj->questmaker != NULL && strlen( obj->questmaker ) > 1 &&
 		obj->questowner != NULL && strlen( obj->questowner ) > 1 ) {
-		sprintf( buf, "This object was created by %s, and is owned by %s.\n\r", obj->questmaker, obj->questowner );
+		snprintf( buf, sizeof( buf ), "This object was created by %s, and is owned by %s.\n\r", obj->questmaker, obj->questowner );
 		send_to_char( buf, ch );
 	} else if ( obj->questmaker != NULL && strlen( obj->questmaker ) > 1 ) {
-		sprintf( buf, "This object was created by %s.\n\r", obj->questmaker );
+		snprintf( buf, sizeof( buf ), "This object was created by %s.\n\r", obj->questmaker );
 		send_to_char( buf, ch );
 	} else if ( obj->questowner != NULL && strlen( obj->questowner ) > 1 ) {
-		sprintf( buf, "This object is owned by %s.\n\r", obj->questowner );
+		snprintf( buf, sizeof( buf ), "This object is owned by %s.\n\r", obj->questowner );
 		send_to_char( buf, ch );
 	}
 
@@ -1973,7 +1973,7 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	case ITEM_PILL:
 	case ITEM_SCROLL:
 	case ITEM_POTION:
-		sprintf( buf, "Level %d spells of:", obj->value[0] );
+		snprintf( buf, sizeof( buf ), "Level %d spells of:", obj->value[0] );
 		send_to_char( buf, ch );
 
 		if ( obj->value[1] >= 0 && obj->value[1] < MAX_SKILL ) {
@@ -1998,18 +1998,18 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		break;
 
 	case ITEM_QUEST:
-		sprintf( buf, "Quest point value is %d.\n\r", obj->value[0] );
+		snprintf( buf, sizeof( buf ), "Quest point value is %d.\n\r", obj->value[0] );
 		send_to_char( buf, ch );
 		break;
 
 	case ITEM_QUESTCARD:
-		sprintf( buf, "Quest completion reward is %d quest points.\n\r", obj->level );
+		snprintf( buf, sizeof( buf ), "Quest completion reward is %d quest points.\n\r", obj->level );
 		send_to_char( buf, ch );
 		break;
 
 	case ITEM_WAND:
 	case ITEM_STAFF:
-		sprintf( buf, "Has %d(%d) charges of level %d",
+		snprintf( buf, sizeof( buf ), "Has %d(%d) charges of level %d",
 			obj->value[1], obj->value[2], obj->value[0] );
 		send_to_char( buf, ch );
 
@@ -2023,7 +2023,7 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		break;
 
 	case ITEM_WEAPON:
-		sprintf( buf, "Damage is %d to %d (average %d).\n\r",
+		snprintf( buf, sizeof( buf ), "Damage is %d to %d (average %d).\n\r",
 			obj->value[1], obj->value[2],
 			( obj->value[1] + obj->value[2] ) / 2 );
 		send_to_char( buf, ch );
@@ -2035,38 +2035,38 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 		if ( itemtype > 0 ) {
 			if ( obj->level < 10 )
-				sprintf( buf, "%s is a minor spell weapon.\n\r", capitalize( obj->short_descr ) );
+				snprintf( buf, sizeof( buf ), "%s is a minor spell weapon.\n\r", capitalize( obj->short_descr ) );
 			else if ( obj->level < 20 )
-				sprintf( buf, "%s is a lesser spell weapon.\n\r", capitalize( obj->short_descr ) );
+				snprintf( buf, sizeof( buf ), "%s is a lesser spell weapon.\n\r", capitalize( obj->short_descr ) );
 			else if ( obj->level < 30 )
-				sprintf( buf, "%s is an average spell weapon.\n\r", capitalize( obj->short_descr ) );
+				snprintf( buf, sizeof( buf ), "%s is an average spell weapon.\n\r", capitalize( obj->short_descr ) );
 			else if ( obj->level < 40 )
-				sprintf( buf, "%s is a greater spell weapon.\n\r", capitalize( obj->short_descr ) );
+				snprintf( buf, sizeof( buf ), "%s is a greater spell weapon.\n\r", capitalize( obj->short_descr ) );
 			else if ( obj->level < 50 )
-				sprintf( buf, "%s is a major spell weapon.\n\r", capitalize( obj->short_descr ) );
+				snprintf( buf, sizeof( buf ), "%s is a major spell weapon.\n\r", capitalize( obj->short_descr ) );
 			else if ( obj->level > 50 )
-				sprintf( buf, "%s is an ultimate spell weapon.\n\r", capitalize( obj->short_descr ) );
+				snprintf( buf, sizeof( buf ), "%s is an ultimate spell weapon.\n\r", capitalize( obj->short_descr ) );
 			else
-				sprintf( buf, "%s is a supreme spell weapon.\n\r", capitalize( obj->short_descr ) );
+				snprintf( buf, sizeof( buf ), "%s is a supreme spell weapon.\n\r", capitalize( obj->short_descr ) );
 			send_to_char( buf, ch );
 		}
 
 		if ( itemtype == 1 )
-			sprintf( buf, "This weapon is dripping with corrosive acid.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon is dripping with corrosive acid.\n\r" );
 		else if ( itemtype == 4 )
-			sprintf( buf, "This weapon radiates an aura of darkness.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon radiates an aura of darkness.\n\r" );
 		else if ( itemtype == 30 )
-			sprintf( buf, "This ancient relic is the bane of all evil.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient relic is the bane of all evil.\n\r" );
 		else if ( itemtype == 34 )
-			sprintf( buf, "This vampiric weapon drinks the souls of its victims.\n\r" );
+			snprintf( buf, sizeof( buf ), "This vampiric weapon drinks the souls of its victims.\n\r" );
 		else if ( itemtype == 37 )
-			sprintf( buf, "This weapon has been tempered in hellfire.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon has been tempered in hellfire.\n\r" );
 		else if ( itemtype == 48 )
-			sprintf( buf, "This weapon crackles with sparks of lightning.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon crackles with sparks of lightning.\n\r" );
 		else if ( itemtype == 53 )
-			sprintf( buf, "This weapon is dripping with a dark poison.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon is dripping with a dark poison.\n\r" );
 		else if ( itemtype > 0 )
-			sprintf( buf, "This weapon has been imbued with the power of %s.\n\r", skill_table[itemtype].name );
+			snprintf( buf, sizeof( buf ), "This weapon has been imbued with the power of %s.\n\r", skill_table[itemtype].name );
 		if ( itemtype > 0 )
 			send_to_char( buf, ch );
 
@@ -2076,132 +2076,132 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 			break;
 
 		if ( itemtype == 4 )
-			sprintf( buf, "This weapon radiates an aura of darkness.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon radiates an aura of darkness.\n\r" );
 		else if ( itemtype == 27 || itemtype == 2 )
-			sprintf( buf, "This weapon allows the wielder to see invisible things.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon allows the wielder to see invisible things.\n\r" );
 		else if ( itemtype == 39 || itemtype == 3 )
-			sprintf( buf, "This weapon grants the power of flight.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon grants the power of flight.\n\r" );
 		else if ( itemtype == 45 || itemtype == 1 )
-			sprintf( buf, "This weapon allows the wielder to see in the dark.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon allows the wielder to see in the dark.\n\r" );
 		else if ( itemtype == 46 || itemtype == 5 )
-			sprintf( buf, "This weapon renders the wielder invisible to the human eye.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon renders the wielder invisible to the human eye.\n\r" );
 		else if ( itemtype == 52 || itemtype == 6 )
-			sprintf( buf, "This weapon allows the wielder to walk through solid doors.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon allows the wielder to walk through solid doors.\n\r" );
 		else if ( itemtype == 54 || itemtype == 7 )
-			sprintf( buf, "This holy weapon protects the wielder from evil.\n\r" );
+			snprintf( buf, sizeof( buf ), "This holy weapon protects the wielder from evil.\n\r" );
 		else if ( itemtype == 139 )
-			sprintf( buf, "This unholy weapon protects the wielder from good.\n\r" );
+			snprintf( buf, sizeof( buf ), "This unholy weapon protects the wielder from good.\n\r" );
 		else if ( itemtype == 57 || itemtype == 8 )
-			sprintf( buf, "This ancient weapon protects the wielder in combat.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon protects the wielder in combat.\n\r" );
 		else if ( itemtype == 9 )
-			sprintf( buf, "This crafty weapon allows the wielder to walk in complete silence.\n\r" );
+			snprintf( buf, sizeof( buf ), "This crafty weapon allows the wielder to walk in complete silence.\n\r" );
 		else if ( itemtype == 10 )
-			sprintf( buf, "This powerful weapon surrounds its wielder with a shield of lightning.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful weapon surrounds its wielder with a shield of lightning.\n\r" );
 		else if ( itemtype == 11 )
-			sprintf( buf, "This powerful weapon surrounds its wielder with a shield of fire.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful weapon surrounds its wielder with a shield of fire.\n\r" );
 		else if ( itemtype == 12 )
-			sprintf( buf, "This powerful weapon surrounds its wielder with a shield of ice.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful weapon surrounds its wielder with a shield of ice.\n\r" );
 		else if ( itemtype == 13 )
-			sprintf( buf, "This powerful weapon surrounds its wielder with a shield of acid.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful weapon surrounds its wielder with a shield of acid.\n\r" );
 		else if ( itemtype == 14 )
-			sprintf( buf, "This weapon protects its wielder from clan DarkBlade guardians.\n\r" );
+			snprintf( buf, sizeof( buf ), "This weapon protects its wielder from clan DarkBlade guardians.\n\r" );
 		else if ( itemtype == 15 )
-			sprintf( buf, "This ancient weapon surrounds its wielder with a shield of chaos.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon surrounds its wielder with a shield of chaos.\n\r" );
 		else if ( itemtype == 16 )
-			sprintf( buf, "This ancient weapon regenerates the wounds of its wielder.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon regenerates the wounds of its wielder.\n\r" );
 		else if ( itemtype == 26 )
-			sprintf( buf, "This ancient weapon gives the power of mantis 3.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon gives the power of mantis 3.\n\r" );
 		else if ( itemtype == 17 )
-			sprintf( buf, "This ancient weapon allows its wielder to move at supernatural speed.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon allows its wielder to move at supernatural speed.\n\r" );
 		else if ( itemtype == 18 )
-			sprintf( buf, "This razor sharp weapon can slice through armour without difficulty.\n\r" );
+			snprintf( buf, sizeof( buf ), "This razor sharp weapon can slice through armour without difficulty.\n\r" );
 		else if ( itemtype == 19 )
-			sprintf( buf, "This ancient weapon protects its wearer from player attacks.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon protects its wearer from player attacks.\n\r" );
 		else if ( itemtype == 20 )
-			sprintf( buf, "This ancient weapon surrounds its wielder with a shield of darkness.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon surrounds its wielder with a shield of darkness.\n\r" );
 		else if ( itemtype == 21 )
-			sprintf( buf, "This ancient weapon grants superior protection to its wielder.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon grants superior protection to its wielder.\n\r" );
 		else if ( itemtype == 22 )
-			sprintf( buf, "This ancient weapon grants its wielder supernatural vision.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon grants its wielder supernatural vision.\n\r" );
 		else if ( itemtype == 23 )
-			sprintf( buf, "This ancient weapon makes its wielder fleet-footed.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon makes its wielder fleet-footed.\n\r" );
 		else if ( itemtype == 24 )
-			sprintf( buf, "This ancient weapon conceals its wielder from sight.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon conceals its wielder from sight.\n\r" );
 		else if ( itemtype == 25 )
-			sprintf( buf, "This ancient weapon invokes the power of the beast.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon invokes the power of the beast.\n\r" );
 		else if ( itemtype == 28 )
-			sprintf( buf, "This ancient weapon increases the level of your spells by 20.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient weapon increases the level of your spells by 20.\n\r" );
 		else
-			sprintf( buf, "This item is bugged...please report it.\n\r" );
+			snprintf( buf, sizeof( buf ), "This item is bugged...please report it.\n\r" );
 		if ( itemtype > 0 )
 			send_to_char( buf, ch );
 		break;
 
 	case ITEM_ARMOR:
-		sprintf( buf, "Armor class is %d.\n\r", obj->value[0] );
+		snprintf( buf, sizeof( buf ), "Armor class is %d.\n\r", obj->value[0] );
 		send_to_char( buf, ch );
 		if ( obj->value[3] < 1 )
 			break;
 		if ( obj->value[3] == 4 )
-			sprintf( buf, "This object radiates an aura of darkness.\n\r" );
+			snprintf( buf, sizeof( buf ), "This object radiates an aura of darkness.\n\r" );
 		else if ( obj->value[3] == 27 || obj->value[3] == 2 )
-			sprintf( buf, "This item allows the wearer to see invisible things.\n\r" );
+			snprintf( buf, sizeof( buf ), "This item allows the wearer to see invisible things.\n\r" );
 		else if ( obj->value[3] == 39 || obj->value[3] == 3 )
-			sprintf( buf, "This object grants the power of flight.\n\r" );
+			snprintf( buf, sizeof( buf ), "This object grants the power of flight.\n\r" );
 		else if ( obj->value[3] == 45 || obj->value[3] == 1 )
-			sprintf( buf, "This item allows the wearer to see in the dark.\n\r" );
+			snprintf( buf, sizeof( buf ), "This item allows the wearer to see in the dark.\n\r" );
 		else if ( obj->value[3] == 46 || obj->value[3] == 5 )
-			sprintf( buf, "This object renders the wearer invisible to the human eye.\n\r" );
+			snprintf( buf, sizeof( buf ), "This object renders the wearer invisible to the human eye.\n\r" );
 		else if ( obj->value[3] == 52 || obj->value[3] == 6 )
-			sprintf( buf, "This object allows the wearer to walk through solid doors.\n\r" );
+			snprintf( buf, sizeof( buf ), "This object allows the wearer to walk through solid doors.\n\r" );
 		else if ( obj->value[3] == 54 || obj->value[3] == 7 )
-			sprintf( buf, "This holy relic protects the wearer from evil.\n\r" );
+			snprintf( buf, sizeof( buf ), "This holy relic protects the wearer from evil.\n\r" );
 		else if ( obj->value[3] == 139 )
-			sprintf( buf, "This unholy relic protects the wearer from good.\n\r" );
+			snprintf( buf, sizeof( buf ), "This unholy relic protects the wearer from good.\n\r" );
 		else if ( obj->value[3] == 57 || obj->value[3] == 8 )
-			sprintf( buf, "This ancient relic protects the wearer in combat.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient relic protects the wearer in combat.\n\r" );
 		else if ( obj->value[3] == 9 )
-			sprintf( buf, "This crafty item allows the wearer to walk in complete silence.\n\r" );
+			snprintf( buf, sizeof( buf ), "This crafty item allows the wearer to walk in complete silence.\n\r" );
 		else if ( obj->value[3] == 10 )
-			sprintf( buf, "This powerful item surrounds its wearer with a shield of lightning.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful item surrounds its wearer with a shield of lightning.\n\r" );
 		else if ( obj->value[3] == 11 )
-			sprintf( buf, "This powerful item surrounds its wearer with a shield of fire.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful item surrounds its wearer with a shield of fire.\n\r" );
 		else if ( obj->value[3] == 12 )
-			sprintf( buf, "This powerful item surrounds its wearer with a shield of ice.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful item surrounds its wearer with a shield of ice.\n\r" );
 		else if ( obj->value[3] == 13 )
-			sprintf( buf, "This powerful item surrounds its wearer with a shield of acid.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful item surrounds its wearer with a shield of acid.\n\r" );
 		else if ( obj->value[3] == 14 )
-			sprintf( buf, "This object channels the power of god into its wearer.\n\r" );
+			snprintf( buf, sizeof( buf ), "This object channels the power of god into its wearer.\n\r" );
 		else if ( obj->value[3] == 15 )
-			sprintf( buf, "This ancient item surrounds its wearer with a shield of chaos.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item surrounds its wearer with a shield of chaos.\n\r" );
 		else if ( obj->value[3] == 16 )
-			sprintf( buf, "This ancient item regenerates the wounds of its wearer.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item regenerates the wounds of its wearer.\n\r" );
 		else if ( obj->value[3] == 17 )
-			sprintf( buf, "This ancient item allows its wearer to move at supernatural speed.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item allows its wearer to move at supernatural speed.\n\r" );
 		else if ( obj->value[3] == 18 )
-			sprintf( buf, "This powerful item allows its wearer to shear through armour without difficulty.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful item allows its wearer to shear through armour without difficulty.\n\r" );
 		else if ( obj->value[3] == 19 )
-			sprintf( buf, "This powerful item protects its wearer from player attacks.\n\r" );
+			snprintf( buf, sizeof( buf ), "This powerful item protects its wearer from player attacks.\n\r" );
 		else if ( obj->value[3] == 20 )
-			sprintf( buf, "This ancient item surrounds its wearer with a shield of darkness.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item surrounds its wearer with a shield of darkness.\n\r" );
 		else if ( obj->value[3] == 21 )
-			sprintf( buf, "This ancient item grants superior protection to its wearer.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item grants superior protection to its wearer.\n\r" );
 		else if ( obj->value[3] == 22 )
-			sprintf( buf, "This ancient item grants its wearer supernatural vision.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item grants its wearer supernatural vision.\n\r" );
 		else if ( obj->value[3] == 23 )
-			sprintf( buf, "This ancient item makes its wearer fleet-footed.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item makes its wearer fleet-footed.\n\r" );
 		else if ( obj->value[3] == 24 )
-			sprintf( buf, "This ancient item conceals its wearer from sight.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item conceals its wearer from sight.\n\r" );
 		else if ( obj->value[3] == 25 )
-			sprintf( buf, "This ancient item invokes the power of the beast.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item invokes the power of the beast.\n\r" );
 		else if ( obj->value[3] == 28 )
-			sprintf( buf, "This ancient item invokes the power of ancient magic.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient item invokes the power of ancient magic.\n\r" );
 		else if ( obj->value[3] == 29 )
-			sprintf( buf, "This ancient artifact grants its wearer the power of the third eye.\n\r" );
+			snprintf( buf, sizeof( buf ), "This ancient artifact grants its wearer the power of the third eye.\n\r" );
 		else if ( obj->value[3] == 30 )
-			sprintf( buf, "This great bird grants the power of talons.\n\r" );
+			snprintf( buf, sizeof( buf ), "This great bird grants the power of talons.\n\r" );
 		else
-			sprintf( buf, "This item is bugged...please report it.\n\r" );
+			snprintf( buf, sizeof( buf ), "This item is bugged...please report it.\n\r" );
 		if ( obj->value[3] > 0 )
 			send_to_char( buf, ch );
 		break;
@@ -2209,7 +2209,7 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	for ( paf = obj->pIndexData->affected; paf != NULL; paf = paf->next ) {
 		if ( paf->location != APPLY_NONE && paf->modifier != 0 ) {
-			sprintf( buf, "Affects %s by %d.\n\r",
+			snprintf( buf, sizeof( buf ), "Affects %s by %d.\n\r",
 				affect_loc_name( paf->location ), paf->modifier );
 			send_to_char( buf, ch );
 		}
@@ -2217,7 +2217,7 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	for ( paf = obj->affected; paf != NULL; paf = paf->next ) {
 		if ( paf->location != APPLY_NONE && paf->modifier != 0 ) {
-			sprintf( buf, "Affects %s by %d.\n\r",
+			snprintf( buf, sizeof( buf ), "Affects %s by %d.\n\r",
 				affect_loc_name( paf->location ), paf->modifier );
 			send_to_char( buf, ch );
 		}
@@ -2343,10 +2343,10 @@ void spell_locate_object( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		for ( in_obj = obj; in_obj->in_obj != NULL; in_obj = in_obj->in_obj );
 
 		if ( in_obj->carried_by != NULL ) {
-			sprintf( buf, "%s carried by %s.\n\r",
+			snprintf( buf, sizeof( buf ), "%s carried by %s.\n\r",
 				obj->short_descr, PERS( in_obj->carried_by, ch ) );
 		} else {
-			sprintf( buf, "%s in %s.\n\r",
+			snprintf( buf, sizeof( buf ), "%s in %s.\n\r",
 				obj->short_descr, in_obj->in_room == NULL ? "somewhere" : in_obj->in_room->name );
 		}
 
@@ -2434,7 +2434,7 @@ void spell_pass_door( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_poison( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
 	AFFECT_DATA af;
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 
 	/* Ghosts cannot be poisoned - KaVir */
 	if ( IS_NPC( victim ) && IS_AFFECTED( victim, AFF_ETHEREAL ) ) return;
@@ -2460,9 +2460,9 @@ void spell_poison( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	send_to_char( "You feel very sick.\n\r", victim );
 	if ( ch == victim ) return;
 	if ( !IS_NPC( victim ) )
-		sprintf( buf, "%s looks very sick as your poison takes affect.\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s looks very sick as your poison takes affect.\n\r", victim->name );
 	else
-		sprintf( buf, "%s looks very sick as your poison takes affect.\n\r", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "%s looks very sick as your poison takes affect.\n\r", victim->short_descr );
 	send_to_char( buf, ch );
 	return;
 }
@@ -2470,52 +2470,52 @@ void spell_poison( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_readaura( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
 	/*    char      arg [MAX_INPUT_LENGTH];*/
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 
 	act( "$n examines $N intently.", ch, NULL, victim, TO_NOTVICT );
 	act( "$n examines you intently.", ch, NULL, victim, TO_VICT );
 	if ( IS_NPC( victim ) )
-		sprintf( buf, "%s is an NPC.\n\r", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "%s is an NPC.\n\r", victim->short_descr );
 	else {
 		if ( victim->level == 12 )
-			sprintf( buf, "%s is an Implementor.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Implementor.\n\r", victim->name );
 		else if ( victim->level == 11 )
-			sprintf( buf, "%s is a High Judge.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a High Judge.\n\r", victim->name );
 		else if ( victim->level == 10 )
-			sprintf( buf, "%s is a Judge.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Judge.\n\r", victim->name );
 		else if ( victim->level == 9 )
-			sprintf( buf, "%s is an Enforcer.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Enforcer.\n\r", victim->name );
 		else if ( victim->level == 8 )
-			sprintf( buf, "%s is a Quest Maker.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Quest Maker.\n\r", victim->name );
 		else if ( victim->level == 7 )
-			sprintf( buf, "%s is a Builder.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Builder.\n\r", victim->name );
 		else if ( victim->level >= 3 )
-			sprintf( buf, "%s is an Avatar.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Avatar.\n\r", victim->name );
 		else
-			sprintf( buf, "%s is a Mortal.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Mortal.\n\r", victim->name );
 	}
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) ) {
-		sprintf( buf, "Str:%d, Int:%d, Wis:%d, Dex:%d, Con:%d.\n\r", get_curr_str( victim ), get_curr_int( victim ),
+		snprintf( buf, sizeof( buf ), "Str:%d, Int:%d, Wis:%d, Dex:%d, Con:%d.\n\r", get_curr_str( victim ), get_curr_int( victim ),
 			get_curr_wis( victim ), get_curr_dex( victim ), get_curr_con( victim ) );
 		send_to_char( buf, ch );
 	}
-	sprintf( buf, "Hp:%d/%d, Mana:%d/%d, Move:%d/%d.\n\r", victim->hit, victim->max_hit, victim->mana, victim->max_mana,
+	snprintf( buf, sizeof( buf ), "Hp:%d/%d, Mana:%d/%d, Move:%d/%d.\n\r", victim->hit, victim->max_hit, victim->mana, victim->max_mana,
 		victim->move, victim->max_move );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) )
-		sprintf( buf, "Hitroll:%d, Damroll:%d, AC:%d.\n\r", char_hitroll( victim ), char_damroll( victim ),
+		snprintf( buf, sizeof( buf ), "Hitroll:%d, Damroll:%d, AC:%d.\n\r", char_hitroll( victim ), char_damroll( victim ),
 			char_ac( victim ) );
 	else
-		sprintf( buf, "AC:%d.\n\r", char_ac( victim ) );
+		snprintf( buf, sizeof( buf ), "AC:%d.\n\r", char_ac( victim ) );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) ) {
 		if ( IS_CLASS( victim, CLASS_VAMPIRE ) ) {
-			sprintf( buf, "Blood:%d, ", victim->pcdata->condition[COND_THIRST] );
+			snprintf( buf, sizeof( buf ), "Blood:%d, ", victim->pcdata->condition[COND_THIRST] );
 			send_to_char( buf, ch );
 		}
 	}
-	sprintf( buf, "Alignment:%d.\n\r", victim->alignment );
+	snprintf( buf, sizeof( buf ), "Alignment:%d.\n\r", victim->alignment );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) && IS_EXTRA( victim, EXTRA_PREGNANT ) && ch->sex == SEX_FEMALE )
 		act( "$N is pregnant.", ch, NULL, victim, TO_CHAR );
@@ -2796,8 +2796,8 @@ void spell_ventriloquate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	target_name = one_argument( target_name, speaker );
 
-	sprintf( buf1, "%s says '%s'.\n\r", speaker, target_name );
-	sprintf( buf2, "Someone makes %s say '%s'.\n\r", speaker, target_name );
+	snprintf( buf1, sizeof( buf1 ), "%s says '%s'.\n\r", speaker, target_name );
+	snprintf( buf2, sizeof( buf2 ), "Someone makes %s say '%s'.\n\r", speaker, target_name );
 	buf1[0] = UPPER( buf1[0] );
 
 	for ( vch = ch->in_room->people; vch != NULL; vch = vch->next_in_room ) {
@@ -2932,7 +2932,7 @@ void spell_lightning_breath( int sn, int level, CHAR_DATA *ch, void *vo ) {
 /* Extra spells written by KaVir. */
 
 void spell_guardian( int sn, int level, CHAR_DATA *ch, void *vo ) {
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *victim;
 	AFFECT_DATA af;
 
@@ -2950,7 +2950,7 @@ void spell_guardian( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	victim->damroll = level;
 	victim->armor = 100 - ( level * 7 );
 
-	sprintf( buf, "Come forth, creature of darkness, and do my bidding!" );
+	snprintf( buf, sizeof( buf ), "Come forth, creature of darkness, and do my bidding!" );
 	do_say( ch, buf );
 
 	send_to_char( "A demon bursts from the ground and bows before you.\n\r", ch );
@@ -2978,65 +2978,65 @@ void spell_soulblade( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	if ( ch->wpn[1] > ch->wpn[weapontype] ) {
 		weapontype = 1;
-		sprintf( wpnname, "blade" );
+		snprintf( wpnname, sizeof( wpnname ), "blade" );
 	}
 	if ( ch->wpn[2] > ch->wpn[weapontype] ) {
 		weapontype = 2;
-		sprintf( wpnname, "blade" );
+		snprintf( wpnname, sizeof( wpnname ), "blade" );
 	}
 	if ( ch->wpn[4] > ch->wpn[weapontype] ) {
 		weapontype = 4;
-		sprintf( wpnname, "whip" );
+		snprintf( wpnname, sizeof( wpnname ), "whip" );
 	}
 	if ( ch->wpn[5] > ch->wpn[weapontype] ) {
 		weapontype = 5;
-		sprintf( wpnname, "claw" );
+		snprintf( wpnname, sizeof( wpnname ), "claw" );
 	}
 	if ( ch->wpn[6] > ch->wpn[weapontype] ) {
 		weapontype = 6;
-		sprintf( wpnname, "blaster" );
+		snprintf( wpnname, sizeof( wpnname ), "blaster" );
 	}
 	if ( ch->wpn[7] > ch->wpn[weapontype] ) {
 		weapontype = 7;
-		sprintf( wpnname, "mace" );
+		snprintf( wpnname, sizeof( wpnname ), "mace" );
 	}
 	if ( ch->wpn[8] > ch->wpn[weapontype] ) {
 		weapontype = 8;
-		sprintf( wpnname, "mace" );
+		snprintf( wpnname, sizeof( wpnname ), "mace" );
 	}
 	if ( ch->wpn[9] > ch->wpn[weapontype] ) {
 		weapontype = 9;
-		sprintf( wpnname, "grepper" );
+		snprintf( wpnname, sizeof( wpnname ), "grepper" );
 	}
 	if ( ch->wpn[10] > ch->wpn[weapontype] ) {
 		weapontype = 10;
-		sprintf( wpnname, "fang" );
+		snprintf( wpnname, sizeof( wpnname ), "fang" );
 	}
 	if ( ch->wpn[11] > ch->wpn[weapontype] ) {
 		weapontype = 11;
-		sprintf( wpnname, "blade" );
+		snprintf( wpnname, sizeof( wpnname ), "blade" );
 	}
 	if ( ch->wpn[12] > ch->wpn[weapontype] ) {
 		weapontype = 12;
-		sprintf( wpnname, "sucker" );
+		snprintf( wpnname, sizeof( wpnname ), "sucker" );
 	}
-	if ( weapontype == 3 ) sprintf( wpnname, "blade" );
+	if ( weapontype == 3 ) snprintf( wpnname, sizeof( wpnname ), "blade" );
 	/* First we name the weapon */
 	free_string( obj->name );
-	sprintf( buf, "%s soul %s", ch->name, wpnname );
+	snprintf( buf, sizeof( buf ), "%s soul %s", ch->name, wpnname );
 	obj->name = str_dup( buf );
 	free_string( obj->short_descr );
 	if ( IS_NPC( ch ) )
-		sprintf( buf, "%s's soul %s", ch->short_descr, wpnname );
+		snprintf( buf, sizeof( buf ), "%s's soul %s", ch->short_descr, wpnname );
 	else
-		sprintf( buf, "%s's soul %s", ch->pcdata->switchname, wpnname );
+		snprintf( buf, sizeof( buf ), "%s's soul %s", ch->pcdata->switchname, wpnname );
 	buf[0] = UPPER( buf[0] );
 	obj->short_descr = str_dup( buf );
 	free_string( obj->description );
 	if ( IS_NPC( ch ) )
-		sprintf( buf, "%s's soul %s is lying here.", ch->short_descr, wpnname );
+		snprintf( buf, sizeof( buf ), "%s's soul %s is lying here.", ch->short_descr, wpnname );
 	else
-		sprintf( buf, "%s's soul %s is lying here.", ch->name, wpnname );
+		snprintf( buf, sizeof( buf ), "%s's soul %s is lying here.", ch->name, wpnname );
 	buf[0] = UPPER( buf[0] );
 	obj->description = str_dup( buf );
 
@@ -3241,7 +3241,7 @@ void spell_energyflux( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_voodoo( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
 	OBJ_DATA *obj;
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char arg[MAX_INPUT_LENGTH];
 	char part1[MAX_INPUT_LENGTH];
 	char part2[MAX_INPUT_LENGTH];
@@ -3282,59 +3282,59 @@ void spell_voodoo( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	}
 
 	if ( obj->value[2] == 12 )
-		sprintf( part1, "head %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "head %s", victim->name );
 	else if ( obj->value[2] == 13 )
-		sprintf( part1, "heart %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "heart %s", victim->name );
 	else if ( obj->value[2] == 14 )
-		sprintf( part1, "arm %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "arm %s", victim->name );
 	else if ( obj->value[2] == 15 )
-		sprintf( part1, "leg %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "leg %s", victim->name );
 	else if ( obj->value[2] == 30004 )
-		sprintf( part1, "entrails %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "entrails %s", victim->name );
 	else if ( obj->value[2] == 30005 )
-		sprintf( part1, "brain %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "brain %s", victim->name );
 	else if ( obj->value[2] == 30006 )
-		sprintf( part1, "eye eyeball %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "eye eyeball %s", victim->name );
 	else if ( obj->value[2] == 30012 )
-		sprintf( part1, "face %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "face %s", victim->name );
 	else if ( obj->value[2] == 30013 )
-		sprintf( part1, "windpipe %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "windpipe %s", victim->name );
 	else if ( obj->value[2] == 30014 )
-		sprintf( part1, "cracked head %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "cracked head %s", victim->name );
 	else if ( obj->value[2] == 30025 )
-		sprintf( part1, "ear %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "ear %s", victim->name );
 	else if ( obj->value[2] == 30026 )
-		sprintf( part1, "nose %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "nose %s", victim->name );
 	else if ( obj->value[2] == 30027 )
-		sprintf( part1, "tooth %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "tooth %s", victim->name );
 	else if ( obj->value[2] == 30028 )
-		sprintf( part1, "tongue %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "tongue %s", victim->name );
 	else if ( obj->value[2] == 30029 )
-		sprintf( part1, "hand %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "hand %s", victim->name );
 	else if ( obj->value[2] == 30030 )
-		sprintf( part1, "foot %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "foot %s", victim->name );
 	else if ( obj->value[2] == 30031 )
-		sprintf( part1, "thumb %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "thumb %s", victim->name );
 	else if ( obj->value[2] == 30032 )
-		sprintf( part1, "index finger %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "index finger %s", victim->name );
 	else if ( obj->value[2] == 30033 )
-		sprintf( part1, "middle finger %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "middle finger %s", victim->name );
 	else if ( obj->value[2] == 30034 )
-		sprintf( part1, "ring finger %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "ring finger %s", victim->name );
 	else if ( obj->value[2] == 30035 )
-		sprintf( part1, "little finger %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "little finger %s", victim->name );
 	else if ( obj->value[2] == 30036 )
-		sprintf( part1, "toe %s", victim->name );
+		snprintf( part1, sizeof( part1 ), "toe %s", victim->name );
 	else {
-		sprintf( buf, "%s isn't a part of %s!\n\r", obj->name, victim->name );
+		snprintf( buf, sizeof( buf ), "%s isn't a part of %s!\n\r", obj->name, victim->name );
 		send_to_char( buf, ch );
 		return;
 	}
 
-	sprintf( part2, "%s", obj->name );
+	snprintf( part2, sizeof( part2 ), "%s", obj->name );
 
 	if ( str_cmp( part1, part2 ) ) {
-		sprintf( buf, "But you are holding %s, not %s!\n\r", obj->short_descr, victim->name );
+		snprintf( buf, sizeof( buf ), "But you are holding %s, not %s!\n\r", obj->short_descr, victim->name );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -3346,15 +3346,15 @@ void spell_voodoo( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	obj = create_object( get_obj_index( OBJ_VNUM_VOODOO_DOLL ), 0 );
 
-	sprintf( buf, "%s voodoo doll", victim->name );
+	snprintf( buf, sizeof( buf ), "%s voodoo doll", victim->name );
 	free_string( obj->name );
 	obj->name = str_dup( buf );
 
-	sprintf( buf, "a voodoo doll of %s", victim->name );
+	snprintf( buf, sizeof( buf ), "a voodoo doll of %s", victim->name );
 	free_string( obj->short_descr );
 	obj->short_descr = str_dup( buf );
 
-	sprintf( buf, "A voodoo doll of %s lies here.", victim->name );
+	snprintf( buf, sizeof( buf ), "A voodoo doll of %s lies here.", victim->name );
 	free_string( obj->description );
 	obj->description = str_dup( buf );
 
@@ -3893,7 +3893,7 @@ void spell_quest( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_minor_creation( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	OBJ_DATA *obj;
 	char arg[MAX_INPUT_LENGTH];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char itemkind[10];
 	int itemtype;
 
@@ -3901,19 +3901,19 @@ void spell_minor_creation( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	if ( !str_cmp( arg, "potion" ) ) {
 		itemtype = ITEM_POTION;
-		sprintf( itemkind, "potion" );
+		snprintf( itemkind, sizeof( itemkind ), "potion" );
 	} else if ( !str_cmp( arg, "scroll" ) ) {
 		itemtype = ITEM_SCROLL;
-		sprintf( itemkind, "scroll" );
+		snprintf( itemkind, sizeof( itemkind ), "scroll" );
 	} else if ( !str_cmp( arg, "wand" ) ) {
 		itemtype = ITEM_WAND;
-		sprintf( itemkind, "wand" );
+		snprintf( itemkind, sizeof( itemkind ), "wand" );
 	} else if ( !str_cmp( arg, "staff" ) ) {
 		itemtype = ITEM_STAFF;
-		sprintf( itemkind, "staff" );
+		snprintf( itemkind, sizeof( itemkind ), "staff" );
 	} else if ( !str_cmp( arg, "pill" ) ) {
 		itemtype = ITEM_PILL;
-		sprintf( itemkind, "pill" );
+		snprintf( itemkind, sizeof( itemkind ), "pill" );
 	} else {
 		send_to_char( "Item can be one of: Potion, Scroll, Wand, Staff or Pill.\n\r", ch );
 		return;
@@ -3921,13 +3921,13 @@ void spell_minor_creation( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	obj = create_object( get_obj_index( OBJ_VNUM_PROTOPLASM ), 0 );
 	obj->item_type = itemtype;
 
-	sprintf( buf, "%s %s", ch->name, itemkind );
+	snprintf( buf, sizeof( buf ), "%s %s", ch->name, itemkind );
 	free_string( obj->name );
 	obj->name = str_dup( buf );
-	sprintf( buf, "%s's %s", ch->name, itemkind );
+	snprintf( buf, sizeof( buf ), "%s's %s", ch->name, itemkind );
 	free_string( obj->short_descr );
 	obj->short_descr = str_dup( buf );
-	sprintf( buf, "%s's %s lies here.", ch->name, itemkind );
+	snprintf( buf, sizeof( buf ), "%s's %s lies here.", ch->name, itemkind );
 	free_string( obj->description );
 	obj->description = str_dup( buf );
 
@@ -3945,7 +3945,7 @@ void spell_minor_creation( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_brew( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	char arg1[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char col[10];
 	OBJ_DATA *obj;
 
@@ -3985,19 +3985,19 @@ void spell_brew( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	}
 	if ( skill_table[sn].target == 0 ) {
 		obj->value[0] = ch->spl[0] / 4;
-		sprintf( col, "purple" );
+		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
 		obj->value[0] = ch->spl[1] / 4;
-		sprintf( col, "red" );
+		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
 		obj->value[0] = ch->spl[2] / 4;
-		sprintf( col, "blue" );
+		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
 		obj->value[0] = ch->spl[3] / 4;
-		sprintf( col, "green" );
+		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
 		obj->value[0] = ch->spl[4] / 4;
-		sprintf( col, "yellow" );
+		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
 		return;
@@ -4012,13 +4012,13 @@ void spell_brew( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	else
 		obj->value[3] = -1;
 	free_string( obj->name );
-	sprintf( buf, "%s potion %s %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s potion %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
 	free_string( obj->short_descr );
-	sprintf( buf, "%s's %s potion of %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s's %s potion of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
 	free_string( obj->description );
-	sprintf( buf, "A %s potion is lying here.", col );
+	snprintf( buf, sizeof( buf ), "A %s potion is lying here.", col );
 	obj->description = str_dup( buf );
 	act( "You brew $p.", ch, obj, NULL, TO_CHAR );
 	act( "$n brews $p.", ch, obj, NULL, TO_ROOM );
@@ -4028,7 +4028,7 @@ void spell_brew( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_scribe( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	char arg1[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char col[10];
 	OBJ_DATA *obj;
 
@@ -4070,19 +4070,19 @@ void spell_scribe( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	}
 	if ( skill_table[sn].target == 0 ) {
 		obj->value[0] = ch->spl[0] / 4;
-		sprintf( col, "purple" );
+		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
 		obj->value[0] = ch->spl[1] / 4;
-		sprintf( col, "red" );
+		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
 		obj->value[0] = ch->spl[2] / 4;
-		sprintf( col, "blue" );
+		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
 		obj->value[0] = ch->spl[3] / 4;
-		sprintf( col, "green" );
+		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
 		obj->value[0] = ch->spl[4] / 4;
-		sprintf( col, "yellow" );
+		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
 		return;
@@ -4097,13 +4097,13 @@ void spell_scribe( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	else
 		obj->value[3] = -1;
 	free_string( obj->name );
-	sprintf( buf, "%s scroll %s %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s scroll %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
 	free_string( obj->short_descr );
-	sprintf( buf, "%s's %s scroll of %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s's %s scroll of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
 	free_string( obj->description );
-	sprintf( buf, "A %s scroll is lying here.", col );
+	snprintf( buf, sizeof( buf ), "A %s scroll is lying here.", col );
 	obj->description = str_dup( buf );
 	act( "You scribe $p.", ch, obj, NULL, TO_CHAR );
 	act( "$n scribes $p.", ch, obj, NULL, TO_ROOM );
@@ -4113,7 +4113,7 @@ void spell_scribe( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_carve( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	char arg1[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char col[10];
 	OBJ_DATA *obj;
 
@@ -4153,19 +4153,19 @@ void spell_carve( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	}
 	if ( skill_table[sn].target == 0 ) {
 		obj->value[0] = ch->spl[0] / 4;
-		sprintf( col, "purple" );
+		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
 		obj->value[0] = ch->spl[1] / 4;
-		sprintf( col, "red" );
+		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
 		obj->value[0] = ch->spl[2] / 4;
-		sprintf( col, "blue" );
+		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
 		obj->value[0] = ch->spl[3] / 4;
-		sprintf( col, "green" );
+		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
 		obj->value[0] = ch->spl[4] / 4;
-		sprintf( col, "yellow" );
+		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
 		return;
@@ -4174,13 +4174,13 @@ void spell_carve( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	obj->value[2] = ( obj->value[0] / 5 ) + 1;
 	obj->value[3] = sn;
 	free_string( obj->name );
-	sprintf( buf, "%s wand %s %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s wand %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
 	free_string( obj->short_descr );
-	sprintf( buf, "%s's %s wand of %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s's %s wand of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
 	free_string( obj->description );
-	sprintf( buf, "A %s wand is lying here.", col );
+	snprintf( buf, sizeof( buf ), "A %s wand is lying here.", col );
 	obj->description = str_dup( buf );
 	obj->wear_flags = ITEM_TAKE + ITEM_HOLD;
 	act( "You carve $p.", ch, obj, NULL, TO_CHAR );
@@ -4191,7 +4191,7 @@ void spell_carve( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_engrave( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	char arg1[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char col[10];
 	OBJ_DATA *obj;
 
@@ -4231,19 +4231,19 @@ void spell_engrave( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	}
 	if ( skill_table[sn].target == 0 ) {
 		obj->value[0] = ( ch->spl[0] + 1 ) / 4;
-		sprintf( col, "purple" );
+		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
 		obj->value[0] = ( ch->spl[1] + 1 ) / 4;
-		sprintf( col, "red" );
+		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
 		obj->value[0] = ( ch->spl[2] + 1 ) / 4;
-		sprintf( col, "blue" );
+		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
 		obj->value[0] = ( ch->spl[3] + 1 ) / 4;
-		sprintf( col, "green" );
+		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
 		obj->value[0] = ( ch->spl[4] + 1 ) / 4;
-		sprintf( col, "yellow" );
+		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
 		return;
@@ -4252,13 +4252,13 @@ void spell_engrave( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	obj->value[2] = ( obj->value[0] / 10 ) + 1;
 	obj->value[3] = sn;
 	free_string( obj->name );
-	sprintf( buf, "%s staff %s %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s staff %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
 	free_string( obj->short_descr );
-	sprintf( buf, "%s's %s staff of %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s's %s staff of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
 	free_string( obj->description );
-	sprintf( buf, "A %s staff is lying here.", col );
+	snprintf( buf, sizeof( buf ), "A %s staff is lying here.", col );
 	obj->description = str_dup( buf );
 	obj->wear_flags = ITEM_TAKE + ITEM_HOLD;
 	act( "You engrave $p.", ch, obj, NULL, TO_CHAR );
@@ -4269,7 +4269,7 @@ void spell_engrave( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_bake( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	char arg1[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char col[10];
 	OBJ_DATA *obj;
 
@@ -4309,19 +4309,19 @@ void spell_bake( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	}
 	if ( skill_table[sn].target == 0 ) {
 		obj->value[0] = ch->spl[0] / 4;
-		sprintf( col, "purple" );
+		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
 		obj->value[0] = ch->spl[1] / 4;
-		sprintf( col, "red" );
+		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
 		obj->value[0] = ch->spl[2] / 4;
-		sprintf( col, "blue" );
+		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
 		obj->value[0] = ch->spl[3] / 4;
-		sprintf( col, "green" );
+		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
 		obj->value[0] = ch->spl[4] / 4;
-		sprintf( col, "yellow" );
+		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
 		return;
@@ -4336,13 +4336,13 @@ void spell_bake( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	else
 		obj->value[3] = -1;
 	free_string( obj->name );
-	sprintf( buf, "%s pill %s %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s pill %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
 	free_string( obj->short_descr );
-	sprintf( buf, "%s's %s pill of %s", ch->name, col, skill_table[sn].name );
+	snprintf( buf, sizeof( buf ), "%s's %s pill of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
 	free_string( obj->description );
-	sprintf( buf, "A %s pill is lying here.", col );
+	snprintf( buf, sizeof( buf ), "A %s pill is lying here.", col );
 	obj->description = str_dup( buf );
 	act( "You bake $p.", ch, obj, NULL, TO_CHAR );
 	act( "$n bakes $p.", ch, obj, NULL, TO_ROOM );
@@ -4350,7 +4350,7 @@ void spell_bake( int sn, int level, CHAR_DATA *ch, void *vo ) {
 }
 
 void spell_mount( int sn, int level, CHAR_DATA *ch, void *vo ) {
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *victim;
 
 	if ( IS_NPC( ch ) ) return;
@@ -4408,7 +4408,7 @@ void spell_mount( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	if ( IS_GOOD( ch ) ) {
 		free_string( victim->name );
 		victim->name = str_dup( "mount white horse pegasus" );
-		sprintf( buf, "%s's white pegasus", ch->name );
+		snprintf( buf, sizeof( buf ), "%s's white pegasus", ch->name );
 		free_string( victim->short_descr );
 		victim->short_descr = str_dup( buf );
 		free_string( victim->long_descr );
@@ -4416,7 +4416,7 @@ void spell_mount( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	} else if ( IS_NEUTRAL( ch ) ) {
 		free_string( victim->name );
 		victim->name = str_dup( "mount griffin" );
-		sprintf( buf, "%s's griffin", ch->name );
+		snprintf( buf, sizeof( buf ), "%s's griffin", ch->name );
 		free_string( victim->short_descr );
 		victim->short_descr = str_dup( buf );
 		free_string( victim->long_descr );
@@ -4424,7 +4424,7 @@ void spell_mount( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	} else {
 		free_string( victim->name );
 		victim->name = str_dup( "mount black horse nightmare" );
-		sprintf( buf, "%s's black nightmare", ch->name );
+		snprintf( buf, sizeof( buf ), "%s's black nightmare", ch->name );
 		free_string( victim->short_descr );
 		victim->short_descr = str_dup( buf );
 		free_string( victim->long_descr );
@@ -4586,14 +4586,14 @@ void spell_make_bag( int sn, int level, CHAR_DATA *ch,void *vo)
 	int len = strlen(headers[i]);
 	if ( memcmp(obj->short_descr, headers[i], len) == 0)
 		{
-		 sprintf( buf, "bag %s", obj->short_descr+len );
+		 snprintf( buf, sizeof( buf ), "bag %s", obj->short_descr+len );
 		 free_string( obj->name );
 		 obj->name = str_dup(buf);
-		 sprintf( buf, "A bag of fine %s hide catches your eye. ",
+		 snprintf( buf, sizeof( buf ), "A bag of fine %s hide catches your eye. ",
 				 obj->short_descr+len );
 		 free_string( obj->description );
 		 obj->description = str_dup( buf );
-		 sprintf(buf, "bag made from %s hide", obj->short_descr+len);
+		 snprintf( buf, sizeof( buf ), "bag made from %s hide", obj->short_descr+len);
 		 free_string( obj->short_descr );
 		 obj->short_descr = str_dup( buf );
 
@@ -4740,7 +4740,7 @@ void spell_clay( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	AFFECT_DATA af;
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_AFFECTED( ch, AFF_POLYMORPH ) ) {
 		send_to_char( "You cannot polymorph from this form.\n\r", ch );
@@ -4760,7 +4760,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		af.modifier = POLY_FROG;
 		af.bitvector = AFF_POLYMORPH;
 		affect_to_char( ch, &af );
-		sprintf( buf, "%s the frog", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the frog", ch->name );
 		free_string( ch->morph );
 		ch->morph = str_dup( buf );
 		return;
@@ -4775,7 +4775,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		af.modifier = POLY_FISH;
 		af.bitvector = AFF_POLYMORPH;
 		affect_to_char( ch, &af );
-		sprintf( buf, "%s the fish", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the fish", ch->name );
 		free_string( ch->morph );
 		ch->morph = str_dup( buf );
 		return;
@@ -4796,7 +4796,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		af.location = APPLY_POLY;
 		af.modifier = POLY_RAVEN;
 		affect_to_char( ch, &af );
-		sprintf( buf, "%s the raven", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the raven", ch->name );
 		free_string( ch->morph );
 		ch->morph = str_dup( buf );
 		return;

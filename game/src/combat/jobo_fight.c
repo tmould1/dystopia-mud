@@ -136,7 +136,7 @@ void do_gensteal( CHAR_DATA *ch, char *argument ) {
 	act( "Lightning flows through your body as you steal the powers of $N.\n\r", ch, NULL, victim, TO_CHAR );
 	act( "$n puts his hands on $N's head and lightning cowers his body.\n\r", ch, NULL, victim, TO_NOTVICT );
 	send_to_char( "Your generation has been stolen.\n\r", victim );
-	sprintf( buf, "#G%s #ohas beaten #L%s #oin combat, and has stolen their generation!#n", ch->pcdata->switchname,
+	snprintf( buf, sizeof( buf ), "#G%s #ohas beaten #L%s #oin combat, and has stolen their generation!#n", ch->pcdata->switchname,
 		victim->pcdata->switchname );
 	do_info( ch, buf );
 	ch->generation -= 1;

@@ -56,7 +56,7 @@ void do_arenastats( CHAR_DATA *ch, char *argument ) {
 				if ( d->character->max_hit > 0 ) hp_stats = 100 * d->character->hit / d->character->max_hit;
 				if ( d->character->max_move > 0 ) move_stats = 100 * d->character->move / d->character->max_move;
 				if ( d->character->max_mana > 0 ) mana_stats = 100 * d->character->mana / d->character->max_mana;
-				sprintf( buf, "%-15s    %3d/100   %3d/100   %3d/100\n\r", d->character->name, hp_stats, move_stats, mana_stats );
+				snprintf( buf, sizeof( buf ), "%-15s    %3d/100   %3d/100   %3d/100\n\r", d->character->name, hp_stats, move_stats, mana_stats );
 				send_to_char( buf, ch );
 			}
 		}
@@ -149,7 +149,7 @@ void do_arenajoin( CHAR_DATA *ch, char *argument ) {
 	char_from_room( ch );
 	char_to_room( ch, get_room_index( next_arena_room ) );
 	next_arena_room += ( ARENA_HVNUM - ARENA_LVNUM ) / ARENA_PLAYERS;
-	sprintf( buf, "%s has joined the arena!", ch->name );
+	snprintf( buf, sizeof( buf ), "%s has joined the arena!", ch->name );
 	do_info( ch, buf );
 	do_restore( ch, "self" );
 	SET_BIT( ch->act, PLR_FREEZE );
@@ -170,7 +170,7 @@ void do_resign( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	sprintf( buf, "%s resigns from the arena", ch->name );
+	snprintf( buf, sizeof( buf ), "%s resigns from the arena", ch->name );
 	do_info( ch, buf );
 	if ( ( location = get_room_index( ROOM_VNUM_ALTAR ) ) == NULL ) return;
 	char_from_room( ch );
@@ -187,7 +187,7 @@ void do_resign( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 	if ( found == 1 ) {
-		sprintf( buf, "#C%s #oemerges victorious from the #Rarena#n", gch->name );
+		snprintf( buf, sizeof( buf ), "#C%s #oemerges victorious from the #Rarena#n", gch->name );
 		gch->pcdata->awins++;
 		do_info( gch, buf );
 		if ( ( location = get_room_index( ROOM_VNUM_ALTAR ) ) == NULL ) return;

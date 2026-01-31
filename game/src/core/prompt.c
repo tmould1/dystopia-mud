@@ -112,7 +112,7 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 			i = buf2;
 			break;
 		case 'x':
-			add_commas_to_number( ch->exp, buf2 );
+			add_commas_to_number( ch->exp, buf2, sizeof( buf2 ) );
 			COL_SCALE( buf2, ch, ch->exp, 10000000 );
 			i = buf2;
 			break;

@@ -25,7 +25,7 @@
 void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	OBJ_DATA *wield;
 	char bufskill[20];
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	int dice1;
 	int dice2;
 	int trapper;
@@ -89,38 +89,38 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	if ( trapper == ch->wpn[dtype] ) return;
 
 	if ( ch->wpn[dtype] == 1 )
-		sprintf( bufskill, "slightly skilled" );
+		snprintf( bufskill, sizeof( bufskill ),"slightly skilled" );
 	else if ( ch->wpn[dtype] == 26 )
-		sprintf( bufskill, "reasonable" );
+		snprintf( bufskill, sizeof( bufskill ),"reasonable" );
 	else if ( ch->wpn[dtype] == 51 )
-		sprintf( bufskill, "fairly competent" );
+		snprintf( bufskill, sizeof( bufskill ),"fairly competent" );
 	else if ( ch->wpn[dtype] == 76 )
-		sprintf( bufskill, "highly skilled" );
+		snprintf( bufskill, sizeof( bufskill ),"highly skilled" );
 	else if ( ch->wpn[dtype] == 101 )
-		sprintf( bufskill, "very dangerous" );
+		snprintf( bufskill, sizeof( bufskill ),"very dangerous" );
 	else if ( ch->wpn[dtype] == 126 )
-		sprintf( bufskill, "extremely deadly" );
+		snprintf( bufskill, sizeof( bufskill ),"extremely deadly" );
 	else if ( ch->wpn[dtype] == 151 )
-		sprintf( bufskill, "an expert" );
+		snprintf( bufskill, sizeof( bufskill ),"an expert" );
 	else if ( ch->wpn[dtype] == 176 )
-		sprintf( bufskill, "a master" );
+		snprintf( bufskill, sizeof( bufskill ),"a master" );
 	else if ( ch->wpn[dtype] == 200 )
-		sprintf( bufskill, "a grand master" );
+		snprintf( bufskill, sizeof( bufskill ),"a grand master" );
 	else if ( ch->wpn[dtype] == 201 )
-		sprintf( bufskill, "supremely skilled" );
+		snprintf( bufskill, sizeof( bufskill ),"supremely skilled" );
 	else if ( ch->wpn[dtype] == 1000 )
-		sprintf( bufskill, "divinely skilled" );
+		snprintf( bufskill, sizeof( bufskill ),"divinely skilled" );
 	else
 		return;
 	if ( wield == NULL || dtype == 0 )
-		sprintf( buf, "You are now %s at unarmed combat.\n\r", bufskill );
+		snprintf( buf, sizeof( buf ),"You are now %s at unarmed combat.\n\r", bufskill );
 	else
-		sprintf( buf, "#GYou are now %s with %s.\n\r#n", bufskill, wield->short_descr );
+		snprintf( buf, sizeof( buf ),"#GYou are now %s with %s.\n\r#n", bufskill, wield->short_descr );
 	send_to_char( buf, ch );
 	return;
 }
 void improve_stance( CHAR_DATA *ch ) {
-	char buf[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	char bufskill[25];
 	char stancename[10];
 	int dice1;
@@ -145,50 +145,50 @@ void improve_stance( CHAR_DATA *ch ) {
 	if ( stance == ch->stance[stance] ) return;
 
 	if ( ch->stance[stance] == 1 )
-		sprintf( bufskill, "an apprentice of" );
+		snprintf( bufskill, sizeof( bufskill ),"an apprentice of" );
 	else if ( ch->stance[stance] == 26 )
-		sprintf( bufskill, "a trainee of" );
+		snprintf( bufskill, sizeof( bufskill ),"a trainee of" );
 	else if ( ch->stance[stance] == 51 )
-		sprintf( bufskill, "a student of" );
+		snprintf( bufskill, sizeof( bufskill ),"a student of" );
 	else if ( ch->stance[stance] == 76 )
-		sprintf( bufskill, "fairly experienced in" );
+		snprintf( bufskill, sizeof( bufskill ),"fairly experienced in" );
 	else if ( ch->stance[stance] == 101 )
-		sprintf( bufskill, "well trained in" );
+		snprintf( bufskill, sizeof( bufskill ),"well trained in" );
 	else if ( ch->stance[stance] == 126 )
-		sprintf( bufskill, "highly skilled in" );
+		snprintf( bufskill, sizeof( bufskill ),"highly skilled in" );
 	else if ( ch->stance[stance] == 151 )
-		sprintf( bufskill, "an expert of" );
+		snprintf( bufskill, sizeof( bufskill ),"an expert of" );
 	else if ( ch->stance[stance] == 176 )
-		sprintf( bufskill, "a master of" );
+		snprintf( bufskill, sizeof( bufskill ),"a master of" );
 	else if ( ch->stance[stance] == 200 )
-		sprintf( bufskill, "a grand master of" );
+		snprintf( bufskill, sizeof( bufskill ),"a grand master of" );
 	else
 		return;
 	if ( stance == STANCE_VIPER )
-		sprintf( stancename, "viper" );
+		snprintf( stancename, sizeof( stancename ),"viper" );
 	else if ( stance == STANCE_CRANE )
-		sprintf( stancename, "crane" );
+		snprintf( stancename, sizeof( stancename ),"crane" );
 	else if ( stance == STANCE_CRAB )
-		sprintf( stancename, "crab" );
+		snprintf( stancename, sizeof( stancename ),"crab" );
 	else if ( stance == STANCE_MONGOOSE )
-		sprintf( stancename, "mongoose" );
+		snprintf( stancename, sizeof( stancename ),"mongoose" );
 	else if ( stance == STANCE_BULL )
-		sprintf( stancename, "bull" );
+		snprintf( stancename, sizeof( stancename ),"bull" );
 	else if ( stance == STANCE_MANTIS )
-		sprintf( stancename, "mantis" );
+		snprintf( stancename, sizeof( stancename ),"mantis" );
 	else if ( stance == STANCE_DRAGON )
-		sprintf( stancename, "dragon" );
+		snprintf( stancename, sizeof( stancename ),"dragon" );
 	else if ( stance == STANCE_TIGER )
-		sprintf( stancename, "tiger" );
+		snprintf( stancename, sizeof( stancename ),"tiger" );
 	else if ( stance == STANCE_MONKEY )
-		sprintf( stancename, "monkey" );
+		snprintf( stancename, sizeof( stancename ),"monkey" );
 	else if ( stance == STANCE_SWALLOW )
-		sprintf( stancename, "swallow" );
+		snprintf( stancename, sizeof( stancename ),"swallow" );
 	else if ( stance == STANCE_WOLF )
-		sprintf( stancename, "wolf" );
+		snprintf( stancename, sizeof( stancename ),"wolf" );
 	else
 		return;
-	sprintf( buf, "#GYou are now %s the %s stance.\n\r#n", bufskill, stancename );
+	snprintf( buf, sizeof( buf ),"#GYou are now %s the %s stance.\n\r#n", bufskill, stancename );
 	send_to_char( buf, ch );
 	return;
 }
@@ -244,7 +244,7 @@ void do_side( CHAR_DATA *ch, char *argument )
 	{
 	ch->class = 3;
 	send_to_char( "You are now a renegade.\n\r", ch );
-	sprintf(buf,"%s has turned renegade!",ch->name);
+	snprintf(buf, sizeof( buf ), "%s has turned renegade!",ch->name);
 	do_info(ch,buf);
 	return;
 	}
@@ -275,14 +275,14 @@ void do_side( CHAR_DATA *ch, char *argument )
 	{
 	ch->class = 1;
 	send_to_char( "You are now a scavenger.\n\r", ch );
-	sprintf(buf,"%s has sided with the scavengers!",ch->name);
+	snprintf(buf, sizeof( buf ), "%s has sided with the scavengers!",ch->name);
 	do_info(ch,buf);
 	}
 	else if (!str_cmp(arg,"mutant"))
 	{
 	ch->class = 2;
 	send_to_char( "You are now a mutant.\n\r", ch );
-	sprintf(buf,"%s has sided with the mutants!",ch->name);
+	snprintf(buf, sizeof( buf ), "%s has sided with the mutants!",ch->name);
 	do_info(ch,buf);
 	}
 	else send_to_char( "Please enter 'Scavenger' or 'Mutant'.\n\r", ch );
@@ -307,7 +307,7 @@ void do_skill( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
 
 	if ( arg[0] == '\0' )
-		sprintf( arg, "self" );
+		snprintf( arg, sizeof( arg ),"self" );
 
 	if ( ( victim = get_char_room( ch, arg ) ) == NULL ) {
 		send_to_char( "They aren't here.\n\r", ch );
@@ -332,76 +332,76 @@ void do_skill( CHAR_DATA *ch, char *argument ) {
 	dtype2 -= 1000;
 
 	if ( victim->wpn[dtype] == 0 )
-		sprintf( bufskill, "totally unskilled" );
+		snprintf( bufskill, sizeof( bufskill ),"totally unskilled" );
 	else if ( victim->wpn[dtype] <= 25 )
-		sprintf( bufskill, "slightly skilled" );
+		snprintf( bufskill, sizeof( bufskill ),"slightly skilled" );
 	else if ( victim->wpn[dtype] <= 50 )
-		sprintf( bufskill, "reasonable" );
+		snprintf( bufskill, sizeof( bufskill ),"reasonable" );
 	else if ( victim->wpn[dtype] <= 75 )
-		sprintf( bufskill, "fairly competent" );
+		snprintf( bufskill, sizeof( bufskill ),"fairly competent" );
 	else if ( victim->wpn[dtype] <= 100 )
-		sprintf( bufskill, "highly skilled" );
+		snprintf( bufskill, sizeof( bufskill ),"highly skilled" );
 	else if ( victim->wpn[dtype] <= 125 )
-		sprintf( bufskill, "very dangerous" );
+		snprintf( bufskill, sizeof( bufskill ),"very dangerous" );
 	else if ( victim->wpn[dtype] <= 150 )
-		sprintf( bufskill, "extremely deadly" );
+		snprintf( bufskill, sizeof( bufskill ),"extremely deadly" );
 	else if ( victim->wpn[dtype] <= 175 )
-		sprintf( bufskill, "an expert" );
+		snprintf( bufskill, sizeof( bufskill ),"an expert" );
 	else if ( victim->wpn[dtype] <= 199 )
-		sprintf( bufskill, "a master" );
+		snprintf( bufskill, sizeof( bufskill ),"a master" );
 	else if ( victim->wpn[dtype] == 200 )
-		sprintf( bufskill, "a grand master" );
+		snprintf( bufskill, sizeof( bufskill ),"a grand master" );
 	else if ( victim->wpn[dtype] <= 999 )
-		sprintf( bufskill, "supremely skilled" );
+		snprintf( bufskill, sizeof( bufskill ),"supremely skilled" );
 	else if ( victim->wpn[dtype] == 1000 )
-		sprintf( bufskill, "divinely skilled" );
+		snprintf( bufskill, sizeof( bufskill ),"divinely skilled" );
 	else
 		return;
 
 	if ( victim->wpn[dtype2] == 0 )
-		sprintf( bufskill2, "totally unskilled" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"totally unskilled" );
 	else if ( victim->wpn[dtype2] <= 25 )
-		sprintf( bufskill2, "slightly skilled" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"slightly skilled" );
 	else if ( victim->wpn[dtype2] <= 50 )
-		sprintf( bufskill2, "reasonable" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"reasonable" );
 	else if ( victim->wpn[dtype2] <= 75 )
-		sprintf( bufskill2, "fairly competent" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"fairly competent" );
 	else if ( victim->wpn[dtype2] <= 100 )
-		sprintf( bufskill2, "highly skilled" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"highly skilled" );
 	else if ( victim->wpn[dtype2] <= 125 )
-		sprintf( bufskill2, "very dangerous" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"very dangerous" );
 	else if ( victim->wpn[dtype2] <= 150 )
-		sprintf( bufskill2, "extremely deadly" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"extremely deadly" );
 	else if ( victim->wpn[dtype2] <= 175 )
-		sprintf( bufskill2, "an expert" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"an expert" );
 	else if ( victim->wpn[dtype2] <= 199 )
-		sprintf( bufskill2, "a master" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"a master" );
 	else if ( victim->wpn[dtype2] == 200 )
-		sprintf( bufskill2, "a grand master" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"a grand master" );
 	else if ( victim->wpn[dtype2] <= 999 )
-		sprintf( bufskill2, "supremely skilled" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"supremely skilled" );
 	else if ( victim->wpn[dtype2] == 1000 )
-		sprintf( bufskill2, "divinely skilled" );
+		snprintf( bufskill2, sizeof( bufskill2 ),"divinely skilled" );
 	else
 		return;
 
 	if ( ch == victim ) {
 		if ( dtype == 0 && dtype2 == 0 )
-			sprintf( buf, "You are %s at unarmed combat.\n\r", bufskill );
+			snprintf( buf, sizeof( buf ),"You are %s at unarmed combat.\n\r", bufskill );
 		else {
 			if ( dtype != 0 )
-				sprintf( buf, "You are %s with %s.\n\r", bufskill, wield->short_descr );
+				snprintf( buf, sizeof( buf ),"You are %s with %s.\n\r", bufskill, wield->short_descr );
 			if ( dtype2 != 0 )
-				sprintf( buf2, "You are %s with %s.\n\r", bufskill2, wield2->short_descr );
+				snprintf( buf2, sizeof( buf2 ),"You are %s with %s.\n\r", bufskill2, wield2->short_descr );
 		}
 	} else {
 		if ( dtype == 0 && dtype2 == 0 )
-			sprintf( buf, "%s is %s at unarmed combat.\n\r", victim->name, bufskill );
+			snprintf( buf, sizeof( buf ),"%s is %s at unarmed combat.\n\r", victim->name, bufskill );
 		else {
 			if ( dtype != 0 )
-				sprintf( buf, "%s is %s with %s.\n\r", victim->name, bufskill, wield->short_descr );
+				snprintf( buf, sizeof( buf ),"%s is %s with %s.\n\r", victim->name, bufskill, wield->short_descr );
 			if ( dtype2 != 0 )
-				sprintf( buf2, "%s is %s with %s.\n\r", victim->name, bufskill2, wield2->short_descr );
+				snprintf( buf2, sizeof( buf2 ),"%s is %s with %s.\n\r", victim->name, bufskill2, wield2->short_descr );
 		}
 	}
 	if ( !( dtype == 0 && dtype2 != 0 ) ) send_to_char( buf, ch );
@@ -463,34 +463,34 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 
 	if ( !str_cmp( arg1, "north" ) ) {
 		door = 0;
-		sprintf( revdoor, "south" );
+		snprintf( revdoor, sizeof( revdoor ),"south" );
 	} else if ( !str_cmp( arg1, "east" ) ) {
 		door = 1;
-		sprintf( revdoor, "west" );
+		snprintf( revdoor, sizeof( revdoor ),"west" );
 	} else if ( !str_cmp( arg1, "south" ) ) {
 		door = 2;
-		sprintf( revdoor, "north" );
+		snprintf( revdoor, sizeof( revdoor ),"north" );
 	} else if ( !str_cmp( arg1, "west" ) ) {
 		door = 3;
-		sprintf( revdoor, "east" );
+		snprintf( revdoor, sizeof( revdoor ),"east" );
 	} else if ( !str_cmp( arg1, "up" ) ) {
 		door = 4;
-		sprintf( revdoor, "down" );
+		snprintf( revdoor, sizeof( revdoor ),"down" );
 	} else if ( !str_cmp( arg1, "down" ) ) {
 		door = 5;
-		sprintf( revdoor, "up" );
+		snprintf( revdoor, sizeof( revdoor ),"up" );
 	} else
 		return;
 
 	location = ch->in_room;
 
-	sprintf( buf, "You hurl $p %s.", direction );
+	snprintf( buf, sizeof( buf ),"You hurl $p %s.", direction );
 	act( buf, ch, obj, NULL, TO_CHAR );
-	sprintf( buf, "$n hurls $p %s.", direction );
+	snprintf( buf, sizeof( buf ),"$n hurls $p %s.", direction );
 	act( buf, ch, obj, NULL, TO_ROOM );
 	/* First room */
 	if ( ( pexit = ch->in_room->exit[door] ) == NULL || ( to_room = pexit->to_room ) == NULL ) {
-		sprintf( buf, "$p bounces off the %s wall.", direction );
+		snprintf( buf, sizeof( buf ),"$p bounces off the %s wall.", direction );
 		act( buf, ch, obj, NULL, TO_ROOM );
 		act( buf, ch, obj, NULL, TO_CHAR );
 		obj_from_char( obj );
@@ -499,7 +499,7 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 	}
 	pexit = ch->in_room->exit[door];
 	if ( IS_SET( pexit->exit_info, EX_CLOSED ) ) {
-		sprintf( buf, "$p bounces off the %s door.", direction );
+		snprintf( buf, sizeof( buf ),"$p bounces off the %s door.", direction );
 		act( buf, ch, obj, NULL, TO_ROOM );
 		act( buf, ch, obj, NULL, TO_CHAR );
 		obj_from_char( obj );
@@ -509,9 +509,9 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 	char_from_room( ch );
 	char_to_room( ch, to_room );
 	if ( ( victim = get_char_room( ch, arg2 ) ) != NULL ) {
-		sprintf( buf, "$p comes flying in from the %s and lands in $N's hands.", revdoor );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and lands in $N's hands.", revdoor );
 		act( buf, ch, obj, victim, TO_NOTVICT );
-		sprintf( buf, "$p comes flying in from the %s and lands in your hands.", revdoor );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and lands in your hands.", revdoor );
 		act( buf, ch, obj, victim, TO_VICT );
 		obj_from_char( obj );
 		obj_to_char( obj, victim );
@@ -522,7 +522,7 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 
 	/* Second room */
 	if ( ( pexit = ch->in_room->exit[door] ) == NULL || ( to_room = pexit->to_room ) == NULL ) {
-		sprintf( buf, "$p comes flying in from the %s and strikes %s wall.", revdoor, direction );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and strikes %s wall.", revdoor, direction );
 		act( buf, ch, obj, NULL, TO_ROOM );
 		obj_from_char( obj );
 		obj_to_room( obj, ch->in_room );
@@ -532,7 +532,7 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 	}
 	pexit = ch->in_room->exit[door];
 	if ( IS_SET( pexit->exit_info, EX_CLOSED ) ) {
-		sprintf( buf, "$p comes flying in from the %s and strikes the %s door.", revdoor, direction );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and strikes the %s door.", revdoor, direction );
 		act( buf, ch, obj, NULL, TO_ROOM );
 		obj_from_char( obj );
 		obj_to_room( obj, ch->in_room );
@@ -540,14 +540,14 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 		char_to_room( ch, location );
 		return;
 	}
-	sprintf( buf, "$p comes flying in from the %s and carries on %s.", revdoor, direction );
+	snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and carries on %s.", revdoor, direction );
 	act( buf, ch, obj, NULL, TO_ROOM );
 	char_from_room( ch );
 	char_to_room( ch, to_room );
 	if ( ( victim = get_char_room( ch, arg2 ) ) != NULL ) {
-		sprintf( buf, "$p comes flying in from the %s and lands in $N's hands.", revdoor );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and lands in $N's hands.", revdoor );
 		act( buf, ch, obj, victim, TO_NOTVICT );
-		sprintf( buf, "$p comes flying in from the %s and lands in your hands.", revdoor );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and lands in your hands.", revdoor );
 		act( buf, ch, obj, victim, TO_VICT );
 		obj_from_char( obj );
 		obj_to_char( obj, victim );
@@ -558,7 +558,7 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 
 	/* Third room */
 	if ( ( pexit = ch->in_room->exit[door] ) == NULL || ( to_room = pexit->to_room ) == NULL ) {
-		sprintf( buf, "$p comes flying in from the %s and strikes %s wall.", revdoor, direction );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and strikes %s wall.", revdoor, direction );
 		act( buf, ch, obj, NULL, TO_ROOM );
 		obj_from_char( obj );
 		obj_to_room( obj, ch->in_room );
@@ -568,7 +568,7 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 	}
 	pexit = ch->in_room->exit[door];
 	if ( IS_SET( pexit->exit_info, EX_CLOSED ) ) {
-		sprintf( buf, "$p comes flying in from the %s and strikes the %s door.", revdoor, direction );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and strikes the %s door.", revdoor, direction );
 		act( buf, ch, obj, NULL, TO_ROOM );
 		obj_from_char( obj );
 		obj_to_room( obj, ch->in_room );
@@ -576,14 +576,14 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 		char_to_room( ch, location );
 		return;
 	}
-	sprintf( buf, "$p comes flying in from the %s and carries on %s.", revdoor, direction );
+	snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and carries on %s.", revdoor, direction );
 	act( buf, ch, obj, NULL, TO_ROOM );
 	char_from_room( ch );
 	char_to_room( ch, to_room );
 	if ( ( victim = get_char_room( ch, arg2 ) ) != NULL ) {
-		sprintf( buf, "$p comes flying in from the %s and lands in $N's hands.", revdoor );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and lands in $N's hands.", revdoor );
 		act( buf, ch, obj, victim, TO_NOTVICT );
-		sprintf( buf, "$p comes flying in from the %s and lands in your hands.", revdoor );
+		snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and lands in your hands.", revdoor );
 		act( buf, ch, obj, victim, TO_VICT );
 		obj_from_char( obj );
 		obj_to_char( obj, victim );
@@ -592,7 +592,7 @@ void do_throw( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "$p comes flying in from the %s and drops at your feet.", revdoor );
+	snprintf( buf, sizeof( buf ),"$p comes flying in from the %s and drops at your feet.", revdoor );
 	act( buf, ch, obj, NULL, TO_ROOM );
 	obj_from_char( obj );
 	obj_to_room( obj, ch->in_room );
@@ -868,7 +868,7 @@ void do_fightstyle( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 	ch->cmbt[( value - 1 )] = selection;
-	sprintf( buf, "Combat option %d now set to %s (%d).\n\r", value, arg2, ch->cmbt[0] );
+	snprintf( buf, sizeof( buf ),"Combat option %d now set to %s (%d).\n\r", value, arg2, ch->cmbt[0] );
 	send_to_char( buf, ch );
 	return;
 }
@@ -1591,37 +1591,37 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 			make_part( victim, "little" );
 		}
 		if ( count == 1 )
-			sprintf( buf2, "finger" );
+			snprintf( buf2, sizeof( buf2 ),"finger" );
 		else
-			sprintf( buf2, "fingers" );
+			snprintf( buf2, sizeof( buf2 ),"fingers" );
 		if ( count > 0 && count2 > 0 ) {
-			sprintf( buf, "Your skillful blow cuts off %d %s and the thumb from $N's left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"Your skillful blow cuts off %d %s and the thumb from $N's left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow cuts off %d %s and the thumb from $N's left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off %d %s and the thumb from $N's left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow cuts off %d %s and the thumb from your left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off %d %s and the thumb from your left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL )
 				take_item( victim, obj );
 			return;
 		} else if ( count > 0 ) {
-			sprintf( buf, "Your skillful blow cuts off %d %s from $N's left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"Your skillful blow cuts off %d %s from $N's left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow cuts off %d %s from $N's left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off %d %s from $N's left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow cuts off %d %s from your left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off %d %s from your left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL )
 				take_item( victim, obj );
 			return;
 		} else if ( count2 > 0 ) {
-			sprintf( buf, "Your skillful blow cuts off the thumb from $N's left hand." );
+			snprintf( buf, sizeof( buf ),"Your skillful blow cuts off the thumb from $N's left hand." );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow cuts off the thumb from $N's left hand." );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off the thumb from $N's left hand." );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow cuts off the thumb from your left hand." );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off the thumb from your left hand." );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL )
@@ -1688,37 +1688,37 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 			count += 1;
 		}
 		if ( count == 1 )
-			sprintf( buf2, "finger" );
+			snprintf( buf2, sizeof( buf2 ),"finger" );
 		else
-			sprintf( buf2, "fingers" );
+			snprintf( buf2, sizeof( buf2 ),"fingers" );
 		if ( count > 0 && count2 > 0 ) {
-			sprintf( buf, "Your skillful breaks %d %s and the thumb on $N's left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"Your skillful breaks %d %s and the thumb on $N's left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow breaks %d %s and the thumb on $N's left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d %s and the thumb on $N's left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow breaks %d %s and the thumb on your left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d %s and the thumb on your left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL )
 				take_item( victim, obj );
 			return;
 		} else if ( count > 0 ) {
-			sprintf( buf, "Your skillful blow breaks %d %s on $N's left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"Your skillful blow breaks %d %s on $N's left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow breaks %d %s on $N's left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d %s on $N's left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow breaks %d %s on your left hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d %s on your left hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL )
 				take_item( victim, obj );
 			return;
 		} else if ( count2 > 0 ) {
-			sprintf( buf, "Your skillful blow breaks the thumb on $N's left hand." );
+			snprintf( buf, sizeof( buf ),"Your skillful blow breaks the thumb on $N's left hand." );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow breaks the thumb on $N's left hand." );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks the thumb on $N's left hand." );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow breaks the thumb on your left hand." );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks the thumb on your left hand." );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL )
@@ -1789,37 +1789,37 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 			make_part( victim, "little" );
 		}
 		if ( count == 1 )
-			sprintf( buf2, "finger" );
+			snprintf( buf2, sizeof( buf2 ),"finger" );
 		else
-			sprintf( buf2, "fingers" );
+			snprintf( buf2, sizeof( buf2 ),"fingers" );
 		if ( count > 0 && count2 > 0 ) {
-			sprintf( buf, "Your skillful blow cuts off %d %s and the thumb from $N's right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"Your skillful blow cuts off %d %s and the thumb from $N's right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow cuts off %d %s and the thumb from $N's right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off %d %s and the thumb from $N's right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow cuts off %d %s and the thumb from your right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off %d %s and the thumb from your right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_WIELD ) ) != NULL )
 				take_item( victim, obj );
 			return;
 		} else if ( count > 0 ) {
-			sprintf( buf, "Your skillful blow cuts off %d %s from $N's right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"Your skillful blow cuts off %d %s from $N's right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow cuts off %d %s from $N's right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off %d %s from $N's right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow cuts off %d %s from your right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off %d %s from your right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_WIELD ) ) != NULL )
 				take_item( victim, obj );
 			return;
 		} else if ( count2 > 0 ) {
-			sprintf( buf, "Your skillful blow cuts off the thumb from $N's right hand." );
+			snprintf( buf, sizeof( buf ),"Your skillful blow cuts off the thumb from $N's right hand." );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow cuts off the thumb from $N's right hand." );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off the thumb from $N's right hand." );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow cuts off the thumb from your right hand." );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow cuts off the thumb from your right hand." );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_WIELD ) ) != NULL )
@@ -1886,37 +1886,37 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 			count += 1;
 		}
 		if ( count == 1 )
-			sprintf( buf2, "finger" );
+			snprintf( buf2, sizeof( buf2 ),"finger" );
 		else
-			sprintf( buf2, "fingers" );
+			snprintf( buf2, sizeof( buf2 ),"fingers" );
 		if ( count > 0 && count2 > 0 ) {
-			sprintf( buf, "Your skillful breaks %d %s and the thumb on $N's right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"Your skillful breaks %d %s and the thumb on $N's right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow breaks %d %s and the thumb on $N's right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d %s and the thumb on $N's right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow breaks %d %s and the thumb on your right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d %s and the thumb on your right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_WIELD ) ) != NULL )
 				take_item( victim, obj );
 			return;
 		} else if ( count > 0 ) {
-			sprintf( buf, "Your skillful blow breaks %d %s on $N's right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"Your skillful blow breaks %d %s on $N's right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow breaks %d %s on $N's right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d %s on $N's right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow breaks %d %s on your right hand.", count, buf2 );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d %s on your right hand.", count, buf2 );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_WIELD ) ) != NULL )
 				take_item( victim, obj );
 			return;
 		} else if ( count2 > 0 ) {
-			sprintf( buf, "Your skillful blow breaks the thumb on $N's right hand." );
+			snprintf( buf, sizeof( buf ),"Your skillful blow breaks the thumb on $N's right hand." );
 			act( buf, ch, NULL, victim, TO_CHAR );
-			sprintf( buf, "$n's skillful blow breaks the thumb on $N's right hand." );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks the thumb on $N's right hand." );
 			act( buf, ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "$n's skillful blow breaks the thumb on your right hand." );
+			snprintf( buf, sizeof( buf ),"$n's skillful blow breaks the thumb on your right hand." );
 			act( buf, ch, NULL, victim, TO_VICT );
 
 			if ( ( obj = get_eq_char( victim, WEAR_WIELD ) ) != NULL )
@@ -2233,11 +2233,11 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 			bodyloc -= 1;
 			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_1 );
 		}
-		sprintf( buf, "Your skillful blow breaks %d of $N's ribs!", broken );
+		snprintf( buf, sizeof( buf ),"Your skillful blow breaks %d of $N's ribs!", broken );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n's skillful blow breaks %d of $N's ribs!", broken );
+		snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d of $N's ribs!", broken );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "$n's skillful blow breaks %d of your ribs!", broken );
+		snprintf( buf, sizeof( buf ),"$n's skillful blow breaks %d of your ribs!", broken );
 		act( buf, ch, NULL, victim, TO_VICT );
 		return;
 	} else if ( critical == 23 ) {
@@ -2307,11 +2307,11 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 			bodyloc -= 1;
 			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_1 );
 		}
-		sprintf( buf, "Your skillful blow knocks out %d of $N's teeth!", broken );
+		snprintf( buf, sizeof( buf ),"Your skillful blow knocks out %d of $N's teeth!", broken );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n's skillful blow knocks out %d of $N's teeth!", broken );
+		snprintf( buf, sizeof( buf ),"$n's skillful blow knocks out %d of $N's teeth!", broken );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "$n's skillful blow knocks out %d of your teeth!", broken );
+		snprintf( buf, sizeof( buf ),"$n's skillful blow knocks out %d of your teeth!", broken );
 		act( buf, ch, NULL, victim, TO_VICT );
 		if ( broken >= 1 ) make_part( victim, "tooth" );
 		if ( broken >= 2 ) make_part( victim, "tooth" );
@@ -2539,28 +2539,28 @@ void special_hurl( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	door = number_range( 0, 3 );
 
 	if ( door == 0 ) {
-		sprintf( direction, "north" );
+		snprintf( direction, sizeof( direction ),"north" );
 		rev_dir = 2;
 	}
 	if ( door == 1 ) {
-		sprintf( direction, "east" );
+		snprintf( direction, sizeof( direction ),"east" );
 		rev_dir = 3;
 	}
 	if ( door == 2 ) {
-		sprintf( direction, "south" );
+		snprintf( direction, sizeof( direction ),"south" );
 		rev_dir = 0;
 	}
 	if ( door == 3 ) {
-		sprintf( direction, "west" );
+		snprintf( direction, sizeof( direction ),"west" );
 		rev_dir = 1;
 	}
 
 	if ( ( pexit = ch->in_room->exit[door] ) == NULL || ( to_room = pexit->to_room ) == NULL ) {
-		sprintf( buf, "$n hurls $N into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ),"$n hurls $N into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "You hurl $N into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ),"You hurl $N into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n hurls you into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ),"$n hurls you into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
 		dam = number_range( ch->level, ( ch->level * 4 ) );
 		victim->hit = victim->hit - dam;
@@ -2585,13 +2585,13 @@ void special_hurl( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			REMOVE_BIT( pexit->exit_info, EX_LOCKED );
 		if ( IS_SET( pexit->exit_info, EX_CLOSED ) )
 			REMOVE_BIT( pexit->exit_info, EX_CLOSED );
-		sprintf( buf, "$n hurls $N %s.", direction );
+		snprintf( buf, sizeof( buf ),"$n hurls $N %s.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "You hurl $N %s.", direction );
+		snprintf( buf, sizeof( buf ),"You hurl $N %s.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n hurls you %s, smashing you through the %s.", direction, pexit->keyword );
+		snprintf( buf, sizeof( buf ),"$n hurls you %s, smashing you through the %s.", direction, pexit->keyword );
 		act( buf, ch, NULL, victim, TO_VICT );
-		sprintf( buf, "There is a loud crash as $n smashes through the $d." );
+		snprintf( buf, sizeof( buf ),"There is a loud crash as $n smashes through the $d." );
 		act( buf, victim, NULL, pexit->keyword, TO_ROOM );
 
 		if ( ( to_room = pexit->to_room ) != NULL && ( pexit_rev = to_room->exit[rev_dir] ) != NULL && pexit_rev->to_room == ch->in_room && pexit_rev->keyword != NULL ) {
@@ -2599,13 +2599,13 @@ void special_hurl( CHAR_DATA *ch, CHAR_DATA *victim ) {
 				REMOVE_BIT( pexit_rev->exit_info, EX_LOCKED );
 			if ( IS_SET( pexit_rev->exit_info, EX_CLOSED ) )
 				REMOVE_BIT( pexit_rev->exit_info, EX_CLOSED );
-			if ( door == 0 ) sprintf( direction, "south" );
-			if ( door == 1 ) sprintf( direction, "west" );
-			if ( door == 2 ) sprintf( direction, "north" );
-			if ( door == 3 ) sprintf( direction, "east" );
+			if ( door == 0 ) snprintf( direction, sizeof( direction ),"south" );
+			if ( door == 1 ) snprintf( direction, sizeof( direction ),"west" );
+			if ( door == 2 ) snprintf( direction, sizeof( direction ),"north" );
+			if ( door == 3 ) snprintf( direction, sizeof( direction ),"east" );
 			char_from_room( victim );
 			char_to_room( victim, to_room );
-			sprintf( buf, "$n comes smashing in through the %s $d.", direction );
+			snprintf( buf, sizeof( buf ),"$n comes smashing in through the %s $d.", direction );
 			act( buf, victim, NULL, pexit->keyword, TO_ROOM );
 			dam = number_range( ch->level, ( ch->level * 6 ) );
 			victim->hit = victim->hit - dam;
@@ -2618,19 +2618,19 @@ void special_hurl( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			}
 		}
 	} else {
-		sprintf( buf, "$n hurls $N %s.", direction );
+		snprintf( buf, sizeof( buf ),"$n hurls $N %s.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "You hurl $N %s.", direction );
+		snprintf( buf, sizeof( buf ),"You hurl $N %s.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "$n hurls you %s.", direction );
+		snprintf( buf, sizeof( buf ),"$n hurls you %s.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
-		if ( door == 0 ) sprintf( direction, "south" );
-		if ( door == 1 ) sprintf( direction, "west" );
-		if ( door == 2 ) sprintf( direction, "north" );
-		if ( door == 3 ) sprintf( direction, "east" );
+		if ( door == 0 ) snprintf( direction, sizeof( direction ),"south" );
+		if ( door == 1 ) snprintf( direction, sizeof( direction ),"west" );
+		if ( door == 2 ) snprintf( direction, sizeof( direction ),"north" );
+		if ( door == 3 ) snprintf( direction, sizeof( direction ),"east" );
 		char_from_room( victim );
 		char_to_room( victim, to_room );
-		sprintf( buf, "$n comes flying in from the %s.", direction );
+		snprintf( buf, sizeof( buf ),"$n comes flying in from the %s.", direction );
 		act( buf, victim, NULL, NULL, TO_ROOM );
 		dam = number_range( ch->level, ( ch->level * 2 ) );
 		victim->hit = victim->hit - dam;

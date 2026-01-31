@@ -1527,7 +1527,7 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 
 			ch = d->character;
 			if ( IS_HEAD( ch, LOST_HEAD ) || IS_EXTRA( ch, EXTRA_OSWITCH ) ) {
-				add_commas_to_number( ch->exp, exp_str );
+				add_commas_to_number( ch->exp, exp_str, sizeof( exp_str ) );
 				COL_SCALE( exp_str, ch, ch->exp, 10000000 );
 				sprintf( buf, "#7<[#4%sX#7] [#3?#1H #3?#6M #3?#2V#7]>#n ", exp_str );
 			} else if ( ch->position == POS_FIGHTING ) {
@@ -1571,7 +1571,7 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 				sprintf( move_str, "%d", ch->move );
 				COL_SCALE( move_str, ch, ch->move, ch->max_move );
 				// sprintf(exp_str, "%d", ch->exp);
-				add_commas_to_number( ch->exp, exp_str );
+				add_commas_to_number( ch->exp, exp_str, sizeof( exp_str ) );
 				COL_SCALE( exp_str, ch, ch->exp, 10000000 );
 				/*
 				sprintf( buf, "[%s exp] <%shp %sm %smv> ",exp_str, hit_str, mana_str, move_str );

@@ -554,6 +554,12 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	if ( ch->desc == NULL )
 		return;
 
+	if ( list == NULL ) {
+		if ( fShowNothing )
+			send_to_char( "     Nothing.\n\r", ch );
+		return;
+	}
+
 	/* Check if MXP is enabled for this character */
 	fMxp = ( ch->desc->mxp_enabled == TRUE );
 
@@ -616,7 +622,7 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	for ( iShow = 0; iShow < nShow; iShow++ ) {
 		if ( IS_NPC( ch ) || IS_SET( ch->act, PLR_COMBINE ) ) {
 			if ( prgnShow[iShow] != 1 ) {
-				sprintf( buf, "(%2d) ", prgnShow[iShow] );
+				snprintf( buf, sizeof( buf ), "(%2d) ", prgnShow[iShow] );
 				send_to_char( buf, ch );
 			} else {
 				send_to_char( "     ", ch );
@@ -1257,10 +1263,10 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "The shadow plane\n\r", ch );
 		else {
 			if ( !IS_NPC( ch ) && ch->level > 6 ) {
-				sprintf( buf, "%s #0[#7%d#0]#n\n\r", ch->in_room->name, ch->in_room->vnum );
+				snprintf( buf, sizeof( buf ), "%s #0[#7%d#0]#n\n\r", ch->in_room->name, ch->in_room->vnum );
 				send_to_char( buf, ch );
 			} else {
-				sprintf( buf, "%s\n\r", ch->in_room->name );
+				snprintf( buf, sizeof( buf ), "%s\n\r", ch->in_room->name );
 				send_to_char( buf, ch );
 			}
 		}
@@ -1281,23 +1287,23 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 				ch->in_room->description ? ch->in_room->description : "" );
 			send_to_char( buf, ch );
 			if ( ch->in_room->blood == 1000 )
-				sprintf( buf, "You notice that the room is completely drenched in blood.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice that the room is completely drenched in blood.\n\r" );
 			else if ( ch->in_room->blood > 750 )
-				sprintf( buf, "You notice that there is a very large amount of blood around the room.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice that there is a very large amount of blood around the room.\n\r" );
 			else if ( ch->in_room->blood > 500 )
-				sprintf( buf, "You notice that there is a large quantity of blood around the room.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice that there is a large quantity of blood around the room.\n\r" );
 			else if ( ch->in_room->blood > 250 )
-				sprintf( buf, "You notice a fair amount of blood on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice a fair amount of blood on the floor.\n\r" );
 			else if ( ch->in_room->blood > 100 )
-				sprintf( buf, "You notice several blood stains on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice several blood stains on the floor.\n\r" );
 			else if ( ch->in_room->blood > 50 )
-				sprintf( buf, "You notice a few blood stains on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice a few blood stains on the floor.\n\r" );
 			else if ( ch->in_room->blood > 25 )
-				sprintf( buf, "You notice a couple of blood stains on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice a couple of blood stains on the floor.\n\r" );
 			else if ( ch->in_room->blood > 0 )
-				sprintf( buf, "You notice a few drops of blood on the floor.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice a few drops of blood on the floor.\n\r" );
 			else
-				sprintf( buf, "You notice nothing special in the room.\n\r" );
+				snprintf( buf, sizeof( buf ), "You notice nothing special in the room.\n\r" );
 			ADD_COLOUR( ch, buf, L_RED );
 			if ( ch->in_room->blood > 0 ) send_to_char( buf, ch );
 		}
@@ -1311,19 +1317,19 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 			if ( ch->in_room->exit[door] == NULL ) continue;
 
 			if ( IS_SET( ch->in_room->exit[door]->exit_info, EX_PRISMATIC_WALL ) ) {
-				sprintf( buf, "     You see a shimmering wall of many colours %s.\n\r", exitname2[door] );
+				snprintf( buf, sizeof( buf ), "     You see a shimmering wall of many colours %s.\n\r", exitname2[door] );
 				send_to_char( buf, ch );
 			} else if ( IS_SET( ch->in_room->exit[door]->exit_info, EX_ICE_WALL ) ) {
-				sprintf( buf, "     You see a glacier of ice %s.\n\r", exitname2[door] );
+				snprintf( buf, sizeof( buf ), "     You see a glacier of ice %s.\n\r", exitname2[door] );
 				send_to_char( buf, ch );
 			} else if ( IS_SET( ch->in_room->exit[door]->exit_info, EX_CALTROP_WALL ) ) {
-				sprintf( buf, "     You see a wall of caltrops %s.\n\r", exitname2[door] );
+				snprintf( buf, sizeof( buf ), "     You see a wall of caltrops %s.\n\r", exitname2[door] );
 				send_to_char( buf, ch );
 			} else if ( IS_SET( ch->in_room->exit[door]->exit_info, EX_FIRE_WALL ) ) {
-				sprintf( buf, "     You see a blazing wall of fire %s.\n\r", exitname2[door] );
+				snprintf( buf, sizeof( buf ), "     You see a blazing wall of fire %s.\n\r", exitname2[door] );
 				send_to_char( buf, ch );
 			} else if ( IS_SET( ch->in_room->exit[door]->exit_info, EX_SWORD_WALL ) ) {
-				sprintf( buf, "     You see a spinning wall of swords %s.\n\r", exitname2[door] );
+				snprintf( buf, sizeof( buf ), "     You see a spinning wall of swords %s.\n\r", exitname2[door] );
 				send_to_char( buf, ch );
 			} else if ( IS_SET( ch->in_room->exit[door]->exit_info, EX_MUSHROOM_WALL ) ) {
 				sprintf( buf, "     You see a vibrating mound of mushrooms %s.\n\r", exitname2[door] );

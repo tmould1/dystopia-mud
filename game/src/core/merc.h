@@ -4492,6 +4492,7 @@ RID *get_room_index args( ( int vnum ) );
 void *alloc_mem args( ( int sMem ) );
 void *alloc_perm args( ( int sMem ) );
 void free_mem args( ( void *pMem, int sMem ) );
+void mem_debug_check_freelists args( ( void ) );
 char *str_dup args( ( const char *str ) );
 void free_string args( ( char *pstr ) );
 int number_fuzzy args( ( int number ) );
@@ -4873,7 +4874,7 @@ char *first_arg args( ( char *argument, char *arg_first, bool fCase ) );
 char *string_unpad args( ( char *argument ) );
 char *string_proper args( ( char *argument ) );
 char *all_capitalize args( ( const char *str ) );
-void add_commas_to_number args( ( int number, char *buf ) );
+void add_commas_to_number args( ( int number, char *buf, size_t buf_size ) );
 
 /* olc.c */
 bool run_olc_editor args( ( DESCRIPTOR_DATA * d ) );

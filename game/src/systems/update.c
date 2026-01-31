@@ -1125,6 +1125,7 @@ void update_handler( void ) {
 	if ( --pulse_violence <= 0 ) {
 		pulse_violence = PULSE_VIOLENCE;
 		violence_update();
+		mem_debug_check_freelists();
 	}
 	if ( --pulse_embrace <= 0 ) {
 		pulse_embrace = PULSE_EMBRACE;

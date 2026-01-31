@@ -17,6 +17,7 @@
 
 #include <sys/types.h>
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -312,6 +313,16 @@ bool ITEMAFFENTROPY = FALSE;
 #define MAX_STRING	   2072864
 #define MAX_PERM_BLOCK 131072
 #define MAX_MEM_LIST   11
+
+/* MEM_DEBUG: heap corruption detection via canary bytes, free list pointer
+ * validation, and freed memory poisoning.
+ * Auto-enabled in Visual Studio Debug builds (_DEBUG).
+ * For Linux/Makefile: make MEM_DEBUG=1
+ * To force on everywhere: uncomment the #define below. */
+/* #define MEM_DEBUG */
+#if defined( _DEBUG ) && !defined( MEM_DEBUG )
+#define MEM_DEBUG
+#endif
 
 void *rgFreeList[MAX_MEM_LIST];
 const int rgSizeList[MAX_MEM_LIST] =
@@ -1049,12 +1060,12 @@ OBJ_DATA *create_object( OBJ_INDEX_DATA *pObjIndex, int level ) {
 	obj->description = str_dup( pObjIndex->description ); /* OLC */
 
 	if ( pObjIndex->chpoweron != NULL ) {
-		obj->chpoweron = pObjIndex->chpoweron;
-		obj->chpoweroff = pObjIndex->chpoweroff;
-		obj->chpoweruse = pObjIndex->chpoweruse;
-		obj->victpoweron = pObjIndex->victpoweron;
-		obj->victpoweroff = pObjIndex->victpoweroff;
-		obj->victpoweruse = pObjIndex->victpoweruse;
+		obj->chpoweron = str_dup( pObjIndex->chpoweron );
+		obj->chpoweroff = str_dup( pObjIndex->chpoweroff );
+		obj->chpoweruse = str_dup( pObjIndex->chpoweruse );
+		obj->victpoweron = str_dup( pObjIndex->victpoweron );
+		obj->victpoweroff = str_dup( pObjIndex->victpoweroff );
+		obj->victpoweruse = str_dup( pObjIndex->victpoweruse );
 		obj->spectype = pObjIndex->spectype;
 		obj->specpower = pObjIndex->specpower;
 	} else {
@@ -1403,6 +1414,68 @@ ROOM_INDEX_DATA *get_room_index( int vnum ) {
 	return NULL;
 }
 
+#ifdef MEM_DEBUG
+#define MEM_CANARY_BYTE  0xFD  /* Written in slack space after requested size */
+#define MEM_FREE_BYTE    0xDD  /* Written over freed blocks (after free list ptr) */
+
+static void mem_debug_dump( const char *label, void *ptr, int size ) {
+	unsigned char *p = (unsigned char *) ptr;
+	char buf[MAX_STRING_LENGTH];
+	int dump_len = ( size < 128 ) ? size : 128;
+	int off = 0;
+
+	off += snprintf( buf + off, sizeof( buf ) - off,
+		"MEM_DEBUG %s ptr=%p size=%d hex: ", label, ptr, size );
+	for ( int i = 0; i < dump_len && off < (int) sizeof( buf ) - 4; i++ )
+		off += snprintf( buf + off, sizeof( buf ) - off, "%02X ", p[i] );
+	log_string( buf );
+
+	off = 0;
+	off += snprintf( buf + off, sizeof( buf ) - off, "MEM_DEBUG %s ascii: ", label );
+	for ( int i = 0; i < dump_len && off < (int) sizeof( buf ) - 4; i++ )
+		off += snprintf( buf + off, sizeof( buf ) - off, "%c",
+			( p[i] >= 32 && p[i] < 127 ) ? (char) p[i] : '.' );
+	log_string( buf );
+}
+
+static bool mem_debug_valid_ptr( void *ptr ) {
+	uintptr_t addr;
+	if ( ptr == NULL ) return TRUE;
+	addr = (uintptr_t) ptr;
+	if ( addr % sizeof( void * ) != 0 ) return FALSE;
+	if ( addr < 0x10000 ) return FALSE;
+	return TRUE;
+}
+
+/* Scan all free lists for corruption. Call periodically from game loop. */
+void mem_debug_check_freelists( void ) {
+	int iList;
+
+	pthread_mutex_lock( &memory_mutex );
+	for ( iList = 0; iList < MAX_MEM_LIST; iList++ ) {
+		void *cur = rgFreeList[iList];
+		int count = 0;
+		while ( cur != NULL && count < 100000 ) {
+			void *next = *( (void **) cur );
+			if ( !mem_debug_valid_ptr( next ) ) {
+				char dbuf[256];
+				snprintf( dbuf, sizeof( dbuf ),
+					"MEM_DEBUG CORRUPTION: free_list[%d] (bucket %d) node #%d at %p has invalid next=%p",
+					iList, rgSizeList[iList], count, cur, next );
+				log_string( dbuf );
+				mem_debug_dump( "Corrupted free node", cur, rgSizeList[iList] );
+				/* Truncate the chain here to prevent crashes */
+				*( (void **) cur ) = NULL;
+				break;
+			}
+			cur = next;
+			count++;
+		}
+	}
+	pthread_mutex_unlock( &memory_mutex );
+}
+#endif /* MEM_DEBUG */
+
 /*
  * Allocate some ordinary memory,
  *   with the expectation of freeing it someday.
@@ -1428,9 +1501,40 @@ void *alloc_mem( int sMem ) {
 		pMem = alloc_perm( rgSizeList[iList] );
 		pthread_mutex_lock( &memory_mutex );
 	} else {
+#ifdef MEM_DEBUG
+		/* Validate free list head's next pointer before following it */
+		void *next = *( (void **) rgFreeList[iList] );
+		if ( !mem_debug_valid_ptr( next ) ) {
+			char dbuf[256];
+			snprintf( dbuf, sizeof( dbuf ),
+				"MEM_DEBUG CORRUPTION in alloc_mem: free_list[%d] (bucket %d) head=%p has invalid next=%p",
+				iList, rgSizeList[iList], rgFreeList[iList], next );
+			log_string( dbuf );
+			mem_debug_dump( "Corrupted free list head", rgFreeList[iList], rgSizeList[iList] );
+			dump_last_command();
+			/* Discard corrupted chain, allocate fresh */
+			rgFreeList[iList] = NULL;
+			pthread_mutex_unlock( &memory_mutex );
+			pMem = alloc_perm( rgSizeList[iList] );
+			pthread_mutex_lock( &memory_mutex );
+		} else {
+			pMem = rgFreeList[iList];
+			rgFreeList[iList] = next;
+		}
+#else
 		pMem = rgFreeList[iList];
 		rgFreeList[iList] = *( (void **) rgFreeList[iList] );
+#endif
 	}
+
+#ifdef MEM_DEBUG
+	/* Write canary bytes in the slack space between requested size and bucket size */
+	{
+		int slack = rgSizeList[iList] - sMem;
+		if ( slack > 0 )
+			memset( (unsigned char *) pMem + sMem, MEM_CANARY_BYTE, slack );
+	}
+#endif
 
 	pthread_mutex_unlock( &memory_mutex );
 	return pMem;
@@ -1455,12 +1559,82 @@ void free_mem( void *pMem, int sMem ) {
 		exit( 1 );
 	}
 
+#ifdef MEM_DEBUG
+	/* Check for double-free: if bytes after the free list pointer are all 0xDD,
+	 * this block was already freed and is being freed again. */
+	if ( rgSizeList[iList] > (int) sizeof( void * ) ) {
+		unsigned char *post_ptr = (unsigned char *) pMem + sizeof( void * );
+		int check_len = rgSizeList[iList] - (int) sizeof( void * );
+		int all_poison = 1;
+		int j;
+		for ( j = 0; j < check_len; j++ ) {
+			if ( post_ptr[j] != MEM_FREE_BYTE ) {
+				all_poison = 0;
+				break;
+			}
+		}
+		if ( all_poison ) {
+			char dbuf[512];
+			snprintf( dbuf, sizeof( dbuf ),
+				"MEM_DEBUG DOUBLE-FREE: ptr=%p req_size=%d bucket=%d - block already has free poison!",
+				pMem, sMem, rgSizeList[iList] );
+			log_string( dbuf );
+			/* Show the free list pointer stored in this already-freed block */
+			{
+				void *stale_next = *( (void **) pMem );
+				snprintf( dbuf, sizeof( dbuf ),
+					"MEM_DEBUG DOUBLE-FREE: stale free-list next=%p (block is already on free list)",
+					stale_next );
+				log_string( dbuf );
+			}
+			mem_debug_dump( "Double-freed block", pMem, rgSizeList[iList] );
+			dump_last_command();
+			/* Skip the free to avoid corrupting the free list further */
+			pthread_mutex_unlock( &memory_mutex );
+			return;
+		}
+	}
+
+	/* Check canary bytes in slack space - detects buffer overflows */
+	{
+		int slack = rgSizeList[iList] - sMem;
+		if ( slack > 0 ) {
+			unsigned char *canary = (unsigned char *) pMem + sMem;
+			int i;
+			for ( i = 0; i < slack; i++ ) {
+				if ( canary[i] != MEM_CANARY_BYTE )
+					break;
+			}
+			if ( i < slack ) {
+				char dbuf[256];
+				snprintf( dbuf, sizeof( dbuf ),
+					"MEM_DEBUG OVERFLOW in free_mem: ptr=%p req_size=%d bucket=%d canary corrupted at offset %d",
+					pMem, sMem, rgSizeList[iList], sMem + i );
+				log_string( dbuf );
+				mem_debug_dump( "Overflowed block", pMem, rgSizeList[iList] );
+				dump_last_command();
+			}
+		}
+	}
+
+	/* Poison freed memory (after free list pointer) to detect use-after-free */
+	if ( rgSizeList[iList] > (int) sizeof( void * ) )
+		memset( (unsigned char *) pMem + sizeof( void * ), MEM_FREE_BYTE,
+			rgSizeList[iList] - (int) sizeof( void * ) );
+#endif
+
 	*( (void **) pMem ) = rgFreeList[iList];
 	rgFreeList[iList] = pMem;
 
 	pthread_mutex_unlock( &memory_mutex );
 	return;
 }
+
+#ifndef MEM_DEBUG
+void mem_debug_check_freelists( void ) {
+	/* No-op when MEM_DEBUG is not enabled */
+}
+#endif
 
 /*
  * Allocate some permanent memory.
@@ -1535,7 +1709,6 @@ char *str_dup( const char *str ) {
 void free_string( char *pstr ) {
 
 	if ( pstr == NULL || pstr == &str_empty[0] || ( pstr >= string_space && pstr < top_string ) ) {
-		pthread_mutex_unlock( &memory_mutex );
 		return;
 	}
 

@@ -82,21 +82,21 @@ bool spec_vladd_decap( CHAR_DATA *ch ) {
 		rnd_chat = number_range( 1, 10 );
 
 		if ( rnd_chat <= 5 )
-			sprintf( buf, "Death to is the true end...\n\r" );
+			snprintf( buf, sizeof( buf ), "Death to is the true end...\n\r" );
 		else if ( rnd_chat <= 6 )
-			sprintf( buf, "Time to die....\n\r" );
+			snprintf( buf, sizeof( buf ), "Time to die....\n\r" );
 		else if ( rnd_chat <= 7 )
-			sprintf( buf, "Cabrone....\n\r" );
+			snprintf( buf, sizeof( buf ), "Cabrone....\n\r" );
 		else if ( rnd_chat <= 8 )
-			sprintf( buf, "Welcome to your fate....\n\r" );
+			snprintf( buf, sizeof( buf ), "Welcome to your fate....\n\r" );
 		else if ( rnd_chat <= 9 )
-			sprintf( buf, "We have never met, but now is time for you to die....\n\r" );
+			snprintf( buf, sizeof( buf ), "We have never met, but now is time for you to die....\n\r" );
 		else if ( rnd_chat <= 10 )
-			sprintf( buf, "Ever dance with the devil....\n\r" );
+			snprintf( buf, sizeof( buf ), "Ever dance with the devil....\n\r" );
 
 		do_chat( ch, buf );
 		behead( victim );
-		sprintf( buf, "%s has been decapitated by %s.", victim->pcdata->switchname, ch->long_descr );
+		snprintf( buf, sizeof( buf ), "%s has been decapitated by %s.", victim->pcdata->switchname, ch->long_descr );
 		do_info( ch, buf );
 
 		return TRUE;
@@ -134,17 +134,17 @@ bool spec_assassin( CHAR_DATA *ch ) {
 	rnd_say = number_range( 1, 10 );
 
 	if ( rnd_say <= 5 )
-		sprintf( buf, "Death to is the true end..." );
+		snprintf( buf, sizeof( buf ), "Death to is the true end..." );
 	else if ( rnd_say <= 6 )
-		sprintf( buf, "Time to die...." );
+		snprintf( buf, sizeof( buf ), "Time to die...." );
 	else if ( rnd_say <= 7 )
-		sprintf( buf, "Cabrone...." );
+		snprintf( buf, sizeof( buf ), "Cabrone...." );
 	else if ( rnd_say <= 8 )
-		sprintf( buf, "Welcome to your fate...." );
+		snprintf( buf, sizeof( buf ), "Welcome to your fate...." );
 	else if ( rnd_say <= 9 )
-		sprintf( buf, "We have never met, but now is time for you to die...." );
+		snprintf( buf, sizeof( buf ), "We have never met, but now is time for you to die...." );
 	else if ( rnd_say <= 10 )
-		sprintf( buf, "Ever dance with the devil...." );
+		snprintf( buf, sizeof( buf ), "Ever dance with the devil...." );
 
 	do_say( ch, buf );
 	multi_hit( ch, victim, gsn_backstab );
@@ -186,7 +186,7 @@ bool spec_guard_werewolf( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is invading the sacred Caern!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is invading the sacred Caern!\n\r", victim->name );
 		do_howl( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -231,7 +231,7 @@ bool spec_guard_dragon( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is invading the Sanctuary!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is invading the Sanctuary!\n\r", victim->name );
 		do_howl( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -276,7 +276,7 @@ bool spec_guard_mage( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is invading the Sanctuary!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is invading the Sanctuary!\n\r", victim->name );
 		do_howl( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -321,7 +321,7 @@ bool spec_guard_highlander( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is invading the sacred Temple!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is invading the sacred Temple!\n\r", victim->name );
 		do_howl( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -366,7 +366,7 @@ bool spec_guard_vampire( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is invading the Kindred's Grounds!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is invading the Kindred's Grounds!\n\r", victim->name );
 		do_vamptalk( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -411,7 +411,7 @@ bool spec_guard_demon( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is invading Hell!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is invading Hell!\n\r", victim->name );
 		do_pray( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -456,7 +456,7 @@ bool spec_guard_drow( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is invading Drow Headquarters!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is invading Drow Headquarters!\n\r", victim->name );
 		do_sign( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -501,7 +501,7 @@ bool spec_guard_monk( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is imposing upon the Holy Grounds!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is imposing upon the Holy Grounds!\n\r", victim->name );
 		do_yell( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -546,7 +546,7 @@ bool spec_guard_ninja( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s is violating our Sanctuary!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s is violating our Sanctuary!\n\r", victim->name );
 		do_miktalk( ch, buf );
 
 		multi_hit( ch, victim, gsn_punch );
@@ -986,7 +986,7 @@ bool spec_guard( CHAR_DATA *ch ) {
 	if ( victim != NULL ) {
 		rand = number_range( 1, 5 );
 		if ( rand == 1 ) {
-			sprintf( buf, "It is an honour to meet you, %s!",
+			snprintf( buf, sizeof( buf ), "It is an honour to meet you, %s!",
 				victim->name );
 			do_say( ch, buf );
 		} else if ( rand == 2 ) {
@@ -997,14 +997,14 @@ bool spec_guard( CHAR_DATA *ch ) {
 			act( "You shake $N's hand.", ch, NULL, victim, TO_CHAR );
 			act( "$n shakes your hand.", ch, NULL, victim, TO_VICT );
 			act( "$n shakes $N's hand.", ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "It's a pleasure to see you again, %s!",
+			snprintf( buf, sizeof( buf ), "It's a pleasure to see you again, %s!",
 				victim->name );
 			do_say( ch, buf );
 		} else if ( rand == 4 ) {
 			act( "You pat $N on the back.", ch, NULL, victim, TO_CHAR );
 			act( "$n pats you on the back.", ch, NULL, victim, TO_VICT );
 			act( "$n pats $N on the back.", ch, NULL, victim, TO_NOTVICT );
-			sprintf( buf, "Greetings %s!  If you need anything, just say!",
+			snprintf( buf, sizeof( buf ), "Greetings %s!  If you need anything, just say!",
 				victim->name );
 			do_say( ch, buf );
 		} else {
@@ -1237,42 +1237,42 @@ bool spec_gremlin_original( CHAR_DATA *ch ) {
 		}
 		if ( victim != NULL ) {
 			if ( speech == 1 ) {
-				sprintf( buf, "Anyone got any food? I'm famished!" );
+				snprintf( buf, sizeof( buf ), "Anyone got any food? I'm famished!" );
 				do_say( ch, buf );
 			}
 			if ( speech == 2 ) do_emote( ch, "rubs his tummy hungrily." );
 			if ( speech == 3 ) do_emote( ch, "looks around for any scraps of food." );
 			if ( speech == 4 ) {
 				if ( !IS_NPC( victim ) )
-					sprintf( buf, "Excuse me %s, have you got any spare food?", victim->name );
+					snprintf( buf, sizeof( buf ), "Excuse me %s, have you got any spare food?", victim->name );
 				else
-					sprintf( buf, "I wonder if %s has got any spare food?", victim->short_descr );
+					snprintf( buf, sizeof( buf ), "I wonder if %s has got any spare food?", victim->short_descr );
 				do_say( ch, buf );
 			}
 
 			if ( speech == 5 ) {
-				sprintf( buf, "If you're not hungry, drop that pie for me!" );
+				snprintf( buf, sizeof( buf ), "If you're not hungry, drop that pie for me!" );
 				do_say( ch, buf );
 			}
 			if ( speech == 6 ) {
 				if ( !IS_NPC( victim ) )
-					sprintf( buf, "Do you have any food, %s?  Pleeeaaase?", victim->name );
+					snprintf( buf, sizeof( buf ), "Do you have any food, %s?  Pleeeaaase?", victim->name );
 				else
-					sprintf( buf, "I bet %s has lots of spare food!", victim->short_descr );
+					snprintf( buf, sizeof( buf ), "I bet %s has lots of spare food!", victim->short_descr );
 				do_say( ch, buf );
 			}
 			if ( speech == 7 ) {
 				if ( !IS_NPC( victim ) )
-					sprintf( buf, "Why won't you give me any food, %s?", victim->name );
+					snprintf( buf, sizeof( buf ), "Why won't you give me any food, %s?", victim->name );
 				else
-					sprintf( buf, "Why won't you give me any food, %s?", victim->short_descr );
+					snprintf( buf, sizeof( buf ), "Why won't you give me any food, %s?", victim->short_descr );
 				do_say( ch, buf );
 			}
 			if ( speech == 8 ) {
 				if ( !IS_NPC( victim ) )
-					sprintf( buf, "I think i'll follow you around for a while, ok %s?", victim->name );
+					snprintf( buf, sizeof( buf ), "I think i'll follow you around for a while, ok %s?", victim->name );
 				else
-					sprintf( buf, "I bet %s has lots of food.", victim->short_descr );
+					snprintf( buf, sizeof( buf ), "I bet %s has lots of food.", victim->short_descr );
 				do_say( ch, buf );
 				do_follow( ch, victim->name );
 			}
@@ -1294,7 +1294,7 @@ bool spec_gremlin_original( CHAR_DATA *ch ) {
 			act( "$n picks $p up.", ch, object, NULL, TO_ROOM );
 			obj_from_room( object );
 			obj_to_char( object, ch );
-			sprintf( buf, "Ah....foooood....goooood!" );
+			snprintf( buf, sizeof( buf ), "Ah....foooood....goooood!" );
 			do_say( ch, buf );
 			if ( object->item_type == ITEM_CORPSE_NPC ) do_get( ch, "all corpse" );
 			act( "$n eats $p.", ch, object, NULL, TO_ROOM );
@@ -1331,7 +1331,7 @@ bool spec_gremlin_born( CHAR_DATA *ch ) {
 	}
 	ch->max_move = ch->max_move - 1;
 	if ( ch->max_move < 5 ) {
-		sprintf( buf, "Alas, there is not enough food to go around..." );
+		snprintf( buf, sizeof( buf ), "Alas, there is not enough food to go around..." );
 		do_say( ch, buf );
 		act( "$n falls to the floor and crumbles into dust.", ch, NULL, NULL, TO_ROOM );
 		extract_char( ch, TRUE );
@@ -1411,7 +1411,7 @@ bool spec_gremlin_born( CHAR_DATA *ch ) {
 
 		if ( victim->in_room == ch->in_room ) {
 			if ( victim->name == ch->name ) {
-				sprintf( buf, "Sorry brother, but I must eat you or I'll starve." );
+				snprintf( buf, sizeof( buf ), "Sorry brother, but I must eat you or I'll starve." );
 				do_say( ch, buf );
 				do_kill( ch, "gremlin" );
 				do_kill( ch, "2.gremlin" );
@@ -1452,24 +1452,24 @@ bool spec_executioner( CHAR_DATA *ch ) {
 		rnd_chat = number_range( 1, 10 );
 
 		if ( rnd_chat <= 4 )
-			sprintf( buf, "Pain is only weakness leaving the body, prepare to get cleansed." );
+			snprintf( buf, sizeof( buf ), "Pain is only weakness leaving the body, prepare to get cleansed." );
 		else if ( rnd_chat <= 5 )
-			sprintf( buf, "There can only be one, and your not it pansy!" );
+			snprintf( buf, sizeof( buf ), "There can only be one, and your not it pansy!" );
 		else if ( rnd_chat <= 6 )
-			sprintf( buf, "Time to die...." );
+			snprintf( buf, sizeof( buf ), "Time to die...." );
 		else if ( rnd_chat <= 7 )
-			sprintf( buf, "DIE!" );
+			snprintf( buf, sizeof( buf ), "DIE!" );
 		else if ( rnd_chat <= 8 )
-			sprintf( buf, "Welcome to your fate...." );
+			snprintf( buf, sizeof( buf ), "Welcome to your fate...." );
 		else if ( rnd_chat <= 9 )
-			sprintf( buf, "Knock knock...." );
+			snprintf( buf, sizeof( buf ), "Knock knock...." );
 		else if ( rnd_chat <= 10 )
-			sprintf( buf, "DIE FREAK!...." );
+			snprintf( buf, sizeof( buf ), "DIE FREAK!...." );
 
 		do_chat( ch, buf );
 		behead( victim );
 		victim->level = 2;
-		sprintf( buf, "%s has been executed by Vladd's Executioner", victim->pcdata->switchname );
+		snprintf( buf, sizeof( buf ), "%s has been executed by Vladd's Executioner", victim->pcdata->switchname );
 		do_info( ch, buf );
 
 		return TRUE;
@@ -1508,31 +1508,31 @@ bool spec_executioner( CHAR_DATA *ch ) {
 			if ( !obj2 ) {
 				switch ( object->item_type ) {
 				default:
-					sprintf( buf, "Hey, what a find!" );
+					snprintf( buf, sizeof( buf ), "Hey, what a find!" );
 					do_say( ch, buf );
 					break;
 				case ITEM_FOOD:
-					sprintf( buf, "This looks like a tasty morsel!" );
+					snprintf( buf, sizeof( buf ), "This looks like a tasty morsel!" );
 					do_say( ch, buf );
 					do_eat( ch, object->name );
 					break;
 				case ITEM_WAND:
-					sprintf( buf, "Wow, a magic wand!" );
+					snprintf( buf, sizeof( buf ), "Wow, a magic wand!" );
 					do_say( ch, buf );
 					wear_obj( ch, object, FALSE );
 					break;
 				case ITEM_STAFF:
-					sprintf( buf, "Kewl, a magic staff!" );
+					snprintf( buf, sizeof( buf ), "Kewl, a magic staff!" );
 					do_say( ch, buf );
 					wear_obj( ch, object, FALSE );
 					break;
 				case ITEM_WEAPON:
-					sprintf( buf, "Hey, this looks like a nifty weapon!" );
+					snprintf( buf, sizeof( buf ), "Hey, this looks like a nifty weapon!" );
 					do_say( ch, buf );
 					wear_obj( ch, object, FALSE );
 					break;
 				case ITEM_ARMOR:
-					sprintf( buf, "Oooh...a nice piece of armor!" );
+					snprintf( buf, sizeof( buf ), "Oooh...a nice piece of armor!" );
 					do_say( ch, buf );
 					wear_obj( ch, object, FALSE );
 					break; /*
@@ -1561,12 +1561,12 @@ bool spec_executioner( CHAR_DATA *ch ) {
 			}
 
 			if ( ( object->level > obj2->level ) ) {
-				sprintf( buf, "Now THIS looks like an improvement!" );
+				snprintf( buf, sizeof( buf ), "Now THIS looks like an improvement!" );
 				do_say( ch, buf );
 				remove_obj( ch, obj2->wear_loc, TRUE );
 				wear_obj( ch, object, FALSE );
 			} else {
-				sprintf( buf, "I don't want this piece of junk!" );
+				snprintf( buf, sizeof( buf ), "I don't want this piece of junk!" );
 				do_say( ch, buf );
 				act( "You don't like the look of $p.", ch, object, NULL, TO_CHAR );
 				do_drop( ch, object->name );
@@ -1621,31 +1621,31 @@ bool spec_rogue( CHAR_DATA *ch ) {
 			if ( !obj2 ) {
 				switch ( object->item_type ) {
 				default:
-					sprintf( buf, "Hey, what a find!" );
+					snprintf( buf, sizeof( buf ), "Hey, what a find!" );
 					do_say( ch, buf );
 					break;
 				case ITEM_FOOD:
-					sprintf( buf, "This looks like a tasty morsel!" );
+					snprintf( buf, sizeof( buf ), "This looks like a tasty morsel!" );
 					do_say( ch, buf );
 					do_eat( ch, object->name );
 					break;
 				case ITEM_WAND:
-					sprintf( buf, "Wow, a magic wand!" );
+					snprintf( buf, sizeof( buf ), "Wow, a magic wand!" );
 					do_say( ch, buf );
 					wear_obj( ch, object, FALSE );
 					break;
 				case ITEM_STAFF:
-					sprintf( buf, "Kewl, a magic staff!" );
+					snprintf( buf, sizeof( buf ), "Kewl, a magic staff!" );
 					do_say( ch, buf );
 					wear_obj( ch, object, FALSE );
 					break;
 				case ITEM_WEAPON:
-					sprintf( buf, "Hey, this looks like a nifty weapon!" );
+					snprintf( buf, sizeof( buf ), "Hey, this looks like a nifty weapon!" );
 					do_say( ch, buf );
 					wear_obj( ch, object, FALSE );
 					break;
 				case ITEM_ARMOR:
-					sprintf( buf, "Oooh...a nice piece of armor!" );
+					snprintf( buf, sizeof( buf ), "Oooh...a nice piece of armor!" );
 					do_say( ch, buf );
 					wear_obj( ch, object, FALSE );
 					break; /*
@@ -1674,12 +1674,12 @@ bool spec_rogue( CHAR_DATA *ch ) {
 			}
 
 			if ( ( object->level > obj2->level ) ) {
-				sprintf( buf, "Now THIS looks like an improvement!" );
+				snprintf( buf, sizeof( buf ), "Now THIS looks like an improvement!" );
 				do_say( ch, buf );
 				remove_obj( ch, obj2->wear_loc, TRUE );
 				wear_obj( ch, object, FALSE );
 			} else {
-				sprintf( buf, "I don't want this piece of junk!" );
+				snprintf( buf, sizeof( buf ), "I don't want this piece of junk!" );
 				do_say( ch, buf );
 				act( "You don't like the look of $p.", ch, object, NULL, TO_CHAR );
 				do_drop( ch, object->name );
@@ -1761,7 +1761,7 @@ SPC_INCONNU))
 		 char_to_room(victim, get_room_index(ROOM_VNUM_ALTAR));
 		 continue;
 	  }
-	  sprintf( buf,"%s Is In Manus Nigrum Headquarters! Attack!\n\r",
+	  snprintf( buf, sizeof( buf ), "%s Is In Manus Nigrum Headquarters! Attack!\n\r",
 victim->name);
 	  do_yell( ch , buf);
 
@@ -1810,7 +1810,7 @@ bool spec_guard_cyborg( CHAR_DATA *ch ) {
 			char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
 			continue;
 		}
-		sprintf( buf, "%s has entered the Cyborg Lands!!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "%s has entered the Cyborg Lands!!\n\r", victim->name );
 		do_yell( ch, buf );
 
 		multi_hit( ch, victim, gsn_stuntubes );
@@ -1928,24 +1928,24 @@ bool spec_zombie_lord( CHAR_DATA *ch ) {
 		default:
 			break;
 		case 1:
-			sprintf( buf, "Foolish mortal, you think you can kill what is already dead?" );
+			snprintf( buf, sizeof( buf ), "Foolish mortal, you think you can kill what is already dead?" );
 			do_say( ch, buf );
 			break;
 		case 2:
 			if ( IS_NPC( victim ) )
-				sprintf( buf, "I shall feast on your soul for this, %s", victim->short_descr );
+				snprintf( buf, sizeof( buf ), "I shall feast on your soul for this, %s", victim->short_descr );
 			else
-				sprintf( buf, "I shall feast on your soul for this, %s", victim->name );
+				snprintf( buf, sizeof( buf ), "I shall feast on your soul for this, %s", victim->name );
 			do_say( ch, buf );
 		case 3:
 			if ( IS_NPC( victim ) )
-				sprintf( buf, "%s shall pay for his arrogance!", victim->short_descr );
+				snprintf( buf, sizeof( buf ), "%s shall pay for his arrogance!", victim->short_descr );
 			else
-				sprintf( buf, "%s shall pay for his arrogance!", victim->name );
+				snprintf( buf, sizeof( buf ), "%s shall pay for his arrogance!", victim->name );
 			do_yell( ch, buf );
 			break;
 		case 4:
-			sprintf( buf, "This fight shall be your last!" );
+			snprintf( buf, sizeof( buf ), "This fight shall be your last!" );
 			do_say( ch, buf );
 			break;
 		}
@@ -1958,13 +1958,13 @@ bool spec_zombie_lord( CHAR_DATA *ch ) {
 				return spec_rogue( ch );
 			victim = create_mobile( pMobIndex );
 			char_to_room( victim, ch->in_room );
-			sprintf( buf, "zombie %s", victim->name );
-			sprintf( buf, "The zombie of %s stands here.\n\r", victim->short_descr );
+			snprintf( buf, sizeof( buf ), "zombie %s", victim->name );
+			snprintf( buf, sizeof( buf ), "The zombie of %s stands here.\n\r", victim->short_descr );
 			free_string( victim->long_descr );
 			victim->long_descr = str_dup( buf );
 			free_string( victim->name );
 			victim->name = str_dup( buf );
-			sprintf( buf, "the zombie of %s", victim->short_descr );
+			snprintf( buf, sizeof( buf ), "the zombie of %s", victim->short_descr );
 			free_string( victim->short_descr );
 			victim->short_descr = str_dup( buf );
 			act( "$n makes a few gestures over $p.", ch, obj, NULL, TO_ROOM );
@@ -1981,7 +1981,7 @@ bool spec_zombie_lord( CHAR_DATA *ch ) {
 					victim->spec_fun = ch->spec_fun;
 			*/
 			do_wear( victim, "all" );
-			sprintf( buf, "I shall spread the corruption!  The time of the Apocalypse is at hand!" );
+			snprintf( buf, sizeof( buf ), "I shall spread the corruption!  The time of the Apocalypse is at hand!" );
 			do_say( victim, buf );
 		}
 		door = number_range( 0, 5 );
@@ -2025,7 +2025,7 @@ bool spec_zombie_lord( CHAR_DATA *ch ) {
 		(void) down_ok;
 
 		if ( countup < 1 ) {
-			sprintf( buf, "Damn, I hate it when this happens!" );
+			snprintf( buf, sizeof( buf ), "Damn, I hate it when this happens!" );
 			do_say( ch, buf );
 			char_from_room( ch );
 			char_to_room( ch, get_room_index( 3001 ) );
@@ -2102,39 +2102,39 @@ bool spec_zombie_lord( CHAR_DATA *ch ) {
 				default:
 					break;
 				case 8:
-					sprintf( buf, "This shouldn't take more than a few seconds!" );
+					snprintf( buf, sizeof( buf ), "This shouldn't take more than a few seconds!" );
 					do_say( ch, buf );
 					break;
 				case 7:
-					sprintf( buf, "Ha! You are no match for me!" );
+					snprintf( buf, sizeof( buf ), "Ha! You are no match for me!" );
 					do_say( ch, buf );
 					break;
 				case 6:
-					sprintf( buf, "I should be able to win this one..." );
+					snprintf( buf, sizeof( buf ), "I should be able to win this one..." );
 					do_say( ch, buf );
 					break;
 				case 5:
-					sprintf( buf, "Hmmm, close match, but I think I have the edge." );
+					snprintf( buf, sizeof( buf ), "Hmmm, close match, but I think I have the edge." );
 					do_say( ch, buf );
 					break;
 				case 4:
-					sprintf( buf, "I'd rather not, my toe hurts." );
+					snprintf( buf, sizeof( buf ), "I'd rather not, my toe hurts." );
 					do_say( ch, buf );
 					break;
 				case 3:
-					sprintf( buf, "Hmmm, I'm not sure if I can win this one." );
+					snprintf( buf, sizeof( buf ), "Hmmm, I'm not sure if I can win this one." );
 					do_say( ch, buf );
 					break;
 				case 2:
-					sprintf( buf, "Heheh better not risk it..." );
+					snprintf( buf, sizeof( buf ), "Heheh better not risk it..." );
 					do_say( ch, buf );
 					break;
 				case 1:
-					sprintf( buf, "I'd need a lot of luck...better not." );
+					snprintf( buf, sizeof( buf ), "I'd need a lot of luck...better not." );
 					do_say( ch, buf );
 					break;
 				case 0:
-					sprintf( buf, "I think I'll give this one a miss!!!" );
+					snprintf( buf, sizeof( buf ), "I think I'll give this one a miss!!!" );
 					do_say( ch, buf );
 					break;
 				}
