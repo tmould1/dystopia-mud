@@ -28,6 +28,8 @@
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
 
+void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx );
+
 /*
  * Local functions.
  */
@@ -1941,6 +1943,8 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 	}
 
 	if ( victim->position == POS_DEAD ) {
+		MOB_INDEX_DATA *victim_idx = IS_NPC( victim ) ? victim->pIndexData : NULL;
+
 		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) {
 			ch->mkill += 1;
 
@@ -1979,11 +1983,121 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 			if ( IS_SET( ch->act, PLR_AUTOSAC ) )
 				do_sacrifice( ch, "corpse" );
 		}
+
+		/* Death teleport: if mob had death_teleport_vnum, move the killer */
+		if ( victim_idx != NULL && victim_idx->death_teleport_vnum != 0
+		  && !IS_NPC( ch ) ) {
+			death_teleport( ch, victim_idx );
+		}
+
 		return;
 	}
 	if ( victim == ch ) return;
 	tail_chain();
 	return;
+}
+
+/*
+ * Death teleport: when a mob with death_teleport_vnum dies, teleport the
+ * killer to another room. If the target is within the mob's own area,
+ * pick a random room that has a living NPC (gauntlet mode). If the chosen
+ * room is empty, force-spawn its mob from resets. Falls back to the
+ * target_vnum (entry room) when no candidates remain.
+ */
+void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx ) {
+	ROOM_INDEX_DATA *dest = NULL;
+	ROOM_INDEX_DATA *candidates[64];
+	AREA_DATA *area;
+	int target_vnum;
+	int count = 0;
+	int vnum;
+
+	if ( !ch || !victim_idx || !ch->in_room )
+		return;
+
+	target_vnum = victim_idx->death_teleport_vnum;
+	area = victim_idx->area;
+
+	if ( area && target_vnum >= area->lvnum && target_vnum <= area->uvnum ) {
+		/* Gauntlet mode: gather rooms in area with living NPCs */
+		for ( vnum = area->lvnum; vnum <= area->uvnum && count < 64; vnum++ ) {
+			ROOM_INDEX_DATA *room = get_room_index( vnum );
+			CHAR_DATA *rch;
+			bool has_mob = FALSE;
+			if ( room == NULL || room == ch->in_room )
+				continue;
+			for ( rch = room->people; rch; rch = rch->next_in_room ) {
+				if ( IS_NPC( rch ) && rch->position != POS_DEAD ) {
+					has_mob = TRUE;
+					break;
+				}
+			}
+			if ( has_mob )
+				candidates[count++] = room;
+		}
+
+		if ( count > 0 ) {
+			dest = candidates[number_range( 0, count - 1 )];
+		} else {
+			/* All mobs dead — check for rooms with mob resets and force-spawn */
+			ROOM_INDEX_DATA *spawn_candidates[64];
+			int spawn_count = 0;
+			for ( vnum = area->lvnum; vnum <= area->uvnum && spawn_count < 64; vnum++ ) {
+				ROOM_INDEX_DATA *room = get_room_index( vnum );
+				RESET_DATA *pReset;
+				if ( room == NULL || room == ch->in_room || room->vnum == target_vnum )
+					continue;
+				for ( pReset = room->reset_first; pReset; pReset = pReset->next ) {
+					if ( pReset->command == 'M' ) {
+						spawn_candidates[spawn_count++] = room;
+						break;
+					}
+				}
+			}
+			if ( spawn_count > 0 ) {
+				RESET_DATA *pReset;
+				dest = spawn_candidates[number_range( 0, spawn_count - 1 )];
+				/* Force-spawn the mob from this room's reset */
+				for ( pReset = dest->reset_first; pReset; pReset = pReset->next ) {
+					if ( pReset->command == 'M' ) {
+						MOB_INDEX_DATA *pMobIdx = get_mob_index( pReset->arg1 );
+						if ( pMobIdx ) {
+							CHAR_DATA *mob = create_mobile( pMobIdx );
+							if ( room_is_dark( dest ) )
+								SET_BIT( mob->affected_by, AFF_INFRARED );
+							char_to_room( mob, dest );
+						}
+						break;
+					}
+				}
+			} else {
+				dest = get_room_index( target_vnum );
+			}
+		}
+	} else {
+		/* Direct teleport to specified room */
+		dest = get_room_index( target_vnum );
+	}
+
+	if ( dest == NULL || dest == ch->in_room )
+		return;
+
+	{
+		const char *msg_char = victim_idx->death_teleport_msg
+			? victim_idx->death_teleport_msg
+			: "A mysterious force pulls you away!\n\r";
+		const char *msg_room = victim_idx->death_teleport_msg_room
+			? victim_idx->death_teleport_msg_room
+			: "$n vanishes in a flash of light!";
+
+		send_to_char( "\n\r", ch );
+		act( msg_char, ch, NULL, NULL, TO_CHAR );
+		act( msg_room, ch, NULL, NULL, TO_ROOM );
+		char_from_room( ch );
+		char_to_room( ch, dest );
+		act( msg_room, ch, NULL, NULL, TO_ROOM );
+		do_look( ch, "auto" );
+	}
 }
 
 bool is_safe( CHAR_DATA *ch, CHAR_DATA *victim ) {
