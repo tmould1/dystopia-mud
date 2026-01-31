@@ -29,8 +29,8 @@ nice
 ulimit -c $((8128 * 1024))  # Core dump size in bytes
 ulimit -f $((16256 * 1024))  # File size limit in bytes
 
-if [ -e "$GAMEDATA_DIR/area/shutdown.txt" ]; then
-  rm -f "$GAMEDATA_DIR/area/shutdown.txt"
+if [ -e "$GAMEDATA_DIR/txt/shutdown.txt" ]; then
+  rm -f "$GAMEDATA_DIR/txt/shutdown.txt"
 fi
 
 while true; do
@@ -39,8 +39,8 @@ while true; do
   "$GAMEDATA_DIR/dystopia" "$port"
 
   # Restart, giving old connections a chance to die.
-  if [ -e "$GAMEDATA_DIR/area/shutdown.txt" ]; then
-    rm -f "$GAMEDATA_DIR/area/shutdown.txt"
+  if [ -e "$GAMEDATA_DIR/txt/shutdown.txt" ]; then
+    rm -f "$GAMEDATA_DIR/txt/shutdown.txt"
     exit 0
   fi
 
