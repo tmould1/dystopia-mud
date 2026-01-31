@@ -27,7 +27,6 @@ Metadata:
           default: "GitHub Configuration"
         Parameters:
           - GithubRepoName
-          - ThumbprintList
 
 Parameters:
   KeyName:
@@ -96,11 +95,6 @@ Parameters:
     Description: IP range for the private subnet in the second Availability Zone
     Type: String
     Default: 10.192.21.0/24
-
-  ThumbprintList:
-    Description: SHA1 thumbprint of GitHub OIDC provider certificate
-    Type: String
-    Default: 6938fd4d98bab03faadb97b34396831e3780aea1
 
   GithubRepoName:
     Description: GitHub repository name (e.g., owner/repo-name)
@@ -423,15 +417,6 @@ Resources:
       Roles:
         - !Ref WebappRole
 
-  IDCProvider:
-    Type: AWS::IAM::OIDCProvider
-    Properties:
-      Url: https://token.actions.githubusercontent.com
-      ClientIdList:
-        - sts.amazonaws.com
-      ThumbprintList:
-        - !Ref ThumbprintList
-
   GitHubIAMRole:
     Type: AWS::IAM::Role
     Properties:
@@ -441,7 +426,7 @@ Resources:
           - Effect: Allow
             Action: sts:AssumeRoleWithWebIdentity
             Principal:
-              Federated: !Ref IDCProvider
+              Federated: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com
             Condition:
               StringLike:
                 token.actions.githubusercontent.com:sub: !Sub repo:${GithubRepoName}:*
