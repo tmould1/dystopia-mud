@@ -363,8 +363,11 @@ void db_player_init( void ) {
 	ensure_directory( mud_db_players_dir );
 
 	/* Ensure backup subdirectory exists */
-	snprintf( backup_dir, sizeof( backup_dir ), "%s%sbackup",
-		mud_db_players_dir, PATH_SEPARATOR );
+	if ( snprintf( backup_dir, sizeof( backup_dir ), "%s%sbackup",
+		mud_db_players_dir, PATH_SEPARATOR ) >= (int)sizeof( backup_dir ) ) {
+		bug( "db_player_init: backup path truncated.", 0 );
+		return;
+	}
 	ensure_directory( backup_dir );
 }
 

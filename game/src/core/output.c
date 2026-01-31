@@ -231,6 +231,12 @@ void act( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2,
 		point = buf;
 		str = format;
 		while ( *str != '\0' ) {
+			/* Check for buffer overflow using helper */
+			if ( !buf_has_space( point, buf, MAX_STRING_LENGTH, 1, 10 ) ) {
+				bug( "act: buffer overflow, truncating message", 0 );
+				break;
+			}
+
 			if ( *str != '$' ) {
 				*point++ = *str++;
 				continue;
@@ -306,12 +312,19 @@ void act( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2,
 			}
 
 			++str;
-			while ( ( *point = *i ) != '\0' )
-				++point, ++i;
+			/* Copy replacement string with bounds checking using helper */
+			point = buf_append_safe( point, i, buf, MAX_STRING_LENGTH, 10 );
+			if ( point == NULL ) {
+				bug( "act: replacement string overflow", 0 );
+				break;
+			}
 		}
 
-		*point++ = '\n';
-		*point++ = '\r';
+		/* Safely add newline using helper */
+		if ( buf_has_space( point, buf, MAX_STRING_LENGTH, 2, 0 ) && point != NULL ) {
+			*point++ = '\n';
+			*point++ = '\r';
+		}
 
 		if ( is_fam ) {
 			if ( to->in_room != ch->in_room && familiar != NULL &&
@@ -428,6 +441,12 @@ void act2( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2
 		point = buf;
 		str = format;
 		while ( *str != '\0' ) {
+			/* Check for buffer overflow using helper */
+			if ( !buf_has_space( point, buf, MAX_STRING_LENGTH, 1, 10 ) ) {
+				bug( "act2: buffer overflow, truncating message", 0 );
+				break;
+			}
+
 			if ( *str != '$' ) {
 				*point++ = *str++;
 				continue;
@@ -517,12 +536,19 @@ void act2( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2
 			}
 
 			++str;
-			while ( ( *point = *i ) != '\0' )
-				++point, ++i;
+			/* Copy replacement string with bounds checking using helper */
+			point = buf_append_safe( point, i, buf, MAX_STRING_LENGTH, 10 );
+			if ( point == NULL ) {
+				bug( "act2: replacement string overflow", 0 );
+				break;
+			}
 		}
 
-		*point++ = '\n';
-		*point++ = '\r';
+		/* Safely add newline using helper */
+		if ( buf_has_space( point, buf, MAX_STRING_LENGTH, 2, 0 ) && point != NULL ) {
+			*point++ = '\n';
+			*point++ = '\r';
+		}
 
 		if ( is_fam ) {
 			if ( to->in_room != ch->in_room && familiar != NULL &&

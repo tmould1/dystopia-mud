@@ -62,12 +62,18 @@ void save_char_obj_backup( CHAR_DATA *ch ) {
 	db_player_save( ch );
 
 	/* Copy the .db file to backup/ directory under db/players/ */
-	snprintf( src, sizeof( src ), "%s%splayers%s%s.db",
+	if ( snprintf( src, sizeof( src ), "%s%splayers%s%s.db",
 		mud_db_dir, PATH_SEPARATOR, PATH_SEPARATOR,
-		capitalize( ch->pcdata->switchname ) );
-	snprintf( dst, sizeof( dst ), "%s%splayers%sbackup%s%s.db",
+		capitalize( ch->pcdata->switchname ) ) >= (int)sizeof( src ) ) {
+		bug( "backup_char: source path truncated", 0 );
+		return;
+	}
+	if ( snprintf( dst, sizeof( dst ), "%s%splayers%sbackup%s%s.db",
 		mud_db_dir, PATH_SEPARATOR, PATH_SEPARATOR, PATH_SEPARATOR,
-		capitalize( ch->pcdata->switchname ) );
+		capitalize( ch->pcdata->switchname ) ) >= (int)sizeof( dst ) ) {
+		bug( "backup_char: destination path truncated", 0 );
+		return;
+	}
 
 	fin = fopen( src, "rb" );
 	if ( !fin )

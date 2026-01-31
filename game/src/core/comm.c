@@ -1661,12 +1661,14 @@ static const char *lookup_color( char code ) {
 void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 	static char output[32000];
 	char *ptr;
+	char *output_end;
 	int i = 0;
 	const char *ansi;
 
 	/* clear the output buffer, and set the pointer */
 	output[0] = '\0';
 	ptr = output;
+	output_end = output + sizeof(output) - 20;  /* Reserve space for final ANSI reset + safety margin */
 
 	if ( length <= 0 )
 		length = (int) strlen( txt );
@@ -1684,6 +1686,12 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 	}
 
 	while ( *txt != '\0' && i++ < length ) {
+		/* Check for buffer space before processing */
+		if ( ptr >= output_end ) {
+			bug( "write_to_buffer: output buffer overflow, truncating", 0 );
+			break;
+		}
+
 		if ( *txt != '#' ) {
 			*ptr++ = *txt++;
 			continue;
@@ -1698,22 +1706,25 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		/* Check for special character escapes */
 		switch ( *txt ) {
 		case '#':
-			*ptr++ = '#';
+			if ( ptr < output_end )
+				*ptr++ = '#';
 			txt++;
 			continue;
 		case '-':
-			*ptr++ = '~';
+			if ( ptr < output_end )
+				*ptr++ = '~';
 			txt++;
 			continue;
 		case '+':
-			*ptr++ = '%';
+			if ( ptr < output_end )
+				*ptr++ = '%';
 			txt++;
 			continue;
 		}
 
 		/* Check color lookup table */
 		if ( ( ansi = lookup_color( *txt ) ) != NULL ) {
-			while ( *ansi )
+			while ( *ansi && ptr < output_end )
 				*ptr++ = *ansi++;
 			txt++;
 			continue;
@@ -1723,32 +1734,35 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		switch ( *txt ) {
 		case 's': /* Random color */
 			ansi = random_colors[number_range( 0, NUM_RANDOM_COLORS - 1 )];
-			while ( *ansi )
+			while ( *ansi && ptr < output_end )
 				*ptr++ = *ansi++;
 			txt++;
 			break;
 		case 'x': /* 256-color: #x### */
 			if ( isdigit( txt[1] ) && isdigit( txt[2] ) && isdigit( txt[3] ) ) {
-				*ptr++ = '\033';
-				*ptr++ = '[';
-				*ptr++ = '0';
-				*ptr++ = ';';
-				*ptr++ = '3';
-				*ptr++ = '8';
-				*ptr++ = ';';
-				*ptr++ = '5';
-				*ptr++ = ';';
-				*ptr++ = txt[1];
-				*ptr++ = txt[2];
-				*ptr++ = txt[3];
-				*ptr++ = 'm';
+				/* Need 14 bytes for ANSI sequence */
+				if ( ptr + 14 < output_end ) {
+					*ptr++ = '\033';
+					*ptr++ = '[';
+					*ptr++ = '0';
+					*ptr++ = ';';
+					*ptr++ = '3';
+					*ptr++ = '8';
+					*ptr++ = ';';
+					*ptr++ = '5';
+					*ptr++ = ';';
+					*ptr++ = txt[1];
+					*ptr++ = txt[2];
+					*ptr++ = txt[3];
+					*ptr++ = 'm';
+				}
 				txt += 4;
 			} else {
 				txt++;
 			}
 			break;
 		case 'M': /* MXP Secure line start */
-			if ( d->mxp_enabled ) {
+			if ( d->mxp_enabled && ptr + 4 < output_end ) {
 				*ptr++ = '\033';
 				*ptr++ = '[';
 				*ptr++ = '1';
@@ -1757,29 +1771,29 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 			txt++;
 			break;
 		case '<': /* MXP entity escape for < */
-			if ( d->mxp_enabled ) {
+			if ( d->mxp_enabled && ptr + 4 < output_end ) {
 				*ptr++ = '&';
 				*ptr++ = 'l';
 				*ptr++ = 't';
 				*ptr++ = ';';
-			} else {
+			} else if ( ptr < output_end ) {
 				*ptr++ = '<';
 			}
 			txt++;
 			break;
 		case '>': /* MXP entity escape for > */
-			if ( d->mxp_enabled ) {
+			if ( d->mxp_enabled && ptr + 4 < output_end ) {
 				*ptr++ = '&';
 				*ptr++ = 'g';
 				*ptr++ = 't';
 				*ptr++ = ';';
-			} else {
+			} else if ( ptr < output_end ) {
 				*ptr++ = '>';
 			}
 			txt++;
 			break;
 		case ']': /* MXP Locked line (reset) */
-			if ( d->mxp_enabled ) {
+			if ( d->mxp_enabled && ptr + 4 < output_end ) {
 				*ptr++ = '\033';
 				*ptr++ = '[';
 				*ptr++ = '2';
@@ -1794,11 +1808,13 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		}
 	}
 
-	/* Terminate with reset color */
-	*ptr++ = '\033';
-	*ptr++ = '[';
-	*ptr++ = '0';
-	*ptr++ = 'm';
+	/* Terminate with reset color (we reserved space for this) */
+	if ( ptr + 4 < output + sizeof(output) ) {
+		*ptr++ = '\033';
+		*ptr++ = '[';
+		*ptr++ = '0';
+		*ptr++ = 'm';
+	}
 	*ptr = '\0';
 
 	length = (int) strlen( output );

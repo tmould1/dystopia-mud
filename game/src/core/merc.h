@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
 /* Windows compatibility - must come before POSIX headers */
 #include "compat.h"
@@ -4432,6 +4434,36 @@ void divide5_to_char args( ( CHAR_DATA * ch ) );
 void divide6_to_char args( ( CHAR_DATA * ch ) );
 void stc args( ( const char *txt, CHAR_DATA *ch ) );
 void cent_to_char args( ( char *txt, CHAR_DATA *ch ) );
+
+/*
+ * Buffer-safe string copy helpers - prevent buffer overflows from color codes
+ * Use these when building strings that may contain xterm color codes like #x###
+ * which expand significantly during output processing.
+ */
+
+/*
+ * Safe string copy into a buffer with bounds checking.
+ * Returns updated pointer, or NULL if buffer full.
+ * margin: bytes to reserve at end of buffer (for terminators, etc.)
+ */
+static inline char *buf_append_safe( char *dest, const char *src,
+                                     char *buf_start, size_t buf_size, size_t margin ) {
+	char *buf_end = buf_start + buf_size - margin;
+	if ( dest >= buf_end || dest < buf_start )
+		return NULL;
+	while ( *src != '\0' && dest < buf_end )
+		*dest++ = *src++;
+	return dest;
+}
+
+/*
+ * Check if there's room in buffer for at least 'needed' bytes.
+ * margin: bytes to reserve at end of buffer.
+ */
+static inline bool buf_has_space( const char *ptr, const char *buf_start,
+                                   size_t buf_size, size_t needed, size_t margin ) {
+	return ( ptr + needed + margin ) <= ( buf_start + buf_size );
+}
 
 /* prototypes from interp.c */
 void load_disabled args( (void) );
