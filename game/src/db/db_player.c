@@ -1693,6 +1693,14 @@ static void load_player_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		obj->value[2] = sqlite3_column_int( obj_stmt, col++ );
 		obj->value[3] = sqlite3_column_int( obj_stmt, col++ );
 
+		/* Clamp liquid index for drink containers and fountains */
+		if ( ( obj->item_type == ITEM_DRINK_CON || obj->item_type == ITEM_FOUNTAIN )
+				&& ( obj->value[2] < 0 || obj->value[2] >= LIQ_MAX ) ) {
+			bug( "load_player_objects: bad liquid %d, clamping to water",
+				obj->value[2] );
+			obj->value[2] = 0;
+		}
+
 		/* Look up the object's prototype */
 		obj->pIndexData = get_obj_index( vnum );
 		if ( !obj->pIndexData )

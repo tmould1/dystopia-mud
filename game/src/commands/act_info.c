@@ -1406,28 +1406,34 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 			char_to_room( ch, location );
 			break;
 
-		case ITEM_DRINK_CON:
+		case ITEM_DRINK_CON: {
+			int liquid;
 			if ( obj->value[1] <= 0 ) {
 				send_to_char( "It is empty.\n\r", ch );
 				break;
 			}
 
+			liquid = obj->value[2];
+			if ( liquid < 0 || liquid >= LIQ_MAX )
+				liquid = 0;
+
 			if ( obj->value[1] < obj->value[0] / 5 )
-				sprintf( buf, "There is a little %s liquid left in it.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "There is a little %s liquid left in it.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] < obj->value[0] / 4 )
-				sprintf( buf, "It contains a small about of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "It contains a small about of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] < obj->value[0] / 3 )
-				sprintf( buf, "It's about a third full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "It's about a third full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] < obj->value[0] / 2 )
-				sprintf( buf, "It's about half full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "It's about half full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] < obj->value[0] )
-				sprintf( buf, "It is almost full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "It is almost full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] == obj->value[0] )
-				sprintf( buf, "It's completely full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "It's completely full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else
-				sprintf( buf, "Somehow it is MORE than full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "Somehow it is MORE than full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			send_to_char( buf, ch );
 			break;
+		}
 
 		case ITEM_CONTAINER:
 		case ITEM_CORPSE_NPC:
@@ -3104,27 +3110,32 @@ void do_inventory( CHAR_DATA *ch, char *argument ) {
 			char_to_room( ch, location );
 			break;
 
-		case ITEM_DRINK_CON:
+		case ITEM_DRINK_CON: {
+			int liquid;
 			if ( obj->value[1] <= 0 ) {
 				send_to_char( "You are empty.\n\r", ch );
 				break;
 			}
+			liquid = obj->value[2];
+			if ( liquid < 0 || liquid >= LIQ_MAX )
+				liquid = 0;
 			if ( obj->value[1] < obj->value[0] / 5 )
-				sprintf( buf, "There is a little %s liquid left in you.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "There is a little %s liquid left in you.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] < obj->value[0] / 4 )
-				sprintf( buf, "You contain a small about of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "You contain a small about of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] < obj->value[0] / 3 )
-				sprintf( buf, "You're about a third full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "You're about a third full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] < obj->value[0] / 2 )
-				sprintf( buf, "You're about half full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "You're about half full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] < obj->value[0] )
-				sprintf( buf, "You are almost full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "You are almost full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else if ( obj->value[1] == obj->value[0] )
-				sprintf( buf, "You're completely full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "You're completely full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			else
-				sprintf( buf, "Somehow you are MORE than full of %s liquid.\n\r", liq_table[obj->value[2]].liq_color );
+				sprintf( buf, "Somehow you are MORE than full of %s liquid.\n\r", liq_table[liquid].liq_color );
 			send_to_char( buf, ch );
 			break;
+		}
 
 		case ITEM_CONTAINER:
 		case ITEM_CORPSE_NPC:

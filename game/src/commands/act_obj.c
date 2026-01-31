@@ -783,6 +783,8 @@ void do_fill( CHAR_DATA *ch, char *argument ) {
 	obj->value[2] = fountain->value[2];
 	obj->value[1] = obj->value[0];
 	liquid = obj->value[2];
+	if ( liquid < 0 || liquid >= LIQ_MAX )
+		liquid = obj->value[2] = 0;
 	act( "$n fills $p with $T.", ch, obj, liq_table[liquid].liq_name, TO_ROOM );
 	act( "You fill $p with $T.", ch, obj, liq_table[liquid].liq_name, TO_CHAR );
 	return;
@@ -827,7 +829,7 @@ void do_drink( CHAR_DATA *ch, char *argument ) {
 		do_quaff( ch, obj->name );
 		return;
 	case ITEM_FOUNTAIN:
-		if ( ( liquid = obj->value[2] ) >= LIQ_MAX ) {
+		if ( ( liquid = obj->value[2] ) < 0 || liquid >= LIQ_MAX ) {
 			bug( "Do_drink: bad liquid number %d.", liquid );
 			liquid = obj->value[2] = 0;
 		}
@@ -847,7 +849,7 @@ void do_drink( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		if ( liquid != 13 && liquid != 16 && liquid != 17 && liquid != 18 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+		if ( liquid != 13 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 			send_to_char( "You can only drink blood.\n\r", ch );
 			break;
 		}
@@ -906,7 +908,7 @@ void do_drink( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		if ( ( liquid = obj->value[2] ) >= LIQ_MAX ) {
+		if ( ( liquid = obj->value[2] ) < 0 || liquid >= LIQ_MAX ) {
 			bug( "Do_drink: bad liquid number %d.", liquid );
 			liquid = obj->value[2] = 0;
 		}
@@ -999,8 +1001,8 @@ void do_empty( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		if ( ( liquid = obj->value[2] ) >= LIQ_MAX ) {
-			bug( "Do_drink: bad liquid number %d.", liquid );
+		if ( ( liquid = obj->value[2] ) < 0 || liquid >= LIQ_MAX ) {
+			bug( "Do_empty: bad liquid number %d.", liquid );
 			liquid = obj->value[2] = 0;
 		}
 
