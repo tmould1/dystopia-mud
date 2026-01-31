@@ -49,7 +49,7 @@
  * MXP Buffer sizes
  */
 #define MXP_TAG_MAX_LEN 256	 /* Max length of a single MXP tag */
-#define MXP_BUF_MAX_LEN 4096 /* Max length for MXP formatted output */
+#define MXP_BUF_MAX_LEN 16384 /* Max length for MXP formatted output (needs to hold MAX_STRING_LENGTH + MXP markup) */
 
 /*
  * Function prototypes
