@@ -14,17 +14,6 @@ from .models import (
 )
 
 
-def strip_color_codes(text: str) -> str:
-    """Remove MUD color codes from text."""
-    # Handle [#7-#0] style bracketed codes first
-    text = re.sub(r'\[[#\d\-]+\]', '', text)
-    # Common patterns: #R, #G, #B, #W, #0, #n (reset), etc.
-    text = re.sub(r'#[0-9a-zA-Z]', '', text)
-    # Handle ^M style codes
-    text = re.sub(r'\^[A-Za-z]', '', text)
-    return text.strip()
-
-
 def read_tilde_string(lines: List[str], idx: int) -> Tuple[str, int]:
     """Read a tilde-terminated string from lines, starting at idx."""
     result = []
@@ -68,19 +57,15 @@ def parse_mobiles(lines: List[str], start_idx: int, area: Area) -> int:
 
             # Read name (keywords), tilde-terminated
             name, idx = read_tilde_string(lines, idx)
-            name = strip_color_codes(name)
 
             # Read short description
             short_descr, idx = read_tilde_string(lines, idx)
-            short_descr = strip_color_codes(short_descr)
 
             # Read long description
             long_descr, idx = read_tilde_string(lines, idx)
-            long_descr = strip_color_codes(long_descr)
 
             # Read detailed description
             description, idx = read_tilde_string(lines, idx)
-            description = strip_color_codes(description)
 
             # Read stats line 1: act affected_by alignment letter
             if idx < len(lines):
@@ -167,15 +152,12 @@ def parse_objects(lines: List[str], start_idx: int, area: Area) -> int:
 
             # Read name (keywords)
             name, idx = read_tilde_string(lines, idx)
-            name = strip_color_codes(name)
 
             # Read short description
             short_descr, idx = read_tilde_string(lines, idx)
-            short_descr = strip_color_codes(short_descr)
 
             # Read long description
             long_descr, idx = read_tilde_string(lines, idx)
-            long_descr = strip_color_codes(long_descr)
 
             # Read action description (often empty/tilde)
             _, idx = read_tilde_string(lines, idx)
@@ -345,7 +327,6 @@ def parse_rooms(lines: List[str], start_idx: int, area: Area) -> int:
 
             # Read room name (tilde-terminated)
             room_name, idx = read_tilde_string(lines, idx)
-            room_name = strip_color_codes(room_name)
 
             # Read room description (tilde-terminated)
             room_desc, idx = read_tilde_string(lines, idx)
@@ -582,7 +563,7 @@ def parse_area_file(filepath: Path) -> Optional[Area]:
                 idx += 1
 
             area = Area(
-                name=strip_color_codes(name),
+                name=name,
                 filename=filepath.name,
                 lvnum=lvnum,
                 uvnum=uvnum,
