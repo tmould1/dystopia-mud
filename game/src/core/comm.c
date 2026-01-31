@@ -248,6 +248,18 @@ int main( int argc, char **argv ) {
 		extern pthread_mutex_t memory_mutex;
 		InitializeCriticalSection( &memory_mutex );
 	}
+#else
+	/* Initialize memory mutex as recursive to prevent deadlock in crash handler.
+	 * If a crash occurs while holding the mutex, the signal handler needs to
+	 * be able to allocate memory for crash logging without deadlocking. */
+	{
+		extern pthread_mutex_t memory_mutex;
+		pthread_mutexattr_t attr;
+		pthread_mutexattr_init( &attr );
+		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE );
+		pthread_mutex_init( &memory_mutex, &attr );
+		pthread_mutexattr_destroy( &attr );
+	}
 #endif
 
 	/*
