@@ -27,9 +27,10 @@ crash.txt
 build_log.txt
 build_output.txt
 
-# IDE/Editor (in game/build/)
+# IDE/Editor and generated build files (in game/build/)
 game/build/.vscode/
 game/build/.vs/
+game/build/Makefile
 game/build/dystopia.sln
 game/build/dystopia.vcxproj
 game/build/dystopia.vcxproj.filters
