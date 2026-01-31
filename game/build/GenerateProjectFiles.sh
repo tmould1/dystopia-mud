@@ -16,8 +16,8 @@ echo " Dystopia MUD - Project File Generator"
 echo "============================================================"
 echo ""
 
-# Navigate to script directory (project root)
-cd "$(dirname "$0")"
+# Navigate to game/ directory (parent of build/ where this script lives)
+cd "$(dirname "$0")/.."
 
 # Source subdirectories
 SUBDIRS="core classes combat commands world systems db"
