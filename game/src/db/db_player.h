@@ -25,3 +25,4 @@ bool db_player_load_short( DESCRIPTOR_DATA *d, char *name );
 bool db_player_exists( const char *name );
 
 #endif /* DB_PLAYER_H */
+CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name );

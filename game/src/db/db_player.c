@@ -993,7 +993,7 @@ void db_player_save( CHAR_DATA *ch ) {
  * This mirrors the init block in load_char_obj() from save.c.
  * Returns the allocated CHAR_DATA.
  */
-static CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
+CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	static PC_DATA pcdata_zero;
 	CHAR_DATA *ch;
 	char *strtime;

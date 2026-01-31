@@ -143,10 +143,10 @@ OBJ_DATA *obj_free;
 PC_DATA *pcdata_free;
 BAN_DATA *ban_free;
 
-char bug_buf[2 * MAX_INPUT_LENGTH];
+char bug_buf[MAX_STRING_LENGTH];
 CHAR_DATA *char_list;
 char *help_greeting;
-char log_buf[2 * MAX_INPUT_LENGTH];
+char log_buf[MAX_STRING_LENGTH];
 KILL_DATA kill_table[MAX_LEVEL];
 OBJ_DATA *object_list;
 TIME_INFO_DATA time_info;
