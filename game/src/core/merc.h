@@ -3902,6 +3902,7 @@ DECLARE_DO_FUN( do_recite );
 DECLARE_DO_FUN( do_regenerate );
 DECLARE_DO_FUN( do_release );
 DECLARE_DO_FUN( do_relevel );
+DECLARE_DO_FUN( do_superadmin );
 DECLARE_DO_FUN( do_nike );
 DECLARE_DO_FUN( do_hreload );
 DECLARE_DO_FUN( do_remove );

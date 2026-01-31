@@ -121,6 +121,10 @@ static const char *GAME_SCHEMA_SQL =
 	"CREATE TABLE IF NOT EXISTS ability_config ("
 	"  key   TEXT PRIMARY KEY,"
 	"  value INTEGER NOT NULL"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS super_admins ("
+	"  name  TEXT PRIMARY KEY COLLATE NOCASE"
 	");";
 
 
@@ -1047,4 +1051,95 @@ void db_game_save_ability_config( void ) {
 
 	sqlite3_finalize( stmt );
 	db_commit( game_db );
+}
+
+
+/*
+ * Super admins (game.db)
+ * Character names that can use the relevel command for instant admin access.
+ * This allows forks to configure their own admins without modifying code.
+ */
+bool db_game_is_super_admin( const char *name ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT 1 FROM super_admins WHERE name = ? LIMIT 1";
+	bool found = FALSE;
+
+	if ( !game_db || !name || !name[0] )
+		return FALSE;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return FALSE;
+
+	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
+
+	if ( sqlite3_step( stmt ) == SQLITE_ROW )
+		found = TRUE;
+
+	sqlite3_finalize( stmt );
+	return found;
+}
+
+void db_game_add_super_admin( const char *name ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "INSERT OR IGNORE INTO super_admins (name) VALUES (?)";
+
+	if ( !game_db || !name || !name[0] )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
+	sqlite3_step( stmt );
+	sqlite3_finalize( stmt );
+}
+
+void db_game_remove_super_admin( const char *name ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "DELETE FROM super_admins WHERE name = ?";
+
+	if ( !game_db || !name || !name[0] )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
+	sqlite3_step( stmt );
+	sqlite3_finalize( stmt );
+}
+
+void db_game_list_super_admins( CHAR_DATA *ch ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT name FROM super_admins ORDER BY name";
+	int count = 0;
+
+	if ( !game_db ) {
+		send_to_char( "Database not available.\n\r", ch );
+		return;
+	}
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		send_to_char( "Database error.\n\r", ch );
+		return;
+	}
+
+	send_to_char( "#GSuperadmin list:#n\n\r", ch );
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		char buf[MAX_STRING_LENGTH];
+		snprintf( buf, sizeof( buf ), "  %s\n\r", col_text( stmt, 0 ) );
+		send_to_char( buf, ch );
+		count++;
+	}
+
+	sqlite3_finalize( stmt );
+
+	if ( count == 0 )
+		send_to_char( "  (none)\n\r", ch );
+	else {
+		char buf[MAX_STRING_LENGTH];
+		snprintf( buf, sizeof( buf ), "#wTotal: %d#n\n\r", count );
+		send_to_char( buf, ch );
+	}
 }

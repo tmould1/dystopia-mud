@@ -65,4 +65,10 @@ void db_game_save_balance( void );
 void db_game_load_ability_config( void );
 void db_game_save_ability_config( void );
 
+/* Super admins (game.db) - character names with relevel access */
+bool db_game_is_super_admin( const char *name );
+void db_game_add_super_admin( const char *name );
+void db_game_remove_super_admin( const char *name );
+void db_game_list_super_admins( CHAR_DATA *ch );
+
 #endif /* DB_GAME_H */

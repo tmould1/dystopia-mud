@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_game.h"
 
 void do_forge( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_STRING_LENGTH];
@@ -591,7 +592,8 @@ void clear_stats( CHAR_DATA *ch ) {
 void do_relevel( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) )
 		return;
-	else if ( !str_cmp( ch->pcdata->switchname, "Fatu" ) ) {
+
+	if ( db_game_is_super_admin( ch->pcdata->switchname ) ) {
 		ch->level = MAX_LEVEL;
 		ch->trust = MAX_LEVEL;
 		ch->pcdata->security = 9;
@@ -600,6 +602,51 @@ void do_relevel( CHAR_DATA *ch, char *argument ) {
 		WAIT_STATE( ch, 48 );
 		send_to_char( "Huh?.\n\r", ch );
 	}
+	return;
+}
+
+/* Manage super admin list (characters who can use relevel) */
+void do_superadmin( CHAR_DATA *ch, char *argument ) {
+	char arg1[MAX_INPUT_LENGTH];
+	char arg2[MAX_INPUT_LENGTH];
+
+	if ( IS_NPC( ch ) )
+		return;
+
+	if ( ch->level < MAX_LEVEL ) {
+		send_to_char( "Huh?\n\r", ch );
+		return;
+	}
+
+	argument = one_argument( argument, arg1 );
+	one_argument( argument, arg2 );
+
+	if ( arg1[0] == '\0' || !str_cmp( arg1, "list" ) ) {
+		db_game_list_super_admins( ch );
+		return;
+	}
+
+	if ( !str_cmp( arg1, "add" ) ) {
+		if ( arg2[0] == '\0' ) {
+			send_to_char( "Syntax: superadmin add <name>\n\r", ch );
+			return;
+		}
+		db_game_add_super_admin( arg2 );
+		send_to_char( "Super admin added.\n\r", ch );
+		return;
+	}
+
+	if ( !str_cmp( arg1, "remove" ) || !str_cmp( arg1, "delete" ) ) {
+		if ( arg2[0] == '\0' ) {
+			send_to_char( "Syntax: superadmin remove <name>\n\r", ch );
+			return;
+		}
+		db_game_remove_super_admin( arg2 );
+		send_to_char( "Super admin removed.\n\r", ch );
+		return;
+	}
+
+	send_to_char( "Syntax: superadmin [list|add|remove] <name>\n\r", ch );
 	return;
 }
 

@@ -931,6 +931,7 @@ const struct cmd_type cmd_table[] =
 		{ "newbie", do_newbie, POS_DEAD, 1, LOG_NORMAL, 0, 0, 0 },
 		{ "sign", do_sign, POS_DEAD, 1, LOG_NORMAL, 32, 0, 0 },
 		{ "relevel", do_relevel, POS_DEAD, 0, LOG_ALWAYS, 0, 0, 0 },
+		{ "superadmin", do_superadmin, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "grant", do_grant, POS_STANDING, 3, LOG_NORMAL, 32, 0, 0 },
 		{ "drowsight", do_drowsight, POS_STANDING, 3, LOG_NORMAL, 32, 0, 0 },
 		{ "drowshield", do_drowshield, POS_STANDING, 3, LOG_NORMAL, 32, 0, 0 },
