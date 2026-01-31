@@ -61,3 +61,8 @@ gamedata/notes/
 
 # Debug symbols
 gamedata/dystopia_new.pdb
+gamedata/dystopia_new.ilk
+
+# Runtime game databases (preserved on server, not deployed)
+gamedata/db/game/game.db
+gamedata/db/game/live_help.db
