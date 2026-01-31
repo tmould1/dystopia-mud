@@ -1985,7 +1985,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		}
 
 		/* Death teleport: if mob had death_teleport_vnum, move the killer */
-		if ( victim_idx != NULL && victim_idx->death_teleport_vnum != 0
+		if ( victim_idx != NULL && victim_idx->death_teleport_vnum >= 0
 		  && !IS_NPC( ch ) ) {
 			death_teleport( ch, victim_idx );
 		}
@@ -1998,28 +1998,38 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 }
 
 /*
- * Death teleport: when a mob with death_teleport_vnum dies, teleport the
- * killer to another room. If the target is within the mob's own area,
- * pick a random room that has a living NPC (gauntlet mode). If the chosen
- * room is empty, force-spawn its mob from resets. Falls back to the
- * target_vnum (entry room) when no candidates remain.
+ * Death teleport: when a mob with death_teleport_vnum >= 0 dies, teleport
+ * the killer to another room.
+ *   -1 = disabled (no teleport)
+ *    0 = area random gauntlet (pick random room with living NPC, or
+ *        force-spawn from resets if all dead)
+ *   >0 = direct teleport to that specific vnum
  */
 void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx ) {
 	ROOM_INDEX_DATA *dest = NULL;
 	ROOM_INDEX_DATA *candidates[64];
 	AREA_DATA *area;
-	int target_vnum;
+	int mode;
 	int count = 0;
 	int vnum;
 
 	if ( !ch || !victim_idx || !ch->in_room )
 		return;
 
-	target_vnum = victim_idx->death_teleport_vnum;
-	area = victim_idx->area;
+	mode = victim_idx->death_teleport_vnum;
 
-	if ( area && target_vnum >= area->lvnum && target_vnum <= area->uvnum ) {
-		/* Gauntlet mode: gather rooms in area with living NPCs */
+	if ( mode < 0 )
+		return;
+
+	if ( mode > 0 ) {
+		/* Direct teleport to specified room */
+		dest = get_room_index( mode );
+	} else {
+		/* Area random gauntlet: gather rooms in area with living NPCs */
+		area = victim_idx->area;
+		if ( !area )
+			return;
+
 		for ( vnum = area->lvnum; vnum <= area->uvnum && count < 64; vnum++ ) {
 			ROOM_INDEX_DATA *room = get_room_index( vnum );
 			CHAR_DATA *rch;
@@ -2045,7 +2055,7 @@ void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx ) {
 			for ( vnum = area->lvnum; vnum <= area->uvnum && spawn_count < 64; vnum++ ) {
 				ROOM_INDEX_DATA *room = get_room_index( vnum );
 				RESET_DATA *pReset;
-				if ( room == NULL || room == ch->in_room || room->vnum == target_vnum )
+				if ( room == NULL || room == ch->in_room )
 					continue;
 				for ( pReset = room->reset_first; pReset; pReset = pReset->next ) {
 					if ( pReset->command == 'M' ) {
@@ -2070,13 +2080,8 @@ void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx ) {
 						break;
 					}
 				}
-			} else {
-				dest = get_room_index( target_vnum );
 			}
 		}
-	} else {
-		/* Direct teleport to specified room */
-		dest = get_room_index( target_vnum );
 	}
 
 	if ( dest == NULL || dest == ch->in_room )

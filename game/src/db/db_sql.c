@@ -75,7 +75,7 @@ static const char *SCHEMA_SQL =
 	"  hitnodice   INTEGER, hitsizedice INTEGER, hitplus INTEGER,"
 	"  damnodice   INTEGER, damsizedice INTEGER, damplus INTEGER,"
 	"  gold        INTEGER, sex INTEGER,"
-	"  death_teleport_vnum INTEGER DEFAULT 0,"
+	"  death_teleport_vnum INTEGER DEFAULT -1,"
 	"  death_teleport_msg TEXT DEFAULT NULL,"
 	"  death_teleport_msg_room TEXT DEFAULT NULL"
 	");"
@@ -367,7 +367,7 @@ static sqlite3 *db_sql_open_area( const char *area_filename ) {
 
 	/* Migrations for existing databases - ignore errors if columns exist */
 	sqlite3_exec( db,
-		"ALTER TABLE mobiles ADD COLUMN death_teleport_vnum INTEGER DEFAULT 0;",
+		"ALTER TABLE mobiles ADD COLUMN death_teleport_vnum INTEGER DEFAULT -1;",
 		NULL, NULL, NULL );
 	sqlite3_exec( db,
 		"ALTER TABLE mobiles ADD COLUMN death_teleport_msg TEXT DEFAULT NULL;",

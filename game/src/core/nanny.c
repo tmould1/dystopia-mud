@@ -5,6 +5,7 @@
  ***************************************************************************/
 
 #include "merc.h"
+#include "../db/db_player.h"
 
 /* External variables from comm.c */
 extern char echo_off_str[];
@@ -162,6 +163,18 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		fOld = load_char_short( d, argument );
 		ch = d->character;
 
+		/* For new players, d->character is NULL - create properly initialized character */
+		if ( !fOld || ch == NULL ) {
+			/* New player - use proper initialization function */
+			init_char_for_load( d, argument );
+			ch = d->character;
+
+			sprintf( buf, " You want %s engraved on your tombstone (Y/N)? ", argument );
+			write_to_buffer( d, buf, 0 );
+			d->connected = CON_CONFIRM_NEW_NAME;
+			return;
+		}
+
 		char_age = years_old( ch );
 		if ( IS_SET( ch->act, PLR_DENY ) ) {
 			sprintf( log_buf, "Denying access to %s@%s.", argument, ch->lasthost );
@@ -209,19 +222,11 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 			}
 		}
 
-		if ( fOld ) {
-			/* Old player */
-			write_to_buffer( d, " Please enter password: ", 0 );
-			write_to_buffer( d, echo_off_str, 0 );
-			d->connected = CON_GET_OLD_PASSWORD;
-			return;
-		} else {
-			/* New player */
-			sprintf( buf, " You want %s engraved on your tombstone (Y/N)? ", argument );
-			write_to_buffer( d, buf, 0 );
-			d->connected = CON_CONFIRM_NEW_NAME;
-			return;
-		}
+		/* If we got here, it's an old player */
+		write_to_buffer( d, " Please enter password: ", 0 );
+		write_to_buffer( d, echo_off_str, 0 );
+		d->connected = CON_GET_OLD_PASSWORD;
+		return;
 		break;
 
 	case CON_GET_OLD_PASSWORD:

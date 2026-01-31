@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS mobiles (
   alignment INTEGER, level INTEGER, hitroll INTEGER, ac INTEGER,
   hitnodice INTEGER, hitsizedice INTEGER, hitplus INTEGER,
   damnodice INTEGER, damsizedice INTEGER, damplus INTEGER,
-  gold INTEGER, sex INTEGER, death_teleport_vnum INTEGER DEFAULT 0,
+  gold INTEGER, sex INTEGER, death_teleport_vnum INTEGER DEFAULT -1,
   death_teleport_msg TEXT DEFAULT NULL,
   death_teleport_msg_room TEXT DEFAULT NULL
 );
@@ -142,7 +142,8 @@ c.execute("INSERT INTO exits (room_vnum, direction, description, keyword, exit_i
 # ACT_IS_NPC=1, ACT_SENTINEL=2, ACT_AGGRESSIVE=8, ACT_STAY_AREA=16
 # Entry guard: 1|2|16 = 19 (not aggressive)
 # Others:      1|2|8|16 = 27 (aggressive)
-# All death_teleport_vnum = 40000 (entry room = area pool marker)
+# death_teleport_vnum: -1=disabled, 0=area random gauntlet, >0=direct vnum
+# Regular mobs = 0 (area random), King Kandy = 40000 (direct to entrance)
 
 CANDY_MSG_CHAR = 'A swirl of candy-colored light engulfs you!\n\r'
 CANDY_MSG_ROOM = '$n vanishes in a burst of candy-colored light!'
@@ -156,67 +157,67 @@ mobiles = [
      '#x223the #x034G#x071u#x077m#x071d#x034r#x071o#x077p #x034Guard#n',
      '#x223A guard made of hardened #x034g#x071u#x077m#x071d#x034r#x071o#x077p#x034s #x223stands watch here.#n\n\r',
      'This sentinel is composed entirely of compressed gumdrops in various colors. Its body is translucent, revealing a sticky, sugary interior. Despite its sweet appearance, it looks ready to fight.',
-     19, 0, 0, 40, 10, 50, 8, 8, 400, 4, 4, 40, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     19, 0, 0, 40, 10, 50, 8, 8, 400, 4, 4, 40, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40001, 'gumdrop golem',
      '#x223the #x034G#x071u#x077m#x071d#x034r#x071o#x077p #x071Golem#n',
      '#x223A massive #x071golem #x223of fused #x034g#x071u#x077m#x071d#x034r#x071o#x077p#x034s #x223lumbers about.#n\n\r',
      'Towering above you, this golem is made of thousands of gumdrops fused together into a hulking form. Its fists are dense clusters of hardened candy.',
-     27, 0, 0, 41, 11, 48, 8, 8, 420, 4, 4, 42, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 41, 11, 48, 8, 8, 420, 4, 4, 42, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40002, 'peppermint soldier',
      '#x223the #x231Peppermint #x196Soldier#n',
      '#x223A soldier in #x231peppermint #x223armor patrols aggressively.#n\n\r',
      'Clad in armor forged from hardened peppermint, this soldier carries a sharpened candy cane spear. A cool minty aura surrounds it.',
-     27, 0, 0, 41, 11, 46, 8, 9, 430, 4, 5, 44, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 41, 11, 46, 8, 9, 430, 4, 5, 44, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40003, 'licorice lord',
      '#x223the #x053Licorice #x090Lord#n',
      '#x223A dark figure wrapped in #x053licorice #x090tentacles #x223lurks here.#n\n\r',
      'This creature appears to be made entirely of black licorice, its body shifting and reforming constantly. Whip-like tendrils of licorice lash out from its form.',
-     27, 0, 0, 42, 12, 44, 9, 9, 450, 5, 5, 46, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 42, 12, 44, 9, 9, 450, 5, 5, 46, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40004, 'gingerbread warrior',
      '#x223the #x136Gingerbread #x172Warrior#n',
      '#x223A massive #x136gingerbread #x172warrior #x223stands ready for battle.#n\n\r',
      'This warrior is carved from a single enormous slab of gingerbread, decorated with fierce frosting war paint. It wields a candy cane greataxe.',
-     27, 0, 0, 42, 12, 42, 9, 9, 460, 5, 5, 48, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 42, 12, 42, 9, 9, 460, 5, 5, 48, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40005, 'candy cane sentinel',
      '#x223the #x196Candy #x231Cane #x160Sentinel#n',
      '#x223A #x196sentinel #x223forged from twisted #x231candy #x196canes #x223blocks your path.#n\n\r',
      'This towering sentinel is made of intertwined candy canes, red and white stripes spiraling along its crystalline form. It crackles with sugary energy.',
-     27, 0, 0, 43, 13, 40, 9, 10, 480, 5, 5, 50, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 43, 13, 40, 9, 10, 480, 5, 5, 50, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40006, 'chocolate knight',
      '#x223the #x058Chocolate #x094Knight#n',
      '#x223A knight in dark #x058chocolate #x094armor #x223challenges all comers.#n\n\r',
      'Encased in armor of tempered dark chocolate, this knight is an imposing figure. Its shield bears a cocoa bean crest, and its sword drips with molten chocolate.',
-     27, 0, 0, 43, 13, 38, 10, 10, 490, 5, 6, 52, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 43, 13, 38, 10, 10, 490, 5, 6, 52, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40007, 'taffy titan',
      '#x223the #x213T#x218a#x219f#x218f#x213y #x218Titan#n',
      '#x223An enormous #x213t#x218i#x219t#x218a#x213n #x223of stretched #x218taffy #x223fills the space.#n\n\r',
      'This massive creature is made of saltwater taffy, its body constantly stretching and reforming. Blows seem to sink into its elastic form before being hurled back.',
-     27, 0, 0, 43, 14, 36, 10, 10, 500, 5, 6, 54, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 43, 14, 36, 10, 10, 500, 5, 6, 54, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40008, 'lollipop lancer',
      '#x223the #x196L#x208o#x220l#x046l#x033i#x135p#x196o#x208p #x220Lancer#n',
      '#x223A #x220lancer #x223mounted on a #x196g#x208u#x046m#x033m#x135y #x033bear #x223charges forward.#n\n\r',
      'This warrior rides a giant gummy bear mount and carries an enormous lollipop lance. The lance has been sharpened to a razor edge.',
-     27, 0, 0, 44, 14, 34, 10, 10, 520, 6, 6, 56, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 44, 14, 34, 10, 10, 520, 6, 6, 56, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40009, 'marshmallow mauler',
      '#x223the #x231Marshmallow #x253Mauler#n',
      '#x223A hulking #x231marshmallow #x253creature #x223raises enormous fists.#n\n\r',
      'This creature resembles an enormous, slightly charred marshmallow with muscular arms. Despite its soft appearance, its blows land with devastating force.',
-     27, 0, 0, 44, 15, 32, 10, 11, 540, 6, 6, 58, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 44, 15, 32, 10, 11, 540, 6, 6, 58, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40010, 'cotton candy cyclone',
      '#x223the #x218C#x183o#x147t#x111t#x147o#x183n #x218C#x183a#x147n#x111d#x147y #x218Cyclone#n',
      '#x223A whirling vortex of #x218c#x183o#x147t#x111t#x147o#x183n #x218c#x183a#x147n#x111d#x147y #x223tears through the area.#n\n\r',
      'This living tornado of cotton candy spins with incredible force. Shards of crystallized sugar fly from its form like deadly shrapnel.',
-     27, 0, 0, 44, 15, 30, 11, 11, 560, 6, 7, 60, 0, 0, 40000, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
+     27, 0, 0, 44, 15, 30, 11, 11, 560, 6, 7, 60, 0, 0, 0, CANDY_MSG_CHAR, CANDY_MSG_ROOM),
 
     (40011, 'king kandy',
      '#x214K#x220i#x221n#x226g #x214K#x220a#x221n#x226d#x227y#n',
