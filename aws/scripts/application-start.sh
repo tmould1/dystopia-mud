@@ -15,22 +15,29 @@ echo "Game port: $GAME_PORT"
 # Reload systemd in case service file changed
 systemctl daemon-reload
 
-# Start the service
-echo "Starting mudder service..."
-systemctl start mudder
-
-# Give it a moment to start
-sleep 3
-
-# Check if it's running
+# Check if service is already running
 if systemctl is-active --quiet mudder; then
-    echo "Mudder service started successfully"
+    echo "Mudder service is already running"
+    echo "New binary deployed - will be picked up on next copyover"
     systemctl status mudder --no-pager
 else
-    echo "ERROR: Mudder service failed to start"
-    echo "=== Service logs ==="
-    journalctl -u mudder --no-pager -n 50
-    exit 1
+    # Service not running, start it
+    echo "Starting mudder service..."
+    systemctl start mudder
+
+    # Give it a moment to start
+    sleep 3
+
+    # Check if it started successfully
+    if systemctl is-active --quiet mudder; then
+        echo "Mudder service started successfully"
+        systemctl status mudder --no-pager
+    else
+        echo "ERROR: Mudder service failed to start"
+        echo "=== Service logs ==="
+        journalctl -u mudder --no-pager -n 50
+        exit 1
+    fi
 fi
 
 echo "=== ApplicationStart: Complete ==="
