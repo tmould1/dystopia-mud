@@ -550,7 +550,7 @@ Resources:
 
           # Update system and install dependencies (AL2023 uses dnf)
           dnf update -y
-          dnf install -y ruby wget amazon-efs-utils jq nmap-ncat
+          dnf install -y ruby wget amazon-efs-utils jq nmap-ncat libxcrypt-compat
 
           # Install CodeDeploy agent
           cd /tmp
