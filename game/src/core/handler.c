@@ -2531,7 +2531,7 @@ char *affect_loc_name( int location ) {
  * Return ascii name of an affect bit vector.
  */
 char *affect_bit_name( int vector ) {
-	static char buf[512];
+	static char buf[MAX_STRING_LENGTH];
 
 	buf[0] = '\0';
 	if ( vector & AFF_BLIND ) strcat( buf, " blind" );
@@ -2568,7 +2568,7 @@ char *affect_bit_name( int vector ) {
  * Return ascii name of extra flags vector.
  */
 char *extra_bit_name( int extra_flags ) {
-	static char buf[512];
+	static char buf[MAX_STRING_LENGTH];
 
 	buf[0] = '\0';
 	if ( extra_flags & ITEM_GLOW ) strcat( buf, " glow" );

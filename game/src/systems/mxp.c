@@ -1316,7 +1316,7 @@ char *mxp_char_link( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) {
  * If MXP disabled, returns prefix unchanged.
  */
 char *mxp_aura_tag( CHAR_DATA *ch, const char *prefix, const char *tooltip, int sn ) {
-	static char bufs[16][512];
+	static char bufs[16][MAX_STRING_LENGTH];
 	static int idx = 0;
 	char *buf;
 	const char *display_tooltip;
@@ -1365,7 +1365,7 @@ char *mxp_aura_tag( CHAR_DATA *ch, const char *prefix, const char *tooltip, int 
 			had_trailing_space = TRUE;
 		}
 
-		snprintf( buf, 512,
+		snprintf( buf, MAX_STRING_LENGTH,
 			MXP_SECURE_LINE "<SEND hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED "%s",
 			escaped_tooltip, clean_prefix, had_trailing_space ? " " : "" );
 	}

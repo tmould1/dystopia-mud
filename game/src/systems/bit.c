@@ -162,7 +162,7 @@ int flag_value( const struct flag_type *flag_table, char *argument ) {
  Called by:	act_olc.c, olc.c, and olc_save.c.
  ****************************************************************************/
 char *flag_string( const struct flag_type *flag_table, int bits ) {
-	static char buf[512];
+	static char buf[MAX_STRING_LENGTH];
 	int flag;
 
 	buf[0] = '\0';

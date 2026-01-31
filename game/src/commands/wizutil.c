@@ -339,7 +339,7 @@ void do_affects( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 char *plr_bit_name( int arg ) {
-	static char buf[512];
+	static char buf[MAX_STRING_LENGTH];
 
 	buf[0] = '\0';
 
@@ -363,7 +363,7 @@ char *plr_bit_name( int arg ) {
 }
 
 char *extra_plr_bit_name( int arg ) {
-	static char buf[512];
+	static char buf[MAX_STRING_LENGTH];
 
 	buf[0] = '\0';
 
@@ -416,7 +416,7 @@ char *get_position_name( int arg ) {
  * Itemaffect bit names :)
  */
 char *itemaffect_bit_name( int arg ) {
-	static char buf[512];
+	static char buf[MAX_STRING_LENGTH];
 
 	buf[0] = '\0';
 
