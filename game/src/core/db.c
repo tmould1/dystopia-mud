@@ -54,7 +54,6 @@ char *mud_path( const char *dir, const char *filename ) {
 void mud_init_paths( const char *exe_path ) {
 	char *last_sep;
 	char exe_dir[MUD_PATH_MAX];
-	char abs_path[MUD_PATH_MAX];
 	char gamedata_dir[MUD_PATH_MAX];
 
 	/* Get directory containing executable */
@@ -76,14 +75,23 @@ void mud_init_paths( const char *exe_path ) {
 
 	/* Convert to absolute path to ensure consistency across copyover */
 #if defined( WIN32 )
-	if ( _fullpath( abs_path, exe_dir, MUD_PATH_MAX ) != NULL ) {
-		strncpy( exe_dir, abs_path, MUD_PATH_MAX - 1 );
-		exe_dir[MUD_PATH_MAX - 1] = '\0';
+	{
+		char abs_path[MUD_PATH_MAX];
+		if ( _fullpath( abs_path, exe_dir, MUD_PATH_MAX ) != NULL ) {
+			strncpy( exe_dir, abs_path, MUD_PATH_MAX - 1 );
+			exe_dir[MUD_PATH_MAX - 1] = '\0';
+		}
 	}
 #else
-	if ( realpath( exe_dir, abs_path ) != NULL ) {
-		strncpy( exe_dir, abs_path, MUD_PATH_MAX - 1 );
-		exe_dir[MUD_PATH_MAX - 1] = '\0';
+	{
+		/* realpath() on POSIX requires a PATH_MAX buffer (typically 4096 bytes).
+		 * Pass NULL to let it allocate memory, then copy the result. */
+		char *abs_path = realpath( exe_dir, NULL );
+		if ( abs_path != NULL ) {
+			strncpy( exe_dir, abs_path, MUD_PATH_MAX - 1 );
+			exe_dir[MUD_PATH_MAX - 1] = '\0';
+			free( abs_path );
+		}
 	}
 #endif
 
