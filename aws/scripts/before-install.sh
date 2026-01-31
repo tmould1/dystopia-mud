@@ -37,7 +37,7 @@ if ! mountpoint -q /usr/local/mudder/gamedata; then
     # Ensure EFS mount helper is installed
     if ! command -v mount.efs &> /dev/null; then
         echo "Installing amazon-efs-utils..."
-        yum install -y amazon-efs-utils
+        dnf install -y amazon-efs-utils || yum install -y amazon-efs-utils
     fi
 
     # Mount EFS
