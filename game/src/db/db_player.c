@@ -276,6 +276,12 @@ static sqlite3 *db_player_open( const char *name ) {
 		return NULL;
 	}
 
+	/* WAL mode: eliminates journal file create/delete per transaction.
+	 * synchronous=NORMAL: fsync only at WAL checkpoints, not every commit.
+	 * Together these reduce write latency ~5-10x vs defaults. */
+	sqlite3_exec( db, "PRAGMA journal_mode=WAL", NULL, NULL, NULL );
+	sqlite3_exec( db, "PRAGMA synchronous=NORMAL", NULL, NULL, NULL );
+
 	return db;
 }
 

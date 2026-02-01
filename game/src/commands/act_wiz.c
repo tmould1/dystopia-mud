@@ -5768,7 +5768,6 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 	do_restore( ch, "all" );
 	do_force( ch, "all stand" );
 	do_force( ch, "all call all" );
-	do_force( ch, "all save" );
 	do_asave( ch, "changed" );
 
 	/* Headform off - hmm, work on this*/
