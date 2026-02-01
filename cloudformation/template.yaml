@@ -2,6 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   CloudFormation for Dystopia MUD server with CI/CD via GitHub Actions and CodeDeploy.
+  Supports multiple game instances (e.g., main + 5e) on separate ports with shared infrastructure.
   Includes EFS for persistent game data and SSM Parameter Store for configuration.
   **WARNING** This template creates EC2, EFS, VPC and related resources. You will be billed for the AWS resources used.
 
@@ -22,7 +23,8 @@ Metadata:
           - InstanceType
           - KeyName
           - SSHLocation
-          - GamePort
+          - GamePortMain
+          - GamePort5e
       - Label:
           default: "GitHub Configuration"
         Parameters:
@@ -59,10 +61,17 @@ Parameters:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
 
-  GamePort:
-    Description: The port the MUD server listens on
+  GamePortMain:
+    Description: The port the main MUD server instance listens on
     Type: Number
     Default: 8888
+    MinValue: 1024
+    MaxValue: 65535
+
+  GamePort5e:
+    Description: The port the 5e MUD server instance listens on
+    Type: Number
+    Default: 8889
     MinValue: 1024
     MaxValue: 65535
 
@@ -263,10 +272,15 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: !Ref GamePort
-          ToPort: !Ref GamePort
+          FromPort: !Ref GamePortMain
+          ToPort: !Ref GamePortMain
           CidrIp: 0.0.0.0/0
-          Description: MUD game port
+          Description: MUD main game port
+        - IpProtocol: tcp
+          FromPort: !Ref GamePort5e
+          ToPort: !Ref GamePort5e
+          CidrIp: 0.0.0.0/0
+          Description: MUD 5e game port
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
@@ -333,13 +347,21 @@ Resources:
       Value: !Ref WebappDeploymentBucket
       Description: S3 bucket for deployment artifacts
 
-  SSMGamePort:
+  SSMGamePortMain:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: /mudder/game-port
+      Name: /mudder/main/game-port
       Type: String
-      Value: !Ref GamePort
-      Description: MUD server port
+      Value: !Ref GamePortMain
+      Description: Main MUD server port
+
+  SSMGamePort5e:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mudder/5e/game-port
+      Type: String
+      Value: !Ref GamePort5e
+      Description: 5e MUD server port
 
   SSMEFSFileSystemId:
     Type: AWS::SSM::Parameter
@@ -357,13 +379,21 @@ Resources:
       Value: !Ref WebappApplication
       Description: CodeDeploy application name
 
-  SSMCodeDeployGroup:
+  SSMCodeDeployGroupMain:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: /mudder/codedeploy-deployment-group
+      Name: /mudder/main/codedeploy-deployment-group
       Type: String
-      Value: !Ref WebappDeploymentGroup
-      Description: CodeDeploy deployment group name
+      Value: !Ref WebappDeploymentGroupMain
+      Description: CodeDeploy deployment group for main instance
+
+  SSMCodeDeployGroup5e:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mudder/5e/codedeploy-deployment-group
+      Type: String
+      Value: !Ref WebappDeploymentGroup5e
+      Description: CodeDeploy deployment group for 5e instance
 
   SSMAWSRegion:
     Type: AWS::SSM::Parameter
@@ -493,7 +523,7 @@ Resources:
           Value: MudderDeploymentBucket
 
   #============================================================================
-  # CodeDeploy Application and Deployment Group
+  # CodeDeploy Application and Deployment Groups
   #============================================================================
   WebappApplication:
     Type: AWS::CodeDeploy::Application
@@ -501,11 +531,28 @@ Resources:
       ApplicationName: MudderApplication
       ComputePlatform: Server
 
-  WebappDeploymentGroup:
+  WebappDeploymentGroupMain:
     Type: AWS::CodeDeploy::DeploymentGroup
     Properties:
       ApplicationName: !Ref WebappApplication
-      DeploymentGroupName: MudderDeploymentGroup
+      DeploymentGroupName: MudderDeploymentGroup-main
+      ServiceRoleArn: !GetAtt CodeDeployRole.Arn
+      DeploymentConfigName: CodeDeployDefault.OneAtATime
+      Ec2TagFilters:
+        - Key: Application
+          Value: MudderServer
+          Type: KEY_AND_VALUE
+      AutoRollbackConfiguration:
+        Enabled: true
+        Events:
+          - DEPLOYMENT_FAILURE
+          - DEPLOYMENT_STOP_ON_REQUEST
+
+  WebappDeploymentGroup5e:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref WebappApplication
+      DeploymentGroupName: MudderDeploymentGroup-5e
       ServiceRoleArn: !GetAtt CodeDeployRole.Arn
       DeploymentConfigName: CodeDeployDefault.OneAtATime
       Ec2TagFilters:
@@ -562,29 +609,36 @@ Resources:
 
           # Create mudder user and directories
           useradd -r -s /sbin/nologin mudder || true
-          mkdir -p /usr/local/mudder/bin
-          mkdir -p /usr/local/mudder/gamedata
+          mkdir -p /usr/local/mudder/efs
+          mkdir -p /usr/local/mudder/main/bin
+          mkdir -p /usr/local/mudder/5e/bin
 
           # Mount EFS for persistent game data
           EFS_ID="${GameDataFileSystem}"
-          echo "${!EFS_ID}:/ /usr/local/mudder/gamedata efs _netdev,tls,iam 0 0" >> /etc/fstab
+          echo "${!EFS_ID}:/ /usr/local/mudder/efs efs _netdev,tls,iam 0 0" >> /etc/fstab
           mount -a
 
-          # Create persistent directories on EFS (if they don't exist)
-          mkdir -p /usr/local/mudder/gamedata/db/areas
-          mkdir -p /usr/local/mudder/gamedata/db/game
-          mkdir -p /usr/local/mudder/gamedata/db/players/backup
-          mkdir -p /usr/local/mudder/gamedata/log
-          mkdir -p /usr/local/mudder/gamedata/doc
-          mkdir -p /usr/local/mudder/gamedata/run
+          # Create persistent directories on EFS for each instance
+          for INST in main 5e; do
+            mkdir -p /usr/local/mudder/efs/$INST/db/areas
+            mkdir -p /usr/local/mudder/efs/$INST/db/game
+            mkdir -p /usr/local/mudder/efs/$INST/db/players/backup
+            mkdir -p /usr/local/mudder/efs/$INST/log
+            mkdir -p /usr/local/mudder/efs/$INST/doc
+            mkdir -p /usr/local/mudder/efs/$INST/run
+            mkdir -p /usr/local/mudder/efs/$INST/txt
+
+            # Symlink gamedata to EFS subdirectory
+            ln -sf /usr/local/mudder/efs/$INST /usr/local/mudder/$INST/gamedata
+          done
 
           # Set ownership
           chown -R mudder:mudder /usr/local/mudder
 
-          # Create systemd service file
-          cat > /etc/systemd/system/mudder.service << 'EOF'
+          # Create systemd service file for main instance
+          cat > /etc/systemd/system/mudder-main.service << 'EOF'
           [Unit]
-          Description=Dystopia MUD Server
+          Description=Dystopia MUD Server (main)
           After=syslog.target network.target remote-fs.target
           Requires=remote-fs.target
 
@@ -592,8 +646,29 @@ Resources:
           Type=simple
           User=mudder
           Group=mudder
-          WorkingDirectory=/usr/local/mudder/gamedata
-          ExecStart=/usr/local/mudder/gamedata/dystopia ${GamePort}
+          WorkingDirectory=/usr/local/mudder/main/gamedata
+          ExecStart=/usr/local/mudder/main/gamedata/dystopia ${GamePortMain}
+          ExecStop=/bin/kill -TERM $MAINPID
+          Restart=on-failure
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          # Create systemd service file for 5e instance
+          cat > /etc/systemd/system/mudder-5e.service << 'EOF'
+          [Unit]
+          Description=Dystopia MUD Server (5e)
+          After=syslog.target network.target remote-fs.target
+          Requires=remote-fs.target
+
+          [Service]
+          Type=simple
+          User=mudder
+          Group=mudder
+          WorkingDirectory=/usr/local/mudder/5e/gamedata
+          ExecStart=/usr/local/mudder/5e/gamedata/dystopia ${GamePort5e}
           ExecStop=/bin/kill -TERM $MAINPID
           Restart=on-failure
           RestartSec=10
@@ -603,9 +678,10 @@ Resources:
           EOF
 
           systemctl daemon-reload
-          systemctl enable mudder.service
+          systemctl enable mudder-main.service
+          systemctl enable mudder-5e.service
 
-          echo "MUD server setup complete. Waiting for CodeDeploy to deploy the binary."
+          echo "MUD server setup complete. Waiting for CodeDeploy to deploy binaries."
 
 Outputs:
   DeploymentBucket:
@@ -618,9 +694,13 @@ Outputs:
     Description: CodeDeploy application name
     Value: !Ref WebappApplication
 
-  DeploymentGroup:
-    Description: CodeDeploy deployment group
-    Value: !Ref WebappDeploymentGroup
+  DeploymentGroupMain:
+    Description: CodeDeploy deployment group (main instance)
+    Value: !Ref WebappDeploymentGroupMain
+
+  DeploymentGroup5e:
+    Description: CodeDeploy deployment group (5e instance)
+    Value: !Ref WebappDeploymentGroup5e
 
   GitHubIAMRoleArn:
     Description: IAM role ARN for GitHub Actions (add as repository secret AWS_OIDC_ROLE_ARN)
@@ -646,6 +726,10 @@ Outputs:
     Description: Public DNS name of the MUD server
     Value: !GetAtt EC2Instance.PublicDnsName
 
-  GameConnectionString:
-    Description: How to connect to the MUD
-    Value: !Sub "telnet ${EC2Instance.PublicIp} ${GamePort}"
+  MainGameConnectionString:
+    Description: How to connect to the main MUD instance
+    Value: !Sub "telnet ${EC2Instance.PublicIp} ${GamePortMain}"
+
+  FiveEGameConnectionString:
+    Description: How to connect to the 5e MUD instance
+    Value: !Sub "telnet ${EC2Instance.PublicIp} ${GamePort5e}"

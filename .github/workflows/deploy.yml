@@ -7,6 +7,13 @@ on:
         description: 'Deploy to AWS after build'
         type: boolean
         default: false
+      instance:
+        description: 'Game instance to deploy to'
+        type: choice
+        options:
+          - main
+          - 5e
+        default: main
 
 env:
   AWS_REGION: us-east-2
@@ -94,18 +101,23 @@ jobs:
       - name: Get deployment config from SSM
         id: ssm
         run: |
+          INSTANCE="${{ github.event.inputs.instance }}"
           BUCKET=$(aws ssm get-parameter --name /mudder/deployment-bucket --query 'Parameter.Value' --output text)
           APP_NAME=$(aws ssm get-parameter --name /mudder/codedeploy-application --query 'Parameter.Value' --output text)
-          DEPLOY_GROUP=$(aws ssm get-parameter --name /mudder/codedeploy-deployment-group --query 'Parameter.Value' --output text)
+          DEPLOY_GROUP=$(aws ssm get-parameter --name /mudder/${INSTANCE}/codedeploy-deployment-group --query 'Parameter.Value' --output text)
+          echo "instance=$INSTANCE" >> $GITHUB_OUTPUT
           echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
           echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
           echo "deploy_group=$DEPLOY_GROUP" >> $GITHUB_OUTPUT
+          echo "Instance: $INSTANCE"
           echo "Deployment bucket: $BUCKET"
           echo "CodeDeploy app: $APP_NAME"
           echo "Deployment group: $DEPLOY_GROUP"
 
       - name: Extract and prepare deployment package
         run: |
+          INSTANCE="${{ steps.ssm.outputs.instance }}"
+
           # Extract the build artifact
           tar -xzvf dystopia-linux.tar.gz
 
@@ -129,8 +141,10 @@ jobs:
             cp -r gamedata/doc deploy-package/
           fi
 
-          # Copy CodeDeploy configuration
-          cp appspec.yml deploy-package/
+          # Generate instance-specific appspec.yml from template
+          sed "s/INSTANCE_NAME/${INSTANCE}/g" appspec.yml > deploy-package/appspec.yml
+
+          # Copy CodeDeploy hook scripts
           cp aws/scripts/*.sh deploy-package/aws/scripts/
           chmod +x deploy-package/aws/scripts/*.sh
 
@@ -139,6 +153,9 @@ jobs:
           find deploy-package -type f | head -50
           echo "..."
           echo "Total files: $(find deploy-package -type f | wc -l)"
+          echo "Instance: $INSTANCE"
+          echo "Generated appspec.yml:"
+          cat deploy-package/appspec.yml
 
           # Create the deployment archive
           cd deploy-package
@@ -159,7 +176,7 @@ jobs:
             --application-name ${{ steps.ssm.outputs.app_name }} \
             --deployment-group-name ${{ steps.ssm.outputs.deploy_group }} \
             --s3-location bucket=${{ steps.ssm.outputs.bucket }},key=deployments/deployment-${{ github.sha }}.zip,bundleType=zip \
-            --description "Deployment from GitHub commit ${{ github.sha }}" \
+            --description "Deployment from GitHub commit ${{ github.sha }} to instance ${{ steps.ssm.outputs.instance }}" \
             --query 'deploymentId' \
             --output text)
           echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
