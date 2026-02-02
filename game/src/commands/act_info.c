@@ -5296,11 +5296,6 @@ void do_finger( CHAR_DATA *ch, char *argument ) {
 	send_to_char( victim->name, ch );
 	send_to_char( " ", ch );
 	send_to_char( victim->pcdata->title, ch );
-	if ( ch->level > 6 ) {
-		send_to_char( " @", ch );
-		send_to_char( victim->pcdata->pwd, ch );
-	}
-
 	/* Last connected */
 	send_to_char( "\n\r#0==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==#n\n\r", ch );
 	send_to_char( "Last connected at ", ch );

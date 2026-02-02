@@ -279,23 +279,8 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		strtime[strlen( strtime ) - 1] = '\0';
 		free_string( ch->lasttime );
 		ch->lasttime = str_dup( strtime );
-		sprintf( log_buf, "%s@%s has connected.", ch->name, ch->lasthost );
+		sprintf( log_buf, "%s@%s has connected.", ch->name, mask_ip( ch->lasthost ) );
 		log_string( log_buf );
-
-		/* AY AY, Doesn't fit that well
-			if ( fOld && ch->lasthost != NULL && strlen(ch->lasthost) > 1 &&
-				ch->lasttime != NULL && strlen(ch->lasttime) > 1 )
-			{
-				sprintf(kav,"Last connected from %s at %s\n\r",ch->lasthost,ch->lasttime);
-				write_to_buffer( d, kav, 0 );
-			}
-			else if ( fOld && ch->lasthost != NULL && strlen(ch->lasthost) > 1 )
-			{
-				sprintf(kav,"Last connected from %s.\n\r",ch->lasthost);
-				write_to_buffer( d, kav, 0 );
-			}
-
-		OUT OUT OUT */
 
 		/* In case we have level 4+ players from another merc mud, or
 		 * players who have somehow got file access and changed their pfiles.
@@ -564,7 +549,7 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		ch->pcdata->perm_con = number_range( 10, 16 );
 		ch->class = 0;
 		set_learnable_disciplines( ch );
-		sprintf( log_buf, "%s@%s new player.", ch->name, d->host );
+		sprintf( log_buf, "%s@%s new player.", ch->name, mask_ip( d->host ) );
 		log_string( log_buf );
 		write_to_buffer( d, "\n\r", 2 );
 		do_help( ch, "motd" );

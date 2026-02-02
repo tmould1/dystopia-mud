@@ -1043,10 +1043,10 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
 	iStart = (int) strlen( d->inbuf );
 	if ( iStart >= (int) sizeof( d->inbuf ) - 10 ) {
 		if ( d != NULL && d->character != NULL ) {
-			sprintf( log_buf, "%s input overflow!", d->character->lasthost );
+			sprintf( log_buf, "%s input overflow!", mask_ip( d->character->lasthost ) );
 			log_string( log_buf );
 		} else if ( d->lookup_status != STATUS_LOOKUP ) {
-			sprintf( log_buf, "%s input overflow!", d->host );
+			sprintf( log_buf, "%s input overflow!", mask_ip( d->host ) );
 			log_string( log_buf );
 		}
 		write_to_descriptor( d,
@@ -1341,10 +1341,10 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 		} else {
 			if ( ++d->repeat >= 40 ) {
 				if ( d != NULL && d->character != NULL ) {
-					sprintf( log_buf, "%s input overflow!", d->character->lasthost );
+					sprintf( log_buf, "%s input overflow!", mask_ip( d->character->lasthost ) );
 					log_string( log_buf );
 				} else if ( d->lookup_status != STATUS_LOOKUP ) {
-					sprintf( log_buf, "%s input overflow!", d->host );
+					sprintf( log_buf, "%s input overflow!", mask_ip( d->host ) );
 					log_string( log_buf );
 				}
 				write_to_descriptor( d,
@@ -1977,4 +1977,26 @@ void merc_logf( char *fmt, ... ) {
 	va_end( args );
 
 	log_string( buf );
+}
+
+/*
+ * Returns a masked version of an IP address for GDPR compliance.
+ * IPv4: masks last two octets (e.g., "192.168.x.x")
+ * Hostnames: returns "***masked***"
+ * Uses a static buffer (not reentrant).
+ */
+const char *mask_ip( const char *ip ) {
+	static char buf[64];
+	int a, b, c, d;
+
+	if ( ip == NULL || ip[0] == '\0' )
+		return "(unknown)";
+
+	if ( sscanf( ip, "%d.%d.%d.%d", &a, &b, &c, &d ) == 4 ) {
+		snprintf( buf, sizeof( buf ), "%d.%d.x.x", a, b );
+		return buf;
+	}
+
+	snprintf( buf, sizeof( buf ), "***masked***" );
+	return buf;
 }

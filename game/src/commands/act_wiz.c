@@ -4354,20 +4354,20 @@ void do_users( CHAR_DATA *ch, char *argument ) {
 				break;
 			}
 
-			if ( strlen( d->character->lasthost ) < 2 ) {
+			{
+				const char *ip_src = ( strlen( d->character->lasthost ) < 2 )
+					? d->host
+					: d->character->lasthost;
+				const char *ip_display = ( get_trust( ch ) >= LEVEL_IMPLEMENTOR )
+					? ip_src
+					: mask_ip( ip_src );
+
 				sprintf( buf + strlen( buf ), "#3[#7%3d %16s#3]  #1%s#2@#3%s\n\r",
 					d->descriptor,
 					st,
 					d->original ? d->original->pcdata->switchname : d->character ? d->character->pcdata->switchname
 																				 : "(none)",
-					d->host );
-			} else {
-				sprintf( buf + strlen( buf ), "#3[#7%3d %16s#3]  #1%s#2@#3%s\n\r",
-					d->descriptor,
-					st,
-					d->original ? d->original->pcdata->switchname : d->character ? d->character->pcdata->switchname
-																				 : "(none)",
-					d->character->lasthost );
+					ip_display );
 			}
 		}
 	}
