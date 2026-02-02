@@ -762,9 +762,11 @@ char *mxp_obj_link( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text, bool in_ro
 	mxp_add_sitem_options( obj, keywords, href_buf, sizeof( href_buf ),
 		hint_buf, sizeof( hint_buf ) );
 
-	/* Build final MXP tag - href first, then hint for popup menu */
+	/* Build final MXP tag - switch to locked mode for display text so raw
+	 * angle brackets in item names aren't parsed as MXP tags, then back
+	 * to secure mode for the closing </SEND> tag */
 	snprintf( buf, sizeof( buf ),
-		MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+		MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED,
 		href_buf, hint_buf, display_text );
 
 	return buf;
@@ -836,17 +838,18 @@ char *mxp_equip_link( OBJ_DATA *obj, CHAR_DATA *ch, char *display_text ) {
 	mxp_escape_string( escaped_hint, hint, sizeof( escaped_hint ) );
 
 	/* Build the MXP-wrapped string: remove/look (and look in for containers)
-	 * Use single quotes around keywords to handle multi-word names like 'newbie sword' */
+	 * Use single quotes around keywords to handle multi-word names like 'newbie sword'
+	 * Switch to locked mode for display text so angle brackets are safe */
 	{
 		bool is_container = ( obj->item_type == ITEM_CONTAINER || obj->item_type == ITEM_CORPSE_NPC || obj->item_type == ITEM_CORPSE_PC );
 
 		if ( is_container ) {
 			snprintf( buf, sizeof( buf ),
-				MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'|look in '%s'\" hint=\"%s|Remove|Look|Look In\">%s</SEND>" MXP_LOCK_LOCKED,
+				MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'|look in '%s'\" hint=\"%s|Remove|Look|Look In\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED,
 				keywords, keywords, keywords, escaped_hint, display_text );
 		} else {
 			snprintf( buf, sizeof( buf ),
-				MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'\" hint=\"%s|Remove|Look\">%s</SEND>" MXP_LOCK_LOCKED,
+				MXP_SECURE_LINE "<SEND href=\"remove '%s'|look '%s'\" hint=\"%s|Remove|Look\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED,
 				keywords, keywords, escaped_hint, display_text );
 		}
 	}
@@ -912,9 +915,10 @@ char *mxp_container_item_link( OBJ_DATA *obj, OBJ_DATA *container, CHAR_DATA *ch
 
 	mxp_escape_string( escaped_hint, hint, sizeof( escaped_hint ) );
 
-	/* Simple click to get item from container - no menu needed */
+	/* Simple click to get item from container - no menu needed
+	 * Switch to locked mode for display text so angle brackets are safe */
 	snprintf( buf, sizeof( buf ),
-		MXP_SECURE_LINE "<SEND href=\"get '%s' '%s'\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+		MXP_SECURE_LINE "<SEND href=\"get '%s' '%s'\" hint=\"%s\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED,
 		obj_keywords, container_keywords, escaped_hint, display_text );
 
 	return buf;
@@ -963,9 +967,10 @@ char *mxp_player_link( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) {
 	mxp_escape_string( escaped_name, name, sizeof( escaped_name ) );
 	mxp_escape_string( escaped_hint, hint, sizeof( escaped_hint ) );
 
-	/* Build the MXP-wrapped string */
+	/* Build the MXP-wrapped string
+	 * Switch to locked mode for display text so angle brackets are safe */
 	snprintf( buf, sizeof( buf ),
-		MXP_SECURE_LINE "<SEND href=\"finger %s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+		MXP_SECURE_LINE "<SEND href=\"finger %s\" hint=\"%s\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED,
 		escaped_name, escaped_hint, display_text );
 
 	return buf;
@@ -1167,8 +1172,9 @@ char *mxp_exit_link( EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_te
 		mxp_escape_string( escaped_hint, simple_hint, sizeof( escaped_hint ) );
 	}
 
+	/* Switch to locked mode for display text so angle brackets are safe */
 	snprintf( outbuf, MXP_BUF_MAX_LEN,
-		MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED,
+		MXP_SECURE_LINE "<SEND href=\"%s\" hint=\"%s\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED,
 		cmd, escaped_hint, display_text );
 
 	return outbuf;
@@ -1291,15 +1297,16 @@ char *mxp_char_link( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) {
 	 * So: href has N commands, hint has N+1 entries (tooltip + N menu labels)
 	 *
 	 * Trailing newlines are added after the MXP closing tag */
+	/* Switch to locked mode for display text so angle brackets are safe */
 	if ( IS_NPC( victim ) ) {
 		/* 3 commands: attack, look, consider -> 4 hints: tooltip + 3 labels */
 		snprintf( buf, sizeof( buf ),
-			MXP_SECURE_LINE "<SEND href=\"attack %s|look %s|consider %s\" hint=\"%s|Attack|Look|Consider\">%s</SEND>" MXP_LOCK_LOCKED "%s",
+			MXP_SECURE_LINE "<SEND href=\"attack %s|look %s|consider %s\" hint=\"%s|Attack|Look|Consider\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED "%s",
 			escaped_keyword, escaped_keyword, escaped_keyword, escaped_hint, clean_text, trailing );
 	} else {
 		/* 4 commands: attack, look, consider, finger -> 5 hints: tooltip + 4 labels */
 		snprintf( buf, sizeof( buf ),
-			MXP_SECURE_LINE "<SEND href=\"attack %s|look %s|consider %s|finger %s\" hint=\"%s|Attack|Look|Consider|Finger\">%s</SEND>" MXP_LOCK_LOCKED "%s",
+			MXP_SECURE_LINE "<SEND href=\"attack %s|look %s|consider %s|finger %s\" hint=\"%s|Attack|Look|Consider|Finger\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED "%s",
 			escaped_keyword, escaped_keyword, escaped_keyword, escaped_keyword, escaped_hint, clean_text, trailing );
 	}
 
@@ -1371,8 +1378,9 @@ char *mxp_aura_tag( CHAR_DATA *ch, const char *prefix, const char *tooltip, int 
 			had_trailing_space = TRUE;
 		}
 
+		/* Switch to locked mode for display text so angle brackets are safe */
 		snprintf( buf, MAX_STRING_LENGTH,
-			MXP_SECURE_LINE "<SEND hint=\"%s\">%s</SEND>" MXP_LOCK_LOCKED "%s",
+			MXP_SECURE_LINE "<SEND hint=\"%s\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED "%s",
 			escaped_tooltip, clean_prefix, had_trailing_space ? " " : "" );
 	}
 
