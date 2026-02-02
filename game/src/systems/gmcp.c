@@ -413,7 +413,14 @@ void gmcp_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int le
 	}
 	/* Handle Core.Supports.Add - add a package */
 	else if ( !strcmp( package, "Core.Supports.Add" ) ) {
+		int old_packages = d->gmcp_packages;
 		d->gmcp_packages |= parse_package_support( json_data );
+
+		/* If Client.Media was just enabled, send the default media URL */
+		if ( ( d->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) &&
+			!( old_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ) {
+			mcmp_set_default( d );
+		}
 	}
 	/* Handle Core.Supports.Remove - remove a package */
 	else if ( !strcmp( package, "Core.Supports.Remove" ) ) {

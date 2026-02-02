@@ -85,9 +85,6 @@ void mcmp_play( DESCRIPTOR_DATA *d, const char *name, const char *type,
 		len += snprintf( buf + len, sizeof( buf ) - len, ",\"key\":\"%s\"", key );
 	if ( cont )
 		len += snprintf( buf + len, sizeof( buf ) - len, ",\"continue\":true" );
-	if ( caption != NULL )
-		len += snprintf( buf + len, sizeof( buf ) - len, ",\"caption\":\"%s\"", caption );
-
 	snprintf( buf + len, sizeof( buf ) - len, "}" );
 
 	gmcp_send( d, "Client.Media.Play", buf );
@@ -407,9 +404,33 @@ void do_mcmptest( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
+	/* Debug: show URL and resend Default */
+	if ( !str_cmp( arg, "debug" ) ) {
+		char dbg[MAX_STRING_LENGTH];
+		const char *url;
+		url = ( game_config.audio_url && game_config.audio_url[0] != '\0' )
+			? game_config.audio_url : MCMP_DEFAULT_URL;
+		snprintf( dbg, sizeof( dbg ),
+			"MCMP Debug:\n\r"
+			"  gmcp_enabled: %d\n\r"
+			"  Client.Media: %s\n\r"
+			"  audio_url:    \"%s\"\n\r"
+			"  test URL:     %sweather/thunder.ogg\n\r",
+			ch->desc->gmcp_enabled,
+			( ch->desc->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ? "Yes" : "No",
+			url, url );
+		send_to_char( dbg, ch );
+		if ( mcmp_enabled( ch->desc ) ) {
+			mcmp_set_default( ch->desc );
+			send_to_char( "  -> Resent Client.Media.Default\n\r", ch );
+		}
+		return;
+	}
+
 	if ( !mcmp_enabled( ch->desc ) ) {
 		send_to_char( "MCMP is not active on your connection.\n\r", ch );
-		send_to_char( "Use 'mcmptest force' to enable Client.Media manually.\n\r", ch );
+		send_to_char( "In Mudlet: Settings > Game protocols > enable 'Allow server to download and play media'\n\r", ch );
+		send_to_char( "Or use 'mcmptest force' to enable manually.\n\r", ch );
 		return;
 	}
 

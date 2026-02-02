@@ -1151,6 +1151,23 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					i += (int) strlen( gmcp_dont ) - 1;
 					d->gmcp_enabled = FALSE;
 				}
+				/* GMCP subnegotiation: IAC SB GMCP ... IAC SE */
+				else if ( d->inbuf[i + 1] == (signed char) SB &&
+					d->inbuf[i + 2] == (signed char) TELOPT_GMCP ) {
+					int sb_start = i + 3;
+					int sb_len = 0;
+					while ( d->inbuf[sb_start + sb_len] != '\0' ) {
+						if ( d->inbuf[sb_start + sb_len] == (signed char) IAC &&
+							d->inbuf[sb_start + sb_len + 1] == (signed char) SE ) {
+							break;
+						}
+						sb_len++;
+					}
+					if ( sb_len > 0 ) {
+						gmcp_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
+					}
+					i += 3 + sb_len + 1; /* Skip IAC SB GMCP ... IAC SE */
+				}
 				/* MXP - check strlen > 0 to avoid matching empty strings */
 				else if ( strlen( mxp_do ) > 0 && !memcmp( &d->inbuf[i], mxp_do, strlen( mxp_do ) ) ) {
 					i += (int) strlen( mxp_do ) - 1;

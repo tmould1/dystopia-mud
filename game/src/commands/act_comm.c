@@ -1963,6 +1963,9 @@ void do_protocols( CHAR_DATA *ch, char *argument ) {
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ), "#w|#n  #yGMCP#n  Data Channel     %s    #w|#n\n\r", gmcp_status );
 	send_to_char( buf, ch );
+	snprintf( buf, sizeof( buf ), "#w|#n  #yMCMP#n  Client.Media     %s    #w|#n\n\r",
+		mcmp_enabled( ch->desc ) ? "#GOn#n " : "#rOff#n" );
+	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ), "#w|#n  #yMXP#n   Extensions       %s    #w|#n\n\r", mxp_status );
 	send_to_char( buf, ch );
 	send_to_char( "#w|#n  #yMSSP#n  Server Status    #yAvail#n  #w|#n\n\r", ch );
@@ -1973,12 +1976,13 @@ void do_protocols( CHAR_DATA *ch, char *argument ) {
 	/* Show additional GMCP details if enabled */
 	if ( ch->desc->gmcp_enabled && ch->desc->gmcp_packages > 0 ) {
 		snprintf( buf, sizeof( buf ),
-			"\n\r#yGMCP Packages:#n %s%s%s%s%s\n\r",
+			"\n\r#yGMCP Packages:#n %s%s%s%s%s%s\n\r",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CORE ) ? "Core " : "",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR ) ? "Char " : "",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_VITALS ) ? "Char.Vitals " : "",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_STATUS ) ? "Char.Status " : "",
-			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_INFO ) ? "Char.Info " : "" );
+			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_INFO ) ? "Char.Info " : "",
+			( ch->desc->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ? "Client.Media " : "" );
 		send_to_char( buf, ch );
 	}
 }
