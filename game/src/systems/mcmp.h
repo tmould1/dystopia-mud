@@ -46,7 +46,7 @@ void mcmp_load( DESCRIPTOR_DATA *d, const char *name );
 
 /*
  * Send Client.Media.Play
- *   name:    filename (e.g., "combat/engage.ogg")
+ *   name:    filename (e.g., "combat/engage.mp3")
  *   type:    MCMP_SOUND or MCMP_MUSIC
  *   tag:     category tag (e.g., MCMP_TAG_COMBAT)
  *   volume:  1-100 (0 = use default 50)

@@ -3,16 +3,18 @@
 fetch_audio.py - Download CC0 sound files for the MCMP starter audio pack.
 
 Reads audio_manifest.json, downloads ZIP packs from Kenney.nl and OpenGameArt,
-extracts the specified files, and places them in the audio/ directory tree.
+extracts the specified files, converts them to MP3, and places them in the
+audio/ directory tree.
 
 All sources are CC0 (public domain). No attribution required.
 
-Requirements: Python 3 (no external dependencies).
+Requirements: Python 3, ffmpeg (must be on PATH or in standard install locations).
 """
 
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import urllib.request
@@ -22,6 +24,52 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
 AUDIO_DIR = os.path.join(REPO_ROOT, "audio")
 MANIFEST_PATH = os.path.join(SCRIPT_DIR, "audio_manifest.json")
+
+
+def find_ffmpeg():
+    """Locate ffmpeg executable on PATH or in common install locations."""
+    # Try PATH first
+    try:
+        subprocess.run(["ffmpeg", "-version"], capture_output=True, check=True)
+        return "ffmpeg"
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        pass
+
+    # Check common Windows install locations
+    candidates = [
+        os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\WinGet\Links\ffmpeg.exe"),
+        r"C:\ffmpeg\bin\ffmpeg.exe",
+        r"C:\tools\ffmpeg\bin\ffmpeg.exe",
+    ]
+    # Also check winget package directories
+    winget_dir = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\WinGet\Packages")
+    if os.path.isdir(winget_dir):
+        for entry in os.listdir(winget_dir):
+            if "FFmpeg" in entry:
+                for root, dirs, files in os.walk(os.path.join(winget_dir, entry)):
+                    if "ffmpeg.exe" in files:
+                        candidates.append(os.path.join(root, "ffmpeg.exe"))
+
+    for path in candidates:
+        if os.path.isfile(path):
+            return path
+
+    return None
+
+
+def convert_ogg_to_mp3(ffmpeg, ogg_path, mp3_path):
+    """Convert an OGG file to MP3 using ffmpeg. Returns True on success."""
+    try:
+        result = subprocess.run(
+            [ffmpeg, "-y", "-i", ogg_path, "-codec:a", "libmp3lame", "-qscale:a", "4", mp3_path],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0 and os.path.isfile(mp3_path):
+            os.remove(ogg_path)
+            return True
+        return False
+    except Exception:
+        return False
 
 
 def load_manifest():
@@ -87,6 +135,16 @@ def main():
     print(f"Manifest: {MANIFEST_PATH}")
     print()
 
+    # Find ffmpeg for OGG -> MP3 conversion
+    ffmpeg = find_ffmpeg()
+    if ffmpeg is None:
+        print("ERROR: ffmpeg not found. Install ffmpeg and ensure it is on PATH.")
+        print("  Windows: winget install Gyan.FFmpeg")
+        print("  Linux:   sudo apt install ffmpeg")
+        return 1
+    print(f"Using ffmpeg: {ffmpeg}")
+    print()
+
     manifest = load_manifest()
     packs = manifest["_packs"]
     sounds = manifest["sounds"]
@@ -109,11 +167,11 @@ def main():
         if download_pack(pack_info["url"], zip_path):
             pack_zips[pack_name] = zip_path
         else:
-            print(f"  SKIPPING pack '{pack_name}' — download failed")
+            print(f"  SKIPPING pack '{pack_name}' -- download failed")
     print()
 
-    # Extract sounds
-    print("=== Extracting sounds ===")
+    # Extract sounds (OGG from ZIPs) and convert to MP3
+    print("=== Extracting and converting sounds ===")
     ok_count = 0
     fail_count = 0
     for target_path, info in sorted(sounds.items()):
@@ -126,11 +184,22 @@ def main():
             fail_count += 1
             continue
 
-        if extract_file(pack_zips[pack_name], source_file, dest):
+        # Extract OGG to a temp location, then convert to MP3
+        ogg_tmp = dest.rsplit(".mp3", 1)[0] + ".ogg.tmp"
+        if not extract_file(pack_zips[pack_name], source_file, ogg_tmp):
+            fail_count += 1
+            continue
+
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        if convert_ogg_to_mp3(ffmpeg, ogg_tmp, dest):
             size_kb = os.path.getsize(dest) / 1024
             print(f"  OK  {target_path} ({size_kb:.1f} KB)")
             ok_count += 1
         else:
+            # Clean up failed temp file
+            if os.path.isfile(ogg_tmp):
+                os.remove(ogg_tmp)
+            print(f"  FAILED converting {target_path}")
             fail_count += 1
 
     print()

@@ -115,9 +115,9 @@ Combat in Dystopia does 2-30+ individual attacks per 0.75-second round via `mult
 
 The solution: `violence_update()` captures the victim's HP before calling `multi_hit()`, then calculates the total damage delta afterward and calls `mcmp_combat_round()` exactly once with a summary:
 
-- `total_dam > 2000` -> `combat/heavy_hit.ogg`
-- `total_dam > 0` -> `combat/light_hit.ogg`
-- `total_dam == 0` (all misses) -> `combat/miss.ogg`
+- `total_dam > 2000` -> `combat/heavy_hit.mp3`
+- `total_dam > 0` -> `combat/light_hit.mp3`
+- `total_dam == 0` (all misses) -> `combat/miss.mp3`
 
 ## MSSP Advertisement
 
