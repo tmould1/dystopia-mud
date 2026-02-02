@@ -173,6 +173,12 @@ void gmcp_send( DESCRIPTOR_DATA *d, const char *package, const char *data ) {
 	if ( package == NULL )
 		return;
 
+	/* Flush any pending text output before sending out-of-band data.
+	 * This ensures text (combat messages, etc.) arrives at the client
+	 * before related GMCP messages (sounds, vitals updates). */
+	if ( d->outtop > 0 )
+		process_output( d, FALSE );
+
 	/* Build the GMCP message */
 	buf[0] = (char) IAC;
 	buf[1] = (char) SB;
