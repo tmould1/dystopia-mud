@@ -115,6 +115,9 @@ void mssp_send( DESCRIPTOR_DATA *d ) {
 	/* Feature flags */
 	pos = mssp_add_var( buf, pos, "ANSI", "1" );
 	pos = mssp_add_var( buf, pos, "MCCP", "1" );
+	pos = mssp_add_var( buf, pos, "GMCP", "1" );
+	pos = mssp_add_var( buf, pos, "MCMP", "1" );
+	pos = mssp_add_var( buf, pos, "MXP", "1" );
 
 	/* End subnegotiation: IAC SE */
 	buf[pos++] = IAC;

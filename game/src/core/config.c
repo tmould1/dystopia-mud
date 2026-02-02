@@ -5,6 +5,7 @@
 #include <time.h>
 #include "merc.h"
 #include "../db/db_game.h"
+#include "../systems/mcmp.h"
 
 GAMECONFIG_DATA game_config;
 
@@ -18,6 +19,7 @@ void load_gameconfig() {
 	game_config.banner_left = str_dup( "#0<>#n" );
 	game_config.banner_right = str_dup( "#0<>#n" );
 	game_config.banner_fill = str_dup( "#0==#n" );
+	game_config.audio_url = str_dup( MCMP_DEFAULT_URL );
 
 	/* Load from game.db (overwrites defaults for any keys present) */
 	db_game_load_gameconfig();
@@ -37,24 +39,25 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 	if ( arg[0] == '\0' ) {
 		char buf[MAX_STRING_LENGTH];
 
-		send_to_char( "Syntax: gameconfig <field> <value>\n\r", ch );
-		send_to_char( "Field - Description - Current Value:\n\r", ch );
+		send_to_char( "Syntax: gameconfig <field> <value>\n\r\n\r", ch );
 
-		sprintf( buf, "base_xp - Base XP: %d\n\r", game_config.base_xp );
+		sprintf( buf, "  %-16s %d\n\r", "base_xp", game_config.base_xp );
 		send_to_char( buf, ch );
-		sprintf( buf, "max_xp_per_kill - Max XP per kill: %d\n\r", game_config.max_xp_per_kill );
+		sprintf( buf, "  %-16s %d\n\r", "max_xp_per_kill", game_config.max_xp_per_kill );
 		send_to_char( buf, ch );
-		sprintf( buf, "game_name - Game Name: \"%s\"\n\r", game_config.game_name );
+		sprintf( buf, "  %-16s \"%s\"\n\r", "game_name", game_config.game_name );
 		send_to_char( buf, ch );
-		sprintf( buf, "gui_url - Mudlet GUI Package URL: \"%s\"\n\r", game_config.gui_url );
+		sprintf( buf, "  %-16s \"%s\"\n\r", "gui_url", game_config.gui_url );
 		send_to_char( buf, ch );
-		sprintf( buf, "gui_version - Mudlet GUI Package Version: \"%s\"\n\r", game_config.gui_version );
+		sprintf( buf, "  %-16s \"%s\"\n\r", "gui_version", game_config.gui_version );
 		send_to_char( buf, ch );
-		sprintf( buf, "banner_left - Who Banner Left Endcap: \"%s\"\n\r", game_config.banner_left );
+		sprintf( buf, "  %-16s \"%s\"\n\r", "banner_left", game_config.banner_left );
 		send_to_char( buf, ch );
-		sprintf( buf, "banner_right - Who Banner Right Endcap: \"%s\"\n\r", game_config.banner_right );
+		sprintf( buf, "  %-16s \"%s\"\n\r", "banner_right", game_config.banner_right );
 		send_to_char( buf, ch );
-		sprintf( buf, "banner_fill - Who Banner Fill: \"%s\"\n\r", game_config.banner_fill );
+		sprintf( buf, "  %-16s \"%s\"\n\r", "banner_fill", game_config.banner_fill );
+		send_to_char( buf, ch );
+		sprintf( buf, "  %-16s \"%s\"\n\r", "audio_url", game_config.audio_url );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -173,6 +176,19 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( new_value, "%s", arg2 );
 		free_string( game_config.banner_fill );
 		game_config.banner_fill = str_dup( new_value );
+	} else if ( !str_cmp( arg, "audio_url" ) ) {
+		if ( arg2[0] == '\0' ) {
+			char buf[MAX_STRING_LENGTH];
+			sprintf( buf, "MCMP Audio Base URL: \"%s\"\n\r", game_config.audio_url );
+			send_to_char( buf, ch );
+			return;
+		}
+
+		sprintf( modified_field, "MCMP Audio Base URL" );
+		sprintf( old_value, "%s", game_config.audio_url );
+		sprintf( new_value, "%s", arg2 );
+		free_string( game_config.audio_url );
+		game_config.audio_url = str_dup( new_value );
 	}
 	// arg1 not recognized, show prompt
 	else {

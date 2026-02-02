@@ -24,6 +24,7 @@
 #include <unistd.h> /* unlink */
 #endif
 #include "merc.h"
+#include "mcmp.h"
 
 /*
  * Local functions.
@@ -733,8 +734,10 @@ void weather_update( void ) {
 
 	if ( buf[0] != '\0' ) {
 		for ( d = descriptor_list; d != NULL; d = d->next ) {
-			if ( ( d->connected == CON_PLAYING || d->connected == CON_EDITING ) && IS_OUTSIDE( d->character ) && IS_AWAKE( d->character ) )
+			if ( ( d->connected == CON_PLAYING || d->connected == CON_EDITING ) && IS_OUTSIDE( d->character ) && IS_AWAKE( d->character ) ) {
 				send_to_char( buf, d->character );
+				mcmp_weather_change( d->character, weather_info.sky );
+			}
 		}
 	}
 

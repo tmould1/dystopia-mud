@@ -341,6 +341,7 @@ const struct cmd_type cmd_table[] =
 		{ "mxp", do_mxp, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "gmcp", do_gmcp, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "protocols", do_protocols, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
+		{ "screenreader", do_screenreader, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "description", do_description, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "password", do_password, POS_DEAD, 0, LOG_NEVER, 0, 0, 0 },
 		{ "title", do_title, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
@@ -1173,7 +1174,8 @@ const struct cmd_type cmd_table[] =
 		/*
 		 * Configuration commands.
 		 */
-		{ "gameconfig", do_gameconfig, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
+		{ "mcmptest",   do_mcmptest,   POS_DEAD, 8, LOG_NORMAL, 0, 0, 0 },
+		{ "gameconfig", do_gameconfig, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "balance",    do_balance,    POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "ability",    do_ability,    POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 

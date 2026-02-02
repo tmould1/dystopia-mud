@@ -6,6 +6,8 @@
 
 #include "merc.h"
 #include "../db/db_player.h"
+#include "../systems/gmcp.h"
+#include "../systems/mcmp.h"
 
 /* External variables from comm.c */
 extern char echo_off_str[];
@@ -512,11 +514,12 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 			write_to_buffer( d, " Please choose 1, 2, or 3: ", 0 );
 			return;
 		}
-		write_to_buffer( d, "\n\r Choose your color mode:\n\r", 0 );
+		write_to_buffer( d, "\n\r Choose your display mode:\n\r", 0 );
 		write_to_buffer( d, "   [N]one  - Plain text, no colors\n\r", 0 );
 		write_to_buffer( d, "   [A]NSI  - Standard 16 colors (works with most clients)\n\r", 0 );
 		write_to_buffer( d, "   [X]term - Full 256 colors (modern clients only)\n\r", 0 );
-		write_to_buffer( d, " Your choice (N/A/X)? ", 0 );
+		write_to_buffer( d, "   [S]creen reader - Optimized for JAWS, NVDA, VoiceOver\n\r", 0 );
+		write_to_buffer( d, " Your choice (N/A/X/S)? ", 0 );
 		d->connected = CON_GET_NEW_ANSI;
 		break;
 
@@ -531,18 +534,28 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		case 'A':
 			SET_BIT( ch->act, PLR_ANSI );
 			break;
+		case 's':
+		case 'S':
+			SET_BIT( ch->act, PLR_SCREENREADER );
+			SET_BIT( ch->act, PLR_BLANK );
+			SET_BIT( ch->act, PLR_AUTOEXIT );
+			d->mxp_enabled = FALSE;
+			write_to_buffer( d, " Screen reader mode enabled.\n\r", 0 );
+			break;
 		case 'n':
 		case 'N':
 			break;
 		default:
-			write_to_buffer( d, " Please choose [N]one, [A]NSI, or [X]term: ", 0 );
+			write_to_buffer( d, " Please choose [N]one, [A]NSI, [X]term, or [S]creen reader: ", 0 );
 			return;
 		}
-		/* Auto-detect GMCP/MXP - enable silently if client negotiated them */
+		/* Auto-detect GMCP/MXP/MCMP - enable silently if client negotiated them */
 		if ( d->gmcp_enabled )
 			SET_BIT( ch->act, PLR_PREFER_GMCP );
-		if ( d->mxp_enabled )
+		if ( d->mxp_enabled && !IS_SET( ch->act, PLR_SCREENREADER ) )
 			SET_BIT( ch->act, PLR_PREFER_MXP );
+		if ( d->gmcp_enabled && ( d->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) )
+			SET_BIT( ch->act, PLR_PREFER_MCMP );
 		/* Character creation finalization */
 		ch->pcdata->perm_str = number_range( 10, 16 );
 		ch->pcdata->perm_int = number_range( 10, 16 );
@@ -759,6 +772,7 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 
 			/* Send initial GMCP data */
 			gmcp_send_char_data( ch );
+			mcmp_ui_event( ch, "login" );
 			break;
 		} else if ( !IS_NPC( ch ) && ch->pcdata->obj_vnum != 0 ) {
 			if ( ch->in_room != NULL )
@@ -803,6 +817,7 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		/* Send initial GMCP data if enabled */
 		if ( d->gmcp_enabled )
 			gmcp_send_char_data( ch );
+		mcmp_ui_event( ch, "login" );
 		break;
 
 		/* states for new note system, (c)1995-96 erwin@pip.dknet.dk */

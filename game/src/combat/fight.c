@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../systems/mcmp.h"
 
 #define MAX_SLAY_TYPES 3
 #define MONK_AUTODROP  12
@@ -167,9 +168,17 @@ void violence_update( void ) {
 			else if ( ch->fight_timer < 25 )
 				ch->fight_timer += 3;
 		}
-		if ( IS_AWAKE( ch ) && IS_AWAKE( victim ) && ch->in_room == victim->in_room )
+		if ( IS_AWAKE( ch ) && IS_AWAKE( victim ) && ch->in_room == victim->in_room ) {
+			int pre_hp = victim->hit;
 			multi_hit( ch, victim, TYPE_UNDEFINED );
-		else
+			/* Per-round combat sound: estimate damage from HP delta */
+			if ( !IS_NPC( ch ) && ch->desc != NULL ) {
+				int round_dam = pre_hp - victim->hit;
+				if ( round_dam < 0 ) round_dam = 0;
+				mcmp_combat_round( ch, victim, ( round_dam > 0 ? 1 : 0 ),
+					( round_dam <= 0 ? 1 : 0 ), round_dam );
+			}
+		} else
 			stop_fighting( ch, FALSE );
 		if ( ( victim = ch->fighting ) == NULL ) continue;
 		/*
@@ -1967,6 +1976,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) {
 			victim->mdeath = victim->mdeath + 1;
 		}
+		mcmp_combat_death( ch, victim );
 		raw_kill( victim );
 		if ( !IS_NPC( ch ) && !IS_NPC( victim ) && victim->pcdata->bounty > 0 ) {
 			snprintf( buf, sizeof( buf ), "You recive a %d QP bounty, for killing %s.\n\r",
@@ -1989,6 +1999,10 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		  && !IS_NPC( ch ) ) {
 			death_teleport( ch, victim_idx );
 		}
+
+		/* Victory sound if no longer fighting */
+		if ( !IS_NPC( ch ) && ch->fighting == NULL )
+			mcmp_combat_end( ch );
 
 		return;
 	}
@@ -3352,11 +3366,21 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 		vs = " #yso hard it hurts just to see!#n";
 		vp = " #yso hard it hurts just to see!#n";
 	} else if ( dam <= 8000 ) {
-		vs = " #G<#y*#L{#R*#L}#y*#G> #sextracting organs #G<#y*#L{#R*#L}#y*#G>#n";
-		vp = " #G<#y*#L{#R*#L}#y*#G> #sextracting organs #G<#y*#L{#R*#L}#y*#G>#n";
+		if ( !IS_NPC( ch ) && IS_SCREENREADER( ch ) ) {
+			vs = ", extracting organs!";
+			vp = ", extracting organs!";
+		} else {
+			vs = " #G<#y*#L{#R*#L}#y*#G> #sextracting organs #G<#y*#L{#R*#L}#y*#G>#n";
+			vp = " #G<#y*#L{#R*#L}#y*#G> #sextracting organs #G<#y*#L{#R*#L}#y*#G>#n";
+		}
 	} else {
-		vs = " #R()#G()#R() #CHumiliatingly Hard #R()#G()#R()#n";
-		vp = " #R()#G()#R() #CHumiliatingly Hard #R()#G()#R()#n";
+		if ( !IS_NPC( ch ) && IS_SCREENREADER( ch ) ) {
+			vs = ", humiliatingly hard!";
+			vp = ", humiliatingly hard!";
+		} else {
+			vs = " #R()#G()#R() #CHumiliatingly Hard #R()#G()#R()#n";
+			vp = " #R()#G()#R() #CHumiliatingly Hard #R()#G()#R()#n";
+		}
 	}
 
 	/* If victim's hp are less/equal to 'damp', attacker gets a death blow */
