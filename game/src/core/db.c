@@ -2179,11 +2179,22 @@ bool str_suffix( const char *astr, const char *bstr ) {
 char *capitalize( const char *str ) {
 	static char strcap[MAX_STRING_LENGTH];
 	int i;
+	bool found_alpha = FALSE;
 
-	for ( i = 0; str[i] != '\0'; i++ )
-		strcap[i] = LOWER( str[i] );
+	for ( i = 0; str[i] != '\0'; i++ ) {
+		strcap[i] = str[i];
+		if ( !found_alpha && str[i] == '#' && str[i + 1] != '\0' ) {
+			/* Skip color code: copy the '#' and the next char as-is */
+			i++;
+			strcap[i] = str[i];
+			continue;
+		}
+		if ( !found_alpha && isalpha( (unsigned char) str[i] ) ) {
+			strcap[i] = UPPER( str[i] );
+			found_alpha = TRUE;
+		}
+	}
 	strcap[i] = '\0';
-	strcap[0] = UPPER( strcap[0] );
 	return strcap;
 }
 
