@@ -604,6 +604,7 @@ void weather_update( void ) {
 					SET_BIT( ch->newbits, NEW_NATURAL );
 
 				send_to_char( "You hear a clock in the distance strike midnight.\n\r", ch );
+				mcmp_time_of_day( ch, time_info.hour );
 				if ( IS_EXTRA( ch, EXTRA_ROT ) ) {
 					send_to_char( "Your flesh feels better.\n\r", ch );
 					REMOVE_BIT( ch->extra, EXTRA_ROT );
@@ -736,6 +737,7 @@ void weather_update( void ) {
 		for ( d = descriptor_list; d != NULL; d = d->next ) {
 			if ( ( d->connected == CON_PLAYING || d->connected == CON_EDITING ) && IS_OUTSIDE( d->character ) && IS_AWAKE( d->character ) ) {
 				send_to_char( buf, d->character );
+				mcmp_time_of_day( d->character, time_info.hour );
 				mcmp_weather_change( d->character, weather_info.sky );
 			}
 		}

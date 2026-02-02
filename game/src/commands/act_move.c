@@ -992,6 +992,9 @@ void do_open( CHAR_DATA *ch, char *argument ) {
 		REMOVE_BIT( pexit->exit_info, EX_CLOSED );
 		act( "$n opens the $d.", ch, NULL, pexit->keyword, TO_ROOM );
 		send_to_char( "Ok.\n\r", ch );
+		if ( ch->desc != NULL )
+			mcmp_play( ch->desc, "environment/door_open.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+				35, 1, 20, NULL, FALSE, "Door creaks open" );
 
 		/* open the other side */
 		if ( ( to_room = pexit->to_room ) != NULL && ( pexit_rev = to_room->exit[rev_dir[door]] ) != NULL && pexit_rev->to_room == ch->in_room ) {
@@ -1055,6 +1058,9 @@ void do_close( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( pexit->exit_info, EX_CLOSED );
 		act( "$n closes the $d.", ch, NULL, pexit->keyword, TO_ROOM );
 		send_to_char( "Ok.\n\r", ch );
+		if ( ch->desc != NULL )
+			mcmp_play( ch->desc, "environment/door_close.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+				35, 1, 20, NULL, FALSE, "Door thuds shut" );
 
 		/* close the other side */
 		if ( ( to_room = pexit->to_room ) != NULL && ( pexit_rev = to_room->exit[rev_dir[door]] ) != 0 && pexit_rev->to_room == ch->in_room ) {

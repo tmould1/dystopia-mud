@@ -184,9 +184,21 @@ All game event functions check `mcmp_enabled()` internally and are safe to call 
 | `mcmp_spell_cast(ch, sn)` | Available for magic.c | Spell casting sound |
 | `mcmp_movement(ch, sector_to)` | [act_move.c — move_char()](../../src/commands/act_move.c) | Footstep sound |
 | `mcmp_room_ambient(ch, sector_type)` | [act_move.c — move_char()](../../src/commands/act_move.c) | Ambient loop change |
+| `mcmp_time_of_day(ch, hour)` | [update.c — weather_update()](../../src/systems/update.c) | Dawn, sunrise, sunset, nightfall, midnight clock |
 | `mcmp_weather_change(ch, sky_state)` | [update.c — weather_update()](../../src/systems/update.c) | Weather overlay sound |
 | `mcmp_channel_notify(ch, channel_type)` | [act_comm.c — talk_channel(), do_tell()](../../src/commands/act_comm.c) | Channel notification |
 | `mcmp_ui_event(ch, event)` | [nanny.c](../../src/core/nanny.c) | Login, levelup, death, achievement |
+
+### Direct `mcmp_play()` Callsites
+
+Some environmental sounds are simple enough that a direct `mcmp_play()` call is cleaner than a dedicated wrapper function.
+
+| Location | Sound | Caption | Notes |
+|----------|-------|---------|-------|
+| [db.c — area_update()](../../src/core/db.c) | `environment/bell_distant.mp3` | "Distant bell tolls" | Area reset warning bell |
+| [act_move.c — do_open()](../../src/commands/act_move.c) | `environment/door_open.mp3` | "Door creaks open" | Door opened by player |
+| [act_move.c — do_close()](../../src/commands/act_move.c) | `environment/door_close.mp3` | "Door thuds shut" | Door closed by player |
+| [act_comm.c — talk_channel()](../../src/commands/act_comm.c) | `environment/howl.mp3` | "A loud howl" / "A howl nearby" / "A distant howl" | Werewolf howl at 3 volume tiers (60/35/15) |
 
 ### Audio Layering Strategy
 
@@ -219,8 +231,8 @@ The solution: `violence_update()` captures the victim's HP before calling `multi
 | 80-90 | Death events (victim death UI, killer death sound) |
 | 70 | UI milestones (login, levelup, achievement) |
 | 50-60 | Combat engagement, victory, thunder |
-| 30-40 | Per-round combat, spells |
-| 20 | Channels, weather loops |
+| 30-40 | Per-round combat, spells, time-of-day events, howl |
+| 20 | Channels, weather loops, area bell, doors |
 | 10 | Ambient loops, footsteps |
 
 ## MSSP Advertisement

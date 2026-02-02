@@ -23,6 +23,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../systems/mcmp.h"
 #include "../db/db_sql.h"
 #include "../db/db_game.h"
 #include "../db/db_player.h"
@@ -669,8 +670,12 @@ void area_update( void ) {
 		 */
 		if ( pArea->nplayer > 0 && pArea->age == 15 - 1 ) {
 			for ( pch = char_list; pch != NULL; pch = pch->next ) {
-				if ( !IS_NPC( pch ) && IS_AWAKE( pch ) && pch->in_room != NULL && pch->in_room->area == pArea )
+				if ( !IS_NPC( pch ) && IS_AWAKE( pch ) && pch->in_room != NULL && pch->in_room->area == pArea ) {
 					send_to_char( "You hear the sound of a bell in the distance.\n\r", pch );
+					if ( pch->desc != NULL )
+						mcmp_play( pch->desc, "environment/bell_distant.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+							25, 1, 20, NULL, FALSE, "Distant bell tolls" );
+				}
 			}
 		}
 

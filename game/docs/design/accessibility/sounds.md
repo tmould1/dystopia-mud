@@ -12,7 +12,7 @@ All files should be in **MP3** format for broad client support (Mudlet uses Wind
 
 1. Create the `audio/` directory at the repository root with the subdirectory structure shown below.
 
-2. Add OGG Vorbis sound files matching the filenames listed in the tables.
+2. Add MP3 sound files matching the filenames listed in the tables.
 
 3. Commit and push to `main`. Files are immediately available via `raw.githubusercontent.com`.
 
@@ -59,6 +59,16 @@ audio/
     werewolf_howl.mp3
     demon_fire.mp3
     angel_smite.mp3
+  environment/
+    dawn.mp3
+    sunrise.mp3
+    sunset.mp3
+    nightfall.mp3
+    clock_midnight.mp3
+    bell_distant.mp3
+    door_open.mp3
+    door_close.mp3
+    howl.mp3
   ui/
     login.mp3
     levelup.mp3
@@ -71,7 +81,7 @@ audio/
     wind.mp3
 ```
 
-**Total: ~37 sound files** across 7 directories.
+**Total: ~46 sound files** across 8 directories.
 
 ## Sound File Reference
 
@@ -98,7 +108,7 @@ Per-use sounds for spells and class abilities. Currently `spell_cast.mp3` is the
 | `spell_heal.mp3` | Healing spell (future) | spell | "Healing energy flows" |
 | `spell_damage.mp3` | Damage spell (future) | spell | "Destructive magic unleashed" |
 | `vampire_drain.mp3` | Vampire blood drain (future) | spell | "Life force drained" |
-| `werewolf_howl.mp3` | Werewolf howl (future) | spell | "A primal howl echoes" |
+| `werewolf_howl.mp3` | Werewolf howl ability (future) | spell | "A primal howl echoes" |
 | `demon_fire.mp3` | Demon fire attack (future) | spell | "Hellfire erupts" |
 | `angel_smite.mp3` | Angel smite (future) | spell | "Divine light strikes" |
 
@@ -150,6 +160,51 @@ Overlay sounds that play on top of ambient when weather changes. Uses `key: "wea
 | `thunder.mp3` | SKY_LIGHTNING | sound | 1 | "Thunder crashes" |
 
 When skies clear (SKY_CLOUDLESS), the server sends `Client.Media.Stop` with `key: "weather"`, `fadeaway: true`, `fadeout: 3000` to fade out weather sounds over 3 seconds.
+
+### Environment Sounds (`environment/`)
+
+One-shot environmental sounds triggered by game events — time-of-day transitions, area resets, door interactions, and werewolf howls. All use `tag: "environment"`.
+
+#### Time of Day
+
+Broadcast to all outdoor, awake players at each time-of-day transition. Triggered by `mcmp_time_of_day()` in [mcmp.c](../../src/systems/mcmp.c), called from `weather_update()` in [update.c](../../src/systems/update.c).
+
+| File | Hour | Text Message | Volume | Priority | Caption |
+|------|------|-------------|--------|----------|---------|
+| `dawn.mp3` | 5 | "The day has begun." | 30 | 30 | "Dawn breaks" |
+| `sunrise.mp3` | 6 | "The sun rises in the east." | 30 | 30 | "Birds sing at sunrise" |
+| `sunset.mp3` | 19 | "The sun slowly disappears in the west." | 30 | 30 | "Evening crickets" |
+| `nightfall.mp3` | 20 | "The night has begun." | 30 | 30 | "Night creatures stir" |
+| `clock_midnight.mp3` | 0 (24) | "You hear a clock in the distance strike midnight." | 35 | 40 | "Clock tolls midnight" |
+
+#### Area Reset Bell
+
+Sent to all awake players in an area when it is about to reset (~1 tick before reset). Direct `mcmp_play()` call in `area_update()` in [db.c](../../src/core/db.c).
+
+| File | Trigger | Volume | Priority | Caption |
+|------|---------|--------|----------|---------|
+| `bell_distant.mp3` | Area age reaches reset-1 | 25 | 20 | "Distant bell tolls" |
+
+#### Doors
+
+Played to the actor when opening or closing a door (not containers). Direct `mcmp_play()` calls in `do_open()` and `do_close()` in [act_move.c](../../src/commands/act_move.c).
+
+| File | Trigger | Volume | Priority | Caption |
+|------|---------|--------|----------|---------|
+| `door_open.mp3` | Player opens a door | 35 | 20 | "Door creaks open" |
+| `door_close.mp3` | Player closes a door | 35 | 20 | "Door thuds shut" |
+
+#### Werewolf Howl
+
+Played at three volume tiers based on distance from the howler. Non-werewolves hear a generic howl instead of the channel message. Direct `mcmp_play()` calls in `talk_channel()` in [act_comm.c](../../src/commands/act_comm.c).
+
+| File | Distance | Volume | Priority | Caption |
+|------|----------|--------|----------|---------|
+| `howl.mp3` | Same room | 60 | 30 | "A loud howl" |
+| `howl.mp3` | Same area | 35 | 30 | "A howl nearby" |
+| `howl.mp3` | Different area | 15 | 30 | "A distant howl" |
+
+The same sound file is used at all three distances — the volume parameter creates the perception of distance.
 
 ### Channel Notification Sounds (`channels/`)
 

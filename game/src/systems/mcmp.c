@@ -395,6 +395,64 @@ void mcmp_room_ambient( CHAR_DATA *ch, int sector_type ) {
 }
 
 /*
+ * Time of day — one-shot environmental sounds for dawn, sunrise, sunset,
+ * nightfall, and midnight clock strike.
+ *
+ * These are broadcast to all outdoor/awake players at each time transition
+ * in weather_update(). No key is used — these are independent of the
+ * ambient and weather layers.
+ *
+ * Priority 30 for atmospheric transitions, 40 for midnight (more prominent).
+ */
+void mcmp_time_of_day( CHAR_DATA *ch, int hour ) {
+	const char *sound;
+	const char *caption;
+	int volume;
+	int priority;
+
+	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
+		return;
+
+	switch ( hour ) {
+	case 5:
+		sound   = "environment/dawn.mp3";
+		caption = "Dawn breaks";
+		volume  = 30;
+		priority = 30;
+		break;
+	case 6:
+		sound   = "environment/sunrise.mp3";
+		caption = "Birds sing at sunrise";
+		volume  = 30;
+		priority = 30;
+		break;
+	case 19:
+		sound   = "environment/sunset.mp3";
+		caption = "Evening crickets";
+		volume  = 30;
+		priority = 30;
+		break;
+	case 20:
+		sound   = "environment/nightfall.mp3";
+		caption = "Night creatures stir";
+		volume  = 30;
+		priority = 30;
+		break;
+	case 0: /* midnight — hour resets to 0 before this is called */
+		sound   = "environment/clock_midnight.mp3";
+		caption = "Clock tolls midnight";
+		volume  = 35;
+		priority = 40;
+		break;
+	default:
+		return;
+	}
+
+	mcmp_play( ch->desc, sound, MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+		volume, 1, priority, NULL, FALSE, caption );
+}
+
+/*
  * Weather change — ambient weather overlay that layers on top of the
  * sector ambient loop.
  *
@@ -569,6 +627,8 @@ void do_mcmptest( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "            weather thunder rain wind\n\r", ch );
 		send_to_char( "            chat tell yell spell\n\r", ch );
 		send_to_char( "            login levelup die achievement\n\r", ch );
+		send_to_char( "            dawn sunrise sunset nightfall midnight\n\r", ch );
+		send_to_char( "            bell door howl\n\r", ch );
 		send_to_char( "            stop  -- stop all sounds\n\r", ch );
 		return;
 	}
@@ -649,6 +709,34 @@ void do_mcmptest( CHAR_DATA *ch, char *argument ) {
 	else if ( !str_cmp( arg, "achievement" ) )
 		mcmp_play( ch->desc, "ui/achievement.mp3", MCMP_SOUND, MCMP_TAG_UI,
 			50, 1, 70, NULL, FALSE, "Test: achievement" );
+
+	/* Environment — time of day */
+	else if ( !str_cmp( arg, "dawn" ) )
+		mcmp_play( ch->desc, "environment/dawn.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+			50, 1, 30, NULL, FALSE, "Test: dawn breaks" );
+	else if ( !str_cmp( arg, "sunrise" ) )
+		mcmp_play( ch->desc, "environment/sunrise.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+			50, 1, 30, NULL, FALSE, "Test: sunrise" );
+	else if ( !str_cmp( arg, "sunset" ) )
+		mcmp_play( ch->desc, "environment/sunset.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+			50, 1, 30, NULL, FALSE, "Test: sunset" );
+	else if ( !str_cmp( arg, "nightfall" ) )
+		mcmp_play( ch->desc, "environment/nightfall.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+			50, 1, 30, NULL, FALSE, "Test: nightfall" );
+	else if ( !str_cmp( arg, "midnight" ) )
+		mcmp_play( ch->desc, "environment/clock_midnight.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+			50, 1, 40, NULL, FALSE, "Test: clock tolls midnight" );
+
+	/* Environment — bell, door, howl */
+	else if ( !str_cmp( arg, "bell" ) )
+		mcmp_play( ch->desc, "environment/bell_distant.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+			50, 1, 20, NULL, FALSE, "Test: distant bell" );
+	else if ( !str_cmp( arg, "door" ) )
+		mcmp_play( ch->desc, "environment/door_open.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+			50, 1, 20, NULL, FALSE, "Test: door opens" );
+	else if ( !str_cmp( arg, "howl" ) )
+		mcmp_play( ch->desc, "environment/howl.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+			50, 1, 30, NULL, FALSE, "Test: wolf howl" );
 
 	/* Stop all */
 	else if ( !str_cmp( arg, "stop" ) ) {

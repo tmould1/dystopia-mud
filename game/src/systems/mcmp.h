@@ -124,6 +124,9 @@ void mcmp_spell_cast( CHAR_DATA *ch, int sn );
 void mcmp_movement( CHAR_DATA *ch, int sector_to );
 void mcmp_room_ambient( CHAR_DATA *ch, int sector_type );
 
+/* Time of day — dawn, sunrise, sunset, nightfall, midnight */
+void mcmp_time_of_day( CHAR_DATA *ch, int hour );
+
 /* Weather */
 void mcmp_weather_change( CHAR_DATA *ch, int sky_state );
 

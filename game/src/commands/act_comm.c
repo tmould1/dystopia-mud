@@ -361,12 +361,21 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 				if ( ( och->in_room ) && ( ch->in_room ) ) {
 					if ( ( och->in_room == ch->in_room ) ) {
 						act( "$n throws back $s head and howls loudly.", ch, argument, och, TO_VICT );
+						if ( och->desc != NULL )
+							mcmp_play( och->desc, "environment/howl.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+								60, 1, 30, NULL, FALSE, "A loud howl" );
 						continue;
 					} else if ( ( och->in_room->area == ch->in_room->area ) ) {
 						act( "You hear a loud howl nearby.", ch, NULL, och, TO_VICT );
+						if ( och->desc != NULL )
+							mcmp_play( och->desc, "environment/howl.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+								35, 1, 30, NULL, FALSE, "A howl nearby" );
 						continue;
 					} else {
 						act( "You hear a loud howl in the distance.", ch, NULL, och, TO_VICT );
+						if ( och->desc != NULL )
+							mcmp_play( och->desc, "environment/howl.mp3", MCMP_SOUND, MCMP_TAG_ENVIRONMENT,
+								15, 1, 30, NULL, FALSE, "A distant howl" );
 						continue;
 					}
 				}
