@@ -6,7 +6,7 @@ Sound files live in the `audio/` directory at the repository root and are served
 #define MCMP_DEFAULT_URL "https://raw.githubusercontent.com/tmould1/dystopia-mud/main/audio/"
 ```
 
-All files should be in **OGG Vorbis** format for broad client support.
+All files should be in **MP3** format for broad client support (Mudlet uses Windows Media Foundation on Windows, which requires MP3).
 
 ## Setup
 
@@ -175,6 +175,20 @@ Event sounds for significant player milestones.
 | `levelup.mp3` | `"levelup"` | Player gains a level (future hook) | "Level up" |
 | `death.mp3` | `"death"` | Player dies (sent to victim via `mcmp_combat_death`) | "You have died" |
 | `achievement.mp3` | *(default)* | Quest/achievement (future hook) | "Achievement earned" |
+
+## Caption Writing Guidelines
+
+Every sound file must have a corresponding `caption` string in its `mcmp_play()` call. Captions provide accessibility for hearing-impaired players — clients display them as subtitles or pass them to screen readers.
+
+Follow the [Captioning Key: Sound Effects and Music](https://www.captioningkey.org/) standard referenced by the MCMP spec:
+
+1. **Keep it short** — 2-5 words. Captions appear inline with game text.
+2. **Describe the sound, not the mechanic** — "Thunder crashes" not "Weather state 3".
+3. **Use present tense** — "Wind picks up" not "Wind picked up".
+4. **Be distinct within each category** — Don't reuse the same caption for different sounds.
+5. **Match the tables below** — Each sound file table includes the required caption text.
+
+See [mcmp.md — Caption Accessibility](mcmp.md#caption-accessibility) for the full convention guide.
 
 ## Sound Design Guidelines
 

@@ -28,7 +28,17 @@ bool mcmp_enabled( DESCRIPTOR_DATA *d ) {
 }
 
 /*
- * Send Client.Media.Default — set the base URL for media files
+ * Send Client.Media.Default — set the base URL for media files.
+ *
+ * Spec: https://wiki.mudlet.org/w/Standards:MUD_Client_Media_Protocol#Client.Media.Default
+ *
+ * Called once when the client first advertises Client.Media support
+ * (in gmcp_handle_subnegotiation). Sets the base directory URL that all
+ * subsequent Client.Media.Load and Client.Media.Play filenames are
+ * relative to. The URL must end with a trailing slash.
+ *
+ * Uses the runtime gameconfig audio_url if set, otherwise falls back
+ * to MCMP_DEFAULT_URL.
  */
 void mcmp_set_default( DESCRIPTOR_DATA *d ) {
 	char buf[MAX_STRING_LENGTH];
@@ -45,7 +55,16 @@ void mcmp_set_default( DESCRIPTOR_DATA *d ) {
 }
 
 /*
- * Send Client.Media.Load — preload a media file
+ * Send Client.Media.Load — preload a media file for client-side caching.
+ *
+ * Spec: https://wiki.mudlet.org/w/Standards:MUD_Client_Media_Protocol#Client.Media.Load
+ *
+ * The client downloads the file in advance so that later Play messages
+ * start instantly without a download delay. The "name" field is a path
+ * relative to the base URL set by Client.Media.Default.
+ *
+ * We omit the optional "url" parameter because our base URL is already
+ * established via Client.Media.Default at connection time.
  */
 void mcmp_load( DESCRIPTOR_DATA *d, const char *name ) {
 	char buf[MAX_STRING_LENGTH];
@@ -58,7 +77,29 @@ void mcmp_load( DESCRIPTOR_DATA *d, const char *name ) {
 }
 
 /*
- * Send Client.Media.Play — play a media file
+ * Send Client.Media.Play — play a media file.
+ *
+ * Spec: https://wiki.mudlet.org/w/Standards:MUD_Client_Media_Protocol#Client.Media.Play
+ *
+ * Parameters we emit (mapped to spec):
+ *   name     (required) Filename relative to base URL, e.g. "combat/engage.mp3"
+ *   type     "sound" or "music" — controls client mixing behavior
+ *   tag      Category label for bulk stop (e.g. "combat", "weather")
+ *   volume   1-100, relative to client master volume (spec default: 50)
+ *   loops    Repetitions: 1 = once, -1 = infinite (spec default: 1)
+ *   priority 1-100, higher priority halts lower-priority sounds (spec default: none)
+ *   key      Unique binding key — sounds with same key replace each other
+ *   continue TRUE = don't restart if same file already playing (spec default: true)
+ *   caption  Accessibility text for hearing-impaired players (spec v1.0.3+)
+ *            Should use the "Captioning Key" style: onomatopoeia for
+ *            environmental/ambient, short descriptive phrases for events.
+ *
+ * Parameters intentionally omitted (no current use case):
+ *   url      Not needed — base URL set once via Client.Media.Default
+ *   fadein   Linear volume ramp at start (milliseconds)
+ *   fadeout  Linear volume ramp at end (milliseconds)
+ *   start    Playback start offset (milliseconds)
+ *   finish   Playback end offset (milliseconds)
  */
 void mcmp_play( DESCRIPTOR_DATA *d, const char *name, const char *type,
                 const char *tag, int volume, int loops, int priority,
@@ -85,13 +126,32 @@ void mcmp_play( DESCRIPTOR_DATA *d, const char *name, const char *type,
 		len += snprintf( buf + len, sizeof( buf ) - len, ",\"key\":\"%s\"", key );
 	if ( cont )
 		len += snprintf( buf + len, sizeof( buf ) - len, ",\"continue\":true" );
+	if ( caption != NULL )
+		len += snprintf( buf + len, sizeof( buf ) - len, ",\"caption\":\"%s\"", caption );
 	snprintf( buf + len, sizeof( buf ) - len, "}" );
 
 	gmcp_send( d, "Client.Media.Play", buf );
 }
 
 /*
- * Send Client.Media.Stop — stop playing media
+ * Send Client.Media.Stop — stop playing media.
+ *
+ * Spec: https://wiki.mudlet.org/w/Standards:MUD_Client_Media_Protocol#Client.Media.Stop
+ *
+ * All filter parameters are optional. An empty body {} stops all media.
+ * Multiple filters combine as AND (e.g. name + type stops only that
+ * specific file of that type).
+ *
+ * Parameters we emit (mapped to spec):
+ *   name     Stop by filename match
+ *   type     Stop by media type ("sound" or "music")
+ *   tag      Stop by tag category match
+ *   key      Stop by binding key match
+ *   fadeaway TRUE = apply a volume decrease before stopping
+ *   fadeout  Fade duration in ms (spec default: 5000 if fadeaway but no fadeout)
+ *
+ * Parameters intentionally omitted:
+ *   priority  Stop sounds at or below a priority level — not currently needed
  */
 void mcmp_stop( DESCRIPTOR_DATA *d, const char *name, const char *type,
                 const char *tag, const char *key, bool fadeaway, int fadeout ) {
@@ -197,7 +257,24 @@ static const char *sector_footstep_caption[] = {
 };
 
 /*
- * Combat round summary — called once at end of multi_hit()
+ * Combat round summary — called once per round from violence_update().
+ *
+ * Combat in Dystopia does 2-30+ individual attacks per 0.75s round via
+ * multi_hit(). Sending a sound per attack would flood the client. Instead,
+ * violence_update() captures the victim's HP before multi_hit(), computes
+ * the total damage delta afterward, and calls this function exactly once
+ * with the aggregated result.
+ *
+ * Damage thresholds:
+ *   total_dam > 2000  -> heavy_hit.mp3  (vol 50, priority 40)
+ *   total_dam > 0     -> light_hit.mp3  (vol 40, priority 30)
+ *   total_dam == 0    -> miss.mp3       (vol 30, priority 30)
+ *
+ * All combat sounds are one-shot (loops=1), no key (independent of
+ * ambient/weather layers), continue=false.
+ *
+ * Caption uses descriptive phrases: "Heavy blows land", "Light blows
+ * exchanged", "Attacks miss".
  */
 void mcmp_combat_round( CHAR_DATA *ch, CHAR_DATA *victim, int hits, int misses, int total_dam ) {
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
@@ -216,7 +293,11 @@ void mcmp_combat_round( CHAR_DATA *ch, CHAR_DATA *victim, int hits, int misses, 
 }
 
 /*
- * Death event — target killed
+ * Death event — sends separate sounds to killer and victim.
+ *
+ * The killer hears combat/death.mp3 ("A death cry rings out"), tagged as
+ * combat. The victim hears ui/death.mp3 ("You have died"), tagged as UI
+ * with higher priority (90) to cut through any ongoing combat sounds.
  */
 void mcmp_combat_death( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	if ( ch != NULL && ch->desc != NULL && mcmp_enabled( ch->desc ) ) {
@@ -230,7 +311,8 @@ void mcmp_combat_death( CHAR_DATA *ch, CHAR_DATA *victim ) {
 }
 
 /*
- * Combat starts — first engagement
+ * Combat starts — first engagement. One-shot sound at medium priority
+ * so it doesn't override higher-priority death/victory sounds.
  */
 void mcmp_combat_start( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
@@ -263,7 +345,11 @@ void mcmp_spell_cast( CHAR_DATA *ch, int sn ) {
 }
 
 /*
- * Movement — footstep sound based on sector type
+ * Movement — one-shot footstep sound based on destination sector type.
+ *
+ * Low volume (25) and low priority (10) so footsteps provide subtle
+ * spatial awareness without dominating. Captions describe the surface:
+ * "Footsteps on stone", "Splashing through water", etc.
  */
 void mcmp_movement( CHAR_DATA *ch, int sector_to ) {
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
@@ -277,8 +363,25 @@ void mcmp_movement( CHAR_DATA *ch, int sector_to ) {
 }
 
 /*
- * Room ambient — start/change ambient loop based on sector type
- * Uses key "ambient" and continue=true so same-sector moves don't restart.
+ * Room ambient — start or change the background ambient loop.
+ *
+ * Audio layering strategy (uses MCMP key + continue interaction):
+ *   key="ambient", type="music", loops=-1, continue=true
+ *
+ * Per the spec, "continue: true" means if a file with the same name is
+ * already playing, the client keeps it running rather than restarting.
+ * This prevents the ambient loop from cutting out and restarting when
+ * a player walks between rooms of the same sector type.
+ *
+ * When the sector type changes, the new file has a different name, so
+ * the client starts the new ambient and the old one (same key) is
+ * implicitly replaced.
+ *
+ * Volume is kept low (20) so ambient doesn't overpower one-shot sounds.
+ * Priority is low (10) so combat/UI sounds take precedence.
+ *
+ * Captions describe the ambient environment in present tense:
+ * "Forest, birds and rustling", "City sounds", etc.
  */
 void mcmp_room_ambient( CHAR_DATA *ch, int sector_type ) {
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
@@ -292,7 +395,23 @@ void mcmp_room_ambient( CHAR_DATA *ch, int sector_type ) {
 }
 
 /*
- * Weather change — ambient weather overlay
+ * Weather change — ambient weather overlay that layers on top of the
+ * sector ambient loop.
+ *
+ * Audio layering strategy:
+ *   key="weather", separate from key="ambient" — both play concurrently.
+ *   Weather loops use continue=false so changing weather replaces the
+ *   previous weather sound (e.g., wind -> rain replaces, not overlaps).
+ *
+ * Thunder is a special case: it's a one-shot sound with no key, so it
+ * plays independently on top of any existing weather loop.
+ *
+ * When skies clear (SKY_CLOUDLESS), we send Client.Media.Stop with
+ * key="weather", fadeaway=true, fadeout=3000 to fade out the weather
+ * overlay over 3 seconds rather than cutting abruptly.
+ *
+ * Captions use descriptive present tense: "Wind picks up", "Heavy rain",
+ * "Thunder crashes".
  */
 void mcmp_weather_change( CHAR_DATA *ch, int sky_state ) {
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
@@ -319,7 +438,13 @@ void mcmp_weather_change( CHAR_DATA *ch, int sky_state ) {
 }
 
 /*
- * Channel notification — sound when receiving a chat/tell message
+ * Channel notification — short one-shot sound when receiving a message.
+ *
+ * Each channel type maps to a distinct sound file so players can
+ * distinguish tells from chats by audio alone. Captions use the
+ * channel context: "Private message", "Chat message", etc.
+ *
+ * Low priority (20) ensures these don't interrupt combat or UI sounds.
  */
 void mcmp_channel_notify( CHAR_DATA *ch, int channel_type ) {
 	const char *sound;
@@ -353,7 +478,10 @@ void mcmp_channel_notify( CHAR_DATA *ch, int channel_type ) {
 }
 
 /*
- * UI event — login, levelup, death, achievement
+ * UI event — significant player milestones: login, levelup, death, achievement.
+ *
+ * High priority (70) so these are heard over ambient and combat sounds.
+ * Captions are short imperative labels: "Welcome", "Level up", etc.
  */
 void mcmp_ui_event( CHAR_DATA *ch, const char *event ) {
 	const char *sound;
