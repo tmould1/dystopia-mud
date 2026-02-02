@@ -1,0 +1,174 @@
+{
+  "_comment": "MCMP Starter Audio Pack — all sources are CC0 (public domain). No attribution required.",
+  "_packs": {
+    "kenney_impact": {
+      "url": "https://kenney.nl/media/pages/assets/impact-sounds/8aa7b545c9-1677589768/kenney_impact-sounds.zip",
+      "license": "CC0",
+      "author": "Kenney (kenney.nl)"
+    },
+    "kenney_rpg": {
+      "url": "https://kenney.nl/media/pages/assets/rpg-audio/706161bc16-1677590336/kenney_rpg-audio.zip",
+      "license": "CC0",
+      "author": "Kenney (kenney.nl)"
+    },
+    "kenney_interface": {
+      "url": "https://kenney.nl/media/pages/assets/interface-sounds/d23a84242e-1677589452/kenney_interface-sounds.zip",
+      "license": "CC0",
+      "author": "Kenney (kenney.nl)"
+    },
+    "sfx100v2": {
+      "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+      "license": "CC0",
+      "author": "Kenney (via OpenGameArt)"
+    }
+  },
+
+  "sounds": {
+    "combat/light_hit.ogg": {
+      "pack": "kenney_impact",
+      "source_file": "Audio/impactGeneric_light_000.ogg"
+    },
+    "combat/heavy_hit.ogg": {
+      "pack": "kenney_impact",
+      "source_file": "Audio/impactPunch_heavy_000.ogg"
+    },
+    "combat/miss.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_air_02.ogg"
+    },
+    "combat/engage.ogg": {
+      "pack": "kenney_rpg",
+      "source_file": "Audio/knifeSlice.ogg"
+    },
+    "combat/death.ogg": {
+      "pack": "kenney_impact",
+      "source_file": "Audio/impactBell_heavy_001.ogg"
+    },
+    "combat/victory.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/confirmation_002.ogg"
+    },
+
+    "movement/footstep_stone.ogg": {
+      "pack": "kenney_impact",
+      "source_file": "Audio/footstep_concrete_000.ogg"
+    },
+    "movement/footstep_grass.ogg": {
+      "pack": "kenney_impact",
+      "source_file": "Audio/footstep_grass_000.ogg"
+    },
+    "movement/footstep_forest.ogg": {
+      "pack": "kenney_impact",
+      "source_file": "Audio/footstep_wood_000.ogg"
+    },
+    "movement/footstep_gravel.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_footstep_01.ogg"
+    },
+    "movement/splash.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_footstep_wet_01.ogg"
+    },
+    "movement/whoosh.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_air_01.ogg"
+    },
+    "movement/footstep_sand.ogg": {
+      "pack": "kenney_impact",
+      "source_file": "Audio/footstep_snow_000.ogg"
+    },
+
+    "weather/thunder.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_thunder_01.ogg"
+    },
+    "weather/rain_heavy.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_loop_water_01.ogg"
+    },
+    "weather/wind.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_air_03.ogg"
+    },
+    "weather/rain_light.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_loop_water_02.ogg"
+    },
+
+    "channels/chat.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/pluck_001.ogg"
+    },
+    "channels/tell.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/pluck_002.ogg"
+    },
+    "channels/yell.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/bong_001.ogg"
+    },
+    "channels/immtalk.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/confirmation_001.ogg"
+    },
+
+    "ui/login.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/confirmation_003.ogg"
+    },
+    "ui/levelup.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/confirmation_004.ogg"
+    },
+    "ui/death.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/error_008.ogg"
+    },
+    "ui/achievement.ogg": {
+      "pack": "kenney_interface",
+      "source_file": "Audio/maximize_008.ogg"
+    },
+
+    "specials/spell_cast.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_misc_01.ogg"
+    },
+
+    "ambient/indoor.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_loop_ambient_01.ogg"
+    },
+    "ambient/city.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_loop_ambient_02.ogg"
+    },
+    "ambient/field.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_loop_ambient_03.ogg"
+    },
+    "ambient/forest.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_loop_ambient_04.ogg"
+    },
+    "ambient/hills.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_air_01.ogg"
+    },
+    "ambient/mountain.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_air_03.ogg"
+    },
+    "ambient/water.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_loop_water_03.ogg"
+    },
+    "ambient/air.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_air_02.ogg"
+    },
+    "ambient/desert.ogg": {
+      "pack": "sfx100v2",
+      "source_file": "sfx100v2_loop_ambient_01.ogg"
+    }
+  }
+}
