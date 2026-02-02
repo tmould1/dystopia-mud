@@ -159,6 +159,37 @@ char *const where_name[] =
 		"#R[#CBodyart       #R]#n ",
 };
 
+char *const where_name_sr[] =
+	{
+		"Light: ",
+		"On Finger: ",
+		"On Finger: ",
+		"Around Neck: ",
+		"Around Neck: ",
+		"On Body: ",
+		"On Head: ",
+		"On Legs: ",
+		"On Feet: ",
+		"On Hands: ",
+		"On Arms: ",
+		"Off Hand: ",
+		"Around Body: ",
+		"Around Waist: ",
+		"Around Wrist: ",
+		"Around Wrist: ",
+		"Right Hand: ",
+		"Left Hand: ",
+		"Third Hand: ",
+		"Fourth Hand: ",
+		"On Face: ",
+		"Left Scabbard: ",
+		"Right Scabbard: ",
+		"Special: ",
+		"Floating: ",
+		"Medal: ",
+		"Bodyart: ",
+};
+
 const char *exitname[6] =
 	{
 		"#Cn#0orth#n",
@@ -1660,6 +1691,37 @@ void do_exits( CHAR_DATA *ch, char *argument ) {
 	if ( !check_blind( ch ) )
 		return;
 
+	/*
+	 * Screen reader mode: plain comma-separated exit list.
+	 */
+	if ( IS_SCREENREADER( ch ) ) {
+		strcpy( buf, fAuto ? "Exits:" : "Obvious exits:\n\r" );
+		found = FALSE;
+		for ( door = 0; door <= 5; door++ ) {
+			if ( ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL ) {
+				if ( fAuto ) {
+					strcat( buf, found ? ", " : " " );
+					strcat( buf, dir_name[door] );
+				} else {
+					char exit_line[256];
+					snprintf( exit_line, sizeof( exit_line ), "%s - %s\n\r",
+						capitalize( dir_name[door] ),
+						room_is_dark( pexit->to_room )
+							? "Too dark to tell"
+							: pexit->to_room->name );
+					strcat( buf, exit_line );
+				}
+				found = TRUE;
+			}
+		}
+		if ( !found )
+			strcat( buf, fAuto ? " none" : "None.\n\r" );
+		if ( fAuto )
+			strcat( buf, "\n\r" );
+		send_to_char( buf, ch );
+		return;
+	}
+
 	if ( fAuto && fMxp )
 		strcpy( buf, MXP_SECURE_LINE "#R[#GExits#7:#C" );
 	else
@@ -1741,6 +1803,29 @@ const char *transformation_message[2][12] =
 void do_weaplist( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	if ( IS_NPC( ch ) ) return;
+
+	if ( IS_SCREENREADER( ch ) ) {
+		send_to_char( "Weapon, Stance, and Spell Skill\n\r\n\r", ch );
+		send_to_char( "Weapons:\n\r", ch );
+		sprintf( buf, "Unarmed: %d. Slice: %d. Stab: %d. Slash: %d. Whip: %d. Claw: %d. Blast: %d.\n\r",
+			ch->wpn[0], ch->wpn[1], ch->wpn[2], ch->wpn[3], ch->wpn[4], ch->wpn[5], ch->wpn[6] );
+		send_to_char( buf, ch );
+		sprintf( buf, "Pound: %d. Crush: %d. Grep: %d. Bite: %d. Pierce: %d. Suck: %d.\n\r",
+			ch->wpn[7], ch->wpn[8], ch->wpn[9], ch->wpn[10], ch->wpn[11], ch->wpn[12] );
+		send_to_char( buf, ch );
+		send_to_char( "\n\rStances:\n\r", ch );
+		sprintf( buf, "Viper: %d. Crane: %d. Crab: %d. Mongoose: %d. Bull: %d. Mantis: %d.\n\r",
+			ch->stance[1], ch->stance[2], ch->stance[3], ch->stance[4], ch->stance[5], ch->stance[6] );
+		send_to_char( buf, ch );
+		sprintf( buf, "Dragon: %d. Tiger: %d. Monkey: %d. Swallow: %d. Leopard: %d.\n\r",
+			ch->stance[7], ch->stance[8], ch->stance[9], ch->stance[10], ch->stance[11] );
+		send_to_char( buf, ch );
+		send_to_char( "\n\rMagic:\n\r", ch );
+		sprintf( buf, "Purple: %d. Red: %d. Blue: %d. Green: %d. Yellow: %d.\n\r",
+			ch->spl[0], ch->spl[1], ch->spl[2], ch->spl[3], ch->spl[4] );
+		send_to_char( buf, ch );
+		return;
+	}
 
 	send_to_char(
 
@@ -1952,6 +2037,55 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 		obj_score( ch, ch->pcdata->chobj );
 		return;
 	}
+
+	/*
+	 * Screen reader mode: clean labeled output without decorative brackets.
+	 */
+	if ( IS_SCREENREADER( ch ) ) {
+		sprintf( buf, "You are %s%s. Playing for %d hours.\n\r",
+			ch->pcdata->switchname,
+			IS_NPC( ch ) ? "" : ch->pcdata->title,
+			( ch->played + (int) ( current_time - ch->logon ) ) / 3600 );
+		send_to_char( buf, ch );
+		sprintf( buf, "Hit Points: %d/%d. Mana: %d/%d. Movement: %d/%d. Primal: %d.\n\r",
+			ch->hit, ch->max_hit, ch->mana, ch->max_mana,
+			ch->move, ch->max_move, ch->practice );
+		send_to_char( buf, ch );
+		sprintf( buf, "Carrying: %d/%d items, %d/%d kg.\n\r",
+			ch->carry_number, can_carry_n( ch ),
+			ch->carry_weight, can_carry_w( ch ) );
+		send_to_char( buf, ch );
+		sprintf( buf, "Str: %d. Int: %d. Wis: %d. Dex: %d. Con: %d.\n\r",
+			get_curr_str( ch ), get_curr_int( ch ), get_curr_wis( ch ),
+			get_curr_dex( ch ), get_curr_con( ch ) );
+		send_to_char( buf, ch );
+		sprintf( buf, "Exp: %d. Gold: %d.\n\r", ch->exp, ch->gold );
+		send_to_char( buf, ch );
+		sprintf( buf, "AC: %d. Hitroll: %d. Damroll: %d. Damcap: %d.\n\r",
+			a_c, char_hitroll( ch ), char_damroll( ch ), ch->damcap[0] );
+		send_to_char( buf, ch );
+		sprintf( buf, "Alignment: %d. Autoexit: %s. Autoloot: %s. Autosac: %s.\n\r",
+			ch->alignment,
+			IS_SET( ch->act, PLR_AUTOEXIT ) ? "yes" : "no",
+			IS_SET( ch->act, PLR_AUTOLOOT ) ? "yes" : "no",
+			IS_SET( ch->act, PLR_AUTOSAC ) ? "yes" : "no" );
+		send_to_char( buf, ch );
+		sprintf( buf, "Arena: %d wins, %d losses.\n\r",
+			ch->pcdata->awins, ch->pcdata->alosses );
+		send_to_char( buf, ch );
+		sprintf( buf, "Player kills: %d. Player deaths: %d. Mob kills: %d. Mob deaths: %d.\n\r",
+			ch->pkill, ch->pdeath, ch->mkill, ch->mdeath );
+		send_to_char( buf, ch );
+		sprintf( buf, "Quests: %d completed for %d points. Quest points: %d.\n\r",
+			ch->pcdata->questsrun, ch->pcdata->questtotal, ch->pcdata->quest );
+		send_to_char( buf, ch );
+		if ( ch->fight_timer > 0 ) {
+			sprintf( buf, "Fight timer: %d rounds.\n\r", ch->fight_timer );
+			send_to_char( buf, ch );
+		}
+		return;
+	}
+
 	sprintf( buf,
 		"#R[#nYou are #C%s%s#R][#nYou have been playing for #C%d #nhours#R]#n\n\r",
 		ch->pcdata->switchname,
@@ -2608,8 +2742,12 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 
 		/*
 		 * Time to parse the class name, first we do the symbols.
+		 * Screen readers skip decorative brackets entirely.
 		 */
-		if ( IS_CLASS( gch, CLASS_TANARRI ) ) {
+		if ( IS_SCREENREADER( ch ) ) {
+			strcpy( openb, "" );
+			strcpy( closeb, "" );
+		} else if ( IS_CLASS( gch, CLASS_TANARRI ) ) {
 			strcpy( openb, "#y{#n" );
 			strcpy( closeb, "#y}#n" );
 		} else if ( IS_CLASS( gch, CLASS_ANGEL ) ) {
@@ -2993,58 +3131,96 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 	{
 		char center_text[MAX_INPUT_LENGTH];
 
-		/* Title banner with game name */
-		snprintf( center_text, sizeof( center_text ), "  #G%s#n  ", game_config.game_name );
-		make_who_banner( ch, buf, sizeof( buf ), center_text );
-		send_to_char( buf, ch );
+		if ( IS_SCREENREADER( ch ) ) {
+			/* Screen reader: plain text headers, no decorative banners */
+			sprintf( buf, "%s - Who List\n\r", game_config.game_name );
+			send_to_char( buf, ch );
 
-		if ( a1 ) {
-			snprintf( center_text, sizeof( center_text ), "  #GGods of %s#n  ", game_config.game_name );
-			send_to_char( "\n\r", ch );
+			if ( a1 ) {
+				send_to_char( "\n\rGods:\n\r", ch );
+				send_to_char( buf1, ch );
+			}
+			if ( avatars ) {
+				send_to_char( "\n\rAvatars:\n\r", ch );
+				if ( a2 ) send_to_char( buf2, ch );
+				if ( a3 ) send_to_char( buf3, ch );
+				if ( a4 ) send_to_char( buf4, ch );
+				if ( a5 ) send_to_char( buf5, ch );
+				if ( a6 ) send_to_char( buf6, ch );
+				if ( a7 ) send_to_char( buf7, ch );
+				if ( a8 ) send_to_char( buf8, ch );
+				if ( a9 ) send_to_char( buf9, ch );
+				if ( a10 ) send_to_char( buf10, ch );
+				if ( a11 ) send_to_char( buf11, ch );
+				if ( a12 ) send_to_char( buf12, ch );
+				if ( a13 ) send_to_char( buf13, ch );
+				if ( a14 ) send_to_char( buf14, ch );
+				if ( a15 ) send_to_char( buf15, ch );
+				if ( a16 ) send_to_char( buf16, ch );
+			}
+			if ( a17 ) {
+				send_to_char( "\n\rMortals:\n\r", ch );
+				send_to_char( buf17, ch );
+			}
+
+			sprintf( buf, "\n\r%d of %d visible players and %d visible immortals connected.\n\r",
+				nPlayerVis, nPlayerAll, nImmVis );
+			send_to_char( buf, ch );
+		} else {
+			/* Normal: decorative banners */
+			/* Title banner with game name */
+			snprintf( center_text, sizeof( center_text ), "  #G%s#n  ", game_config.game_name );
 			make_who_banner( ch, buf, sizeof( buf ), center_text );
 			send_to_char( buf, ch );
-			send_to_char( buf1, ch );
-		}
-		if ( avatars ) {
+
+			if ( a1 ) {
+				snprintf( center_text, sizeof( center_text ), "  #GGods of %s#n  ", game_config.game_name );
+				send_to_char( "\n\r", ch );
+				make_who_banner( ch, buf, sizeof( buf ), center_text );
+				send_to_char( buf, ch );
+				send_to_char( buf1, ch );
+			}
+			if ( avatars ) {
+				send_to_char( "\n\r", ch );
+				make_who_banner( ch, buf, sizeof( buf ), "     #GAvatars#n      " );
+				send_to_char( buf, ch );
+				if ( a2 ) send_to_char( buf2, ch );
+				if ( a3 ) send_to_char( buf3, ch );
+				if ( a4 ) send_to_char( buf4, ch );
+				if ( a5 ) send_to_char( buf5, ch );
+				if ( a6 ) send_to_char( buf6, ch );
+				if ( a7 ) send_to_char( buf7, ch );
+				if ( a8 ) send_to_char( buf8, ch );
+				if ( a9 ) send_to_char( buf9, ch );
+				if ( a10 ) send_to_char( buf10, ch );
+				if ( a11 ) send_to_char( buf11, ch );
+				if ( a12 ) send_to_char( buf12, ch );
+				if ( a13 ) send_to_char( buf13, ch );
+				if ( a14 ) send_to_char( buf14, ch );
+				if ( a15 ) send_to_char( buf15, ch );
+				if ( a16 ) send_to_char( buf16, ch );
+			}
+			if ( a17 ) {
+				send_to_char( "\n\r", ch );
+				make_who_banner( ch, buf, sizeof( buf ), "     #GMortals#n      " );
+				send_to_char( buf, ch );
+				send_to_char( buf17, ch );
+			}
+
+			/* Footer separator */
 			send_to_char( "\n\r", ch );
-			make_who_banner( ch, buf, sizeof( buf ), "     #GAvatars#n      " );
+			make_who_banner( ch, buf, sizeof( buf ), "" );
 			send_to_char( buf, ch );
-			if ( a2 ) send_to_char( buf2, ch );
-			if ( a3 ) send_to_char( buf3, ch );
-			if ( a4 ) send_to_char( buf4, ch );
-			if ( a5 ) send_to_char( buf5, ch );
-			if ( a6 ) send_to_char( buf6, ch );
-			if ( a7 ) send_to_char( buf7, ch );
-			if ( a8 ) send_to_char( buf8, ch );
-			if ( a9 ) send_to_char( buf9, ch );
-			if ( a10 ) send_to_char( buf10, ch );
-			if ( a11 ) send_to_char( buf11, ch );
-			if ( a12 ) send_to_char( buf12, ch );
-			if ( a13 ) send_to_char( buf13, ch );
-			if ( a14 ) send_to_char( buf14, ch );
-			if ( a15 ) send_to_char( buf15, ch );
-			if ( a16 ) send_to_char( buf16, ch );
-		}
-		if ( a17 ) {
-			send_to_char( "\n\r", ch );
-			make_who_banner( ch, buf, sizeof( buf ), "     #GMortals#n      " );
+
+			/* Player count line */
+			sprintf( buf, "         #C%d#0/#C%d #GVisible players and #C%d #Gvisible immortals connected to %s#n\n\r",
+				nPlayerVis, nPlayerAll, nImmVis, game_config.game_name );
 			send_to_char( buf, ch );
-			send_to_char( buf17, ch );
+
+			/* Bottom border */
+			make_who_banner( ch, buf, sizeof( buf ), "" );
+			send_to_char( buf, ch );
 		}
-
-		/* Footer separator */
-		send_to_char( "\n\r", ch );
-		make_who_banner( ch, buf, sizeof( buf ), "" );
-		send_to_char( buf, ch );
-
-		/* Player count line */
-		sprintf( buf, "         #C%d#0/#C%d #GVisible players and #C%d #Gvisible immortals connected to %s#n\n\r",
-			nPlayerVis, nPlayerAll, nImmVis, game_config.game_name );
-		send_to_char( buf, ch );
-
-		/* Bottom border */
-		make_who_banner( ch, buf, sizeof( buf ), "" );
-		send_to_char( buf, ch );
 	}
 	return;
 }
@@ -3163,7 +3339,7 @@ void do_equipment( CHAR_DATA *ch, char *argument ) {
 		if ( ( obj = get_eq_char( ch, iWear ) ) == NULL )
 			continue;
 
-		send_to_char( where_name[iWear], ch );
+		send_to_char( IS_SCREENREADER( ch ) ? where_name_sr[iWear] : where_name[iWear], ch );
 		if ( can_see_obj( ch, obj ) ) {
 			/* Output prefixes first (each already has MXP tooltip) */
 			prefix = format_obj_prefixes( obj, ch );
@@ -4177,6 +4353,16 @@ void do_config( CHAR_DATA *ch, char *argument ) {
 				? "[+XTERM    ] Xterm 256-color mode enabled.\n\r"
 				: "[-xterm    ] Xterm 256-color mode disabled.\n\r",
 			ch );
+
+		send_to_char( IS_SET( ch->act, PLR_SCREENREADER )
+				? "[+SCREENRD ] Screen reader accessibility mode on.\n\r"
+				: "[-screenrd ] Screen reader accessibility mode off.\n\r",
+			ch );
+
+		send_to_char( IS_SET( ch->act, PLR_PREFER_MCMP )
+				? "[+MCMP     ] MCMP sound protocol preferred (auto-enabled if client supports).\n\r"
+				: "[-mcmp     ] MCMP sound protocol not preferred.\n\r",
+			ch );
 	} else {
 		bool fSet;
 		int bit;
@@ -4218,6 +4404,10 @@ void do_config( CHAR_DATA *ch, char *argument ) {
 			bit = PLR_PREFER_MXP;
 		else if ( !str_cmp( arg + 1, "xterm" ) )
 			bit = PLR_XTERM;
+		else if ( !str_cmp( arg + 1, "screenrd" ) || !str_cmp( arg + 1, "screenreader" ) )
+			bit = PLR_SCREENREADER;
+		else if ( !str_cmp( arg + 1, "mcmp" ) )
+			bit = PLR_PREFER_MCMP;
 		else {
 			send_to_char( "Config which option?\n\r", ch );
 			return;
@@ -4316,6 +4506,27 @@ void do_brief4( CHAR_DATA *ch, char *argument ) {
 		do_config( ch, "-brief4" );
 	else
 		do_config( ch, "+brief4" );
+	return;
+}
+
+void do_screenreader( CHAR_DATA *ch, char *argument ) {
+	if ( IS_NPC( ch ) ) return;
+
+	if ( IS_SET( ch->act, PLR_SCREENREADER ) ) {
+		REMOVE_BIT( ch->act, PLR_SCREENREADER );
+		SET_BIT( ch->act, PLR_ANSI );
+		send_to_char( "Screen reader mode disabled. ANSI color restored.\n\r", ch );
+	} else {
+		SET_BIT( ch->act, PLR_SCREENREADER );
+		REMOVE_BIT( ch->act, PLR_ANSI );
+		REMOVE_BIT( ch->act, PLR_XTERM );
+		if ( ch->desc != NULL )
+			ch->desc->mxp_enabled = FALSE;
+		SET_BIT( ch->act, PLR_BLANK );
+		SET_BIT( ch->act, PLR_AUTOEXIT );
+		send_to_char( "Screen reader mode enabled.\n\r", ch );
+		send_to_char( "ANSI color disabled, MXP disabled, blank lines on, auto-exits on.\n\r", ch );
+	}
 	return;
 }
 

@@ -20,6 +20,7 @@
 #include <time.h>
 #include "telnet.h"
 #include "gmcp.h"
+#include "mcmp.h"
 #include "class.h"
 
 /*
@@ -339,6 +340,8 @@ static int parse_package_support( const char *pkg ) {
 	if ( !strncmp( pkg, "Char", 4 ) )
 		return GMCP_PACKAGE_CHAR | GMCP_PACKAGE_CHAR_VITALS |
 			GMCP_PACKAGE_CHAR_STATUS | GMCP_PACKAGE_CHAR_INFO;
+	if ( !strncmp( pkg, "Client.Media", 12 ) )
+		return GMCP_PACKAGE_CLIENT_MEDIA;
 	if ( !strncmp( pkg, "Core", 4 ) )
 		return GMCP_PACKAGE_CORE;
 
@@ -378,6 +381,7 @@ void gmcp_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int le
 		char *ptr = json_data;
 		char pkg_buf[128];
 		int pkg_i;
+		int old_packages = d->gmcp_packages;
 
 		while ( *ptr ) {
 			/* Find start of package name (after quote) */
@@ -399,6 +403,12 @@ void gmcp_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int le
 			/* Skip to next */
 			if ( *ptr == '"' )
 				ptr++;
+		}
+
+		/* If Client.Media was just enabled, send the default media URL */
+		if ( ( d->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) &&
+			!( old_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ) {
+			mcmp_set_default( d );
 		}
 	}
 	/* Handle Core.Supports.Add - add a package */
@@ -434,12 +444,13 @@ void do_gmcp( CHAR_DATA *ch, char *argument ) {
 	snprintf( buf, sizeof( buf ),
 		"GMCP Status:\n\r"
 		"  Enabled: Yes\n\r"
-		"  Packages: %s%s%s%s%s\n\r",
+		"  Packages: %s%s%s%s%s%s\n\r",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CORE ) ? "Core " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR ) ? "Char " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_VITALS ) ? "Char.Vitals " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_STATUS ) ? "Char.Status " : "",
-		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_INFO ) ? "Char.Info " : "" );
+		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_INFO ) ? "Char.Info " : "",
+		( ch->desc->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ? "Client.Media " : "" );
 
 	send_to_char( buf, ch );
 }

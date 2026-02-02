@@ -384,6 +384,9 @@ void db_game_load_gameconfig( void ) {
 		} else if ( !str_cmp( key, "banner_fill" ) ) {
 			free_string( game_config.banner_fill );
 			game_config.banner_fill = str_dup( val );
+		} else if ( !str_cmp( key, "audio_url" ) ) {
+			free_string( game_config.audio_url );
+			game_config.audio_url = str_dup( val );
 		}
 	}
 
@@ -424,6 +427,7 @@ void db_game_save_gameconfig( void ) {
 	SAVE_STR( "banner_left", game_config.banner_left );
 	SAVE_STR( "banner_right", game_config.banner_right );
 	SAVE_STR( "banner_fill", game_config.banner_fill );
+	SAVE_STR( "audio_url", game_config.audio_url );
 
 #undef SAVE_INT
 #undef SAVE_STR

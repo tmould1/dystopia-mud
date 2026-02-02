@@ -23,6 +23,7 @@
 #include <time.h>
 #include "merc.h"
 #include "gmcp.h"
+#include "../systems/mcmp.h"
 #include "../db/db_game.h"
 
 extern GAMECONFIG_DATA game_config;
@@ -380,6 +381,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 
 			act( buf, ch, argument, vch, TO_VICT );
 			vch->position = position;
+			mcmp_channel_notify( vch, channel );
 		}
 	}
 
@@ -1012,6 +1014,7 @@ void do_tell( CHAR_DATA *ch, char *argument ) {
 
 	victim->position = position;
 	victim->reply = ch;
+	mcmp_channel_notify( victim, CHANNEL_TELL );
 
 	return;
 }

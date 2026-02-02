@@ -347,6 +347,7 @@ typedef struct config_data {
 	char *banner_left;	/* Left banner endcap, e.g. "#0<>#n" */
 	char *banner_right; /* Right banner endcap, e.g. "#0<>#n" */
 	char *banner_fill;	/* Banner fill pattern, e.g. "#0==#n" */
+	char *audio_url;	/* Base URL for MCMP audio files */
 } GAMECONFIG_DATA;
 
 typedef struct balance_data {
@@ -1933,6 +1934,8 @@ struct kill_data {
 #define PLR_AMBI		268435456	// Can use both hands well.
 #define PLR_XTERM		536870912	// Full xterm-256 color support
 #define PLR_PREFER_GMCP 1073741824	// User prefers GMCP enabled
+#define PLR_SCREENREADER 256		// Screen reader accessibility mode
+#define PLR_PREFER_MCMP	4194304		// User prefers MCMP (Client.Media) enabled
 #define PLR_PREFER_MXP	2147483648U // User prefers MXP enabled
 
 /*New bits for playrs (Infidel)*/
@@ -3020,7 +3023,8 @@ extern sh_int gsn_multiplearms;
 #define GET_PROPER_NAME( ch ) ( IS_NPC( ( ch ) ) ? ( ch )->short_descr : ( ch )->pcdata->switchname )
 #define GET_PC_NAME( ch )	  ( IS_NPC( ( ch ) ) ? "<npc>" : ( ch )->pcdata->switchname )
 
-#define IS_NPC( ch )	  ( IS_SET( ( ch )->act, ACT_IS_NPC ) )
+#define IS_NPC( ch )		  ( IS_SET( ( ch )->act, ACT_IS_NPC ) )
+#define IS_SCREENREADER( ch ) ( !IS_NPC( ch ) && IS_SET( ( ch )->act, PLR_SCREENREADER ) )
 #define IS_JUDGE( ch )	  ( get_trust( ch ) >= LEVEL_JUDGE )
 #define IS_IMMORTAL( ch ) ( get_trust( ch ) >= LEVEL_IMMORTAL )
 #define IS_HERO( ch )	  ( get_trust( ch ) >= LEVEL_HERO )
@@ -3514,6 +3518,7 @@ DECLARE_DO_FUN( do_compres );
 DECLARE_DO_FUN( do_mxp );
 DECLARE_DO_FUN( do_gmcp );
 DECLARE_DO_FUN( do_protocols );
+DECLARE_DO_FUN( do_screenreader );
 DECLARE_DO_FUN( do_knightarmor );
 DECLARE_DO_FUN( do_gain );
 DECLARE_DO_FUN( do_weaponpractice );

@@ -5,6 +5,7 @@
 #include <time.h>
 #include "merc.h"
 #include "../db/db_game.h"
+#include "../systems/mcmp.h"
 
 GAMECONFIG_DATA game_config;
 
@@ -18,6 +19,7 @@ void load_gameconfig() {
 	game_config.banner_left = str_dup( "#0<>#n" );
 	game_config.banner_right = str_dup( "#0<>#n" );
 	game_config.banner_fill = str_dup( "#0==#n" );
+	game_config.audio_url = str_dup( MCMP_DEFAULT_URL );
 
 	/* Load from game.db (overwrites defaults for any keys present) */
 	db_game_load_gameconfig();
@@ -55,6 +57,8 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "banner_right - Who Banner Right Endcap: \"%s\"\n\r", game_config.banner_right );
 		send_to_char( buf, ch );
 		sprintf( buf, "banner_fill - Who Banner Fill: \"%s\"\n\r", game_config.banner_fill );
+		send_to_char( buf, ch );
+		sprintf( buf, "audio_url - MCMP Audio Base URL: \"%s\"\n\r", game_config.audio_url );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -173,6 +177,19 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( new_value, "%s", arg2 );
 		free_string( game_config.banner_fill );
 		game_config.banner_fill = str_dup( new_value );
+	} else if ( !str_cmp( arg, "audio_url" ) ) {
+		if ( arg2[0] == '\0' ) {
+			char buf[MAX_STRING_LENGTH];
+			sprintf( buf, "MCMP Audio Base URL: \"%s\"\n\r", game_config.audio_url );
+			send_to_char( buf, ch );
+			return;
+		}
+
+		sprintf( modified_field, "MCMP Audio Base URL" );
+		sprintf( old_value, "%s", game_config.audio_url );
+		sprintf( new_value, "%s", arg2 );
+		free_string( game_config.audio_url );
+		game_config.audio_url = str_dup( new_value );
 	}
 	// arg1 not recognized, show prompt
 	else {

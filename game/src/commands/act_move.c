@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../systems/mcmp.h"
 
 void horn args( ( CHAR_DATA * ch ) );
 
@@ -378,6 +379,14 @@ void move_char( CHAR_DATA *ch, int door ) {
 	}
 	char_from_room( ch );
 	char_to_room( ch, to_room );
+
+	/* MCMP: movement footstep and ambient sounds */
+	if ( !IS_NPC( ch ) ) {
+		mcmp_movement( ch, to_room->sector_type );
+		if ( in_room->sector_type != to_room->sector_type )
+			mcmp_room_ambient( ch, to_room->sector_type );
+	}
+
 	if ( door == 0 )
 		sprintf( buf, "the south" );
 	else if ( door == 1 )

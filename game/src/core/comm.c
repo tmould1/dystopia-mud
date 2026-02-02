@@ -1849,6 +1849,31 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 
 	length = (int) strlen( output ); /* Use strlen for safety */
 
+	/*
+	 * Screen reader post-processing: collapse multiple spaces to one.
+	 * This cleans up alignment padding in who list, equipment, etc.
+	 */
+	if ( wch && !IS_NPC( wch ) && IS_SET( wch->act, PLR_SCREENREADER ) ) {
+		char *src = output;
+		char *dst = output;
+		bool prev_space = FALSE;
+
+		while ( *src != '\0' ) {
+			if ( *src == ' ' ) {
+				if ( !prev_space ) {
+					*dst++ = ' ';
+					prev_space = TRUE;
+				}
+				src++;
+			} else {
+				prev_space = FALSE;
+				*dst++ = *src++;
+			}
+		}
+		*dst = '\0';
+		length = (int) ( dst - output );
+	}
+
 	/* Expand the buffer as needed */
 	while ( d->outtop + length >= d->outsize ) {
 		char *obuf;

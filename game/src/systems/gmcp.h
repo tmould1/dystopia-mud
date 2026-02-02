@@ -18,7 +18,8 @@
 #define GMCP_PACKAGE_CHAR		 ( 1 << 1 ) /* Char.* - character info */
 #define GMCP_PACKAGE_CHAR_VITALS ( 1 << 2 ) /* Char.Vitals - hp/mana/move */
 #define GMCP_PACKAGE_CHAR_STATUS ( 1 << 3 ) /* Char.Status - level/class */
-#define GMCP_PACKAGE_CHAR_INFO	 ( 1 << 4 ) /* Char.Info - name/race */
+#define GMCP_PACKAGE_CHAR_INFO	   ( 1 << 4 ) /* Char.Info - name/race */
+#define GMCP_PACKAGE_CLIENT_MEDIA  ( 1 << 5 ) /* Client.Media - MCMP sounds */
 
 /*
  * Telnet negotiation strings (defined in gmcp.c)
