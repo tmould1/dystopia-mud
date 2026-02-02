@@ -4078,6 +4078,7 @@ DECLARE_DO_FUN( do_servant );
 DECLARE_DO_FUN( do_relearn );
 
 DECLARE_DO_FUN( do_gameconfig );
+DECLARE_DO_FUN( do_mcmptest );
 DECLARE_DO_FUN( do_balance );
 DECLARE_DO_FUN( do_ability );
 

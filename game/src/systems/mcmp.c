@@ -385,3 +385,133 @@ void mcmp_ui_event( CHAR_DATA *ch, const char *event ) {
 	mcmp_play( ch->desc, sound, MCMP_SOUND, MCMP_TAG_UI,
 		50, 1, 70, NULL, FALSE, caption );
 }
+
+/*
+ * Immortal test command — play a specific MCMP sound by category
+ */
+void do_mcmptest( CHAR_DATA *ch, char *argument ) {
+	char arg[MAX_INPUT_LENGTH];
+
+	if ( ch->desc == NULL ) {
+		send_to_char( "No descriptor.\n\r", ch );
+		return;
+	}
+
+	one_argument( argument, arg );
+
+	/* Force-enable Client.Media for testing */
+	if ( !str_cmp( arg, "force" ) ) {
+		ch->desc->gmcp_packages |= GMCP_PACKAGE_CLIENT_MEDIA;
+		mcmp_set_default( ch->desc );
+		send_to_char( "Forced Client.Media enabled on your descriptor.\n\r", ch );
+		return;
+	}
+
+	if ( !mcmp_enabled( ch->desc ) ) {
+		send_to_char( "MCMP is not active on your connection.\n\r", ch );
+		send_to_char( "Use 'mcmptest force' to enable Client.Media manually.\n\r", ch );
+		return;
+	}
+
+	if ( arg[0] == '\0' ) {
+		send_to_char( "mcmptest <category> -- play a test sound\n\r", ch );
+		send_to_char( "Categories: combat miss engage death victory\n\r", ch );
+		send_to_char( "            footstep splash whoosh ambient\n\r", ch );
+		send_to_char( "            weather thunder rain wind\n\r", ch );
+		send_to_char( "            chat tell yell spell\n\r", ch );
+		send_to_char( "            login levelup die achievement\n\r", ch );
+		send_to_char( "            stop  -- stop all sounds\n\r", ch );
+		return;
+	}
+
+	/* Combat */
+	if ( !str_cmp( arg, "combat" ) )
+		mcmp_play( ch->desc, "combat/light_hit.ogg", MCMP_SOUND, MCMP_TAG_COMBAT,
+			50, 1, 50, NULL, FALSE, "Test: light hit" );
+	else if ( !str_cmp( arg, "miss" ) )
+		mcmp_play( ch->desc, "combat/miss.ogg", MCMP_SOUND, MCMP_TAG_COMBAT,
+			50, 1, 50, NULL, FALSE, "Test: miss" );
+	else if ( !str_cmp( arg, "engage" ) )
+		mcmp_play( ch->desc, "combat/engage.ogg", MCMP_SOUND, MCMP_TAG_COMBAT,
+			50, 1, 50, NULL, FALSE, "Test: engage" );
+	else if ( !str_cmp( arg, "death" ) )
+		mcmp_play( ch->desc, "combat/death.ogg", MCMP_SOUND, MCMP_TAG_COMBAT,
+			50, 1, 50, NULL, FALSE, "Test: death" );
+	else if ( !str_cmp( arg, "victory" ) )
+		mcmp_play( ch->desc, "combat/victory.ogg", MCMP_SOUND, MCMP_TAG_COMBAT,
+			50, 1, 50, NULL, FALSE, "Test: victory" );
+
+	/* Movement */
+	else if ( !str_cmp( arg, "footstep" ) )
+		mcmp_play( ch->desc, "movement/footstep_stone.ogg", MCMP_SOUND, MCMP_TAG_MOVEMENT,
+			50, 1, 50, NULL, FALSE, "Test: footstep" );
+	else if ( !str_cmp( arg, "splash" ) )
+		mcmp_play( ch->desc, "movement/splash.ogg", MCMP_SOUND, MCMP_TAG_MOVEMENT,
+			50, 1, 50, NULL, FALSE, "Test: splash" );
+	else if ( !str_cmp( arg, "whoosh" ) )
+		mcmp_play( ch->desc, "movement/whoosh.ogg", MCMP_SOUND, MCMP_TAG_MOVEMENT,
+			50, 1, 50, NULL, FALSE, "Test: whoosh" );
+
+	/* Ambient */
+	else if ( !str_cmp( arg, "ambient" ) )
+		mcmp_play( ch->desc, "ambient/forest.ogg", MCMP_MUSIC, MCMP_TAG_ENVIRONMENT,
+			30, -1, 10, "ambient", TRUE, "Test: forest ambient" );
+
+	/* Weather */
+	else if ( !str_cmp( arg, "weather" ) )
+		mcmp_play( ch->desc, "weather/wind.ogg", MCMP_MUSIC, MCMP_TAG_WEATHER,
+			30, -1, 20, "weather", FALSE, "Test: wind" );
+	else if ( !str_cmp( arg, "thunder" ) )
+		mcmp_play( ch->desc, "weather/thunder.ogg", MCMP_SOUND, MCMP_TAG_WEATHER,
+			50, 1, 60, NULL, FALSE, "Test: thunder" );
+	else if ( !str_cmp( arg, "rain" ) )
+		mcmp_play( ch->desc, "weather/rain_heavy.ogg", MCMP_MUSIC, MCMP_TAG_WEATHER,
+			30, -1, 20, "weather", FALSE, "Test: rain" );
+	else if ( !str_cmp( arg, "wind" ) )
+		mcmp_play( ch->desc, "weather/wind.ogg", MCMP_MUSIC, MCMP_TAG_WEATHER,
+			30, -1, 20, "weather", FALSE, "Test: wind" );
+
+	/* Channels */
+	else if ( !str_cmp( arg, "chat" ) )
+		mcmp_play( ch->desc, "channels/chat.ogg", MCMP_SOUND, MCMP_TAG_CHANNEL,
+			50, 1, 20, NULL, FALSE, "Test: chat" );
+	else if ( !str_cmp( arg, "tell" ) )
+		mcmp_play( ch->desc, "channels/tell.ogg", MCMP_SOUND, MCMP_TAG_CHANNEL,
+			50, 1, 20, NULL, FALSE, "Test: tell" );
+	else if ( !str_cmp( arg, "yell" ) )
+		mcmp_play( ch->desc, "channels/yell.ogg", MCMP_SOUND, MCMP_TAG_CHANNEL,
+			50, 1, 20, NULL, FALSE, "Test: yell" );
+
+	/* Spell */
+	else if ( !str_cmp( arg, "spell" ) )
+		mcmp_play( ch->desc, "specials/spell_cast.ogg", MCMP_SOUND, MCMP_TAG_SPELL,
+			50, 1, 40, NULL, FALSE, "Test: spell cast" );
+
+	/* UI */
+	else if ( !str_cmp( arg, "login" ) )
+		mcmp_play( ch->desc, "ui/login.ogg", MCMP_SOUND, MCMP_TAG_UI,
+			50, 1, 70, NULL, FALSE, "Test: login" );
+	else if ( !str_cmp( arg, "levelup" ) )
+		mcmp_play( ch->desc, "ui/levelup.ogg", MCMP_SOUND, MCMP_TAG_UI,
+			50, 1, 70, NULL, FALSE, "Test: level up" );
+	else if ( !str_cmp( arg, "die" ) )
+		mcmp_play( ch->desc, "ui/death.ogg", MCMP_SOUND, MCMP_TAG_UI,
+			50, 1, 70, NULL, FALSE, "Test: death" );
+	else if ( !str_cmp( arg, "achievement" ) )
+		mcmp_play( ch->desc, "ui/achievement.ogg", MCMP_SOUND, MCMP_TAG_UI,
+			50, 1, 70, NULL, FALSE, "Test: achievement" );
+
+	/* Stop all */
+	else if ( !str_cmp( arg, "stop" ) ) {
+		mcmp_stop( ch->desc, NULL, NULL, NULL, NULL, TRUE, 1000 );
+		send_to_char( "Stopping all MCMP sounds.\n\r", ch );
+		return;
+	}
+
+	else {
+		send_to_char( "Unknown category. Type 'mcmptest' for a list.\n\r", ch );
+		return;
+	}
+
+	send_to_char( "MCMP test sound sent.\n\r", ch );
+}
