@@ -115,7 +115,7 @@ Basic combat ability that deals sonic damage and builds resonance.
 |----------|-------|------------|
 | Mana Cost | 20 | `dirgesinger.warcry.mana_cost` |
 | Cooldown | 4 pulses | `dirgesinger.warcry.cooldown` |
-| Base Damage | 10-40 + (resonance × 2) | `dirgesinger.warcry.dam_bonus_min/max` |
+| Base Damage | 50-120 + (resonance × 2) | `dirgesinger.warcry.dam_bonus_min/max` |
 | Resonance Gain | +5 | `dirgesinger.warcry.resonance_gain` |
 | Requires | Fighting, War Chants 1 | |
 
@@ -190,7 +190,7 @@ Damage-over-time that stacks progressively, increasing damage each tick.
 | Mana Cost | 25 | `dirgesinger.dirge.mana_cost` |
 | Max Stacks | 5 | `dirgesinger.dirge.max_stacks` |
 | Duration | 6 ticks | `dirgesinger.dirge.duration` |
-| Tick Damage | 30 × stacks | `dirgesinger.dirge.tick_damage` |
+| Tick Damage | 50 × stacks | `dirgesinger.dirge.tick_damage` |
 | Resonance Gain | +3 per stack | |
 | Requires | Fighting, Dirges 1 | |
 
@@ -265,14 +265,16 @@ Create equipment via `dirgesingerarmor <piece>` (`dirgesinger.c:401-455`):
 ### Damage Cap Bonuses (`fight.c:1704-1708`)
 
 ```c
-max_dam += ch->rage * balance.damcap_dirgesinger_res_mult;    // +5 per resonance
+max_dam += balance.damcap_dirgesinger_base;                    // +200 flat
+max_dam += ch->rage * balance.damcap_dirgesinger_res_mult;    // +7 per resonance
 if ( battlehymn active )
     max_dam += balance.damcap_dirgesinger_battlehymn;          // +200
 ```
 
 | Source | Bonus | Balance Key |
 |--------|-------|-------------|
-| Resonance | +5 per point (max +500) | `damcap_dirgesinger_res_mult` (default: 5) |
+| Base | +200 flat | `damcap_dirgesinger_base` (default: 200) |
+| Resonance | +7 per point (max +700) | `damcap_dirgesinger_res_mult` (default: 7) |
 | Battlehymn | +200 flat | `damcap_dirgesinger_battlehymn` (default: 200) |
 
 ### Extra Attacks (`fight.c:1004-1006`)
@@ -287,7 +289,7 @@ Absorbs incoming damage before it reaches HP. Shared with Siren class.
 
 Called from `update.c:508`. Per-tick processing:
 1. Resonance build (+2 fighting) or decay (-3 not fighting)
-2. Dirge DOT damage (30 × stacks per tick)
+2. Dirge DOT damage (50 × stacks per tick)
 3. Battlehymn duration countdown
 4. Ironsong barrier duration countdown
 5. Cadence duration countdown

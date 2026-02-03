@@ -1702,6 +1702,7 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		}
 		/* Dirgesinger/Siren: resonance-based damcap bonus + battlehymn */
 		if ( IS_CLASS( ch, CLASS_DIRGESINGER ) ) {
+			max_dam += balance.damcap_dirgesinger_base;
 			max_dam += ch->rage * balance.damcap_dirgesinger_res_mult;
 			if ( ch->pcdata->powers[DIRGE_BATTLEHYMN_ACTIVE] > 0 )
 				max_dam += balance.damcap_dirgesinger_battlehymn;

@@ -79,6 +79,7 @@ balance_entry_t balance_map[] = {
 	{ "damcap_uk_wpn_mult",       &balance.damcap_uk_wpn_mult },
 	{ "damcap_samurai_per_wpn",   &balance.damcap_samurai_per_wpn },
 	{ "damcap_samurai_base",      &balance.damcap_samurai_base },
+	{ "damcap_dirgesinger_base",      &balance.damcap_dirgesinger_base },
 	{ "damcap_dirgesinger_res_mult",  &balance.damcap_dirgesinger_res_mult },
 	{ "damcap_dirgesinger_battlehymn",&balance.damcap_dirgesinger_battlehymn },
 	{ "damcap_siren_res_mult",        &balance.damcap_siren_res_mult },
@@ -197,7 +198,8 @@ void load_balance( void ) {
 	balance.damcap_uk_wpn_mult       = 275;
 	balance.damcap_samurai_per_wpn   = 175;
 	balance.damcap_samurai_base      = 375;
-	balance.damcap_dirgesinger_res_mult  = 5;
+	balance.damcap_dirgesinger_base      = 200;
+	balance.damcap_dirgesinger_res_mult  = 7;
 	balance.damcap_dirgesinger_battlehymn = 200;
 	balance.damcap_siren_res_mult        = 7;
 	balance.damcap_siren_echoshield      = 150;

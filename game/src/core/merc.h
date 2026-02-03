@@ -403,6 +403,7 @@ typedef struct balance_data {
 	int   damcap_uk_wpn_mult;
 	int   damcap_samurai_per_wpn;
 	int   damcap_samurai_base;
+	int   damcap_dirgesinger_base;
 	int   damcap_dirgesinger_res_mult;
 	int   damcap_dirgesinger_battlehymn;
 	int   damcap_siren_res_mult;

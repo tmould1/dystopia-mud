@@ -112,12 +112,20 @@ void do_soulrend( CHAR_DATA *ch, char *argument ) {
 	act( "$n sings a note of pure agony that tears at your soul!", ch, NULL, victim, TO_VICT );
 	act( "$n sings a note of pure agony at $N!", ch, NULL, victim, TO_NOTVICT );
 
-	/* Bypasses armor - direct HP damage */
-	victim->hit -= dam;
-	if ( victim->hit < -10 ) {
-		act( "$N collapses, soul torn asunder!", ch, NULL, victim, TO_CHAR );
-		act( "Your soul is torn asunder!", ch, NULL, victim, TO_VICT );
-		raw_kill( victim );
+	/* Split damage: bypass_pct goes direct to HP, rest through normal damage */
+	{
+		int bypass_pct = acfg( "siren.soulrend.bypass_pct" );
+		int spirit_dam = dam * bypass_pct / 100;
+		int normal_dam = dam - spirit_dam;
+		damage( ch, victim, normal_dam, gsn_punch );
+		if ( victim->position > POS_DEAD ) {
+			victim->hit -= spirit_dam;
+			if ( victim->hit < -10 ) {
+				act( "$N collapses, soul torn asunder!", ch, NULL, victim, TO_CHAR );
+				act( "Your soul is torn asunder!", ch, NULL, victim, TO_VICT );
+				raw_kill( victim );
+			}
+		}
 	}
 	return;
 }
@@ -532,14 +540,19 @@ void do_ariaofunmaking( CHAR_DATA *ch, char *argument ) {
 		if ( stripped >= 3 ) break; /* Cap at 3 affects stripped */
 	}
 
-	if ( IS_AFFECTED( victim, AFF_SANCTUARY ) ) {
-		REMOVE_BIT( victim->affected_by, AFF_SANCTUARY );
-		act( "$N's sanctuary is shattered!", ch, NULL, victim, TO_CHAR );
-		stripped++;
-	}
-	if ( IS_AFFECTED( victim, AFF_PROTECT ) ) {
-		REMOVE_BIT( victim->affected_by, AFF_PROTECT );
-		stripped++;
+	/* PvP resist: players have a chance to resist protection stripping */
+	if ( !IS_NPC( victim ) && number_percent() <= acfg( "siren.ariaofunmaking.pvp_resist_pct" ) ) {
+		send_to_char( "Your target's willpower resists the unmaking of their protections!\n\r", ch );
+	} else {
+		if ( IS_AFFECTED( victim, AFF_SANCTUARY ) ) {
+			REMOVE_BIT( victim->affected_by, AFF_SANCTUARY );
+			act( "$N's sanctuary is shattered!", ch, NULL, victim, TO_CHAR );
+			stripped++;
+		}
+		if ( IS_AFFECTED( victim, AFF_PROTECT ) ) {
+			REMOVE_BIT( victim->affected_by, AFF_PROTECT );
+			stripped++;
+		}
 	}
 
 	if ( stripped == 0 )

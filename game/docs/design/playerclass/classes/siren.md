@@ -115,7 +115,7 @@ Massive area attack that can instantly kill weak NPCs. The signature Siren offen
 
 ### Soulrend - Spirit Damage (`siren.c:76-115`)
 
-Bypasses all physical resistance and armor, dealing direct HP damage. Can kill targets outright.
+Partially bypasses armor, dealing a mix of normal and direct HP (spirit) damage. Can kill targets outright.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
@@ -123,10 +123,10 @@ Bypasses all physical resistance and armor, dealing direct HP damage. Can kill t
 | Resonance Cost | 20 | `siren.soulrend.resonance_cost` |
 | Cooldown | 8 pulses | `siren.soulrend.cooldown` |
 | Damage | 250-500 + (resonance × 3) | |
-| Special | Bypasses armor (direct `victim->hit` reduction) | |
+| Bypass % | 40% direct HP, 60% normal damage | `siren.soulrend.bypass_pct` |
 | Requires | Fighting | |
 
-**Warning**: Soulrend uses `raw_kill()` if target drops below -10 HP, bypassing normal death processing.
+**Mechanic**: Damage is split — 60% goes through normal `damage()` (subject to damcap/armor), 40% bypasses as direct HP reduction (spirit damage). Uses `raw_kill()` if target drops below -10 HP from the spirit portion.
 
 ### Crescendo - Building Finisher (`siren.c:120-176`)
 
@@ -137,12 +137,12 @@ Multi-round attack that builds through 3 stages before unleashing a devastating 
 | 1 | Piano | 0 | Building phase |
 | 2 | Mezzo Forte | 50-100 | Moderate hit |
 | 3 | Forte | 100-200 | Strong hit |
-| Finale | **Fortissimo** | (400-800) × 3 + (resonance × 5) | All resonance consumed |
+| Finale | **Fortissimo** | (400-800) × 2 + (resonance × 5) | All resonance consumed |
 
 | Property | Value | Config Key |
 |----------|-------|------------|
 | Mana per Stage | 25 | `siren.crescendo.mana_per_stage` |
-| Finale Multiplier | 3× | `siren.crescendo.finale_dam_mult` |
+| Finale Multiplier | 2× | `siren.crescendo.finale_dam_mult` |
 | Requires | Fighting | |
 
 **Timeout**: Crescendo resets if the Siren leaves combat (`siren.c:600-603`).
@@ -238,6 +238,7 @@ Strips magical protections and affects from the target.
 | Cooldown | 15 pulses | `siren.ariaofunmaking.cooldown` |
 | Max Affects Stripped | 3 | |
 | Also Removes | AFF_SANCTUARY, AFF_PROTECT | |
+| PvP Resist | 50% chance to resist protection strip | `siren.ariaofunmaking.pvp_resist_pct` |
 | Requires | Fighting | |
 
 ## Siren Armor

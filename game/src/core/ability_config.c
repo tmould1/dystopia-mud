@@ -942,8 +942,8 @@ static acfg_entry_t acfg_table[] = {
 	{ "dirgesinger.warcry.mana_cost",            20,       20 },
 	{ "dirgesinger.warcry.resonance_gain",        5,        5 },
 	{ "dirgesinger.warcry.cooldown",              4,        4 },
-	{ "dirgesinger.warcry.dam_bonus_min",        10,       10 },
-	{ "dirgesinger.warcry.dam_bonus_max",        40,       40 },
+	{ "dirgesinger.warcry.dam_bonus_min",        50,       50 },
+	{ "dirgesinger.warcry.dam_bonus_max",       120,      120 },
 	{ "dirgesinger.shatter.mana_cost",           40,       40 },
 	{ "dirgesinger.shatter.resonance_req",       25,       25 },
 	{ "dirgesinger.shatter.resonance_cost",      10,       10 },
@@ -954,7 +954,7 @@ static acfg_entry_t acfg_table[] = {
 	{ "dirgesinger.battlehymn.dam_bonus",        50,       50 },
 	{ "dirgesinger.dirge.mana_cost",             25,       25 },
 	{ "dirgesinger.dirge.max_stacks",             5,        5 },
-	{ "dirgesinger.dirge.tick_damage",           30,       30 },
+	{ "dirgesinger.dirge.tick_damage",           50,       50 },
 	{ "dirgesinger.dirge.duration",               6,        6 },
 	{ "dirgesinger.thunderclap.mana_cost",       50,       50 },
 	{ "dirgesinger.thunderclap.resonance_req",   40,       40 },
@@ -987,8 +987,9 @@ static acfg_entry_t acfg_table[] = {
 	{ "siren.soulrend.mana_cost",               50,       50 },
 	{ "siren.soulrend.resonance_cost",           20,       20 },
 	{ "siren.soulrend.cooldown",                  8,        8 },
+	{ "siren.soulrend.bypass_pct",               40,       40 },
 	{ "siren.crescendo.mana_per_stage",          25,       25 },
-	{ "siren.crescendo.finale_dam_mult",          3,        3 },
+	{ "siren.crescendo.finale_dam_mult",          2,        2 },
 	{ "siren.cacophony.mana_cost",               60,       60 },
 	{ "siren.cacophony.resonance_cost",          40,       40 },
 	{ "siren.cacophony.cooldown",                12,       12 },
@@ -1012,6 +1013,7 @@ static acfg_entry_t acfg_table[] = {
 	{ "siren.ariaofunmaking.mana_cost",         70,       70 },
 	{ "siren.ariaofunmaking.resonance_cost",    60,       60 },
 	{ "siren.ariaofunmaking.cooldown",          15,       15 },
+	{ "siren.ariaofunmaking.pvp_resist_pct",    50,       50 },
 
 	/* Sentinel */
 	{ NULL, 0, 0 }
