@@ -4,6 +4,9 @@
  *  Stores per-class display information in game.db with in-memory caching.
  ***************************************************************************/
 
+/* Disable format-truncation warning - truncation is intentional for admin input */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+
 #include "../core/merc.h"
 #include "class.h"
 #include "class_display.h"
@@ -410,10 +413,8 @@ void do_classedit( CHAR_DATA *ch, char *argument ) {
             return;
         }
 
-        strncpy( cd->left_symbol, arg3, CLASS_SYMBOL_LEN - 1 );
-        cd->left_symbol[CLASS_SYMBOL_LEN - 1] = '\0';
-        strncpy( cd->right_symbol, argument, CLASS_SYMBOL_LEN - 1 );
-        cd->right_symbol[CLASS_SYMBOL_LEN - 1] = '\0';
+        snprintf( cd->left_symbol, CLASS_SYMBOL_LEN, "%s", arg3 );
+        snprintf( cd->right_symbol, CLASS_SYMBOL_LEN, "%s", argument );
 
         db_class_display_save_one( cd->class_id );
 
@@ -432,8 +433,7 @@ void do_classedit( CHAR_DATA *ch, char *argument ) {
             /* Re-parse to get full remaining argument including the first word */
             char *full_arg = arg2 + strlen(arg2) + 1;
             while ( *full_arg == ' ' ) full_arg++;
-            strncpy( cd->look_display, full_arg, CLASS_LOOK_LEN - 1 );
-            cd->look_display[CLASS_LOOK_LEN - 1] = '\0';
+            snprintf( cd->look_display, CLASS_LOOK_LEN, "%s", full_arg );
             snprintf( buf, sizeof(buf), "Set %s look display to: %s#n\n\r", cd->name, cd->look_display );
             send_to_char( buf, ch );
         }
@@ -446,8 +446,7 @@ void do_classedit( CHAR_DATA *ch, char *argument ) {
     if ( !str_prefix( arg2, "color" ) ) {
         argument = one_argument( argument, arg3 );
 
-        strncpy( cd->title_color, arg3, sizeof(cd->title_color) - 1 );
-        cd->title_color[sizeof(cd->title_color) - 1] = '\0';
+        snprintf( cd->title_color, sizeof(cd->title_color), "%s", arg3 );
 
         db_class_display_save_one( cd->class_id );
 
@@ -482,8 +481,7 @@ void do_classedit( CHAR_DATA *ch, char *argument ) {
             }
         }
 
-        strncpy( cd->titles[gen], argument, CLASS_TITLE_LEN - 1 );
-        cd->titles[gen][CLASS_TITLE_LEN - 1] = '\0';
+        snprintf( cd->titles[gen], CLASS_TITLE_LEN, "%s", argument );
 
         db_class_display_save_one( cd->class_id );
 
