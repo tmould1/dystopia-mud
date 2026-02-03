@@ -24,6 +24,7 @@
 #include "merc.h"
 #include "garou.h"
 #include "../db/db_game.h"
+#include "../classes/class_display.h"
 
 bool check_social args( ( CHAR_DATA * ch, char *command,
 	char *argument ) );
@@ -933,6 +934,7 @@ const struct cmd_type cmd_table[] =
 		{ "sign", do_sign, POS_DEAD, 1, LOG_NORMAL, 32, 0, 0 },
 		{ "relevel", do_relevel, POS_DEAD, 0, LOG_ALWAYS, 0, 0, 0 },
 		{ "superadmin", do_superadmin, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
+		{ "classedit", do_classedit, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "grant", do_grant, POS_STANDING, 3, LOG_NORMAL, 32, 0, 0 },
 		{ "drowsight", do_drowsight, POS_STANDING, 3, LOG_NORMAL, 32, 0, 0 },
 		{ "drowshield", do_drowshield, POS_STANDING, 3, LOG_NORMAL, 32, 0, 0 },

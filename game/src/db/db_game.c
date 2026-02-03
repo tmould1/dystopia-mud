@@ -8,6 +8,7 @@
 #include "db_util.h"
 #include "db_game.h"
 #include "../core/ability_config.h"
+#include "../classes/class_display.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,6 +126,22 @@ static const char *GAME_SCHEMA_SQL =
 
 	"CREATE TABLE IF NOT EXISTS super_admins ("
 	"  name  TEXT PRIMARY KEY COLLATE NOCASE"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS class_display ("
+	"  class_id      INTEGER PRIMARY KEY,"
+	"  name          TEXT NOT NULL,"
+	"  left_symbol   TEXT NOT NULL DEFAULT '',"
+	"  right_symbol  TEXT NOT NULL DEFAULT '',"
+	"  look_display  TEXT NOT NULL DEFAULT '',"
+	"  title_color   TEXT NOT NULL DEFAULT ''"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS generation_titles ("
+	"  class_id    INTEGER NOT NULL,"
+	"  generation  INTEGER NOT NULL,"
+	"  title       TEXT NOT NULL,"
+	"  PRIMARY KEY (class_id, generation)"
 	");";
 
 
@@ -1146,4 +1163,140 @@ void db_game_list_super_admins( CHAR_DATA *ch ) {
 		snprintf( buf, sizeof( buf ), "#wTotal: %d#n\n\r", count );
 		send_to_char( buf, ch );
 	}
+}
+
+
+/*
+ * Class display data (game.db)
+ * Stores class symbols, titles, and look display strings.
+ */
+void db_class_display_load( void ) {
+	sqlite3_stmt *stmt;
+	char buf[MAX_STRING_LENGTH];
+	int loaded = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Load class_display table */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, name, left_symbol, right_symbol, look_display, title_color "
+			"FROM class_display ORDER BY class_id",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+
+		while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+			int class_id = sqlite3_column_int( stmt, 0 );
+			CLASS_DISPLAY_DATA *cd = class_display_get( class_id );
+
+			if ( cd ) {
+				/* Update existing entry with DB values */
+				strncpy( cd->name, col_text( stmt, 1 ), CLASS_NAME_LEN - 1 );
+				cd->name[CLASS_NAME_LEN - 1] = '\0';
+				strncpy( cd->left_symbol, col_text( stmt, 2 ), CLASS_SYMBOL_LEN - 1 );
+				cd->left_symbol[CLASS_SYMBOL_LEN - 1] = '\0';
+				strncpy( cd->right_symbol, col_text( stmt, 3 ), CLASS_SYMBOL_LEN - 1 );
+				cd->right_symbol[CLASS_SYMBOL_LEN - 1] = '\0';
+				strncpy( cd->look_display, col_text( stmt, 4 ), CLASS_LOOK_LEN - 1 );
+				cd->look_display[CLASS_LOOK_LEN - 1] = '\0';
+				strncpy( cd->title_color, col_text( stmt, 5 ), sizeof(cd->title_color) - 1 );
+				cd->title_color[sizeof(cd->title_color) - 1] = '\0';
+				loaded++;
+			}
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	/* Load generation_titles table */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, generation, title FROM generation_titles",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+
+		while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+			int class_id   = sqlite3_column_int( stmt, 0 );
+			int generation = sqlite3_column_int( stmt, 1 );
+			CLASS_DISPLAY_DATA *cd = class_display_get( class_id );
+
+			if ( cd && generation >= 0 && generation < MAX_GENERATIONS ) {
+				strncpy( cd->titles[generation], col_text( stmt, 2 ), CLASS_TITLE_LEN - 1 );
+				cd->titles[generation][CLASS_TITLE_LEN - 1] = '\0';
+			}
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	if ( loaded > 0 ) {
+		snprintf( buf, sizeof(buf), "  Loaded %d class display overrides from game.db", loaded );
+		log_string( buf );
+	}
+}
+
+void db_class_display_save( void ) {
+	int i;
+
+	if ( !game_db )
+		return;
+
+	for ( i = 0; i < class_display_count; i++ ) {
+		db_class_display_save_one( class_display_table[i].class_id );
+	}
+}
+
+void db_class_display_save_one( int class_id ) {
+	sqlite3_stmt *stmt;
+	CLASS_DISPLAY_DATA *cd;
+	int j;
+
+	if ( !game_db )
+		return;
+
+	cd = class_display_get( class_id );
+	if ( !cd )
+		return;
+
+	db_begin( game_db );
+
+	/* Save/update class_display row */
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT OR REPLACE INTO class_display "
+			"(class_id, name, left_symbol, right_symbol, look_display, title_color) "
+			"VALUES (?,?,?,?,?,?)",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+
+		sqlite3_bind_int( stmt, 1, cd->class_id );
+		sqlite3_bind_text( stmt, 2, cd->name, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, 3, cd->left_symbol, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, 4, cd->right_symbol, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, 5, cd->look_display, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, 6, cd->title_color, -1, SQLITE_TRANSIENT );
+		sqlite3_step( stmt );
+		sqlite3_finalize( stmt );
+	}
+
+	/* Delete existing generation titles for this class */
+	if ( sqlite3_prepare_v2( game_db,
+			"DELETE FROM generation_titles WHERE class_id=?",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+		sqlite3_bind_int( stmt, 1, cd->class_id );
+		sqlite3_step( stmt );
+		sqlite3_finalize( stmt );
+	}
+
+	/* Insert generation titles */
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO generation_titles (class_id, generation, title) VALUES (?,?,?)",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+
+		for ( j = 0; j < MAX_GENERATIONS; j++ ) {
+			if ( cd->titles[j][0] != '\0' ) {
+				sqlite3_reset( stmt );
+				sqlite3_bind_int( stmt, 1, cd->class_id );
+				sqlite3_bind_int( stmt, 2, j );
+				sqlite3_bind_text( stmt, 3, cd->titles[j], -1, SQLITE_TRANSIENT );
+				sqlite3_step( stmt );
+			}
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	db_commit( game_db );
 }

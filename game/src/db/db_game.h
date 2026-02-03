@@ -71,4 +71,9 @@ void db_game_add_super_admin( const char *name );
 void db_game_remove_super_admin( const char *name );
 void db_game_list_super_admins( CHAR_DATA *ch );
 
+/* Class display data (game.db) - symbols, titles, look display */
+void db_class_display_load( void );
+void db_class_display_save( void );
+void db_class_display_save_one( int class_id );
+
 #endif /* DB_GAME_H */

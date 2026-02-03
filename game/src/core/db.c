@@ -27,6 +27,7 @@
 #include "../db/db_sql.h"
 #include "../db/db_game.h"
 #include "../db/db_player.h"
+#include "../classes/class_display.h"
 
 /*
  * Path management - allows executable to run from any directory
@@ -482,6 +483,9 @@ void boot_db( bool fCopyOver ) {
 		load_gameconfig();
 		load_balance();
 		load_ability_config();
+		class_display_init();
+		db_class_display_load();
+		class_display_validate();
 	}
 
 	if ( fCopyOver )

@@ -24,6 +24,7 @@
 #include "merc.h"
 #include "../db/db_player.h"
 #include "../systems/mxp.h"
+#include "../classes/class_display.h"
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
@@ -818,38 +819,17 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 	else if ( !IS_AFFECTED( ch, AFF_SHADOWPLANE ) && IS_AFFECTED( victim, AFF_SHADOWPLANE ) )
 		strcat( prefix_buf, mxp_aura_tag( ch, "#C(#0Shadowplane#C)#n ", "On shadow plane", -1 ) );
 
-	/* Class titles */
-	if ( !IS_NPC( victim ) && !IS_NPC( ch ) && IS_HERO( victim ) ) {
-		if ( IS_CLASS( victim, CLASS_WEREWOLF ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#y(#LWerewolf#y)#n ", "Werewolf", -1 ) );
-		if ( IS_CLASS( victim, CLASS_DEMON ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#0(#RDemon#0)#n ", "Demon", -1 ) );
-		if ( IS_CLASS( victim, CLASS_NINJA ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#R(#yNinja#R)#n ", "Ninja", -1 ) );
-		if ( IS_CLASS( victim, CLASS_MONK ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#C(#nMonk#C)#n ", "Monk", -1 ) );
-		if ( IS_CLASS( victim, CLASS_DROID ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#p(#PDrider#p)#n ", "Spider Droid", -1 ) );
-		if ( IS_CLASS( victim, CLASS_ANGEL ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#0(#7Angel#0)#n ", "Angel", -1 ) );
-		if ( IS_CLASS( victim, CLASS_TANARRI ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#y(#RTanar'ri#y)#n ", "Tanar'ri", -1 ) );
-		if ( IS_CLASS( victim, CLASS_LICH ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#0(#GLich#0)#n ", "Lich", -1 ) );
-		if ( IS_CLASS( victim, CLASS_UNDEAD_KNIGHT ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#y(#0Death Knight#y)#n ", "Death Knight", -1 ) );
-		if ( IS_CLASS( victim, CLASS_SAMURAI ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#C(#ySamu#Rrai#C)#n ", "Samurai", -1 ) );
-		if ( IS_CLASS( victim, CLASS_MAGE ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "{{#CBattlemage#n}} ", "Battlemage", -1 ) );
-		if ( IS_CLASS( victim, CLASS_DROW ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#P(#0Drow#P)#n ", "Drow", -1 ) );
-		if ( IS_CLASS( victim, CLASS_VAMPIRE ) && !IS_AFFECTED( victim, AFF_POLYMORPH ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#R(V#0ampire#R)#n ", "Vampire", -1 ) );
-		if ( IS_CLASS( victim, CLASS_DIRGESINGER ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#x178(#nDirgesinger#x178)#n ", "Dirgesinger", -1 ) );
-		if ( IS_CLASS( victim, CLASS_SIREN ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#x147(#nSiren#x147)#n ", "Siren", -1 ) );
+	/* Class titles (from game.db class_display table) */
+	if ( !IS_NPC( victim ) && !IS_NPC( ch ) && IS_HERO( victim ) && victim->class > 0 ) {
+		/* Special case: Vampire hides class when polymorphed */
+		if ( !IS_CLASS( victim, CLASS_VAMPIRE ) || !IS_AFFECTED( victim, AFF_POLYMORPH ) ) {
+			const char *look_disp = class_get_look_display( victim->class );
+			if ( look_disp && look_disp[0] != '\0' ) {
+				CLASS_DISPLAY_DATA *cd = class_display_get( victim->class );
+				const char *class_name = cd ? cd->name : "Unknown";
+				strcat( prefix_buf, mxp_aura_tag( ch, look_disp, class_name, -1 ) );
+			}
+		}
 	}
 
 	/* ========== PHASE 2: Build suffix (condition effects) ========== */
@@ -2510,10 +2490,10 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *gch;
 	char arg[MAX_INPUT_LENGTH];
 	char pkratio[64]; /* Ratio display, may include xterm color codes */
-	char kav[64];	  /* Class abbreviation */
+	char kav[256];	  /* Class abbreviation with color codes */
 	char faith[64];	  /* Faith indicator, may include xterm color codes */
-	char openb[20];
-	char closeb[20];
+	char openb[CLASS_SYMBOL_LEN];
+	char closeb[CLASS_SYMBOL_LEN];
 	char playername[512];		  /* Player name, possibly MXP-wrapped */
 	char buf[MAX_STRING_LENGTH];  // banners
 	char buf1[MAX_STRING_LENGTH]; // Admin.
@@ -2757,296 +2737,41 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 		/*
 		 * Time to parse the class name, first we do the symbols.
 		 * Screen readers skip decorative brackets entirely.
+		 * Symbols are loaded from game.db (class_display table).
 		 */
 		if ( IS_SCREENREADER( ch ) ) {
 			strcpy( openb, "" );
 			strcpy( closeb, "" );
-		} else if ( IS_CLASS( gch, CLASS_TANARRI ) ) {
-			strcpy( openb, "#y{#n" );
-			strcpy( closeb, "#y}#n" );
-		} else if ( IS_CLASS( gch, CLASS_ANGEL ) ) {
-			strcpy( openb, "#y.x#0[#n" );
-			strcpy( closeb, "#0]#yx.#n" );
-		} else if ( IS_CLASS( gch, CLASS_UNDEAD_KNIGHT ) ) {
-			strcpy( openb, "#0|[#n" );
-			strcpy( closeb, "#0]|#n" );
-		} else if ( IS_CLASS( gch, CLASS_SHAPESHIFTER ) ) {
-			strcpy( openb, "#0[#P*#0]#n" );
-			strcpy( closeb, "#0[#P*#0]#n" );
-		} else if ( IS_CLASS( gch, CLASS_VAMPIRE ) ) {
-			strcpy( openb, "#R<<#n" );
-			strcpy( closeb, "#R>>#n" );
-		} else if ( IS_CLASS( gch, CLASS_LICH ) ) {
-			strcpy( openb, "#G>*<#n" );
-			strcpy( closeb, "#G>*<#n" );
-		} else if ( IS_CLASS( gch, CLASS_WEREWOLF ) ) {
-			strcpy( openb, "#y((#n" );
-			strcpy( closeb, "#y))#n" );
-		} else if ( IS_CLASS( gch, CLASS_MAGE ) ) {
-			strcpy( openb, "{{" );
-			strcpy( closeb, "}}" );
-		} else if ( IS_CLASS( gch, CLASS_DROID ) ) {
-			strcpy( openb, "#p{#0-#p}#n" );
-			strcpy( closeb, "#p{#0-#p}#n" );
-		} else if ( IS_CLASS( gch, CLASS_SAMURAI ) ) {
-			strcpy( openb, "#C-=#n" );
-			strcpy( closeb, "#C=-#n" );
-		} else if ( IS_CLASS( gch, CLASS_DROW ) ) {
-			strcpy( openb, "#P.o0" );
-			strcpy( closeb, "#P0o.#n" );
-		} else if ( IS_CLASS( gch, CLASS_NINJA ) ) {
-			strcpy( openb, "#C***#n" );
-			strcpy( closeb, "#C***#n" );
-		} else if ( IS_CLASS( gch, CLASS_MONK ) ) {
-			strcpy( openb, "#0.x[#n" );
-			strcpy( closeb, "#0]x.#n" );
-		} else if ( IS_CLASS( gch, CLASS_DIRGESINGER ) ) {
-			strcpy( openb, "#x136~#x178[#n" );
-			strcpy( closeb, "#x178]#x136~#n" );
-		} else if ( IS_CLASS( gch, CLASS_SIREN ) ) {
-			strcpy( openb, "#x039~#x147(#n" );
-			strcpy( closeb, "#x147)#x039~#n" );
 		} else {
-			strcpy( openb, "#0[#n" );
-			strcpy( closeb, "#0]#n" );
+			const char *sym_left, *sym_right;
+			class_get_symbols( gch->class, &sym_left, &sym_right );
+			strcpy( openb, sym_left );
+			strcpy( closeb, sym_right );
 		}
 
 		/*
-		 * and then the class name.
+		 * and then the class name (generation title from game.db).
 		 */
 		if ( gch->class > 0 ) {
-			if ( IS_CLASS( gch, CLASS_MAGE ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#CHigh Archmage#n%s       ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#CArchmage#n%s            ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#CLord of Spells#n%s      ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#CHigh Invoker#n%s        ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#CWizard of War#n%s       ", openb, closeb );
-				else if ( gch->generation == 6 )
-					sprintf( kav, "%s#CBattlemage#n%s          ", openb, closeb );
-				else if ( gch->generation == 7 )
-					sprintf( kav, "%s#CApprentice#n%s          ", openb, closeb );
-				else
-					sprintf( kav, "%s#CMagician#n%s            ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_DROID ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#0Drider Lord%s       ", closeb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#0Master of the Web%s ", closeb, closeb );
-				else
-					sprintf( kav, "%s#0Spider Droid%s      ", closeb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_SHAPESHIFTER ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#RSpawn of Malaug#n%s   ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#RShadowmaster#n%s      ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#RMalaugrym Elder#n%s   ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#RMalaugrym#n%s         ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#RShapeshifter#n%s      ", openb, closeb );
-				else if ( gch->generation == 6 )
-					sprintf( kav, "%s#RDoppleganger#n%s      ", openb, closeb );
-				else if ( gch->generation == 7 )
-					sprintf( kav, "%s#RMass of tentacles#n%s ", openb, closeb );
-				else
-					sprintf( kav, "%s#RPlay-Doh#n%s          ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_ANGEL ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#7Arch Angel#n%s        ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#7Cherubim#n%s          ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#7Seraphim#n%s          ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#7Guardian Angel#n%s    ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#7Angel#n%s             ", openb, closeb );
-				else
-					sprintf( kav, "%s#7Nephalim#n%s          ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_UNDEAD_KNIGHT ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#LFallen Paladin#n%s      ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#LUndead Lord#n%s         ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#LUndead Knight#n%s       ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#LUndead Knight#n%s       ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#LUndead Knight#n%s       ", openb, closeb );
-				else
-					sprintf( kav, "%s#LSkeleton Knight#n%s     ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_WEREWOLF ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#LChieftain#n%s           ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#LTribe Shaman#n%s        ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#LPack Leader#n%s         ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#LFenris Wolf#n%s         ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#LStalker#n%s             ", openb, closeb );
-				else if ( gch->generation == 6 )
-					sprintf( kav, "%s#LHunter#n%s              ", openb, closeb );
-				else if ( gch->generation == 7 )
-					sprintf( kav, "%s#LPup of Gaia#n%s         ", openb, closeb );
-				else
-					sprintf( kav, "%s#LHalfbreed Bastard#n%s   ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_MONK ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#cAbbot#n%s             ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#cHigh Priest#n%s       ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#cPriest#n%s            ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#cFather#n%s            ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#cMonk#n%s              ", openb, closeb );
-				else if ( gch->generation == 6 )
-					sprintf( kav, "%s#cBrother#n%s           ", openb, closeb );
-				else if ( gch->generation == 7 )
-					sprintf( kav, "%s#cAcolyte#n%s           ", openb, closeb );
-				else
-					sprintf( kav, "%s#cFanatic#n%s           ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_DROW ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#0Matron Mother#n%s     ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#0Weaponmaster#n%s      ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#0High Priestess#n%s    ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#0Favored of Lloth#n%s  ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#0Black Widow#n%s       ", openb, closeb );
-				else if ( gch->generation == 6 )
-					sprintf( kav, "%s#0Drow#n%s              ", openb, closeb );
-				else if ( gch->generation == 7 )
-					sprintf( kav, "%s#0Drow Male#n%s         ", openb, closeb );
-				else
-					sprintf( kav, "%s#0Drider#n%s            ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_VAMPIRE ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#RI#0nner #RC#0ircle#n%s        ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#RV#0ampire #RJ#0usticar#n%s    ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#RV#0ampire #RP#0rince#n%s      ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#RV#0ampire #RA#0ncilla#n%s     ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#RV#0ampire #RA#0rchon#n%s      ", openb, closeb );
-				else if ( gch->generation == 6 )
-					sprintf( kav, "%s#RV#0ampire#n%s             ", openb, closeb );
-				else if ( gch->generation == 7 )
-					sprintf( kav, "%s#RV#0ampire #RA#0narch#n%s      ", openb, closeb );
-				else
-					sprintf( kav, "%s#RB#0loodsucker#n%s         ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_TANARRI ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#RTanar'ri Balor#n%s        ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#RTanar'ri Marilith#n%s     ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#RGreater Tanar'ri#n%s      ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#RTrue Tanar'ri#n%s         ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#RTanar'ri#n%s              ", openb, closeb );
-				else
-					sprintf( kav, "%s#RCambion#n%s               ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_LICH ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#7Demilich#n%s          ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#7Lich Lord#n%s         ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#7Power Lich#n%s        ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#7Ancient Lich#n%s      ", openb, closeb );
-				else
-					sprintf( kav, "%s#7Lich#n%s              ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_SAMURAI ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#RSho#ygun#n%s              ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#RKata#yna Mas#Rter#n%s       ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#RSamu#yrai Mas#Rter#n%s      ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#RSamu#yrai El#Rite#n%s       ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#RSamu#yrai#n%s             ", openb, closeb );
-				else
-					sprintf( kav, "%s#RTrai#ynee#n%s             ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_NINJA ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#yMaster Assassin#n%s   ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#yExpert Assassin#n%s   ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#yShadowlord#n%s        ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#yShadow Warrior#n%s    ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#yShadow#n%s            ", openb, closeb );
-				else if ( gch->generation == 6 )
-					sprintf( kav, "%s#yNinja#n%s             ", openb, closeb );
-				else if ( gch->generation == 7 )
-					sprintf( kav, "%s#yNinja Apprentice#n%s  ", openb, closeb );
-				else
-					sprintf( kav, "%s#yThug#n%s              ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_DEMON ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#RPit Lord#n%s              ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#RPit Fiend#n%s             ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#RGateKeeper#n%s            ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#RImp Lord#n%s              ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#RHell Spawn#n%s            ", openb, closeb );
-				else if ( gch->generation == 6 )
-					sprintf( kav, "%s#RDemon#n%s                 ", openb, closeb );
-				else if ( gch->generation == 7 )
-					sprintf( kav, "%s#RSpawnling#n%s             ", openb, closeb );
-				else
-					sprintf( kav, "%s#RImp#n%s                   ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_DIRGESINGER ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#x178War Cantor#n%s          ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#x178Battle Bard#n%s         ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#x178Dirgesinger#n%s         ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#x178War Chanter#n%s         ", openb, closeb );
-				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#x178Chanter#n%s             ", openb, closeb );
-				else
-					sprintf( kav, "%s#x178Hummer#n%s              ", openb, closeb );
-			} else if ( IS_CLASS( gch, CLASS_SIREN ) ) {
-				if ( gch->generation == 1 )
-					sprintf( kav, "%s#x147Archsiren#n%s           ", openb, closeb );
-				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#x147Diva of Doom#n%s        ", openb, closeb );
-				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#x147Songweaver#n%s          ", openb, closeb );
-				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#x147Voice of Ruin#n%s       ", openb, closeb );
-				else
-					sprintf( kav, "%s#x147Siren#n%s               ", openb, closeb );
-			} else
-				sprintf( kav, "#nNone#n                    " );
+			const char *gen_title = class_get_title( gch->class, gch->generation );
+			const char *title_color = class_get_title_color( gch->class );
+			char title_buf[128];
+			int vis_len, padding;
+
+			/* Build the title with color */
+			if ( title_color[0] != '\0' ) {
+				/* Simple color prefix + title + reset */
+				snprintf( title_buf, sizeof(title_buf), "%s%s#n", title_color, gen_title );
+			} else {
+				/* Title has embedded colors (e.g., Vampire, Samurai) */
+				snprintf( title_buf, sizeof(title_buf), "%s#n", gen_title );
+			}
+
+			/* Calculate visible length and add padding to reach ~24 chars total */
+			vis_len = visible_strlen( openb ) + visible_strlen( title_buf ) + visible_strlen( closeb );
+			padding = ( vis_len < 24 ) ? 24 - vis_len : 1;
+
+			snprintf( kav, sizeof(kav), "%s%s%s%*s", openb, title_buf, closeb, padding, "" );
 		} else
 			sprintf( kav, "#nNone#n                    " );
 
