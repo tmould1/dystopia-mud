@@ -3023,28 +3023,28 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 					sprintf( kav, "%s#RImp#n%s                   ", openb, closeb );
 			} else if ( IS_CLASS( gch, CLASS_DIRGESINGER ) ) {
 				if ( gch->generation == 1 )
-					sprintf( kav, "%s#x178War Cantor#n%s            ", openb, closeb );
+					sprintf( kav, "%s#x178War Cantor#n%s          ", openb, closeb );
 				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#x178Battle Bard#n%s           ", openb, closeb );
+					sprintf( kav, "%s#x178Battle Bard#n%s         ", openb, closeb );
 				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#x178Dirgesinger#n%s           ", openb, closeb );
+					sprintf( kav, "%s#x178Dirgesinger#n%s         ", openb, closeb );
 				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#x178War Chanter#n%s           ", openb, closeb );
+					sprintf( kav, "%s#x178War Chanter#n%s         ", openb, closeb );
 				else if ( gch->generation == 5 )
-					sprintf( kav, "%s#x178Chanter#n%s               ", openb, closeb );
+					sprintf( kav, "%s#x178Chanter#n%s             ", openb, closeb );
 				else
-					sprintf( kav, "%s#x178Hummer#n%s                ", openb, closeb );
+					sprintf( kav, "%s#x178Hummer#n%s              ", openb, closeb );
 			} else if ( IS_CLASS( gch, CLASS_SIREN ) ) {
 				if ( gch->generation == 1 )
-					sprintf( kav, "%s#x147Archsiren#n%s             ", openb, closeb );
+					sprintf( kav, "%s#x147Archsiren#n%s           ", openb, closeb );
 				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#x147Diva of Doom#n%s          ", openb, closeb );
+					sprintf( kav, "%s#x147Diva of Doom#n%s        ", openb, closeb );
 				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#x147Songweaver#n%s            ", openb, closeb );
+					sprintf( kav, "%s#x147Songweaver#n%s          ", openb, closeb );
 				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#x147Voice of Ruin#n%s         ", openb, closeb );
+					sprintf( kav, "%s#x147Voice of Ruin#n%s       ", openb, closeb );
 				else
-					sprintf( kav, "%s#x147Siren#n%s                 ", openb, closeb );
+					sprintf( kav, "%s#x147Siren#n%s               ", openb, closeb );
 			} else
 				sprintf( kav, "#nNone#n                    " );
 		} else
