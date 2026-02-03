@@ -1052,6 +1052,7 @@ const struct cmd_type cmd_table[] =
 		{ "ariaofunmaking", do_ariaofunmaking, POS_FIGHTING, 3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
 		{ "resonance",    do_resonance,    POS_DEAD,      3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
 		{ "voicetrain",   do_voicetrain,   POS_STANDING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "dirgetalk",    do_dirgetalk,    POS_DEAD,      3, LOG_NORMAL, CLASS_DIRGESINGER | CLASS_SIREN, 0, 0 },
 
 		/*
 		 * Immortal commands.

@@ -2126,6 +2126,7 @@ struct kill_data {
 #define CHANNEL_KNIGHTTALK	8388608
 #define CHANNEL_LICHTALK	16777216
 #define CHANNEL_TANTALK		33554432
+#define CHANNEL_DIRGETALK	67108864
 
 struct top_board {
 	int pkscore;
@@ -4814,6 +4815,7 @@ DECLARE_DO_FUN( do_warsong );
 DECLARE_DO_FUN( do_resonance );
 DECLARE_DO_FUN( do_songtrain );
 DECLARE_DO_FUN( do_dirgesingerarmor );
+DECLARE_DO_FUN( do_dirgetalk );
 
 /* Siren */
 DECLARE_DO_FUN( do_bansheewail );

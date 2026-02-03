@@ -354,6 +354,8 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 				continue;
 			if ( channel == CHANNEL_TANTALK && ( !IS_NPC( och ) && !IS_CLASS( och, CLASS_TANARRI ) && !IS_IMMORTAL( och ) ) )
 				continue;
+			if ( channel == CHANNEL_DIRGETALK && ( !IS_NPC( och ) && !IS_CLASS( och, CLASS_DIRGESINGER ) && !IS_CLASS( och, CLASS_SIREN ) && !IS_IMMORTAL( och ) ) )
+				continue;
 
 			if ( channel == CHANNEL_TELEPATH && ( !IS_NPC( och ) && !IS_CLASS( och, CLASS_SHAPESHIFTER ) && !IS_IMMORTAL( och ) ) )
 				continue;
@@ -541,6 +543,15 @@ void do_tantalk( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	talk_channel( ch, argument, CHANNEL_TANTALK, "tantalk" );
+	return;
+}
+
+void do_dirgetalk( CHAR_DATA *ch, char *argument ) {
+	if ( IS_NPC( ch ) || ( !IS_IMMORTAL( ch ) && !IS_CLASS( ch, CLASS_DIRGESINGER ) && !IS_CLASS( ch, CLASS_SIREN ) ) ) {
+		send_to_char( "Huh?\n\r", ch );
+		return;
+	}
+	talk_channel( ch, argument, CHANNEL_DIRGETALK, "dirgetalk" );
 	return;
 }
 
