@@ -403,6 +403,10 @@ typedef struct balance_data {
 	int   damcap_uk_wpn_mult;
 	int   damcap_samurai_per_wpn;
 	int   damcap_samurai_base;
+	int   damcap_dirgesinger_res_mult;
+	int   damcap_dirgesinger_battlehymn;
+	int   damcap_siren_res_mult;
+	int   damcap_siren_echoshield;
 	int   damcap_artifact;
 
 	/* Stance damcap bonuses */
@@ -4794,6 +4798,35 @@ DECLARE_DO_FUN( do_medit ); /* OLC 1.1b */
 DECLARE_DO_FUN( do_asave );
 DECLARE_DO_FUN( do_alist );
 DECLARE_DO_FUN( do_resets );
+
+/* Dirgesinger */
+DECLARE_DO_FUN( do_warcry );
+DECLARE_DO_FUN( do_shatter );
+DECLARE_DO_FUN( do_battlehymn );
+DECLARE_DO_FUN( do_dirge );
+DECLARE_DO_FUN( do_thunderclap );
+DECLARE_DO_FUN( do_ironsong );
+DECLARE_DO_FUN( do_cadence );
+DECLARE_DO_FUN( do_dissonance );
+DECLARE_DO_FUN( do_rally );
+DECLARE_DO_FUN( do_warsong );
+DECLARE_DO_FUN( do_resonance );
+DECLARE_DO_FUN( do_songtrain );
+DECLARE_DO_FUN( do_dirgesingerarmor );
+
+/* Siren */
+DECLARE_DO_FUN( do_bansheewail );
+DECLARE_DO_FUN( do_soulrend );
+DECLARE_DO_FUN( do_crescendo );
+DECLARE_DO_FUN( do_cacophony );
+DECLARE_DO_FUN( do_enthrall );
+DECLARE_DO_FUN( do_sirensong );
+DECLARE_DO_FUN( do_commandvoice );
+DECLARE_DO_FUN( do_mesmerize );
+DECLARE_DO_FUN( do_echoshield );
+DECLARE_DO_FUN( do_ariaofunmaking );
+DECLARE_DO_FUN( do_voicetrain );
+DECLARE_DO_FUN( do_sirenarmor );
 
 /*
  * Global Constants

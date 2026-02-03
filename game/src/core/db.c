@@ -1123,7 +1123,7 @@ OBJ_DATA *create_object( OBJ_INDEX_DATA *pObjIndex, int level ) {
 		obj->resistance = 1;
 		obj->level = 60;
 		obj->cost = 1000000;
-	} else if ( obj->pIndexData->vnum >= 33000 && obj->pIndexData->vnum <= 33320 ) /* normal class eq */
+	} else if ( obj->pIndexData->vnum >= 33000 && obj->pIndexData->vnum <= 33360 ) /* normal class eq */
 	{
 		obj->condition = 100;
 		obj->toughness = 100;

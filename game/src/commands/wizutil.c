@@ -190,7 +190,7 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Classes: Type selfclass <class> to get classed.\n\r\n\r", ch );
 		send_to_char( "#R[#0Demon#R]#n             #y((#LWerewolf#y))#n         #P.o0#0Drow#P0o.#n\n\r", ch );
 		send_to_char( "#C***#yNinja#C***#n         #0<<#RVampire#0>>#n          #0.x[#lMonk#0]x.\n\r", ch );
-		send_to_char( "#n{{#CBattlemage#n}}\n\r", ch );
+		send_to_char( "#n{{#CBattlemage#n}}         #G~#y[#nDirgesinger#y]#G~#n\n\r", ch );
 		return;
 	}
 	do_clearstats2( ch, "" );
@@ -238,6 +238,9 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You need 5K mana and 100 in all your spellcolors.\n\r", ch );
 			return;
 		}
+	} else if ( !str_cmp( arg1, "dirgesinger" ) ) {
+		ch->class = CLASS_DIRGESINGER;
+		send_to_char( "Your voice becomes your weapon. Let the #Gbattle hymns#n begin.\n\r", ch );
 	} else
 		do_classself( ch, "" );
 	return;

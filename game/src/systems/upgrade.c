@@ -41,6 +41,7 @@ bool is_upgrade( CHAR_DATA *ch ) {
 	if ( IS_CLASS( ch, CLASS_ANGEL ) ) return TRUE;
 	if ( IS_CLASS( ch, CLASS_LICH ) ) return TRUE;
 	if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) return TRUE;
+	if ( IS_CLASS( ch, CLASS_SIREN ) ) return TRUE;
 
 	return FALSE;
 }
@@ -121,6 +122,8 @@ void upgrade2( CHAR_DATA *ch ) {
 		sprintf( buf, "The sky shakes with thunder as %s is proclaimed the messanger of God", ch->name );
 	else if ( IS_CLASS( ch, CLASS_TANARRI ) )
 		sprintf( buf, "Through hardwon battles in the famous Blood Wars, %s has gained skills beyond this world", ch->name );
+	else if ( IS_CLASS( ch, CLASS_SIREN ) )
+		sprintf( buf, "The heavens tremble as %s's voice reaches new heights of power", ch->name );
 	else
 		sprintf( buf, "%s have upgraded", ch->name );
 	do_info( ch, buf );
@@ -197,6 +200,9 @@ void do_upgrade( CHAR_DATA *ch, char *argument ) {
 	} else if ( ch->class == CLASS_MAGE ) {
 		ch->class = CLASS_LICH;
 		sprintf( buf, "%s have sacrificed life for power", ch->name );
+	} else if ( ch->class == CLASS_DIRGESINGER ) {
+		ch->class = CLASS_SIREN;
+		sprintf( buf, "%s's voice transcends mortality, becoming a Siren", ch->name );
 	} else
 		return;
 	clearshit( ch );

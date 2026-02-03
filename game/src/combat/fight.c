@@ -21,6 +21,8 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "ability_config.h"
+#include "dirgesinger.h"
 #include "../systems/mcmp.h"
 
 #define MAX_SLAY_TYPES 3
@@ -998,6 +1000,10 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->rank == BELT_TEN )
 			count += 5;
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) ) count += 5;
+		/* Dirgesinger cadence: extra attacks when active */
+		if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) &&
+			ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] > 0 )
+			count += acfg( "dirgesinger.cadence.extra_attacks" );
 		if ( IS_ITEMAFF( ch, ITEMA_SPEED ) ) count += 2;
 	} else {
 		if ( !IS_NPC( ch ) )
@@ -1694,6 +1700,17 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 				if ( ch->wpn[i] >= 1000 ) max_dam += balance.damcap_samurai_per_wpn;
 			max_dam += balance.damcap_samurai_base;
 		}
+		/* Dirgesinger/Siren: resonance-based damcap bonus + battlehymn */
+		if ( IS_CLASS( ch, CLASS_DIRGESINGER ) ) {
+			max_dam += ch->rage * balance.damcap_dirgesinger_res_mult;
+			if ( ch->pcdata->powers[DIRGE_BATTLEHYMN_ACTIVE] > 0 )
+				max_dam += balance.damcap_dirgesinger_battlehymn;
+		}
+		if ( IS_CLASS( ch, CLASS_SIREN ) ) {
+			max_dam += ch->rage * balance.damcap_siren_res_mult;
+			if ( ch->pcdata->powers[DIRGE_ECHOSHIELD_ACTIVE] > 0 )
+				max_dam += balance.damcap_siren_echoshield;
+		}
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += balance.damcap_artifact;
 
@@ -1864,6 +1881,29 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 		send_to_char( "and absorb the full impact into your system, channeling it into a healing force.\n\r", victim );
 		heal_char( victim, dam );
 		dam = 0;
+	}
+	/* Dirgesinger Ironsong: sonic barrier absorbs damage */
+	if ( !IS_NPC( victim ) && ( IS_CLASS( victim, CLASS_DIRGESINGER ) || IS_CLASS( victim, CLASS_SIREN ) ) &&
+		victim->pcdata->powers[DIRGE_IRONSONG_ACTIVE] > 0 && victim->pcdata->stats[DIRGE_ARMOR_BONUS] > 0 ) {
+		if ( dam <= victim->pcdata->stats[DIRGE_ARMOR_BONUS] ) {
+			victim->pcdata->stats[DIRGE_ARMOR_BONUS] -= dam;
+			send_to_char( "Your ironsong barrier absorbs the blow!\n\r", victim );
+			dam = 0;
+		} else {
+			dam -= victim->pcdata->stats[DIRGE_ARMOR_BONUS];
+			victim->pcdata->stats[DIRGE_ARMOR_BONUS] = 0;
+			victim->pcdata->powers[DIRGE_IRONSONG_ACTIVE] = 0;
+			send_to_char( "Your ironsong barrier shatters!\n\r", victim );
+		}
+	}
+	/* Siren Echoshield: reflect portion of damage as sonic */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SIREN ) &&
+		victim->pcdata->powers[DIRGE_ECHOSHIELD_ACTIVE] > 0 && dam > 0 ) {
+		int reflect = dam * acfg( "siren.echoshield.reflect_pct" ) / 100;
+		if ( reflect > 0 ) {
+			hurt_person( victim, ch, reflect );
+			act( "Your echoshield reverberates, reflecting sonic energy back at $N!", victim, NULL, ch, TO_CHAR );
+		}
 	}
 	hurt_person( ch, victim, dam );
 	dropinvis( ch );

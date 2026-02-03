@@ -455,6 +455,9 @@ int char_damroll( CHAR_DATA *ch ) {
 		value += ch->rage;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->rage > 0 )
 		value += ch->rage;
+	/* Dirgesinger/Siren Resonance */
+	if ( ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) && ch->rage > 0 )
+		value += ch->rage;
 
 	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->pcdata->stats[DEMON_POWER] > 0 )
 		value += ( ( ch->pcdata->stats[DEMON_POWER] ) * ch->pcdata->stats[DEMON_POWER] );
@@ -513,6 +516,9 @@ int char_hitroll( CHAR_DATA *ch ) {
 		value += ch->rage;
 
 	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->rage > 0 )
+		value += ch->rage;
+	/* Dirgesinger/Siren Resonance */
+	if ( ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) && ch->rage > 0 )
 		value += ch->rage;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->pcdata->stats[DEMON_POWER] > 0 )
 		value += ( ( ch->pcdata->stats[DEMON_POWER] ) * ch->pcdata->stats[DEMON_POWER] );
@@ -840,6 +846,10 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 			strcat( prefix_buf, mxp_aura_tag( ch, "#P(#0Drow#P)#n ", "Drow", -1 ) );
 		if ( IS_CLASS( victim, CLASS_VAMPIRE ) && !IS_AFFECTED( victim, AFF_POLYMORPH ) )
 			strcat( prefix_buf, mxp_aura_tag( ch, "#R(V#0ampire#R)#n ", "Vampire", -1 ) );
+		if ( IS_CLASS( victim, CLASS_DIRGESINGER ) )
+			strcat( prefix_buf, mxp_aura_tag( ch, "#x178(#nDirgesinger#x178)#n ", "Dirgesinger", -1 ) );
+		if ( IS_CLASS( victim, CLASS_SIREN ) )
+			strcat( prefix_buf, mxp_aura_tag( ch, "#x147(#nSiren#x147)#n ", "Siren", -1 ) );
 	}
 
 	/* ========== PHASE 2: Build suffix (condition effects) ========== */
@@ -2418,8 +2428,12 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 			sprintf( buf, "#R[#nYou receive the power of HaraKiri for #C%d#n more ticks#R]\n\r", ch->pcdata->powers[HARA_KIRI] );
 			send_to_char( buf, ch );
 		}
+		if ( ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) && ch->rage > 0 ) {
+			sprintf( buf, "#R[#nYour resonance pulses at #C%d#n, enhancing Hitroll and Damroll#R]\n\r", ch->rage );
+			send_to_char( buf, ch );
+		}
 
-		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 && !IS_CLASS( ch, CLASS_NINJA ) ) {
+		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 && !IS_CLASS( ch, CLASS_NINJA ) && !IS_CLASS( ch, CLASS_DIRGESINGER ) && !IS_CLASS( ch, CLASS_SIREN ) ) {
 			sprintf( buf, "#R[#nYou are in a mad frenzy, adding #C%d#n Hitroll and Damroll#R]\n\r", ch->rage );
 			stc( buf, ch );
 		}
@@ -2786,6 +2800,12 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 		} else if ( IS_CLASS( gch, CLASS_MONK ) ) {
 			strcpy( openb, "#0.x[#n" );
 			strcpy( closeb, "#0]x.#n" );
+		} else if ( IS_CLASS( gch, CLASS_DIRGESINGER ) ) {
+			strcpy( openb, "#x136~#x178[#n" );
+			strcpy( closeb, "#x178]#x136~#n" );
+		} else if ( IS_CLASS( gch, CLASS_SIREN ) ) {
+			strcpy( openb, "#x039~#x147(#n" );
+			strcpy( closeb, "#x147)#x039~#n" );
 		} else {
 			strcpy( openb, "#0[#n" );
 			strcpy( closeb, "#0]#n" );
@@ -3001,6 +3021,30 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 					sprintf( kav, "%s#RSpawnling#n%s             ", openb, closeb );
 				else
 					sprintf( kav, "%s#RImp#n%s                   ", openb, closeb );
+			} else if ( IS_CLASS( gch, CLASS_DIRGESINGER ) ) {
+				if ( gch->generation == 1 )
+					sprintf( kav, "%s#x178War Cantor#n%s            ", openb, closeb );
+				else if ( gch->generation == 2 )
+					sprintf( kav, "%s#x178Battle Bard#n%s           ", openb, closeb );
+				else if ( gch->generation == 3 )
+					sprintf( kav, "%s#x178Dirgesinger#n%s           ", openb, closeb );
+				else if ( gch->generation == 4 )
+					sprintf( kav, "%s#x178War Chanter#n%s           ", openb, closeb );
+				else if ( gch->generation == 5 )
+					sprintf( kav, "%s#x178Chanter#n%s               ", openb, closeb );
+				else
+					sprintf( kav, "%s#x178Hummer#n%s                ", openb, closeb );
+			} else if ( IS_CLASS( gch, CLASS_SIREN ) ) {
+				if ( gch->generation == 1 )
+					sprintf( kav, "%s#x147Archsiren#n%s             ", openb, closeb );
+				else if ( gch->generation == 2 )
+					sprintf( kav, "%s#x147Diva of Doom#n%s          ", openb, closeb );
+				else if ( gch->generation == 3 )
+					sprintf( kav, "%s#x147Songweaver#n%s            ", openb, closeb );
+				else if ( gch->generation == 4 )
+					sprintf( kav, "%s#x147Voice of Ruin#n%s         ", openb, closeb );
+				else
+					sprintf( kav, "%s#x147Siren#n%s                 ", openb, closeb );
 			} else
 				sprintf( kav, "#nNone#n                    " );
 		} else
@@ -3979,6 +4023,8 @@ static const char *get_class_name( int class_bits ) {
 	if ( class_bits & CLASS_ANGEL ) return "Angel";
 	if ( class_bits & CLASS_UNDEAD_KNIGHT ) return "Undead Knight";
 	if ( class_bits & CLASS_DROID ) return "Spider Droid";
+	if ( class_bits & CLASS_DIRGESINGER ) return "Dirgesinger";
+	if ( class_bits & CLASS_SIREN ) return "Siren";
 	return "Hero";
 }
 

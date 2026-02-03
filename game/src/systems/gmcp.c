@@ -62,6 +62,8 @@ static const char *get_class_name( int class_bits ) {
 	if ( class_bits & CLASS_ANGEL ) return "Angel";
 	if ( class_bits & CLASS_UNDEAD_KNIGHT ) return "Undead Knight";
 	if ( class_bits & CLASS_DROID ) return "Droid";
+	if ( class_bits & CLASS_DIRGESINGER ) return "Dirgesinger";
+	if ( class_bits & CLASS_SIREN ) return "Siren";
 	return "None";
 }
 

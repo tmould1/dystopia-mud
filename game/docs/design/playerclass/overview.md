@@ -22,6 +22,7 @@ Available via `selfclass` command at level 3 (Avatar):
 - Vampire
 - Monk
 - Battlemage (requires 5K mana and 100 in all spell colors)
+- Dirgesinger
 
 ### Upgrade Classes
 Achieved by upgrading from a maxed base class:
@@ -35,8 +36,9 @@ Achieved by upgrading from a maxed base class:
 | Vampire | Undead Knight |
 | Monk | Angel |
 | Battlemage | Lich |
+| Dirgesinger | Siren |
 
-**Source**: `src/upgrade.c`, `area/help.are` (UPGRADE help entry)
+**Source**: `src/systems/upgrade.c`, `gamedata/db/game/base_help.db` (UPGRADE help entry)
 
 ## Upgrade System
 
@@ -94,6 +96,7 @@ bool is_upgrade(CHAR_DATA *ch) {
     if (IS_CLASS(ch, CLASS_ANGEL))         return TRUE;
     if (IS_CLASS(ch, CLASS_LICH))          return TRUE;
     if (IS_CLASS(ch, CLASS_SHAPESHIFTER))  return TRUE;
+    if (IS_CLASS(ch, CLASS_SIREN))         return TRUE;
     return FALSE;
 }
 ```
@@ -174,6 +177,10 @@ struct pc_data {
 #define CLASS_ANGEL        2048
 #define CLASS_UNDEAD_KNIGHT 4096
 #define CLASS_DROID        8192
+#define CLASS_SIREN       32768
+
+// Base Classes (continued)
+#define CLASS_DIRGESINGER 16384
 ```
 
 ### Checking Class Membership
@@ -214,6 +221,8 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 | Lich | CON_LORE, LIFE_LORE, DEATH_LORE, CHAOS_MAGIC, NECROMANTIC | lich.h |
 | Tanar'ri | TANARRI_POWER (bitfield), TANARRI_POWER_COUNTER | tanarri.h |
 | Undead Knight | NECROMANCY, INVOCATION, SPIRIT | undead_knight.h |
+| Dirgesinger | Buff durations, DOT stacks, training levels (0-13) | dirgesinger.h |
+| Siren | Echoshield, Crescendo stage (6-7) | dirgesinger.h |
 
 ## File Organization
 
@@ -235,6 +244,7 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 - `src/drow.c` - Drow powers
 - `src/monk.c`, `src/monk2.c` - Monk abilities
 - `src/ninja.c` - Ninja abilities
+- `src/dirgesinger.c`, `src/dirgesinger.h` - Dirgesinger powers
 
 **Upgrade Classes:**
 - `src/tanarri.c`, `src/tanarri.h` - Tanar'ri powers
@@ -244,6 +254,7 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 - `src/undead_knight.c`, `src/undead_knight.h` - Undead Knight abilities
 - `src/angel.c`, `src/angel.h` - Angel powers
 - `src/lich.c`, `src/lich.h` - Lich powers
+- `src/siren.c` - Siren powers
 
 ## Design Considerations
 

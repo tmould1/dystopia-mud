@@ -1021,6 +1021,38 @@ const struct cmd_type cmd_table[] =
 
 		{ "showalias", do_showalias, POS_STANDING, 2, LOG_NORMAL, 0, 0, 0 },
 
+		/* Dirgesinger */
+
+		{ "warcry",       do_warcry,       POS_FIGHTING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "shatter",      do_shatter,      POS_FIGHTING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "battlehymn",   do_battlehymn,   POS_FIGHTING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "dirge",        do_dirge,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "thunderclap",  do_thunderclap,  POS_FIGHTING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "ironsong",     do_ironsong,     POS_STANDING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "cadence",      do_cadence,      POS_STANDING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "dissonance",   do_dissonance,   POS_FIGHTING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "rally",        do_rally,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "warsong",      do_warsong,      POS_STANDING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "resonance",    do_resonance,    POS_DEAD,      3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "dirgesingerarmor", do_dirgesingerarmor, POS_STANDING, 3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+		{ "songtrain",    do_songtrain,    POS_STANDING,  3, LOG_NORMAL, CLASS_DIRGESINGER, 0, 0 },
+
+		/* Siren */
+
+		{ "bansheewail",  do_bansheewail,  POS_FIGHTING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "soulrend",     do_soulrend,     POS_FIGHTING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "crescendo",    do_crescendo,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "cacophony",    do_cacophony,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "sirenarmor",   do_sirenarmor,   POS_STANDING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "enthrall",     do_enthrall,     POS_STANDING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "sirensong",    do_sirensong,    POS_STANDING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "commandvoice", do_commandvoice, POS_STANDING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "mesmerize",    do_mesmerize,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "echoshield",   do_echoshield,   POS_STANDING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "ariaofunmaking", do_ariaofunmaking, POS_FIGHTING, 3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "resonance",    do_resonance,    POS_DEAD,      3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+		{ "voicetrain",   do_voicetrain,   POS_STANDING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
+
 		/*
 		 * Immortal commands.
 		 */

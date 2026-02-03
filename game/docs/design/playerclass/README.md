@@ -14,6 +14,9 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [System Overview](overview.md) - High-level architecture, data structures, and upgrade system
 - [Discipline System](disciplines.md) - Power progression and discipline mechanics (Vampire/Werewolf/Demon)
 
+### Guides
+- [Implementing a New Class](implementing-a-new-class.md) - Step-by-step checklist, file inventory, and pitfalls
+
 ### Base Class Documentation
 - [Vampire](classes/vampire.md) - Blood disciplines, generation system
 - [Werewolf](classes/werewolf.md) - Totem spirits and gnosis
@@ -22,6 +25,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [Drow](classes/drow.md) - Lloth worship and professions
 - [Monk](classes/monk.md) - Chi, mantras, and combos
 - [Ninja](classes/ninja.md) - Principles and belts
+- [Dirgesinger](classes/dirgesinger.md) - Sonic martial bard
 
 ### Upgrade Class Documentation
 - [Tanar'ri](classes/tanarri.md) - Upgraded from Demon, Blood Wars powers
@@ -31,6 +35,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [Undead Knight](classes/undead_knight.md) - Upgraded from Vampire, necromancy
 - [Angel](classes/angel.md) - Upgraded from Monk, divine powers
 - [Lich](classes/lich.md) - Upgraded from Battlemage, undead sorcery
+- [Siren](classes/siren.md) - Upgraded from Dirgesinger, voice of domination
 
 ## Upgrade Paths
 
@@ -43,6 +48,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Vampire | Undead Knight | 50K hp, 35K mana/move, 40K qp, gen 1 |
 | Monk | Angel | 50K hp, 35K mana/move, 40K qp, gen 1 |
 | Battlemage | Lich | 50K hp, 35K mana/move, 40K qp, gen 1 |
+| Dirgesinger | Siren | 50K hp, 35K mana/move, 40K qp, gen 1 |
 
 ## Quick Reference
 
@@ -58,6 +64,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Drow | CLASS_DROW | 32 |
 | Monk | CLASS_MONK | 64 |
 | Ninja | CLASS_NINJA | 128 |
+| Dirgesinger | CLASS_DIRGESINGER | 16384 |
 
 **Upgrade Classes:**
 | Class | Constant | Bit Value |
@@ -69,6 +76,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Angel | CLASS_ANGEL | 2048 |
 | Undead Knight | CLASS_UNDEAD_KNIGHT | 4096 |
 | Spider Droid | CLASS_DROID | 8192 |
+| Siren | CLASS_SIREN | 32768 |
 
 ### Key Source Files
 - `src/class.h` - Class constants and definitions

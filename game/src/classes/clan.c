@@ -1525,6 +1525,7 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "#rClasses:#n\n\r", ch );
 		send_to_char( "None, Demon, Drow, Werewolf, Monk, Vampire, Mage, Ninja, Druid, Hobbit, Giant, Draconian.\n\r", ch );
 		send_to_char( "Tanarri, Shapeshifter, Spiderdroid, Samurai, Undeadknight, Angel, Lich, Fae, Drone.\n\r", ch );
+		send_to_char( "Dirgesinger, Siren.\n\r", ch );
 		return;
 	}
 	if ( ( victim = get_char_world( ch, arg1 ) ) == NULL ) {
@@ -1577,6 +1578,12 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 	} else if ( !str_cmp( arg2, "ninja" ) ) {
 		victim->class = 128;
 		send_to_char( "You are now a ninja!\n\r", victim );
+	} else if ( !str_cmp( arg2, "dirgesinger" ) ) {
+		victim->class = CLASS_DIRGESINGER;
+		send_to_char( "You are now a Dirgesinger!\n\r", victim );
+	} else if ( !str_cmp( arg2, "siren" ) ) {
+		victim->class = CLASS_SIREN;
+		send_to_char( "You are now a Siren!\n\r", victim );
 	} else if ( !str_cmp( arg2, "none" ) ) {
 		victim->class = 0;
 		send_to_char( "You class have been removed, BUT this command is broken, please report this.\n\r", victim );

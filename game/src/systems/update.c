@@ -57,6 +57,8 @@ void update_tanarri args( ( CHAR_DATA * ch ) );
 void update_drow args( ( CHAR_DATA * ch ) );
 void update_highlander args( ( CHAR_DATA * ch ) );
 void update_mage args( ( CHAR_DATA * ch ) );
+void update_dirgesinger args( ( CHAR_DATA * ch ) );
+void update_siren args( ( CHAR_DATA * ch ) );
 void update_knight args( ( CHAR_DATA * ch ) );
 void update_shapeshifter args( ( CHAR_DATA * ch ) );
 void update_arti_regen args( ( CHAR_DATA * ch ) );
@@ -503,6 +505,8 @@ void mobile_update( void ) {
 					update_mage( ch );
 					if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
 				}
+				if ( IS_CLASS( ch, CLASS_DIRGESINGER ) ) update_dirgesinger( ch );
+				if ( IS_CLASS( ch, CLASS_SIREN ) ) update_siren( ch );
 				if ( ch->class == 0 && IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
 			} else {
 				heal_char( ch, number_range( 1, 5 ) );
