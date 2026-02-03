@@ -105,7 +105,7 @@ Massive area attack that can instantly kill weak NPCs. The signature Siren offen
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 80 | `siren.bansheewail.mana_cost` |
+| Mana Cost | 150 | `siren.bansheewail.mana_cost` |
 | Resonance Required | 80 | `siren.bansheewail.resonance_req` |
 | Resonance Cost | 60 | `siren.bansheewail.resonance_cost` |
 | Cooldown | 15 pulses | `siren.bansheewail.cooldown` |
@@ -119,7 +119,7 @@ Partially bypasses armor, dealing a mix of normal and direct HP (spirit) damage.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 50 | `siren.soulrend.mana_cost` |
+| Mana Cost | 100 | `siren.soulrend.mana_cost` |
 | Resonance Cost | 20 | `siren.soulrend.resonance_cost` |
 | Cooldown | 8 pulses | `siren.soulrend.cooldown` |
 | Damage | 250-500 + (resonance × 3) | |
@@ -141,7 +141,7 @@ Multi-round attack that builds through 3 stages before unleashing a devastating 
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana per Stage | 25 | `siren.crescendo.mana_per_stage` |
+| Mana per Stage | 50 | `siren.crescendo.mana_per_stage` |
 | Finale Multiplier | 2× | `siren.crescendo.finale_dam_mult` |
 | Requires | Fighting | |
 
@@ -153,7 +153,7 @@ Area damage with chance to cause confusion (flee) on NPCs.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 60 | `siren.cacophony.mana_cost` |
+| Mana Cost | 120 | `siren.cacophony.mana_cost` |
 | Resonance Cost | 40 | `siren.cacophony.resonance_cost` |
 | Cooldown | 12 pulses | `siren.cacophony.cooldown` |
 | Damage per Target | 150-350 + (resonance × 3) | |
@@ -166,7 +166,7 @@ Charm an NPC to fight for you. Sets AFF_CHARM, master, and leader.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 70 | `siren.enthrall.mana_cost` |
+| Mana Cost | 140 | `siren.enthrall.mana_cost` |
 | Resonance Cost | 50 | `siren.enthrall.resonance_cost` |
 | Max Followers | 2 | `siren.enthrall.max_followers` |
 | Duration | 30 ticks | `siren.enthrall.duration` |
@@ -178,7 +178,7 @@ Stops all NPCs in the room from fighting. Does not charm, only pacifies.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 100 | `siren.sirensong.mana_cost` |
+| Mana Cost | 200 | `siren.sirensong.mana_cost` |
 | Resonance Cost | 80 | `siren.sirensong.resonance_cost` |
 | Cooldown | 20 pulses | `siren.sirensong.cooldown` |
 | Effect | All NPCs stop fighting | |
@@ -189,7 +189,7 @@ Compel a target to perform a specific action (flee or drop weapon).
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 40 | `siren.commandvoice.mana_cost` |
+| Mana Cost | 100 | `siren.commandvoice.mana_cost` |
 | Resonance Cost | 30 | `siren.commandvoice.resonance_cost` |
 | Cooldown | 10 pulses | `siren.commandvoice.cooldown` |
 
@@ -204,7 +204,7 @@ Hypnotic melody that stuns the target for multiple combat rounds.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 50 | `siren.mesmerize.mana_cost` |
+| Mana Cost | 100 | `siren.mesmerize.mana_cost` |
 | Resonance Cost | 35 | `siren.mesmerize.resonance_cost` |
 | Cooldown | 12 pulses | `siren.mesmerize.cooldown` |
 | Stun Duration | 3 rounds | `siren.mesmerize.stun_duration` |
@@ -216,7 +216,7 @@ Surrounds the Siren with a sonic shield that reflects a portion of incoming dama
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 40 | `siren.echoshield.mana_cost` |
+| Mana Cost | 80 | `siren.echoshield.mana_cost` |
 | Duration | 10 ticks | `siren.echoshield.duration` |
 | Reflect % | 20% of damage | `siren.echoshield.reflect_pct` |
 | Damcap Bonus | +150 | `balance.damcap_siren_echoshield` |
@@ -233,7 +233,7 @@ Strips magical protections and affects from the target.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 70 | `siren.ariaofunmaking.mana_cost` |
+| Mana Cost | 150 | `siren.ariaofunmaking.mana_cost` |
 | Resonance Cost | 60 | `siren.ariaofunmaking.resonance_cost` |
 | Cooldown | 15 pulses | `siren.ariaofunmaking.cooldown` |
 | Max Affects Stripped | 3 | |

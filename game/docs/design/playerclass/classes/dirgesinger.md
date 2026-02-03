@@ -113,7 +113,7 @@ Basic combat ability that deals sonic damage and builds resonance.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 20 | `dirgesinger.warcry.mana_cost` |
+| Mana Cost | 50 | `dirgesinger.warcry.mana_cost` |
 | Cooldown | 4 pulses | `dirgesinger.warcry.cooldown` |
 | Base Damage | 50-120 + (resonance × 2) | `dirgesinger.warcry.dam_bonus_min/max` |
 | Resonance Gain | +5 | `dirgesinger.warcry.resonance_gain` |
@@ -125,7 +125,7 @@ Powerful single-target attack with disarm chance. Never destroys equipment.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 40 | `dirgesinger.shatter.mana_cost` |
+| Mana Cost | 80 | `dirgesinger.shatter.mana_cost` |
 | Resonance Required | 25 | `dirgesinger.shatter.resonance_req` |
 | Resonance Cost | 10 | `dirgesinger.shatter.resonance_cost` |
 | Cooldown | 8 pulses | `dirgesinger.shatter.cooldown` |
@@ -139,7 +139,7 @@ Area attack hitting all enemies currently fighting the Dirgesinger.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 50 | `dirgesinger.thunderclap.mana_cost` |
+| Mana Cost | 100 | `dirgesinger.thunderclap.mana_cost` |
 | Resonance Required | 40 | `dirgesinger.thunderclap.resonance_req` |
 | Resonance Cost | 20 | `dirgesinger.thunderclap.resonance_cost` |
 | Cooldown | 10 pulses | `dirgesinger.thunderclap.cooldown` |
@@ -152,7 +152,7 @@ Self-buff adding bonus sonic damage to melee attacks. Increases damage cap.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 30 | `dirgesinger.battlehymn.mana_cost` |
+| Mana Cost | 60 | `dirgesinger.battlehymn.mana_cost` |
 | Duration | 10 ticks | `dirgesinger.battlehymn.duration` |
 | Damage Bonus | +50 per hit | `dirgesinger.battlehymn.dam_bonus` |
 | Damcap Bonus | +200 | `balance.damcap_dirgesinger_battlehymn` |
@@ -164,7 +164,7 @@ Grants extra attacks per combat round.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 20 | `dirgesinger.cadence.mana_cost` |
+| Mana Cost | 60 | `dirgesinger.cadence.mana_cost` |
 | Duration | 8 ticks | `dirgesinger.cadence.duration` |
 | Extra Attacks | +2 | `dirgesinger.cadence.extra_attacks` |
 | Requires | Battle Songs 2 | |
@@ -175,7 +175,7 @@ Toggle aura providing combat bonuses to self and group. Drains mana each tick.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Drain | 10/tick | `dirgesinger.warsong.mana_drain_per_tick` |
+| Mana Drain | 25/tick | `dirgesinger.warsong.mana_drain_per_tick` |
 | Effect | Group combat bonuses | |
 | Toggle | On/Off | |
 | Auto-off | When mana depleted | |
@@ -187,7 +187,7 @@ Damage-over-time that stacks progressively, increasing damage each tick.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 25 | `dirgesinger.dirge.mana_cost` |
+| Mana Cost | 50 | `dirgesinger.dirge.mana_cost` |
 | Max Stacks | 5 | `dirgesinger.dirge.max_stacks` |
 | Duration | 6 ticks | `dirgesinger.dirge.duration` |
 | Tick Damage | 50 × stacks | `dirgesinger.dirge.tick_damage` |
@@ -200,7 +200,7 @@ Reduces enemy attack effectiveness for a duration.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 30 | `dirgesinger.dissonance.mana_cost` |
+| Mana Cost | 60 | `dirgesinger.dissonance.mana_cost` |
 | Cooldown | 8 pulses | `dirgesinger.dissonance.cooldown` |
 | Duration | 10 ticks | `dirgesinger.dissonance.duration` |
 | Requires | Fighting, Dirges 2 | |
@@ -211,7 +211,7 @@ Creates an absorptive barrier that blocks incoming damage.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 35 | `dirgesinger.ironsong.mana_cost` |
+| Mana Cost | 70 | `dirgesinger.ironsong.mana_cost` |
 | Duration | 12 ticks | `dirgesinger.ironsong.duration` |
 | Absorb Amount | 1000 HP | `dirgesinger.ironsong.absorb_amount` |
 | Requires | Iron Voice 1 | |
@@ -226,7 +226,7 @@ Heals all group members in the room.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 60 | `dirgesinger.rally.mana_cost` |
+| Mana Cost | 120 | `dirgesinger.rally.mana_cost` |
 | Resonance Required | 50 | `dirgesinger.rally.resonance_req` |
 | Resonance Cost | 30 | `dirgesinger.rally.resonance_cost` |
 | Heal Amount | 500 HP | `dirgesinger.rally.heal_amount` |
