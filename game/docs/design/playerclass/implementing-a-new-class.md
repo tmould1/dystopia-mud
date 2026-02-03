@@ -27,6 +27,8 @@ If the new class is an upgrade that shares a header with its base class (like Si
 | `src/combat/fight.c` | Damcap bonuses, extra attack hooks, defensive mechanics (barrier, reflect) | Multiple locations, search for existing class patterns |
 | `src/systems/update.c` | Call to `<class>_update(ch)` in the tick loop | One line in the character update section |
 | `src/core/handler.c` | Equipment vnum restrictions (if class armor exists) | Prevents other classes from using your gear |
+| `src/commands/wizutil.c` | `selfclass` command entry for base classes | Allows players to select the class at avatar |
+| `src/classes/clan.c` | `do_class` entry for immortal class assignment | Allows immortals to set player class |
 | `src/db/db_sql.h` | Default `acfg` values for all balance-tunable parameters | One INSERT per config key |
 | `src/systems/save.c` | Verify `pcdata->powers[]` and `pcdata->stats[]` are saved/loaded | Usually already handled generically, but verify |
 | `game/build/Makefile` | Add new `.c` file to the build | Run `GenerateProjectFiles.bat` (Windows) or `.sh` (Linux) instead of editing manually |
@@ -74,14 +76,17 @@ This order minimizes back-and-forth and catches integration issues early.
 ### Phase 5: Presentation and Polish
 
 17. **Add who list brackets and titles** - In `act_info.c`, add `openb`/`closeb` with your color scheme, generation-based titles, and room aura tags.
-18. **Create help file entries** - Update `base_help.db` with the class help entry, and add the class to the CLASSES help entry.
-19. **Write the design doc** - Document everything in `game/docs/design/playerclass/classes/<class>.md`.
-20. **Update overview docs** - Add to `overview.md` and `README.md`.
+18. **Add self class announcements** - Base classes need entries in two places:
+    - `wizutil.c:do_classself()` - Add a case for your class so players can select it via `selfclass`. Include a themed welcome message.
+    - `clan.c:do_class()` - Add a case so immortals can assign the class via `class <player> <classname>`. Include a "You are now a ..." message.
+19. **Create help file entries** - Update `base_help.db` with the class help entry, and add the class to the CLASSES help entry.
+20. **Write the design doc** - Document everything in `game/docs/design/playerclass/classes/<class>.md`.
+21. **Update overview docs** - Add to `overview.md` and `README.md`.
 
 ### Phase 6: Upgrade Class (if applicable)
 
-21. **Add upgrade path in `upgrade.c`** - Map base class to upgrade class in the upgrade switch, and add to `is_upgrade()`.
-22. **Add to `selfclass` in `wizutil.c`** - Base classes need a selection entry; upgrade classes do not.
+22. **Add upgrade path in `upgrade.c`** - Map base class to upgrade class in the upgrade switch, and add to `is_upgrade()`.
+23. **Verify `selfclass` entry** - Base classes need a selection entry in `wizutil.c:do_classself()`; upgrade classes do not (they are reached via the upgrade system, not selfclass).
 
 ## Common Pitfalls
 
@@ -139,6 +144,14 @@ Training cost formula pattern: `(current_level + 1) * base_cost` where `base_cos
 
 Help entries in `base_help.db` support the same color codes as in-game text. Use your class colors in the help entry to give it visual identity. Keep the overall structure consistent with other class help entries: overview paragraph, ability list with short descriptions, key commands section.
 
+### Self Class Announcements
+
+Base classes need entries in both `wizutil.c:do_classself()` and `clan.c:do_class()` so players can select the class themselves and immortals can assign it. Missing these entries means:
+- Players can't select the class via `selfclass` (it won't appear in the list or won't work)
+- Immortals can't assign the class via `class <player> <classname>`
+
+Each entry should include a themed announcement message that fits the class identity. See existing classes for examples of the messaging style.
+
 ## Template: Minimal Class Skeleton
 
 A minimal new base class needs at minimum:
@@ -152,6 +165,8 @@ update.c        +1 line   (tick update call)
 fight.c         +1-3 blocks (damcap, defense, extra attacks)
 db_sql.h        +N lines  (acfg defaults)
 handler.c       +1 block  (equipment restrictions)
+wizutil.c       +1 block  (selfclass entry with themed message)
+clan.c          +1 block  (do_class entry for immortal assignment)
 base_help.db    +1 entry  (class help)
 ```
 
@@ -159,4 +174,5 @@ An upgrade class additionally needs:
 ```
 upgrade.c       +2 blocks (is_upgrade check, upgrade path mapping)
 wizutil.c       no change (upgrade classes aren't self-selectable)
+clan.c          +1 block  (do_class entry for immortal assignment)
 ```
