@@ -17,8 +17,8 @@
 /* Initialize game databases (creates game/ subdir, opens connections) */
 void db_game_init( void );
 
-/* Close game database connections */
-void db_game_close( void );
+/* Close game database connections after boot (data cached in memory) */
+void db_game_close_boot_connections( void );
 
 /* Help entries (base_help.db + live_help.db) */
 void db_game_load_helps( void );

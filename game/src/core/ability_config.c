@@ -16,6 +16,22 @@
 #include "../db/db_game.h"
 
 
+/* ================================================================
+ * Hash table for O(1) lookup by key
+ * ================================================================ */
+
+#define ACFG_HASH_SIZE    256
+
+typedef struct acfg_hash_node {
+	acfg_entry_t          *entry;
+	struct acfg_hash_node *next;
+} acfg_hash_node_t;
+
+static acfg_hash_node_t *acfg_hash_table[ACFG_HASH_SIZE];
+static bool              acfg_hash_initialized = FALSE;
+static acfg_hash_node_t *acfg_node_pool = NULL;
+
+
 /*
  * Master table of all per-ability balance constants.
  * Keys use dotted notation: <class>.<ability>.<param>
@@ -1115,15 +1131,79 @@ static acfg_entry_t acfg_table[] = {
 
 
 /* ================================================================
+ * Hash table functions
+ * ================================================================ */
+
+/*
+ * djb2 hash function, case-insensitive.
+ * Returns a hash value in range [0, ACFG_HASH_SIZE-1].
+ */
+static unsigned int acfg_hash_key( const char *key ) {
+	unsigned int hash = 5381;
+	int c;
+
+	while ( ( c = (unsigned char)*key++ ) != '\0' )
+		hash = ( ( hash << 5 ) + hash ) + LOWER( c );  /* hash * 33 + c */
+
+	return hash % ACFG_HASH_SIZE;
+}
+
+/*
+ * Initialize the hash table from acfg_table.
+ * Called once at boot after acfg_table is populated.
+ */
+static void acfg_hash_init( void ) {
+	int i, count, bucket;
+	acfg_hash_node_t *node;
+
+	if ( acfg_hash_initialized )
+		return;
+
+	/* Clear hash table */
+	for ( i = 0; i < ACFG_HASH_SIZE; i++ )
+		acfg_hash_table[i] = NULL;
+
+	/* Count entries and allocate node pool */
+	count = acfg_count();
+	if ( count > 0 ) {
+		acfg_node_pool = alloc_perm( count * sizeof( acfg_hash_node_t ) );
+	}
+
+	/* Insert each entry into hash table */
+	for ( i = 0; i < count; i++ ) {
+		node = &acfg_node_pool[i];
+		node->entry = &acfg_table[i];
+
+		bucket = acfg_hash_key( acfg_table[i].key );
+		node->next = acfg_hash_table[bucket];
+		acfg_hash_table[bucket] = node;
+	}
+
+	acfg_hash_initialized = TRUE;
+}
+
+
+/* ================================================================
  * Lookup functions
  * ================================================================ */
 
 int acfg( const char *key ) {
-	int i;
+	unsigned int bucket;
+	acfg_hash_node_t *node;
 
-	for ( i = 0; acfg_table[i].key != NULL; i++ ) {
-		if ( !str_cmp( key, acfg_table[i].key ) )
-			return acfg_table[i].value;
+	if ( acfg_hash_initialized ) {
+		bucket = acfg_hash_key( key );
+		for ( node = acfg_hash_table[bucket]; node; node = node->next ) {
+			if ( !str_cmp( key, node->entry->key ) )
+				return node->entry->value;
+		}
+	} else {
+		/* Fallback to linear search if hash not ready */
+		int i;
+		for ( i = 0; acfg_table[i].key != NULL; i++ ) {
+			if ( !str_cmp( key, acfg_table[i].key ) )
+				return acfg_table[i].value;
+		}
 	}
 
 	{
@@ -1137,12 +1217,25 @@ int acfg( const char *key ) {
 }
 
 bool acfg_set( const char *key, int value ) {
-	int i;
+	unsigned int bucket;
+	acfg_hash_node_t *node;
 
-	for ( i = 0; acfg_table[i].key != NULL; i++ ) {
-		if ( !str_cmp( key, acfg_table[i].key ) ) {
-			acfg_table[i].value = value;
-			return TRUE;
+	if ( acfg_hash_initialized ) {
+		bucket = acfg_hash_key( key );
+		for ( node = acfg_hash_table[bucket]; node; node = node->next ) {
+			if ( !str_cmp( key, node->entry->key ) ) {
+				node->entry->value = value;
+				return TRUE;
+			}
+		}
+	} else {
+		/* Fallback to linear search */
+		int i;
+		for ( i = 0; acfg_table[i].key != NULL; i++ ) {
+			if ( !str_cmp( key, acfg_table[i].key ) ) {
+				acfg_table[i].value = value;
+				return TRUE;
+			}
 		}
 	}
 
@@ -1150,11 +1243,22 @@ bool acfg_set( const char *key, int value ) {
 }
 
 acfg_entry_t *acfg_find( const char *key ) {
-	int i;
+	unsigned int bucket;
+	acfg_hash_node_t *node;
 
-	for ( i = 0; acfg_table[i].key != NULL; i++ ) {
-		if ( !str_cmp( key, acfg_table[i].key ) )
-			return &acfg_table[i];
+	if ( acfg_hash_initialized ) {
+		bucket = acfg_hash_key( key );
+		for ( node = acfg_hash_table[bucket]; node; node = node->next ) {
+			if ( !str_cmp( key, node->entry->key ) )
+				return node->entry;
+		}
+	} else {
+		/* Fallback to linear search */
+		int i;
+		for ( i = 0; acfg_table[i].key != NULL; i++ ) {
+			if ( !str_cmp( key, acfg_table[i].key ) )
+				return &acfg_table[i];
+		}
 	}
 
 	return NULL;
@@ -1188,12 +1292,15 @@ int acfg_count( void ) {
 void load_ability_config( void ) {
 	char buf[MAX_STRING_LENGTH];
 
+	/* Initialize hash table for O(1) lookup */
+	acfg_hash_init();
+
 	/* Defaults are already baked into the table initializer.
 	 * Just load overrides from the DB. */
 	db_game_load_ability_config();
 
 	snprintf( buf, sizeof( buf ),
-		"  Ability config: %d entries registered", acfg_count() );
+		"  Ability config: %d entries registered (hash table built)", acfg_count() );
 	log_string( buf );
 }
 

@@ -412,10 +412,6 @@ int main( int argc, char **argv ) {
 	WSACleanup();
 #endif
 
-	/*
-	 * Clean up database connections and shut down.
-	 */
-	db_game_close();
 	log_string( "Normal termination of game." );
 	exit( 0 );
 	return 0;

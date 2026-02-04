@@ -222,9 +222,11 @@ void db_game_init( void ) {
 
 
 /*
- * Close game database connections.
+ * Close database connections after boot loading is complete.
+ * All data has been cached in memory; connections are no longer needed.
+ * Called from db.c after all db_game_load_* functions have run.
  */
-void db_game_close( void ) {
+void db_game_close_boot_connections( void ) {
 	if ( base_help_db ) {
 		sqlite3_close( base_help_db );
 		base_help_db = NULL;
@@ -236,6 +238,86 @@ void db_game_close( void ) {
 	if ( game_db ) {
 		sqlite3_close( game_db );
 		game_db = NULL;
+	}
+	log_string( "  Game database connections closed (data cached in memory)." );
+}
+
+
+/*
+ * Helper: Open game.db for a write or query operation.
+ * Returns NULL on failure.
+ */
+static sqlite3 *db_game_open_for_write( void ) {
+	char path[MUD_PATH_MAX];
+	sqlite3 *db = NULL;
+
+	if ( mud_db_game_dir[0] == '\0' )
+		return NULL;
+
+	if ( snprintf( path, sizeof( path ), "%s%sgame.db",
+			mud_db_game_dir, PATH_SEPARATOR ) >= (int)sizeof( path ) ) {
+		bug( "db_game_open_for_write: path truncated.", 0 );
+		return NULL;
+	}
+
+	if ( sqlite3_open( path, &db ) != SQLITE_OK ) {
+		bug( "db_game_open_for_write: cannot open game.db", 0 );
+		if ( db ) sqlite3_close( db );
+		return NULL;
+	}
+
+	return db;
+}
+
+/*
+ * Helper: Open live_help.db for a write operation.
+ * Returns NULL on failure.
+ */
+static sqlite3 *db_game_open_live_help_for_write( void ) {
+	char path[MUD_PATH_MAX];
+	sqlite3 *db = NULL;
+
+	if ( mud_db_game_dir[0] == '\0' )
+		return NULL;
+
+	if ( snprintf( path, sizeof( path ), "%s%slive_help.db",
+			mud_db_game_dir, PATH_SEPARATOR ) >= (int)sizeof( path ) ) {
+		bug( "db_game_open_live_help_for_write: path truncated.", 0 );
+		return NULL;
+	}
+
+	if ( sqlite3_open( path, &db ) != SQLITE_OK ) {
+		bug( "db_game_open_live_help_for_write: cannot open live_help.db", 0 );
+		if ( db ) sqlite3_close( db );
+		return NULL;
+	}
+
+	return db;
+}
+
+/*
+ * Helper: Open help databases for a read operation (used by db_game_reload_help).
+ * Opens both base_help.db (read-only) and live_help.db (read-write).
+ */
+static void db_game_open_help_dbs_for_read( sqlite3 **base_out, sqlite3 **live_out ) {
+	char path[MUD_PATH_MAX];
+
+	*base_out = NULL;
+	*live_out = NULL;
+
+	if ( mud_db_game_dir[0] == '\0' )
+		return;
+
+	/* Open base_help.db read-only */
+	if ( snprintf( path, sizeof( path ), "%s%sbase_help.db",
+			mud_db_game_dir, PATH_SEPARATOR ) < (int)sizeof( path ) ) {
+		sqlite3_open_v2( path, base_out, SQLITE_OPEN_READONLY, NULL );
+	}
+
+	/* Open live_help.db */
+	if ( snprintf( path, sizeof( path ), "%s%slive_help.db",
+			mud_db_game_dir, PATH_SEPARATOR ) < (int)sizeof( path ) ) {
+		sqlite3_open( path, live_out );
 	}
 }
 
@@ -307,18 +389,21 @@ void db_game_load_helps( void ) {
  * base_help.db is never modified at runtime.
  */
 void db_game_save_helps( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT INTO helps (level, keyword, text) VALUES (?,?,?)";
 	HELP_DATA *pHelp;
 
-	if ( !live_help_db )
+	db = db_game_open_live_help_for_write();
+	if ( !db )
 		return;
 
-	db_begin( live_help_db );
-	sqlite3_exec( live_help_db, "DELETE FROM helps", NULL, NULL, NULL );
+	db_begin( db );
+	sqlite3_exec( db, "DELETE FROM helps", NULL, NULL, NULL );
 
-	if ( sqlite3_prepare_v2( live_help_db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
-		db_rollback( live_help_db );
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		db_rollback( db );
+		sqlite3_close( db );
 		return;
 	}
 
@@ -331,7 +416,8 @@ void db_game_save_helps( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	db_commit( live_help_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -341,12 +427,18 @@ void db_game_save_helps( void ) {
  * Returns TRUE if the entry was found and loaded.
  */
 bool db_game_reload_help( const char *keyword ) {
+	sqlite3 *base_db, *live_db;
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT level, keyword, text FROM helps WHERE keyword=?";
-	sqlite3 *dbs[] = { live_help_db, base_help_db };
+	sqlite3 *dbs[2];
 	int i;
+	bool found = FALSE;
 
-	for ( i = 0; i < 2; i++ ) {
+	db_game_open_help_dbs_for_read( &base_db, &live_db );
+	dbs[0] = live_db;   /* Check live first */
+	dbs[1] = base_db;
+
+	for ( i = 0; i < 2 && !found; i++ ) {
 		if ( !dbs[i] )
 			continue;
 
@@ -368,14 +460,16 @@ bool db_game_reload_help( const char *keyword ) {
 				help_greeting = pHelp->text;
 
 			add_help( pHelp );
-			sqlite3_finalize( stmt );
-			return TRUE;
+			found = TRUE;
 		}
 
 		sqlite3_finalize( stmt );
 	}
 
-	return FALSE;
+	if ( base_db ) sqlite3_close( base_db );
+	if ( live_db ) sqlite3_close( live_db );
+
+	return found;
 }
 
 
@@ -429,17 +523,21 @@ void db_game_load_gameconfig( void ) {
 }
 
 void db_game_save_gameconfig( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO gameconfig (key, value) VALUES (?,?)";
 	char buf[64];
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
 		return;
+	}
 
-	db_begin( game_db );
+	db_begin( db );
 
 #define SAVE_INT( k, v ) \
 	sqlite3_reset( stmt ); \
@@ -468,7 +566,8 @@ void db_game_save_gameconfig( void ) {
 #undef SAVE_STR
 
 	sqlite3_finalize( stmt );
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -499,17 +598,21 @@ void db_game_load_topboard( void ) {
 }
 
 void db_game_save_topboard( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO topboard (rank, name, pkscore) VALUES (?,?,?)";
 	int i;
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
 		return;
+	}
 
-	db_begin( game_db );
+	db_begin( db );
 
 	for ( i = 1; i <= MAX_TOP_PLAYERS; i++ ) {
 		sqlite3_reset( stmt );
@@ -520,7 +623,8 @@ void db_game_save_topboard( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -578,16 +682,20 @@ void db_game_load_leaderboard( void ) {
 }
 
 void db_game_save_leaderboard( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO leaderboard (category, name, value) VALUES (?,?,?)";
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
 		return;
+	}
 
-	db_begin( game_db );
+	db_begin( db );
 
 #define SAVE_LB( cat, n, v ) \
 	sqlite3_reset( stmt ); \
@@ -607,7 +715,8 @@ void db_game_save_leaderboard( void ) {
 #undef SAVE_LB
 
 	sqlite3_finalize( stmt );
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -652,6 +761,7 @@ void db_game_load_kingdoms( void ) {
 }
 
 void db_game_save_kingdoms( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO kingdoms "
 		"(id, name, whoname, leader, general, kills, deaths, qps, "
@@ -659,13 +769,16 @@ void db_game_save_kingdoms( void ) {
 		"VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 	int i;
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
 		return;
+	}
 
-	db_begin( game_db );
+	db_begin( db );
 
 	for ( i = 1; i <= MAX_KINGDOM; i++ ) {
 		sqlite3_reset( stmt );
@@ -685,7 +798,8 @@ void db_game_save_kingdoms( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -742,16 +856,18 @@ void db_game_load_notes( int board_idx ) {
 }
 
 void db_game_save_board_notes( int board_idx ) {
+	sqlite3 *db;
 	sqlite3_stmt *del_stmt, *ins_stmt;
 	NOTE_DATA *note;
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	db_begin( game_db );
+	db_begin( db );
 
 	/* Delete all notes for this board */
-	if ( sqlite3_prepare_v2( game_db,
+	if ( sqlite3_prepare_v2( db,
 			"DELETE FROM notes WHERE board_idx=?",
 			-1, &del_stmt, NULL ) == SQLITE_OK ) {
 		sqlite3_bind_int( del_stmt, 1, board_idx );
@@ -760,11 +876,12 @@ void db_game_save_board_notes( int board_idx ) {
 	}
 
 	/* Re-insert all current notes */
-	if ( sqlite3_prepare_v2( game_db,
+	if ( sqlite3_prepare_v2( db,
 			"INSERT INTO notes (board_idx, sender, date, date_stamp, expire, "
 			"to_list, subject, text) VALUES (?,?,?,?,?,?,?,?)",
 			-1, &ins_stmt, NULL ) != SQLITE_OK ) {
-		db_rollback( game_db );
+		db_rollback( db );
+		sqlite3_close( db );
 		return;
 	}
 
@@ -782,20 +899,25 @@ void db_game_save_board_notes( int board_idx ) {
 	}
 
 	sqlite3_finalize( ins_stmt );
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 void db_game_append_note( int board_idx, NOTE_DATA *note ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql =
 		"INSERT INTO notes (board_idx, sender, date, date_stamp, expire, "
 		"to_list, subject, text) VALUES (?,?,?,?,?,?,?,?)";
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
 		return;
+	}
 
 	sqlite3_bind_int( stmt, 1, board_idx );
 	sqlite3_bind_text( stmt, 2, note->sender, -1, SQLITE_TRANSIENT );
@@ -807,6 +929,7 @@ void db_game_append_note( int board_idx, NOTE_DATA *note ) {
 	sqlite3_bind_text( stmt, 8, note->text, -1, SQLITE_TRANSIENT );
 	sqlite3_step( stmt );
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 }
 
 
@@ -815,15 +938,19 @@ void db_game_append_note( int board_idx, NOTE_DATA *note ) {
  * Append-only log of player bug reports and system bugs.
  */
 void db_game_append_bug( int room_vnum, const char *player, const char *message ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql =
 		"INSERT INTO bugs (room_vnum, player, message, timestamp) VALUES (?,?,?,?)";
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
 		return;
+	}
 
 	sqlite3_bind_int( stmt, 1, room_vnum );
 	sqlite3_bind_text( stmt, 2, player, -1, SQLITE_TRANSIENT );
@@ -831,6 +958,7 @@ void db_game_append_bug( int room_vnum, const char *player, const char *message 
 	sqlite3_bind_int64( stmt, 4, (sqlite3_int64)current_time );
 	sqlite3_step( stmt );
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 }
 
 
@@ -862,19 +990,22 @@ void db_game_load_bans( void ) {
 }
 
 void db_game_save_bans( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	BAN_DATA *p;
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	db_begin( game_db );
-	sqlite3_exec( game_db, "DELETE FROM bans", NULL, NULL, NULL );
+	db_begin( db );
+	sqlite3_exec( db, "DELETE FROM bans", NULL, NULL, NULL );
 
-	if ( sqlite3_prepare_v2( game_db,
+	if ( sqlite3_prepare_v2( db,
 			"INSERT INTO bans (name, reason) VALUES (?,?)",
 			-1, &stmt, NULL ) != SQLITE_OK ) {
-		db_rollback( game_db );
+		db_rollback( db );
+		sqlite3_close( db );
 		return;
 	}
 
@@ -886,7 +1017,8 @@ void db_game_save_bans( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -930,21 +1062,24 @@ void db_game_load_disabled( void ) {
 }
 
 void db_game_save_disabled( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	DISABLED_DATA *p;
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	db_begin( game_db );
-	sqlite3_exec( game_db, "DELETE FROM disabled_commands", NULL, NULL, NULL );
+	db_begin( db );
+	sqlite3_exec( db, "DELETE FROM disabled_commands", NULL, NULL, NULL );
 
 	if ( disabled_first ) {
-		if ( sqlite3_prepare_v2( game_db,
+		if ( sqlite3_prepare_v2( db,
 				"INSERT INTO disabled_commands (command_name, level, disabled_by) "
 				"VALUES (?,?,?)",
 				-1, &stmt, NULL ) != SQLITE_OK ) {
-			db_rollback( game_db );
+			db_rollback( db );
+			sqlite3_close( db );
 			return;
 		}
 
@@ -959,7 +1094,8 @@ void db_game_save_disabled( void ) {
 		sqlite3_finalize( stmt );
 	}
 
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -1003,18 +1139,22 @@ void db_game_load_balance( void ) {
 }
 
 void db_game_save_balance( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO balance_config (key, value) VALUES (?,?)";
 	char buf[64];
 	int i;
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
 		return;
+	}
 
-	db_begin( game_db );
+	db_begin( db );
 
 	for ( i = 0; balance_map[i].key != NULL; i++ ) {
 		sqlite3_reset( stmt );
@@ -1025,7 +1165,8 @@ void db_game_save_balance( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -1064,17 +1205,21 @@ void db_game_load_ability_config( void ) {
 }
 
 void db_game_save_ability_config( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO ability_config (key, value) VALUES (?,?)";
 	int i, total;
 
-	if ( !game_db )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
 		return;
+	}
 
-	db_begin( game_db );
+	db_begin( db );
 
 	/* Only save values that differ from defaults */
 	total = acfg_count();
@@ -1089,7 +1234,8 @@ void db_game_save_ability_config( void ) {
 	}
 
 	sqlite3_finalize( stmt );
-	db_commit( game_db );
+	db_commit( db );
+	sqlite3_close( db );
 }
 
 
@@ -1099,15 +1245,22 @@ void db_game_save_ability_config( void ) {
  * This allows forks to configure their own admins without modifying code.
  */
 bool db_game_is_super_admin( const char *name ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT 1 FROM super_admins WHERE name = ? LIMIT 1";
 	bool found = FALSE;
 
-	if ( !game_db || !name || !name[0] )
+	if ( !name || !name[0] )
 		return FALSE;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	db = db_game_open_for_write();
+	if ( !db )
 		return FALSE;
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
+		return FALSE;
+	}
 
 	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
 
@@ -1115,51 +1268,71 @@ bool db_game_is_super_admin( const char *name ) {
 		found = TRUE;
 
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 	return found;
 }
 
 void db_game_add_super_admin( const char *name ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR IGNORE INTO super_admins (name) VALUES (?)";
 
-	if ( !game_db || !name || !name[0] )
+	if ( !name || !name[0] )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
+		return;
+	}
 
 	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
 	sqlite3_step( stmt );
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 }
 
 void db_game_remove_super_admin( const char *name ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "DELETE FROM super_admins WHERE name = ?";
 
-	if ( !game_db || !name || !name[0] )
+	if ( !name || !name[0] )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
+		return;
+	}
 
 	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
 	sqlite3_step( stmt );
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 }
 
 void db_game_list_super_admins( CHAR_DATA *ch ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT name FROM super_admins ORDER BY name";
 	int count = 0;
 
-	if ( !game_db ) {
+	db = db_game_open_for_write();
+	if ( !db ) {
 		send_to_char( "Database not available.\n\r", ch );
 		return;
 	}
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
 		send_to_char( "Database error.\n\r", ch );
+		sqlite3_close( db );
 		return;
 	}
 
@@ -1173,6 +1346,7 @@ void db_game_list_super_admins( CHAR_DATA *ch ) {
 	}
 
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 
 	if ( count == 0 )
 		send_to_char( "  (none)\n\r", ch );
@@ -1453,16 +1627,23 @@ AUDIO_ENTRY *audio_config_find( const char *category, const char *trigger_key ) 
  * Save a single audio config entry to the database.
  */
 static void audio_config_save_entry( AUDIO_ENTRY *ae ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "UPDATE audio_config SET filename=?, volume=?, priority=?, "
 		"loops=?, media_type=?, tag=?, caption=?, use_key=?, use_continue=? "
 		"WHERE category=? AND trigger_key=?";
 
-	if ( !game_db || !ae )
+	if ( !ae )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
+		return;
+	}
 
 	sqlite3_bind_text( stmt, 1, ae->filename, -1, SQLITE_TRANSIENT );
 	sqlite3_bind_int( stmt, 2, ae->volume );
@@ -1481,6 +1662,7 @@ static void audio_config_save_entry( AUDIO_ENTRY *ae ) {
 
 	sqlite3_step( stmt );
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 }
 
 /*
@@ -1674,13 +1856,11 @@ void do_audioconfig( CHAR_DATA *ch, char *argument ) {
  */
 
 void db_game_load_pretitles( void ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT immortal_name, pretitle, set_by, set_date "
 		"FROM immortal_pretitles ORDER BY immortal_name";
 	int i, count = 0;
-
-	if ( !game_db )
-		return;
 
 	/* Free existing entries */
 	if ( pretitle_entries != NULL ) {
@@ -1697,8 +1877,15 @@ void db_game_load_pretitles( void ) {
 		pretitle_count = 0;
 	}
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	/* Use global game_db if available (during boot), otherwise open fresh */
+	db = game_db ? game_db : db_game_open_for_write();
+	if ( !db )
 		return;
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		if ( !game_db ) sqlite3_close( db );
+		return;
+	}
 
 	/* Count rows first */
 	while ( sqlite3_step( stmt ) == SQLITE_ROW )
@@ -1707,6 +1894,7 @@ void db_game_load_pretitles( void ) {
 
 	if ( count == 0 ) {
 		sqlite3_finalize( stmt );
+		if ( !game_db ) sqlite3_close( db );
 		return;
 	}
 
@@ -1726,6 +1914,7 @@ void db_game_load_pretitles( void ) {
 	}
 
 	sqlite3_finalize( stmt );
+	if ( !game_db ) sqlite3_close( db );
 }
 
 const char *db_game_get_pretitle( const char *name ) {
@@ -1743,15 +1932,22 @@ const char *db_game_get_pretitle( const char *name ) {
 }
 
 void db_game_set_pretitle( const char *name, const char *pretitle, const char *set_by ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO immortal_pretitles "
 		"(immortal_name, pretitle, set_by, set_date) VALUES (?,?,?,?)";
 
-	if ( !game_db || !name || !name[0] || !pretitle || !pretitle[0] )
+	if ( !name || !name[0] || !pretitle || !pretitle[0] )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
+		return;
+	}
 
 	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
 	sqlite3_bind_text( stmt, 2, pretitle, -1, SQLITE_TRANSIENT );
@@ -1759,24 +1955,33 @@ void db_game_set_pretitle( const char *name, const char *pretitle, const char *s
 	sqlite3_bind_int64( stmt, 4, (sqlite3_int64)current_time );
 	sqlite3_step( stmt );
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 
 	/* Reload the cache */
 	db_game_load_pretitles();
 }
 
 void db_game_delete_pretitle( const char *name ) {
+	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	const char *sql = "DELETE FROM immortal_pretitles WHERE immortal_name = ?";
 
-	if ( !game_db || !name || !name[0] )
+	if ( !name || !name[0] )
 		return;
 
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+	db = db_game_open_for_write();
+	if ( !db )
 		return;
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
+		return;
+	}
 
 	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
 	sqlite3_step( stmt );
 	sqlite3_finalize( stmt );
+	sqlite3_close( db );
 
 	/* Reload the cache */
 	db_game_load_pretitles();
@@ -1786,11 +1991,7 @@ void db_game_list_pretitles( CHAR_DATA *ch ) {
 	char buf[MAX_STRING_LENGTH];
 	int i;
 
-	if ( !game_db ) {
-		send_to_char( "Database not available.\n\r", ch );
-		return;
-	}
-
+	/* Uses in-memory cache, no DB connection needed */
 	send_to_char( "#GImmortal pretitles:#n\n\r", ch );
 
 	if ( pretitle_count == 0 ) {
