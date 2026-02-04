@@ -939,7 +939,7 @@ class BugsPanel(ttk.Frame):
             tree_frame,
             columns=('id', 'player', 'room', 'date'),
             show='headings',
-            selectmode='browse'
+            selectmode='extended'
         )
         self.tree.heading('id', text='ID')
         self.tree.heading('player', text='Player')
@@ -977,6 +977,13 @@ class BugsPanel(ttk.Frame):
         btn_frame.pack(fill=tk.X, padx=8, pady=4)
         ttk.Button(btn_frame, text="Delete", command=self._delete).pack(side=tk.LEFT)
         ttk.Button(btn_frame, text="Refresh", command=self._load_entries).pack(side=tk.LEFT, padx=(4, 0))
+
+        # Bulk selection buttons at bottom of left panel
+        bulk_frame = ttk.Frame(left_frame)
+        bulk_frame.pack(fill=tk.X, padx=2, pady=4)
+        ttk.Button(bulk_frame, text="Select All", command=self._select_all).pack(side=tk.LEFT)
+        ttk.Button(bulk_frame, text="Deselect All", command=self._deselect_all).pack(side=tk.LEFT, padx=(4, 0))
+        ttk.Button(bulk_frame, text="Delete Selected", command=self._delete_selected).pack(side=tk.LEFT, padx=(4, 0))
 
         # Store all entries for filtering
         self._all_entries = []
@@ -1052,5 +1059,382 @@ class BugsPanel(ttk.Frame):
         self._load_entries()
         self.on_status("Bug report deleted")
 
+    def _select_all(self):
+        """Select all visible bugs in the tree."""
+        children = self.tree.get_children()
+        if children:
+            self.tree.selection_set(children)
+            self.on_status(f"Selected {len(children)} bug reports")
+
+    def _deselect_all(self):
+        """Deselect all bugs."""
+        self.tree.selection_remove(self.tree.selection())
+        self.on_status("Selection cleared")
+
+    def _delete_selected(self):
+        """Delete all selected bug reports."""
+        selection = self.tree.selection()
+        if not selection:
+            messagebox.showinfo("Info", "No bugs selected.")
+            return
+
+        count = len(selection)
+        if not messagebox.askyesno("Confirm Bulk Delete",
+                                   f"Delete {count} bug report(s)?\n\nThis cannot be undone."):
+            return
+
+        # Delete all selected bugs
+        ids_to_delete = [int(iid) for iid in selection]
+        deleted = self.repository.delete_many(ids_to_delete)
+
+        self.current_id = None
+        self.header_label.configure(text="Select a bug report to view", foreground='gray')
+        self.bug_text.configure(state='normal')
+        self.bug_text.delete('1.0', tk.END)
+        self.bug_text.configure(state='disabled')
+        self._load_entries()
+        self.on_status(f"Deleted {deleted} bug reports")
+
     def check_unsaved(self) -> bool:
+        return True
+
+
+class SuperAdminsPanel(ttk.Frame):
+    """Editor panel for super admins."""
+
+    def __init__(
+        self,
+        parent,
+        repository,
+        on_status: Optional[Callable[[str], None]] = None,
+        **kwargs
+    ):
+        super().__init__(parent, **kwargs)
+
+        self.repository = repository
+        self.on_status = on_status or (lambda msg: None)
+
+        self._build_ui()
+        self._load_entries()
+
+    def _build_ui(self):
+        """Build the panel UI."""
+        # Description
+        desc_label = ttk.Label(
+            self,
+            text="Super Admins have elevated privileges and bypass certain restrictions.\n"
+                 "Add player names here to grant super admin status.",
+            foreground='gray'
+        )
+        desc_label.pack(anchor=tk.W, padx=8, pady=(8, 4))
+
+        paned = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        # Left: admin list
+        left_frame = ttk.Frame(paned)
+        paned.add(left_frame, weight=1)
+
+        tree_frame = ttk.Frame(left_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=('name',),
+            show='headings',
+            selectmode='browse'
+        )
+        self.tree.heading('name', text='Player Name')
+        self.tree.column('name', width=200)
+
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.count_var = tk.StringVar(value="0 super admins")
+        ttk.Label(left_frame, textvariable=self.count_var).pack(anchor=tk.W, padx=4)
+
+        # Buttons
+        btn_frame = ttk.Frame(left_frame)
+        btn_frame.pack(fill=tk.X, padx=4, pady=8)
+        ttk.Button(btn_frame, text="Add", command=self._add).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="Remove", command=self._remove).pack(side=tk.LEFT)
+
+    def _load_entries(self):
+        """Load all super admins."""
+        entries = self.repository.list_all()
+
+        self.tree.delete(*self.tree.get_children())
+        for a in entries:
+            self.tree.insert('', tk.END, iid=a['name'], values=(a['name'],))
+
+        self.count_var.set(f"{len(entries)} super admins")
+        self.on_status(f"Loaded {len(entries)} super admins")
+
+    def _add(self):
+        """Add a new super admin."""
+        name = simpledialog.askstring("Add Super Admin", "Enter player name:", parent=self)
+        if not name:
+            return
+
+        name = name.strip()
+        if not name:
+            return
+
+        if self.repository.exists(name):
+            messagebox.showinfo("Info", f"'{name}' is already a super admin.")
+            return
+
+        self.repository.insert({'name': name})
+        self._load_entries()
+        self.on_status(f"Added super admin: {name}")
+
+    def _remove(self):
+        """Remove selected super admin."""
+        selection = self.tree.selection()
+        if not selection:
+            messagebox.showinfo("Info", "Select a super admin to remove.")
+            return
+
+        name = selection[0]
+        if not messagebox.askyesno("Confirm", f"Remove '{name}' from super admins?"):
+            return
+
+        self.repository.delete(name)
+        self._load_entries()
+        self.on_status(f"Removed super admin: {name}")
+
+    def check_unsaved(self) -> bool:
+        return True
+
+
+class ImmortalPretitlesPanel(ttk.Frame):
+    """Editor panel for immortal pretitles (displayed in who list)."""
+
+    def __init__(
+        self,
+        parent,
+        repository,
+        on_status: Optional[Callable[[str], None]] = None,
+        **kwargs
+    ):
+        super().__init__(parent, **kwargs)
+
+        self.repository = repository
+        self.on_status = on_status or (lambda msg: None)
+
+        self.current_name: Optional[str] = None
+        self.unsaved = False
+
+        self._build_ui()
+        self._load_entries()
+
+    def _build_ui(self):
+        """Build the panel UI."""
+        # Description
+        desc_label = ttk.Label(
+            self,
+            text="Immortal Pretitles are displayed before immortal names in the WHO list.\n"
+                 "Example: '[Builder] Gandalf' or '[Head Admin] Merlin'",
+            foreground='gray'
+        )
+        desc_label.pack(anchor=tk.W, padx=8, pady=(8, 4))
+
+        paned = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        # Left: pretitle list
+        left_frame = ttk.Frame(paned)
+        paned.add(left_frame, weight=1)
+
+        tree_frame = ttk.Frame(left_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=('name', 'pretitle', 'set_by'),
+            show='headings',
+            selectmode='browse'
+        )
+        self.tree.heading('name', text='Immortal')
+        self.tree.heading('pretitle', text='Pretitle')
+        self.tree.heading('set_by', text='Set By')
+        self.tree.column('name', width=100)
+        self.tree.column('pretitle', width=150)
+        self.tree.column('set_by', width=100)
+
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.tree.bind('<<TreeviewSelect>>', self._on_select)
+
+        self.count_var = tk.StringVar(value="0 pretitles")
+        ttk.Label(left_frame, textvariable=self.count_var).pack(anchor=tk.W, padx=4)
+
+        # Right: editor
+        right_frame = ttk.LabelFrame(paned, text="Edit Pretitle")
+        paned.add(right_frame, weight=1)
+
+        # Immortal name
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Immortal:", width=12).pack(side=tk.LEFT)
+        self.name_label = ttk.Label(row, text="-", font=('Consolas', 10, 'bold'))
+        self.name_label.pack(side=tk.LEFT)
+
+        # Pretitle
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Pretitle:", width=12).pack(side=tk.LEFT)
+        self.pretitle_var = tk.StringVar()
+        self.pretitle_var.trace_add('write', lambda *_: self._mark_unsaved())
+        ttk.Entry(row, textvariable=self.pretitle_var, width=30).pack(side=tk.LEFT)
+
+        # Set by (read-only info)
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Set By:", width=12).pack(side=tk.LEFT)
+        self.setby_label = ttk.Label(row, text="-", foreground='gray')
+        self.setby_label.pack(side=tk.LEFT)
+
+        # Set date (read-only info)
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Set Date:", width=12).pack(side=tk.LEFT)
+        self.setdate_label = ttk.Label(row, text="-", foreground='gray')
+        self.setdate_label.pack(side=tk.LEFT)
+
+        # Buttons
+        btn_frame = ttk.Frame(right_frame)
+        btn_frame.pack(fill=tk.X, padx=8, pady=8)
+        ttk.Button(btn_frame, text="Save", command=self._save).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="New", command=self._new).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="Delete", command=self._delete).pack(side=tk.LEFT)
+
+    def _load_entries(self):
+        """Load all immortal pretitles."""
+        entries = self.repository.list_all()
+
+        self.tree.delete(*self.tree.get_children())
+        for p in entries:
+            self.tree.insert('', tk.END, iid=p['immortal_name'],
+                           values=(p['immortal_name'], p['pretitle'], p['set_by']))
+
+        self.count_var.set(f"{len(entries)} pretitles")
+        self.on_status(f"Loaded {len(entries)} immortal pretitles")
+
+    def _on_select(self, event):
+        """Handle selection."""
+        if self.unsaved:
+            if not messagebox.askyesno("Unsaved", "Discard changes?"):
+                if self.current_name:
+                    self.tree.selection_set(self.current_name)
+                return
+
+        selection = self.tree.selection()
+        if selection:
+            self._load_entry(selection[0])
+
+    def _load_entry(self, name: str):
+        """Load a pretitle into the editor."""
+        p = self.repository.get_by_id(name)
+        if not p:
+            return
+
+        self.current_name = name
+        self.name_label.configure(text=name)
+        self.pretitle_var.set(p.get('pretitle', ''))
+        self.setby_label.configure(text=p.get('set_by', '-'))
+
+        set_date = p.get('set_date', 0)
+        if set_date:
+            date_str = datetime.fromtimestamp(set_date).strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            date_str = '-'
+        self.setdate_label.configure(text=date_str)
+
+        self.unsaved = False
+
+    def _mark_unsaved(self):
+        self.unsaved = True
+
+    def _save(self):
+        """Save current pretitle."""
+        if self.current_name is None:
+            return
+
+        pretitle = self.pretitle_var.get().strip()
+        if not pretitle:
+            messagebox.showerror("Error", "Pretitle cannot be empty.")
+            return
+
+        data = {
+            'pretitle': pretitle,
+            'set_by': 'Editor',
+            'set_date': int(datetime.now().timestamp()),
+        }
+
+        self.repository.update(self.current_name, data)
+        self.unsaved = False
+        self._load_entries()
+        self.tree.selection_set(self.current_name)
+        self.on_status(f"Saved pretitle for {self.current_name}")
+
+    def _new(self):
+        """Create a new pretitle."""
+        name = simpledialog.askstring("New Pretitle", "Enter immortal name:", parent=self)
+        if not name:
+            return
+
+        name = name.strip()
+        if not name:
+            return
+
+        if self.repository.get_by_id(name):
+            messagebox.showinfo("Info", f"Pretitle for '{name}' already exists. Select it to edit.")
+            return
+
+        pretitle = simpledialog.askstring("New Pretitle", "Enter pretitle text:", parent=self)
+        if not pretitle:
+            return
+
+        self.repository.insert({
+            'immortal_name': name,
+            'pretitle': pretitle.strip(),
+            'set_by': 'Editor',
+            'set_date': int(datetime.now().timestamp()),
+        })
+        self._load_entries()
+        self.tree.selection_set(name)
+        self._load_entry(name)
+        self.on_status(f"Added pretitle for {name}")
+
+    def _delete(self):
+        """Delete current pretitle."""
+        if self.current_name is None:
+            return
+
+        if not messagebox.askyesno("Confirm", f"Delete pretitle for '{self.current_name}'?"):
+            return
+
+        self.repository.delete(self.current_name)
+        self.current_name = None
+        self._clear_editor()
+        self._load_entries()
+        self.on_status("Pretitle deleted")
+
+    def _clear_editor(self):
+        self.current_name = None
+        self.name_label.configure(text="-")
+        self.pretitle_var.set("")
+        self.setby_label.configure(text="-")
+        self.setdate_label.configure(text="-")
+        self.unsaved = False
+
+    def check_unsaved(self) -> bool:
+        if self.unsaved:
+            return messagebox.askyesno("Unsaved", "Discard changes?")
         return True

@@ -132,6 +132,27 @@ class BaseRepository:
         self.conn.commit()
         return cursor.rowcount > 0
 
+    def delete_many(self, id_values: List[Any]) -> int:
+        """
+        Delete multiple rows by primary key.
+
+        Args:
+            id_values: List of primary key values to delete
+
+        Returns:
+            Number of rows deleted
+        """
+        if not id_values:
+            return 0
+
+        placeholders = ', '.join('?' for _ in id_values)
+        cursor = self.conn.execute(
+            f"DELETE FROM {self.table_name} WHERE {self.primary_key} IN ({placeholders})",
+            tuple(id_values)
+        )
+        self.conn.commit()
+        return cursor.rowcount
+
     def count(self) -> int:
         """Return the total number of rows."""
         row = self.conn.execute(f"SELECT COUNT(*) FROM {self.table_name}").fetchone()
@@ -815,3 +836,41 @@ class AudioConfigRepository(BaseRepository):
             term,
             columns or ['category', 'trigger_key', 'filename', 'caption']
         )
+
+
+class SuperAdminsRepository(BaseRepository):
+    """Repository for super_admins table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'super_admins', 'name')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all super admins ordered by name."""
+        return super().list_all(order_by or 'name')
+
+    def exists(self, name: str) -> bool:
+        """Check if a name is a super admin."""
+        row = self.conn.execute(
+            "SELECT 1 FROM super_admins WHERE name = ? COLLATE NOCASE",
+            (name,)
+        ).fetchone()
+        return row is not None
+
+
+class ImmortalPretitlesRepository(BaseRepository):
+    """Repository for immortal_pretitles table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'immortal_pretitles', 'immortal_name')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all immortal pretitles ordered by name."""
+        return super().list_all(order_by or 'immortal_name')
+
+    def get_by_name(self, name: str) -> Optional[Dict]:
+        """Get pretitle for an immortal by name (case-insensitive)."""
+        row = self.conn.execute(
+            "SELECT * FROM immortal_pretitles WHERE immortal_name = ? COLLATE NOCASE",
+            (name,)
+        ).fetchone()
+        return dict(row) if row else None

@@ -17,6 +17,7 @@ from .db.repository import (
     AudioConfigRepository,
     KingdomsRepository, BansRepository, DisabledCommandsRepository,
     TopBoardRepository, LeaderboardRepository, NotesRepository, BugsRepository,
+    SuperAdminsRepository, ImmortalPretitlesRepository,
     PlayerRepository
 )
 from .nav.tree import NavigationTree
@@ -25,7 +26,8 @@ from .panels import (
     ResetEditorPanel, AreaInfoPanel, ShopEditorPanel,
     GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel, AudioConfigPanel,
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
-    LeaderboardPanel, NotesPanel, BugsPanel, PlayerEditorPanel
+    LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
+    PlayerEditorPanel
 )
 
 
@@ -369,6 +371,22 @@ class MudEditorApp:
                     on_status=self._set_status
                 )
 
+            elif entity_type == 'super_admins':
+                repository = SuperAdminsRepository(conn)
+                return SuperAdminsPanel(
+                    self.notebook,
+                    repository,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'immortal_pretitles':
+                repository = ImmortalPretitlesRepository(conn)
+                return ImmortalPretitlesPanel(
+                    self.notebook,
+                    repository,
+                    on_status=self._set_status
+                )
+
             else:
                 return self._create_placeholder_panel(
                     f"Game Config: {entity_type}",
@@ -423,6 +441,8 @@ class MudEditorApp:
                 'bugs': 'Bug Reports',
                 'bans': 'Bans',
                 'disabled_commands': 'Disabled Cmds',
+                'super_admins': 'Super Admins',
+                'immortal_pretitles': 'Imm Pretitles',
             }
             return names.get(entity_type, entity_type.title())
         elif category == 'player':

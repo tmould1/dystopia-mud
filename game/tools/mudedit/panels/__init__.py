@@ -12,7 +12,8 @@ from .ability_config import AbilityConfigPanel
 from .audio_config import AudioConfigPanel
 from .game_panels import (
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
-    LeaderboardPanel, NotesPanel, BugsPanel
+    LeaderboardPanel, NotesPanel, BugsPanel,
+    SuperAdminsPanel, ImmortalPretitlesPanel
 )
 from .player import PlayerEditorPanel
 
@@ -34,5 +35,7 @@ __all__ = [
     'LeaderboardPanel',
     'NotesPanel',
     'BugsPanel',
+    'SuperAdminsPanel',
+    'ImmortalPretitlesPanel',
     'PlayerEditorPanel',
 ]
