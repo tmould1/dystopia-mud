@@ -22,7 +22,6 @@
 #include <time.h>
 #include "merc.h"
 #include "../db/db_game.h"
-#include "../core/ability_config.h"
 #if !defined( WIN32 )
 #include <unistd.h>
 #include <fcntl.h> /* fcntl, F_SETFL, FNDELAY */
@@ -2044,8 +2043,6 @@ void do_shutdown( CHAR_DATA *ch, char *argument ) {
 	do_asave( ch, "changed" );
 	do_forceauto( ch, "save" );
 	do_autosave( ch, "" );
-	save_balance();
-	save_ability_config();
 	merc_down = TRUE;
 	return;
 }
@@ -5907,10 +5904,6 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 	fprintf( fp, "-1\n" );
 	fclose( fp );
-
-	/* Save balance and ability config to database before copyover */
-	save_balance();
-	save_ability_config();
 
 	/* Close reserve and other always-open files and release other resources */
 
