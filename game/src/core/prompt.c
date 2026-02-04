@@ -199,7 +199,7 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 			i = buf2;
 			break;
 		case 'R':
-			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) || IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) ) {
+			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) || IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) || IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) ) ) {
 				snprintf( buf2, sizeof( buf2 ), "#r%d#n", ch->rage );
 			} else
 				snprintf( buf2, sizeof( buf2 ), "0" );

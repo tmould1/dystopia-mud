@@ -4,32 +4,32 @@
 
 Psions are masters of mental energy who wield psionic powers to attack minds, manipulate objects with thought, and project psychic barriers. They build Focus through concentration and meditation, spending it to fuel devastating mental attacks that bypass physical armor. This is a **base class** that upgrades to Mindflayer.
 
-**Source Files**: `src/classes/psion.c`, `src/classes/psion.h` (TBD)
-**Class Constant**: `CLASS_PSION` (TBD - next available power-of-2)
+**Source Files**: `src/classes/psion.c`, `src/classes/psion.h`
+**Class Constant**: `CLASS_PSION` (65536)
 **Upgrades To**: Mindflayer
 
 ## Color Scheme
 
-Psion uses a deep purple palette evoking mental energy and psychic phenomena:
+Psion uses a blue/cyan palette evoking focused thought, mental clarity, and human psionic discipline:
 
 | Element | Code | Color | Usage |
 |---------|------|-------|-------|
-| Accent | `#x093` | Deep violet | Bracket tildes, decorative accents |
-| Primary | `#x141` | Bright purple | Class name, titles, ability highlights |
-| Bracket open | `#x093~#x141[` | Violet~Purple[ | Who list open bracket |
-| Bracket close | `#x141]#x093~` | Purple]Violet~ | Who list close bracket |
-| Room tag | `#x141(#nPsion#x141)` | Purple parens | Room display prefix |
+| Accent | `#x033` | Blue | Bracket chevron, decorative accents |
+| Primary | `#x039` | Cyan | Class name, titles, ability highlights |
+| Bracket open | `#x039<#x033|` | Cyan<Blue| | Who list open bracket (focused beam) |
+| Bracket close | `#x033|#x039>` | Blue|Cyan> | Who list close bracket |
+| Room tag | `#x039(#nPsion#x039)` | Cyan parens | Room display prefix |
 
 **Who List Titles**:
 
 | Generation | Title | Display |
 |------------|-------|---------|
-| 1 | Mind Lord | `#x093~#x141[#x141Mind Lord#n#x141]#x093~` |
-| 2 | Psychic Master | `#x093~#x141[#x141Psychic Master#n#x141]#x093~` |
-| 3 | Psion | `#x093~#x141[#x141Psion#n#x141]#x093~` |
-| 4 | Mentalist | `#x093~#x141[#x141Mentalist#n#x141]#x093~` |
-| 5 | Adept | `#x093~#x141[#x141Adept#n#x141]#x093~` |
-| default | Awakened | `#x093~#x141[#x141Awakened#n#x141]#x093~` |
+| 1 | Mind Lord | `#x039<#x033|#x039Mind Lord#n#x033|#x039>` |
+| 2 | Psychic Master | `#x039<#x033|#x039Psychic Master#n#x033|#x039>` |
+| 3 | Psion | `#x039<#x033|#x039Psion#n#x033|#x039>` |
+| 4 | Mentalist | `#x039<#x033|#x039Mentalist#n#x033|#x039>` |
+| 5 | Adept | `#x039<#x033|#x039Adept#n#x033|#x039>` |
+| default | Awakened | `#x039<#x033|#x039Awakened#n#x033|#x039>` |
 
 ## Core Mechanics
 
@@ -42,7 +42,7 @@ ch->rage  // Current focus (0-100 for Psion, 0-150 for Mindflayer)
 ```
 
 **Building Focus**:
-- Meditation: `meditate` command grants +10 Focus (out of combat only)
+- Meditation: `psimeditate` command grants +10 Focus (out of combat only)
 - Combat: +1 per game tick while fighting (passive concentration)
 - Thought Shield: +3 when absorbing damage
 - Maximum: 100
@@ -55,10 +55,12 @@ ch->rage  // Current focus (0-100 for Psion, 0-150 for Mindflayer)
 
 ### Focus Display
 
-Command: `focus`
+Command: `psifocus`
 - Shows current/max focus
 - Lists all active psionic effects with remaining durations
 - Available to both Psion and Mindflayer
+
+**Note**: Named `psifocus` to avoid conflict with Samurai's `focus` command.
 
 ### Mental Damage
 
@@ -108,9 +110,11 @@ Psion abilities are organized into 3 trainable categories. Each category has 3 l
 
 ## Abilities
 
-### Meditate - Focus Recovery
+### Psimeditate - Focus Recovery
 
-Out-of-combat ability to build Focus through concentration.
+Out-of-combat ability to build Focus through concentration. Command: `psimeditate`
+
+**Note**: Named `psimeditate` to avoid conflict with the existing `meditate` command in act_move.c.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
@@ -321,7 +325,7 @@ Per-tick processing:
 
 | Field | Location | Purpose |
 |-------|----------|---------|
-| class | ch->class | CLASS_PSION bit (TBD) |
+| class | ch->class | CLASS_PSION bit (65536) |
 | focus | ch->rage | Current focus (0-100) |
 | thought_shield | ch->pcdata->powers[0] | Thought Shield ticks remaining |
 | kinetic_barrier | ch->pcdata->powers[1] | Kinetic Barrier ticks remaining |

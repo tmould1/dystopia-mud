@@ -42,6 +42,7 @@ bool is_upgrade( CHAR_DATA *ch ) {
 	if ( IS_CLASS( ch, CLASS_LICH ) ) return TRUE;
 	if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) return TRUE;
 	if ( IS_CLASS( ch, CLASS_SIREN ) ) return TRUE;
+	if ( IS_CLASS( ch, CLASS_MINDFLAYER ) ) return TRUE;
 
 	return FALSE;
 }
@@ -203,6 +204,9 @@ void do_upgrade( CHAR_DATA *ch, char *argument ) {
 	} else if ( ch->class == CLASS_DIRGESINGER ) {
 		ch->class = CLASS_SIREN;
 		sprintf( buf, "%s's voice transcends mortality, becoming a Siren", ch->name );
+	} else if ( ch->class == CLASS_PSION ) {
+		ch->class = CLASS_MINDFLAYER;
+		sprintf( buf, "%s's mind shatters the boundaries of sanity, becoming a Mindflayer", ch->name );
 	} else
 		return;
 	clearshit( ch );

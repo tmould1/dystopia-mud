@@ -191,6 +191,7 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "#R[#0Demon#R]#n             #y((#LWerewolf#y))#n         #P.o0#0Drow#P0o.#n\n\r", ch );
 		send_to_char( "#C***#yNinja#C***#n         #0<<#RVampire#0>>#n          #0.x[#lMonk#0]x.\n\r", ch );
 		send_to_char( "#n{{#CBattlemage#n}}         #G~#y[#nDirgesinger#y]#G~#n\n\r", ch );
+		send_to_char( "#x093~#x141[#nPsion#x141]#x093~#n\n\r", ch );
 		return;
 	}
 	do_clearstats2( ch, "" );
@@ -241,6 +242,9 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 	} else if ( !str_cmp( arg1, "dirgesinger" ) ) {
 		ch->class = CLASS_DIRGESINGER;
 		send_to_char( "Your voice becomes your weapon. Let the #Gbattle hymns#n begin.\n\r", ch );
+	} else if ( !str_cmp( arg1, "psion" ) ) {
+		ch->class = CLASS_PSION;
+		send_to_char( "Your mind awakens to #x141psionic power#n. Focus your thoughts.\n\r", ch );
 	} else
 		do_classself( ch, "" );
 	return;

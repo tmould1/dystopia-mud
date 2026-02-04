@@ -4,31 +4,31 @@
 
 Mindflayers are beings of supreme psionic power who have transcended their Psion origins to become masters of mental domination and consumption. They can enthral enemies to fight for them, consume memories and intellect, and unleash devastating psionic storms that shatter minds across entire areas. This is an **upgrade class** obtained by upgrading from Psion.
 
-**Source Files**: `src/classes/mindflayer.c`, `src/classes/psion.h` (TBD)
-**Class Constant**: `CLASS_MINDFLAYER` (TBD - next available power-of-2)
+**Source Files**: `src/classes/mindflayer.c`, `src/classes/psion.h`
+**Class Constant**: `CLASS_MINDFLAYER` (131072)
 **Upgrades From**: Psion
 
 ## Color Scheme
 
-Mindflayer uses a deep indigo-black palette evoking alien intellect and consuming darkness:
+Mindflayer uses a green/teal palette evoking alien intellect, aberration, and Far Realm horror:
 
 | Element | Code | Color | Usage |
 |---------|------|-------|-------|
-| Accent | `#x054` | Dark indigo | Bracket tildes, decorative accents |
-| Primary | `#x135` | Pale violet-gray | Class name, titles, ability highlights |
-| Bracket open | `#x054~#x135(` | Indigo~PaleViolet( | Who list open bracket |
-| Bracket close | `#x135)#x054~` | PaleViolet)Indigo~ | Who list close bracket |
-| Room tag | `#x135(#nMindflayer#x135)` | PaleViolet parens | Room display prefix |
+| Accent | `#x029` | Dark green | Bracket braces, decorative accents |
+| Primary | `#x035` | Teal | Class name, titles, ability highlights |
+| Bracket open | `#x035~#x029{` | Teal~DarkGreen{ | Who list open bracket (tentacle/brace) |
+| Bracket close | `#x029}#x035~` | DarkGreen}Teal~ | Who list close bracket |
+| Room tag | `#x035(#nMindflayer#x035)` | Teal parens | Room display prefix |
 
 **Who List Titles**:
 
 | Generation | Title | Display |
 |------------|-------|---------|
-| 1 | Elder Brain | `#x054~#x135(#x135Elder Brain#n#x135)#x054~` |
-| 2 | Mind Tyrant | `#x054~#x135(#x135Mind Tyrant#n#x135)#x054~` |
-| 3 | Illithid | `#x054~#x135(#x135Illithid#n#x135)#x054~` |
-| 4 | Brain Eater | `#x054~#x135(#x135Brain Eater#n#x135)#x054~` |
-| default | Mindflayer | `#x054~#x135(#x135Mindflayer#n#x135)#x054~` |
+| 1 | Elder Brain | `#x035~#x029{#x035Elder Brain#n#x029}#x035~` |
+| 2 | Mind Tyrant | `#x035~#x029{#x035Mind Tyrant#n#x029}#x035~` |
+| 3 | Illithid | `#x035~#x029{#x035Illithid#n#x029}#x035~` |
+| 4 | Brain Eater | `#x035~#x029{#x035Brain Eater#n#x029}#x035~` |
+| default | Mindflayer | `#x035~#x029{#x035Mindflayer#n#x029}#x035~` |
 
 ## Core Mechanics
 
@@ -51,7 +51,9 @@ ch->rage  // Current focus (0-150 for Mindflayer)
 
 ### Shared Psion Abilities
 
-Mindflayer retains access to the `focus` status display command and `meditate`. All other Psion abilities are replaced by Mindflayer-specific powers.
+Mindflayer retains access to the `psifocus` status display command and `psimeditate`. All other Psion abilities are replaced by Mindflayer-specific powers.
+
+**Note**: Commands are named `psifocus` and `psimeditate` to avoid conflicts with existing Samurai `focus` and act_move.c `meditate` commands.
 
 ### Upgrade Path
 
@@ -96,7 +98,7 @@ Mindflayer abilities are organized into 3 trainable categories. Stored in `ch->p
 | Level | Ability | Unlock |
 |-------|---------|--------|
 | 1 | `psychicmaelstrom` | AoE mental damage with confusion |
-| 2 | `mindblast` | Cone attack that stuns and damages |
+| 2 | `psiblast` | Cone attack that stuns and damages |
 | 3 | `realityfracture` | Ultimate AoE that tears at sanity itself |
 
 ## Abilities
@@ -223,18 +225,20 @@ Unleashes a whirlwind of psychic energy hitting all enemies in combat, with a ch
 | Damage Type | Mental | |
 | Requires | Fighting, Psionic Storm 1 | |
 
-### Mind Blast - Cone Stun
+### Psiblast - Cone Stun
 
-Projects a cone of psionic force that stuns and damages all enemies in front of the Mindflayer.
+Projects a cone of psionic force that stuns and damages all enemies in front of the Mindflayer. Command: `psiblast`
+
+**Note**: Named `psiblast` to avoid conflict with Vampire's `mindblast` command in vamp.c.
 
 | Property | Value | Config Key |
 |----------|-------|------------|
-| Mana Cost | 140 | `mindflayer.mindblast.mana_cost` |
-| Focus Required | 60 | `mindflayer.mindblast.focus_req` |
-| Focus Cost | 45 | `mindflayer.mindblast.focus_cost` |
-| Cooldown | 14 pulses | `mindflayer.mindblast.cooldown` |
+| Mana Cost | 140 | `mindflayer.psiblast.mana_cost` |
+| Focus Required | 60 | `mindflayer.psiblast.focus_req` |
+| Focus Cost | 45 | `mindflayer.psiblast.focus_cost` |
+| Cooldown | 14 pulses | `mindflayer.psiblast.cooldown` |
 | Damage per Target | 250-450 + (focus × 4) | |
-| Stun Duration | 2 rounds | `mindflayer.mindblast.stun_duration` |
+| Stun Duration | 2 rounds | `mindflayer.psiblast.stun_duration` |
 | Damage Type | Mental | |
 | Requires | Fighting, Psionic Storm 2 | |
 
@@ -318,7 +322,7 @@ Per-tick processing:
 
 | Field | Location | Purpose |
 |-------|----------|---------|
-| class | ch->class | CLASS_MINDFLAYER bit (TBD) |
+| class | ch->class | CLASS_MINDFLAYER bit (131072) |
 | focus | ch->rage | Current focus (0-150) |
 | hivemind | ch->pcdata->powers[0] | Hivemind ticks remaining |
 | thrall_count | ch->pcdata->powers[1] | Number of active thralls |

@@ -4834,6 +4834,36 @@ DECLARE_DO_FUN( do_ariaofunmaking );
 DECLARE_DO_FUN( do_voicetrain );
 DECLARE_DO_FUN( do_sirenarmor );
 
+/* Psion */
+DECLARE_DO_FUN( do_psifocus );
+DECLARE_DO_FUN( do_psimeditate );
+DECLARE_DO_FUN( do_psitrain );
+DECLARE_DO_FUN( do_psionarmor );
+DECLARE_DO_FUN( do_mindscan );
+DECLARE_DO_FUN( do_thoughtshield );
+DECLARE_DO_FUN( do_mentallink );
+DECLARE_DO_FUN( do_forcepush );
+DECLARE_DO_FUN( do_levitate );
+DECLARE_DO_FUN( do_kineticbarrier );
+DECLARE_DO_FUN( do_mindspike );
+DECLARE_DO_FUN( do_psychicscream );
+DECLARE_DO_FUN( do_brainburn );
+
+/* Mindflayer */
+DECLARE_DO_FUN( do_mindtrain );
+DECLARE_DO_FUN( do_mindflayerarmor );
+DECLARE_DO_FUN( do_enthral );
+DECLARE_DO_FUN( do_puppet );
+DECLARE_DO_FUN( do_hivemind );
+DECLARE_DO_FUN( do_massdomination );
+DECLARE_DO_FUN( do_mindfeed );
+DECLARE_DO_FUN( do_memorydrain );
+DECLARE_DO_FUN( do_intellectdevour );
+DECLARE_DO_FUN( do_psychicmaelstrom );
+DECLARE_DO_FUN( do_psiblast );
+DECLARE_DO_FUN( do_realityfracture );
+DECLARE_DO_FUN( do_dismiss );
+
 /*
  * Global Constants
  */

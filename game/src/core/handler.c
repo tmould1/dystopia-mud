@@ -1136,6 +1136,28 @@ void equip_char( CHAR_DATA *ch, OBJ_DATA *obj, int iWear ) {
 		return;
 	}
 
+	/* Psion EQ */
+
+	if ( ( obj->pIndexData->vnum >= 33360 && obj->pIndexData->vnum <= 33379 ) && ( IS_NPC( ch ) || ( !IS_CLASS( ch, CLASS_PSION ) && !IS_CLASS( ch, CLASS_MINDFLAYER ) ) ) ) {
+		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
+		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
+		obj_from_char( obj );
+		obj_to_room( obj, ch->in_room );
+		do_autosave( ch, "" );
+		return;
+	}
+
+	/* Mindflayer EQ */
+
+	if ( ( obj->pIndexData->vnum >= 33380 && obj->pIndexData->vnum <= 33399 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_MINDFLAYER ) ) ) {
+		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
+		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
+		obj_from_char( obj );
+		obj_to_room( obj, ch->in_room );
+		do_autosave( ch, "" );
+		return;
+	}
+
 	/* Wolf EQ */
 
 	if ( ( IS_SET( obj->spectype, SITEM_WOLFWEAPON ) || ( obj->pIndexData->vnum >= 33100 && obj->pIndexData->vnum <= 33119 ) ) && !IS_CLASS( ch, CLASS_WEREWOLF ) ) {

@@ -458,6 +458,9 @@ int char_damroll( CHAR_DATA *ch ) {
 	/* Dirgesinger/Siren Resonance */
 	if ( ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) && ch->rage > 0 )
 		value += ch->rage;
+	/* Psion/Mindflayer Focus */
+	if ( ( IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) ) && ch->rage > 0 )
+		value += ch->rage;
 
 	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->pcdata->stats[DEMON_POWER] > 0 )
 		value += ( ( ch->pcdata->stats[DEMON_POWER] ) * ch->pcdata->stats[DEMON_POWER] );
@@ -519,6 +522,9 @@ int char_hitroll( CHAR_DATA *ch ) {
 		value += ch->rage;
 	/* Dirgesinger/Siren Resonance */
 	if ( ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) && ch->rage > 0 )
+		value += ch->rage;
+	/* Psion/Mindflayer Focus */
+	if ( ( IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) ) && ch->rage > 0 )
 		value += ch->rage;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->pcdata->stats[DEMON_POWER] > 0 )
 		value += ( ( ch->pcdata->stats[DEMON_POWER] ) * ch->pcdata->stats[DEMON_POWER] );
@@ -849,7 +855,11 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 		if ( IS_CLASS( victim, CLASS_DIRGESINGER ) )
 			strcat( prefix_buf, mxp_aura_tag( ch, "#x178(#nDirgesinger#x178)#n ", "Dirgesinger", -1 ) );
 		if ( IS_CLASS( victim, CLASS_SIREN ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#x147(#nSiren#x147)#n ", "Siren", -1 ) );
+			strcat( prefix_buf, mxp_aura_tag( ch, "#x255)#x147(#nSiren#x147)#x255(#n ", "Siren", -1 ) );
+		if ( IS_CLASS( victim, CLASS_PSION ) )
+			strcat( prefix_buf, mxp_aura_tag( ch, "#x255<#x033|#nPsion#x033|#x255>#n ", "Psion", -1 ) );
+		if ( IS_CLASS( victim, CLASS_MINDFLAYER ) )
+			strcat( prefix_buf, mxp_aura_tag( ch, "#x135}#x035{#nMindflayer#x035}#x135{#n ", "Mindflayer", -1 ) );
 	}
 
 	/* ========== PHASE 2: Build suffix (condition effects) ========== */
@@ -2432,8 +2442,16 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 			sprintf( buf, "#R[#nYour resonance pulses at #C%d#n, enhancing Hitroll and Damroll#R]\n\r", ch->rage );
 			send_to_char( buf, ch );
 		}
+		if ( IS_CLASS( ch, CLASS_PSION ) && ch->rage > 0 ) {
+			sprintf( buf, "#x033[#nYour psionic focus burns at #x039%d#n, enhancing Hitroll and Damroll#x033]\n\r", ch->rage );
+			send_to_char( buf, ch );
+		}
+		if ( IS_CLASS( ch, CLASS_MINDFLAYER ) && ch->rage > 0 ) {
+			sprintf( buf, "#x029[#nYour alien intellect seethes at #x035%d#n Focus, enhancing Hitroll and Damroll#x029]\n\r", ch->rage );
+			send_to_char( buf, ch );
+		}
 
-		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 && !IS_CLASS( ch, CLASS_NINJA ) && !IS_CLASS( ch, CLASS_DIRGESINGER ) && !IS_CLASS( ch, CLASS_SIREN ) ) {
+		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 && !IS_CLASS( ch, CLASS_NINJA ) && !IS_CLASS( ch, CLASS_DIRGESINGER ) && !IS_CLASS( ch, CLASS_SIREN ) && !IS_CLASS( ch, CLASS_PSION ) && !IS_CLASS( ch, CLASS_MINDFLAYER ) ) {
 			sprintf( buf, "#R[#nYou are in a mad frenzy, adding #C%d#n Hitroll and Damroll#R]\n\r", ch->rage );
 			stc( buf, ch );
 		}
@@ -2804,8 +2822,14 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 			strcpy( openb, "#x136~#x178[#n" );
 			strcpy( closeb, "#x178]#x136~#n" );
 		} else if ( IS_CLASS( gch, CLASS_SIREN ) ) {
-			strcpy( openb, "#x039~#x147(#n" );
-			strcpy( closeb, "#x147)#x039~#n" );
+			strcpy( openb, "#x255)#x147(#n" );
+			strcpy( closeb, "#x147)#x255(#n" );
+		} else if ( IS_CLASS( gch, CLASS_PSION ) ) {
+			strcpy( openb, "#x255<#x033|#n" );
+			strcpy( closeb, "#x033|#x255>#n" );
+		} else if ( IS_CLASS( gch, CLASS_MINDFLAYER ) ) {
+			strcpy( openb, "#x135}#x035{#n" );
+			strcpy( closeb, "#x035}#x135{#n" );
 		} else {
 			strcpy( openb, "#0[#n" );
 			strcpy( closeb, "#0]#n" );
@@ -3036,15 +3060,39 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 					sprintf( kav, "%s#x178Hummer#n%s              ", openb, closeb );
 			} else if ( IS_CLASS( gch, CLASS_SIREN ) ) {
 				if ( gch->generation == 1 )
-					sprintf( kav, "%s#x147Archsiren#n%s           ", openb, closeb );
+					sprintf( kav, "%s#x255Archsiren#n%s           ", openb, closeb );
 				else if ( gch->generation == 2 )
-					sprintf( kav, "%s#x147Diva of Doom#n%s        ", openb, closeb );
+					sprintf( kav, "%s#x255Diva of Doom#n%s        ", openb, closeb );
 				else if ( gch->generation == 3 )
-					sprintf( kav, "%s#x147Songweaver#n%s          ", openb, closeb );
+					sprintf( kav, "%s#x255Songweaver#n%s          ", openb, closeb );
 				else if ( gch->generation == 4 )
-					sprintf( kav, "%s#x147Voice of Ruin#n%s       ", openb, closeb );
+					sprintf( kav, "%s#x255Voice of Ruin#n%s       ", openb, closeb );
 				else
-					sprintf( kav, "%s#x147Siren#n%s               ", openb, closeb );
+					sprintf( kav, "%s#x255Siren#n%s               ", openb, closeb );
+			} else if ( IS_CLASS( gch, CLASS_PSION ) ) {
+				if ( gch->generation == 1 )
+					sprintf( kav, "%s#CMind Lord#n%s           ", openb, closeb );
+				else if ( gch->generation == 2 )
+					sprintf( kav, "%s#CPsychic Master#n%s      ", openb, closeb );
+				else if ( gch->generation == 3 )
+					sprintf( kav, "%s#CPsion#n%s               ", openb, closeb );
+				else if ( gch->generation == 4 )
+					sprintf( kav, "%s#CMentalist#n%s           ", openb, closeb );
+				else if ( gch->generation == 5 )
+					sprintf( kav, "%s#CAdept#n%s               ", openb, closeb );
+				else
+					sprintf( kav, "%s#CAwakened#n%s            ", openb, closeb );
+			} else if ( IS_CLASS( gch, CLASS_MINDFLAYER ) ) {
+				if ( gch->generation == 1 )
+					sprintf( kav, "%s#GElder Brain#n%s         ", openb, closeb );
+				else if ( gch->generation == 2 )
+					sprintf( kav, "%s#GMind Tyrant#n%s         ", openb, closeb );
+				else if ( gch->generation == 3 )
+					sprintf( kav, "%s#GIllithid#n%s            ", openb, closeb );
+				else if ( gch->generation == 4 )
+					sprintf( kav, "%s#GBrain Eater#n%s         ", openb, closeb );
+				else
+					sprintf( kav, "%s#GMindflayer#n%s          ", openb, closeb );
 			} else
 				sprintf( kav, "#nNone#n                    " );
 		} else
@@ -4025,6 +4073,8 @@ static const char *get_class_name( int class_bits ) {
 	if ( class_bits & CLASS_DROID ) return "Spider Droid";
 	if ( class_bits & CLASS_DIRGESINGER ) return "Dirgesinger";
 	if ( class_bits & CLASS_SIREN ) return "Siren";
+	if ( class_bits & CLASS_PSION ) return "Psion";
+	if ( class_bits & CLASS_MINDFLAYER ) return "Mindflayer";
 	return "Hero";
 }
 

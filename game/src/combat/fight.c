@@ -23,6 +23,7 @@
 #include "merc.h"
 #include "ability_config.h"
 #include "dirgesinger.h"
+#include "psion.h"
 #include "../systems/mcmp.h"
 
 #define MAX_SLAY_TYPES 3
@@ -1712,6 +1713,19 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( ch->pcdata->powers[DIRGE_ECHOSHIELD_ACTIVE] > 0 )
 				max_dam += balance.damcap_siren_echoshield;
 		}
+		/* Psion: focus-based damcap bonus + thought shield */
+		if ( IS_CLASS( ch, CLASS_PSION ) ) {
+			max_dam += acfg( "psion.damcap.base" );
+			max_dam += ch->rage * acfg( "psion.damcap.focus_mult" );
+			if ( ch->pcdata->powers[PSION_THOUGHT_SHIELD] > 0 )
+				max_dam += acfg( "psion.damcap.thoughtshield" );
+		}
+		/* Mindflayer: enhanced focus-based damcap + hivemind */
+		if ( IS_CLASS( ch, CLASS_MINDFLAYER ) ) {
+			max_dam += ch->rage * acfg( "mindflayer.damcap.focus_mult" );
+			if ( ch->pcdata->powers[MIND_HIVEMIND] > 0 )
+				max_dam += acfg( "mindflayer.damcap.hivemind" );
+		}
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += balance.damcap_artifact;
 
@@ -1904,6 +1918,34 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 		if ( reflect > 0 ) {
 			hurt_person( victim, ch, reflect );
 			act( "Your echoshield reverberates, reflecting sonic energy back at $N!", victim, NULL, ch, TO_CHAR );
+		}
+	}
+	/* Psion Thought Shield: mental barrier absorbs damage */
+	if ( !IS_NPC( victim ) && ( IS_CLASS( victim, CLASS_PSION ) || IS_CLASS( victim, CLASS_MINDFLAYER ) ) &&
+		victim->pcdata->powers[PSION_THOUGHT_SHIELD] > 0 && victim->pcdata->stats[PSION_THOUGHT_SHIELD_HP] > 0 ) {
+		if ( dam <= victim->pcdata->stats[PSION_THOUGHT_SHIELD_HP] ) {
+			victim->pcdata->stats[PSION_THOUGHT_SHIELD_HP] -= dam;
+			send_to_char( "Your thought shield absorbs the blow!\n\r", victim );
+			dam = 0;
+		} else {
+			dam -= victim->pcdata->stats[PSION_THOUGHT_SHIELD_HP];
+			victim->pcdata->stats[PSION_THOUGHT_SHIELD_HP] = 0;
+			victim->pcdata->powers[PSION_THOUGHT_SHIELD] = 0;
+			send_to_char( "Your thought shield collapses under the assault!\n\r", victim );
+		}
+	}
+	/* Psion Kinetic Barrier: physical barrier absorbs damage */
+	if ( !IS_NPC( victim ) && ( IS_CLASS( victim, CLASS_PSION ) || IS_CLASS( victim, CLASS_MINDFLAYER ) ) &&
+		victim->pcdata->powers[PSION_KINETIC_BARRIER] > 0 && victim->pcdata->stats[PSION_KINETIC_BARRIER_HP] > 0 ) {
+		if ( dam <= victim->pcdata->stats[PSION_KINETIC_BARRIER_HP] ) {
+			victim->pcdata->stats[PSION_KINETIC_BARRIER_HP] -= dam;
+			send_to_char( "Your kinetic barrier deflects the blow!\n\r", victim );
+			dam = 0;
+		} else {
+			dam -= victim->pcdata->stats[PSION_KINETIC_BARRIER_HP];
+			victim->pcdata->stats[PSION_KINETIC_BARRIER_HP] = 0;
+			victim->pcdata->powers[PSION_KINETIC_BARRIER] = 0;
+			send_to_char( "Your kinetic barrier shatters!\n\r", victim );
 		}
 	}
 	hurt_person( ch, victim, dam );

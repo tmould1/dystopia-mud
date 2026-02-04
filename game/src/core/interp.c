@@ -1053,6 +1053,40 @@ const struct cmd_type cmd_table[] =
 		{ "resonance",    do_resonance,    POS_DEAD,      3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
 		{ "voicetrain",   do_voicetrain,   POS_STANDING,  3, LOG_NORMAL, CLASS_SIREN, 0, 0 },
 
+		/* Psion */
+
+		{ "psifocus",      do_psifocus,      POS_DEAD,      3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "psimeditate",   do_psimeditate,   POS_RESTING,   3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "psitrain",      do_psitrain,      POS_STANDING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "psionarmor",    do_psionarmor,    POS_STANDING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "mindscan",      do_mindscan,      POS_STANDING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "thoughtshield", do_thoughtshield, POS_STANDING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "mentallink",    do_mentallink,    POS_STANDING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "forcepush",     do_forcepush,     POS_FIGHTING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "levitate",      do_levitate,      POS_STANDING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "kineticbarrier", do_kineticbarrier, POS_STANDING, 3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "mindspike",     do_mindspike,     POS_FIGHTING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "psychicscream", do_psychicscream, POS_FIGHTING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+		{ "brainburn",     do_brainburn,     POS_FIGHTING,  3, LOG_NORMAL, CLASS_PSION, 0, 0 },
+
+		/* Mindflayer */
+
+		{ "psifocus",      do_psifocus,      POS_DEAD,      3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "psimeditate",   do_psimeditate,   POS_RESTING,   3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "mindtrain",     do_mindtrain,     POS_STANDING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "mindflayerarmor", do_mindflayerarmor, POS_STANDING, 3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "enthral",       do_enthral,       POS_STANDING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "puppet",        do_puppet,        POS_STANDING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "hivemind",      do_hivemind,      POS_STANDING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "massdomination", do_massdomination, POS_STANDING, 3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "mindfeed",      do_mindfeed,      POS_FIGHTING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "memorydrain",   do_memorydrain,   POS_FIGHTING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "intellectdevour", do_intellectdevour, POS_FIGHTING, 3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "psychicmaelstrom", do_psychicmaelstrom, POS_FIGHTING, 3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "psiblast",      do_psiblast,      POS_FIGHTING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "realityfracture", do_realityfracture, POS_FIGHTING, 3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+		{ "dismiss",       do_dismiss,       POS_STANDING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
+
 		/*
 		 * Immortal commands.
 		 */

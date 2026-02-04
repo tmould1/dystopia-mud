@@ -1574,6 +1574,8 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 				} else if ( IS_CLASS( ch, CLASS_TANARRI ) || IS_CLASS( ch, CLASS_DROID ) ) {
 					snprintf( resource_str, sizeof( resource_str ), " [#CP:%d#n]",
 						ch->pcdata->stats[8] );
+				} else if ( IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) ) {
+					snprintf( resource_str, sizeof( resource_str ), " [#CFoc:%d#n]", ch->rage );
 				}
 			}
 
