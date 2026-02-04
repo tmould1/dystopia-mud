@@ -32,6 +32,7 @@ If the new class is an upgrade that shares a header with its base class (like Si
 | `src/core/ability_config.c` | Default `acfg` values for all balance-tunable parameters | Add entries to `acfg_table[]` array |
 | `src/core/prompt.c` | `%R` prompt variable (if class uses `ch->rage` for resource) | Add class to the `case 'R':` check |
 | `src/systems/save.c` | Verify `pcdata->powers[]` and `pcdata->stats[]` are saved/loaded | Usually already handled generically, but verify |
+| `src/systems/jobo_act.c` | `do_mudstat` player count display | Three locations - see "do_mudstat Player Statistics" section |
 | `game/build/Makefile` | Add new `.c` file to the build | Run `GenerateProjectFiles.bat` (Windows) or `.sh` (Linux) instead of editing manually |
 
 ### Data Files to Modify
@@ -423,6 +424,30 @@ The `act_info.c` file needs updates in **six** locations for each new class. Mis
 
 Also update the "mad frenzy" exclusion list if your class uses `ch->rage` for something other than frenzy (search for "mad frenzy").
 
+### do_mudstat Player Statistics
+
+The `do_mudstat` command in `jobo_act.c` displays online player counts broken down by class. Adding a new class requires updates in **three** locations:
+
+1. **Counter variable declaration** (around line 192) - Add a new counter initialized to 0:
+   ```c
+   int yourclass_count = 0;
+   ```
+
+2. **Switch statement case** (around line 206-267) - Add a case using the `CLASS_*` constant:
+   ```c
+   case CLASS_YOURCLASS:
+       yourclass_count++;
+       total_count++;
+       break;
+   ```
+
+3. **Display output** (around line 272-283) - Add to an existing `sprintf` line or create a new one:
+   ```c
+   sprintf(buf, "#GYourClass#n : %-2d ...\n\r", yourclass_count, ...);
+   ```
+
+**Note**: Use `CLASS_*` constants from `src/classes/class.h` instead of hardcoded numeric values for maintainability.
+
 ### `visible_strlen()` and Color Codes
 
 The who list formatting in `act_info.c` uses `visible_strlen()` to calculate display width for alignment. This function correctly handles standard `#X` codes (2 chars) and `#xNNN` codes (5 chars). If you use other non-standard color sequences, verify alignment still works.
@@ -558,7 +583,7 @@ update.c        +1 line   (tick update call)
 fight.c         +1-3 blocks (damcap, defense, extra attacks) + #include
 ability_config.c +N lines (acfg defaults in acfg_table[])
 handler.c       +1 block  (equipment restrictions)
-jobo_act.c      +2 lines  (mastery item vnum mapping)
+jobo_act.c      +5 locations (do_mudstat counter, switch case, display; do_mastery vnum mapping)
 classeq.db      +N entries (class armor + mastery item)
 base_help.db    +2-4 entries (class help, system helps, update CLASSES)
 ```

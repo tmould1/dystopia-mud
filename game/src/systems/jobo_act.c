@@ -191,6 +191,7 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *gch;
 	int mage_count = 0, lich_count = 0, drow_count = 0, drider_count = 0, ww_count = 0, shape_count = 0, monk_count = 0, angel_count = 0;
 	int vampire_count = 0, knight_count = 0, ninja_count = 0, sam_count = 0, demon_count = 0, tanarri_count = 0, newbie_count = 0, total_count = 0;
+	int dirgesinger_count = 0, siren_count = 0, psion_count = 0, mindflayer_count = 0;
 
 	extern char str_boot_time[];
 
@@ -264,22 +265,41 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 			drider_count++;
 			total_count++;
 			break;
+		case CLASS_DIRGESINGER:
+			dirgesinger_count++;
+			total_count++;
+			break;
+		case CLASS_SIREN:
+			siren_count++;
+			total_count++;
+			break;
+		case CLASS_PSION:
+			psion_count++;
+			total_count++;
+			break;
+		case CLASS_MINDFLAYER:
+			mindflayer_count++;
+			total_count++;
+			break;
 		}
 	}
 
 	send_to_char( "#R--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R== [#y^^#R]  MUD STATS  [#y^^#R] ==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--#n\n\r\n\r", ch );
 	send_to_char( "#LOnline Players by Class :#n\n\r\n\r", ch );
-	sprintf( buf, "#GMages#n     : %-2d            #GLichs#n      : %-2d       #GDrows#n       : %-2d     #GDriders#n :       %-2d\n\r",
+	sprintf( buf, "#GMages#n       : %-2d   #GLichs#n       : %-2d   #GDrows#n       : %-2d   #GDriders#n     : %-2d\n\r",
 		mage_count, lich_count, drow_count, drider_count );
 	send_to_char( buf, ch );
-	sprintf( buf, "#GDemons#n    : %-2d            #GTanar'ris#n  : %-2d       #GWerewolfs#n   : %-2d     #GShapies#n :       %-2d\n\r",
+	sprintf( buf, "#GDemons#n      : %-2d   #GTanar'ris#n   : %-2d   #GWerewolfs#n   : %-2d   #GShapies#n     : %-2d\n\r",
 		demon_count, tanarri_count, ww_count, shape_count );
 	send_to_char( buf, ch );
-	sprintf( buf, "#GNinjas#n    : %-2d            #GSamurais#n   : %-2d       #GVampires#n    : %-2d     #GKnights#n :       %-2d\n\r",
+	sprintf( buf, "#GNinjas#n      : %-2d   #GSamurais#n    : %-2d   #GVampires#n    : %-2d   #GKnights#n     : %-2d\n\r",
 		ninja_count, sam_count, vampire_count, knight_count );
 	send_to_char( buf, ch );
-	sprintf( buf, "#GMonks#n     : %-2d            #GAngels#n     : %-2d       #GNewbies#n     : %-2d     #GTotal#n   :       %-2d\n\r\n\r",
-		monk_count, angel_count, newbie_count, total_count );
+	sprintf( buf, "#GMonks#n       : %-2d   #GAngels#n      : %-2d   #GDirges#n      : %-2d   #GSirens#n      : %-2d\n\r",
+		monk_count, angel_count, dirgesinger_count, siren_count );
+	send_to_char( buf, ch );
+	sprintf( buf, "#GPsions#n      : %-2d   #GMindflayers#n : %-2d   #GNewbies#n     : %-2d   #GTotal#n       : %-2d\n\r\n\r",
+		psion_count, mindflayer_count, newbie_count, total_count );
 	send_to_char( buf, ch );
 	send_to_char( "#R--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==      OTHER STATS     ==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--#n\n\r\n\r", ch );
 	if ( global_exp )
