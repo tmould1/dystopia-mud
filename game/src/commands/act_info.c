@@ -23,6 +23,7 @@
 #include <time.h>
 #include "merc.h"
 #include "../db/db_player.h"
+#include "../db/db_game.h"
 #include "../systems/mxp.h"
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
@@ -35,27 +36,29 @@ extern int can_interpret args( ( CHAR_DATA * ch, int cmd ) );
  *   #X    - 2-char code (e.g., #R, #G, #0, #n)
  *   #xNNN - 5-char extended 256-color code (e.g., #x237)
  */
-static int visible_strlen( const char *str ) {
-	int len = 0;
-	const char *p = str;
+/*
+ * Pad a string (which may contain color codes) to a target visible width.
+ * Appends spaces to reach target_width visible characters.
+ */
+static void pad_to_visible_width( char *dest, size_t destsize, const char *src, int target_width ) {
+	int visible_len = visible_strlen( src );
+	int padding = target_width - visible_len;
+	size_t src_len = strlen( src );
+	size_t i;
 
-	while ( *p ) {
-		if ( *p == '#' && *( p + 1 ) != '\0' ) {
-			/* Check for extended color code #xNNN */
-			if ( ( *( p + 1 ) == 'x' || *( p + 1 ) == 'X' ) &&
-				*( p + 2 ) >= '0' && *( p + 2 ) <= '9' &&
-				*( p + 3 ) >= '0' && *( p + 3 ) <= '9' &&
-				*( p + 4 ) >= '0' && *( p + 4 ) <= '9' ) {
-				p += 5; /* Skip #xNNN */
-			} else {
-				p += 2; /* Skip #X */
-			}
-		} else {
-			len++;
-			p++;
-		}
-	}
-	return len;
+	if ( padding < 0 )
+		padding = 0;
+
+	/* Copy the source string */
+	if ( src_len >= destsize )
+		src_len = destsize - 1;
+	memcpy( dest, src, src_len );
+
+	/* Add padding spaces */
+	for ( i = 0; i < (size_t)padding && ( src_len + i ) < ( destsize - 1 ); i++ )
+		dest[src_len + i] = ' ';
+
+	dest[src_len + i] = '\0';
 }
 
 /*
@@ -2608,6 +2611,7 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 
 	for ( d = descriptor_list; d != NULL; d = d->next ) {
 		char const *title;
+		char padded_title[256];  /* 16 visible chars * up to 16 bytes each (color codes + char) */
 
 		if ( d->connected != CON_PLAYING ) continue;
 		if ( ( gch = d->character ) == NULL ) continue;
@@ -2712,12 +2716,13 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 					title = " #C*#0***A#CF#0K***#C*#n ";
 				else if ( gch->prefix != NULL )
 					title = gch->prefix;
-				else if ( !str_cmp( gch->pcdata->switchname, "Jobo" ) )
-					title = " #G(#C=-#RCODER#C-=#G)#n ";
-				else if ( !str_cmp( gch->pcdata->switchname, "Vladd" ) )
-					title = "#RLOVE MACHINE#n ";
-				else
-					title = " #y>>>>#0GoD#y<<<<#n ";
+				else {
+					const char *db_title = db_game_get_pretitle( gch->pcdata->switchname );
+					if ( db_title != NULL )
+						title = db_title;
+					else
+						title = " #y>>>>#0GoD#y<<<<#n ";
+				}
 				break;
 			case MAX_LEVEL - 6:
 			case MAX_LEVEL - 7:
@@ -3126,12 +3131,17 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 		}
 
 		/*
+		 * Pad title to consistent visible width (accounts for color codes)
+		 */
+		pad_to_visible_width( padded_title, sizeof( padded_title ), title, 16 );
+
+		/*
 		 * Let's figure out where to place the player.
 		 */
 
 		if ( gch->level > 6 ) {
-			snprintf( buf1 + strlen( buf1 ), sizeof( buf1 ) - strlen( buf1 ), " %-16s %-6s %-24s %s %s\n\r",
-				title, pkratio, kav, playername, faith );
+			snprintf( buf1 + strlen( buf1 ), sizeof( buf1 ) - strlen( buf1 ), " %s %-6s %-24s %s %s\n\r",
+				padded_title, pkratio, kav, playername, faith );
 			a1 = TRUE;
 		} else if ( gch->level >= 3 && gch->level <= 6 ) {
 			if ( mightRate > 3500 ) {
@@ -3211,8 +3221,8 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 				avatars = TRUE;
 			}
 		} else if ( gch->level < 3 ) {
-			snprintf( buf17 + strlen( buf17 ), sizeof( buf17 ) - strlen( buf17 ), " %-16s %-6s %-24s %s %s\n\r",
-				title, pkratio, kav, playername, faith );
+			snprintf( buf17 + strlen( buf17 ), sizeof( buf17 ) - strlen( buf17 ), " %s %-6s %-24s %s %s\n\r",
+				padded_title, pkratio, kav, playername, faith );
 			a17 = TRUE;
 		}
 	}

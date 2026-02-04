@@ -38,6 +38,17 @@ static sqlite3 *game_db = NULL;
 /* Directory for game databases */
 static char mud_db_game_dir[MUD_PATH_MAX] = "";
 
+/* In-memory cache for immortal pretitles */
+typedef struct pretitle_entry {
+	char   *immortal_name;
+	char   *pretitle;
+	char   *set_by;
+	time_t  set_date;
+} PRETITLE_ENTRY;
+
+static PRETITLE_ENTRY *pretitle_entries = NULL;
+static int pretitle_count = 0;
+
 /* Schema for help.db */
 static const char *HELP_SCHEMA_SQL =
 	"CREATE TABLE IF NOT EXISTS helps ("
@@ -142,7 +153,14 @@ static const char *GAME_SCHEMA_SQL =
 	"  use_continue INTEGER NOT NULL DEFAULT 0,"
 	"  UNIQUE(category, trigger_key)"
 	");"
-	"CREATE INDEX IF NOT EXISTS idx_audio_category ON audio_config(category);";
+	"CREATE INDEX IF NOT EXISTS idx_audio_category ON audio_config(category);"
+
+	"CREATE TABLE IF NOT EXISTS immortal_pretitles ("
+	"  immortal_name TEXT PRIMARY KEY COLLATE NOCASE,"
+	"  pretitle      TEXT NOT NULL,"
+	"  set_by        TEXT NOT NULL,"
+	"  set_date      INTEGER NOT NULL"
+	");";
 
 
 /*
@@ -1646,5 +1664,147 @@ void do_audioconfig( CHAR_DATA *ch, char *argument ) {
 
 	snprintf( buf, sizeof( buf ), "Audio config %s/%s %s set to: %s\n\r",
 		ae->category, ae->trigger_key, arg3, arg4 );
+	send_to_char( buf, ch );
+}
+
+
+/*
+ * Immortal pretitles (game.db)
+ * Custom pre-titles for immortals displayed in the who list.
+ */
+
+void db_game_load_pretitles( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT immortal_name, pretitle, set_by, set_date "
+		"FROM immortal_pretitles ORDER BY immortal_name";
+	int i, count = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Free existing entries */
+	if ( pretitle_entries != NULL ) {
+		for ( i = 0; i < pretitle_count; i++ ) {
+			if ( pretitle_entries[i].immortal_name )
+				free_string( pretitle_entries[i].immortal_name );
+			if ( pretitle_entries[i].pretitle )
+				free_string( pretitle_entries[i].pretitle );
+			if ( pretitle_entries[i].set_by )
+				free_string( pretitle_entries[i].set_by );
+		}
+		free_mem( pretitle_entries, pretitle_count * sizeof( PRETITLE_ENTRY ) );
+		pretitle_entries = NULL;
+		pretitle_count = 0;
+	}
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	/* Count rows first */
+	while ( sqlite3_step( stmt ) == SQLITE_ROW )
+		count++;
+	sqlite3_reset( stmt );
+
+	if ( count == 0 ) {
+		sqlite3_finalize( stmt );
+		return;
+	}
+
+	/* Allocate array */
+	pretitle_entries = alloc_mem( count * sizeof( PRETITLE_ENTRY ) );
+
+	/* Load entries */
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		PRETITLE_ENTRY *pe = &pretitle_entries[pretitle_count];
+
+		pe->immortal_name = str_dup( col_text( stmt, 0 ) );
+		pe->pretitle      = str_dup( col_text( stmt, 1 ) );
+		pe->set_by        = str_dup( col_text( stmt, 2 ) );
+		pe->set_date      = (time_t)sqlite3_column_int64( stmt, 3 );
+
+		pretitle_count++;
+	}
+
+	sqlite3_finalize( stmt );
+}
+
+const char *db_game_get_pretitle( const char *name ) {
+	int i;
+
+	if ( !name || !name[0] )
+		return NULL;
+
+	for ( i = 0; i < pretitle_count; i++ ) {
+		if ( !str_cmp( pretitle_entries[i].immortal_name, name ) )
+			return pretitle_entries[i].pretitle;
+	}
+
+	return NULL;
+}
+
+void db_game_set_pretitle( const char *name, const char *pretitle, const char *set_by ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "INSERT OR REPLACE INTO immortal_pretitles "
+		"(immortal_name, pretitle, set_by, set_date) VALUES (?,?,?,?)";
+
+	if ( !game_db || !name || !name[0] || !pretitle || !pretitle[0] )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 2, pretitle, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 3, set_by ? set_by : "system", -1, SQLITE_TRANSIENT );
+	sqlite3_bind_int64( stmt, 4, (sqlite3_int64)current_time );
+	sqlite3_step( stmt );
+	sqlite3_finalize( stmt );
+
+	/* Reload the cache */
+	db_game_load_pretitles();
+}
+
+void db_game_delete_pretitle( const char *name ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "DELETE FROM immortal_pretitles WHERE immortal_name = ?";
+
+	if ( !game_db || !name || !name[0] )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_TRANSIENT );
+	sqlite3_step( stmt );
+	sqlite3_finalize( stmt );
+
+	/* Reload the cache */
+	db_game_load_pretitles();
+}
+
+void db_game_list_pretitles( CHAR_DATA *ch ) {
+	char buf[MAX_STRING_LENGTH];
+	int i;
+
+	if ( !game_db ) {
+		send_to_char( "Database not available.\n\r", ch );
+		return;
+	}
+
+	send_to_char( "#GImmortal pretitles:#n\n\r", ch );
+
+	if ( pretitle_count == 0 ) {
+		send_to_char( "  (none)\n\r", ch );
+		return;
+	}
+
+	for ( i = 0; i < pretitle_count; i++ ) {
+		snprintf( buf, sizeof( buf ), "  #w%-15s#n : %s#n\n\r",
+			pretitle_entries[i].immortal_name,
+			pretitle_entries[i].pretitle );
+		send_to_char( buf, ch );
+	}
+
+	snprintf( buf, sizeof( buf ), "#wTotal: %d#n\n\r", pretitle_count );
 	send_to_char( buf, ch );
 }

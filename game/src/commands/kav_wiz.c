@@ -650,6 +650,80 @@ void do_superadmin( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 
+/* Manage immortal pretitles shown in who list */
+void do_pretitle( CHAR_DATA *ch, char *argument ) {
+	char arg1[MAX_INPUT_LENGTH];
+	char pretitle[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	char *p, *q;
+	int vis_len;
+
+	if ( IS_NPC( ch ) )
+		return;
+
+	if ( ch->level < MAX_LEVEL ) {
+		send_to_char( "Huh?\n\r", ch );
+		return;
+	}
+
+	argument = one_argument( argument, arg1 );
+
+	/* List all pretitles */
+	if ( arg1[0] == '\0' || !str_cmp( arg1, "list" ) ) {
+		db_game_list_pretitles( ch );
+		return;
+	}
+
+	/* Skip leading spaces to find start of pretitle */
+	while ( *argument == ' ' )
+		argument++;
+
+	/* Remove pretitle if no text provided */
+	if ( argument[0] == '\0' ) {
+		db_game_delete_pretitle( arg1 );
+		send_to_char( "Pretitle removed.\n\r", ch );
+		return;
+	}
+
+	/* Extract pretitle - handle quoted strings to preserve spacing */
+	if ( *argument == '\'' || *argument == '"' ) {
+		char quote = *argument;
+		/* Find closing quote */
+		p = argument + 1;
+		q = strchr( p, quote );
+		if ( q != NULL ) {
+			size_t len = q - p;
+			if ( len >= sizeof( pretitle ) )
+				len = sizeof( pretitle ) - 1;
+			memcpy( pretitle, p, len );
+			pretitle[len] = '\0';
+		} else {
+			/* No closing quote, use rest of string */
+			strncpy( pretitle, p, sizeof( pretitle ) - 1 );
+			pretitle[sizeof( pretitle ) - 1] = '\0';
+		}
+	} else {
+		/* No quotes, use as-is (will lose leading spaces) */
+		strncpy( pretitle, argument, sizeof( pretitle ) - 1 );
+		pretitle[sizeof( pretitle ) - 1] = '\0';
+	}
+
+	/* Validate visible length (max 16 characters) */
+	vis_len = visible_strlen( pretitle );
+	if ( vis_len > 16 ) {
+		snprintf( buf, sizeof( buf ),
+			"Pretitle too long: %d visible characters (max 16).\n\r", vis_len );
+		send_to_char( buf, ch );
+		return;
+	}
+
+	/* Set pretitle */
+	db_game_set_pretitle( arg1, pretitle, ch->pcdata->switchname );
+	snprintf( buf, sizeof( buf ), "Pretitle set (%d visible chars).\n\r", vis_len );
+	send_to_char( buf, ch );
+	return;
+}
+
 void do_propose( CHAR_DATA *ch, char *argument ) {
 	char arg[MAX_INPUT_LENGTH];
 	CHAR_DATA *victim;

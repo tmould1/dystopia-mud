@@ -26,6 +26,9 @@ void load_gameconfig() {
 
 	/* Load audio config from game.db */
 	db_game_load_audio_config();
+
+	/* Load immortal pretitles from game.db */
+	db_game_load_pretitles();
 }
 
 void save_gameconfig() {

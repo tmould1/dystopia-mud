@@ -482,3 +482,33 @@ void add_commas_to_number( int number, char *out_str, size_t buf_size ) {
 		out_str[j] = non_formatted_string[i];
 	}
 }
+
+/*
+ * Calculate visible string length, excluding color codes.
+ * Handles both standard (#X) and extended (#xNNN) color codes.
+ */
+int visible_strlen( const char *str ) {
+	int len = 0;
+	const char *p = str;
+
+	if ( !str )
+		return 0;
+
+	while ( *p ) {
+		if ( *p == '#' && *( p + 1 ) != '\0' ) {
+			/* Check for extended color code #xNNN */
+			if ( ( *( p + 1 ) == 'x' || *( p + 1 ) == 'X' ) &&
+				*( p + 2 ) >= '0' && *( p + 2 ) <= '9' &&
+				*( p + 3 ) >= '0' && *( p + 3 ) <= '9' &&
+				*( p + 4 ) >= '0' && *( p + 4 ) <= '9' ) {
+				p += 5; /* Skip #xNNN */
+			} else {
+				p += 2; /* Skip #X */
+			}
+		} else {
+			len++;
+			p++;
+		}
+	}
+	return len;
+}

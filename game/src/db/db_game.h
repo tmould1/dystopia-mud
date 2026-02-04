@@ -71,6 +71,13 @@ void db_game_add_super_admin( const char *name );
 void db_game_remove_super_admin( const char *name );
 void db_game_list_super_admins( CHAR_DATA *ch );
 
+/* Immortal pretitles (game.db) - custom who list pretitles */
+void db_game_load_pretitles( void );
+const char *db_game_get_pretitle( const char *name );
+void db_game_set_pretitle( const char *name, const char *pretitle, const char *set_by );
+void db_game_delete_pretitle( const char *name );
+void db_game_list_pretitles( CHAR_DATA *ch );
+
 /* Audio config (game.db) - MCMP audio file mappings */
 typedef struct audio_entry {
 	char   *category;      /* "ambient", "footstep", "combat", etc. */
