@@ -781,12 +781,12 @@ void do_mindflayerarmor( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Usage: mindflayerarmor <piece>\n\r", ch );
 		send_to_char( "Available: scepter ring collar robes crown leggings sandals\n\r", ch );
 		send_to_char( "           gloves vambraces shroud sash bangle lens\n\r", ch );
-		send_to_char( "Cost: 60 primal per piece\n\r", ch );
+		send_to_char( "Cost: 150 primal per piece\n\r", ch );
 		return;
 	}
 
-	if ( ch->practice < 60 ) {
-		send_to_char( "You need 60 primal to create equipment.\n\r", ch );
+	if ( ch->practice < 150 ) {
+		send_to_char( "You need 150 primal to create equipment.\n\r", ch );
 		return;
 	}
 
@@ -813,7 +813,7 @@ void do_mindflayerarmor( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->practice -= 60;
+	ch->practice -= 150;
 
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );

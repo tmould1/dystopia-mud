@@ -87,7 +87,7 @@ storms. Their enhanced Focus cap of 150 enables apocalyptic abilities.#n
   #Rpsiblast#n          Focused mental lance, high single-target damage
   #Rrealityfracture#n   Tear reality with pure thought (100+ focus)
   #Rdismiss#n           Release a thrall from your control
-  #Rmindflayerarmor#n   Create class equipment (60 primal)
+  #Rmindflayerarmor#n   Create class equipment (150 primal)
 
 See also: FOCUS, PSION, MINDFLAYER TRAINING
 '''
