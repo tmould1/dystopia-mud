@@ -26,6 +26,7 @@
 #endif
 #include <string.h>
 #include "merc.h"
+#include "../db/db_game.h"
 
 /*
 ===========================================================================
@@ -172,8 +173,28 @@ void set_pc_name( CHAR_DATA *ch, char *title ) {
 	return;
 }
 
+/*
+ * Apply database-driven starting values after class selection.
+ * Sets beast, level, and calls set_learnable_disciplines() based on class_starting table.
+ */
+static void apply_class_starting( CHAR_DATA *ch, int class_id ) {
+	const CLASS_STARTING *start = db_game_get_starting( class_id );
+	if ( start == NULL )
+		return;
+
+	ch->beast = start->starting_beast;
+
+	if ( start->starting_level > 1 )
+		ch->level = start->starting_level;
+
+	if ( start->has_disciplines )
+		set_learnable_disciplines( ch );
+}
+
 void do_classself( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_STRING_LENGTH];
+	const CLASS_REGISTRY_ENTRY *reg;
+
 	argument = one_argument( argument, arg1 );
 
 	if ( IS_NPC( ch ) ) return;
@@ -186,6 +207,8 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You must be avatar to selfclass.\n\r", ch );
 		return;
 	}
+
+	/* No argument - show help (ASCII art display kept in code) */
 	if ( arg1[0] == '\0' ) {
 		send_to_char( "Classes: Type selfclass <class> to get classed.\n\r\n\r", ch );
 		send_to_char( "#R[#0Demon#R]#n             #y((#LWerewolf#y))#n         #P.o0#0Drow#P0o.#n\n\r", ch );
@@ -194,60 +217,38 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "#x093~#x141[#nPsion#x141]#x093~#n\n\r", ch );
 		return;
 	}
-	do_clearstats2( ch, "" );
-	if ( !str_cmp( arg1, "demon" ) ) {
-		ch->class = CLASS_DEMON;
-		set_learnable_disciplines( ch );
-		send_to_char( "You have chosen the #RDemonic#n path, may god have mercy on yer soul.\n\r", ch );
+
+	/* Look up class by keyword */
+	reg = db_game_get_registry_by_keyword( arg1 );
+
+	if ( !reg ) {
+		/* Invalid keyword - show help */
+		do_classself( ch, "" );
+		return;
 	}
 
-	else if ( !str_cmp( arg1, "werewolf" ) ) {
-		ch->class = CLASS_WEREWOLF;
-		set_learnable_disciplines( ch );
-		send_to_char( "You have chosen the path of the #0Garou#n, may gaia guide you.\n\r", ch );
+	/* Only base classes can be selfclassed (upgrade_class == 0) */
+	if ( !IS_BASE_CLASS( reg ) ) {
+		send_to_char( "That class requires special conditions to unlock.\n\r", ch );
+		return;
 	}
 
-	else if ( !str_cmp( arg1, "drow" ) ) {
-		ch->class = CLASS_DROW;
-		send_to_char( "Choose your profession, and #PLloth#n will guide you.\n\r", ch );
-	}
-
-	else if ( !str_cmp( arg1, "ninja" ) ) {
-		ch->class = CLASS_NINJA;
-		send_to_char( "You have chosen a life in the #0shadows#n, assassinate at will.\n\r", ch );
-	}
-
-	else if ( !str_cmp( arg1, "vampire" ) ) {
-		ch->class = CLASS_VAMPIRE;
-		ch->beast = 30;
-		set_learnable_disciplines( ch );
-		send_to_char( "Fear the #ySun#n nosferatu, God's curse lives in you.\n\r", ch );
-	}
-
-	else if ( !str_cmp( arg1, "monk" ) ) {
-		ch->class = CLASS_MONK;
-		ch->level = 3;
-		send_to_char( "You faith in God will guide you, destroy #7EVIL#n.\n\r", ch );
-	}
-
-	else if ( !str_cmp( arg1, "mage" ) || !str_cmp( arg1, "battlemage" ) ) {
-		if ( ch->max_mana >= 5000 && ch->spl[RED_MAGIC] > 99 && ch->spl[BLUE_MAGIC] > 99 && ch->spl[YELLOW_MAGIC] > 99 && ch->spl[GREEN_MAGIC] > 99 && ch->spl[PURPLE_MAGIC] > 99 ) {
-			ch->class = CLASS_MAGE;
-			ch->level = 3;
-			send_to_char( "You start down the path of power, the #Rarcane#n is your weapon.\n\r", ch );
-		} else {
+	/* Special requirements check for mage */
+	if ( reg->class_id == CLASS_MAGE ) {
+		if ( ch->max_mana < 5000 || ch->spl[RED_MAGIC] < 100 ||
+		     ch->spl[BLUE_MAGIC] < 100 || ch->spl[YELLOW_MAGIC] < 100 ||
+		     ch->spl[GREEN_MAGIC] < 100 || ch->spl[PURPLE_MAGIC] < 100 ) {
 			send_to_char( "You need 5K mana and 100 in all your spellcolors.\n\r", ch );
 			return;
 		}
-	} else if ( !str_cmp( arg1, "dirgesinger" ) ) {
-		ch->class = CLASS_DIRGESINGER;
-		send_to_char( "Your voice becomes your weapon. Let the #Gbattle hymns#n begin.\n\r", ch );
-	} else if ( !str_cmp( arg1, "psion" ) ) {
-		ch->class = CLASS_PSION;
-		send_to_char( "Your mind awakens to #x141psionic power#n. Focus your thoughts.\n\r", ch );
-	} else
-		do_classself( ch, "" );
-	return;
+	}
+
+	/* Apply class */
+	do_clearstats2( ch, "" );
+	ch->class = reg->class_id;
+	apply_class_starting( ch, reg->class_id );
+	send_to_char( reg->selfclass_message, ch );
+	send_to_char( "\n\r", ch );
 }
 
 void do_reimb( CHAR_DATA *ch, char *argument ) {

@@ -536,59 +536,7 @@ void do_songtrain( CHAR_DATA *ch, char *argument ) {
  * Dirgesinger armor - creates class-specific equipment
  */
 void do_dirgesingerarmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_INDEX_DATA *pObjIndex;
-	OBJ_DATA *obj;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	if ( !IS_CLASS( ch, CLASS_DIRGESINGER ) ) {
-		send_to_char( "Huh?\n\r", ch );
-		return;
-	}
-
-	argument = one_argument( argument, arg );
-
-	if ( arg[0] == '\0' ) {
-		send_to_char( "Please specify which piece of armor to create.\n\r", ch );
-		send_to_char( "Options: warhorn ring collar battleplate warhelm greaves warboots gauntlets vambraces warcape belt bracer warmask\n\r", ch );
-		return;
-	}
-
-	if ( ch->practice < acfg( "dirgesinger.armor.primal_cost" ) ) {
-		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You need %d primal to create dirgesinger armor.\n\r", acfg( "dirgesinger.armor.primal_cost" ) );
-		send_to_char( buf, ch );
-		return;
-	}
-
-	if ( !str_cmp( arg, "warhorn" ) )          vnum = 33320;
-	else if ( !str_cmp( arg, "ring" ) )        vnum = 33321;
-	else if ( !str_cmp( arg, "collar" ) )      vnum = 33322;
-	else if ( !str_cmp( arg, "battleplate" ) ) vnum = 33323;
-	else if ( !str_cmp( arg, "warhelm" ) )     vnum = 33324;
-	else if ( !str_cmp( arg, "greaves" ) )     vnum = 33325;
-	else if ( !str_cmp( arg, "warboots" ) )    vnum = 33326;
-	else if ( !str_cmp( arg, "gauntlets" ) )   vnum = 33327;
-	else if ( !str_cmp( arg, "vambraces" ) )   vnum = 33328;
-	else if ( !str_cmp( arg, "warcape" ) )     vnum = 33329;
-	else if ( !str_cmp( arg, "belt" ) )        vnum = 33330;
-	else if ( !str_cmp( arg, "bracer" ) )      vnum = 33331;
-	else if ( !str_cmp( arg, "warmask" ) )     vnum = 33332;
-	else { do_dirgesingerarmor( ch, "" ); return; }
-
-	if ( vnum == 0 || ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "Missing object, please inform an immortal.\n\r", ch );
-		return;
-	}
-
-	ch->practice -= acfg( "dirgesinger.armor.primal_cost" );
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-
-	act( "You shape sonic energy into $p!", ch, obj, NULL, TO_CHAR );
-	act( "$n shapes sonic energy into $p!", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_DIRGESINGER );
 }
 
 /*

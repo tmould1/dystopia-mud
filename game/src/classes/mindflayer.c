@@ -764,64 +764,7 @@ void do_dismiss( CHAR_DATA *ch, char *argument ) {
  * Mindflayer Armor creation command
  */
 void do_mindflayerarmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_DATA *obj;
-	OBJ_INDEX_DATA *pObjIndex;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	if ( !IS_CLASS( ch, CLASS_MINDFLAYER ) ) {
-		send_to_char( "Huh?\n\r", ch );
-		return;
-	}
-
-	one_argument( argument, arg );
-
-	if ( arg[0] == '\0' ) {
-		send_to_char( "#x029~#x035[#n Mindflayer Equipment #x035]#x029~#n\n\r", ch );
-		send_to_char( "Usage: mindflayerarmor <piece>\n\r", ch );
-		send_to_char( "Available: scepter ring collar robes crown leggings sandals\n\r", ch );
-		send_to_char( "           gloves vambraces shroud sash bangle lens\n\r", ch );
-		send_to_char( "Cost: 150 primal per piece\n\r", ch );
-		return;
-	}
-
-	if ( ch->practice < 150 ) {
-		send_to_char( "You need 150 primal to create equipment.\n\r", ch );
-		return;
-	}
-
-	if ( !str_cmp( arg, "scepter" ) )     vnum = 33380;
-	else if ( !str_cmp( arg, "ring" ) )   vnum = 33381;
-	else if ( !str_cmp( arg, "collar" ) ) vnum = 33382;
-	else if ( !str_cmp( arg, "robes" ) )  vnum = 33383;
-	else if ( !str_cmp( arg, "crown" ) )  vnum = 33384;
-	else if ( !str_cmp( arg, "leggings" ) ) vnum = 33385;
-	else if ( !str_cmp( arg, "sandals" ) ) vnum = 33386;
-	else if ( !str_cmp( arg, "gloves" ) ) vnum = 33387;
-	else if ( !str_cmp( arg, "vambraces" ) ) vnum = 33388;
-	else if ( !str_cmp( arg, "shroud" ) ) vnum = 33389;
-	else if ( !str_cmp( arg, "sash" ) )   vnum = 33390;
-	else if ( !str_cmp( arg, "bangle" ) ) vnum = 33391;
-	else if ( !str_cmp( arg, "lens" ) )   vnum = 33392;
-	else {
-		send_to_char( "That is not a valid piece. See 'mindflayerarmor' for options.\n\r", ch );
-		return;
-	}
-
-	if ( ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "That equipment hasn't been created yet.\n\r", ch );
-		return;
-	}
-
-	ch->practice -= 150;
-
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-
-	act( "You create $p with your psychic power.", ch, obj, NULL, TO_CHAR );
-	act( "$n creates $p with psychic power.", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_MINDFLAYER );
 }
 
 /*

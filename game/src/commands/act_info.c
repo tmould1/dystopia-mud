@@ -827,42 +827,23 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 	else if ( !IS_AFFECTED( ch, AFF_SHADOWPLANE ) && IS_AFFECTED( victim, AFF_SHADOWPLANE ) )
 		strcat( prefix_buf, mxp_aura_tag( ch, "#C(#0Shadowplane#C)#n ", "On shadow plane", -1 ) );
 
-	/* Class titles */
+	/* Class titles - database-driven */
 	if ( !IS_NPC( victim ) && !IS_NPC( ch ) && IS_HERO( victim ) ) {
-		if ( IS_CLASS( victim, CLASS_WEREWOLF ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#y(#LWerewolf#y)#n ", "Werewolf", -1 ) );
-		if ( IS_CLASS( victim, CLASS_DEMON ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#0(#RDemon#0)#n ", "Demon", -1 ) );
-		if ( IS_CLASS( victim, CLASS_NINJA ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#R(#yNinja#R)#n ", "Ninja", -1 ) );
-		if ( IS_CLASS( victim, CLASS_MONK ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#C(#nMonk#C)#n ", "Monk", -1 ) );
-		if ( IS_CLASS( victim, CLASS_DROID ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#p(#PDrider#p)#n ", "Spider Droid", -1 ) );
-		if ( IS_CLASS( victim, CLASS_ANGEL ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#0(#7Angel#0)#n ", "Angel", -1 ) );
-		if ( IS_CLASS( victim, CLASS_TANARRI ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#y(#RTanar'ri#y)#n ", "Tanar'ri", -1 ) );
-		if ( IS_CLASS( victim, CLASS_LICH ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#0(#GLich#0)#n ", "Lich", -1 ) );
-		if ( IS_CLASS( victim, CLASS_UNDEAD_KNIGHT ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#y(#0Death Knight#y)#n ", "Death Knight", -1 ) );
-		if ( IS_CLASS( victim, CLASS_SAMURAI ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#C(#ySamu#Rrai#C)#n ", "Samurai", -1 ) );
-		if ( IS_CLASS( victim, CLASS_MAGE ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "{{#CBattlemage#n}} ", "Battlemage", -1 ) );
-		if ( IS_CLASS( victim, CLASS_DROW ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#P(#0Drow#P)#n ", "Drow", -1 ) );
-		if ( IS_CLASS( victim, CLASS_VAMPIRE ) && !IS_AFFECTED( victim, AFF_POLYMORPH ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#R(V#0ampire#R)#n ", "Vampire", -1 ) );
-		if ( IS_CLASS( victim, CLASS_DIRGESINGER ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#x178(#nDirgesinger#x178)#n ", "Dirgesinger", -1 ) );
-		if ( IS_CLASS( victim, CLASS_SIREN ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#x255)#x147(#nSiren#x147)#x255(#n ", "Siren", -1 ) );
-		if ( IS_CLASS( victim, CLASS_PSION ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#x255<#x033|#nPsion#x033|#x255>#n ", "Psion", -1 ) );
-		if ( IS_CLASS( victim, CLASS_MINDFLAYER ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#x135}#x035{#nMindflayer#x035}#x135{#n ", "Mindflayer", -1 ) );
+		int aura_idx;
+		const CLASS_AURA *aura;
+
+		for ( aura_idx = 0; aura_idx < db_game_get_aura_count(); aura_idx++ ) {
+			aura = db_game_get_aura_by_index( aura_idx );
+			if ( aura == NULL )
+				continue;
+
+			/* Special case: Vampire aura hidden when polymorphed */
+			if ( aura->class_id == CLASS_VAMPIRE && IS_AFFECTED( victim, AFF_POLYMORPH ) )
+				continue;
+
+			if ( IS_CLASS( victim, aura->class_id ) )
+				strcat( prefix_buf, mxp_aura_tag( ch, aura->aura_text, aura->mxp_tooltip, -1 ) );
+		}
 	}
 
 	/* ========== PHASE 2: Build suffix (condition effects) ========== */
@@ -2048,6 +2029,62 @@ void do_stat( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 
+/*
+ * Display database-configured score stats for a character.
+ * Uses class_score_stats table entries loaded at boot.
+ */
+static void show_class_score_stats( CHAR_DATA *ch ) {
+	const CLASS_SCORE_STAT *stats;
+	char buf[MAX_STRING_LENGTH];
+	char temp[MAX_STRING_LENGTH];
+	int count, i, val;
+
+	if ( IS_NPC( ch ) || ch->class == 0 )
+		return;
+
+	stats = db_game_get_score_stats( ch->class );
+	count = db_game_get_score_stat_count( ch->class );
+
+	if ( stats == NULL || count == 0 )
+		return;
+
+	for ( i = 0; i < count; i++ ) {
+		val = get_stat_value( ch, stats[i].stat_source );
+
+		/* Skip display if value is 0 and stat is optional (like siltol) */
+		if ( val == 0 && stats[i].stat_source == STAT_SILTOL )
+			continue;
+
+		/* Skip gnosis stats if gnosis maximum is 0 */
+		if ( ch->gnosis[GMAXIMUM] == 0 &&
+		     ( stats[i].stat_source == STAT_GNOSIS_CURRENT ||
+		       stats[i].stat_source == STAT_GNOSIS_MAXIMUM ) )
+			continue;
+
+		/* Build display using format string: %s is label, %d is value */
+		snprintf( temp, sizeof( temp ), stats[i].format_string, stats[i].stat_label, val );
+
+		/* Convert escaped newlines to actual newlines */
+		{
+			char *src = temp, *dst = buf;
+			while ( *src ) {
+				if ( src[0] == '\\' && src[1] == 'n' ) {
+					*dst++ = '\n';
+					src += 2;
+				} else if ( src[0] == '\\' && src[1] == 'r' ) {
+					*dst++ = '\r';
+					src += 2;
+				} else {
+					*dst++ = *src++;
+				}
+			}
+			*dst = '\0';
+		}
+
+		send_to_char( buf, ch );
+	}
+}
+
 void do_score( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	char ss1[32]; /* Kill count string like "#C12345#n players" */
@@ -2158,6 +2195,8 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 			ch->pcdata->stats[DEMON_CURRENT], ch->pcdata->stats[DEMON_TOTAL] );
 		send_to_char( buf, ch );
 	}
+	/* NOTE: Droid, Tanarri, Drow class points/magic now handled by show_class_score_stats() */
+#if 0
 	if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_DROID ) ) ) {
 
 		sprintf( buf, "#R[#nYou have #C%d #nclass points stored#R]\n\r", ch->pcdata->stats[DROID_POWER] );
@@ -2166,13 +2205,6 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_TANARRI ) ) ) {
 		sprintf( buf, "#R[#nYou have #C%d #nclass points stored#R]\n\r", ch->pcdata->stats[TPOINTS] );
 		send_to_char( buf, ch );
-	}
-
-	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) && ch->generation < 13 ) {
-		sprintf( buf,
-			"#R[#nYou have obtained #C%d #nsouls, which you keep in a little jar#R]\n\r",
-			ch->pcdata->souls );
-		stc( buf, ch );
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DROW ) ) {
 		sprintf( buf, "#R[#nYou have #C%d#n class points stored#R]\n\r",
@@ -2183,6 +2215,15 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 		send_to_char( buf, ch );
 		if ( weather_info.sunlight == SUN_DARK )
 			send_to_char( "#R[#nYou feel strong in the night#R]\n\r", ch );
+	}
+#endif
+
+	/* Demon souls - keep in code due to generation condition */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) && ch->generation < 13 ) {
+		sprintf( buf,
+			"#R[#nYou have obtained #C%d #nsouls, which you keep in a little jar#R]\n\r",
+			ch->pcdata->souls );
+		stc( buf, ch );
 	}
 
 	sprintf( buf,
@@ -2197,6 +2238,17 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 			ch->pcdata->awins, ch->pcdata->alosses );
 		send_to_char( buf, ch );
 	}
+
+	/* Display database-configured class stats */
+	show_class_score_stats( ch );
+
+	/* Keep conditional Drow nighttime message */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DROW ) && weather_info.sunlight == SUN_DARK )
+		send_to_char( "#R[#nYou feel strong in the night#R]\n\r", ch );
+
+	/* NOTE: The following class stat blocks have been replaced by database-driven
+	 * display via show_class_score_stats(). Keeping commented out for reference. */
+#if 0
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) {
 		sprintf( buf, "#R[#nYour shapeshifter counter is : #C%d#R]\n\r", ch->pcdata->powers[SHAPE_COUNTER] );
 		stc( buf, ch );
@@ -2233,6 +2285,7 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "#R[#nMaximum gnosis:            #C%d#R]\n\r", ch->gnosis[GMAXIMUM] );
 		stc( buf, ch );
 	}
+#endif
 
 	if ( !IS_NPC( ch ) && ch->pcdata->condition[COND_DRUNK] > 10 )
 		send_to_char( "#R[#nYou are drunk#R]\n\r", ch );
@@ -2421,10 +2474,7 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 	if ( IS_AFFECTED( ch, AFF_HIDE ) ) send_to_char( "#R[#nYou are keeping yourself hidden from those around you#R]\n\r", ch );
 
 	if ( !IS_NPC( ch ) ) {
-		if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch->siltol > 0 ) {
-			sprintf( buf, "#R[#nYou have attained #C%d #npoints of silver tolerance#R]\n\r", ch->siltol );
-			send_to_char( buf, ch );
-		}
+		/* NOTE: Werewolf siltol now handled by show_class_score_stats() */
 		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 ) {
 			sprintf( buf, "#R[#nThe beast is in control of your actions:  Affects Hitroll and Damroll by #C+%d#R]\n\r", ch->rage );
 			send_to_char( buf, ch );

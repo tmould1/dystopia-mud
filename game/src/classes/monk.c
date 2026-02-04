@@ -24,66 +24,7 @@
 #include "ability_config.h"
 
 void do_monkarmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_INDEX_DATA *pObjIndex;
-	OBJ_DATA *obj;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	argument = one_argument( argument, arg );
-	if ( IS_NPC( ch ) ) return;
-	if ( !IS_IMMORTAL( ch ) ) {
-		if ( !IS_CLASS( ch, CLASS_MONK ) ) {
-			send_to_char( "What?\n\r", ch );
-			return;
-		}
-	}
-	if ( arg[0] == '\0' ) {
-		send_to_char( "Please specify which piece of monk armor you wish to make: Ring Collar Robe Helmet Shorts Boots Gloves Sleeves Cloak Belt Bracer Mask.\n\r", ch );
-		return;
-	}
-	if ( ch->practice < acfg("monk.monkarmor.primal_cost") ) {
-		send_to_char( "It costs 60 points of primal to create monk equipment.\n\r", ch );
-		return;
-	}
-	if ( !str_cmp( arg, "bracer" ) )
-		vnum = 33029;
-	else if ( !str_cmp( arg, "cloak" ) )
-		vnum = 33027;
-	else if ( !str_cmp( arg, "gloves" ) )
-		vnum = 33025;
-	else if ( !str_cmp( arg, "ring" ) )
-		vnum = 33020;
-	else if ( !str_cmp( arg, "collar" ) )
-		vnum = 33021;
-	else if ( !str_cmp( arg, "robe" ) )
-		vnum = 33022;
-	else if ( !str_cmp( arg, "helmet" ) )
-		vnum = 33024;
-	else if ( !str_cmp( arg, "boots" ) )
-		vnum = 33031;
-	else if ( !str_cmp( arg, "shorts" ) )
-		vnum = 33023;
-	else if ( !str_cmp( arg, "sleeves" ) )
-		vnum = 33026;
-	else if ( !str_cmp( arg, "belt" ) )
-		vnum = 33028;
-	else if ( !str_cmp( arg, "mask" ) )
-		vnum = 33030;
-	else {
-		do_monkarmor( ch, "" );
-		return;
-	}
-	if ( vnum == 0 || ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "Missing object, please inform a God.\n\r", ch );
-		return;
-	}
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-	ch->practice -= acfg("monk.monkarmor.primal_cost");
-	act( "$p appears in your hands.", ch, obj, NULL, TO_CHAR );
-	act( "$p appears in $n's hands.", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_MONK );
 }
 
 void do_deathtouch( CHAR_DATA *ch, char *argument ) {

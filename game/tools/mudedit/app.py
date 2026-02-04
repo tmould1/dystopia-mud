@@ -19,7 +19,9 @@ from .db.repository import (
     TopBoardRepository, LeaderboardRepository, NotesRepository, BugsRepository,
     SuperAdminsRepository, ImmortalPretitlesRepository,
     PlayerRepository,
-    ClassBracketsRepository, ClassGenerationsRepository
+    ClassBracketsRepository, ClassGenerationsRepository, ClassAurasRepository,
+    ClassArmorConfigRepository, ClassArmorPiecesRepository, ClassStartingRepository,
+    ClassScoreStatsRepository, ClassRegistryRepository
 )
 from .nav.tree import NavigationTree
 from .panels import (
@@ -28,7 +30,8 @@ from .panels import (
     GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel, AudioConfigPanel,
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
-    PlayerEditorPanel, ClassDisplayPanel
+    PlayerEditorPanel, ClassDisplayPanel, ClassAuraPanel, ClassArmorPanel,
+    ClassStartingPanel, ClassScorePanel, ClassRegistryPanel
 )
 
 
@@ -395,6 +398,48 @@ class MudEditorApp:
                     self.notebook,
                     brackets_repo,
                     generations_repo,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'class_auras':
+                auras_repo = ClassAurasRepository(conn)
+                return ClassAuraPanel(
+                    self.notebook,
+                    auras_repo,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'class_armor':
+                config_repo = ClassArmorConfigRepository(conn)
+                pieces_repo = ClassArmorPiecesRepository(conn)
+                return ClassArmorPanel(
+                    self.notebook,
+                    config_repo,
+                    pieces_repo,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'class_starting':
+                starting_repo = ClassStartingRepository(conn)
+                return ClassStartingPanel(
+                    self.notebook,
+                    starting_repo,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'class_score_stats':
+                score_repo = ClassScoreStatsRepository(conn)
+                return ClassScorePanel(
+                    self.notebook,
+                    score_repo,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'class_registry':
+                registry_repo = ClassRegistryRepository(conn)
+                return ClassRegistryPanel(
+                    self.notebook,
+                    registry_repo,
                     on_status=self._set_status
                 )
 

@@ -494,78 +494,7 @@ void do_hara_kiri( CHAR_DATA *ch, char *argument ) {
 }
 
 void do_ninjaarmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_INDEX_DATA *pObjIndex;
-	OBJ_DATA *obj;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	argument = one_argument( argument, arg );
-
-	if ( IS_NPC( ch ) ) return;
-
-	if ( !IS_IMMORTAL( ch ) ) {
-		if ( !IS_CLASS( ch, CLASS_NINJA ) ) {
-			send_to_char( "What?\n\r", ch );
-			return;
-		}
-	}
-
-	if ( arg[0] == '\0' ) {
-		send_to_char( "Please specify which piece of ninja eq you wish to make: Ring Collar Robe Cap Leggings Boots Gloves Sleeves Cloak Belt Bracer Mask Sword Dagger.\n\r", ch );
-		return;
-	}
-
-	if ( ch->practice < acfg("ninja.ninjaarmor.primal_cost") ) {
-		send_to_char( "You don't have the 60 primal needed.\n\r", ch );
-		return;
-	}
-	if ( !str_cmp( arg, "mask" ) )
-		vnum = 33093;
-	else if ( !str_cmp( arg, "dagger" ) )
-		vnum = 33080;
-	else if ( !str_cmp( arg, "sword" ) )
-		vnum = 33081;
-	else if ( !str_cmp( arg, "ring" ) )
-		vnum = 33082;
-	else if ( !str_cmp( arg, "collar" ) )
-		vnum = 33083;
-	else if ( !str_cmp( arg, "robe" ) )
-		vnum = 33085;
-	else if ( !str_cmp( arg, "cap" ) )
-		vnum = 33086;
-	else if ( !str_cmp( arg, "leggings" ) )
-		vnum = 33087;
-	else if ( !str_cmp( arg, "boots" ) )
-		vnum = 33088;
-	else if ( !str_cmp( arg, "gloves" ) )
-		vnum = 33091;
-	else if ( !str_cmp( arg, "sleeves" ) )
-		vnum = 33089;
-	else if ( !str_cmp( arg, "cloak" ) )
-		vnum = 33090;
-	else if ( !str_cmp( arg, "belt" ) )
-		vnum = 33092;
-	else if ( !str_cmp( arg, "bracer" ) )
-		vnum = 33084;
-	else {
-		do_ninjaarmor( ch, "" );
-		return;
-	}
-
-	if ( vnum == 0 || ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "Missing object, please inform a God .\n\r", ch );
-		return;
-	}
-
-	if ( !IS_IMMORTAL( ch ) ) {
-		ch->practice -= acfg("ninja.ninjaarmor.primal_cost");
-	}
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-	act( "You make $p from the shadows.", ch, obj, NULL, TO_CHAR );
-	act( "$n forms $p from the shadows.", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_NINJA );
 }
 
 void do_strangle( CHAR_DATA *ch, char *argument ) {

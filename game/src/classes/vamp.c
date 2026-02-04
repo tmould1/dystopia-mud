@@ -23,73 +23,12 @@
 #include "merc.h"
 #include "ability_config.h"
 
+/*
+ * Vampire armor - now database-driven via class_armor system.
+ * Configuration stored in game.db: class_armor_config + class_armor_pieces
+ */
 void do_vampirearmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_INDEX_DATA *pObjIndex;
-	OBJ_DATA *obj;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	argument = one_argument( argument, arg );
-	if ( IS_NPC( ch ) ) return;
-	if ( !IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-		send_to_char( "What?\n\r", ch );
-		return;
-	}
-	if ( arg[0] == '\0' ) {
-		send_to_char( "Please specify which piece of vampire armor you wish to make: Ring Collar Plate Helmet Leggings Boots Gloves Sleeves Cape Belt Bracer Visor Dagger Longsword.\n\r", ch );
-		return;
-	}
-
-	if ( ch->practice < acfg("vampire.vampirearmor.practice_cost") ) {
-		send_to_char( "It costs 60 points of primal to create vampire equipment.\n\r", ch );
-		return;
-	}
-
-	if ( !str_cmp( arg, "ring" ) )
-		vnum = 33042;
-	else if ( !str_cmp( arg, "plate" ) )
-		vnum = 33044;
-	else if ( !str_cmp( arg, "helmet" ) )
-		vnum = 33045;
-	else if ( !str_cmp( arg, "collar" ) )
-		vnum = 33043;
-	else if ( !str_cmp( arg, "leggings" ) )
-		vnum = 33046;
-	else if ( !str_cmp( arg, "boots" ) )
-		vnum = 33047;
-	else if ( !str_cmp( arg, "gloves" ) )
-		vnum = 33048;
-	else if ( !str_cmp( arg, "sleeves" ) )
-		vnum = 33049;
-	else if ( !str_cmp( arg, "cape" ) )
-		vnum = 33050;
-	else if ( !str_cmp( arg, "belt" ) )
-		vnum = 33051;
-	else if ( !str_cmp( arg, "bracer" ) )
-		vnum = 33052;
-	else if ( !str_cmp( arg, "visor" ) )
-		vnum = 33053;
-	else if ( !str_cmp( arg, "longsword" ) )
-		vnum = 33040;
-	else if ( !str_cmp( arg, "dagger" ) )
-		vnum = 33041;
-	else {
-		do_vampirearmor( ch, "" );
-		return;
-	}
-
-	if ( vnum == 0 || ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "Missing object, please inform a God.\n\r", ch );
-		return;
-	}
-
-	ch->practice -= acfg("vampire.vampirearmor.practice_cost");
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-	act( "$p appears in your hands.", ch, obj, NULL, TO_CHAR );
-	act( "$p appears in $n's hands.", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_VAMPIRE );
 }
 
 void do_preserve( CHAR_DATA *ch, char *argument ) {

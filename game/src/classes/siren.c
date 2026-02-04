@@ -658,58 +658,7 @@ void do_voicetrain( CHAR_DATA *ch, char *argument ) {
  * Siren armor - creates class-specific equipment
  */
 void do_sirenarmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_INDEX_DATA *pObjIndex;
-	OBJ_DATA *obj;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	if ( IS_NPC( ch ) ) return;
-	if ( !IS_CLASS( ch, CLASS_SIREN ) ) {
-		send_to_char( "Huh?\n\r", ch );
-		return;
-	}
-
-	argument = one_argument( argument, arg );
-
-	if ( arg[0] == '\0' ) {
-		send_to_char( "Please specify which piece of siren armor to create.\n\r", ch );
-		send_to_char( "Options: scepter ring choker gown diadem greaves slippers gloves armlets mantle sash bangle veil\n\r", ch );
-		return;
-	}
-
-	if ( ch->practice < 150 ) {
-		send_to_char( "You need 150 primal to create siren armor.\n\r", ch );
-		return;
-	}
-
-	if ( !str_cmp( arg, "scepter" ) )      vnum = 33340;
-	else if ( !str_cmp( arg, "ring" ) )    vnum = 33341;
-	else if ( !str_cmp( arg, "choker" ) )  vnum = 33342;
-	else if ( !str_cmp( arg, "gown" ) )    vnum = 33343;
-	else if ( !str_cmp( arg, "diadem" ) )  vnum = 33344;
-	else if ( !str_cmp( arg, "greaves" ) ) vnum = 33345;
-	else if ( !str_cmp( arg, "slippers" ) ) vnum = 33346;
-	else if ( !str_cmp( arg, "gloves" ) )  vnum = 33347;
-	else if ( !str_cmp( arg, "armlets" ) ) vnum = 33348;
-	else if ( !str_cmp( arg, "mantle" ) )  vnum = 33349;
-	else if ( !str_cmp( arg, "sash" ) )    vnum = 33350;
-	else if ( !str_cmp( arg, "bangle" ) )  vnum = 33351;
-	else if ( !str_cmp( arg, "veil" ) )    vnum = 33352;
-	else { do_sirenarmor( ch, "" ); return; }
-
-	if ( vnum == 0 || ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "Missing object, please inform an immortal.\n\r", ch );
-		return;
-	}
-
-	ch->practice -= 150;
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-
-	act( "You weave a melody that materializes into $p!", ch, obj, NULL, TO_CHAR );
-	act( "$n weaves a melody that materializes into $p!", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_SIREN );
 }
 
 /*

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_game.h"
 
 extern GAMECONFIG_DATA game_config;
 
@@ -184,19 +185,26 @@ void do_healme( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 
-/* MUDSTAT command */
+/* MUDSTAT command - uses class_registry for labels */
 void do_mudstat( CHAR_DATA *ch, char *argument ) {
 	DESCRIPTOR_DATA *d;
 	char buf[MAX_STRING_LENGTH];
+	char line[MAX_STRING_LENGTH];
 	CHAR_DATA *gch;
-	int mage_count = 0, lich_count = 0, drow_count = 0, drider_count = 0, ww_count = 0, shape_count = 0, monk_count = 0, angel_count = 0;
-	int vampire_count = 0, knight_count = 0, ninja_count = 0, sam_count = 0, demon_count = 0, tanarri_count = 0, newbie_count = 0, total_count = 0;
-	int dirgesinger_count = 0, siren_count = 0, psion_count = 0, mindflayer_count = 0;
+	const CLASS_REGISTRY_ENTRY *reg;
+	int class_counts[32];  /* indexed by registry index, max 32 classes */
+	int newbie_count = 0, total_count = 0;
+	int i, col, reg_count;
 
 	extern char str_boot_time[];
 
 	if ( IS_NPC( ch ) ) return;
 
+	/* Initialize class counts */
+	for ( i = 0; i < 32; i++ )
+		class_counts[i] = 0;
+
+	/* Count players by class */
 	for ( d = descriptor_list; d != NULL; d = d->next ) {
 		if ( d->character != NULL )
 			gch = d->character;
@@ -204,103 +212,71 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 			continue;
 		if ( !d->connected == CON_PLAYING ) continue;
 		if ( gch->level > 6 ) continue;
-		switch ( gch->class ) {
-		case 0:
+
+		if ( gch->class == 0 ) {
 			newbie_count++;
-			total_count++;
-			break;
-		case 1:
-			demon_count++;
-			total_count++;
-			break;
-		case 2:
-			mage_count++;
-			total_count++;
-			break;
-		case 4:
-			ww_count++;
-			total_count++;
-			break;
-		case 8:
-			vampire_count++;
-			total_count++;
-			break;
-		case 16:
-			sam_count++;
-			total_count++;
-			break;
-		case 32:
-			drow_count++;
-			total_count++;
-			break;
-		case 64:
-			monk_count++;
-			total_count++;
-			break;
-		case 128:
-			ninja_count++;
-			total_count++;
-			break;
-		case 256:
-			lich_count++;
-			total_count++;
-			break;
-		case 512:
-			shape_count++;
-			total_count++;
-			break;
-		case 1024:
-			tanarri_count++;
-			total_count++;
-			break;
-		case 2048:
-			angel_count++;
-			total_count++;
-			break;
-		case 4096:
-			knight_count++;
-			total_count++;
-			break;
-		case 8192:
-			drider_count++;
-			total_count++;
-			break;
-		case CLASS_DIRGESINGER:
-			dirgesinger_count++;
-			total_count++;
-			break;
-		case CLASS_SIREN:
-			siren_count++;
-			total_count++;
-			break;
-		case CLASS_PSION:
-			psion_count++;
-			total_count++;
-			break;
-		case CLASS_MINDFLAYER:
-			mindflayer_count++;
-			total_count++;
-			break;
+		} else {
+			/* Find class in registry and count */
+			reg_count = db_game_get_registry_count();
+			for ( i = 0; i < reg_count; i++ ) {
+				reg = db_game_get_registry_by_index( i );
+				if ( reg && gch->class == reg->class_id ) {
+					class_counts[i]++;
+					break;
+				}
+			}
+		}
+		total_count++;
+	}
+
+	/* Display header */
+	send_to_char( "#R--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R== [#y^^#R]  MUD STATS  [#y^^#R] ==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--#n\n\r\n\r", ch );
+	send_to_char( "#LOnline Players by Class :#n\n\r\n\r", ch );
+
+	/* Display classes in 4-column rows using registry labels */
+	reg_count = db_game_get_registry_count();
+	col = 0;
+	line[0] = '\0';
+
+	for ( i = 0; i < reg_count; i++ ) {
+		reg = db_game_get_registry_by_index( i );
+		if ( !reg ) continue;
+
+		/* Format: #GLabel#n : count (padded to 17 chars total per column) */
+		sprintf( buf, "#G%-11s#n : %-2d   ", reg->mudstat_label, class_counts[i] );
+		strcat( line, buf );
+		col++;
+
+		if ( col == 4 ) {
+			strcat( line, "\n\r" );
+			send_to_char( line, ch );
+			line[0] = '\0';
+			col = 0;
 		}
 	}
 
-	send_to_char( "#R--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R== [#y^^#R]  MUD STATS  [#y^^#R] ==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--#n\n\r\n\r", ch );
-	send_to_char( "#LOnline Players by Class :#n\n\r\n\r", ch );
-	sprintf( buf, "#GMages#n       : %-2d   #GLichs#n       : %-2d   #GDrows#n       : %-2d   #GDriders#n     : %-2d\n\r",
-		mage_count, lich_count, drow_count, drider_count );
-	send_to_char( buf, ch );
-	sprintf( buf, "#GDemons#n      : %-2d   #GTanar'ris#n   : %-2d   #GWerewolfs#n   : %-2d   #GShapies#n     : %-2d\n\r",
-		demon_count, tanarri_count, ww_count, shape_count );
-	send_to_char( buf, ch );
-	sprintf( buf, "#GNinjas#n      : %-2d   #GSamurais#n    : %-2d   #GVampires#n    : %-2d   #GKnights#n     : %-2d\n\r",
-		ninja_count, sam_count, vampire_count, knight_count );
-	send_to_char( buf, ch );
-	sprintf( buf, "#GMonks#n       : %-2d   #GAngels#n      : %-2d   #GDirges#n      : %-2d   #GSirens#n      : %-2d\n\r",
-		monk_count, angel_count, dirgesinger_count, siren_count );
-	send_to_char( buf, ch );
-	sprintf( buf, "#GPsions#n      : %-2d   #GMindflayers#n : %-2d   #GNewbies#n     : %-2d   #GTotal#n       : %-2d\n\r\n\r",
-		psion_count, mindflayer_count, newbie_count, total_count );
-	send_to_char( buf, ch );
+	/* Add newbies and total on the last row */
+	sprintf( buf, "#GNewbies#n     : %-2d   ", newbie_count );
+	strcat( line, buf );
+	col++;
+	if ( col == 4 ) {
+		strcat( line, "\n\r" );
+		send_to_char( line, ch );
+		line[0] = '\0';
+		col = 0;
+	}
+
+	sprintf( buf, "#GTotal#n       : %-2d   ", total_count );
+	strcat( line, buf );
+	col++;
+
+	/* Finish any partial row */
+	if ( col > 0 ) {
+		strcat( line, "\n\r" );
+		send_to_char( line, ch );
+	}
+
+	send_to_char( "\n\r", ch );
 	send_to_char( "#R--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==      OTHER STATS     ==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--#n\n\r\n\r", ch );
 	if ( global_exp )
 		send_to_char( "#LHappy Hour is #yON!#n", ch );

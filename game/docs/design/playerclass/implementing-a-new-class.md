@@ -2,6 +2,16 @@
 
 Lessons learned and a reference checklist from implementing the Dirgesinger (base) and Siren (upgrade) classes. Use this as a guide when adding future classes.
 
+**Major Update (2024):** Many class display features are now **database-driven** via MudEdit:
+- WHO list brackets and titles → `class_brackets`, `class_generations` tables
+- Room aura text → `class_auras` table
+- Score display stats → `class_score_stats` table
+- Class armor configuration → `class_armor_config`, `class_armor_pieces` tables
+- Selfclass/mudstat metadata → `class_registry` table
+- Starting values → `class_starting` table
+
+This significantly reduces the code changes needed for a new class. See "Database Tables (via MudEdit)" section below.
+
 ## Files That Need Changes
 
 Every new class touches a minimum set of files. Missing any of these will cause build failures or runtime issues.
@@ -20,10 +30,9 @@ If the new class is an upgrade that shares a header with its base class (like Si
 | File | What to Add | Notes |
 |------|-------------|-------|
 | `src/core/class.h` | `#define CLASS_<NAME> <bit>` | Must be a unique power-of-2. Next available after 131072 is 262144. |
-| `src/core/merc.h` | `DECLARE_DO_FUN` for every ability + training + armor command | One line per function |
+| `src/core/merc.h` | `DECLARE_DO_FUN` for every ability + training command | One line per function (armor command is now generic) |
 | `src/core/interp.c` | Entry in `cmd_table[]` for every player command | Set `race` field to `CLASS_<NAME>` for class-restricted commands |
-| `src/commands/act_info.c` | Who list brackets, titles, room aura, score display, class_name(), value calc | Six locations - see "act_info.c Checklist" section |
-| `src/commands/wizutil.c` | `do_classself` base class selection (base classes only) | Add display line and selection case |
+| `src/commands/act_info.c` | `class_name()` function, value calc (if using ch->rage) | Only 2-3 locations now - most display is DB-driven |
 | `src/classes/clan.c` | `do_class` immortal class-setting command | Add to help text and class-setting switch |
 | `src/systems/upgrade.c` | `is_upgrade()` check (upgrade classes only), upgrade path mapping | Two locations |
 | `src/combat/fight.c` | Damcap bonuses, extra attack hooks, defensive mechanics (barrier, reflect) | Multiple locations, add `#include "<class>.h"` for constants |
@@ -32,8 +41,9 @@ If the new class is an upgrade that shares a header with its base class (like Si
 | `src/core/ability_config.c` | Default `acfg` values for all balance-tunable parameters | Add entries to `acfg_table[]` array |
 | `src/core/prompt.c` | `%R` prompt variable (if class uses `ch->rage` for resource) | Add class to the `case 'R':` check |
 | `src/systems/save.c` | Verify `pcdata->powers[]` and `pcdata->stats[]` are saved/loaded | Usually already handled generically, but verify |
-| `src/systems/jobo_act.c` | `do_mudstat` player count display | Three locations - see "do_mudstat Player Statistics" section |
 | `game/build/Makefile` | Add new `.c` file to the build | Run `GenerateProjectFiles.bat` (Windows) or `.sh` (Linux) instead of editing manually |
+
+**Note:** Many items that previously required code changes are now database-driven. See "Database Tables" section below.
 
 ### Data Files to Modify
 
@@ -42,6 +52,25 @@ If the new class is an upgrade that shares a header with its base class (like Si
 | `gamedata/db/game/base_help.db` | Help entry for the class, system-specific help entries, update CLASSES help |
 | `gamedata/db/game/game.db` | Runtime overrides for `acfg` values (defaults are in `ability_config.c`, overrides saved here) |
 | `gamedata/db/areas/classeq.db` | Equipment stats for class armor pieces and mastery item |
+
+### Database Tables (via MudEdit)
+
+Most class display and configuration is now database-driven. Use MudEdit (`python -m mudedit` from `game/tools/`) to add entries. The server loads these at boot time.
+
+| Table | MudEdit Panel | What to Add | Notes |
+|-------|---------------|-------------|-------|
+| `class_registry` | Class Registry | Class metadata: name, keyword, mudstat label, selfclass message | **Add first** - other tables reference this |
+| `class_brackets` | Class Display | WHO list brackets with colors | e.g., `#R<<#n` and `#R>>#n` |
+| `class_generations` | Class Display | Generation-based titles (1-13 + default) | One row per generation level |
+| `class_auras` | Class Aura | Room presence text shown when looking | e.g., `#y(#LVampire#y)#n ` |
+| `class_starting` | Class Starting | Starting beast/level values | Vampire: 30 beast, Monk/Mage: level 3 |
+| `class_score_stats` | Class Score | Custom stats shown in `score` command | Uses STAT_SOURCE enum for value lookup |
+| `class_armor_config` | Class Armor | Armor creation messages and primal cost key | Generic `do_classarmor` uses this |
+| `class_armor_pieces` | Class Armor | Keyword-to-vnum mapping for armor pieces | e.g., "ring" → vnum 12345 |
+
+**Important:** Add `class_registry` entry FIRST, before other tables. Foreign key constraints reference it.
+
+**MudEdit also requires updating `repository.py`:** Add the new class to the `CLASS_NAMES` dictionary at the top of the file (single location - no longer duplicated across classes).
 
 ## Phase Planning Approach
 
@@ -222,8 +251,16 @@ Class equipment provides progression and identity. The vnum range you choose is 
 
 **Implementation Steps:**
 1. **Define equipment vnums** - Pick a contiguous range that doesn't overlap existing ranges. Add the objects to `classeq.db`.
-2. **Implement the armor creation command** - Standard pattern: check class, check primal cost, look up vnum by keyword, create object, give to character.
+2. **Configure armor via MudEdit** - Open the Class Armor panel:
+   - Add a `class_armor_config` entry with:
+     - `acfg_cost_key`: Key for primal cost lookup (e.g., `"classname.armor.practice_cost"`)
+     - `usage_message`: Text showing available pieces
+     - `act_to_char` / `act_to_room`: Messages when creating armor
+   - Add `class_armor_pieces` entries mapping keywords to vnums (e.g., "ring" → 12345)
 3. **Add equipment restrictions to `handler.c`** - Prevent other classes from equipping your class gear by checking vnum ranges.
+4. **Add `acfg` default in `ability_config.c`** - Set the primal cost for armor creation.
+
+**Note:** The armor command itself (`do_classarmor_generic` in `class_armor.c`) is shared by all classes. You do NOT need to write a custom armor command - just configure the database entries.
 
 **Verification:**
 - [ ] All equipment pieces can be created via the armor command
@@ -236,26 +273,27 @@ Class equipment provides progression and identity. The vnum range you choose is 
 **Planning Checklist:**
 Before starting this phase, verify:
 - [ ] Phase 7 complete - equipment works correctly
-- [ ] `src/commands/act_info.c` - review existing class patterns for all 6 locations
 - [ ] Choose your class color scheme (accent and primary colors)
-- [ ] Plan generation-based title progression
+- [ ] Plan generation-based title progression (13 levels + default)
 
 **Why this phase matters:**
-Display integration controls how your class appears everywhere in the game: who list, room descriptions, score command. The act_info.c checklist has 6 specific locations that all need updates. Missing any causes display bugs.
+Display integration controls how your class appears everywhere in the game: who list, room descriptions, score command. Most of this is now database-driven via MudEdit, making it much simpler to add.
 
-**Implementation Steps:**
-1. **Add who list brackets** - Add `openb`/`closeb` with your color scheme in the bracket section.
-2. **Add who list titles** - Add generation-based titles in the title section.
-3. **Add room aura prefix** - Add class tag shown when looking at players in the room.
-4. **Add score display** - Add resource status message in the `score` command.
-5. **Add value calculation** (two locations) - If your class uses `ch->rage` for a resource, add it to value calculation.
-6. **Add to `class_name()` function** - Return the class name string.
+**Implementation Steps (MudEdit - no code changes):**
+1. **Add who list brackets** - Class Display panel → class_brackets table. Add `open_bracket`/`close_bracket` with your color scheme.
+2. **Add who list titles** - Class Display panel → class_generations table. Add 13 generation entries + a generation 0 default.
+3. **Add room aura prefix** - Class Aura panel → class_auras table. Add the class tag shown when looking at players.
+4. **Add score display** - Class Score panel → class_score_stats table. Add entries for each custom stat (use STAT_SOURCE enum).
+
+**Implementation Steps (Code - minimal):**
+5. **Add value calculation** (if needed) - If your class uses `ch->rage` for a resource, add it to value calculation in `act_info.c` (search for "Dirgesinger/Siren Resonance").
+6. **Add to `class_name()` function** - Return the class name string in the switch statement.
 
 **Verification:**
 - [ ] Who list shows correct brackets and titles for your class
 - [ ] Looking at a player shows the correct room aura tag
-- [ ] Score command displays resource correctly
-- [ ] All 6 act_info.c locations updated (see "act_info.c Checklist" in Common Pitfalls)
+- [ ] Score command displays custom stats correctly
+- [ ] `class_name()` returns correct string
 
 ---
 
@@ -290,26 +328,34 @@ Help entries are how players learn to use your class. Well-written help with pro
 **Planning Checklist:**
 Before starting this phase, verify:
 - [ ] Phase 9 complete - help entries exist
-- [ ] `src/commands/wizutil.c` - review `do_classself` format for display and selection
-- [ ] `src/classes/clan.c` - review `do_class` format
-- [ ] Prepare a thematic welcome message for new class members
+- [ ] Prepare a thematic welcome/confirmation message for `selfclass`
+- [ ] Decide if this is a base class (player-selectable) or upgrade class
 
 **Why this phase matters:**
-These commands are how players and immortals assign classes. Without these entries, no one can actually become your class. Base classes go in both `do_classself` and `do_class`; upgrade classes only go in `do_class`.
+These commands are how players and immortals assign classes. Base classes are available via `selfclass`; upgrade classes only via immortal `class` command or the upgrade system.
 
-**Implementation Steps:**
-1. **Add to `do_classself`** (base classes only):
-   - Add display line showing the class with your color scheme
-   - Add selection case with thematic welcome message
-2. **Add to `do_class`** (all classes):
+**Implementation Steps (MudEdit):**
+1. **Add to class_registry** - Class Registry panel:
+   - `class_name`: Display name (e.g., "Vampire")
+   - `keyword`: Selfclass keyword (e.g., "vampire")
+   - `keyword_alt`: Optional alternate keyword (e.g., "battlemage" for Mage)
+   - `mudstat_label`: Plural form for mudstat (e.g., "Vampires")
+   - `selfclass_message`: Welcome message with color codes
+   - `upgrade_class`: NULL for base class, or class_id of the base class this upgrades FROM
+   - `display_order`: Controls mudstat display order
+
+**Implementation Steps (Code):**
+2. **Add to `do_class`** (all classes) in `clan.c`:
    - Add class name to help text listing
    - Add class-setting case
+
+**Note:** The `do_classself` command now uses database lookup via `db_game_get_registry_by_keyword()`. You do NOT need to modify `wizutil.c` for new base classes - just add the class_registry entry with `upgrade_class = NULL`.
 
 **Verification:**
 - [ ] `selfclass <classname>` works for base classes
 - [ ] `class <player> <classname>` works for immortals
-- [ ] Welcome message displays correctly
-- [ ] Class is displayed in the class selection list
+- [ ] Welcome message displays correctly (from class_registry.selfclass_message)
+- [ ] `mudstat` shows the new class with correct label
 
 ### Phase 11: Mastery Item
 
@@ -406,47 +452,34 @@ Before naming abilities, search the codebase for existing `do_<name>` functions 
 
 **Best practice**: Prefix class-specific commands with a short class identifier (e.g., `psi`, `dirge`, `siren`) to avoid conflicts and make grep searches easier.
 
-### act_info.c Checklist
+### act_info.c Checklist (Simplified)
 
-The `act_info.c` file needs updates in **six** locations for each new class. Missing any will cause display bugs:
+Most display features are now database-driven. The `act_info.c` file only needs updates in **2-3** locations:
 
-1. **Value calculation (two locations)** - Add `ch->rage` to value if class uses a resource stored there (Focus, Resonance, etc.). Search for "Dirgesinger/Siren Resonance" to find both.
+1. **class_name() function** - Add class name string. Search for `CLASS_SIREN` in `class_name()` and add before `return "Hero"`.
 
-2. **Room aura prefix** - Add class tag shown when looking at players in the room. Search for `mxp_aura_tag` and add after Siren.
+2. **Value calculation** (if class uses `ch->rage`) - Add `ch->rage` to value if class uses a resource stored there (Focus, Resonance, etc.). Search for "Dirgesinger/Siren Resonance" to find both locations.
 
-3. **Score display** - Add resource status message shown in the `score` command. Search for "resonance pulses" and add your class's resource message.
+3. **"mad frenzy" exclusion** (if class uses `ch->rage`) - Update the exclusion list if your class uses `ch->rage` for something other than frenzy (search for "mad frenzy").
 
-4. **Who list brackets** - Add `openb`/`closeb` color scheme. Search for `CLASS_SIREN` in the bracket section and add before the `else` clause.
+**The following are now DATABASE-DRIVEN (via MudEdit):**
+- ~~Room aura prefix~~ → `class_auras` table (Class Aura panel)
+- ~~Score display~~ → `class_score_stats` table (Class Score panel)
+- ~~Who list brackets~~ → `class_brackets` table (Class Display panel)
+- ~~Who list titles~~ → `class_generations` table (Class Display panel)
 
-5. **Who list titles** - Add generation-based titles. Search for the Siren titles block and add your class before the final `else`.
+### do_mudstat Player Statistics (Now Database-Driven)
 
-6. **class_name() function** - Add class name string. Search for `CLASS_SIREN` in `class_name()` and add before `return "Hero"`.
+The `do_mudstat` command in `jobo_act.c` now uses the `class_registry` database table. **No code changes are needed** - just add an entry to the class_registry table via MudEdit.
 
-Also update the "mad frenzy" exclusion list if your class uses `ch->rage` for something other than frenzy (search for "mad frenzy").
+The command iterates through all entries in `class_registry` using `db_game_get_registry_by_index()` and displays the `mudstat_label` field for each class.
 
-### do_mudstat Player Statistics
+**To add a new class to mudstat:**
+1. Open MudEdit → Class Registry panel
+2. Add your class with appropriate `mudstat_label` (e.g., "Vampires", "Demons")
+3. Set `display_order` to control row grouping (lower = displayed earlier)
 
-The `do_mudstat` command in `jobo_act.c` displays online player counts broken down by class. Adding a new class requires updates in **three** locations:
-
-1. **Counter variable declaration** (around line 192) - Add a new counter initialized to 0:
-   ```c
-   int yourclass_count = 0;
-   ```
-
-2. **Switch statement case** (around line 206-267) - Add a case using the `CLASS_*` constant:
-   ```c
-   case CLASS_YOURCLASS:
-       yourclass_count++;
-       total_count++;
-       break;
-   ```
-
-3. **Display output** (around line 272-283) - Add to an existing `sprintf` line or create a new one:
-   ```c
-   sprintf(buf, "#GYourClass#n : %-2d ...\n\r", yourclass_count, ...);
-   ```
-
-**Note**: Use `CLASS_*` constants from `src/classes/class.h` instead of hardcoded numeric values for maintainability.
+**Note**: The old manual counter/switch/sprintf pattern in `jobo_act.c` has been replaced with a loop over the registry cache.
 
 ### `visible_strlen()` and Color Codes
 
@@ -496,16 +529,14 @@ Forgetting this step means the new source file won't be compiled, leading to lin
 
 ### Class Selection Commands
 
-Two commands need updating when adding new classes:
-
 **`do_classself` (wizutil.c)** - Player self-selection at avatar:
-- **Base classes only** - Upgrade classes are obtained via the `upgrade` command, not `selfclass`
-- Add a display line showing the new class in the class list (with your color scheme)
-- Add an `else if (!str_cmp(arg1, "classname"))` case to set `ch->class`
-- Include a thematic welcome message
+- **Now database-driven** - Uses `db_game_get_registry_by_keyword()` to look up class
+- **No code changes needed for new base classes** - just add a class_registry entry with `upgrade_class = NULL`
+- The ASCII art display in `do_classself` is still hardcoded (rarely changes)
+- Mage still has a special requirements check in code (5K mana + spell colors)
 
 **`do_class` (clan.c)** - Immortal command to set any player's class:
-- **All classes** - Both base and upgrade classes need entries here
+- **Still requires code changes** - Both base and upgrade classes need entries here
 - Add the class name to the help text that lists available classes
 - Add an `else if (!str_cmp(arg2, "classname"))` case to set `victim->class`
 - Call `set_learnable_disciplines()` if the class uses the discipline system
@@ -570,29 +601,67 @@ Use your class colors in the help entry. Keep the overall structure consistent w
 
 ## Template: Minimal Class Skeleton
 
-A minimal new base class needs at minimum:
+### Code Changes (Compile-Time)
+
+A minimal new base class needs these **code** changes:
 
 ```
-class.h         +1 line   (CLASS_FOO define)
-merc.h          +N lines  (DECLARE_DO_FUN per ability)
-interp.c        +N lines  (cmd_table entries)
-act_info.c      +6 blocks (value calc x2, aura, score, brackets, titles, class_name)
-wizutil.c       +2 blocks (do_classself display line + selection case)
-clan.c          +2 blocks (do_class help text + class-setting case)
-update.c        +1 line   (tick update call)
-fight.c         +1-3 blocks (damcap, defense, extra attacks) + #include
-ability_config.c +N lines (acfg defaults in acfg_table[])
-handler.c       +1 block  (equipment restrictions)
-jobo_act.c      +5 locations (do_mudstat counter, switch case, display; do_mastery vnum mapping)
-classeq.db      +N entries (class armor + mastery item)
-base_help.db    +2-4 entries (class help, system helps, update CLASSES)
+class.h          +1 line   (CLASS_FOO define)
+merc.h           +N lines  (DECLARE_DO_FUN per ability)
+interp.c         +N lines  (cmd_table entries)
+act_info.c       +1-3 blocks (class_name, value calc if using ch->rage)
+clan.c           +2 blocks (do_class help text + class-setting case)
+update.c         +1 line   (tick update call)
+fight.c          +1-3 blocks (damcap, defense, extra attacks) + #include
+ability_config.c +N lines  (acfg defaults in acfg_table[])
+handler.c        +1 block  (equipment restrictions)
+jobo_act.c       +1 block  (do_mastery vnum mapping only - mudstat is now DB)
 ```
+
+### Database Entries (via MudEdit)
+
+These are configured in `game.db` via MudEdit - no code changes needed:
+
+```
+class_registry      +1 entry  (name, keyword, mudstat label, selfclass message)  ← ADD FIRST
+class_brackets      +1 entry  (WHO list open/close brackets with colors)
+class_generations   +14 entries (generation titles 1-13 + default)
+class_auras         +1 entry  (room presence text)
+class_starting      +1 entry  (starting beast/level values)
+class_score_stats   +N entries (custom score display stats)
+class_armor_config  +1 entry  (armor creation messages)
+class_armor_pieces  +N entries (keyword-to-vnum mapping)
+```
+
+### Data Files
+
+```
+classeq.db       +N entries (class armor + mastery item object definitions)
+base_help.db     +2-4 entries (class help, system helps, update CLASSES)
+repository.py    +1 line   (add class to CLASS_NAMES dictionary at module top)
+```
+
+### Upgrade Class Additions
 
 The corresponding upgrade class (required for every base class) additionally needs:
+
+**Code:**
 ```
-upgrade.c       +2 blocks (is_upgrade check, upgrade path mapping)
-clan.c          +1 block  (do_class class-setting case for immortals)
-act_info.c      +6 blocks (same as base class - all display locations)
-wizutil.c       no change (upgrade classes aren't player-selectable)
-+ All base class files (merc.h, interp.c, fight.c, etc.) for upgrade abilities
+upgrade.c        +2 blocks (is_upgrade check, upgrade path mapping)
+clan.c           +1 block  (do_class class-setting case for immortals)
+act_info.c       +1 block  (class_name only - display is DB-driven)
++ Standard code changes (merc.h, interp.c, fight.c, etc.) for upgrade abilities
 ```
+
+**Database (MudEdit):**
+```
+class_registry   +1 entry  (set upgrade_class to base class_id)
+class_brackets   +1 entry
+class_generations +14 entries
+class_auras      +1 entry
+class_starting   +1 entry
+class_score_stats +N entries
+class_armor_*    (if upgrade has different armor)
+```
+
+**Note:** Upgrade classes set `upgrade_class` in class_registry to the base class's class_id (not NULL). This marks them as upgrade classes, making them unavailable via `selfclass`.

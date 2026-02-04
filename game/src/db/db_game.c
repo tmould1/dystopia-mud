@@ -59,6 +59,40 @@ static int bracket_count = 0;
 static CLASS_GENERATION gen_cache[MAX_CACHED_GENERATIONS];
 static int gen_count = 0;
 
+/* In-memory cache for class aura config */
+#define MAX_CACHED_AURAS        32
+
+static CLASS_AURA aura_cache[MAX_CACHED_AURAS];
+static int aura_count = 0;
+
+/* In-memory cache for class armor config */
+#define MAX_CACHED_ARMOR_CONFIGS  32
+#define MAX_CACHED_ARMOR_PIECES   512
+
+static CLASS_ARMOR_CONFIG armor_config_cache[MAX_CACHED_ARMOR_CONFIGS];
+static int armor_config_count = 0;
+
+static CLASS_ARMOR_PIECE armor_piece_cache[MAX_CACHED_ARMOR_PIECES];
+static int armor_piece_count = 0;
+
+/* In-memory cache for class starting config */
+#define MAX_CACHED_STARTING  32
+
+static CLASS_STARTING starting_cache[MAX_CACHED_STARTING];
+static int starting_count = 0;
+
+/* In-memory cache for class score stats */
+#define MAX_CACHED_SCORE_STATS  128
+
+static CLASS_SCORE_STAT score_stats_cache[MAX_CACHED_SCORE_STATS];
+static int score_stats_count = 0;
+
+/* In-memory cache for class registry */
+#define MAX_CACHED_REGISTRY  32
+
+static CLASS_REGISTRY_ENTRY registry_cache[MAX_CACHED_REGISTRY];
+static int registry_count = 0;
+
 /* Schema for help.db */
 static const char *HELP_SCHEMA_SQL =
 	"CREATE TABLE IF NOT EXISTS helps ("
@@ -172,8 +206,23 @@ static const char *GAME_SCHEMA_SQL =
 	"  set_date      INTEGER NOT NULL"
 	");"
 
+	/* Class registry must be created first - other class tables reference it */
+	"CREATE TABLE IF NOT EXISTS class_registry ("
+	"  class_id          INTEGER PRIMARY KEY,"
+	"  class_name        TEXT NOT NULL,"
+	"  keyword           TEXT NOT NULL UNIQUE,"
+	"  keyword_alt       TEXT,"
+	"  mudstat_label     TEXT NOT NULL,"
+	"  selfclass_message TEXT NOT NULL,"
+	"  display_order     INTEGER NOT NULL DEFAULT 0,"
+	"  upgrade_class     INTEGER REFERENCES class_registry(class_id),"
+	"  requirements      TEXT"
+	");"
+	"CREATE INDEX IF NOT EXISTS idx_class_keyword ON class_registry(keyword);"
+	"CREATE INDEX IF NOT EXISTS idx_class_keyword_alt ON class_registry(keyword_alt);"
+
 	"CREATE TABLE IF NOT EXISTS class_brackets ("
-	"  class_id      INTEGER PRIMARY KEY,"
+	"  class_id      INTEGER PRIMARY KEY REFERENCES class_registry(class_id),"
 	"  class_name    TEXT NOT NULL,"
 	"  open_bracket  TEXT NOT NULL,"
 	"  close_bracket TEXT NOT NULL"
@@ -181,12 +230,52 @@ static const char *GAME_SCHEMA_SQL =
 
 	"CREATE TABLE IF NOT EXISTS class_generations ("
 	"  id            INTEGER PRIMARY KEY AUTOINCREMENT,"
-	"  class_id      INTEGER NOT NULL,"
+	"  class_id      INTEGER NOT NULL REFERENCES class_registry(class_id),"
 	"  generation    INTEGER NOT NULL,"
 	"  title         TEXT NOT NULL,"
 	"  UNIQUE(class_id, generation)"
 	");"
-	"CREATE INDEX IF NOT EXISTS idx_class_gen ON class_generations(class_id, generation);";
+	"CREATE INDEX IF NOT EXISTS idx_class_gen ON class_generations(class_id, generation);"
+
+	"CREATE TABLE IF NOT EXISTS class_auras ("
+	"  class_id      INTEGER PRIMARY KEY REFERENCES class_registry(class_id),"
+	"  aura_text     TEXT NOT NULL,"
+	"  mxp_tooltip   TEXT NOT NULL,"
+	"  display_order INTEGER NOT NULL DEFAULT 0"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS class_armor_config ("
+	"  class_id      INTEGER PRIMARY KEY REFERENCES class_registry(class_id),"
+	"  acfg_cost_key TEXT NOT NULL,"
+	"  usage_message TEXT NOT NULL,"
+	"  act_to_char   TEXT NOT NULL DEFAULT '$p appears in your hands.',"
+	"  act_to_room   TEXT NOT NULL DEFAULT '$p appears in $n''s hands.'"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS class_armor_pieces ("
+	"  id            INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  class_id      INTEGER NOT NULL REFERENCES class_registry(class_id),"
+	"  keyword       TEXT NOT NULL,"
+	"  vnum          INTEGER NOT NULL,"
+	"  UNIQUE(class_id, keyword)"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS class_starting ("
+	"  class_id         INTEGER PRIMARY KEY REFERENCES class_registry(class_id),"
+	"  starting_beast   INTEGER NOT NULL DEFAULT 15,"
+	"  starting_level   INTEGER NOT NULL DEFAULT 1,"
+	"  has_disciplines  INTEGER NOT NULL DEFAULT 0"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS class_score_stats ("
+	"  id              INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  class_id        INTEGER NOT NULL REFERENCES class_registry(class_id),"
+	"  stat_source     INTEGER NOT NULL,"
+	"  stat_source_max INTEGER NOT NULL DEFAULT 0,"
+	"  stat_label      TEXT NOT NULL,"
+	"  format_string   TEXT NOT NULL DEFAULT '#R[#n%s: #C%d#R]\\n\\r',"
+	"  display_order   INTEGER NOT NULL DEFAULT 0"
+	");";
 
 
 /*
@@ -2374,4 +2463,1185 @@ const char *db_game_get_generation_title( int class_id, int generation ) {
 	}
 
 	return fallback;
+}
+
+
+/*
+ * Class aura config (game.db)
+ * Room aura text displayed when looking at characters.
+ */
+
+/* Insert default class aura entries if table is empty */
+static void class_aura_insert_defaults( void ) {
+	sqlite3_stmt *count_stmt, *aura_stmt;
+	int count = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Check if auras table already has entries */
+	if ( sqlite3_prepare_v2( game_db, "SELECT COUNT(*) FROM class_auras", -1, &count_stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( count_stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( count_stmt, 0 );
+		sqlite3_finalize( count_stmt );
+	}
+
+	if ( count > 0 )
+		return;  /* Already has data */
+
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_auras (class_id, aura_text, mxp_tooltip, display_order) VALUES (?,?,?,?)",
+			-1, &aura_stmt, NULL ) != SQLITE_OK )
+		return;
+
+	db_begin( game_db );
+
+#define INSERT_AURA( cid, text, tooltip, order ) \
+	sqlite3_reset( aura_stmt ); \
+	sqlite3_bind_int( aura_stmt, 1, cid ); \
+	sqlite3_bind_text( aura_stmt, 2, text, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( aura_stmt, 3, tooltip, -1, SQLITE_STATIC ); \
+	sqlite3_bind_int( aura_stmt, 4, order ); \
+	sqlite3_step( aura_stmt )
+
+	/* Default auras - matching existing hardcoded values from act_info.c */
+	INSERT_AURA( 4,      "#y(#LWerewolf#y)#n ",                     "Werewolf",     1 );   /* CLASS_WEREWOLF */
+	INSERT_AURA( 1,      "#0(#RDemon#0)#n ",                        "Demon",        2 );   /* CLASS_DEMON */
+	INSERT_AURA( 128,    "#R(#yNinja#R)#n ",                        "Ninja",        3 );   /* CLASS_NINJA */
+	INSERT_AURA( 64,     "#C(#nMonk#C)#n ",                         "Monk",         4 );   /* CLASS_MONK */
+	INSERT_AURA( 8192,   "#p(#PDrider#p)#n ",                       "Spider Droid", 5 );   /* CLASS_DROID */
+	INSERT_AURA( 2048,   "#0(#7Angel#0)#n ",                        "Angel",        6 );   /* CLASS_ANGEL */
+	INSERT_AURA( 1024,   "#y(#RTanar'ri#y)#n ",                     "Tanar'ri",     7 );   /* CLASS_TANARRI */
+	INSERT_AURA( 256,    "#0(#GLich#0)#n ",                         "Lich",         8 );   /* CLASS_LICH */
+	INSERT_AURA( 4096,   "#y(#0Death Knight#y)#n ",                 "Death Knight", 9 );   /* CLASS_UNDEAD_KNIGHT */
+	INSERT_AURA( 16,     "#C(#ySamu#Rrai#C)#n ",                    "Samurai",      10 );  /* CLASS_SAMURAI */
+	INSERT_AURA( 2,      "{{#CBattlemage#n}} ",                     "Battlemage",   11 );  /* CLASS_MAGE */
+	INSERT_AURA( 32,     "#P(#0Drow#P)#n ",                         "Drow",         12 );  /* CLASS_DROW */
+	INSERT_AURA( 8,      "#R(V#0ampire#R)#n ",                      "Vampire",      13 );  /* CLASS_VAMPIRE */
+	INSERT_AURA( 16384,  "#x178(#nDirgesinger#x178)#n ",            "Dirgesinger",  14 );  /* CLASS_DIRGESINGER */
+	INSERT_AURA( 32768,  "#x255)#x147(#nSiren#x147)#x255(#n ",      "Siren",        15 );  /* CLASS_SIREN */
+	INSERT_AURA( 65536,  "#x255<#x033|#nPsion#x033|#x255>#n ",      "Psion",        16 );  /* CLASS_PSION */
+	INSERT_AURA( 131072, "#x135}#x035{#nMindflayer#x035}#x135{#n ", "Mindflayer",   17 );  /* CLASS_MINDFLAYER */
+
+#undef INSERT_AURA
+
+	db_commit( game_db );
+	sqlite3_finalize( aura_stmt );
+
+	log_string( "  Inserted default class aura configuration." );
+}
+
+/*
+ * Load class aura config from database into memory.
+ * Call this during boot after db_game_init().
+ */
+void db_game_load_class_aura( void ) {
+	sqlite3_stmt *stmt;
+	char buf[256];
+	int i;
+
+	if ( !game_db )
+		return;
+
+	/* Clear existing aura cache */
+	for ( i = 0; i < aura_count; i++ ) {
+		if ( aura_cache[i].aura_text )   free_string( aura_cache[i].aura_text );
+		if ( aura_cache[i].mxp_tooltip ) free_string( aura_cache[i].mxp_tooltip );
+	}
+	aura_count = 0;
+
+	/* Insert defaults if table is empty */
+	class_aura_insert_defaults();
+
+	/* Load auras ordered by display_order */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, aura_text, mxp_tooltip, display_order "
+			"FROM class_auras ORDER BY display_order, class_id",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+		while ( sqlite3_step( stmt ) == SQLITE_ROW && aura_count < MAX_CACHED_AURAS ) {
+			aura_cache[aura_count].class_id      = sqlite3_column_int( stmt, 0 );
+			aura_cache[aura_count].aura_text     = str_dup( col_text( stmt, 1 ) );
+			aura_cache[aura_count].mxp_tooltip   = str_dup( col_text( stmt, 2 ) );
+			aura_cache[aura_count].display_order = sqlite3_column_int( stmt, 3 );
+			aura_count++;
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	snprintf( buf, sizeof( buf ), "  Loaded %d class auras.", aura_count );
+	log_string( buf );
+}
+
+/*
+ * Get aura config for a class.
+ * Returns NULL if not found.
+ */
+const CLASS_AURA *db_game_get_aura( int class_id ) {
+	int i;
+
+	for ( i = 0; i < aura_count; i++ ) {
+		if ( aura_cache[i].class_id == class_id )
+			return &aura_cache[i];
+	}
+
+	return NULL;
+}
+
+/*
+ * Get total number of loaded auras (for iteration).
+ */
+int db_game_get_aura_count( void ) {
+	return aura_count;
+}
+
+/*
+ * Get aura by index (for iteration in display order).
+ * Returns NULL if index out of range.
+ */
+const CLASS_AURA *db_game_get_aura_by_index( int index ) {
+	if ( index < 0 || index >= aura_count )
+		return NULL;
+
+	return &aura_cache[index];
+}
+
+
+/*
+ * Class armor config (game.db)
+ * Armor piece definitions for class equipment creation commands.
+ */
+
+/* Insert default class armor entries if tables are empty */
+static void class_armor_insert_defaults( void ) {
+	sqlite3_stmt *count_stmt, *cfg_stmt, *piece_stmt;
+	int count = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Check if config table already has entries */
+	if ( sqlite3_prepare_v2( game_db, "SELECT COUNT(*) FROM class_armor_config", -1, &count_stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( count_stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( count_stmt, 0 );
+		sqlite3_finalize( count_stmt );
+	}
+
+	if ( count > 0 )
+		return;  /* Already has data */
+
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_armor_config (class_id, acfg_cost_key, usage_message, act_to_char, act_to_room) VALUES (?,?,?,?,?)",
+			-1, &cfg_stmt, NULL ) != SQLITE_OK )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_armor_pieces (class_id, keyword, vnum) VALUES (?,?,?)",
+			-1, &piece_stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_finalize( cfg_stmt );
+		return;
+	}
+
+	db_begin( game_db );
+
+#define INSERT_CONFIG( cid, cost_key, usage, to_char, to_room ) \
+	sqlite3_reset( cfg_stmt ); \
+	sqlite3_bind_int( cfg_stmt, 1, cid ); \
+	sqlite3_bind_text( cfg_stmt, 2, cost_key, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( cfg_stmt, 3, usage, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( cfg_stmt, 4, to_char, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( cfg_stmt, 5, to_room, -1, SQLITE_STATIC ); \
+	sqlite3_step( cfg_stmt )
+
+#define INSERT_PIECE( cid, kw, v ) \
+	sqlite3_reset( piece_stmt ); \
+	sqlite3_bind_int( piece_stmt, 1, cid ); \
+	sqlite3_bind_text( piece_stmt, 2, kw, -1, SQLITE_STATIC ); \
+	sqlite3_bind_int( piece_stmt, 3, v ); \
+	sqlite3_step( piece_stmt )
+
+	/* Mage armor (CLASS_MAGE=2) */
+	INSERT_CONFIG( 2, "mage.magearmor.practice_cost",
+		"Please specify which piece of mage armor you wish to make: Dagger Staff Ring Collar Robe Cap Leggings Boots Gloves Sleeves Cape Belt Bracer Mask.",
+		"$p appears in your hands.", "$p appears in $n's hands." );
+	INSERT_PIECE( 2, "staff",     33000 );
+	INSERT_PIECE( 2, "dagger",    33001 );
+	INSERT_PIECE( 2, "ring",      33002 );
+	INSERT_PIECE( 2, "collar",    33003 );
+	INSERT_PIECE( 2, "robe",      33004 );
+	INSERT_PIECE( 2, "cap",       33005 );
+	INSERT_PIECE( 2, "leggings",  33006 );
+	INSERT_PIECE( 2, "boots",     33007 );
+	INSERT_PIECE( 2, "gloves",    33008 );
+	INSERT_PIECE( 2, "sleeves",   33009 );
+	INSERT_PIECE( 2, "cape",      33010 );
+	INSERT_PIECE( 2, "belt",      33011 );
+	INSERT_PIECE( 2, "bracer",    33012 );
+	INSERT_PIECE( 2, "mask",      33013 );
+
+	/* Vampire armor (CLASS_VAMPIRE=8) */
+	INSERT_CONFIG( 8, "vampire.vampirearmor.practice_cost",
+		"Please specify which piece of vampire armor you wish to make: Ring Collar Plate Helmet Leggings Boots Gloves Sleeves Cape Belt Bracer Visor Dagger Longsword.",
+		"$p appears in your hands.", "$p appears in $n's hands." );
+	INSERT_PIECE( 8, "longsword", 33040 );
+	INSERT_PIECE( 8, "dagger",    33041 );
+	INSERT_PIECE( 8, "ring",      33042 );
+	INSERT_PIECE( 8, "collar",    33043 );
+	INSERT_PIECE( 8, "plate",     33044 );
+	INSERT_PIECE( 8, "helmet",    33045 );
+	INSERT_PIECE( 8, "leggings",  33046 );
+	INSERT_PIECE( 8, "boots",     33047 );
+	INSERT_PIECE( 8, "gloves",    33048 );
+	INSERT_PIECE( 8, "sleeves",   33049 );
+	INSERT_PIECE( 8, "cape",      33050 );
+	INSERT_PIECE( 8, "belt",      33051 );
+	INSERT_PIECE( 8, "bracer",    33052 );
+	INSERT_PIECE( 8, "visor",     33053 );
+
+	/* Monk armor (CLASS_MONK=64) */
+	INSERT_CONFIG( 64, "monk.monkarmor.primal_cost",
+		"Please specify which piece of monk armor you wish to make: Ring Collar Robe Helmet Shorts Boots Gloves Sleeves Cloak Belt Bracer Mask.",
+		"$p appears in your hands.", "$p appears in $n's hands." );
+	INSERT_PIECE( 64, "ring",     33020 );
+	INSERT_PIECE( 64, "collar",   33021 );
+	INSERT_PIECE( 64, "robe",     33022 );
+	INSERT_PIECE( 64, "shorts",   33023 );
+	INSERT_PIECE( 64, "helmet",   33024 );
+	INSERT_PIECE( 64, "gloves",   33025 );
+	INSERT_PIECE( 64, "sleeves",  33026 );
+	INSERT_PIECE( 64, "cloak",    33027 );
+	INSERT_PIECE( 64, "belt",     33028 );
+	INSERT_PIECE( 64, "bracer",   33029 );
+	INSERT_PIECE( 64, "mask",     33030 );
+	INSERT_PIECE( 64, "boots",    33031 );
+
+	/* Ninja armor (CLASS_NINJA=128) */
+	INSERT_CONFIG( 128, "ninja.ninjaarmor.primal_cost",
+		"Please specify which piece of ninja eq you wish to make: Ring Collar Robe Cap Leggings Boots Gloves Sleeves Cloak Belt Bracer Mask Sword Dagger.",
+		"You make $p from the shadows.", "$n forms $p from the shadows." );
+	INSERT_PIECE( 128, "dagger",   33080 );
+	INSERT_PIECE( 128, "sword",    33081 );
+	INSERT_PIECE( 128, "ring",     33082 );
+	INSERT_PIECE( 128, "collar",   33083 );
+	INSERT_PIECE( 128, "bracer",   33084 );
+	INSERT_PIECE( 128, "robe",     33085 );
+	INSERT_PIECE( 128, "cap",      33086 );
+	INSERT_PIECE( 128, "leggings", 33087 );
+	INSERT_PIECE( 128, "boots",    33088 );
+	INSERT_PIECE( 128, "sleeves",  33089 );
+	INSERT_PIECE( 128, "cloak",    33090 );
+	INSERT_PIECE( 128, "gloves",   33091 );
+	INSERT_PIECE( 128, "belt",     33092 );
+	INSERT_PIECE( 128, "mask",     33093 );
+
+	/* Lich armor (CLASS_LICH=256) */
+	INSERT_CONFIG( 256, "lich.licharmor.practice_cost",
+		"Please specify which piece of angel armor you wish to make: Scythe Bracer Amulet Ring Plate Helmet Leggings Boots Gauntlets Sleeves Cloak Belt Mask.",
+		"$p appears in your hands.", "$p appears in $n's hands." );
+	INSERT_PIECE( 256, "scythe",    33220 );
+	INSERT_PIECE( 256, "ring",      33221 );
+	INSERT_PIECE( 256, "bracer",    33222 );
+	INSERT_PIECE( 256, "amulet",    33223 );
+	INSERT_PIECE( 256, "plate",     33224 );
+	INSERT_PIECE( 256, "helmet",    33225 );
+	INSERT_PIECE( 256, "belt",      33226 );
+	INSERT_PIECE( 256, "mask",      33227 );
+	INSERT_PIECE( 256, "gauntlets", 33228 );
+	INSERT_PIECE( 256, "sleeves",   33229 );
+	INSERT_PIECE( 256, "boots",     33230 );
+	INSERT_PIECE( 256, "leggings",  33231 );
+	INSERT_PIECE( 256, "cloak",     33232 );
+
+	/* Shapeshifter armor (CLASS_SHAPESHIFTER=512) */
+	INSERT_CONFIG( 512, "shapeshifter.shapearmor.primal_cost",
+		"Please specify which piece of shapeshifter armor you wish to make: Knife Kane Bands Necklace Ring Jacket Helmet Pants Boots Gloves Shirt Cloak Belt Visor.",
+		"$p appears in your hands.", "$p appears in $n's hands." );
+	INSERT_PIECE( 512, "knife",    33160 );
+	INSERT_PIECE( 512, "kane",     33161 );
+	INSERT_PIECE( 512, "bands",    33162 );
+	INSERT_PIECE( 512, "necklace", 33163 );
+	INSERT_PIECE( 512, "ring",     33164 );
+	INSERT_PIECE( 512, "jacket",   33165 );
+	INSERT_PIECE( 512, "helmet",   33166 );
+	INSERT_PIECE( 512, "pants",    33167 );
+	INSERT_PIECE( 512, "boots",    33168 );
+	INSERT_PIECE( 512, "gloves",   33169 );
+	INSERT_PIECE( 512, "shirt",    33170 );
+	INSERT_PIECE( 512, "cloak",    33171 );
+	INSERT_PIECE( 512, "belt",     33172 );
+	INSERT_PIECE( 512, "visor",    33173 );
+
+	/* Angel armor (CLASS_ANGEL=2048) - uses hardcoded cost 150 */
+	INSERT_CONFIG( 2048, "angel.angelicarmor.primal_cost",
+		"Please specify which piece of angel armor you wish to make: Sword Bracer Necklace Ring Plate Helmet Leggings Boots Gauntlets Sleeves Cloak Belt Visor.",
+		"$p appears in your hands.", "$p appears in $n's hands." );
+	INSERT_PIECE( 2048, "ring",      33180 );
+	INSERT_PIECE( 2048, "bracer",    33181 );
+	INSERT_PIECE( 2048, "necklace",  33182 );
+	INSERT_PIECE( 2048, "belt",      33183 );
+	INSERT_PIECE( 2048, "helmet",    33184 );
+	INSERT_PIECE( 2048, "cloak",     33185 );
+	INSERT_PIECE( 2048, "visor",     33186 );
+	INSERT_PIECE( 2048, "plate",     33187 );
+	INSERT_PIECE( 2048, "leggings",  33188 );
+	INSERT_PIECE( 2048, "boots",     33189 );
+	INSERT_PIECE( 2048, "gauntlets", 33190 );
+	INSERT_PIECE( 2048, "sleeves",   33191 );
+	INSERT_PIECE( 2048, "sword",     33192 );
+
+	/* Undead Knight armor (CLASS_UNDEAD_KNIGHT=4096) */
+	INSERT_CONFIG( 4096, "undead_knight.knightarmor.primal_cost",
+		"Please specify which piece of unholy armor you wish to make: plate ring bracer collar helmet leggings boots gauntlets chains cloak belt visor longsword shortsword.",
+		"$p appears in your hands.", "$p appears in $n's hands." );
+	INSERT_PIECE( 4096, "plate",      29975 );
+	INSERT_PIECE( 4096, "longsword",  29976 );
+	INSERT_PIECE( 4096, "shortsword", 29977 );
+	INSERT_PIECE( 4096, "ring",       29978 );
+	INSERT_PIECE( 4096, "bracer",     29979 );
+	INSERT_PIECE( 4096, "collar",     29980 );
+	INSERT_PIECE( 4096, "helmet",     29981 );
+	INSERT_PIECE( 4096, "leggings",   29982 );
+	INSERT_PIECE( 4096, "boots",      29983 );
+	INSERT_PIECE( 4096, "gauntlets",  29984 );
+	INSERT_PIECE( 4096, "chains",     29985 );
+	INSERT_PIECE( 4096, "cloak",      29986 );
+	INSERT_PIECE( 4096, "belt",       29987 );
+	INSERT_PIECE( 4096, "visor",      29988 );
+
+	/* Dirgesinger armor (CLASS_DIRGESINGER=16384) */
+	INSERT_CONFIG( 16384, "dirgesinger.armor.primal_cost",
+		"Please specify which piece of armor to create.\nOptions: warhorn ring collar battleplate warhelm greaves warboots gauntlets vambraces warcape belt bracer warmask",
+		"You shape sonic energy into $p!", "$n shapes sonic energy into $p!" );
+	INSERT_PIECE( 16384, "warhorn",     33320 );
+	INSERT_PIECE( 16384, "ring",        33321 );
+	INSERT_PIECE( 16384, "collar",      33322 );
+	INSERT_PIECE( 16384, "battleplate", 33323 );
+	INSERT_PIECE( 16384, "warhelm",     33324 );
+	INSERT_PIECE( 16384, "greaves",     33325 );
+	INSERT_PIECE( 16384, "warboots",    33326 );
+	INSERT_PIECE( 16384, "gauntlets",   33327 );
+	INSERT_PIECE( 16384, "vambraces",   33328 );
+	INSERT_PIECE( 16384, "warcape",     33329 );
+	INSERT_PIECE( 16384, "belt",        33330 );
+	INSERT_PIECE( 16384, "bracer",      33331 );
+	INSERT_PIECE( 16384, "warmask",     33332 );
+
+	/* Siren armor (CLASS_SIREN=32768) - uses hardcoded cost 150 */
+	INSERT_CONFIG( 32768, "siren.sirenarmor.primal_cost",
+		"Please specify which piece of siren armor to create.\nOptions: scepter ring choker gown diadem greaves slippers gloves armlets mantle sash bangle veil",
+		"You weave a melody that materializes into $p!", "$n weaves a melody that materializes into $p!" );
+	INSERT_PIECE( 32768, "scepter",  33340 );
+	INSERT_PIECE( 32768, "ring",     33341 );
+	INSERT_PIECE( 32768, "choker",   33342 );
+	INSERT_PIECE( 32768, "gown",     33343 );
+	INSERT_PIECE( 32768, "diadem",   33344 );
+	INSERT_PIECE( 32768, "greaves",  33345 );
+	INSERT_PIECE( 32768, "slippers", 33346 );
+	INSERT_PIECE( 32768, "gloves",   33347 );
+	INSERT_PIECE( 32768, "armlets",  33348 );
+	INSERT_PIECE( 32768, "mantle",   33349 );
+	INSERT_PIECE( 32768, "sash",     33350 );
+	INSERT_PIECE( 32768, "bangle",   33351 );
+	INSERT_PIECE( 32768, "veil",     33352 );
+
+	/* Psion armor (CLASS_PSION=65536) - uses hardcoded cost 60 */
+	INSERT_CONFIG( 65536, "psion.psionarmor.primal_cost",
+		"#x033~#x039[#n Psion Equipment #x039]#x033~#n\nUsage: psionarmor <piece>\nAvailable: focus ring amulet robe circlet leggings sandals gloves bracers cloak sash wristband gem\nCost: 60 primal per piece",
+		"You create $p with your psychic power.", "$n creates $p with psychic power." );
+	INSERT_PIECE( 65536, "focus",     33360 );
+	INSERT_PIECE( 65536, "ring",      33361 );
+	INSERT_PIECE( 65536, "amulet",    33362 );
+	INSERT_PIECE( 65536, "robe",      33363 );
+	INSERT_PIECE( 65536, "circlet",   33364 );
+	INSERT_PIECE( 65536, "leggings",  33365 );
+	INSERT_PIECE( 65536, "sandals",   33366 );
+	INSERT_PIECE( 65536, "gloves",    33367 );
+	INSERT_PIECE( 65536, "bracers",   33368 );
+	INSERT_PIECE( 65536, "cloak",     33369 );
+	INSERT_PIECE( 65536, "sash",      33370 );
+	INSERT_PIECE( 65536, "wristband", 33371 );
+	INSERT_PIECE( 65536, "gem",       33372 );
+
+	/* Mindflayer armor (CLASS_MINDFLAYER=131072) - uses hardcoded cost 150 */
+	INSERT_CONFIG( 131072, "mindflayer.mindflayerarmor.primal_cost",
+		"#x029~#x035[#n Mindflayer Equipment #x035]#x029~#n\nUsage: mindflayerarmor <piece>\nAvailable: scepter ring collar robes crown leggings sandals gloves vambraces shroud sash bangle lens\nCost: 150 primal per piece",
+		"You create $p with your psychic power.", "$n creates $p with psychic power." );
+	INSERT_PIECE( 131072, "scepter",   33380 );
+	INSERT_PIECE( 131072, "ring",      33381 );
+	INSERT_PIECE( 131072, "collar",    33382 );
+	INSERT_PIECE( 131072, "robes",     33383 );
+	INSERT_PIECE( 131072, "crown",     33384 );
+	INSERT_PIECE( 131072, "leggings",  33385 );
+	INSERT_PIECE( 131072, "sandals",   33386 );
+	INSERT_PIECE( 131072, "gloves",    33387 );
+	INSERT_PIECE( 131072, "vambraces", 33388 );
+	INSERT_PIECE( 131072, "shroud",    33389 );
+	INSERT_PIECE( 131072, "sash",      33390 );
+	INSERT_PIECE( 131072, "bangle",    33391 );
+	INSERT_PIECE( 131072, "lens",      33392 );
+
+#undef INSERT_CONFIG
+#undef INSERT_PIECE
+
+	db_commit( game_db );
+	sqlite3_finalize( cfg_stmt );
+	sqlite3_finalize( piece_stmt );
+
+	log_string( "  Inserted default class armor configuration." );
+}
+
+/*
+ * Load class armor config from database into memory.
+ * Call this during boot after db_game_init().
+ */
+void db_game_load_class_armor( void ) {
+	sqlite3_stmt *stmt;
+	char buf[256];
+	int i;
+
+	if ( !game_db )
+		return;
+
+	/* Clear existing config cache */
+	for ( i = 0; i < armor_config_count; i++ ) {
+		if ( armor_config_cache[i].acfg_cost_key ) free_string( armor_config_cache[i].acfg_cost_key );
+		if ( armor_config_cache[i].usage_message ) free_string( armor_config_cache[i].usage_message );
+		if ( armor_config_cache[i].act_to_char )   free_string( armor_config_cache[i].act_to_char );
+		if ( armor_config_cache[i].act_to_room )   free_string( armor_config_cache[i].act_to_room );
+	}
+	armor_config_count = 0;
+
+	/* Clear existing piece cache */
+	for ( i = 0; i < armor_piece_count; i++ ) {
+		if ( armor_piece_cache[i].keyword ) free_string( armor_piece_cache[i].keyword );
+	}
+	armor_piece_count = 0;
+
+	/* Insert defaults if tables are empty */
+	class_armor_insert_defaults();
+
+	/* Load armor configs */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, acfg_cost_key, usage_message, act_to_char, act_to_room "
+			"FROM class_armor_config ORDER BY class_id",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+		while ( sqlite3_step( stmt ) == SQLITE_ROW && armor_config_count < MAX_CACHED_ARMOR_CONFIGS ) {
+			armor_config_cache[armor_config_count].class_id      = sqlite3_column_int( stmt, 0 );
+			armor_config_cache[armor_config_count].acfg_cost_key = str_dup( col_text( stmt, 1 ) );
+			armor_config_cache[armor_config_count].usage_message = str_dup( col_text( stmt, 2 ) );
+			armor_config_cache[armor_config_count].act_to_char   = str_dup( col_text( stmt, 3 ) );
+			armor_config_cache[armor_config_count].act_to_room   = str_dup( col_text( stmt, 4 ) );
+			armor_config_count++;
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	/* Load armor pieces */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, keyword, vnum "
+			"FROM class_armor_pieces ORDER BY class_id, keyword",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+		while ( sqlite3_step( stmt ) == SQLITE_ROW && armor_piece_count < MAX_CACHED_ARMOR_PIECES ) {
+			armor_piece_cache[armor_piece_count].class_id = sqlite3_column_int( stmt, 0 );
+			armor_piece_cache[armor_piece_count].keyword  = str_dup( col_text( stmt, 1 ) );
+			armor_piece_cache[armor_piece_count].vnum     = sqlite3_column_int( stmt, 2 );
+			armor_piece_count++;
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	snprintf( buf, sizeof( buf ),
+		"  Loaded %d armor configs, %d armor pieces.", armor_config_count, armor_piece_count );
+	log_string( buf );
+}
+
+/*
+ * Get armor config for a class.
+ * Returns NULL if not found.
+ */
+const CLASS_ARMOR_CONFIG *db_game_get_armor_config( int class_id ) {
+	int i;
+
+	for ( i = 0; i < armor_config_count; i++ ) {
+		if ( armor_config_cache[i].class_id == class_id )
+			return &armor_config_cache[i];
+	}
+
+	return NULL;
+}
+
+/*
+ * Get armor piece vnum for a class and keyword.
+ * Returns 0 if not found.
+ */
+int db_game_get_armor_vnum( int class_id, const char *keyword ) {
+	int i;
+
+	for ( i = 0; i < armor_piece_count; i++ ) {
+		if ( armor_piece_cache[i].class_id == class_id &&
+		     !str_cmp( armor_piece_cache[i].keyword, keyword ) )
+			return armor_piece_cache[i].vnum;
+	}
+
+	return 0;
+}
+
+
+/***************************************************************************
+ * Class starting config (game.db)
+ * Starting values for class selection (beast, level, disciplines).
+ ***************************************************************************/
+
+/* Insert default class starting entries if table is empty */
+static void class_starting_insert_defaults( void ) {
+	sqlite3_stmt *count_stmt, *stmt;
+	int count = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Check if table already has entries */
+	if ( sqlite3_prepare_v2( game_db, "SELECT COUNT(*) FROM class_starting", -1, &count_stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( count_stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( count_stmt, 0 );
+		sqlite3_finalize( count_stmt );
+	}
+
+	if ( count > 0 )
+		return;  /* Already has data */
+
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_starting (class_id, starting_beast, starting_level, has_disciplines) VALUES (?,?,?,?)",
+			-1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	db_begin( game_db );
+
+#define INSERT_STARTING( cid, beast, level, disc ) \
+	sqlite3_reset( stmt ); \
+	sqlite3_bind_int( stmt, 1, cid ); \
+	sqlite3_bind_int( stmt, 2, beast ); \
+	sqlite3_bind_int( stmt, 3, level ); \
+	sqlite3_bind_int( stmt, 4, disc ); \
+	sqlite3_step( stmt )
+
+	/* Vampire: beast=30, has disciplines */
+	INSERT_STARTING( 8, 30, 1, 1 );     /* CLASS_VAMPIRE=8 */
+
+	/* Werewolf: has disciplines */
+	INSERT_STARTING( 4, 15, 1, 1 );     /* CLASS_WEREWOLF=4 */
+
+	/* Demon: has disciplines */
+	INSERT_STARTING( 1, 15, 1, 1 );     /* CLASS_DEMON=1 */
+
+	/* Monk: starts at level 3 */
+	INSERT_STARTING( 64, 15, 3, 0 );    /* CLASS_MONK=64 */
+
+	/* Mage: starts at level 3 */
+	INSERT_STARTING( 2, 15, 3, 0 );     /* CLASS_MAGE=2 */
+
+	/* Standard classes (no special values) */
+	INSERT_STARTING( 16, 15, 1, 0 );    /* CLASS_SAMURAI=16 */
+	INSERT_STARTING( 32, 15, 1, 0 );    /* CLASS_DROW=32 */
+	INSERT_STARTING( 128, 15, 1, 0 );   /* CLASS_NINJA=128 */
+	INSERT_STARTING( 256, 15, 1, 0 );   /* CLASS_LICH=256 */
+	INSERT_STARTING( 512, 15, 1, 0 );   /* CLASS_SHAPESHIFTER=512 */
+	INSERT_STARTING( 1024, 15, 1, 0 );  /* CLASS_TANARRI=1024 */
+	INSERT_STARTING( 2048, 15, 1, 0 );  /* CLASS_ANGEL=2048 */
+	INSERT_STARTING( 4096, 15, 1, 0 );  /* CLASS_UNDEAD_KNIGHT=4096 */
+	INSERT_STARTING( 8192, 15, 1, 0 );  /* CLASS_DROID=8192 */
+	INSERT_STARTING( 16384, 15, 1, 0 ); /* CLASS_DIRGESINGER=16384 */
+	INSERT_STARTING( 32768, 15, 1, 0 ); /* CLASS_SIREN=32768 */
+	INSERT_STARTING( 65536, 15, 1, 0 ); /* CLASS_PSION=65536 */
+	INSERT_STARTING( 131072, 15, 1, 0 ); /* CLASS_MINDFLAYER=131072 */
+
+#undef INSERT_STARTING
+
+	db_commit( game_db );
+	sqlite3_finalize( stmt );
+
+	log_string( "  Inserted default class starting configuration." );
+}
+
+/*
+ * Load class starting config from database into memory.
+ * Call this during boot after db_game_init().
+ */
+void db_game_load_class_starting( void ) {
+	sqlite3_stmt *stmt;
+	char buf[256];
+
+	if ( !game_db )
+		return;
+
+	/* Clear existing cache */
+	starting_count = 0;
+
+	/* Insert defaults if table is empty */
+	class_starting_insert_defaults();
+
+	/* Load starting configs */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, starting_beast, starting_level, has_disciplines "
+			"FROM class_starting ORDER BY class_id",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+		while ( sqlite3_step( stmt ) == SQLITE_ROW && starting_count < MAX_CACHED_STARTING ) {
+			starting_cache[starting_count].class_id        = sqlite3_column_int( stmt, 0 );
+			starting_cache[starting_count].starting_beast  = sqlite3_column_int( stmt, 1 );
+			starting_cache[starting_count].starting_level  = sqlite3_column_int( stmt, 2 );
+			starting_cache[starting_count].has_disciplines = sqlite3_column_int( stmt, 3 ) != 0;
+			starting_count++;
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	snprintf( buf, sizeof( buf ), "  Loaded %d class starting configs.", starting_count );
+	log_string( buf );
+}
+
+/*
+ * Get starting config for a class.
+ * Returns NULL if not found.
+ */
+const CLASS_STARTING *db_game_get_starting( int class_id ) {
+	int i;
+
+	for ( i = 0; i < starting_count; i++ ) {
+		if ( starting_cache[i].class_id == class_id )
+			return &starting_cache[i];
+	}
+
+	return NULL;
+}
+
+/* --------------------------------------------------------------------------
+ * Class Score Stats (class_score_stats table)
+ * -------------------------------------------------------------------------- */
+
+/*
+ * Insert default score stats if table is empty.
+ */
+static void class_score_stats_insert_defaults( void ) {
+	sqlite3_stmt *count_stmt = NULL;
+	sqlite3_stmt *insert_stmt = NULL;
+	int count = 0;
+
+	/* Check if table is empty */
+	if ( sqlite3_prepare_v2( game_db, "SELECT COUNT(*) FROM class_score_stats", -1, &count_stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( count_stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( count_stmt, 0 );
+		sqlite3_finalize( count_stmt );
+	}
+
+	if ( count > 0 )
+		return;  /* Table has data, don't insert defaults */
+
+	/* Insert default score stats for each class */
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_score_stats (class_id, stat_source, stat_source_max, stat_label, format_string, display_order) "
+			"VALUES (?,?,?,?,?,?)",
+			-1, &insert_stmt, NULL ) != SQLITE_OK )
+		return;
+
+	/* Vampire: beast */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_VAMPIRE );
+	sqlite3_bind_int( insert_stmt, 2, STAT_BEAST );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Your current beast is", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s: #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 10 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Monk: block counter */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_MONK );
+	sqlite3_bind_int( insert_stmt, 2, STAT_MONKBLOCK );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Your block counter is currently", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s: #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 10 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Monk: chi current */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_MONK );
+	sqlite3_bind_int( insert_stmt, 2, STAT_CHI_CURRENT );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Your current level of chi", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s:       #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 20 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Monk: chi maximum */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_MONK );
+	sqlite3_bind_int( insert_stmt, 2, STAT_CHI_MAXIMUM );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Your maximum level of chi", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s:       #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 30 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Werewolf: gnosis current */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_WEREWOLF );
+	sqlite3_bind_int( insert_stmt, 2, STAT_GNOSIS_CURRENT );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Current Gnosis", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s:            #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 10 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Werewolf: gnosis maximum */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_WEREWOLF );
+	sqlite3_bind_int( insert_stmt, 2, STAT_GNOSIS_MAXIMUM );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Maximum gnosis", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s:            #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 20 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Werewolf: silver tolerance */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_WEREWOLF );
+	sqlite3_bind_int( insert_stmt, 2, STAT_SILTOL );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "You have attained", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s #C%d #npoints of silver tolerance#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 30 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Droid: class points */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_DROID );
+	sqlite3_bind_int( insert_stmt, 2, STAT_DROID_POWER );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "You have", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s #C%d #nclass points stored#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 10 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Tanarri: class points */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_TANARRI );
+	sqlite3_bind_int( insert_stmt, 2, STAT_TPOINTS );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "You have", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s #C%d #nclass points stored#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 10 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* NOTE: Demon souls is NOT included - it has generation condition in code */
+
+	/* Drow: class points */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_DROW );
+	sqlite3_bind_int( insert_stmt, 2, STAT_DROW_POWER );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "You have", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s #C%d#n class points stored#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 10 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Drow: magic resistance */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_DROW );
+	sqlite3_bind_int( insert_stmt, 2, STAT_DROW_MAGIC );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "You have", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s #C%d #npoints of magic resistance#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 20 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Shapeshifter: counter */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_SHAPESHIFTER );
+	sqlite3_bind_int( insert_stmt, 2, STAT_SHAPE_COUNTER );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Your shapeshifter counter is", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s : #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 10 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Shapeshifter: phase counter */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_SHAPESHIFTER );
+	sqlite3_bind_int( insert_stmt, 2, STAT_PHASE_COUNTER );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Your phase counter is", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s        : #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 20 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Angel: justice */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_ANGEL );
+	sqlite3_bind_int( insert_stmt, 2, STAT_ANGEL_JUSTICE );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Angelic Justice", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s   : #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 10 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Angel: love */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_ANGEL );
+	sqlite3_bind_int( insert_stmt, 2, STAT_ANGEL_LOVE );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Angelic Love", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s      : #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 20 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Angel: harmony */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_ANGEL );
+	sqlite3_bind_int( insert_stmt, 2, STAT_ANGEL_HARMONY );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Angelic Harmony", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s   : #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 30 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	/* Angel: peace */
+	sqlite3_bind_int( insert_stmt, 1, CLASS_ANGEL );
+	sqlite3_bind_int( insert_stmt, 2, STAT_ANGEL_PEACE );
+	sqlite3_bind_int( insert_stmt, 3, 0 );
+	sqlite3_bind_text( insert_stmt, 4, "Angelic Peace", -1, SQLITE_STATIC );
+	sqlite3_bind_text( insert_stmt, 5, "#R[#n%s     : #C%d#R]\\n\\r", -1, SQLITE_STATIC );
+	sqlite3_bind_int( insert_stmt, 6, 40 );
+	sqlite3_step( insert_stmt );
+	sqlite3_reset( insert_stmt );
+
+	sqlite3_finalize( insert_stmt );
+}
+
+/*
+ * Load class score stats from database into memory cache.
+ * Called during boot after tables are created.
+ */
+void db_game_load_class_score( void ) {
+	sqlite3_stmt *stmt = NULL;
+	char buf[MAX_STRING_LENGTH];
+
+	if ( game_db == NULL ) {
+		log_string( "db_game_load_class_score: game_db not open" );
+		return;
+	}
+
+	class_score_stats_insert_defaults();
+
+	score_stats_count = 0;
+
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, stat_source, stat_source_max, stat_label, format_string, display_order "
+			"FROM class_score_stats ORDER BY class_id, display_order",
+			-1, &stmt, NULL ) != SQLITE_OK ) {
+		log_string( "db_game_load_class_score: failed to prepare select" );
+		return;
+	}
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW && score_stats_count < MAX_CACHED_SCORE_STATS ) {
+		CLASS_SCORE_STAT *entry = &score_stats_cache[score_stats_count];
+
+		entry->class_id        = sqlite3_column_int( stmt, 0 );
+		entry->stat_source     = sqlite3_column_int( stmt, 1 );
+		entry->stat_source_max = sqlite3_column_int( stmt, 2 );
+		entry->stat_label      = str_dup( (const char *)sqlite3_column_text( stmt, 3 ) );
+		entry->format_string   = str_dup( (const char *)sqlite3_column_text( stmt, 4 ) );
+		entry->display_order   = sqlite3_column_int( stmt, 5 );
+
+		score_stats_count++;
+	}
+
+	sqlite3_finalize( stmt );
+
+	sprintf( buf, "Loaded %d class score stats from database.", score_stats_count );
+	log_string( buf );
+}
+
+/*
+ * Get count of score stats for a specific class.
+ */
+int db_game_get_score_stat_count( int class_id ) {
+	int i;
+	int count = 0;
+
+	for ( i = 0; i < score_stats_count; i++ ) {
+		if ( score_stats_cache[i].class_id == class_id )
+			count++;
+	}
+
+	return count;
+}
+
+/*
+ * Get array of score stats for a class.
+ * Returns pointer to first entry for this class in the cache.
+ * Caller should use db_game_get_score_stat_count to know how many entries.
+ * Note: Cache is sorted by class_id, display_order, so entries are contiguous.
+ */
+const CLASS_SCORE_STAT *db_game_get_score_stats( int class_id ) {
+	int i;
+
+	for ( i = 0; i < score_stats_count; i++ ) {
+		if ( score_stats_cache[i].class_id == class_id )
+			return &score_stats_cache[i];
+	}
+
+	return NULL;
+}
+
+/*
+ * Get the value of a stat from a character based on stat_source enum.
+ */
+int get_stat_value( CHAR_DATA *ch, int stat_source ) {
+	if ( ch == NULL || IS_NPC( ch ) )
+		return 0;
+
+	switch ( stat_source ) {
+		case STAT_BEAST:          return ch->beast;
+		case STAT_RAGE:           return ch->rage;
+		case STAT_CHI_CURRENT:    return ch->chi[CURRENT];
+		case STAT_CHI_MAXIMUM:    return ch->chi[MAXIMUM];
+		case STAT_GNOSIS_CURRENT: return ch->gnosis[GCURRENT];
+		case STAT_GNOSIS_MAXIMUM: return ch->gnosis[GMAXIMUM];
+		case STAT_MONKBLOCK:      return ch->monkblock;
+		case STAT_SILTOL:         return ch->siltol;
+		case STAT_SOULS:          return ch->pcdata->souls;
+		case STAT_DEMON_POWER:    return ch->pcdata->stats[DEMON_CURRENT];
+		case STAT_DEMON_TOTAL:    return ch->pcdata->stats[DEMON_TOTAL];
+		case STAT_DROID_POWER:    return ch->pcdata->stats[DROID_POWER];
+		case STAT_DROW_POWER:     return ch->pcdata->stats[DROW_POWER];
+		case STAT_DROW_MAGIC:     return ch->pcdata->stats[DROW_MAGIC];
+		case STAT_TPOINTS:        return ch->pcdata->stats[TPOINTS];
+		case STAT_ANGEL_JUSTICE:  return ch->pcdata->powers[ANGEL_JUSTICE];
+		case STAT_ANGEL_LOVE:     return ch->pcdata->powers[ANGEL_LOVE];
+		case STAT_ANGEL_HARMONY:  return ch->pcdata->powers[ANGEL_HARMONY];
+		case STAT_ANGEL_PEACE:    return ch->pcdata->powers[ANGEL_PEACE];
+		case STAT_SHAPE_COUNTER:  return ch->pcdata->powers[SHAPE_COUNTER];
+		case STAT_PHASE_COUNTER:  return ch->pcdata->powers[PHASE_COUNTER];
+		case STAT_HARA_KIRI:      return ch->pcdata->powers[HARA_KIRI];
+		default:                  return 0;
+	}
+}
+
+/*
+ * ==========================================================================
+ *                         CLASS REGISTRY FUNCTIONS
+ * ==========================================================================
+ */
+
+/*
+ * Insert default class registry entries if table is empty.
+ */
+static void class_registry_insert_defaults( void ) {
+	sqlite3_stmt *count_stmt = NULL;
+	sqlite3_stmt *insert_stmt = NULL;
+	int count = 0;
+
+	/* Check if table is empty */
+	if ( sqlite3_prepare_v2( game_db, "SELECT COUNT(*) FROM class_registry", -1, &count_stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( count_stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( count_stmt, 0 );
+		sqlite3_finalize( count_stmt );
+	}
+
+	if ( count > 0 )
+		return;  /* Table has data, don't insert defaults */
+
+	/* Prepare insert statement */
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_registry (class_id, class_name, keyword, keyword_alt, mudstat_label, "
+			"selfclass_message, display_order, upgrade_class, requirements) "
+			"VALUES (?,?,?,?,?,?,?,?,?)",
+			-1, &insert_stmt, NULL ) != SQLITE_OK )
+		return;
+
+	/* Helper macro for inserting registry entries */
+	#define INSERT_REGISTRY( cid, name, kw, kw_alt, label, msg, order, upg, req ) \
+		sqlite3_bind_int( insert_stmt, 1, cid ); \
+		sqlite3_bind_text( insert_stmt, 2, name, -1, SQLITE_STATIC ); \
+		sqlite3_bind_text( insert_stmt, 3, kw, -1, SQLITE_STATIC ); \
+		if ( kw_alt ) sqlite3_bind_text( insert_stmt, 4, kw_alt, -1, SQLITE_STATIC ); else sqlite3_bind_null( insert_stmt, 4 ); \
+		sqlite3_bind_text( insert_stmt, 5, label, -1, SQLITE_STATIC ); \
+		sqlite3_bind_text( insert_stmt, 6, msg, -1, SQLITE_STATIC ); \
+		sqlite3_bind_int( insert_stmt, 7, order ); \
+		if ( upg > 0 ) sqlite3_bind_int( insert_stmt, 8, upg ); else sqlite3_bind_null( insert_stmt, 8 ); \
+		if ( req ) sqlite3_bind_text( insert_stmt, 9, req, -1, SQLITE_STATIC ); else sqlite3_bind_null( insert_stmt, 9 ); \
+		sqlite3_step( insert_stmt ); \
+		sqlite3_reset( insert_stmt );
+
+	/* Base Classes (9) - upgrade_class = 0 (NULL) */
+	INSERT_REGISTRY( CLASS_DEMON, "Demon", "demon", NULL, "Demons",
+		"You have chosen the #RDemonic#n path, may god have mercy on yer soul.", 0, 0, NULL );
+
+	INSERT_REGISTRY( CLASS_MAGE, "Mage", "mage", "battlemage", "Mages",
+		"You start down the path of power, the #Rarcane#n is your weapon.", 0, 0,
+		"Requires 5K mana and 100 in all spell colors" );
+
+	INSERT_REGISTRY( CLASS_WEREWOLF, "Werewolf", "werewolf", NULL, "Werewolfs",
+		"You have chosen the path of the #0Garou#n, may gaia guide you.", 1, 0, NULL );
+
+	INSERT_REGISTRY( CLASS_VAMPIRE, "Vampire", "vampire", NULL, "Vampires",
+		"Fear the #ySun#n nosferatu, God's curse lives in you.", 1, 0, NULL );
+
+	INSERT_REGISTRY( CLASS_DROW, "Drow", "drow", NULL, "Drows",
+		"Choose your profession, and #PLloth#n will guide you.", 2, 0, NULL );
+
+	INSERT_REGISTRY( CLASS_MONK, "Monk", "monk", NULL, "Monks",
+		"Your faith in God will guide you, destroy #7EVIL#n.", 3, 0, NULL );
+
+	INSERT_REGISTRY( CLASS_NINJA, "Ninja", "ninja", NULL, "Ninjas",
+		"You have chosen a life in the #0shadows#n, assassinate at will.", 2, 0, NULL );
+
+	INSERT_REGISTRY( CLASS_DIRGESINGER, "Dirgesinger", "dirgesinger", NULL, "Dirges",
+		"Your voice becomes your weapon. Let the #Gbattle hymns#n begin.", 5, 0, NULL );
+
+	INSERT_REGISTRY( CLASS_PSION, "Psion", "psion", NULL, "Psions",
+		"Your mind awakens to #x141psionic power#n. Focus your thoughts.", 6, 0, NULL );
+
+	/* Upgrade Classes (9) - upgrade_class = base class_id */
+	INSERT_REGISTRY( CLASS_SAMURAI, "Samurai", "samurai", NULL, "Samurais",
+		"You walk the path of the #Rwarrior#n. Honor guides your blade.", 2, CLASS_NINJA, NULL );
+
+	INSERT_REGISTRY( CLASS_LICH, "Lich", "lich", NULL, "Lichs",
+		"Undeath calls to you. Embrace the #0cold#n eternity.", 3, CLASS_MAGE, NULL );
+
+	INSERT_REGISTRY( CLASS_SHAPESHIFTER, "Shapeshifter", "shapeshifter", NULL, "Shapies",
+		"Your form is malleable. Become #Ranything#n.", 3, CLASS_WEREWOLF, NULL );
+
+	INSERT_REGISTRY( CLASS_TANARRI, "Tanarri", "tanarri", NULL, "Tanar'ris",
+		"Chaos incarnate. The #Rabyss#n welcomes you.", 4, CLASS_DEMON, NULL );
+
+	INSERT_REGISTRY( CLASS_ANGEL, "Angel", "angel", NULL, "Angels",
+		"Heaven's light shines upon you. Protect the #7innocent#n.", 4, CLASS_MONK, NULL );
+
+	INSERT_REGISTRY( CLASS_UNDEAD_KNIGHT, "Undead Knight", "knight", "undeadknight", "Knights",
+		"Death is not the end. Rise as an #LUndead Knight#n.", 4, CLASS_VAMPIRE, NULL );
+
+	INSERT_REGISTRY( CLASS_DROID, "Spider Droid", "droid", "spiderdroid", "Driders",
+		"Mechanical precision. #0Calculate#n and destroy.", 5, CLASS_DROW, NULL );
+
+	INSERT_REGISTRY( CLASS_SIREN, "Siren", "siren", NULL, "Sirens",
+		"Your song enchants all who hear. #x255Sing#n of their doom.", 5, CLASS_DIRGESINGER, NULL );
+
+	INSERT_REGISTRY( CLASS_MINDFLAYER, "Mindflayer", "mindflayer", NULL, "Mindflayers",
+		"The hunger for #Gminds#n consumes you. Feed.", 6, CLASS_PSION, NULL );
+
+	#undef INSERT_REGISTRY
+
+	sqlite3_finalize( insert_stmt );
+}
+
+/*
+ * Load class registry from database into memory cache.
+ * Called during boot after tables are created.
+ */
+void db_game_load_class_registry( void ) {
+	sqlite3_stmt *stmt = NULL;
+	char buf[MAX_STRING_LENGTH];
+	const char *text;
+
+	if ( game_db == NULL ) {
+		log_string( "db_game_load_class_registry: game_db not open" );
+		return;
+	}
+
+	class_registry_insert_defaults();
+
+	registry_count = 0;
+
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, class_name, keyword, keyword_alt, mudstat_label, "
+			"selfclass_message, display_order, upgrade_class, requirements "
+			"FROM class_registry ORDER BY display_order, class_id",
+			-1, &stmt, NULL ) != SQLITE_OK ) {
+		log_string( "db_game_load_class_registry: failed to prepare select" );
+		return;
+	}
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW && registry_count < MAX_CACHED_REGISTRY ) {
+		CLASS_REGISTRY_ENTRY *entry = &registry_cache[registry_count];
+
+		entry->class_id        = sqlite3_column_int( stmt, 0 );
+		entry->class_name      = str_dup( (const char *)sqlite3_column_text( stmt, 1 ) );
+		entry->keyword         = str_dup( (const char *)sqlite3_column_text( stmt, 2 ) );
+
+		text = (const char *)sqlite3_column_text( stmt, 3 );
+		entry->keyword_alt     = text ? str_dup( text ) : NULL;
+
+		entry->mudstat_label   = str_dup( (const char *)sqlite3_column_text( stmt, 4 ) );
+		entry->selfclass_message = str_dup( (const char *)sqlite3_column_text( stmt, 5 ) );
+		entry->display_order   = sqlite3_column_int( stmt, 6 );
+
+		if ( sqlite3_column_type( stmt, 7 ) == SQLITE_NULL )
+			entry->upgrade_class = 0;
+		else
+			entry->upgrade_class = sqlite3_column_int( stmt, 7 );
+
+		text = (const char *)sqlite3_column_text( stmt, 8 );
+		entry->requirements    = text ? str_dup( text ) : NULL;
+
+		registry_count++;
+	}
+
+	sqlite3_finalize( stmt );
+
+	sprintf( buf, "Loaded %d class registry entries from database.", registry_count );
+	log_string( buf );
+}
+
+/*
+ * Get count of registry entries.
+ */
+int db_game_get_registry_count( void ) {
+	return registry_count;
+}
+
+/*
+ * Get registry entry by class_id.
+ */
+const CLASS_REGISTRY_ENTRY *db_game_get_registry_by_id( int class_id ) {
+	int i;
+
+	for ( i = 0; i < registry_count; i++ ) {
+		if ( registry_cache[i].class_id == class_id )
+			return &registry_cache[i];
+	}
+
+	return NULL;
+}
+
+/*
+ * Get registry entry by keyword or alternate keyword.
+ * Case-insensitive match.
+ */
+const CLASS_REGISTRY_ENTRY *db_game_get_registry_by_keyword( const char *keyword ) {
+	int i;
+
+	if ( keyword == NULL || keyword[0] == '\0' )
+		return NULL;
+
+	for ( i = 0; i < registry_count; i++ ) {
+		if ( !str_cmp( registry_cache[i].keyword, keyword ) )
+			return &registry_cache[i];
+
+		if ( registry_cache[i].keyword_alt != NULL &&
+		     !str_cmp( registry_cache[i].keyword_alt, keyword ) )
+			return &registry_cache[i];
+	}
+
+	return NULL;
+}
+
+/*
+ * Get registry entry by index (for iteration).
+ */
+const CLASS_REGISTRY_ENTRY *db_game_get_registry_by_index( int index ) {
+	if ( index < 0 || index >= registry_count )
+		return NULL;
+
+	return &registry_cache[index];
 }

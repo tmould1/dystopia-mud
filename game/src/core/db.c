@@ -483,7 +483,12 @@ void boot_db( bool fCopyOver ) {
 		load_gameconfig();
 		load_balance();
 		load_ability_config();
+		db_game_load_class_registry();  /* Must load first - other class tables reference it */
 		db_game_load_class_display();
+		db_game_load_class_aura();
+		db_game_load_class_armor();
+		db_game_load_class_starting();
+		db_game_load_class_score();
 		db_game_close_boot_connections();
 	}
 

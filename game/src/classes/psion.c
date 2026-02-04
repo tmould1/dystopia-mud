@@ -643,64 +643,7 @@ void do_brainburn( CHAR_DATA *ch, char *argument ) {
  * Psion Armor creation command
  */
 void do_psionarmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_DATA *obj;
-	OBJ_INDEX_DATA *pObjIndex;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	if ( !IS_CLASS( ch, CLASS_PSION ) ) {
-		send_to_char( "Huh?\n\r", ch );
-		return;
-	}
-
-	one_argument( argument, arg );
-
-	if ( arg[0] == '\0' ) {
-		send_to_char( "#x033~#x039[#n Psion Equipment #x039]#x033~#n\n\r", ch );
-		send_to_char( "Usage: psionarmor <piece>\n\r", ch );
-		send_to_char( "Available: focus ring amulet robe circlet leggings sandals\n\r", ch );
-		send_to_char( "           gloves bracers cloak sash wristband gem\n\r", ch );
-		send_to_char( "Cost: 60 primal per piece\n\r", ch );
-		return;
-	}
-
-	if ( ch->practice < 60 ) {
-		send_to_char( "You need 60 primal to create equipment.\n\r", ch );
-		return;
-	}
-
-	if ( !str_cmp( arg, "focus" ) )        vnum = 33360;
-	else if ( !str_cmp( arg, "ring" ) )    vnum = 33361;
-	else if ( !str_cmp( arg, "amulet" ) )  vnum = 33362;
-	else if ( !str_cmp( arg, "robe" ) )    vnum = 33363;
-	else if ( !str_cmp( arg, "circlet" ) ) vnum = 33364;
-	else if ( !str_cmp( arg, "leggings" ) ) vnum = 33365;
-	else if ( !str_cmp( arg, "sandals" ) ) vnum = 33366;
-	else if ( !str_cmp( arg, "gloves" ) )  vnum = 33367;
-	else if ( !str_cmp( arg, "bracers" ) ) vnum = 33368;
-	else if ( !str_cmp( arg, "cloak" ) )   vnum = 33369;
-	else if ( !str_cmp( arg, "sash" ) )    vnum = 33370;
-	else if ( !str_cmp( arg, "wristband" ) ) vnum = 33371;
-	else if ( !str_cmp( arg, "gem" ) )     vnum = 33372;
-	else {
-		send_to_char( "That is not a valid piece. See 'psionarmor' for options.\n\r", ch );
-		return;
-	}
-
-	if ( ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "That equipment hasn't been created yet.\n\r", ch );
-		return;
-	}
-
-	ch->practice -= 60;
-
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-
-	act( "You create $p with your psychic power.", ch, obj, NULL, TO_CHAR );
-	act( "$n creates $p with psychic power.", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_PSION );
 }
 
 /*

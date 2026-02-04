@@ -126,6 +126,11 @@ class NavigationTree(ttk.Frame):
                 ('super_admins', 'Super Admins'),
                 ('immortal_pretitles', 'Immortal Pretitles'),
                 ('class_display', 'Class Display'),
+                ('class_auras', 'Class Auras'),
+                ('class_armor', 'Class Armor'),
+                ('class_starting', 'Class Starting'),
+                ('class_score_stats', 'Class Score Stats'),
+                ('class_registry', 'Class Registry'),
             ]:
                 node_id = self.tree.insert(game_node, tk.END, text=label)
                 self._node_data[node_id] = ('game', game_db, table_name)

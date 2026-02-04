@@ -160,67 +160,7 @@ void do_soulsuck( CHAR_DATA *ch, char *argument ) {
 }
 
 void do_licharmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_INDEX_DATA *pObjIndex;
-	OBJ_DATA *obj;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	argument = one_argument( argument, arg );
-
-	if ( IS_NPC( ch ) ) return;
-	if ( !IS_CLASS( ch, CLASS_LICH ) ) {
-		send_to_char( "Huh?\n\r", ch );
-		return;
-	}
-	if ( arg[0] == '\0' ) {
-		send_to_char( "Please specify which piece of angel armor you wish to make: Scythe Bracer Amulet Ring Plate Helmet Leggings Boots Gauntlets Sleeves Cloak Belt Mask.\n\r", ch );
-		return;
-	}
-	if ( ch->practice < acfg("lich.licharmor.practice_cost") ) {
-		send_to_char( "It costs 150 points of primal to create lich equipment.\n\r", ch );
-		return;
-	}
-	if ( !str_cmp( arg, "scythe" ) )
-		vnum = 33220;
-	else if ( !str_cmp( arg, "bracer" ) )
-		vnum = 33222;
-	else if ( !str_cmp( arg, "amulet" ) )
-		vnum = 33223;
-	else if ( !str_cmp( arg, "ring" ) )
-		vnum = 33221;
-	else if ( !str_cmp( arg, "plate" ) )
-		vnum = 33224;
-	else if ( !str_cmp( arg, "helmet" ) )
-		vnum = 33225;
-	else if ( !str_cmp( arg, "leggings" ) )
-		vnum = 33231;
-	else if ( !str_cmp( arg, "boots" ) )
-		vnum = 33230;
-	else if ( !str_cmp( arg, "gauntlets" ) )
-		vnum = 33228;
-	else if ( !str_cmp( arg, "sleeves" ) )
-		vnum = 33229;
-	else if ( !str_cmp( arg, "cloak" ) )
-		vnum = 33232;
-	else if ( !str_cmp( arg, "belt" ) )
-		vnum = 33226;
-	else if ( !str_cmp( arg, "mask" ) )
-		vnum = 33227;
-	else {
-		do_licharmor( ch, "" );
-		return;
-	}
-	if ( vnum == 0 || ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "Missing object, please inform a God.\n\r", ch );
-		return;
-	}
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-	ch->practice -= acfg("lich.licharmor.practice_cost");
-	act( "$p appears in your hands.", ch, obj, NULL, TO_CHAR );
-	act( "$p appears in $n's hands.", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_LICH );
 }
 
 void do_earthswallow( CHAR_DATA *ch, char *argument ) {

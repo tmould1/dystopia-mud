@@ -4970,4 +4970,7 @@ void merc_logf args( ( char *fmt, ... ) );
 
 void copyover_recover args( (void) );
 
+/* class_armor.c */
+void do_classarmor_generic args( ( CHAR_DATA *ch, char *argument, int class_id ) );
+
 #endif // MERC_H

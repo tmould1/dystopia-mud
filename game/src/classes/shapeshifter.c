@@ -179,68 +179,7 @@ void do_phase( CHAR_DATA *ch, char *argument ) {
 }
 
 void do_shapearmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_INDEX_DATA *pObjIndex;
-	OBJ_DATA *obj;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	argument = one_argument( argument, arg );
-	if ( IS_NPC( ch ) ) return;
-	if ( !IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) {
-		send_to_char( "What?\n\r", ch );
-		return;
-	}
-	if ( arg[0] == '\0' ) {
-		send_to_char( "Please specify which piece of shapeshifter armor you wish to make: Knife Kane Bands Necklace Ring Jacket Helmet Pants Boots Gloves Shirt Cloak Belt Visor.\n\r", ch );
-		return;
-	}
-	if ( ch->practice < acfg("shapeshifter.shapearmor.primal_cost") ) {
-		send_to_char( "It costs 150 points of primal to create shapeshifter equipment.\n\r", ch );
-		return;
-	}
-	if ( !str_cmp( arg, "knife" ) )
-		vnum = 33160;
-	else if ( !str_cmp( arg, "kane" ) )
-		vnum = 33161;
-	else if ( !str_cmp( arg, "bands" ) )
-		vnum = 33162;
-	else if ( !str_cmp( arg, "necklace" ) )
-		vnum = 33163;
-	else if ( !str_cmp( arg, "ring" ) )
-		vnum = 33164;
-	else if ( !str_cmp( arg, "jacket" ) )
-		vnum = 33165;
-	else if ( !str_cmp( arg, "helmet" ) )
-		vnum = 33166;
-	else if ( !str_cmp( arg, "pants" ) )
-		vnum = 33167;
-	else if ( !str_cmp( arg, "boots" ) )
-		vnum = 33168;
-	else if ( !str_cmp( arg, "gloves" ) )
-		vnum = 33169;
-	else if ( !str_cmp( arg, "shirt" ) )
-		vnum = 33170;
-	else if ( !str_cmp( arg, "cloak" ) )
-		vnum = 33171;
-	else if ( !str_cmp( arg, "belt" ) )
-		vnum = 33172;
-	else if ( !str_cmp( arg, "visor" ) )
-		vnum = 33173;
-	else {
-		do_shapearmor( ch, "" );
-		return;
-	}
-	if ( vnum == 0 || ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "Missing object, please inform a God.\n\r", ch );
-		return;
-	}
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-	ch->practice -= acfg("shapeshifter.shapearmor.primal_cost");
-	act( "$p appears in your hands.", ch, obj, NULL, TO_CHAR );
-	act( "$p appears in $n's hands.", ch, obj, NULL, TO_ROOM );
-	return;
+	do_classarmor_generic( ch, argument, CLASS_SHAPESHIFTER );
 }
 
 void do_mistwalk( CHAR_DATA *ch, char *argument ) {

@@ -91,68 +91,7 @@ void do_ride( CHAR_DATA *ch, char *argument ) {
 }
 
 void do_knightarmor( CHAR_DATA *ch, char *argument ) {
-	OBJ_INDEX_DATA *pObjIndex;
-	OBJ_DATA *obj;
-	char arg[MAX_INPUT_LENGTH];
-	int vnum = 0;
-
-	argument = one_argument( argument, arg );
-	if ( IS_NPC( ch ) ) return;
-	if ( !IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) ) {
-		send_to_char( "You are not one of the undead!!!\n\r", ch );
-		return;
-	}
-	if ( arg[0] == '\0' ) {
-		send_to_char( "Please specify which piece of unholy armor you wish to make: plate ring bracer collar helmet leggings boots gauntlets chains cloak belt visor longsword shortsword.\n\r", ch );
-		return;
-	}
-	if ( ch->practice < acfg("undead_knight.knightarmor.primal_cost") ) {
-		send_to_char( "It costs 150 points of primal to create a piece of unholy armor.\n\r", ch );
-		return;
-	}
-	if ( !str_cmp( arg, "plate" ) )
-		vnum = 29975;
-	else if ( !str_cmp( arg, "longsword" ) )
-		vnum = 29976;
-	else if ( !str_cmp( arg, "shortsword" ) )
-		vnum = 29977;
-	else if ( !str_cmp( arg, "ring" ) )
-		vnum = 29978;
-	else if ( !str_cmp( arg, "bracer" ) )
-		vnum = 29979;
-	else if ( !str_cmp( arg, "collar" ) )
-		vnum = 29980;
-	else if ( !str_cmp( arg, "helmet" ) )
-		vnum = 29981;
-	else if ( !str_cmp( arg, "leggings" ) )
-		vnum = 29982;
-	else if ( !str_cmp( arg, "boots" ) )
-		vnum = 29983;
-	else if ( !str_cmp( arg, "gauntlets" ) )
-		vnum = 29984;
-	else if ( !str_cmp( arg, "chains" ) )
-		vnum = 29985;
-	else if ( !str_cmp( arg, "cloak" ) )
-		vnum = 29986;
-	else if ( !str_cmp( arg, "belt" ) )
-		vnum = 29987;
-	else if ( !str_cmp( arg, "visor" ) )
-		vnum = 29988;
-	else {
-		send_to_char( "Please specify which piece of unholy armor you wish to make: plate ring bracer collar helmet leggings boots gauntlets chains cloak belt visor longsword shortsword.\n\r", ch );
-		return;
-	}
-	if ( vnum == 0 || ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
-		send_to_char( "Missing object, please inform Jobo.\n\r", ch );
-		return;
-	}
-	obj = create_object( pObjIndex, 50 );
-	obj->questowner = str_dup( ch->pcdata->switchname );
-	obj_to_char( obj, ch );
-	act( "$p appears in your hands.", ch, obj, NULL, TO_CHAR );
-	act( "$p appears in $n's hands.", ch, obj, NULL, TO_ROOM );
-	ch->practice -= acfg("undead_knight.knightarmor.primal_cost");
-	return;
+	do_classarmor_generic( ch, argument, CLASS_UNDEAD_KNIGHT );
 }
 
 void do_unholyrite( CHAR_DATA *ch, char *argument ) {

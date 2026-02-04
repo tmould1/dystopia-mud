@@ -8,6 +8,74 @@ import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
 
 
+# =============================================================================
+# Shared Constants - Class ID to name mapping (matches C defines in class.h)
+# =============================================================================
+CLASS_NAMES = {
+    1: 'Demon',
+    2: 'Mage',
+    4: 'Werewolf',
+    8: 'Vampire',
+    16: 'Samurai',
+    32: 'Drow',
+    64: 'Monk',
+    128: 'Ninja',
+    256: 'Lich',
+    512: 'Shapeshifter',
+    1024: 'Tanarri',
+    2048: 'Angel',
+    4096: 'Undead Knight',
+    8192: 'Spider Droid',
+    16384: 'Dirgesinger',
+    32768: 'Siren',
+    65536: 'Psion',
+    131072: 'Mindflayer',
+}
+
+# Stat source enum mapping (matches C STAT_SOURCE enum in db_game.h)
+STAT_SOURCES = {
+    0: ('STAT_NONE', 'None'),
+    1: ('STAT_BEAST', 'Beast (ch->beast)'),
+    2: ('STAT_RAGE', 'Rage (ch->rage)'),
+    3: ('STAT_CHI_CURRENT', 'Chi Current'),
+    4: ('STAT_CHI_MAXIMUM', 'Chi Maximum'),
+    5: ('STAT_GNOSIS_CURRENT', 'Gnosis Current'),
+    6: ('STAT_GNOSIS_MAXIMUM', 'Gnosis Maximum'),
+    7: ('STAT_MONKBLOCK', 'Monk Block'),
+    8: ('STAT_SILTOL', 'Silver Tolerance'),
+    9: ('STAT_SOULS', 'Souls'),
+    10: ('STAT_DEMON_POWER', 'Demon Power (Current)'),
+    11: ('STAT_DEMON_TOTAL', 'Demon Power (Total)'),
+    12: ('STAT_DROID_POWER', 'Droid Power'),
+    13: ('STAT_DROW_POWER', 'Drow Power'),
+    14: ('STAT_DROW_MAGIC', 'Drow Magic'),
+    15: ('STAT_TPOINTS', 'Tanarri Points'),
+    16: ('STAT_ANGEL_JUSTICE', 'Angel Justice'),
+    17: ('STAT_ANGEL_LOVE', 'Angel Love'),
+    18: ('STAT_ANGEL_HARMONY', 'Angel Harmony'),
+    19: ('STAT_ANGEL_PEACE', 'Angel Peace'),
+    20: ('STAT_SHAPE_COUNTER', 'Shape Counter'),
+    21: ('STAT_PHASE_COUNTER', 'Phase Counter'),
+    22: ('STAT_HARA_KIRI', 'Hara Kiri'),
+}
+
+
+def get_class_name(class_id: int) -> str:
+    """Get human-readable class name from class_id."""
+    return CLASS_NAMES.get(class_id, f'Unknown ({class_id})')
+
+
+def get_stat_source_name(stat_source: int) -> str:
+    """Get human-readable stat source name."""
+    if stat_source in STAT_SOURCES:
+        return STAT_SOURCES[stat_source][1]
+    return f'Unknown ({stat_source})'
+
+
+# =============================================================================
+# Repository Classes
+# =============================================================================
+
 class BaseRepository:
     """
     Base class for entity repositories.
@@ -879,28 +947,6 @@ class ImmortalPretitlesRepository(BaseRepository):
 class ClassBracketsRepository(BaseRepository):
     """Repository for class_brackets table - who list brackets by class."""
 
-    # Class ID to name mapping (matches C defines in class.h)
-    CLASS_NAMES = {
-        1: 'Demon',
-        2: 'Mage',
-        4: 'Werewolf',
-        8: 'Vampire',
-        16: 'Samurai',
-        32: 'Drow',
-        64: 'Monk',
-        128: 'Ninja',
-        256: 'Lich',
-        512: 'Shapeshifter',
-        1024: 'Tanarri',
-        2048: 'Angel',
-        4096: 'Undead Knight',
-        8192: 'Spider Droid',
-        16384: 'Dirgesinger',
-        32768: 'Siren',
-        65536: 'Psion',
-        131072: 'Mindflayer',
-    }
-
     def __init__(self, conn: sqlite3.Connection):
         super().__init__(conn, 'class_brackets', 'class_id')
 
@@ -941,3 +987,122 @@ class ClassGenerationsRepository(BaseRepository):
             "SELECT DISTINCT class_id FROM class_generations ORDER BY class_id"
         ).fetchall()
         return [row['class_id'] for row in rows]
+
+
+class ClassAurasRepository(BaseRepository):
+    """Repository for class_auras table - room aura text by class."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_auras', 'class_id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all class auras ordered by display_order."""
+        return super().list_all(order_by or 'display_order, class_id')
+
+
+class ClassArmorConfigRepository(BaseRepository):
+    """Repository for class_armor_config table - armor creation settings per class."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_armor_config', 'class_id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all armor configs ordered by class_id."""
+        return super().list_all(order_by or 'class_id')
+
+
+class ClassArmorPiecesRepository(BaseRepository):
+    """Repository for class_armor_pieces table - armor pieces per class."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_armor_pieces', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all armor pieces ordered by class_id and keyword."""
+        return super().list_all(order_by or 'class_id, keyword')
+
+    def get_by_class(self, class_id: int) -> List[Dict]:
+        """Get all armor pieces for a specific class."""
+        rows = self.conn.execute(
+            "SELECT * FROM class_armor_pieces WHERE class_id = ? ORDER BY keyword",
+            (class_id,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_by_class_and_keyword(self, class_id: int, keyword: str) -> Optional[Dict]:
+        """Get a specific armor piece by class and keyword."""
+        row = self.conn.execute(
+            "SELECT * FROM class_armor_pieces WHERE class_id = ? AND keyword = ?",
+            (class_id, keyword)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+class ClassStartingRepository(BaseRepository):
+    """Repository for class_starting table - starting values for class selection."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_starting', 'class_id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all starting configs ordered by class_id."""
+        return super().list_all(order_by or 'class_id')
+
+
+class ClassScoreStatsRepository(BaseRepository):
+    """Repository for class_score_stats table - customizable score display per class."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_score_stats', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all score stats ordered by class_id and display_order."""
+        return super().list_all(order_by or 'class_id, display_order')
+
+    def get_by_class(self, class_id: int) -> List[Dict]:
+        """Get all score stats for a specific class."""
+        rows = self.conn.execute(
+            "SELECT * FROM class_score_stats WHERE class_id = ? ORDER BY display_order",
+            (class_id,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_classes_with_stats(self) -> List[int]:
+        """Get list of class IDs that have score stats."""
+        rows = self.conn.execute(
+            "SELECT DISTINCT class_id FROM class_score_stats ORDER BY class_id"
+        ).fetchall()
+        return [row['class_id'] for row in rows]
+
+
+class ClassRegistryRepository(BaseRepository):
+    """Repository for class_registry table - centralized class metadata."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_registry', 'class_id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all registry entries ordered by display_order, class_id."""
+        return super().list_all(order_by or 'display_order, class_id')
+
+    def get_by_keyword(self, keyword: str) -> Optional[Dict]:
+        """Find class by keyword or alternate keyword."""
+        row = self.conn.execute(
+            "SELECT * FROM class_registry WHERE keyword = ? OR keyword_alt = ?",
+            (keyword.lower(), keyword.lower())
+        ).fetchone()
+        return dict(row) if row else None
+
+    def get_base_classes(self) -> List[Dict]:
+        """Get all base classes (upgrade_class IS NULL)."""
+        rows = self.conn.execute(
+            "SELECT * FROM class_registry WHERE upgrade_class IS NULL ORDER BY display_order, class_id"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_upgrade_classes(self) -> List[Dict]:
+        """Get all upgrade classes (upgrade_class IS NOT NULL)."""
+        rows = self.conn.execute(
+            "SELECT * FROM class_registry WHERE upgrade_class IS NOT NULL ORDER BY display_order, class_id"
+        ).fetchall()
+        return [dict(row) for row in rows]
