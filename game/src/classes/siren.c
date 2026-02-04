@@ -677,10 +677,8 @@ void do_sirenarmor( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->practice < acfg( "dirgesinger.armor.primal_cost" ) ) {
-		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You need %d primal to create siren armor.\n\r", acfg( "dirgesinger.armor.primal_cost" ) );
-		send_to_char( buf, ch );
+	if ( ch->practice < 150 ) {
+		send_to_char( "You need 150 primal to create siren armor.\n\r", ch );
 		return;
 	}
 
@@ -704,7 +702,7 @@ void do_sirenarmor( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->practice -= acfg( "dirgesinger.armor.primal_cost" );
+	ch->practice -= 150;
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
