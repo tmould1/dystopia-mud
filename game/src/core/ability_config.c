@@ -1151,10 +1151,11 @@ void do_ability( CHAR_DATA *ch, char *argument ) {
 
 	/* No args: show summary by class */
 	if ( arg[0] == '\0' ) {
-		const char *last_class = "";
+		char last_class[64];
 		int class_count = 0;
 		int total_classes = 0;
 
+		last_class[0] = '\0';
 		output[0] = '\0';
 		snprintf( buf, sizeof( buf ),
 			"#yAbility Config#n  (%d total entries)\r\n"
@@ -1172,7 +1173,7 @@ void do_ability( CHAR_DATA *ch, char *argument ) {
 					strncat( output, buf, sizeof( output ) - strlen( output ) - 1 );
 					total_classes++;
 				}
-				last_class = cls;
+				snprintf( last_class, sizeof( last_class ), "%s", cls );
 				class_count = 1;
 			} else {
 				class_count++;
