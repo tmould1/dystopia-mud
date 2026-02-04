@@ -28,6 +28,27 @@ DIR_OFFSETS = {
     DIR_DOWN: (0, 0, -1),
 }
 
+# Character classes from class.h (bitfield values)
+CLASS_TABLE = {
+    0: 'None',
+    1: 'Demon',
+    2: 'Mage',
+    4: 'Werewolf',
+    8: 'Vampire',
+    16: 'Samurai',
+    32: 'Drow',
+    64: 'Monk',
+    128: 'Ninja',
+    256: 'Lich',
+    512: 'Shapeshifter',
+    1024: 'Tanarri',
+    2048: 'Angel',
+    4096: 'Undead Knight',
+    8192: 'Spider Droid',
+    16384: 'Dirgesinger',
+    32768: 'Siren',
+}
+
 # Sector types from merc.h
 SECTOR_NAMES = {
     0: 'inside',

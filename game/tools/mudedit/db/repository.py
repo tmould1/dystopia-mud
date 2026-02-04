@@ -1,0 +1,730 @@
+"""
+Repository classes for CRUD operations on MUD database entities.
+
+Provides a generic BaseRepository and specialized repositories for each entity type.
+"""
+
+import sqlite3
+from typing import Any, Dict, List, Optional, Tuple
+
+
+class BaseRepository:
+    """
+    Base class for entity repositories.
+
+    Provides generic CRUD operations that can be customized by subclasses.
+    """
+
+    def __init__(self, conn: sqlite3.Connection, table_name: str, primary_key: str = 'id'):
+        """
+        Initialize the repository.
+
+        Args:
+            conn: SQLite connection (should have row_factory = sqlite3.Row)
+            table_name: Name of the database table
+            primary_key: Name of the primary key column
+        """
+        self.conn = conn
+        self.table_name = table_name
+        self.primary_key = primary_key
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """
+        Return all rows as dictionaries.
+
+        Args:
+            order_by: Optional column name to order by (defaults to primary key)
+        """
+        order_by = order_by or self.primary_key
+        rows = self.conn.execute(
+            f"SELECT * FROM {self.table_name} ORDER BY {order_by}"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_by_id(self, id_value: Any) -> Optional[Dict]:
+        """Get a single row by primary key."""
+        row = self.conn.execute(
+            f"SELECT * FROM {self.table_name} WHERE {self.primary_key} = ?",
+            (id_value,)
+        ).fetchone()
+        return dict(row) if row else None
+
+    def search(self, term: str, columns: List[str]) -> List[Dict]:
+        """
+        Search across specified columns.
+
+        Args:
+            term: Search term (case-insensitive LIKE match)
+            columns: List of column names to search
+        """
+        if not columns:
+            return []
+
+        conditions = ' OR '.join(f"{col} LIKE ?" for col in columns)
+        params = tuple(f"%{term}%" for _ in columns)
+
+        rows = self.conn.execute(
+            f"SELECT * FROM {self.table_name} WHERE {conditions} ORDER BY {self.primary_key}",
+            params
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def insert(self, data: Dict) -> Any:
+        """
+        Insert a new row.
+
+        Args:
+            data: Dictionary of column_name -> value
+
+        Returns:
+            The new row's primary key value
+        """
+        columns = list(data.keys())
+        placeholders = ', '.join('?' for _ in columns)
+        column_names = ', '.join(columns)
+        values = tuple(data.values())
+
+        self.conn.execute(
+            f"INSERT INTO {self.table_name} ({column_names}) VALUES ({placeholders})",
+            values
+        )
+        self.conn.commit()
+
+        # Return the new ID
+        row = self.conn.execute("SELECT last_insert_rowid()").fetchone()
+        return row[0]
+
+    def update(self, id_value: Any, data: Dict) -> bool:
+        """
+        Update an existing row.
+
+        Args:
+            id_value: Primary key value of the row to update
+            data: Dictionary of column_name -> new_value
+
+        Returns:
+            True if a row was updated, False if not found
+        """
+        if not data:
+            return False
+
+        set_clause = ', '.join(f"{col} = ?" for col in data.keys())
+        values = tuple(data.values()) + (id_value,)
+
+        cursor = self.conn.execute(
+            f"UPDATE {self.table_name} SET {set_clause} WHERE {self.primary_key} = ?",
+            values
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def delete(self, id_value: Any) -> bool:
+        """
+        Delete a row by primary key.
+
+        Returns:
+            True if a row was deleted, False if not found
+        """
+        cursor = self.conn.execute(
+            f"DELETE FROM {self.table_name} WHERE {self.primary_key} = ?",
+            (id_value,)
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def count(self) -> int:
+        """Return the total number of rows."""
+        row = self.conn.execute(f"SELECT COUNT(*) FROM {self.table_name}").fetchone()
+        return row[0]
+
+
+class HelpRepository(BaseRepository):
+    """Repository for help entries."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'helps', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all help entries ordered by ID."""
+        return super().list_all(order_by or 'id')
+
+    def search(self, term: str, columns: Optional[List[str]] = None) -> List[Dict]:
+        """Search help entries by keyword or text content."""
+        return super().search(term, columns or ['keyword', 'text'])
+
+    def find_by_keyword(self, keyword: str) -> List[Dict]:
+        """Find help entries matching a keyword (case-insensitive)."""
+        rows = self.conn.execute(
+            "SELECT * FROM helps WHERE keyword LIKE ? ORDER BY id",
+            (f"%{keyword}%",)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+class MobileRepository(BaseRepository):
+    """Repository for mobile/NPC entities."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'mobiles', 'vnum')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all mobiles ordered by vnum."""
+        return super().list_all(order_by or 'vnum')
+
+    def search(self, term: str, columns: Optional[List[str]] = None) -> List[Dict]:
+        """Search mobiles by name or description."""
+        return super().search(
+            term,
+            columns or ['player_name', 'short_descr', 'description']
+        )
+
+    def get_with_special(self, vnum: int) -> Optional[Dict]:
+        """Get a mobile with its special function (if any)."""
+        mobile = self.get_by_id(vnum)
+        if not mobile:
+            return None
+
+        # Check for special function
+        row = self.conn.execute(
+            "SELECT spec_fun_name FROM specials WHERE mob_vnum = ?",
+            (vnum,)
+        ).fetchone()
+
+        if row:
+            mobile['spec_fun_name'] = row['spec_fun_name']
+        else:
+            mobile['spec_fun_name'] = None
+
+        return mobile
+
+    def get_spawns(self, vnum: int) -> List[Dict]:
+        """Get all reset entries that spawn this mobile."""
+        rows = self.conn.execute(
+            "SELECT * FROM resets WHERE command = 'M' AND arg1 = ? ORDER BY sort_order",
+            (vnum,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+class ObjectRepository(BaseRepository):
+    """Repository for object/item entities."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'objects', 'vnum')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all objects ordered by vnum."""
+        return super().list_all(order_by or 'vnum')
+
+    def search(self, term: str, columns: Optional[List[str]] = None) -> List[Dict]:
+        """Search objects by name or description."""
+        return super().search(
+            term,
+            columns or ['name', 'short_descr', 'description']
+        )
+
+    def get_with_affects(self, vnum: int) -> Optional[Dict]:
+        """Get an object with its affects."""
+        obj = self.get_by_id(vnum)
+        if not obj:
+            return None
+
+        rows = self.conn.execute(
+            "SELECT * FROM object_affects WHERE obj_vnum = ? ORDER BY sort_order",
+            (vnum,)
+        ).fetchall()
+        obj['affects'] = [dict(row) for row in rows]
+
+        return obj
+
+    def get_extra_descs(self, vnum: int) -> List[Dict]:
+        """Get extra descriptions for an object."""
+        rows = self.conn.execute(
+            "SELECT * FROM extra_descriptions WHERE owner_type = 'objects' AND owner_vnum = ? ORDER BY sort_order",
+            (vnum,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+class RoomRepository(BaseRepository):
+    """Repository for room entities."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'rooms', 'vnum')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all rooms ordered by vnum."""
+        return super().list_all(order_by or 'vnum')
+
+    def search(self, term: str, columns: Optional[List[str]] = None) -> List[Dict]:
+        """Search rooms by name or description."""
+        return super().search(
+            term,
+            columns or ['name', 'description']
+        )
+
+    def get_with_exits(self, vnum: int) -> Optional[Dict]:
+        """Get a room with all its exits."""
+        room = self.get_by_id(vnum)
+        if not room:
+            return None
+
+        rows = self.conn.execute(
+            "SELECT * FROM exits WHERE room_vnum = ? ORDER BY direction",
+            (vnum,)
+        ).fetchall()
+        room['exits'] = [dict(row) for row in rows]
+
+        return room
+
+    def get_room_texts(self, vnum: int) -> List[Dict]:
+        """Get room text triggers for a room."""
+        rows = self.conn.execute(
+            "SELECT * FROM room_texts WHERE room_vnum = ? ORDER BY sort_order",
+            (vnum,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_extra_descs(self, vnum: int) -> List[Dict]:
+        """Get extra descriptions for a room."""
+        rows = self.conn.execute(
+            "SELECT * FROM extra_descriptions WHERE owner_type = 'rooms' AND owner_vnum = ? ORDER BY sort_order",
+            (vnum,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_resets_for_room(self, vnum: int) -> List[Dict]:
+        """Get all reset entries for this room."""
+        rows = self.conn.execute(
+            "SELECT * FROM resets WHERE (command = 'M' AND arg3 = ?) OR (command = 'O' AND arg3 = ?) ORDER BY sort_order",
+            (vnum, vnum)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+class ResetRepository(BaseRepository):
+    """Repository for area reset commands."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'resets', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all resets ordered by sort_order."""
+        return super().list_all(order_by or 'sort_order')
+
+    def get_by_command(self, command: str) -> List[Dict]:
+        """Get all resets of a specific command type (M, O, G, E, P)."""
+        rows = self.conn.execute(
+            "SELECT * FROM resets WHERE command = ? ORDER BY sort_order",
+            (command,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+class ShopRepository(BaseRepository):
+    """Repository for shop configurations."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'shops', 'keeper_vnum')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all shops ordered by keeper vnum."""
+        return super().list_all(order_by or 'keeper_vnum')
+
+    def get_for_mobile(self, mob_vnum: int) -> Optional[Dict]:
+        """Get shop configuration for a specific mobile."""
+        return self.get_by_id(mob_vnum)
+
+
+class AreaRepository(BaseRepository):
+    """Repository for area metadata."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'area', 'name')
+
+    def get_info(self) -> Optional[Dict]:
+        """Get the area's metadata (there's only one row)."""
+        row = self.conn.execute("SELECT * FROM area LIMIT 1").fetchone()
+        return dict(row) if row else None
+
+    def update_info(self, data: Dict) -> bool:
+        """Update the area's metadata."""
+        if not data:
+            return False
+
+        set_clause = ', '.join(f"{col} = ?" for col in data.keys())
+        values = tuple(data.values())
+
+        cursor = self.conn.execute(
+            f"UPDATE area SET {set_clause}",
+            values
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+
+class ExitRepository(BaseRepository):
+    """Repository for room exits."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'exits', 'id')
+
+    def get_for_room(self, room_vnum: int) -> List[Dict]:
+        """Get all exits for a specific room."""
+        rows = self.conn.execute(
+            "SELECT * FROM exits WHERE room_vnum = ? ORDER BY direction",
+            (room_vnum,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_by_room_and_direction(self, room_vnum: int, direction: int) -> Optional[Dict]:
+        """Get a specific exit by room and direction."""
+        row = self.conn.execute(
+            "SELECT * FROM exits WHERE room_vnum = ? AND direction = ?",
+            (room_vnum, direction)
+        ).fetchone()
+        return dict(row) if row else None
+
+    def delete_for_room(self, room_vnum: int) -> int:
+        """Delete all exits for a room. Returns count of deleted exits."""
+        cursor = self.conn.execute(
+            "DELETE FROM exits WHERE room_vnum = ?",
+            (room_vnum,)
+        )
+        self.conn.commit()
+        return cursor.rowcount
+
+
+class KeyValueRepository(BaseRepository):
+    """Repository for key-value configuration tables (gameconfig, balance_config)."""
+
+    def __init__(self, conn: sqlite3.Connection, table_name: str):
+        super().__init__(conn, table_name, 'key')
+
+    def get_value(self, key: str) -> Optional[str]:
+        """Get a single configuration value."""
+        row = self.conn.execute(
+            f"SELECT value FROM {self.table_name} WHERE key = ?",
+            (key,)
+        ).fetchone()
+        return row['value'] if row else None
+
+    def set_value(self, key: str, value: str) -> bool:
+        """Set a configuration value (insert or update)."""
+        existing = self.get_by_id(key)
+        if existing:
+            return self.update(key, {'value': value})
+        else:
+            self.insert({'key': key, 'value': value})
+            return True
+
+
+class GameConfigRepository(KeyValueRepository):
+    """Repository for gameconfig table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'gameconfig')
+
+
+class BalanceConfigRepository(KeyValueRepository):
+    """Repository for balance_config table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'balance_config')
+
+
+class AbilityConfigRepository(BaseRepository):
+    """Repository for ability_config table with hierarchical key support."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'ability_config', 'key')
+
+    def get_value(self, key: str) -> Optional[int]:
+        """Get a single ability config value."""
+        row = self.conn.execute(
+            "SELECT value FROM ability_config WHERE key = ?",
+            (key,)
+        ).fetchone()
+        return row['value'] if row else None
+
+    def set_value(self, key: str, value: int) -> bool:
+        """Set an ability config value (insert or update)."""
+        existing = self.get_by_id(key)
+        if existing:
+            return self.update(key, {'value': value})
+        else:
+            self.insert({'key': key, 'value': value})
+            return True
+
+    def get_by_class(self, class_name: str) -> List[Dict]:
+        """Get all abilities for a specific class."""
+        rows = self.conn.execute(
+            "SELECT * FROM ability_config WHERE key LIKE ? ORDER BY key",
+            (f"{class_name}.%",)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_classes(self) -> List[str]:
+        """Get list of unique class names."""
+        rows = self.conn.execute(
+            "SELECT DISTINCT substr(key, 1, instr(key, '.') - 1) as class_name "
+            "FROM ability_config WHERE instr(key, '.') > 0 ORDER BY class_name"
+        ).fetchall()
+        return [row['class_name'] for row in rows if row['class_name']]
+
+    def get_abilities_for_class(self, class_name: str) -> List[str]:
+        """Get list of unique abilities for a class."""
+        prefix = f"{class_name}."
+        rows = self.conn.execute(
+            "SELECT DISTINCT "
+            "  substr(key, ?, instr(substr(key, ?), '.') - 1) as ability "
+            "FROM ability_config "
+            "WHERE key LIKE ? AND instr(substr(key, ?), '.') > 0 "
+            "ORDER BY ability",
+            (len(prefix) + 1, len(prefix) + 1, f"{prefix}%", len(prefix) + 1)
+        ).fetchall()
+        return [row['ability'] for row in rows if row['ability']]
+
+    def get_ability_params(self, class_name: str, ability_name: str) -> List[Dict]:
+        """Get all parameters for a specific class ability."""
+        rows = self.conn.execute(
+            "SELECT * FROM ability_config WHERE key LIKE ? ORDER BY key",
+            (f"{class_name}.{ability_name}.%",)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+class KingdomsRepository(BaseRepository):
+    """Repository for kingdoms table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'kingdoms', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all kingdoms ordered by ID."""
+        return super().list_all(order_by or 'id')
+
+
+class BansRepository(BaseRepository):
+    """Repository for bans table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'bans', 'id')
+
+    def find_by_name(self, name: str) -> Optional[Dict]:
+        """Find a ban by name."""
+        row = self.conn.execute(
+            "SELECT * FROM bans WHERE name = ?",
+            (name,)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+class DisabledCommandsRepository(BaseRepository):
+    """Repository for disabled_commands table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'disabled_commands', 'command_name')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all disabled commands ordered by name."""
+        return super().list_all(order_by or 'command_name')
+
+
+class TopBoardRepository(BaseRepository):
+    """Repository for topboard table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'topboard', 'rank')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all topboard entries ordered by rank."""
+        return super().list_all(order_by or 'rank')
+
+
+class LeaderboardRepository(BaseRepository):
+    """Repository for leaderboard table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'leaderboard', 'category')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all leaderboard entries ordered by category."""
+        return super().list_all(order_by or 'category')
+
+
+class NotesRepository(BaseRepository):
+    """Repository for notes table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'notes', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all notes ordered by date_stamp descending."""
+        return super().list_all(order_by or 'date_stamp DESC')
+
+    def get_by_board(self, board_idx: int) -> List[Dict]:
+        """Get all notes for a specific board."""
+        rows = self.conn.execute(
+            "SELECT * FROM notes WHERE board_idx = ? ORDER BY date_stamp DESC",
+            (board_idx,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+class BugsRepository(BaseRepository):
+    """Repository for bugs table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'bugs', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all bug reports ordered by timestamp descending."""
+        return super().list_all(order_by or 'timestamp DESC')
+
+
+class PlayerRepository:
+    """Repository for player database files."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        self.conn = conn
+
+    def get_player(self) -> Optional[Dict]:
+        """Get player data (excluding password)."""
+        row = self.conn.execute(
+            "SELECT * FROM player LIMIT 1"
+        ).fetchone()
+        if not row:
+            return None
+
+        data = dict(row)
+        # Mask password - never expose it
+        if 'password' in data:
+            data['password'] = '********'
+        return data
+
+    def update_player(self, data: Dict) -> bool:
+        """Update player data. Password must be handled separately."""
+        if not data:
+            return False
+
+        # Never allow password update through this method
+        data = {k: v for k, v in data.items() if k != 'password'}
+        if not data:
+            return False
+
+        set_clause = ', '.join(f"{col} = ?" for col in data.keys())
+        values = tuple(data.values())
+
+        cursor = self.conn.execute(
+            f"UPDATE player SET {set_clause}",
+            values
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def set_password(self, password_hash: str) -> bool:
+        """Set player password (write-only, expects pre-hashed value)."""
+        cursor = self.conn.execute(
+            "UPDATE player SET password = ?",
+            (password_hash,)
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def get_skills(self) -> List[Dict]:
+        """Get all player skills."""
+        rows = self.conn.execute(
+            "SELECT * FROM skills ORDER BY skill_name"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def update_skill(self, skill_name: str, value: int) -> bool:
+        """Update or insert a skill value."""
+        existing = self.conn.execute(
+            "SELECT * FROM skills WHERE skill_name = ?",
+            (skill_name,)
+        ).fetchone()
+
+        if existing:
+            if value == 0:
+                # Delete zero-value skills
+                self.conn.execute("DELETE FROM skills WHERE skill_name = ?", (skill_name,))
+            else:
+                self.conn.execute(
+                    "UPDATE skills SET value = ? WHERE skill_name = ?",
+                    (value, skill_name)
+                )
+        else:
+            if value != 0:
+                self.conn.execute(
+                    "INSERT INTO skills (skill_name, value) VALUES (?, ?)",
+                    (skill_name, value)
+                )
+        self.conn.commit()
+        return True
+
+    def get_aliases(self) -> List[Dict]:
+        """Get all player aliases."""
+        rows = self.conn.execute(
+            "SELECT * FROM aliases ORDER BY short_n"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def add_alias(self, short_n: str, long_n: str) -> int:
+        """Add a new alias."""
+        cursor = self.conn.execute(
+            "INSERT INTO aliases (short_n, long_n) VALUES (?, ?)",
+            (short_n, long_n)
+        )
+        self.conn.commit()
+        return cursor.lastrowid
+
+    def delete_alias(self, id_val: int) -> bool:
+        """Delete an alias."""
+        cursor = self.conn.execute("DELETE FROM aliases WHERE id = ?", (id_val,))
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def get_affects(self) -> List[Dict]:
+        """Get all active affects."""
+        rows = self.conn.execute(
+            "SELECT * FROM affects ORDER BY skill_name"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def delete_affect(self, id_val: int) -> bool:
+        """Delete an affect."""
+        cursor = self.conn.execute("DELETE FROM affects WHERE id = ?", (id_val,))
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def get_objects(self) -> List[Dict]:
+        """Get all player objects/inventory."""
+        rows = self.conn.execute(
+            "SELECT * FROM objects ORDER BY nest, id"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_player_arrays(self) -> Dict[str, List[int]]:
+        """Get all player arrays as a dictionary."""
+        rows = self.conn.execute("SELECT * FROM player_arrays").fetchall()
+        result = {}
+        for row in rows:
+            name = row['name']
+            data_str = row['data']
+            if data_str:
+                result[name] = [int(x) for x in data_str.split()]
+            else:
+                result[name] = []
+        return result
+
+    def update_player_array(self, name: str, values: List[int]) -> bool:
+        """Update a player array."""
+        data_str = ' '.join(str(v) for v in values)
+        cursor = self.conn.execute(
+            "UPDATE player_arrays SET data = ? WHERE name = ?",
+            (data_str, name)
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
