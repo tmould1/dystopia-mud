@@ -2,24 +2,22 @@
 Class Display editor panel.
 
 Provides interface for editing class brackets and generation titles
-with live ANSI color preview using the ColorTextEditor widget.
+with live ANSI color preview showing the combined result.
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 from typing import Callable, Optional
 
-from ..widgets.color_text import ColorTextEditor
-from ..db.repository import ClassBracketsRepository
+from ..widgets.colors import parse_colored_segments, DEFAULT_FG, PREVIEW_BG, xterm256_to_hex
 
 
 class ClassDisplayPanel(ttk.Frame):
     """
     Editor panel for class brackets and generation titles.
 
-    Uses a notebook with two tabs:
-    - Class Brackets: Edit decorative brackets for each class
-    - Generation Titles: Edit rank/generation names for each class
+    Shows a unified view with class list on left, and brackets + generations
+    on the right with a combined preview at the bottom.
     """
 
     def __init__(
@@ -36,266 +34,303 @@ class ClassDisplayPanel(ttk.Frame):
         self.generations_repo = generations_repo
         self.on_status = on_status or (lambda msg: None)
 
-        self.current_bracket_id: Optional[int] = None
+        self.current_class_id: Optional[int] = None
         self.current_gen_id: Optional[int] = None
         self.unsaved_brackets = False
         self.unsaved_gens = False
+        self._gen_entries = []
 
         self._build_ui()
-        self._load_brackets()
-        self._load_generations()
+        self._load_classes()
 
     def _build_ui(self):
-        """Build the panel UI with tabbed interface."""
-        notebook = ttk.Notebook(self)
-        notebook.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
-
-        # Tab 1: Class Brackets
-        brackets_frame = ttk.Frame(notebook)
-        notebook.add(brackets_frame, text="Class Brackets")
-        self._build_brackets_ui(brackets_frame)
-
-        # Tab 2: Generation Titles
-        generations_frame = ttk.Frame(notebook)
-        notebook.add(generations_frame, text="Generation Titles")
-        self._build_generations_ui(generations_frame)
-
-    def _build_brackets_ui(self, parent):
-        """Build the brackets editor UI."""
-        paned = ttk.PanedWindow(parent, orient=tk.HORIZONTAL)
-        paned.pack(fill=tk.BOTH, expand=True)
+        """Build the panel UI."""
+        main_paned = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        main_paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
 
         # Left: class list
-        left_frame = ttk.Frame(paned)
-        paned.add(left_frame, weight=1)
+        left_frame = ttk.LabelFrame(main_paned, text="Classes")
+        main_paned.add(left_frame, weight=1)
 
         tree_frame = ttk.Frame(left_frame)
         tree_frame.pack(fill=tk.BOTH, expand=True)
 
-        self.brackets_tree = ttk.Treeview(
+        self.class_tree = ttk.Treeview(
             tree_frame,
             columns=('class_id', 'class_name'),
             show='headings',
             selectmode='browse'
         )
-        self.brackets_tree.heading('class_id', text='ID')
-        self.brackets_tree.heading('class_name', text='Class')
-        self.brackets_tree.column('class_id', width=60, stretch=False)
-        self.brackets_tree.column('class_name', width=120)
+        self.class_tree.heading('class_id', text='ID')
+        self.class_tree.heading('class_name', text='Class')
+        self.class_tree.column('class_id', width=50, stretch=False)
+        self.class_tree.column('class_name', width=100)
 
-        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.brackets_tree.yview)
-        self.brackets_tree.configure(yscrollcommand=scrollbar.set)
-        self.brackets_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.class_tree.yview)
+        self.class_tree.configure(yscrollcommand=scrollbar.set)
+        self.class_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        self.brackets_tree.bind('<<TreeviewSelect>>', self._on_bracket_select)
+        self.class_tree.bind('<<TreeviewSelect>>', self._on_class_select)
 
-        # Right: bracket editor with ColorTextEditor
-        right_frame = ttk.LabelFrame(paned, text="Edit Brackets")
-        paned.add(right_frame, weight=2)
+        # Right: editors and preview (vertical layout)
+        right_frame = ttk.Frame(main_paned)
+        main_paned.add(right_frame, weight=4)
 
-        # Class info
-        row = ttk.Frame(right_frame)
-        row.pack(fill=tk.X, padx=8, pady=4)
-        ttk.Label(row, text="Class:", width=14).pack(side=tk.LEFT)
-        self.bracket_class_label = ttk.Label(row, text="-", font=('Consolas', 10, 'bold'))
-        self.bracket_class_label.pack(side=tk.LEFT)
+        # Top section: Compact editors
+        edit_frame = ttk.LabelFrame(right_frame, text="Edit")
+        edit_frame.pack(fill=tk.X, padx=4, pady=4)
 
-        # Open bracket
-        ttk.Label(right_frame, text="Open Bracket (with color codes):").pack(anchor=tk.W, padx=8, pady=(8, 2))
-        self.open_bracket_editor = ColorTextEditor(right_frame, show_preview=True, on_change=self._mark_brackets_unsaved)
-        self.open_bracket_editor.pack(fill=tk.BOTH, expand=True, padx=8, pady=4)
+        # Row 1: Class + Brackets (inline)
+        row1 = ttk.Frame(edit_frame)
+        row1.pack(fill=tk.X, padx=8, pady=4)
 
-        # Close bracket
-        ttk.Label(right_frame, text="Close Bracket (with color codes):").pack(anchor=tk.W, padx=8, pady=(8, 2))
-        self.close_bracket_editor = ColorTextEditor(right_frame, show_preview=True, on_change=self._mark_brackets_unsaved)
-        self.close_bracket_editor.pack(fill=tk.BOTH, expand=True, padx=8, pady=4)
+        ttk.Label(row1, text="Class:").pack(side=tk.LEFT)
+        self.class_label = ttk.Label(row1, text="-", font=('Consolas', 10, 'bold'), width=15)
+        self.class_label.pack(side=tk.LEFT, padx=(4, 16))
 
-        # Buttons
-        btn_frame = ttk.Frame(right_frame)
-        btn_frame.pack(fill=tk.X, padx=8, pady=8)
-        ttk.Button(btn_frame, text="Save Bracket", command=self._save_bracket).pack(side=tk.LEFT, padx=4)
+        ttk.Label(row1, text="Open:").pack(side=tk.LEFT)
+        self.open_var = tk.StringVar()
+        self.open_var.trace_add('write', lambda *_: self._on_bracket_change())
+        self.open_entry = ttk.Entry(row1, textvariable=self.open_var, width=15, font=('Consolas', 10))
+        self.open_entry.pack(side=tk.LEFT, padx=(4, 16))
 
-    def _build_generations_ui(self, parent):
-        """Build the generations editor UI."""
-        paned = ttk.PanedWindow(parent, orient=tk.HORIZONTAL)
-        paned.pack(fill=tk.BOTH, expand=True)
+        ttk.Label(row1, text="Close:").pack(side=tk.LEFT)
+        self.close_var = tk.StringVar()
+        self.close_var.trace_add('write', lambda *_: self._on_bracket_change())
+        self.close_entry = ttk.Entry(row1, textvariable=self.close_var, width=15, font=('Consolas', 10))
+        self.close_entry.pack(side=tk.LEFT, padx=(4, 8))
 
-        # Left: class/generation tree
-        left_frame = ttk.Frame(paned)
-        paned.add(left_frame, weight=1)
+        ttk.Button(row1, text="Save Brackets", command=self._save_brackets).pack(side=tk.LEFT, padx=8)
 
-        # Class selector
-        class_frame = ttk.Frame(left_frame)
-        class_frame.pack(fill=tk.X, padx=4, pady=4)
-        ttk.Label(class_frame, text="Class:").pack(side=tk.LEFT)
-        self.class_combo = ttk.Combobox(class_frame, state='readonly', width=20)
-        self.class_combo.pack(side=tk.LEFT, padx=4)
-        self.class_combo.bind('<<ComboboxSelected>>', self._on_class_select)
+        # Row 2: Generation selection + title edit (inline)
+        row2 = ttk.Frame(edit_frame)
+        row2.pack(fill=tk.X, padx=8, pady=4)
 
-        # Generation list
-        tree_frame = ttk.Frame(left_frame)
-        tree_frame.pack(fill=tk.BOTH, expand=True)
+        ttk.Label(row2, text="Gen:").pack(side=tk.LEFT)
+        self.gen_combo = ttk.Combobox(row2, state='readonly', width=10)
+        self.gen_combo.pack(side=tk.LEFT, padx=(4, 16))
+        self.gen_combo.bind('<<ComboboxSelected>>', self._on_gen_combo_select)
 
-        self.gens_tree = ttk.Treeview(
-            tree_frame,
-            columns=('gen', 'title'),
-            show='headings',
-            selectmode='browse'
+        ttk.Label(row2, text="Title:").pack(side=tk.LEFT)
+        self.title_var = tk.StringVar()
+        self.title_var.trace_add('write', lambda *_: self._on_title_change())
+        self.title_entry = ttk.Entry(row2, textvariable=self.title_var, width=40, font=('Consolas', 10))
+        self.title_entry.pack(side=tk.LEFT, padx=(4, 8), fill=tk.X, expand=True)
+
+        ttk.Button(row2, text="Save Title", command=self._save_gen).pack(side=tk.LEFT, padx=2)
+        ttk.Button(row2, text="New", command=self._new_gen).pack(side=tk.LEFT, padx=2)
+        ttk.Button(row2, text="Del", command=self._delete_gen).pack(side=tk.LEFT, padx=2)
+
+        # Main section: Combined Preview (takes most space)
+        preview_frame = ttk.LabelFrame(right_frame, text="Preview (all generations with brackets)")
+        preview_frame.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        self.preview_text = tk.Text(
+            preview_frame,
+            wrap=tk.NONE,
+            state=tk.DISABLED,
+            bg=PREVIEW_BG,
+            fg=DEFAULT_FG,
+            font=('Consolas', 11),
+            relief=tk.SUNKEN,
+            borderwidth=2
         )
-        self.gens_tree.heading('gen', text='Gen')
-        self.gens_tree.heading('title', text='Title (raw)')
-        self.gens_tree.column('gen', width=50, stretch=False)
-        self.gens_tree.column('title', width=150)
+        preview_scroll = ttk.Scrollbar(preview_frame, orient=tk.VERTICAL, command=self.preview_text.yview)
+        self.preview_text.configure(yscrollcommand=preview_scroll.set)
+        self.preview_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=8, pady=8)
+        preview_scroll.pack(side=tk.RIGHT, fill=tk.Y, pady=8)
 
-        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.gens_tree.yview)
-        self.gens_tree.configure(yscrollcommand=scrollbar.set)
-        self.gens_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # Help text at bottom
+        help_text = "Gen 0 = default/fallback. Changes require server restart."
+        ttk.Label(preview_frame, text=help_text, foreground='gray').pack(anchor=tk.W, padx=8, pady=(0, 4))
 
-        self.gens_tree.bind('<<TreeviewSelect>>', self._on_gen_select)
-
-        # Right: title editor
-        right_frame = ttk.LabelFrame(paned, text="Edit Generation Title")
-        paned.add(right_frame, weight=2)
-
-        # Generation info
-        row = ttk.Frame(right_frame)
-        row.pack(fill=tk.X, padx=8, pady=4)
-        ttk.Label(row, text="Generation:", width=14).pack(side=tk.LEFT)
-        self.gen_label = ttk.Label(row, text="-", font=('Consolas', 10, 'bold'))
-        self.gen_label.pack(side=tk.LEFT)
-
-        # Title with color preview
-        ttk.Label(right_frame, text="Title (with color codes):").pack(anchor=tk.W, padx=8, pady=(8, 2))
-        self.title_editor = ColorTextEditor(right_frame, show_preview=True, on_change=self._mark_gens_unsaved)
-        self.title_editor.pack(fill=tk.BOTH, expand=True, padx=8, pady=4)
-
-        # Help text
-        help_text = "Gen 0 = default/fallback for any unspecified generation"
-        ttk.Label(right_frame, text=help_text, foreground='gray').pack(anchor=tk.W, padx=8, pady=4)
-
-        # Buttons
-        btn_frame = ttk.Frame(right_frame)
-        btn_frame.pack(fill=tk.X, padx=8, pady=8)
-        ttk.Button(btn_frame, text="Save Title", command=self._save_gen).pack(side=tk.LEFT, padx=4)
-        ttk.Button(btn_frame, text="New Title", command=self._new_gen).pack(side=tk.LEFT, padx=4)
-        ttk.Button(btn_frame, text="Delete", command=self._delete_gen).pack(side=tk.LEFT, padx=4)
-
-    def _load_brackets(self):
-        """Load brackets into the tree."""
-        self.brackets_tree.delete(*self.brackets_tree.get_children())
+    def _load_classes(self):
+        """Load classes into the tree."""
+        self.class_tree.delete(*self.class_tree.get_children())
 
         entries = self.brackets_repo.list_all()
         for entry in entries:
-            self.brackets_tree.insert('', tk.END, iid=str(entry['class_id']),
-                                       values=(entry['class_id'], entry['class_name']))
+            self.class_tree.insert('', tk.END, iid=str(entry['class_id']),
+                                    values=(entry['class_id'], entry['class_name']))
 
-        self.on_status(f"Loaded {len(entries)} class brackets")
+        self.on_status(f"Loaded {len(entries)} classes")
 
-    def _load_generations(self):
-        """Load class list into combo."""
-        # Build class list from brackets (which has class names)
-        brackets = self.brackets_repo.list_all()
-        class_names = [(b['class_id'], b['class_name']) for b in brackets]
-        class_names.sort(key=lambda x: x[1])
-
-        self.class_list = class_names
-        self.class_combo['values'] = [f"{name} ({cid})" for cid, name in class_names]
-
-        if class_names:
-            self.class_combo.current(0)
-            self._on_class_select(None)
-
-    def _on_bracket_select(self, event):
-        """Handle bracket selection."""
-        if self.unsaved_brackets:
-            if not messagebox.askyesno("Unsaved Changes", "Discard unsaved bracket changes?"):
+    def _on_class_select(self, event):
+        """Handle class selection."""
+        if self.unsaved_brackets or self.unsaved_gens:
+            if not messagebox.askyesno("Unsaved Changes", "Discard unsaved changes?"):
                 return
 
-        selection = self.brackets_tree.selection()
+        selection = self.class_tree.selection()
         if not selection:
             return
 
         class_id = int(selection[0])
-        self.current_bracket_id = class_id
+        self.current_class_id = class_id
+        self.current_gen_id = None
 
+        # Load bracket info
         entry = self.brackets_repo.get_by_id(class_id)
         if entry:
-            self.bracket_class_label.config(text=f"{entry['class_name']} (ID: {class_id})")
-            self.open_bracket_editor.set_text(entry['open_bracket'])
-            self.close_bracket_editor.set_text(entry['close_bracket'])
+            self.class_label.config(text=entry['class_name'])
+            self.open_var.set(entry['open_bracket'])
+            self.close_var.set(entry['close_bracket'])
             self.unsaved_brackets = False
-            self.on_status(f"Editing brackets for {entry['class_name']}")
 
-    def _on_class_select(self, event):
-        """Handle class selection in generations tab."""
-        idx = self.class_combo.current()
-        if idx < 0 or idx >= len(self.class_list):
-            return
+        # Load generations into combo (this also selects first gen and sets title)
+        self._load_generations_for_class(class_id)
+        self.unsaved_gens = False
 
-        class_id = self.class_list[idx][0]
-        self._load_gens_for_class(class_id)
+        # Update preview
+        self._update_preview()
 
-    def _load_gens_for_class(self, class_id: int):
-        """Load generation entries for a class."""
-        self.gens_tree.delete(*self.gens_tree.get_children())
+        self.on_status(f"Editing {entry['class_name']}")
 
-        entries = self.generations_repo.get_by_class(class_id)
-        for entry in entries:
-            gen_label = str(entry['generation']) if entry['generation'] > 0 else "0 (default)"
-            # Strip color codes for display in tree (just show raw)
-            title_preview = entry['title'][:30] + "..." if len(entry['title']) > 30 else entry['title']
-            self.gens_tree.insert('', tk.END, iid=str(entry['id']),
-                                   values=(gen_label, title_preview))
+    def _load_generations_for_class(self, class_id: int):
+        """Load generation entries for a class into the combo."""
+        self._gen_entries = self.generations_repo.get_by_class(class_id)
 
-        self.on_status(f"Loaded {len(entries)} generation titles")
+        # Build combo values
+        combo_values = []
+        for entry in self._gen_entries:
+            gen_label = f"Gen {entry['generation']}" if entry['generation'] > 0 else "Default (0)"
+            combo_values.append(gen_label)
 
-    def _on_gen_select(self, event):
-        """Handle generation selection."""
-        if self.unsaved_gens:
+        self.gen_combo['values'] = combo_values
+        if combo_values:
+            self.gen_combo.current(0)
+            self._on_gen_combo_select(None)
+
+    def _on_gen_combo_select(self, event):
+        """Handle generation combo selection."""
+        if self.unsaved_gens and event is not None:
             if not messagebox.askyesno("Unsaved Changes", "Discard unsaved title changes?"):
                 return
 
-        selection = self.gens_tree.selection()
-        if not selection:
+        idx = self.gen_combo.current()
+        if idx < 0 or idx >= len(self._gen_entries):
             return
 
-        gen_id = int(selection[0])
-        self.current_gen_id = gen_id
+        entry = self._gen_entries[idx]
+        self.current_gen_id = entry['id']
+        self.title_var.set(entry['title'])
+        self.unsaved_gens = False
 
-        entry = self.generations_repo.get_by_id(gen_id)
-        if entry:
-            gen_label = str(entry['generation']) if entry['generation'] > 0 else "0 (default)"
-            self.gen_label.config(text=gen_label)
-            self.title_editor.set_text(entry['title'])
-            self.unsaved_gens = False
+        self._update_preview()
 
-    def _mark_brackets_unsaved(self):
-        """Mark brackets as having unsaved changes."""
+    def _on_bracket_change(self):
+        """Called when bracket text changes."""
         self.unsaved_brackets = True
+        self._update_preview()
 
-    def _mark_gens_unsaved(self):
-        """Mark generations as having unsaved changes."""
+    def _on_title_change(self):
+        """Called when title text changes."""
         self.unsaved_gens = True
+        self._update_preview()
 
-    def _save_bracket(self):
-        """Save current bracket."""
-        if self.current_bracket_id is None:
+    def _update_preview(self):
+        """Update the combined preview."""
+        open_b = self.open_var.get().strip()
+        close_b = self.close_var.get().strip()
+        title = self.title_var.get().strip() or "#nNo Title#n"
+
+        # Build preview lines for ALL generations
+        preview_lines = []
+
+        if self.current_class_id:
+            entries = self.generations_repo.get_by_class(self.current_class_id)
+            # Show all generations
+            for entry in entries:
+                gen = entry['generation']
+                gen_title = entry['title']
+                # If this is the currently selected generation, use the editor value
+                if self.current_gen_id and entry['id'] == self.current_gen_id:
+                    gen_title = title
+                combined = f"{open_b}{gen_title}{close_b}"
+                gen_label = f"Gen {gen}" if gen > 0 else "Default"
+                preview_lines.append((f"{gen_label:>8}: ", combined))
+
+            if not entries:
+                combined = f"{open_b}{title}{close_b}"
+                preview_lines.append(("Preview: ", combined))
+        else:
+            combined = f"{open_b}{title}{close_b}"
+            preview_lines.append(("Preview: ", combined))
+
+        # Render preview
+        self.preview_text.config(state=tk.NORMAL)
+        self.preview_text.delete('1.0', tk.END)
+
+        for label, colored_text in preview_lines:
+            # Insert label
+            self.preview_text.insert(tk.END, label)
+            # Insert colored text
+            self._insert_colored_text(colored_text)
+            self.preview_text.insert(tk.END, "\n")
+
+        self.preview_text.config(state=tk.DISABLED)
+
+    def _insert_colored_text(self, text: str):
+        """Insert text with MUD color codes into preview widget."""
+        segments = parse_colored_segments(text)
+
+        for plain_text, tag_name in segments:
+            if not plain_text:
+                continue
+
+            # tag_name is like 'color_R', 'color_y', 'color_x123', 'color_n'
+            # Extract the actual color code
+            code = tag_name[6:] if tag_name.startswith('color_') else tag_name
+
+            if code == 'n':
+                # Reset - use default color
+                self.preview_text.insert(tk.END, plain_text)
+            elif code.startswith('x') and len(code) > 1:
+                # 256-color code like 'x123'
+                try:
+                    color_num = int(code[1:])
+                    hex_color = xterm256_to_hex(color_num)
+                    self.preview_text.tag_configure(tag_name, foreground=hex_color)
+                    self.preview_text.insert(tk.END, plain_text, tag_name)
+                except:
+                    self.preview_text.insert(tk.END, plain_text)
+            else:
+                # Standard color code
+                color_map = {
+                    'R': '#ff5555', 'r': '#aa0000',
+                    'G': '#55ff55', 'g': '#00aa00',
+                    'Y': '#ffff55', 'y': '#aaaa00',
+                    'B': '#5555ff', 'b': '#0000aa',
+                    'P': '#ff55ff', 'p': '#aa00aa',
+                    'C': '#55ffff', 'c': '#00aaaa',
+                    'W': '#ffffff', 'w': '#aaaaaa',
+                    'L': '#55ffff', 'l': '#555555',
+                    '0': '#555555', '7': '#c0c0c0', '9': '#ffffff',
+                    'o': '#ffaa00', 'O': '#ffaa00',
+                }
+                if code in color_map:
+                    self.preview_text.tag_configure(tag_name, foreground=color_map[code])
+                    self.preview_text.insert(tk.END, plain_text, tag_name)
+                else:
+                    self.preview_text.insert(tk.END, plain_text)
+
+    def _save_brackets(self):
+        """Save current brackets."""
+        if self.current_class_id is None:
             messagebox.showwarning("No Selection", "Please select a class first.")
             return
 
-        open_bracket = self.open_bracket_editor.get_text().strip()
-        close_bracket = self.close_bracket_editor.get_text().strip()
+        open_bracket = self.open_var.get().strip()
+        close_bracket = self.close_var.get().strip()
 
-        self.brackets_repo.update(self.current_bracket_id, {
+        self.brackets_repo.update(self.current_class_id, {
             'open_bracket': open_bracket,
             'close_bracket': close_bracket
         })
 
         self.unsaved_brackets = False
-        self.on_status("Bracket saved. Restart server to apply changes.")
-        messagebox.showinfo("Saved", "Bracket saved. Restart server to apply changes.")
+        self.on_status("Brackets saved. Restart server to apply.")
 
     def _save_gen(self):
         """Save current generation title."""
@@ -303,61 +338,56 @@ class ClassDisplayPanel(ttk.Frame):
             messagebox.showwarning("No Selection", "Please select a generation first.")
             return
 
-        title = self.title_editor.get_text().strip()
+        title = self.title_var.get().strip()
         if not title:
             messagebox.showwarning("Empty Title", "Title cannot be empty.")
             return
 
-        self.generations_repo.update(self.current_gen_id, {
-            'title': title
-        })
-
+        self.generations_repo.update(self.current_gen_id, {'title': title})
         self.unsaved_gens = False
 
-        # Refresh tree
-        idx = self.class_combo.current()
-        if idx >= 0:
-            class_id = self.class_list[idx][0]
-            self._load_gens_for_class(class_id)
+        # Refresh combo and re-select
+        if self.current_class_id:
+            idx = self.gen_combo.current()
+            self._load_generations_for_class(self.current_class_id)
+            if idx >= 0:
+                self.gen_combo.current(idx)
 
-        self.on_status("Generation title saved. Restart server to apply changes.")
+        self._update_preview()
+        self.on_status("Title saved. Restart server to apply.")
 
     def _new_gen(self):
         """Create a new generation title."""
-        idx = self.class_combo.current()
-        if idx < 0:
+        if self.current_class_id is None:
             messagebox.showwarning("No Class", "Please select a class first.")
             return
 
-        class_id = self.class_list[idx][0]
-
-        # Ask for generation number
-        from tkinter import simpledialog
         gen = simpledialog.askinteger("New Generation",
                                        "Generation number (1-8, or 0 for default):",
                                        minvalue=0, maxvalue=8)
         if gen is None:
             return
 
-        # Check if exists
-        existing = self.generations_repo.get_by_class_and_gen(class_id, gen)
+        existing = self.generations_repo.get_by_class_and_gen(self.current_class_id, gen)
         if existing:
             messagebox.showwarning("Exists", f"Generation {gen} already exists for this class.")
             return
 
-        # Insert new entry
-        new_id = self.generations_repo.insert({
-            'class_id': class_id,
+        self.generations_repo.insert({
+            'class_id': self.current_class_id,
             'generation': gen,
             'title': '#nNew Title#n'
         })
 
-        # Refresh and select new entry
-        self._load_gens_for_class(class_id)
-        self.gens_tree.selection_set(str(new_id))
-        self._on_gen_select(None)
+        self._load_generations_for_class(self.current_class_id)
+        # Select the newly created one (will be in the list somewhere)
+        for i, entry in enumerate(self._gen_entries):
+            if entry['generation'] == gen:
+                self.gen_combo.current(i)
+                self._on_gen_combo_select(None)
+                break
 
-        self.on_status(f"Created generation {gen}. Edit the title and save.")
+        self.on_status(f"Created generation {gen}. Edit and save.")
 
     def _delete_gen(self):
         """Delete current generation title."""
@@ -371,15 +401,12 @@ class ClassDisplayPanel(ttk.Frame):
         self.generations_repo.delete(self.current_gen_id)
         self.current_gen_id = None
 
-        # Refresh tree
-        idx = self.class_combo.current()
-        if idx >= 0:
-            class_id = self.class_list[idx][0]
-            self._load_gens_for_class(class_id)
+        if self.current_class_id:
+            self._load_generations_for_class(self.current_class_id)
 
-        self.title_editor.set_text("")
-        self.gen_label.config(text="-")
+        self.title_var.set("")
         self.unsaved_gens = False
+        self._update_preview()
 
         self.on_status("Generation title deleted.")
 
