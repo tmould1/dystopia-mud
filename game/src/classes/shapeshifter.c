@@ -37,7 +37,7 @@ void do_stomp( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "What?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[BULL_LEVEL] < acfg("shapeshifter.stomp.level_req") ) {
+	if ( ch->pcdata->powers[BULL_LEVEL] < acfg( ACFG_SHAPESHIFTER_STOMP_LEVEL_REQ ) ) {
 		send_to_char( "Your bull form is not strong enough.\n\r", ch );
 		return;
 	}
@@ -52,7 +52,7 @@ void do_stomp( CHAR_DATA *ch, char *argument ) {
 	act( "You throw $N to the ground and tramples $S to a bloody pulp.", ch, NULL, victim, TO_CHAR );
 	act( "$n throws you to the ground and #RSTOMPS#n on you.", ch, NULL, victim, TO_VICT );
 	act( "$n throws $N to the ground and tramples $S to a bloody pulp.", ch, NULL, victim, TO_NOTVICT );
-	hurt_person( ch, victim, acfg("shapeshifter.stomp.damage") );
+	hurt_person( ch, victim, acfg( ACFG_SHAPESHIFTER_STOMP_DAMAGE ) );
 	limb = number_range( 1, 4 );
 	if ( number_range( 1, 100 ) > 60 && !IS_NPC( victim ) ) {
 		if ( limb < 3 ) {
@@ -75,7 +75,7 @@ void do_stomp( CHAR_DATA *ch, char *argument ) {
 			if ( ( obj = get_eq_char( victim, WEAR_FINGER_L ) ) != NULL ) take_item( victim, obj );
 		}
 	}
-	WAIT_STATE( ch, acfg("shapeshifter.stomp.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_SHAPESHIFTER_STOMP_COOLDOWN ) );
 	return;
 }
 
@@ -91,7 +91,7 @@ void do_faeriecurse( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "What?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[FAERIE_LEVEL] < acfg("shapeshifter.faeriecurse.level_req") ) {
+	if ( ch->pcdata->powers[FAERIE_LEVEL] < acfg( ACFG_SHAPESHIFTER_FAERIECURSE_LEVEL_REQ ) ) {
 		send_to_char( "Your faerie form is not strong enough.\n\r", ch );
 		return;
 	}
@@ -103,7 +103,7 @@ void do_faeriecurse( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Not on yourself.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("shapeshifter.faeriecurse.mana_cost") || ch->move < acfg("shapeshifter.faeriecurse.move_cost") ) {
+	if ( ch->mana < acfg( ACFG_SHAPESHIFTER_FAERIECURSE_MANA_COST ) || ch->move < acfg( ACFG_SHAPESHIFTER_FAERIECURSE_MOVE_COST ) ) {
 		send_to_char( "You are to tired.\n\r", ch );
 		return;
 	}
@@ -120,9 +120,9 @@ void do_faeriecurse( CHAR_DATA *ch, char *argument ) {
 		level = 50;
 		( *skill_table[sn].spell_fun )( sn, level, ch, victim );
 	}
-	use_mana( ch, acfg("shapeshifter.faeriecurse.mana_cost") );
-	use_move( ch, acfg("shapeshifter.faeriecurse.move_cost") );
-	WAIT_STATE( ch, acfg("shapeshifter.faeriecurse.cooldown") );
+	use_mana( ch, acfg( ACFG_SHAPESHIFTER_FAERIECURSE_MANA_COST ) );
+	use_move( ch, acfg( ACFG_SHAPESHIFTER_FAERIECURSE_MOVE_COST ) );
+	WAIT_STATE( ch, acfg( ACFG_SHAPESHIFTER_FAERIECURSE_COOLDOWN ) );
 	return;
 }
 
@@ -150,7 +150,7 @@ void do_breath( CHAR_DATA *ch, char *argument ) {
 	if ( ch->pcdata->powers[HYDRA_LEVEL] > 1 ) ( *skill_table[sn].spell_fun )( sn, level, ch, victim );
 	if ( ch->pcdata->powers[HYDRA_LEVEL] > 3 ) ( *skill_table[sn].spell_fun )( sn, level, ch, victim );
 	if ( ch->pcdata->powers[HYDRA_LEVEL] > 4 ) ( *skill_table[sn].spell_fun )( sn, level, ch, victim );
-	WAIT_STATE( ch, acfg("shapeshifter.breath.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_SHAPESHIFTER_BREATH_COOLDOWN ) );
 	return;
 }
 
@@ -160,7 +160,7 @@ void do_phase( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "What?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[TIGER_LEVEL] < acfg("shapeshifter.phase.level_req") ) {
+	if ( ch->pcdata->powers[TIGER_LEVEL] < acfg( ACFG_SHAPESHIFTER_PHASE_LEVEL_REQ ) ) {
 		send_to_char( "Your tiger form is not strong enough.\n\r", ch );
 		return;
 	}
@@ -172,7 +172,7 @@ void do_phase( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Your to tired to phase.\n\r", ch );
 		return;
 	}
-	ch->pcdata->powers[PHASE_COUNTER] = acfg("shapeshifter.phase.duration");
+	ch->pcdata->powers[PHASE_COUNTER] = acfg( ACFG_SHAPESHIFTER_PHASE_DURATION );
 	act( "You phase halfway out of existance.", ch, NULL, NULL, TO_CHAR );
 	act( "$n phases halfway out of existance.", ch, NULL, NULL, TO_ROOM );
 	return;
@@ -193,7 +193,7 @@ void do_mistwalk( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[SHAPE_POWERS] < acfg("shapeshifter.mistwalk.level_req") ) {
+	if ( ch->pcdata->powers[SHAPE_POWERS] < acfg( ACFG_SHAPESHIFTER_MISTWALK_LEVEL_REQ ) ) {
 		send_to_char( "You need level 2 shiftpowers.\n\r", ch );
 		return;
 	}
@@ -214,13 +214,13 @@ void do_mistwalk( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	location = victim->in_room;
-	if ( ch->move < acfg("shapeshifter.mistwalk.move_cost") ) {
+	if ( ch->move < acfg( ACFG_SHAPESHIFTER_MISTWALK_MOVE_COST ) ) {
 		send_to_char( "You are too tired to reform into mist.\n\r", ch );
 		return;
 	}
 	act( "You reform into thin mist and seep into the floor.", ch, NULL, NULL, TO_CHAR );
 	act( "$n reforms into thin mist and seeps into the floor.", ch, NULL, NULL, TO_ROOM );
-	use_move( ch, acfg("shapeshifter.mistwalk.move_cost") );
+	use_move( ch, acfg( ACFG_SHAPESHIFTER_MISTWALK_MOVE_COST ) );
 	char_from_room( ch );
 	char_to_room( ch, location );
 	do_look( ch, "auto" );
@@ -237,7 +237,7 @@ void do_hatform( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[SHAPE_POWERS] < acfg("shapeshifter.hatform.level_req") ) {
+	if ( ch->pcdata->powers[SHAPE_POWERS] < acfg( ACFG_SHAPESHIFTER_HATFORM_LEVEL_REQ ) ) {
 		send_to_char( "You need level 3 shiftpowers.\n\r", ch );
 		return;
 	}
@@ -280,7 +280,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "What form do you want to shift to? [Tiger/Hydra/Faerie/Bull/Human]\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[SHAPE_COUNTER] > acfg("shapeshifter.shift.counter_max") ) {
+	if ( ch->pcdata->powers[SHAPE_COUNTER] > acfg( ACFG_SHAPESHIFTER_SHIFT_COUNTER_MAX ) ) {
 		send_to_char( "Your to tired from all this formshifting.\n\r", ch );
 		return;
 	}
@@ -293,14 +293,14 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		act( "Your shape blurs and you reform into a huge tiger.", ch, NULL, NULL, TO_CHAR );
 		act( "$n blurs and reforms into a huge tiger.", ch, NULL, NULL, TO_ROOM );
 		ch->pcdata->powers[SHAPE_FORM] = TIGER_FORM;
-		ch->pcdata->powers[SHAPE_COUNTER] += acfg("shapeshifter.shift.counter_increment");
+		ch->pcdata->powers[SHAPE_COUNTER] += acfg( ACFG_SHAPESHIFTER_SHIFT_COUNTER_INCREMENT );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
-		ch->damroll += acfg("shapeshifter.shift.tiger_damroll");
-		ch->hitroll += acfg("shapeshifter.shift.tiger_hitroll");
-		ch->armor += acfg("shapeshifter.shift.tiger_armor");
+		ch->damroll += acfg( ACFG_SHAPESHIFTER_SHIFT_TIGER_DAMROLL );
+		ch->hitroll += acfg( ACFG_SHAPESHIFTER_SHIFT_TIGER_HITROLL );
+		ch->armor += acfg( ACFG_SHAPESHIFTER_SHIFT_TIGER_ARMOR );
 		if ( ch->pcdata->powers[SHAPE_COUNTER] < 15 ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
-			heal_char( ch, (int) UMIN( acfg("shapeshifter.shift.heal_cap"), ch->max_hit * 0.1 ) );
+			heal_char( ch, (int) UMIN( acfg( ACFG_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
 		sprintf( buf, "%s the huge phase tiger", ch->name );
 		free_string( ch->morph );
@@ -315,14 +315,14 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		act( "Your shape blurs and you reform into a horrific hydra.", ch, NULL, NULL, TO_CHAR );
 		act( "$n blurs and reforms into a horrific hydra.", ch, NULL, NULL, TO_ROOM );
 		ch->pcdata->powers[SHAPE_FORM] = HYDRA_FORM;
-		ch->pcdata->powers[SHAPE_COUNTER] += acfg("shapeshifter.shift.counter_increment");
+		ch->pcdata->powers[SHAPE_COUNTER] += acfg( ACFG_SHAPESHIFTER_SHIFT_COUNTER_INCREMENT );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
-		ch->damroll += acfg("shapeshifter.shift.hydra_damroll");
-		ch->hitroll += acfg("shapeshifter.shift.hydra_hitroll");
-		ch->armor += acfg("shapeshifter.shift.hydra_armor");
+		ch->damroll += acfg( ACFG_SHAPESHIFTER_SHIFT_HYDRA_DAMROLL );
+		ch->hitroll += acfg( ACFG_SHAPESHIFTER_SHIFT_HYDRA_HITROLL );
+		ch->armor += acfg( ACFG_SHAPESHIFTER_SHIFT_HYDRA_ARMOR );
 		if ( ch->pcdata->powers[SHAPE_COUNTER] < 15 ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
-			heal_char( ch, (int) UMIN( acfg("shapeshifter.shift.heal_cap"), ch->max_hit * 0.1 ) );
+			heal_char( ch, (int) UMIN( acfg( ACFG_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
 		sprintf( buf, "%s the horrific hydra", ch->name );
 		free_string( ch->morph );
@@ -337,14 +337,14 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		act( "Your shape blurs and you reform into a black bull.", ch, NULL, NULL, TO_CHAR );
 		act( "$n blurs and reforms into a black bull.", ch, NULL, NULL, TO_ROOM );
 		ch->pcdata->powers[SHAPE_FORM] = BULL_FORM;
-		ch->pcdata->powers[SHAPE_COUNTER] += acfg("shapeshifter.shift.counter_increment");
+		ch->pcdata->powers[SHAPE_COUNTER] += acfg( ACFG_SHAPESHIFTER_SHIFT_COUNTER_INCREMENT );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
-		ch->damroll += acfg("shapeshifter.shift.bull_damroll");
-		ch->hitroll += acfg("shapeshifter.shift.bull_hitroll");
-		ch->armor += acfg("shapeshifter.shift.bull_armor");
+		ch->damroll += acfg( ACFG_SHAPESHIFTER_SHIFT_BULL_DAMROLL );
+		ch->hitroll += acfg( ACFG_SHAPESHIFTER_SHIFT_BULL_HITROLL );
+		ch->armor += acfg( ACFG_SHAPESHIFTER_SHIFT_BULL_ARMOR );
 		if ( ch->pcdata->powers[SHAPE_COUNTER] < 15 ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
-			heal_char( ch, (int) UMIN( acfg("shapeshifter.shift.heal_cap"), ch->max_hit * 0.1 ) );
+			heal_char( ch, (int) UMIN( acfg( ACFG_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
 		sprintf( buf, "%s the black bull", ch->name );
 		free_string( ch->morph );
@@ -359,14 +359,14 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		act( "Your shape blurs and you reform into a small pixie.", ch, NULL, NULL, TO_CHAR );
 		act( "$n blurs and reforms into a small pixie.", ch, NULL, NULL, TO_ROOM );
 		ch->pcdata->powers[SHAPE_FORM] = FAERIE_FORM;
-		ch->pcdata->powers[SHAPE_COUNTER] += acfg("shapeshifter.shift.counter_increment");
+		ch->pcdata->powers[SHAPE_COUNTER] += acfg( ACFG_SHAPESHIFTER_SHIFT_COUNTER_INCREMENT );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
-		ch->damroll += acfg("shapeshifter.shift.faerie_damroll");
-		ch->hitroll += acfg("shapeshifter.shift.faerie_hitroll");
-		ch->armor += acfg("shapeshifter.shift.faerie_armor");
+		ch->damroll += acfg( ACFG_SHAPESHIFTER_SHIFT_FAERIE_DAMROLL );
+		ch->hitroll += acfg( ACFG_SHAPESHIFTER_SHIFT_FAERIE_HITROLL );
+		ch->armor += acfg( ACFG_SHAPESHIFTER_SHIFT_FAERIE_ARMOR );
 		if ( ch->pcdata->powers[SHAPE_COUNTER] < 15 ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
-			heal_char( ch, (int) UMIN( acfg("shapeshifter.shift.heal_cap"), ch->max_hit * 0.1 ) );
+			heal_char( ch, (int) UMIN( acfg( ACFG_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
 		sprintf( buf, "%s the small pixie", ch->name );
 		free_string( ch->morph );
@@ -378,21 +378,21 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( IS_SET( ch->pcdata->powers[SHAPE_FORM], TIGER_FORM ) ) {
-			ch->damroll -= acfg("shapeshifter.shift.tiger_damroll");
-			ch->hitroll -= acfg("shapeshifter.shift.tiger_hitroll");
-			ch->armor -= acfg("shapeshifter.shift.tiger_armor");
+			ch->damroll -= acfg( ACFG_SHAPESHIFTER_SHIFT_TIGER_DAMROLL );
+			ch->hitroll -= acfg( ACFG_SHAPESHIFTER_SHIFT_TIGER_HITROLL );
+			ch->armor -= acfg( ACFG_SHAPESHIFTER_SHIFT_TIGER_ARMOR );
 		} else if ( IS_SET( ch->pcdata->powers[SHAPE_FORM], FAERIE_FORM ) ) {
-			ch->damroll -= acfg("shapeshifter.shift.faerie_damroll");
-			ch->hitroll -= acfg("shapeshifter.shift.faerie_hitroll");
-			ch->armor -= acfg("shapeshifter.shift.faerie_armor");
+			ch->damroll -= acfg( ACFG_SHAPESHIFTER_SHIFT_FAERIE_DAMROLL );
+			ch->hitroll -= acfg( ACFG_SHAPESHIFTER_SHIFT_FAERIE_HITROLL );
+			ch->armor -= acfg( ACFG_SHAPESHIFTER_SHIFT_FAERIE_ARMOR );
 		} else if ( IS_SET( ch->pcdata->powers[SHAPE_FORM], BULL_FORM ) ) {
-			ch->damroll -= acfg("shapeshifter.shift.bull_damroll");
-			ch->hitroll -= acfg("shapeshifter.shift.bull_hitroll");
-			ch->armor -= acfg("shapeshifter.shift.bull_armor");
+			ch->damroll -= acfg( ACFG_SHAPESHIFTER_SHIFT_BULL_DAMROLL );
+			ch->hitroll -= acfg( ACFG_SHAPESHIFTER_SHIFT_BULL_HITROLL );
+			ch->armor -= acfg( ACFG_SHAPESHIFTER_SHIFT_BULL_ARMOR );
 		} else if ( IS_SET( ch->pcdata->powers[SHAPE_FORM], HYDRA_FORM ) ) {
-			ch->damroll -= acfg("shapeshifter.shift.hydra_damroll");
-			ch->hitroll -= acfg("shapeshifter.shift.hydra_hitroll");
-			ch->armor -= acfg("shapeshifter.shift.hydra_armor");
+			ch->damroll -= acfg( ACFG_SHAPESHIFTER_SHIFT_HYDRA_DAMROLL );
+			ch->hitroll -= acfg( ACFG_SHAPESHIFTER_SHIFT_HYDRA_HITROLL );
+			ch->armor -= acfg( ACFG_SHAPESHIFTER_SHIFT_HYDRA_ARMOR );
 		}
 		ch->pcdata->powers[SHAPE_FORM] = 0;
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
@@ -425,11 +425,11 @@ void do_formlearn( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg, "hydra" ) ) {
-		if ( ch->pcdata->powers[HYDRA_LEVEL] >= acfg("shapeshifter.formlearn.max_level") ) {
+		if ( ch->pcdata->powers[HYDRA_LEVEL] >= acfg( ACFG_SHAPESHIFTER_FORMLEARN_MAX_LEVEL ) ) {
 			send_to_char( "Your Hydra form is complete.\n\r", ch );
 			return;
 		}
-		if ( ch->practice < ( acfg("shapeshifter.formlearn.cost_multiplier") * ch->pcdata->powers[HYDRA_LEVEL] + acfg("shapeshifter.formlearn.cost_multiplier") ) ) {
+		if ( ch->practice < ( acfg( ACFG_SHAPESHIFTER_FORMLEARN_COST_MULTIPLIER ) * ch->pcdata->powers[HYDRA_LEVEL] + acfg( ACFG_SHAPESHIFTER_FORMLEARN_COST_MULTIPLIER ) ) ) {
 			send_to_char( "You don't have enough primal to improve this form.\n\r", ch );
 			return;
 		}
@@ -444,7 +444,7 @@ void do_formlearn( CHAR_DATA *ch, char *argument ) {
 		else if ( ch->pcdata->powers[HYDRA_LEVEL] == 4 )
 			send_to_char( "You now have 5 heads in Hydra form.\n\r", ch );
 		ch->pcdata->powers[HYDRA_LEVEL]++;
-		ch->practice -= ch->pcdata->powers[HYDRA_LEVEL] * acfg("shapeshifter.formlearn.cost_multiplier");
+		ch->practice -= ch->pcdata->powers[HYDRA_LEVEL] * acfg( ACFG_SHAPESHIFTER_FORMLEARN_COST_MULTIPLIER );
 		return;
 	} else if ( !str_cmp( arg, "tiger" ) ) {
 		if ( ch->pcdata->powers[TIGER_LEVEL] > 4 ) {

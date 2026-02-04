@@ -43,7 +43,7 @@ void do_taneq( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Please specify which piece of tanar'ri armor you wish to make: Claymore Bracer Collar Ring Plate Helmet Leggings Boots Gauntlets Sleeves Cloak Belt Visor.\n\r", ch );
 		return;
 	}
-	if ( ch->practice < acfg("tanarri.taneq.primal_cost") ) {
+	if ( ch->practice < acfg( ACFG_TANARRI_TANEQ_PRIMAL_COST ) ) {
 		send_to_char( "It costs 150 points of primal to create Tanar'ri equipment.\n\r", ch );
 		return;
 	}
@@ -84,7 +84,7 @@ void do_taneq( CHAR_DATA *ch, char *argument ) {
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
-	ch->practice -= acfg("tanarri.taneq.primal_cost");
+	ch->practice -= acfg( ACFG_TANARRI_TANEQ_PRIMAL_COST );
 	act( "$p appears in your hands.", ch, obj, NULL, TO_CHAR );
 	act( "$p appears in $n's hands.", ch, obj, NULL, TO_ROOM );
 	return;
@@ -125,11 +125,11 @@ void do_chaossurge( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( victim->alignment > 500 )
-		dam = acfg("tanarri.chaossurge.damage_good");
+		dam = acfg( ACFG_TANARRI_CHAOSSURGE_DAMAGE_GOOD );
 	else if ( victim->alignment > 0 )
-		dam = acfg("tanarri.chaossurge.damage_neutral");
+		dam = acfg( ACFG_TANARRI_CHAOSSURGE_DAMAGE_NEUTRAL );
 	else
-		dam = acfg("tanarri.chaossurge.damage_mildevil");
+		dam = acfg( ACFG_TANARRI_CHAOSSURGE_DAMAGE_MILDEVIL );
 	sprintf( buf, "Your let chaos envelope $N and $S is hurt [%d]", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
 	sprintf( buf, "$n points a wicked finger at you and chaos strikes your mind! [%d]", dam );
@@ -137,7 +137,7 @@ void do_chaossurge( CHAR_DATA *ch, char *argument ) {
 	sprintf( buf, "$n strikes $N down with a burst of pure #RCHAOS!#n." );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 	hurt_person( ch, victim, dam );
-	WAIT_STATE( ch, acfg("tanarri.chaossurge.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_TANARRI_CHAOSSURGE_COOLDOWN ) );
 	return;
 }
 
@@ -180,7 +180,7 @@ void do_enmity( CHAR_DATA *ch, char *argument ) {
 		do_kill( victim2, victim1->pcdata->switchname );
 	else
 		send_to_char( "#RSomeone is trying to control your actions!!!#n\n\r", victim2 );
-	WAIT_STATE( ch, acfg("tanarri.enmity.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_TANARRI_ENMITY_COOLDOWN ) );
 	return;
 }
 
@@ -212,7 +212,7 @@ void do_enrage( CHAR_DATA *ch, char *argument ) {
 		do_berserk2( victim, "" );
 	else
 		send_to_char( "#RSomeone is trying to control your actions!!!#n\n\r", victim );
-	WAIT_STATE( ch, acfg("tanarri.enrage.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_TANARRI_ENRAGE_COOLDOWN ) );
 	return;
 }
 
@@ -346,7 +346,7 @@ void do_lavablast( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Perhaps you should learn that power first.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("tanarri.lavablast.mana_cost") || ch->move < acfg("tanarri.lavablast.move_cost") ) {
+	if ( ch->mana < acfg( ACFG_TANARRI_LAVABLAST_MANA_COST ) || ch->move < acfg( ACFG_TANARRI_LAVABLAST_MOVE_COST ) ) {
 		send_to_char( "Your not up to it, you ain't got the fire in ya.\n\r", ch );
 		return;
 	}
@@ -354,14 +354,14 @@ void do_lavablast( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	use_mana( ch, acfg("tanarri.lavablast.mana_cost") );
-	use_move( ch, acfg("tanarri.lavablast.move_cost") );
+	use_mana( ch, acfg( ACFG_TANARRI_LAVABLAST_MANA_COST ) );
+	use_move( ch, acfg( ACFG_TANARRI_LAVABLAST_MOVE_COST ) );
 	one_hit( ch, victim, gsn_magma, 1 );
 	one_hit( ch, victim, gsn_magma, 1 );
 	one_hit( ch, victim, gsn_magma, 1 );
 	if ( !IS_AFFECTED( victim, AFF_FLAMING ) )
 		SET_BIT( victim->affected_by, AFF_FLAMING );
-	WAIT_STATE( ch, acfg("tanarri.lavablast.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_TANARRI_LAVABLAST_COOLDOWN ) );
 	return;
 }
 
@@ -398,7 +398,7 @@ void do_chaosgate( CHAR_DATA *ch, char *argument ) {
 		stc( "Your room is not connected to the astral plane.\n\r", ch );
 		return;
 	}
-	if ( ch->move < acfg("tanarri.chaosgate.move_cost") ) {
+	if ( ch->move < acfg( ACFG_TANARRI_CHAOSGATE_MOVE_COST ) ) {
 		send_to_char( "You don't have the move to open a chaosgate.\n\r", ch );
 		return;
 	}
@@ -415,7 +415,7 @@ void do_chaosgate( CHAR_DATA *ch, char *argument ) {
 	}
 	act( "You open a gate made from pure chaos and steps into it.", ch, NULL, NULL, TO_CHAR );
 	act( "$n opens a gate of pure chaos and steps into it.", ch, NULL, NULL, TO_ROOM );
-	use_move( ch, acfg("tanarri.chaosgate.move_cost") );
+	use_move( ch, acfg( ACFG_TANARRI_CHAOSGATE_MOVE_COST ) );
 	char_from_room( ch );
 	char_to_room( ch, location );
 	do_look( ch, "auto" );
@@ -458,7 +458,7 @@ void do_booming( CHAR_DATA *ch, char *argument ) {
 			victim->position = POS_STUNNED;
 		}
 	}
-	WAIT_STATE( ch, acfg("tanarri.booming.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_TANARRI_BOOMING_COOLDOWN ) );
 	return;
 }
 
@@ -473,13 +473,13 @@ void do_fury( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->powers[TANARRI_FURY_ON] == 1 ) {
-		ch->hitroll -= acfg("tanarri.fury.hitroll_bonus");
-		ch->damroll -= acfg("tanarri.fury.damroll_bonus");
+		ch->hitroll -= acfg( ACFG_TANARRI_FURY_HITROLL_BONUS );
+		ch->damroll -= acfg( ACFG_TANARRI_FURY_DAMROLL_BONUS );
 		send_to_char( "You calm your fury.\n\r", ch );
 		ch->pcdata->powers[TANARRI_FURY_ON] = 0;
 	} else {
-		ch->damroll += acfg("tanarri.fury.damroll_bonus");
-		ch->hitroll += acfg("tanarri.fury.hitroll_bonus");
+		ch->damroll += acfg( ACFG_TANARRI_FURY_DAMROLL_BONUS );
+		ch->hitroll += acfg( ACFG_TANARRI_FURY_HITROLL_BONUS );
 		send_to_char( "You become enraged.\n\r", ch );
 		ch->pcdata->powers[TANARRI_FURY_ON] = 1;
 	}
@@ -499,7 +499,7 @@ void do_earthquake( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("tanarri.earthquake.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_TANARRI_EARTHQUAKE_MANA_COST ) ) {
 		send_to_char( "You need more mana to summon an earthquake.\n\r", ch );
 		return;
 	}
@@ -514,8 +514,8 @@ void do_earthquake( CHAR_DATA *ch, char *argument ) {
 		}
 		ich = ich_next;
 	}
-	use_mana( ch, acfg("tanarri.earthquake.mana_cost") );
-	WAIT_STATE( ch, acfg("tanarri.earthquake.cooldown") );
+	use_mana( ch, acfg( ACFG_TANARRI_EARTHQUAKE_MANA_COST ) );
+	WAIT_STATE( ch, acfg( ACFG_TANARRI_EARTHQUAKE_COOLDOWN ) );
 	return;
 }
 
@@ -532,7 +532,7 @@ void do_tornado( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("tanarri.tornado.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_TANARRI_TORNADO_MANA_COST ) ) {
 		send_to_char( "You need more mana to summon a storm.\n\r", ch );
 		return;
 	}
@@ -548,8 +548,8 @@ void do_tornado( CHAR_DATA *ch, char *argument ) {
 		}
 		ich = ich_next;
 	}
-	use_mana( ch, acfg("tanarri.tornado.mana_cost") );
-	WAIT_STATE( ch, acfg("tanarri.tornado.cooldown") );
+	use_mana( ch, acfg( ACFG_TANARRI_TORNADO_MANA_COST ) );
+	WAIT_STATE( ch, acfg( ACFG_TANARRI_TORNADO_COOLDOWN ) );
 	return;
 }
 
@@ -570,7 +570,7 @@ void do_infernal( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("tanarri.infernal.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_TANARRI_INFERNAL_MANA_COST ) ) {
 		if ( IS_CLASS( ch, CLASS_TANARRI ) )
 			send_to_char( "You need more mana to summon the infernal flames of the abyss.\n\r", ch );
 		else
@@ -592,7 +592,7 @@ void do_infernal( CHAR_DATA *ch, char *argument ) {
 		}
 		ich = ich_next;
 	}
-	use_mana( ch, acfg("tanarri.infernal.mana_cost") );
-	WAIT_STATE( ch, acfg("tanarri.infernal.cooldown") );
+	use_mana( ch, acfg( ACFG_TANARRI_INFERNAL_MANA_COST ) );
+	WAIT_STATE( ch, acfg( ACFG_TANARRI_INFERNAL_COOLDOWN ) );
 	return;
 }

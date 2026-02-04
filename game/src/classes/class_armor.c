@@ -46,8 +46,16 @@ void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id ) {
 		return;
 	}
 
-	/* Check primal cost */
-	cost = acfg( config->acfg_cost_key );
+	/* Check primal cost - convert string key from DB to enum */
+	{
+		acfg_key_t cost_key = acfg_key_from_string( config->acfg_cost_key );
+		if ( cost_key == ACFG_COUNT ) {
+			log_string( "class_armor: invalid acfg key in database" );
+			cost = 60;  /* Fallback default */
+		} else {
+			cost = acfg( cost_key );
+		}
+	}
 	if ( !IS_IMMORTAL( ch ) && ch->practice < cost ) {
 		char buf[256];
 		snprintf( buf, sizeof( buf ), "It costs %d points of primal to create equipment.\n\r", cost );

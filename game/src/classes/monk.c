@@ -38,7 +38,7 @@ void do_deathtouch( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->monkab[SPIRIT] < acfg("monk.deathtouch.level_req") ) {
+	if ( ch->monkab[SPIRIT] < acfg( ACFG_MONK_DEATHTOUCH_LEVEL_REQ ) ) {
 		stc( "You need to obtain level 4 spirit to use Death touch.\n\r", ch );
 		return;
 	}
@@ -55,7 +55,7 @@ void do_deathtouch( CHAR_DATA *ch, char *argument ) {
 		stc( "That doesn't seem like a good idea.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg("monk.deathtouch.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_MONK_DEATHTOUCH_COOLDOWN ) );
 	act( "You place your hands on $N's head and channel negative energy into $m.", ch, NULL, victim, TO_CHAR );
 	act( "$n places $s hands on your head, and you scream in utter pain.", ch, NULL, victim, TO_VICT );
 	act( "$n places $s hands on $N's head and $N screams in pain.", ch, NULL, victim, TO_ROOM );
@@ -74,7 +74,7 @@ void do_healingtouch( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->monkab[SPIRIT] < acfg("monk.healingtouch.level_req") ) {
+	if ( ch->monkab[SPIRIT] < acfg( ACFG_MONK_HEALINGTOUCH_LEVEL_REQ ) ) {
 		stc( "You need to obtain level 3 spirit to use Healing touch.\n\r", ch );
 		return;
 	}
@@ -86,7 +86,7 @@ void do_healingtouch( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Not on mobiles.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg("monk.healingtouch.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_MONK_HEALINGTOUCH_COOLDOWN ) );
 
 	if ( victim == ch ) {
 		stc( "You focus your energy, and magical sparks leap out of your body.\n\r", ch );
@@ -103,25 +103,25 @@ void do_healingtouch( CHAR_DATA *ch, char *argument ) {
 
 void do_spiritpower( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
-	if ( !IS_CLASS( ch, CLASS_MONK ) || ch->monkab[BODY] < acfg("monk.spiritpower.level_req") ) {
+	if ( !IS_CLASS( ch, CLASS_MONK ) || ch->monkab[BODY] < acfg( ACFG_MONK_SPIRITPOWER_LEVEL_REQ ) ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
 	if ( IS_SET( ch->newbits, NEW_POWER ) ) {
 		stc( "Your spiritual power fades.\n\r", ch );
-		ch->damroll -= acfg("monk.spiritpower.damroll_bonus");
-		ch->hitroll -= acfg("monk.spiritpower.hitroll_bonus");
+		ch->damroll -= acfg( ACFG_MONK_SPIRITPOWER_DAMROLL_BONUS );
+		ch->hitroll -= acfg( ACFG_MONK_SPIRITPOWER_HITROLL_BONUS );
 		REMOVE_BIT( ch->newbits, NEW_POWER );
 		return;
 	}
-	if ( ch->move < acfg("monk.spiritpower.move_check") ) {
+	if ( ch->move < acfg( ACFG_MONK_SPIRITPOWER_MOVE_CHECK ) ) {
 		stc( "You are too exhausted.\n\r", ch );
 		return;
 	}
 	SET_BIT( ch->newbits, NEW_POWER );
-	ch->damroll += acfg("monk.spiritpower.damroll_bonus");
-	ch->hitroll += acfg("monk.spiritpower.hitroll_bonus");
-	use_move( ch, acfg("monk.spiritpower.move_cost") );
+	ch->damroll += acfg( ACFG_MONK_SPIRITPOWER_DAMROLL_BONUS );
+	ch->hitroll += acfg( ACFG_MONK_SPIRITPOWER_HITROLL_BONUS );
+	use_move( ch, acfg( ACFG_MONK_SPIRITPOWER_MOVE_COST ) );
 	stc( "Your body pulses with spiritual energy.\n\r", ch );
 	return;
 }
@@ -141,7 +141,7 @@ void do_relax( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	ch->chi[CURRENT]--;
-	WAIT_STATE( ch, acfg("monk.relax.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_MONK_RELAX_COOLDOWN ) );
 	stc( "You breathe deeply and relax your focus.\n\r", ch );
 	act( "$n looks more relaxed.", ch, NULL, NULL, TO_ROOM );
 	return;
@@ -169,7 +169,7 @@ void do_chi( CHAR_DATA *ch, char *argument ) {
 		}
 		return;
 	}
-	if ( ch->move < acfg("monk.chi.move_cost_base") + ( ( ch->chi[CURRENT] + 1 ) * acfg("monk.chi.move_cost_per_level") ) ) {
+	if ( ch->move < acfg( ACFG_MONK_CHI_MOVE_COST_BASE ) + ( ( ch->chi[CURRENT] + 1 ) * acfg( ACFG_MONK_CHI_MOVE_COST_PER_LEVEL ) ) ) {
 		stc( "You are too exhausted.\n\r", ch );
 		return;
 	}
@@ -197,9 +197,9 @@ void do_chi( CHAR_DATA *ch, char *argument ) {
 		stc( "Your body emits sparks of energy as you fully focus your ch'i.\n\r", ch );
 		act( "$n's body emits sparks of energy.", ch, NULL, NULL, TO_ROOM );
 	}
-	WAIT_STATE( ch, acfg("monk.chi.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_MONK_CHI_COOLDOWN ) );
 	ch->chi[CURRENT]++;
-	use_move( ch, ch->chi[CURRENT] * acfg("monk.chi.move_cost_per_level") );
+	use_move( ch, ch->chi[CURRENT] * acfg( ACFG_MONK_CHI_MOVE_COST_PER_LEVEL ) );
 	return;
 }
 
@@ -210,7 +210,7 @@ void do_chands( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->pcdata->powers[PMONK] < acfg("monk.chands.level_req") ) {
+	if ( ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_CHANDS_LEVEL_REQ ) ) {
 		stc( "You do not yet have this ability\n\r", ch );
 		return;
 	}
@@ -297,17 +297,17 @@ void do_guide( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You cannot guide an unwilling person.\n\r", ch );
 		return;
 	}
-	if ( ch->exp < acfg("monk.guide.exp_cost") ) {
+	if ( ch->exp < acfg( ACFG_MONK_GUIDE_EXP_COST ) ) {
 		send_to_char( "You cannot afford the 50000 exp required to guide them.\n\r", ch );
 		return;
 	}
-	if ( victim->exp < acfg("monk.guide.exp_cost") ) {
+	if ( victim->exp < acfg( ACFG_MONK_GUIDE_EXP_COST ) ) {
 		send_to_char( "They cannot afford the 50000 exp required to be guided from you.\n\r", ch );
 		return;
 	}
 
-	ch->exp -= acfg("monk.guide.exp_cost");
-	victim->exp -= acfg("monk.guide.exp_cost");
+	ch->exp -= acfg( ACFG_MONK_GUIDE_EXP_COST );
+	victim->exp -= acfg( ACFG_MONK_GUIDE_EXP_COST );
 
 	act( "You guide $N in the ways of god.", ch, NULL, victim, TO_CHAR );
 	act( "$n guide $N in the ways of god.", ch, NULL, victim, TO_NOTVICT );
@@ -381,7 +381,7 @@ void do_mantra( CHAR_DATA *ch, char *argument ) {
 
 		if ( !str_cmp( arg1, "power" ) ) {
 			improve = PMONK;
-			max = acfg("monk.mantra.max_level");
+			max = acfg( ACFG_MONK_MANTRA_MAX_LEVEL );
 		} else {
 			send_to_char( "________________________________\n\r", ch );
 			send_to_char( "|                               |\n\r", ch );
@@ -405,7 +405,7 @@ void do_mantra( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		cost = ( ch->pcdata->powers[improve] + 1 ) * acfg("monk.mantra.cost_multiplier");
+		cost = ( ch->pcdata->powers[improve] + 1 ) * acfg( ACFG_MONK_MANTRA_COST_MULTIPLIER );
 		arg1[0] = UPPER( arg1[0] );
 		if ( ch->pcdata->powers[improve] >= max ) {
 			sprintf( buf, "You have already gained all the known Mantras.\n\r" );
@@ -433,11 +433,11 @@ void do_cloak( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[PMONK] < acfg("monk.cloak.level_req") ) {
+	if ( ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_CLOAK_LEVEL_REQ ) ) {
 		send_to_char( "You do not have the mantra of the Cloak of Life.\n\r", ch );
 		return;
 	}
-	if ( ch->move < acfg("monk.cloak.move_cost") ) {
+	if ( ch->move < acfg( ACFG_MONK_CLOAK_MOVE_COST ) ) {
 		send_to_char( "You do not have enough vitality to do that.\n\r", ch );
 		return;
 	}
@@ -451,7 +451,7 @@ void do_cloak( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->newbits, NEW_MONKCLOAK );
 		send_to_char( "You are protected by the Almighty's cloak.\n\r", ch );
 		act( "$n is protected by the Almighty's cloak of life.\n\r", ch, NULL, NULL, TO_ROOM );
-		use_move( ch, acfg("monk.cloak.move_cost") );
+		use_move( ch, acfg( ACFG_MONK_CLOAK_MOVE_COST ) );
 		return;
 	}
 }
@@ -476,7 +476,7 @@ void do_sacredinvis( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[PMONK] < acfg("monk.sacredinvis.level_req") ) {
+	if ( ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_SACREDINVIS_LEVEL_REQ ) ) {
 		send_to_char( "You do not have the mantra of Sacred Invisibility.\n\r", ch );
 		return;
 	}
@@ -489,14 +489,14 @@ void do_sacredinvis( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You emerge from your cloak of invisibility.\n\r", ch );
 		act( "$n slowly emerges from a cloak of holy invisibility.", ch, NULL, NULL, TO_ROOM );
 	} else {
-		if ( ch->move < acfg("monk.sacredinvis.move_cost") ) {
+		if ( ch->move < acfg( ACFG_MONK_SACREDINVIS_MOVE_COST ) ) {
 			send_to_char( "You do not have enough movement to do this.\n\r", ch );
 			return;
 		}
 		send_to_char( "You slowly fade into a cloak of invisibility.\n\r", ch );
 		act( "$n slowly fades into a cloak of holy invisibility..", ch, NULL, NULL, TO_ROOM );
 		SET_BIT( ch->act, AFF_HIDE );
-		use_move( ch, acfg("monk.sacredinvis.move_cost") );
+		use_move( ch, acfg( ACFG_MONK_SACREDINVIS_MOVE_COST ) );
 	}
 	return;
 }
@@ -507,7 +507,7 @@ void do_flaminghands( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[PMONK] < acfg("monk.flaminghands.level_req") ) {
+	if ( ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_FLAMINGHANDS_LEVEL_REQ ) ) {
 		send_to_char( "You do not have the mantra of Flaming Hands.\n\r", ch );
 		return;
 	}
@@ -531,7 +531,7 @@ void do_adamantium( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->monkab[BODY] < acfg("monk.adamantium.level_req") ) {
+	if ( ch->monkab[BODY] < acfg( ACFG_MONK_ADAMANTIUM_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned this ability yet.\n\r", ch );
 		return;
 	}
@@ -560,11 +560,11 @@ void do_celestial( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[PMONK] < acfg("monk.celestial.level_req") ) {
+	if ( ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_CELESTIAL_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain level 10 in mantras to use Celestial Path.\n\r", ch );
 		return;
 	}
-	if ( ch->move < acfg("monk.celestial.move_cost") ) {
+	if ( ch->move < acfg( ACFG_MONK_CELESTIAL_MOVE_COST ) ) {
 		stc( "You do not have enough vitality to do that!\n\r", ch );
 		return;
 	}
@@ -617,7 +617,7 @@ void do_celestial( CHAR_DATA *ch, char *argument ) {
 	}
 	act( "$n appears before you through a Celestial portal!\n\r", ch, NULL, NULL, TO_ROOM );
 	do_look( ch, "auto" );
-	use_move( ch, acfg("monk.celestial.move_cost") );
+	use_move( ch, acfg( ACFG_MONK_CELESTIAL_MOVE_COST ) );
 	return;
 }
 
@@ -627,7 +627,7 @@ void do_godseye( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[PMONK] < acfg("monk.godseye.level_req") ) {
+	if ( ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_GODSEYE_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Eyes of God Mantra.\n\r", ch );
 		return;
 	}
@@ -647,7 +647,7 @@ void do_steelskin( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[PMONK] < acfg("monk.steelskin.level_req") ) {
+	if ( ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_STEELSKIN_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Steel of Skin Mantra.\n\r", ch );
 		return;
 	}
@@ -670,19 +670,19 @@ void do_godsbless( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg("monk.godsbless.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_GODSBLESS_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Almighty Favor Mantra.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("monk.godsbless.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_MONK_GODSBLESS_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 	if ( ( sn = skill_lookup( "godbless" ) ) < 0 ) return;
 	level = 500;
 	( *skill_table[sn].spell_fun )( sn, level, ch, ch );
-	WAIT_STATE( ch, acfg("monk.godsbless.cooldown") );
-	use_mana( ch, acfg("monk.godsbless.mana_cost") );
+	WAIT_STATE( ch, acfg( ACFG_MONK_GODSBLESS_COOLDOWN ) );
+	use_mana( ch, acfg( ACFG_MONK_GODSBLESS_MANA_COST ) );
 	return;
 }
 
@@ -694,7 +694,7 @@ void do_wrathofgod( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg("monk.wrathofgod.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_WRATHOFGOD_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned to call on the wrath of god yet.\n\r", ch );
 		return;
 	}
@@ -703,8 +703,8 @@ void do_wrathofgod( CHAR_DATA *ch, char *argument ) {
 	else
 		return;
 	if ( !IS_NPC( victim ) ) return;
-	{ int i; for ( i = 0; i < acfg("monk.wrathofgod.num_hits"); i++ ) one_hit( ch, victim, gsn_wrathofgod, 1 ); }
-	WAIT_STATE( ch, acfg("monk.wrathofgod.cooldown") );
+	{ int i; for ( i = 0; i < acfg( ACFG_MONK_WRATHOFGOD_NUM_HITS ); i++ ) one_hit( ch, victim, gsn_wrathofgod, 1 ); }
+	WAIT_STATE( ch, acfg( ACFG_MONK_WRATHOFGOD_COOLDOWN ) );
 	return;
 }
 
@@ -714,11 +714,11 @@ void do_godsfavor( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg("monk.godsfavor.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_GODSFAVOR_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Almighty's Favor Mantra.\n\r", ch );
 		return;
 	}
-	if ( ch->move < acfg("monk.godsfavor.move_cost") ) {
+	if ( ch->move < acfg( ACFG_MONK_GODSFAVOR_MOVE_COST ) ) {
 		send_to_char( "You do not have the vitality to do that!\n\r", ch );
 		return;
 	}
@@ -726,8 +726,8 @@ void do_godsfavor( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->newbits, NEW_MONKFAVOR );
 		send_to_char( "God smiles upon you and you feel strengthened.\n\r", ch );
 		act( "$n is blessed by the Almighty.", ch, NULL, NULL, TO_ROOM );
-		use_move( ch, acfg("monk.godsfavor.move_cost") );
-		WAIT_STATE( ch, acfg("monk.godsfavor.cooldown") );
+		use_move( ch, acfg( ACFG_MONK_GODSFAVOR_MOVE_COST ) );
+		WAIT_STATE( ch, acfg( ACFG_MONK_GODSFAVOR_COOLDOWN ) );
 		return;
 	}
 	if ( IS_SET( ch->newbits, NEW_MONKFAVOR ) ) {
@@ -747,7 +747,7 @@ void do_darkblaze( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg("monk.darkblaze.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_DARKBLAZE_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Dark Blaze Mantra.\n\r", ch );
 		return;
 	}
@@ -765,12 +765,12 @@ void do_darkblaze( CHAR_DATA *ch, char *argument ) {
 	af.type = skill_lookup( "blindness" );
 	af.location = APPLY_HITROLL;
 	af.modifier = -4;
-	af.duration = acfg("monk.darkblaze.blind_duration");
+	af.duration = acfg( ACFG_MONK_DARKBLAZE_BLIND_DURATION );
 	af.bitvector = AFF_BLIND;
 	affect_to_char( victim, &af );
 	send_to_char( "Your hands blaze up, blinding your opponent.\n\r", ch );
 	send_to_char( "Your opponents hands flashes with a blinding light.\n\r", victim );
-	WAIT_STATE( ch, acfg("monk.darkblaze.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_MONK_DARKBLAZE_COOLDOWN ) );
 	return;
 }
 
@@ -780,28 +780,28 @@ void do_godsheal( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg("monk.godsheal.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_GODSHEAL_LEVEL_REQ ) ) {
 		send_to_char( "You need to obtain heal to use heal.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("monk.godsheal.mana_check") ) {
+	if ( ch->mana < acfg( ACFG_MONK_GODSHEAL_MANA_CHECK ) ) {
 		send_to_char( "You don't have enough energy to use heal.\n\r", ch );
 		return;
 	}
 	if ( ch->fighting != NULL ) {
 		send_to_char( "You are surrounded in a glowing halo of energy.\n\r", ch );
 		act( "$n is surrounded by a glowing halo, and looks very relaxed.\n\r", ch, NULL, NULL, TO_ROOM );
-		heal_char( ch, acfg("monk.godsheal.heal_fighting") );
-		use_mana( ch, acfg("monk.godsheal.mana_cost") );
-		WAIT_STATE( ch, acfg("monk.godsheal.cooldown_fighting") );
+		heal_char( ch, acfg( ACFG_MONK_GODSHEAL_HEAL_FIGHTING ) );
+		use_mana( ch, acfg( ACFG_MONK_GODSHEAL_MANA_COST ) );
+		WAIT_STATE( ch, acfg( ACFG_MONK_GODSHEAL_COOLDOWN_FIGHTING ) );
 		return;
 	}
 	if ( ch->fighting == NULL ) {
 		send_to_char( "You feel a mighty force lay his hands on you.\n\r", ch );
 		act( "$n is surrounded by a glowing halo, and looks very relaxed.\n\r", ch, NULL, NULL, TO_ROOM );
-		heal_char( ch, acfg("monk.godsheal.heal_nonfighting") );
-		use_mana( ch, acfg("monk.godsheal.mana_cost") );
-		WAIT_STATE( ch, acfg("monk.godsheal.cooldown_nonfighting") );
+		heal_char( ch, acfg( ACFG_MONK_GODSHEAL_HEAL_NONFIGHTING ) );
+		use_mana( ch, acfg( ACFG_MONK_GODSHEAL_MANA_COST ) );
+		WAIT_STATE( ch, acfg( ACFG_MONK_GODSHEAL_COOLDOWN_NONFIGHTING ) );
 		return;
 	}
 }
@@ -812,7 +812,7 @@ void do_ghold( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg("monk.ghold.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_MONK ) && ch->pcdata->powers[PMONK] < acfg( ACFG_MONK_GHOLD_LEVEL_REQ ) ) {
 		send_to_char( "You need Mantra 13 to use gods hold.\n\r", ch );
 		return;
 	}

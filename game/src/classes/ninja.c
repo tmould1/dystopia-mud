@@ -47,7 +47,7 @@ void do_stalk( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->move < acfg("ninja.stalk.move_cost") ) {
+	if ( ch->move < acfg( ACFG_NINJA_STALK_MOVE_COST ) ) {
 		stc( "You don't have enough movement points to stalk them.\n\r", ch );
 		return;
 	}
@@ -84,7 +84,7 @@ void do_stalk( CHAR_DATA *ch, char *argument ) {
 	act( "$n slides into the shadows, stalking someone.", ch, NULL, victim, TO_ROOM );
 	char_from_room( ch );
 	char_to_room( ch, victim->in_room );
-	use_move( ch, acfg("ninja.stalk.move_cost") );
+	use_move( ch, acfg( ACFG_NINJA_STALK_MOVE_COST ) );
 	act( "$n walks out of nowhere behind $N.", ch, NULL, victim, TO_NOTVICT );
 	act( "$n walks out of nowhere from behind.", ch, NULL, victim, TO_VICT );
 	do_look( ch, "scry" );
@@ -180,13 +180,13 @@ void do_principles( CHAR_DATA *ch, char *argument ) {
 
 		if ( !str_cmp( arg1, "sora" ) ) {
 			improve = NPOWER_SORA;
-			max = acfg("ninja.principles.sora_max");
+			max = acfg( ACFG_NINJA_PRINCIPLES_SORA_MAX );
 		} else if ( !str_cmp( arg1, "chikyu" ) ) {
 			improve = NPOWER_CHIKYU;
-			max = acfg("ninja.principles.chikyu_max");
+			max = acfg( ACFG_NINJA_PRINCIPLES_CHIKYU_MAX );
 		} else if ( !str_cmp( arg1, "ningenno" ) ) {
 			improve = NPOWER_NINGENNO;
-			max = acfg("ninja.principles.ningenno_max");
+			max = acfg( ACFG_NINJA_PRINCIPLES_NINGENNO_MAX );
 		} else {
 			send_to_char( "Principles: Sora, Chikyu, Ningenno.\n\r", ch );
 			return;
@@ -222,20 +222,20 @@ void do_michi( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_CLASS( ch, CLASS_NINJA ) ) {
 
-		if ( ch->rage >= acfg("ninja.michi.rage_threshold") ) {
+		if ( ch->rage >= acfg( ACFG_NINJA_MICHI_RAGE_THRESHOLD ) ) {
 			send_to_char( "But you are already in the state of Michi.\n\r", ch );
 			return;
 		}
-		if ( ch->move < acfg("ninja.michi.move_cost") ) {
+		if ( ch->move < acfg( ACFG_NINJA_MICHI_MOVE_COST ) ) {
 			send_to_char( "But you don't have enough move to perform the michi.\n\r", ch );
 			return;
 		}
 
 		send_to_char( "You are gifted positive energy while performing the michi.\n\r", ch );
 		act( "$n is gifted positives energies while performing the michi.", ch, NULL, NULL, TO_ROOM );
-		ch->rage += acfg("ninja.michi.rage_gain");
-		use_move( ch, acfg("ninja.michi.move_cost") );
-		WAIT_STATE( ch, acfg("ninja.michi.cooldown") );
+		ch->rage += acfg( ACFG_NINJA_MICHI_RAGE_GAIN );
+		use_move( ch, acfg( ACFG_NINJA_MICHI_MOVE_COST ) );
+		WAIT_STATE( ch, acfg( ACFG_NINJA_MICHI_COOLDOWN ) );
 		return;
 	} else
 		send_to_char( "But you are already in the state of Michi.\n\r", ch );
@@ -250,12 +250,12 @@ void do_kakusu( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_SORA] < acfg("ninja.kakusu.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_SORA] < acfg( ACFG_NINJA_KAKUSU_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Sora principle to 3.\n\r", ch );
 		return;
 	}
 
-	if ( ch->move < acfg("ninja.kakusu.move_cost") ) {
+	if ( ch->move < acfg( ACFG_NINJA_KAKUSU_MOVE_COST ) ) {
 		send_to_char( "You don't have 500 move to activate your power.\n\r", ch );
 		return;
 	}
@@ -272,7 +272,7 @@ void do_kakusu( CHAR_DATA *ch, char *argument ) {
 	} else {
 		act( "$n disappears into the shadows.", ch, NULL, NULL, TO_ROOM );
 		send_to_char( "You disappear into the shadows.\n\r", ch );
-		use_move( ch, acfg("ninja.kakusu.move_cost") );
+		use_move( ch, acfg( ACFG_NINJA_KAKUSU_MOVE_COST ) );
 		SET_BIT( ch->act, AFF_HIDE );
 	}
 	return;
@@ -286,12 +286,12 @@ void do_kanzuite( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_SORA] < acfg("ninja.kanzuite.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_SORA] < acfg( ACFG_NINJA_KANZUITE_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Sora principle to 5.\n\r", ch );
 		return;
 	}
 
-	else if ( ch->move < acfg("ninja.kanzuite.move_cost") ) {
+	else if ( ch->move < acfg( ACFG_NINJA_KANZUITE_MOVE_COST ) ) {
 		send_to_char( "You don't have 500 move to increase your awareness.\n\r", ch );
 		return;
 	}
@@ -302,7 +302,7 @@ void do_kanzuite( CHAR_DATA *ch, char *argument ) {
 	} else {
 		SET_BIT( ch->act, PLR_HOLYLIGHT );
 		send_to_char( "You're senses increase into incredible proportions.\n\r", ch );
-		use_move( ch, acfg("ninja.kanzuite.move_cost") );
+		use_move( ch, acfg( ACFG_NINJA_KANZUITE_MOVE_COST ) );
 	}
 
 	return;
@@ -314,7 +314,7 @@ void do_mienaku( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	int attempt;
 
-	if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_NINGENNO] < acfg("ninja.mienaku.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_NINGENNO] < acfg( ACFG_NINJA_MIENAKU_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Ningenno principle to 3.\n\r", ch );
 		return;
 	} else if ( !IS_CLASS( ch, CLASS_NINJA ) ) {
@@ -330,7 +330,7 @@ void do_mienaku( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->move < acfg("ninja.mienaku.move_cost") ) {
+	if ( ch->move < acfg( ACFG_NINJA_MIENAKU_MOVE_COST ) ) {
 		send_to_char( "You don't have enough movement points to flee.\n\r", ch );
 		return;
 	}
@@ -374,7 +374,7 @@ void do_mienaku( CHAR_DATA *ch, char *argument ) {
 					return;
 				}
 			  */
-			use_move( ch, acfg("ninja.mienaku.move_cost") );
+			use_move( ch, acfg( ACFG_NINJA_MIENAKU_MOVE_COST ) );
 			stop_fighting( ch, TRUE );
 			return;
 		}
@@ -392,7 +392,7 @@ void do_bomuzite( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_CLASS( ch, CLASS_NINJA ) ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
-	} else if ( ch->pcdata->powers[NPOWER_SORA] < acfg("ninja.bomuzite.level_req") ) {
+	} else if ( ch->pcdata->powers[NPOWER_SORA] < acfg( ACFG_NINJA_BOMUZITE_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned the Sora principle to 6.\n\r", ch );
 		return;
 	}
@@ -424,7 +424,7 @@ void do_bomuzite( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->move < acfg("ninja.bomuzite.move_cost") ) {
+	if ( ch->move < acfg( ACFG_NINJA_BOMUZITE_MOVE_COST ) ) {
 		send_to_char( "You don't have enough movement points.\n\r", ch );
 		return;
 	}
@@ -433,8 +433,8 @@ void do_bomuzite( CHAR_DATA *ch, char *argument ) {
 		act( "You toss your bomb onto the floor and put $N to sleep.", ch, NULL, victim, TO_CHAR );
 		act( "$n tosses a bomb onto the floor.  You feel sleepy.", ch, NULL, victim, TO_VICT );
 		victim->position = POS_SLEEPING;
-		use_move( ch, acfg("ninja.bomuzite.move_cost") );
-		WAIT_STATE( ch, acfg("ninja.bomuzite.cooldown") );
+		use_move( ch, acfg( ACFG_NINJA_BOMUZITE_MOVE_COST ) );
+		WAIT_STATE( ch, acfg( ACFG_NINJA_BOMUZITE_COOLDOWN ) );
 		return;
 	}
 
@@ -445,7 +445,7 @@ void do_tsume( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( !IS_CLASS( ch, CLASS_NINJA ) || ch->pcdata->powers[NPOWER_NINGENNO] < acfg("ninja.tsume.level_req") ) {
+	if ( !IS_CLASS( ch, CLASS_NINJA ) || ch->pcdata->powers[NPOWER_NINGENNO] < acfg( ACFG_NINJA_TSUME_LEVEL_REQ ) ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
@@ -467,7 +467,7 @@ void do_hara_kiri( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( !IS_CLASS( ch, CLASS_NINJA ) || ch->pcdata->powers[NPOWER_CHIKYU] < acfg("ninja.hara_kiri.level_req") ) {
+	if ( !IS_CLASS( ch, CLASS_NINJA ) || ch->pcdata->powers[NPOWER_CHIKYU] < acfg( ACFG_NINJA_HARA_KIRI_LEVEL_REQ ) ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
@@ -483,8 +483,8 @@ void do_hara_kiri( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->pcdata->powers[HARA_KIRI] = ch->hit / 500;
-	if ( ch->pcdata->powers[HARA_KIRI] < acfg("ninja.hara_kiri.min_duration") )
-		ch->pcdata->powers[HARA_KIRI] = acfg("ninja.hara_kiri.min_duration");
+	if ( ch->pcdata->powers[HARA_KIRI] < acfg( ACFG_NINJA_HARA_KIRI_MIN_DURATION ) )
+		ch->pcdata->powers[HARA_KIRI] = acfg( ACFG_NINJA_HARA_KIRI_MIN_DURATION );
 	ch->hit = 1;
 	ch->mana = 1;
 	ch->move = 1;
@@ -510,7 +510,7 @@ void do_strangle( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[NPOWER_NINGENNO] < acfg("ninja.strangle.level_req") ) {
+	if ( ch->pcdata->powers[NPOWER_NINGENNO] < acfg( ACFG_NINJA_STRANGLE_LEVEL_REQ ) ) {
 		send_to_char( "You do not have that power yet.\n\r", ch );
 		return;
 	}
@@ -530,15 +530,15 @@ void do_strangle( CHAR_DATA *ch, char *argument ) {
 	act( "$n stabs $N in the back, causing great damage.", ch, NULL, victim, TO_NOTVICT );
 	act( "You backstab $N.", ch, NULL, victim, TO_CHAR );
 	act( "You suddenly feel a great pain and notice $n pulling out a dagger from your back.", ch, NULL, victim, TO_VICT );
-	if ( chance > acfg("ninja.strangle.fail_threshold") ) {
+	if ( chance > acfg( ACFG_NINJA_STRANGLE_FAIL_THRESHOLD ) ) {
 		int i;
-		for ( i = 0; i < acfg("ninja.strangle.hits_success"); i++ )
+		for ( i = 0; i < acfg( ACFG_NINJA_STRANGLE_HITS_SUCCESS ); i++ )
 			one_hit( ch, victim, gsn_backstab, 1 );
-		WAIT_STATE( ch, acfg("ninja.strangle.cooldown_success") );
+		WAIT_STATE( ch, acfg( ACFG_NINJA_STRANGLE_COOLDOWN_SUCCESS ) );
 	} else {
 		send_to_char( "You failed your attempt.\n\r", ch );
 		one_hit( ch, victim, gsn_backstab, 1 );
-		WAIT_STATE( ch, acfg("ninja.strangle.cooldown_fail") );
+		WAIT_STATE( ch, acfg( ACFG_NINJA_STRANGLE_COOLDOWN_FAIL ) );
 	}
 	return;
 }

@@ -1303,11 +1303,14 @@ void db_game_load_ability_config( void ) {
 		return;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		const char *key = col_text( stmt, 0 );
-		int val         = sqlite3_column_int( stmt, 1 );
+		const char *key_str = col_text( stmt, 0 );
+		int val             = sqlite3_column_int( stmt, 1 );
+		acfg_key_t key      = acfg_key_from_string( key_str );
 
-		if ( acfg_set( key, val ) )
+		if ( key != ACFG_COUNT ) {
+			acfg_set( key, val );
 			count++;
+		}
 	}
 
 	sqlite3_finalize( stmt );
@@ -1339,7 +1342,7 @@ void db_game_save_ability_config( void ) {
 	/* Only save values that differ from defaults */
 	total = acfg_count();
 	for ( i = 0; i < total; i++ ) {
-		acfg_entry_t *e = acfg_find_by_index( i );
+		acfg_entry_t *e = acfg_entry_by_index( i );
 		if ( !e || e->value == e->default_value )
 			continue;
 		sqlite3_reset( stmt );

@@ -31,7 +31,7 @@ void do_planeshift( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[NECROMANTIC] < acfg("lich.planeshift.level_req") ) {
+	if ( ch->pcdata->powers[NECROMANTIC] < acfg( ACFG_LICH_PLANESHIFT_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -63,11 +63,11 @@ void do_pentagram( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[CON_LORE] < acfg("lich.pentagram.level_req") ) {
+	if ( ch->pcdata->powers[CON_LORE] < acfg( ACFG_LICH_PENTAGRAM_LEVEL_REQ ) ) {
 		send_to_char( "I think not.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("lich.pentagram.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_LICH_PENTAGRAM_MANA_COST ) ) {
 		send_to_char( "And how would you do that, you got no mana.\n\r", ch );
 		return;
 	}
@@ -94,13 +94,13 @@ void do_pentagram( CHAR_DATA *ch, char *argument ) {
 	act( "$n draws a pentagram on the floor and starts chanting.", ch, NULL, NULL, TO_ROOM );
 	act( "A pentagram forms under your feet and the world is suddenly a big blurr.", victim, NULL, NULL, TO_CHAR );
 	act( "A pentagram forms under $n and $e becomes blurry and fades out of existance.", victim, NULL, NULL, TO_ROOM );
-	use_mana( ch, acfg("lich.pentagram.mana_cost") );
+	use_mana( ch, acfg( ACFG_LICH_PENTAGRAM_MANA_COST ) );
 	char_from_room( victim );
 	char_to_room( victim, location );
 	do_look( victim, "auto" );
 	act( "$N appears in your pentagram.", ch, NULL, victim, TO_CHAR );
 	act( "$N appears in $n's pentagram.", ch, NULL, victim, TO_ROOM );
-	WAIT_STATE( ch, acfg("lich.pentagram.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_LICH_PENTAGRAM_COOLDOWN ) );
 	return;
 }
 
@@ -117,7 +117,7 @@ void do_soulsuck( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_LICH ) && ch->pcdata->powers[NECROMANTIC] < acfg("lich.soulsuck.level_req") ) {
+	if ( IS_CLASS( ch, CLASS_LICH ) && ch->pcdata->powers[NECROMANTIC] < acfg( ACFG_LICH_SOULSUCK_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -142,7 +142,7 @@ void do_soulsuck( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "That doesn't seem like a good idea.\n\r", ch );
 		return;
 	}
-	dam = number_range( acfg("lich.soulsuck.damage_min"), acfg("lich.soulsuck.damage_max") );
+	dam = number_range( acfg( ACFG_LICH_SOULSUCK_DAMAGE_MIN ), acfg( ACFG_LICH_SOULSUCK_DAMAGE_MAX ) );
 	sprintf( buf, "You suck the soul out of $N and use the energy to heal yourself [%d]", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
 	sprintf( buf, "$n sucks at your soul, damn it's nasty, ooo, hurts to [%d]", dam );
@@ -155,7 +155,7 @@ void do_soulsuck( CHAR_DATA *ch, char *argument ) {
 		if ( victim->fighting == NULL ) set_fighting( victim, ch );
 		if ( ch->fighting == NULL ) set_fighting( ch, victim );
 	}
-	WAIT_STATE( ch, acfg("lich.soulsuck.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_LICH_SOULSUCK_COOLDOWN ) );
 	return;
 }
 
@@ -175,11 +175,11 @@ void do_earthswallow( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[LIFE_LORE] < acfg("lich.earthswallow.level_req") ) {
+	if ( ch->pcdata->powers[LIFE_LORE] < acfg( ACFG_LICH_EARTHSWALLOW_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("lich.earthswallow.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_LICH_EARTHSWALLOW_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
@@ -203,7 +203,7 @@ void do_earthswallow( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "That doesn't seem like a good idea.\n\r", ch );
 		return;
 	}
-	use_mana( ch, acfg("lich.earthswallow.mana_cost") );
+	use_mana( ch, acfg( ACFG_LICH_EARTHSWALLOW_MANA_COST ) );
 	act( "$n is swallowed by the earth and disappears.", victim, NULL, NULL, TO_ROOM );
 	char_from_room( victim );
 	char_to_room( victim, get_room_index( ROOM_VNUM_ALTAR ) );
@@ -213,7 +213,7 @@ void do_earthswallow( CHAR_DATA *ch, char *argument ) {
 	char_from_room( mount );
 	char_to_room( mount, victim->in_room );
 	do_look( mount, "auto" );
-	WAIT_STATE( ch, acfg("lich.earthswallow.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_LICH_EARTHSWALLOW_COOLDOWN ) );
 	return;
 }
 
@@ -223,14 +223,14 @@ void do_painwreck( CHAR_DATA *ch, char *argument ) {
 	int dam;
 
 	argument = one_argument( argument, arg );
-	dam = number_range( acfg("lich.painwreck.damage_min"), acfg("lich.painwreck.damage_max") );
+	dam = number_range( acfg( ACFG_LICH_PAINWRECK_DAMAGE_MIN ), acfg( ACFG_LICH_PAINWRECK_DAMAGE_MAX ) );
 
 	if ( IS_NPC( ch ) ) return;
 	if ( !IS_CLASS( ch, CLASS_LICH ) ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[DEATH_LORE] < acfg("lich.painwreck.level_req") ) {
+	if ( ch->pcdata->powers[DEATH_LORE] < acfg( ACFG_LICH_PAINWRECK_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -247,11 +247,11 @@ void do_painwreck( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "That doesn't seem like a good idea.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg("lich.painwreck.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_LICH_PAINWRECK_COOLDOWN ) );
 	hurt_person( ch, victim, dam );
 	act( "You channel unholy energies into $N and watch $M writhe in pain.", ch, NULL, victim, TO_CHAR );
 	act( "$n looks at you, and suddenly your body is filled with intense pain.", ch, NULL, victim, TO_VICT );
-	if ( number_range( 1, acfg("lich.painwreck.stun_chance") ) == 1 ) {
+	if ( number_range( 1, acfg( ACFG_LICH_PAINWRECK_STUN_CHANCE ) ) == 1 ) {
 		if ( victim->position == POS_FIGHTING ) stop_fighting( victim, TRUE );
 		act( "$N screams in pure agony and falls to the ground.", ch, NULL, victim, TO_CHAR );
 		act( "AARGH!!! The pain is to much, you drop to the ground.", ch, NULL, victim, TO_VICT );
@@ -275,11 +275,11 @@ void do_creepingdoom( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[DEATH_LORE] < acfg("lich.creepingdoom.level_req") ) {
+	if ( ch->pcdata->powers[DEATH_LORE] < acfg( ACFG_LICH_CREEPINGDOOM_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("lich.creepingdoom.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_LICH_CREEPINGDOOM_MANA_COST ) ) {
 		send_to_char( "You don't have the power to summon the insects.\n\r", ch );
 		return;
 	}
@@ -304,7 +304,7 @@ void do_creepingdoom( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 	use_mana( ch, ch->mana / 2 );
-	WAIT_STATE( ch, acfg("lich.creepingdoom.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_LICH_CREEPINGDOOM_COOLDOWN ) );
 	return;
 }
 
@@ -312,7 +312,7 @@ void do_chillhand( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	AFFECT_DATA af;
 	char arg[MAX_INPUT_LENGTH];
-	int dam = number_range( acfg("lich.chillhand.damage_min"), acfg("lich.chillhand.damage_max") );
+	int dam = number_range( acfg( ACFG_LICH_CHILLHAND_DAMAGE_MIN ), acfg( ACFG_LICH_CHILLHAND_DAMAGE_MAX ) );
 	int sn;
 
 	argument = one_argument( argument, arg );
@@ -322,7 +322,7 @@ void do_chillhand( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[DEATH_LORE] < acfg("lich.chillhand.level_req") ) {
+	if ( ch->pcdata->powers[DEATH_LORE] < acfg( ACFG_LICH_CHILLHAND_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -337,14 +337,14 @@ void do_chillhand( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( is_safe( ch, victim ) ) return;
-	if ( !IS_NPC( victim ) ) dam /= acfg("lich.chillhand.pvp_damage_divisor");
+	if ( !IS_NPC( victim ) ) dam /= acfg( ACFG_LICH_CHILLHAND_PVP_DAMAGE_DIVISOR );
 	damage( ch, victim, dam, gsn_chillhand );
-	WAIT_STATE( ch, acfg("lich.chillhand.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_LICH_CHILLHAND_COOLDOWN ) );
 	sn = skill_lookup( "chill touch" );
 	af.type = sn;
-	af.duration = acfg("lich.chillhand.debuff_duration");
+	af.duration = acfg( ACFG_LICH_CHILLHAND_DEBUFF_DURATION );
 	af.location = APPLY_STR;
-	af.modifier = acfg("lich.chillhand.str_modifier");
+	af.modifier = acfg( ACFG_LICH_CHILLHAND_STR_MODIFIER );
 	af.bitvector = 0;
 	affect_to_char( victim, &af );
 	return;
@@ -362,7 +362,7 @@ void do_polarity( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[LIFE_LORE] < acfg("lich.polarity.level_req") ) {
+	if ( ch->pcdata->powers[LIFE_LORE] < acfg( ACFG_LICH_POLARITY_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -377,13 +377,13 @@ void do_polarity( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( is_safe( ch, victim ) ) return;
-	dam = number_range( acfg("lich.polarity.drain_min"), acfg("lich.polarity.drain_max") );
+	dam = number_range( acfg( ACFG_LICH_POLARITY_DRAIN_MIN ), acfg( ACFG_LICH_POLARITY_DRAIN_MAX ) );
 	dam = UMIN( dam, victim->mana );
 	use_mana( victim, dam );
-	heal_char( ch, dam / acfg("lich.polarity.heal_divisor") );
+	heal_char( ch, dam / acfg( ACFG_LICH_POLARITY_HEAL_DIVISOR ) );
 	send_to_char( "You feel your mystical energies being sucked out of your body!!!\n\r", victim );
 	send_to_char( "You drain their mana and heal yourself with it.\n\r", ch );
-	WAIT_STATE( ch, acfg("lich.polarity.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_LICH_POLARITY_COOLDOWN ) );
 	return;
 }
 
@@ -393,11 +393,11 @@ void do_powertransfer( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("lich.powertransfer.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_LICH_POWERTRANSFER_MANA_COST ) ) {
 		send_to_char( "You don't have the mana.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[LIFE_LORE] < acfg("lich.powertransfer.level_req") ) {
+	if ( ch->pcdata->powers[LIFE_LORE] < acfg( ACFG_LICH_POWERTRANSFER_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -406,10 +406,10 @@ void do_powertransfer( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( has_timer( ch ) ) return;
-	heal_char( ch, number_range( acfg("lich.powertransfer.heal_min"), acfg("lich.powertransfer.heal_max") ) );
-	use_mana( ch, acfg("lich.powertransfer.mana_cost") );
+	heal_char( ch, number_range( acfg( ACFG_LICH_POWERTRANSFER_HEAL_MIN ), acfg( ACFG_LICH_POWERTRANSFER_HEAL_MAX ) ) );
+	use_mana( ch, acfg( ACFG_LICH_POWERTRANSFER_MANA_COST ) );
 	send_to_char( "You transfer the mystical energies in your body into life energy and heal your wounds.\n\r", ch );
-	WAIT_STATE( ch, acfg("lich.powertransfer.cooldown") );
+	WAIT_STATE( ch, acfg( ACFG_LICH_POWERTRANSFER_COOLDOWN ) );
 	return;
 }
 
@@ -426,11 +426,11 @@ void do_planarstorm( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg("lich.planarstorm.mana_cost") ) {
+	if ( ch->mana < acfg( ACFG_LICH_PLANARSTORM_MANA_COST ) ) {
 		send_to_char( "You can't control the planes.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[NECROMANTIC] < acfg("lich.planarstorm.level_req") ) {
+	if ( ch->pcdata->powers[NECROMANTIC] < acfg( ACFG_LICH_PLANARSTORM_LEVEL_REQ ) ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -438,7 +438,7 @@ void do_planarstorm( CHAR_DATA *ch, char *argument ) {
 	for ( ich = ch->in_room->people; dummychar != NULL; ich = dummychar ) {
 		dummychar = ich->next_in_room;
 		if ( is_safe( ch, ich ) ) continue;
-		dam = number_range( acfg("lich.planarstorm.damage_min"), acfg("lich.planarstorm.damage_max") );
+		dam = number_range( acfg( ACFG_LICH_PLANARSTORM_DAMAGE_MIN ), acfg( ACFG_LICH_PLANARSTORM_DAMAGE_MAX ) );
 		dam = cap_dam( ch, ich, dam );
 		if ( ich == ch ) dam = dam / 2;
 		sprintf( buf1, "$N screams in pain as $S body is spread over the planes [#C%d#n]", dam );

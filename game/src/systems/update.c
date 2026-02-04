@@ -373,11 +373,11 @@ void char_update( void ) {
 
 			/* Sun damage values are configurable via ability config */
 			if ( IS_POLYAFF( ch, POLY_SERPENT ) )
-				ch->hit = ch->hit - acfg( "vampire.sun.damage_serpent" );
+				ch->hit = ch->hit - acfg( ACFG_VAMPIRE_SUN_DAMAGE_SERPENT );
 			else
 				ch->hit = ch->hit - number_range(
-					acfg( "vampire.sun.damage_min" ),
-					acfg( "vampire.sun.damage_max" ) );
+					acfg( ACFG_VAMPIRE_SUN_DAMAGE_MIN ),
+					acfg( ACFG_VAMPIRE_SUN_DAMAGE_MAX ) );
 			update_pos( ch );
 		}
 

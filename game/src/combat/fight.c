@@ -1004,7 +1004,7 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		/* Dirgesinger cadence: extra attacks when active */
 		if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) &&
 			ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] > 0 )
-			count += acfg( "dirgesinger.cadence.extra_attacks" );
+			count += acfg( ACFG_DIRGESINGER_CADENCE_EXTRA_ATTACKS );
 		if ( IS_ITEMAFF( ch, ITEMA_SPEED ) ) count += 2;
 	} else {
 		if ( !IS_NPC( ch ) )
@@ -1715,16 +1715,16 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		}
 		/* Psion: focus-based damcap bonus + thought shield */
 		if ( IS_CLASS( ch, CLASS_PSION ) ) {
-			max_dam += acfg( "psion.damcap.base" );
-			max_dam += ch->rage * acfg( "psion.damcap.focus_mult" );
+			max_dam += acfg( ACFG_PSION_DAMCAP_BASE );
+			max_dam += ch->rage * acfg( ACFG_PSION_DAMCAP_FOCUS_MULT );
 			if ( ch->pcdata->powers[PSION_THOUGHT_SHIELD] > 0 )
-				max_dam += acfg( "psion.damcap.thoughtshield" );
+				max_dam += acfg( ACFG_PSION_DAMCAP_THOUGHTSHIELD );
 		}
 		/* Mindflayer: enhanced focus-based damcap + hivemind */
 		if ( IS_CLASS( ch, CLASS_MINDFLAYER ) ) {
-			max_dam += ch->rage * acfg( "mindflayer.damcap.focus_mult" );
+			max_dam += ch->rage * acfg( ACFG_MINDFLAYER_DAMCAP_FOCUS_MULT );
 			if ( ch->pcdata->powers[MIND_HIVEMIND] > 0 )
-				max_dam += acfg( "mindflayer.damcap.hivemind" );
+				max_dam += acfg( ACFG_MINDFLAYER_DAMCAP_HIVEMIND );
 		}
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += balance.damcap_artifact;
@@ -1914,7 +1914,7 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 	/* Siren Echoshield: reflect portion of damage as sonic */
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SIREN ) &&
 		victim->pcdata->powers[DIRGE_ECHOSHIELD_ACTIVE] > 0 && dam > 0 ) {
-		int reflect = dam * acfg( "siren.echoshield.reflect_pct" ) / 100;
+		int reflect = dam * acfg( ACFG_SIREN_ECHOSHIELD_REFLECT_PCT ) / 100;
 		if ( reflect > 0 ) {
 			hurt_person( victim, ch, reflect );
 			act( "Your echoshield reverberates, reflecting sonic energy back at $N!", victim, NULL, ch, TO_CHAR );
