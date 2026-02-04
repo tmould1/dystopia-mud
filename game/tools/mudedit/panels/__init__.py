@@ -9,6 +9,7 @@ from .area import AreaInfoPanel
 from .shop import ShopEditorPanel
 from .gameconfig import GameConfigPanel, BalanceConfigPanel
 from .ability_config import AbilityConfigPanel
+from .audio_config import AudioConfigPanel
 from .game_panels import (
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel
@@ -26,6 +27,7 @@ __all__ = [
     'GameConfigPanel',
     'BalanceConfigPanel',
     'AbilityConfigPanel',
+    'AudioConfigPanel',
     'KingdomsPanel',
     'BansPanel',
     'DisabledCommandsPanel',

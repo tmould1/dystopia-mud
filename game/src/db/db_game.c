@@ -125,7 +125,24 @@ static const char *GAME_SCHEMA_SQL =
 
 	"CREATE TABLE IF NOT EXISTS super_admins ("
 	"  name  TEXT PRIMARY KEY COLLATE NOCASE"
-	");";
+	");"
+
+	"CREATE TABLE IF NOT EXISTS audio_config ("
+	"  id           INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  category     TEXT NOT NULL,"
+	"  trigger_key  TEXT NOT NULL,"
+	"  filename     TEXT NOT NULL,"
+	"  volume       INTEGER NOT NULL DEFAULT 50,"
+	"  priority     INTEGER NOT NULL DEFAULT 50,"
+	"  loops        INTEGER NOT NULL DEFAULT 1,"
+	"  media_type   TEXT NOT NULL DEFAULT 'sound',"
+	"  tag          TEXT NOT NULL DEFAULT '',"
+	"  caption      TEXT NOT NULL DEFAULT '',"
+	"  use_key      TEXT DEFAULT NULL,"
+	"  use_continue INTEGER NOT NULL DEFAULT 0,"
+	"  UNIQUE(category, trigger_key)"
+	");"
+	"CREATE INDEX IF NOT EXISTS idx_audio_category ON audio_config(category);";
 
 
 /*
@@ -1146,4 +1163,488 @@ void db_game_list_super_admins( CHAR_DATA *ch ) {
 		snprintf( buf, sizeof( buf ), "#wTotal: %d#n\n\r", count );
 		send_to_char( buf, ch );
 	}
+}
+
+
+/*
+ * Audio config (game.db)
+ * MCMP audio file mappings loaded into memory for fast lookup.
+ */
+static AUDIO_ENTRY *audio_entries = NULL;
+static int audio_entry_count = 0;
+static int audio_entry_alloc = 0;
+
+/* Sector-indexed lookup arrays */
+AUDIO_ENTRY *audio_ambient[SECT_MAX];
+AUDIO_ENTRY *audio_footstep[SECT_MAX];
+
+/* Parse sector key string to integer */
+static int parse_sector_key( const char *key ) {
+	if ( !str_cmp( key, "SECT_INSIDE" ) )      return SECT_INSIDE;
+	if ( !str_cmp( key, "SECT_CITY" ) )        return SECT_CITY;
+	if ( !str_cmp( key, "SECT_FIELD" ) )       return SECT_FIELD;
+	if ( !str_cmp( key, "SECT_FOREST" ) )      return SECT_FOREST;
+	if ( !str_cmp( key, "SECT_HILLS" ) )       return SECT_HILLS;
+	if ( !str_cmp( key, "SECT_MOUNTAIN" ) )    return SECT_MOUNTAIN;
+	if ( !str_cmp( key, "SECT_WATER_SWIM" ) )  return SECT_WATER_SWIM;
+	if ( !str_cmp( key, "SECT_WATER_NOSWIM" )) return SECT_WATER_NOSWIM;
+	if ( !str_cmp( key, "SECT_UNUSED" ) )      return SECT_UNUSED;
+	if ( !str_cmp( key, "SECT_AIR" ) )         return SECT_AIR;
+	if ( !str_cmp( key, "SECT_DESERT" ) )      return SECT_DESERT;
+	return -1;
+}
+
+/* Insert default audio entries if table is empty */
+static void audio_config_insert_defaults( void ) {
+	sqlite3_stmt *stmt, *count_stmt;
+	const char *sql = "INSERT OR IGNORE INTO audio_config "
+		"(category, trigger_key, filename, volume, priority, loops, media_type, tag, caption, use_key, use_continue) "
+		"VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+	int count = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Check if table already has entries */
+	if ( sqlite3_prepare_v2( game_db, "SELECT COUNT(*) FROM audio_config", -1, &count_stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( count_stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( count_stmt, 0 );
+		sqlite3_finalize( count_stmt );
+	}
+
+	if ( count > 0 )
+		return;  /* Already has data */
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	db_begin( game_db );
+
+#define INSERT_AUDIO( cat, key, file, vol, pri, lps, mtype, tg, cap, ukey, ucont ) \
+	sqlite3_reset( stmt ); \
+	sqlite3_bind_text( stmt, 1, cat, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( stmt, 2, key, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( stmt, 3, file, -1, SQLITE_STATIC ); \
+	sqlite3_bind_int( stmt, 4, vol ); \
+	sqlite3_bind_int( stmt, 5, pri ); \
+	sqlite3_bind_int( stmt, 6, lps ); \
+	sqlite3_bind_text( stmt, 7, mtype, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( stmt, 8, tg, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( stmt, 9, cap, -1, SQLITE_STATIC ); \
+	if ( ukey ) sqlite3_bind_text( stmt, 10, ukey, -1, SQLITE_STATIC ); \
+	else sqlite3_bind_null( stmt, 10 ); \
+	sqlite3_bind_int( stmt, 11, ucont ); \
+	sqlite3_step( stmt )
+
+	/* Ambient sounds by sector type */
+	INSERT_AUDIO( "ambient", "SECT_INSIDE",      "ambient/indoor.mp3",   20, 10, -1, "music", "environment", "Indoor ambience", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_CITY",        "ambient/city.mp3",     20, 10, -1, "music", "environment", "City sounds", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_FIELD",       "ambient/field.mp3",    20, 10, -1, "music", "environment", "Open field, wind blowing", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_FOREST",      "ambient/forest.mp3",   20, 10, -1, "music", "environment", "Forest, birds and rustling", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_HILLS",       "ambient/hills.mp3",    20, 10, -1, "music", "environment", "Hilly terrain, wind", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_MOUNTAIN",    "ambient/mountain.mp3", 20, 10, -1, "music", "environment", "Mountain wind, distant echoes", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_WATER_SWIM",  "ambient/water.mp3",    20, 10, -1, "music", "environment", "Water flowing", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_WATER_NOSWIM","ambient/water.mp3",    20, 10, -1, "music", "environment", "Water flowing", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_UNUSED",      "ambient/indoor.mp3",   20, 10, -1, "music", "environment", "Indoor ambience", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_AIR",         "ambient/air.mp3",      20, 10, -1, "music", "environment", "High altitude wind", "ambient", 1 );
+	INSERT_AUDIO( "ambient", "SECT_DESERT",      "ambient/desert.mp3",   20, 10, -1, "music", "environment", "Desert wind", "ambient", 1 );
+
+	/* Footstep sounds by sector type */
+	INSERT_AUDIO( "footstep", "SECT_INSIDE",      "movement/footstep_stone.mp3",  25, 10, 1, "sound", "movement", "Footsteps on stone", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_CITY",        "movement/footstep_stone.mp3",  25, 10, 1, "sound", "movement", "Footsteps on stone", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_FIELD",       "movement/footstep_grass.mp3",  25, 10, 1, "sound", "movement", "Footsteps on grass", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_FOREST",      "movement/footstep_forest.mp3", 25, 10, 1, "sound", "movement", "Footsteps through undergrowth", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_HILLS",       "movement/footstep_gravel.mp3", 25, 10, 1, "sound", "movement", "Footsteps on gravel", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_MOUNTAIN",    "movement/footstep_gravel.mp3", 25, 10, 1, "sound", "movement", "Footsteps on gravel", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_WATER_SWIM",  "movement/splash.mp3",          25, 10, 1, "sound", "movement", "Splashing through water", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_WATER_NOSWIM","movement/splash.mp3",          25, 10, 1, "sound", "movement", "Splashing through water", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_UNUSED",      "movement/footstep_stone.mp3",  25, 10, 1, "sound", "movement", "Footsteps on stone", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_AIR",         "movement/whoosh.mp3",          25, 10, 1, "sound", "movement", "Wind rushing past", NULL, 0 );
+	INSERT_AUDIO( "footstep", "SECT_DESERT",      "movement/footstep_sand.mp3",   25, 10, 1, "sound", "movement", "Footsteps on sand", NULL, 0 );
+
+	/* Combat sounds */
+	INSERT_AUDIO( "combat", "combat_miss",      "combat/miss.mp3",      30, 30, 1, "sound", "combat", "Attacks miss", NULL, 0 );
+	INSERT_AUDIO( "combat", "combat_light_hit", "combat/light_hit.mp3", 40, 30, 1, "sound", "combat", "Light blows exchanged", NULL, 0 );
+	INSERT_AUDIO( "combat", "combat_heavy_hit", "combat/heavy_hit.mp3", 50, 40, 1, "sound", "combat", "Heavy blows land", NULL, 0 );
+	INSERT_AUDIO( "combat", "combat_death",     "combat/death.mp3",     60, 80, 1, "sound", "combat", "A death cry rings out", NULL, 0 );
+	INSERT_AUDIO( "combat", "combat_engage",    "combat/engage.mp3",    50, 50, 1, "sound", "combat", "Combat begins", NULL, 0 );
+	INSERT_AUDIO( "combat", "combat_victory",   "combat/victory.mp3",   50, 60, 1, "sound", "combat", "Victory", NULL, 0 );
+
+	/* Weather sounds */
+	INSERT_AUDIO( "weather", "SKY_CLOUDY",    "weather/wind.mp3",       15, 20, -1, "music", "weather", "Wind picks up", "weather", 0 );
+	INSERT_AUDIO( "weather", "SKY_RAINING",   "weather/rain_heavy.mp3", 25, 20, -1, "music", "weather", "Heavy rain", "weather", 0 );
+	INSERT_AUDIO( "weather", "SKY_LIGHTNING", "weather/thunder.mp3",    50, 60, 1,  "sound", "weather", "Thunder crashes", NULL, 0 );
+
+	/* Channel notification sounds */
+	INSERT_AUDIO( "channel", "CHANNEL_TELL",    "channels/tell.mp3",    30, 20, 1, "sound", "channel", "Private message", NULL, 0 );
+	INSERT_AUDIO( "channel", "CHANNEL_YELL",    "channels/yell.mp3",    30, 20, 1, "sound", "channel", "Someone yells", NULL, 0 );
+	INSERT_AUDIO( "channel", "CHANNEL_IMMTALK", "channels/immtalk.mp3", 30, 20, 1, "sound", "channel", "Immortal message", NULL, 0 );
+	INSERT_AUDIO( "channel", "CHANNEL_CHAT",    "channels/chat.mp3",    30, 20, 1, "sound", "channel", "Chat message", NULL, 0 );
+
+	/* Time of day sounds */
+	INSERT_AUDIO( "time", "hour_5",  "environment/dawn.mp3",           30, 30, 1, "sound", "environment", "Dawn breaks", NULL, 0 );
+	INSERT_AUDIO( "time", "hour_6",  "environment/sunrise.mp3",        30, 30, 1, "sound", "environment", "Birds sing at sunrise", NULL, 0 );
+	INSERT_AUDIO( "time", "hour_19", "environment/sunset.mp3",         30, 30, 1, "sound", "environment", "Evening crickets", NULL, 0 );
+	INSERT_AUDIO( "time", "hour_20", "environment/nightfall.mp3",      30, 30, 1, "sound", "environment", "Night creatures stir", NULL, 0 );
+	INSERT_AUDIO( "time", "hour_0",  "environment/clock_midnight.mp3", 35, 40, 1, "sound", "environment", "Clock tolls midnight", NULL, 0 );
+
+	/* UI event sounds */
+	INSERT_AUDIO( "ui", "ui_login",       "ui/login.mp3",       50, 70, 1, "sound", "ui", "Welcome", NULL, 0 );
+	INSERT_AUDIO( "ui", "ui_levelup",     "ui/levelup.mp3",     50, 70, 1, "sound", "ui", "Level up", NULL, 0 );
+	INSERT_AUDIO( "ui", "ui_death",       "ui/death.mp3",       60, 90, 1, "sound", "ui", "You have died", NULL, 0 );
+	INSERT_AUDIO( "ui", "ui_achievement", "ui/achievement.mp3", 50, 70, 1, "sound", "ui", "Achievement earned", NULL, 0 );
+
+	/* Spell sounds */
+	INSERT_AUDIO( "spell", "spell_generic", "specials/spell_cast.mp3", 40, 40, 1, "sound", "spell", "A spell is cast", NULL, 0 );
+
+	/* Environment misc sounds */
+	INSERT_AUDIO( "environment", "env_bell",       "environment/bell_distant.mp3", 25, 20, 1, "sound", "environment", "Distant bell", NULL, 0 );
+	INSERT_AUDIO( "environment", "env_door_open",  "environment/door_open.mp3",    35, 20, 1, "sound", "environment", "Door opens", NULL, 0 );
+	INSERT_AUDIO( "environment", "env_door_close", "environment/door_close.mp3",   35, 20, 1, "sound", "environment", "Door closes", NULL, 0 );
+	INSERT_AUDIO( "environment", "env_howl",       "environment/howl.mp3",         50, 30, 1, "sound", "environment", "Wolf howl", NULL, 0 );
+
+#undef INSERT_AUDIO
+
+	db_commit( game_db );
+	sqlite3_finalize( stmt );
+
+	log_string( "  Inserted default audio config entries." );
+}
+
+/*
+ * Load audio config from database into memory.
+ * Call this during boot after db_game_init().
+ */
+void db_game_load_audio_config( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT category, trigger_key, filename, volume, priority, "
+		"loops, media_type, tag, caption, use_key, use_continue "
+		"FROM audio_config ORDER BY category, trigger_key";
+	char buf[256];
+	int i;
+
+	if ( !game_db )
+		return;
+
+	/* Insert defaults if table is empty */
+	audio_config_insert_defaults();
+
+	/* Free existing entries */
+	if ( audio_entries != NULL ) {
+		for ( i = 0; i < audio_entry_count; i++ ) {
+			if ( audio_entries[i].category )   free_string( audio_entries[i].category );
+			if ( audio_entries[i].trigger_key ) free_string( audio_entries[i].trigger_key );
+			if ( audio_entries[i].filename )   free_string( audio_entries[i].filename );
+			if ( audio_entries[i].media_type ) free_string( audio_entries[i].media_type );
+			if ( audio_entries[i].tag )        free_string( audio_entries[i].tag );
+			if ( audio_entries[i].caption )    free_string( audio_entries[i].caption );
+			if ( audio_entries[i].use_key )    free_string( audio_entries[i].use_key );
+		}
+		free_mem( audio_entries, audio_entry_alloc * sizeof( AUDIO_ENTRY ) );
+		audio_entries = NULL;
+		audio_entry_count = 0;
+		audio_entry_alloc = 0;
+	}
+
+	/* Clear sector lookup arrays */
+	for ( i = 0; i < SECT_MAX; i++ ) {
+		audio_ambient[i] = NULL;
+		audio_footstep[i] = NULL;
+	}
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	/* Count rows first */
+	while ( sqlite3_step( stmt ) == SQLITE_ROW )
+		audio_entry_alloc++;
+	sqlite3_reset( stmt );
+
+	if ( audio_entry_alloc == 0 ) {
+		sqlite3_finalize( stmt );
+		return;
+	}
+
+	/* Allocate array */
+	audio_entries = alloc_mem( audio_entry_alloc * sizeof( AUDIO_ENTRY ) );
+
+	/* Load entries */
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		AUDIO_ENTRY *ae = &audio_entries[audio_entry_count];
+		const char *ukey;
+
+		ae->category    = str_dup( col_text( stmt, 0 ) );
+		ae->trigger_key = str_dup( col_text( stmt, 1 ) );
+		ae->filename    = str_dup( col_text( stmt, 2 ) );
+		ae->volume      = sqlite3_column_int( stmt, 3 );
+		ae->priority    = sqlite3_column_int( stmt, 4 );
+		ae->loops       = sqlite3_column_int( stmt, 5 );
+		ae->media_type  = str_dup( col_text( stmt, 6 ) );
+		ae->tag         = str_dup( col_text( stmt, 7 ) );
+		ae->caption     = str_dup( col_text( stmt, 8 ) );
+		ukey = (const char *)sqlite3_column_text( stmt, 9 );
+		ae->use_key     = ( ukey && ukey[0] ) ? str_dup( ukey ) : NULL;
+		ae->use_continue = sqlite3_column_int( stmt, 10 ) != 0;
+
+		audio_entry_count++;
+	}
+
+	sqlite3_finalize( stmt );
+
+	/* Build sector-indexed lookup arrays */
+	for ( i = 0; i < audio_entry_count; i++ ) {
+		AUDIO_ENTRY *ae = &audio_entries[i];
+		int sect;
+
+		if ( !str_cmp( ae->category, "ambient" ) ) {
+			sect = parse_sector_key( ae->trigger_key );
+			if ( sect >= 0 && sect < SECT_MAX )
+				audio_ambient[sect] = ae;
+		}
+		else if ( !str_cmp( ae->category, "footstep" ) ) {
+			sect = parse_sector_key( ae->trigger_key );
+			if ( sect >= 0 && sect < SECT_MAX )
+				audio_footstep[sect] = ae;
+		}
+	}
+
+	snprintf( buf, sizeof( buf ), "  Loaded %d audio config entries.", audio_entry_count );
+	log_string( buf );
+}
+
+/*
+ * Find an audio config entry by category and trigger key.
+ * Returns NULL if not found.
+ */
+AUDIO_ENTRY *audio_config_find( const char *category, const char *trigger_key ) {
+	int i;
+
+	if ( category == NULL || trigger_key == NULL )
+		return NULL;
+
+	for ( i = 0; i < audio_entry_count; i++ ) {
+		if ( !str_cmp( audio_entries[i].category, category ) &&
+		     !str_cmp( audio_entries[i].trigger_key, trigger_key ) )
+			return &audio_entries[i];
+	}
+
+	return NULL;
+}
+
+/*
+ * Save a single audio config entry to the database.
+ */
+static void audio_config_save_entry( AUDIO_ENTRY *ae ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "UPDATE audio_config SET filename=?, volume=?, priority=?, "
+		"loops=?, media_type=?, tag=?, caption=?, use_key=?, use_continue=? "
+		"WHERE category=? AND trigger_key=?";
+
+	if ( !game_db || !ae )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	sqlite3_bind_text( stmt, 1, ae->filename, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_int( stmt, 2, ae->volume );
+	sqlite3_bind_int( stmt, 3, ae->priority );
+	sqlite3_bind_int( stmt, 4, ae->loops );
+	sqlite3_bind_text( stmt, 5, ae->media_type, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 6, ae->tag, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 7, ae->caption, -1, SQLITE_TRANSIENT );
+	if ( ae->use_key )
+		sqlite3_bind_text( stmt, 8, ae->use_key, -1, SQLITE_TRANSIENT );
+	else
+		sqlite3_bind_null( stmt, 8 );
+	sqlite3_bind_int( stmt, 9, ae->use_continue ? 1 : 0 );
+	sqlite3_bind_text( stmt, 10, ae->category, -1, SQLITE_TRANSIENT );
+	sqlite3_bind_text( stmt, 11, ae->trigger_key, -1, SQLITE_TRANSIENT );
+
+	sqlite3_step( stmt );
+	sqlite3_finalize( stmt );
+}
+
+/*
+ * In-game command to view and edit audio configuration.
+ *
+ * Syntax:
+ *   audioconfig                      - list categories
+ *   audioconfig <category>           - list entries in category
+ *   audioconfig <cat> <trigger>      - show entry details
+ *   audioconfig <cat> <trigger> <field> <value> - edit a field
+ */
+void do_audioconfig( CHAR_DATA *ch, char *argument ) {
+	char arg1[MAX_INPUT_LENGTH];
+	char arg2[MAX_INPUT_LENGTH];
+	char arg3[MAX_INPUT_LENGTH];
+	char arg4[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	AUDIO_ENTRY *ae;
+	int i, count;
+
+	argument = one_argument( argument, arg1 );
+	argument = one_argument( argument, arg2 );
+	argument = one_argument( argument, arg3 );
+	strcpy( arg4, argument );  /* Value may have spaces */
+
+	/* No arguments - list categories */
+	if ( arg1[0] == '\0' ) {
+		const char *categories[] = {
+			"ambient", "footstep", "combat", "weather",
+			"channel", "time", "ui", "spell", "environment", NULL
+		};
+
+		send_to_char( "#GAudio Config Categories:#n\n\r\n\r", ch );
+
+		for ( i = 0; categories[i] != NULL; i++ ) {
+			count = 0;
+			for ( int j = 0; j < audio_entry_count; j++ ) {
+				if ( !str_cmp( audio_entries[j].category, categories[i] ) )
+					count++;
+			}
+			snprintf( buf, sizeof( buf ), "  %-12s  %d entries\n\r",
+				categories[i], count );
+			send_to_char( buf, ch );
+		}
+
+		send_to_char( "\n\r#wSyntax:#n audioconfig <category> [trigger] [field] [value]\n\r", ch );
+		send_to_char( "#wFields:#n filename volume priority loops media_type tag caption use_key use_continue\n\r", ch );
+		return;
+	}
+
+	/* One argument - list entries in category */
+	if ( arg2[0] == '\0' ) {
+		send_to_char( "#GAudio entries in category:#n ", ch );
+		send_to_char( arg1, ch );
+		send_to_char( "\n\r\n\r", ch );
+
+		count = 0;
+		for ( i = 0; i < audio_entry_count; i++ ) {
+			if ( !str_cmp( audio_entries[i].category, arg1 ) ) {
+				snprintf( buf, sizeof( buf ),
+					"  %-20s  %-30s  vol=%d pri=%d\n\r",
+					audio_entries[i].trigger_key,
+					audio_entries[i].filename,
+					audio_entries[i].volume,
+					audio_entries[i].priority );
+				send_to_char( buf, ch );
+				count++;
+			}
+		}
+
+		if ( count == 0 )
+			send_to_char( "  (no entries found)\n\r", ch );
+		else {
+			snprintf( buf, sizeof( buf ), "\n\r#wTotal:#n %d entries\n\r", count );
+			send_to_char( buf, ch );
+		}
+		return;
+	}
+
+	/* Two arguments - show entry details */
+	ae = audio_config_find( arg1, arg2 );
+	if ( ae == NULL ) {
+		send_to_char( "No audio entry found for that category/trigger.\n\r", ch );
+		return;
+	}
+
+	if ( arg3[0] == '\0' ) {
+		snprintf( buf, sizeof( buf ),
+			"#GAudio Entry:#n %s / %s\n\r\n\r"
+			"  filename:     %s\n\r"
+			"  volume:       %d\n\r"
+			"  priority:     %d\n\r"
+			"  loops:        %d\n\r"
+			"  media_type:   %s\n\r"
+			"  tag:          %s\n\r"
+			"  caption:      %s\n\r"
+			"  use_key:      %s\n\r"
+			"  use_continue: %s\n\r",
+			ae->category, ae->trigger_key,
+			ae->filename,
+			ae->volume,
+			ae->priority,
+			ae->loops,
+			ae->media_type,
+			ae->tag[0] ? ae->tag : "(none)",
+			ae->caption[0] ? ae->caption : "(none)",
+			ae->use_key ? ae->use_key : "(none)",
+			ae->use_continue ? "true" : "false" );
+		send_to_char( buf, ch );
+		return;
+	}
+
+	/* Four arguments - edit a field */
+	if ( arg4[0] == '\0' ) {
+		send_to_char( "Syntax: audioconfig <category> <trigger> <field> <value>\n\r", ch );
+		return;
+	}
+
+	/* Edit the field */
+	if ( !str_cmp( arg3, "filename" ) ) {
+		free_string( ae->filename );
+		ae->filename = str_dup( arg4 );
+	}
+	else if ( !str_cmp( arg3, "volume" ) ) {
+		int val = atoi( arg4 );
+		if ( val < 0 || val > 100 ) {
+			send_to_char( "Volume must be 0-100.\n\r", ch );
+			return;
+		}
+		ae->volume = val;
+	}
+	else if ( !str_cmp( arg3, "priority" ) ) {
+		int val = atoi( arg4 );
+		if ( val < 0 || val > 100 ) {
+			send_to_char( "Priority must be 0-100.\n\r", ch );
+			return;
+		}
+		ae->priority = val;
+	}
+	else if ( !str_cmp( arg3, "loops" ) ) {
+		ae->loops = atoi( arg4 );
+	}
+	else if ( !str_cmp( arg3, "media_type" ) ) {
+		if ( str_cmp( arg4, "sound" ) && str_cmp( arg4, "music" ) ) {
+			send_to_char( "Media type must be 'sound' or 'music'.\n\r", ch );
+			return;
+		}
+		free_string( ae->media_type );
+		ae->media_type = str_dup( arg4 );
+	}
+	else if ( !str_cmp( arg3, "tag" ) ) {
+		free_string( ae->tag );
+		ae->tag = str_dup( arg4 );
+	}
+	else if ( !str_cmp( arg3, "caption" ) ) {
+		free_string( ae->caption );
+		ae->caption = str_dup( arg4 );
+	}
+	else if ( !str_cmp( arg3, "use_key" ) ) {
+		if ( ae->use_key )
+			free_string( ae->use_key );
+		if ( !str_cmp( arg4, "none" ) || !str_cmp( arg4, "null" ) )
+			ae->use_key = NULL;
+		else
+			ae->use_key = str_dup( arg4 );
+	}
+	else if ( !str_cmp( arg3, "use_continue" ) ) {
+		if ( !str_cmp( arg4, "true" ) || !str_cmp( arg4, "1" ) || !str_cmp( arg4, "yes" ) )
+			ae->use_continue = TRUE;
+		else
+			ae->use_continue = FALSE;
+	}
+	else {
+		send_to_char( "Unknown field. Valid fields:\n\r", ch );
+		send_to_char( "  filename volume priority loops media_type tag caption use_key use_continue\n\r", ch );
+		return;
+	}
+
+	/* Save to database */
+	audio_config_save_entry( ae );
+
+	snprintf( buf, sizeof( buf ), "Audio config %s/%s %s set to: %s\n\r",
+		ae->category, ae->trigger_key, arg3, arg4 );
+	send_to_char( buf, ch );
 }

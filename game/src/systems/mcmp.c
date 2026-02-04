@@ -13,6 +13,7 @@
 #include <string.h>
 #include "gmcp.h"
 #include "mcmp.h"
+#include "../db/db_game.h"
 
 extern GAMECONFIG_DATA game_config;
 
@@ -277,9 +278,32 @@ static const char *sector_footstep_caption[] = {
  * exchanged", "Attacks miss".
  */
 void mcmp_combat_round( CHAR_DATA *ch, CHAR_DATA *victim, int hits, int misses, int total_dam ) {
+	AUDIO_ENTRY *ae;
+	const char *key;
+
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
+	/* Determine which combat sound to play */
+	if ( hits == 0 )
+		key = "combat_miss";
+	else if ( total_dam > 2000 )
+		key = "combat_heavy_hit";
+	else
+		key = "combat_light_hit";
+
+	/* Try database lookup first */
+	ae = audio_config_find( "combat", key );
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_COMBAT,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+		return;
+	}
+
+	/* Fallback to hard-coded defaults */
 	if ( hits == 0 ) {
 		mcmp_play( ch->desc, "combat/miss.mp3", MCMP_SOUND, MCMP_TAG_COMBAT,
 			30, 1, 30, NULL, FALSE, "Attacks miss" );
@@ -300,13 +324,33 @@ void mcmp_combat_round( CHAR_DATA *ch, CHAR_DATA *victim, int hits, int misses, 
  * with higher priority (90) to cut through any ongoing combat sounds.
  */
 void mcmp_combat_death( CHAR_DATA *ch, CHAR_DATA *victim ) {
+	AUDIO_ENTRY *ae;
+
 	if ( ch != NULL && ch->desc != NULL && mcmp_enabled( ch->desc ) ) {
-		mcmp_play( ch->desc, "combat/death.mp3", MCMP_SOUND, MCMP_TAG_COMBAT,
-			60, 1, 80, NULL, FALSE, "A death cry rings out" );
+		ae = audio_config_find( "combat", "combat_death" );
+		if ( ae != NULL ) {
+			mcmp_play( ch->desc, ae->filename,
+				ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+				ae->tag[0] ? ae->tag : MCMP_TAG_COMBAT,
+				ae->volume, ae->loops, ae->priority,
+				ae->use_key, ae->use_continue, ae->caption );
+		} else {
+			mcmp_play( ch->desc, "combat/death.mp3", MCMP_SOUND, MCMP_TAG_COMBAT,
+				60, 1, 80, NULL, FALSE, "A death cry rings out" );
+		}
 	}
 	if ( victim != NULL && victim->desc != NULL && mcmp_enabled( victim->desc ) ) {
-		mcmp_play( victim->desc, "ui/death.mp3", MCMP_SOUND, MCMP_TAG_UI,
-			60, 1, 90, NULL, FALSE, "You have died" );
+		ae = audio_config_find( "ui", "ui_death" );
+		if ( ae != NULL ) {
+			mcmp_play( victim->desc, ae->filename,
+				ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+				ae->tag[0] ? ae->tag : MCMP_TAG_UI,
+				ae->volume, ae->loops, ae->priority,
+				ae->use_key, ae->use_continue, ae->caption );
+		} else {
+			mcmp_play( victim->desc, "ui/death.mp3", MCMP_SOUND, MCMP_TAG_UI,
+				60, 1, 90, NULL, FALSE, "You have died" );
+		}
 	}
 }
 
@@ -315,33 +359,66 @@ void mcmp_combat_death( CHAR_DATA *ch, CHAR_DATA *victim ) {
  * so it doesn't override higher-priority death/victory sounds.
  */
 void mcmp_combat_start( CHAR_DATA *ch, CHAR_DATA *victim ) {
+	AUDIO_ENTRY *ae;
+
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
-	mcmp_play( ch->desc, "combat/engage.mp3", MCMP_SOUND, MCMP_TAG_COMBAT,
-		50, 1, 50, NULL, FALSE, "Combat begins" );
+	ae = audio_config_find( "combat", "combat_engage" );
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_COMBAT,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+	} else {
+		mcmp_play( ch->desc, "combat/engage.mp3", MCMP_SOUND, MCMP_TAG_COMBAT,
+			50, 1, 50, NULL, FALSE, "Combat begins" );
+	}
 }
 
 /*
  * Combat ends — last enemy killed
  */
 void mcmp_combat_end( CHAR_DATA *ch ) {
+	AUDIO_ENTRY *ae;
+
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
-	mcmp_play( ch->desc, "combat/victory.mp3", MCMP_SOUND, MCMP_TAG_COMBAT,
-		50, 1, 60, NULL, FALSE, "Victory" );
+	ae = audio_config_find( "combat", "combat_victory" );
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_COMBAT,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+	} else {
+		mcmp_play( ch->desc, "combat/victory.mp3", MCMP_SOUND, MCMP_TAG_COMBAT,
+			50, 1, 60, NULL, FALSE, "Victory" );
+	}
 }
 
 /*
  * Spell cast — generic spell sound
  */
 void mcmp_spell_cast( CHAR_DATA *ch, int sn ) {
+	AUDIO_ENTRY *ae;
+
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
-	mcmp_play( ch->desc, "specials/spell_cast.mp3", MCMP_SOUND, MCMP_TAG_SPELL,
-		40, 1, 40, NULL, FALSE, "A spell is cast" );
+	ae = audio_config_find( "spell", "spell_generic" );
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_SPELL,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+	} else {
+		mcmp_play( ch->desc, "specials/spell_cast.mp3", MCMP_SOUND, MCMP_TAG_SPELL,
+			40, 1, 40, NULL, FALSE, "A spell is cast" );
+	}
 }
 
 /*
@@ -352,12 +429,26 @@ void mcmp_spell_cast( CHAR_DATA *ch, int sn ) {
  * "Footsteps on stone", "Splashing through water", etc.
  */
 void mcmp_movement( CHAR_DATA *ch, int sector_to ) {
+	AUDIO_ENTRY *ae;
+
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
 	if ( sector_to < 0 || sector_to >= SECT_MAX )
 		return;
 
+	/* Try database lookup first */
+	ae = audio_footstep[sector_to];
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_MOVEMENT,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+		return;
+	}
+
+	/* Fallback to hard-coded defaults */
 	mcmp_play( ch->desc, sector_footstep[sector_to], MCMP_SOUND, MCMP_TAG_MOVEMENT,
 		25, 1, 10, NULL, FALSE, sector_footstep_caption[sector_to] );
 }
@@ -384,12 +475,26 @@ void mcmp_movement( CHAR_DATA *ch, int sector_to ) {
  * "Forest, birds and rustling", "City sounds", etc.
  */
 void mcmp_room_ambient( CHAR_DATA *ch, int sector_type ) {
+	AUDIO_ENTRY *ae;
+
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
 	if ( sector_type < 0 || sector_type >= SECT_MAX )
 		return;
 
+	/* Try database lookup first */
+	ae = audio_ambient[sector_type];
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_ENVIRONMENT,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+		return;
+	}
+
+	/* Fallback to hard-coded defaults */
 	mcmp_play( ch->desc, sector_ambient[sector_type], MCMP_MUSIC, MCMP_TAG_ENVIRONMENT,
 		20, -1, 10, "ambient", TRUE, sector_ambient_caption[sector_type] );
 }
@@ -405,6 +510,8 @@ void mcmp_room_ambient( CHAR_DATA *ch, int sector_type ) {
  * Priority 30 for atmospheric transitions, 40 for midnight (more prominent).
  */
 void mcmp_time_of_day( CHAR_DATA *ch, int hour ) {
+	AUDIO_ENTRY *ae;
+	char key[32];
 	const char *sound;
 	const char *caption;
 	int volume;
@@ -413,6 +520,21 @@ void mcmp_time_of_day( CHAR_DATA *ch, int hour ) {
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
+	/* Build trigger key from hour */
+	snprintf( key, sizeof( key ), "hour_%d", hour );
+
+	/* Try database lookup first */
+	ae = audio_config_find( "time", key );
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_ENVIRONMENT,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+		return;
+	}
+
+	/* Fallback to hard-coded defaults */
 	switch ( hour ) {
 	case 5:
 		sound   = "environment/dawn.mp3";
@@ -472,6 +594,9 @@ void mcmp_time_of_day( CHAR_DATA *ch, int hour ) {
  * "Thunder crashes".
  */
 void mcmp_weather_change( CHAR_DATA *ch, int sky_state ) {
+	AUDIO_ENTRY *ae;
+	const char *key;
+
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
@@ -479,7 +604,26 @@ void mcmp_weather_change( CHAR_DATA *ch, int sky_state ) {
 	case SKY_CLOUDLESS:
 		/* Clear skies — stop weather sounds */
 		mcmp_stop( ch->desc, NULL, NULL, NULL, "weather", TRUE, 3000 );
-		break;
+		return;
+	case SKY_CLOUDY:    key = "SKY_CLOUDY";    break;
+	case SKY_RAINING:   key = "SKY_RAINING";   break;
+	case SKY_LIGHTNING: key = "SKY_LIGHTNING"; break;
+	default: return;
+	}
+
+	/* Try database lookup first */
+	ae = audio_config_find( "weather", key );
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_WEATHER,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+		return;
+	}
+
+	/* Fallback to hard-coded defaults */
+	switch ( sky_state ) {
 	case SKY_CLOUDY:
 		mcmp_play( ch->desc, "weather/wind.mp3", MCMP_MUSIC, MCMP_TAG_WEATHER,
 			15, -1, 20, "weather", FALSE, "Wind picks up" );
@@ -505,12 +649,34 @@ void mcmp_weather_change( CHAR_DATA *ch, int sky_state ) {
  * Low priority (20) ensures these don't interrupt combat or UI sounds.
  */
 void mcmp_channel_notify( CHAR_DATA *ch, int channel_type ) {
+	AUDIO_ENTRY *ae;
+	const char *key;
 	const char *sound;
 	const char *caption;
 
 	if ( ch == NULL || ch->desc == NULL || !mcmp_enabled( ch->desc ) )
 		return;
 
+	switch ( channel_type ) {
+	case CHANNEL_TELL:    key = "CHANNEL_TELL";    break;
+	case CHANNEL_YELL:    key = "CHANNEL_YELL";    break;
+	case CHANNEL_IMMTALK: key = "CHANNEL_IMMTALK"; break;
+	case CHANNEL_CHAT:
+	default:              key = "CHANNEL_CHAT";    break;
+	}
+
+	/* Try database lookup first */
+	ae = audio_config_find( "channel", key );
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_CHANNEL,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+		return;
+	}
+
+	/* Fallback to hard-coded defaults */
 	switch ( channel_type ) {
 	case CHANNEL_TELL:
 		sound = "channels/tell.mp3";
@@ -542,6 +708,8 @@ void mcmp_channel_notify( CHAR_DATA *ch, int channel_type ) {
  * Captions are short imperative labels: "Welcome", "Level up", etc.
  */
 void mcmp_ui_event( CHAR_DATA *ch, const char *event ) {
+	AUDIO_ENTRY *ae;
+	char key[32];
 	const char *sound;
 	const char *caption;
 
@@ -551,6 +719,21 @@ void mcmp_ui_event( CHAR_DATA *ch, const char *event ) {
 	if ( event == NULL )
 		return;
 
+	/* Build trigger key from event name */
+	snprintf( key, sizeof( key ), "ui_%s", event );
+
+	/* Try database lookup first */
+	ae = audio_config_find( "ui", key );
+	if ( ae != NULL ) {
+		mcmp_play( ch->desc, ae->filename,
+			ae->media_type[0] == 'm' ? MCMP_MUSIC : MCMP_SOUND,
+			ae->tag[0] ? ae->tag : MCMP_TAG_UI,
+			ae->volume, ae->loops, ae->priority,
+			ae->use_key, ae->use_continue, ae->caption );
+		return;
+	}
+
+	/* Fallback to hard-coded defaults */
 	if ( !strcmp( event, "login" ) ) {
 		sound = "ui/login.mp3";
 		caption = "Welcome";

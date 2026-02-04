@@ -728,3 +728,90 @@ class PlayerRepository:
         )
         self.conn.commit()
         return cursor.rowcount > 0
+
+
+class AudioConfigRepository(BaseRepository):
+    """Repository for audio_config table - MCMP audio file mappings."""
+
+    CATEGORIES = [
+        'ambient', 'footstep', 'combat', 'weather',
+        'channel', 'time', 'ui', 'spell', 'environment'
+    ]
+
+    MEDIA_TYPES = ['sound', 'music']
+
+    TAGS = [
+        'combat', 'environment', 'weather',
+        'channel', 'ui', 'movement', 'spell'
+    ]
+
+    # Sector trigger keys for ambient/footstep categories
+    SECTOR_KEYS = [
+        'SECT_INSIDE', 'SECT_CITY', 'SECT_FIELD', 'SECT_FOREST',
+        'SECT_HILLS', 'SECT_MOUNTAIN', 'SECT_WATER_SWIM',
+        'SECT_WATER_NOSWIM', 'SECT_UNUSED', 'SECT_AIR', 'SECT_DESERT'
+    ]
+
+    WEATHER_KEYS = ['SKY_CLOUDY', 'SKY_RAINING', 'SKY_LIGHTNING']
+
+    CHANNEL_KEYS = ['CHANNEL_TELL', 'CHANNEL_YELL', 'CHANNEL_IMMTALK', 'CHANNEL_CHAT']
+
+    TIME_KEYS = ['hour_0', 'hour_5', 'hour_6', 'hour_19', 'hour_20']
+
+    COMBAT_KEYS = ['combat_miss', 'combat_light_hit', 'combat_heavy_hit',
+                   'combat_death', 'combat_engage', 'combat_victory']
+
+    UI_KEYS = ['ui_login', 'ui_levelup', 'ui_death', 'ui_achievement']
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'audio_config', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all audio config entries ordered by category and trigger_key."""
+        return super().list_all(order_by or 'category, trigger_key')
+
+    def get_by_category(self, category: str) -> List[Dict]:
+        """Get all entries for a specific category."""
+        rows = self.conn.execute(
+            "SELECT * FROM audio_config WHERE category = ? ORDER BY trigger_key",
+            (category,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def find_by_trigger(self, category: str, trigger_key: str) -> Optional[Dict]:
+        """Find a specific entry by category and trigger key."""
+        row = self.conn.execute(
+            "SELECT * FROM audio_config WHERE category = ? AND trigger_key = ?",
+            (category, trigger_key)
+        ).fetchone()
+        return dict(row) if row else None
+
+    def get_categories(self) -> List[str]:
+        """Get list of categories that have entries."""
+        rows = self.conn.execute(
+            "SELECT DISTINCT category FROM audio_config ORDER BY category"
+        ).fetchall()
+        return [row['category'] for row in rows]
+
+    def get_trigger_keys_for_category(self, category: str) -> List[str]:
+        """Get suggested trigger keys based on category."""
+        if category in ('ambient', 'footstep'):
+            return self.SECTOR_KEYS
+        elif category == 'weather':
+            return self.WEATHER_KEYS
+        elif category == 'channel':
+            return self.CHANNEL_KEYS
+        elif category == 'time':
+            return self.TIME_KEYS
+        elif category == 'combat':
+            return self.COMBAT_KEYS
+        elif category == 'ui':
+            return self.UI_KEYS
+        return []  # Free-form for other categories
+
+    def search(self, term: str, columns: Optional[List[str]] = None) -> List[Dict]:
+        """Search audio entries."""
+        return super().search(
+            term,
+            columns or ['category', 'trigger_key', 'filename', 'caption']
+        )

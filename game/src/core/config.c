@@ -23,6 +23,9 @@ void load_gameconfig() {
 
 	/* Load from game.db (overwrites defaults for any keys present) */
 	db_game_load_gameconfig();
+
+	/* Load audio config from game.db */
+	db_game_load_audio_config();
 }
 
 void save_gameconfig() {

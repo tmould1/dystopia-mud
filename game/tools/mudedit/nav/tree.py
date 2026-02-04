@@ -115,6 +115,7 @@ class NavigationTree(ttk.Frame):
                 ('gameconfig', 'Configuration'),
                 ('balance_config', 'Balance Config'),
                 ('ability_config', 'Ability Config'),
+                ('audio_config', 'Audio Config'),
                 ('kingdoms', 'Kingdoms'),
                 ('topboard', 'Top Board'),
                 ('leaderboard', 'Leaderboard'),

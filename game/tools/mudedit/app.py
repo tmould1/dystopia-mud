@@ -14,6 +14,7 @@ from .db.repository import (
     HelpRepository, MobileRepository, ObjectRepository, RoomRepository,
     ResetRepository, ShopRepository, AreaRepository,
     GameConfigRepository, BalanceConfigRepository, AbilityConfigRepository,
+    AudioConfigRepository,
     KingdomsRepository, BansRepository, DisabledCommandsRepository,
     TopBoardRepository, LeaderboardRepository, NotesRepository, BugsRepository,
     PlayerRepository
@@ -22,7 +23,7 @@ from .nav.tree import NavigationTree
 from .panels import (
     HelpEditorPanel, MobileEditorPanel, ObjectEditorPanel, RoomEditorPanel,
     ResetEditorPanel, AreaInfoPanel, ShopEditorPanel,
-    GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel,
+    GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel, AudioConfigPanel,
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, PlayerEditorPanel
 )
@@ -310,6 +311,14 @@ class MudEditorApp:
                     on_status=self._set_status
                 )
 
+            elif entity_type == 'audio_config':
+                repository = AudioConfigRepository(conn)
+                return AudioConfigPanel(
+                    self.notebook,
+                    repository,
+                    on_status=self._set_status
+                )
+
             elif entity_type == 'kingdoms':
                 repository = KingdomsRepository(conn)
                 return KingdomsPanel(
@@ -406,6 +415,7 @@ class MudEditorApp:
                 'gameconfig': 'Configuration',
                 'balance_config': 'Balance Config',
                 'ability_config': 'Ability Config',
+                'audio_config': 'Audio Config',
                 'kingdoms': 'Kingdoms',
                 'topboard': 'Leaderboards',
                 'leaderboard': 'Leaderboards',

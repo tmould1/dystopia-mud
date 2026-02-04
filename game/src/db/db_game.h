@@ -71,4 +71,26 @@ void db_game_add_super_admin( const char *name );
 void db_game_remove_super_admin( const char *name );
 void db_game_list_super_admins( CHAR_DATA *ch );
 
+/* Audio config (game.db) - MCMP audio file mappings */
+typedef struct audio_entry {
+	char   *category;      /* "ambient", "footstep", "combat", etc. */
+	char   *trigger_key;   /* "SECT_FOREST", "combat_miss", etc. */
+	char   *filename;      /* "ambient/forest.mp3" */
+	int    volume;         /* 1-100, default 50 */
+	int    priority;       /* 1-100, default 50 */
+	int    loops;          /* 1 = once, -1 = infinite */
+	char   *media_type;    /* "sound" or "music" */
+	char   *tag;           /* "combat", "environment", etc. */
+	char   *caption;       /* accessibility caption */
+	char   *use_key;       /* binding key (e.g., "ambient", "weather") */
+	bool   use_continue;   /* TRUE = don't restart if same file playing */
+} AUDIO_ENTRY;
+
+void db_game_load_audio_config( void );
+AUDIO_ENTRY *audio_config_find( const char *category, const char *trigger_key );
+
+/* Sector-indexed audio lookup arrays (for fast ambient/footstep access) */
+extern AUDIO_ENTRY *audio_ambient[SECT_MAX];
+extern AUDIO_ENTRY *audio_footstep[SECT_MAX];
+
 #endif /* DB_GAME_H */
