@@ -199,8 +199,45 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 			i = buf2;
 			break;
 		case 'R':
-			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) ) ) {
+			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) || IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) ) {
 				snprintf( buf2, sizeof( buf2 ), "#r%d#n", ch->rage );
+			} else
+				snprintf( buf2, sizeof( buf2 ), "0" );
+			i = buf2;
+			break;
+		case 'G':
+			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch->gnosis[GMAXIMUM] > 0 ) {
+				snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( ch->gnosis[GCURRENT], ch->gnosis[GMAXIMUM] ), ch->gnosis[GCURRENT] );
+			} else
+				snprintf( buf2, sizeof( buf2 ), "0" );
+			i = buf2;
+			break;
+		case 'i':
+			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MONK ) && ch->chi[MAXIMUM] > 0 ) {
+				snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( ch->chi[CURRENT], ch->chi[MAXIMUM] ), ch->chi[CURRENT] );
+			} else
+				snprintf( buf2, sizeof( buf2 ), "0" );
+			i = buf2;
+			break;
+		case 'I':
+			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MONK ) ) {
+				snprintf( buf2, sizeof( buf2 ), "#C%d#n", ch->chi[MAXIMUM] );
+			} else
+				snprintf( buf2, sizeof( buf2 ), "0" );
+			i = buf2;
+			break;
+		case 'd':
+			if ( !IS_NPC( ch ) && ch->pcdata != NULL &&
+				( IS_CLASS( ch, CLASS_DEMON ) || IS_CLASS( ch, CLASS_DROW ) || IS_CLASS( ch, CLASS_TANARRI ) || IS_CLASS( ch, CLASS_DROID ) ) ) {
+				snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( ch->pcdata->stats[8], ch->pcdata->stats[9] > 0 ? ch->pcdata->stats[9] : ch->pcdata->stats[8] ), ch->pcdata->stats[8] );
+			} else
+				snprintf( buf2, sizeof( buf2 ), "0" );
+			i = buf2;
+			break;
+		case 'D':
+			if ( !IS_NPC( ch ) && ch->pcdata != NULL &&
+				( IS_CLASS( ch, CLASS_DEMON ) || IS_CLASS( ch, CLASS_DROW ) ) ) {
+				snprintf( buf2, sizeof( buf2 ), "#C%d#n", ch->pcdata->stats[9] );
 			} else
 				snprintf( buf2, sizeof( buf2 ), "0" );
 			i = buf2;

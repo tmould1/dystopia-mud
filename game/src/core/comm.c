@@ -1544,8 +1544,39 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 			char move_str[MAX_INPUT_LENGTH];
 			char exp_str[MAX_INPUT_LENGTH];
 			char tmp_str[MAX_INPUT_LENGTH];
+			char resource_str[MAX_INPUT_LENGTH];
 
 			ch = d->character;
+
+			/* Build class-specific resource string */
+			resource_str[0] = '\0';
+			if ( !IS_NPC( ch ) && ch->pcdata != NULL ) {
+				if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
+					if ( ch->gnosis[GMAXIMUM] > 0 ) {
+						snprintf( resource_str, sizeof( resource_str ), " [#rR:%d#n #CG:%d#n]",
+							ch->rage, ch->gnosis[GCURRENT] );
+					} else {
+						snprintf( resource_str, sizeof( resource_str ), " [#rR:%d#n]", ch->rage );
+					}
+				} else if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+					snprintf( resource_str, sizeof( resource_str ), " [#rR:%d#n #rB:%d#n]",
+						ch->rage, ch->pcdata->condition[COND_THIRST] );
+				} else if ( IS_CLASS( ch, CLASS_NINJA ) ) {
+					snprintf( resource_str, sizeof( resource_str ), " [#rR:%d#n]", ch->rage );
+				} else if ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) {
+					snprintf( resource_str, sizeof( resource_str ), " [#rRes:%d#n]", ch->rage );
+				} else if ( IS_CLASS( ch, CLASS_MONK ) ) {
+					snprintf( resource_str, sizeof( resource_str ), " [#CC:%d/%d#n]",
+						ch->chi[CURRENT], ch->chi[MAXIMUM] );
+				} else if ( IS_CLASS( ch, CLASS_DEMON ) || IS_CLASS( ch, CLASS_DROW ) ) {
+					snprintf( resource_str, sizeof( resource_str ), " [#CP:%d/%d#n]",
+						ch->pcdata->stats[8], ch->pcdata->stats[9] );
+				} else if ( IS_CLASS( ch, CLASS_TANARRI ) || IS_CLASS( ch, CLASS_DROID ) ) {
+					snprintf( resource_str, sizeof( resource_str ), " [#CP:%d#n]",
+						ch->pcdata->stats[8] );
+				}
+			}
+
 			if ( IS_HEAD( ch, LOST_HEAD ) || IS_EXTRA( ch, EXTRA_OSWITCH ) ) {
 				add_commas_to_number( ch->exp, tmp_str, sizeof( tmp_str ) );
 				snprintf( exp_str, sizeof( exp_str ), "%s%s#n", col_scale_code( ch->exp, 10000000 ), tmp_str );
@@ -1568,15 +1599,15 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 				snprintf( hit_str, sizeof( hit_str ), "%s%d#n", col_scale_code( ch->hit, ch->max_hit ), ch->hit );
 				snprintf( mana_str, sizeof( mana_str ), "%s%d#n", col_scale_code( ch->mana, ch->max_mana ), ch->mana );
 				snprintf( move_str, sizeof( move_str ), "%s%d#n", col_scale_code( ch->move, ch->max_move ), ch->move );
-				snprintf( buf, sizeof( buf ), "#7<[%s] [%sH %sM %sV]> ", cond,
-					hit_str, mana_str, move_str );
+				snprintf( buf, sizeof( buf ), "#7<[%s] [%sH %sM %sV]%s>#n ", cond,
+					hit_str, mana_str, move_str, resource_str );
 			} else {
 				snprintf( hit_str, sizeof( hit_str ), "%s%d#n", col_scale_code( ch->hit, ch->max_hit ), ch->hit );
 				snprintf( mana_str, sizeof( mana_str ), "%s%d#n", col_scale_code( ch->mana, ch->max_mana ), ch->mana );
 				snprintf( move_str, sizeof( move_str ), "%s%d#n", col_scale_code( ch->move, ch->max_move ), ch->move );
 				add_commas_to_number( ch->exp, tmp_str, sizeof( tmp_str ) );
 				snprintf( exp_str, sizeof( exp_str ), "%s%s#n", col_scale_code( ch->exp, 10000000 ), tmp_str );
-				snprintf( buf, sizeof( buf ), "#7<[%s] [%sH %sM %sV]> ", exp_str, hit_str, mana_str, move_str );
+				snprintf( buf, sizeof( buf ), "#7<[%s] [%sH %sM %sV]%s>#n ", exp_str, hit_str, mana_str, move_str, resource_str );
 			}
 			write_to_buffer( d, buf, 0 );
 		}
