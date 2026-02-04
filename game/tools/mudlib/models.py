@@ -47,6 +47,8 @@ CLASS_TABLE = {
     8192: 'Spider Droid',
     16384: 'Dirgesinger',
     32768: 'Siren',
+    65536: 'Psion',
+    131072: 'Mindflayer',
 }
 
 # Sector types from merc.h
