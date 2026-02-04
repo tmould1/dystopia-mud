@@ -625,8 +625,16 @@ void do_mastery( CHAR_DATA *ch, char *argument ) {
 		vnum = 33213;
 	else if ( IS_CLASS( ch, CLASS_LICH ) )
 		vnum = 33233;
+	else if ( IS_CLASS( ch, CLASS_DIRGESINGER ) )
+		vnum = 33333;
+	else if ( IS_CLASS( ch, CLASS_SIREN ) )
+		vnum = 33353;
+	else if ( IS_CLASS( ch, CLASS_PSION ) )
+		vnum = 33293;
+	else if ( IS_CLASS( ch, CLASS_MINDFLAYER ) )
+		vnum = 33313;
 	else {
-		send_to_char( "Your class mastery is not done yet, please notify Jobo that you want him to make it.\n\r", ch );
+		send_to_char( "Your class mastery is not done yet, write a note on the idea board.\n\r", ch );
 		return;
 	}
 	if ( ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {

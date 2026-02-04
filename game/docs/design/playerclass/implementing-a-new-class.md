@@ -78,10 +78,18 @@ This order minimizes back-and-forth and catches integration issues early.
 19. **Write the design doc** - Document everything in `game/docs/design/playerclass/classes/<class>.md`.
 20. **Update overview docs** - Add to `overview.md` and `README.md`.
 
+### Phase 5b: Mastery Item
+
+21. **Create mastery item** - Add a unique mastery reward item to `classeq.db`:
+    - Pick a vnum after your class armor range (e.g., if armor is 33320-33332, use 33333)
+    - Design stats that match your class theme (mana-focused for casters, HP/combat for melee)
+    - Use your class color scheme in the short description
+22. **Add mastery vnum to `jobo_act.c`** - In `do_mastery()`, add an `else if (IS_CLASS(ch, CLASS_<NAME>))` case with your item vnum. Ensure the vnum falls within your class's equipment restriction range in `handler.c`.
+
 ### Phase 6: Upgrade Class (if applicable)
 
-21. **Add upgrade path in `upgrade.c`** - Map base class to upgrade class in the upgrade switch, and add to `is_upgrade()`.
-22. **Add to `selfclass` in `wizutil.c`** - Base classes need a selection entry; upgrade classes do not.
+23. **Add upgrade path in `upgrade.c`** - Map base class to upgrade class in the upgrade switch, and add to `is_upgrade()`.
+24. **Add to `selfclass` in `wizutil.c`** - Base classes need a selection entry; upgrade classes do not.
 
 ## Common Pitfalls
 
@@ -152,6 +160,8 @@ update.c        +1 line   (tick update call)
 fight.c         +1-3 blocks (damcap, defense, extra attacks)
 db_sql.h        +N lines  (acfg defaults)
 handler.c       +1 block  (equipment restrictions)
+jobo_act.c      +2 lines  (mastery item vnum mapping)
+classeq.db      +1 entry  (mastery item definition + affects)
 base_help.db    +1 entry  (class help)
 ```
 
