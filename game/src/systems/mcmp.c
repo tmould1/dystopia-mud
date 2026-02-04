@@ -25,6 +25,10 @@ bool mcmp_enabled( DESCRIPTOR_DATA *d ) {
 		return FALSE;
 	if ( !( d->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) )
 		return FALSE;
+	/* Check player preference - respect their config setting */
+	if ( d->character && !IS_NPC( d->character ) &&
+	     !IS_SET( d->character->act, PLR_PREFER_MCMP ) )
+		return FALSE;
 	return TRUE;
 }
 
