@@ -25,6 +25,7 @@
 #endif
 #include "merc.h"
 #include "mcmp.h"
+#include "../core/ability_config.h"
 
 /*
  * Local functions.
@@ -368,11 +369,13 @@ void char_update( void ) {
 			act( "$n's flesh smolders in the sunlight!", ch, NULL, NULL, TO_ROOM );
 			send_to_char( "Your flesh smolders in the sunlight!\n\r", ch );
 
-			/* This one's to keep Zarkas quiet ;) */
+			/* Sun damage values are configurable via ability config */
 			if ( IS_POLYAFF( ch, POLY_SERPENT ) )
-				ch->hit = ch->hit - number_range( 2, 4 );
+				ch->hit = ch->hit - acfg( "vampire.sun.damage_serpent" );
 			else
-				ch->hit = ch->hit - number_range( 5, 10 );
+				ch->hit = ch->hit - number_range(
+					acfg( "vampire.sun.damage_min" ),
+					acfg( "vampire.sun.damage_max" ) );
 			update_pos( ch );
 		}
 
@@ -577,6 +580,11 @@ void weather_update( void ) {
 
 	buf[0] = '\0';
 
+	/* Use time_scale to slow down day cycle (default 5 = ~60 min day) */
+	if ( ++time_info.tick < balance.time_scale )
+		goto weather_change;
+	time_info.tick = 0;
+
 	switch ( ++time_info.hour ) {
 	case 5:
 		weather_info.sunlight = SUN_LIGHT;
@@ -678,6 +686,7 @@ void weather_update( void ) {
 	/*
 	 * Weather change.
 	 */
+weather_change:
 	if ( time_info.month >= 9 && time_info.month <= 16 )
 		diff = weather_info.mmhg > 985 ? -2 : 2;
 	else

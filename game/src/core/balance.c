@@ -19,6 +19,9 @@ typedef struct balance_entry {
 } balance_entry_t;
 
 balance_entry_t balance_map[] = {
+	/* Global settings */
+	{ "time_scale",               &balance.time_scale },
+
 	/* Global combat */
 	{ "base_damcap",              &balance.base_damcap },
 	{ "builder_damcap",           &balance.builder_damcap },
@@ -142,6 +145,8 @@ balance_entry_t balance_map[] = {
 
 void load_balance( void ) {
 	/* Set defaults */
+	balance.time_scale              = 5;	/* 5 ticks/hour = ~60 min day cycle */
+
 	balance.base_damcap             = 1000;
 	balance.builder_damcap          = 30000;
 	balance.pvp_damage_divisor      = 2;

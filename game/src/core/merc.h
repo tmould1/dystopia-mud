@@ -301,6 +301,7 @@ struct time_info_data {
 	int day;
 	int month;
 	int year;
+	int tick;	/* Sub-hour tick counter for time_scale */
 };
 
 struct weather_data {
@@ -351,6 +352,9 @@ typedef struct config_data {
 } GAMECONFIG_DATA;
 
 typedef struct balance_data {
+	/* Global settings */
+	int   time_scale;				/* Ticks per MUD hour (5 = ~60 min day) */
+
 	/* Global combat */
 	int   base_damcap;
 	int   builder_damcap;

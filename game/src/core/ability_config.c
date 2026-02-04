@@ -26,6 +26,12 @@ static acfg_entry_t acfg_table[] = {
 	/* ================================================================
 	 * VAMPIRE  (vamp.c)
 	 * ================================================================ */
+
+	/* Vampire sun damage (update.c char_update) */
+	{ "vampire.sun.damage_min",                    1,        1 },
+	{ "vampire.sun.damage_max",                    2,        2 },
+	{ "vampire.sun.damage_serpent",                1,        1 },
+
 	{ "vampire.vampirearmor.practice_cost",       60,       60 },
 	{ "vampire.preserve.level_req",                2,        2 },
 	{ "vampire.spiritguard.level_req",             4,        4 },

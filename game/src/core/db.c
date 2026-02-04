@@ -387,6 +387,7 @@ void boot_db( bool fCopyOver ) {
 		lmonth = lday / 35;
 		time_info.month = lmonth % 17;
 		time_info.year = lmonth / 17;
+		time_info.tick = 0;
 
 		if ( time_info.hour < 5 )
 			weather_info.sunlight = SUN_DARK;
