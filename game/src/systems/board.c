@@ -22,6 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "mxp.h"
 #include "../db/db_game.h"
 
 /*
@@ -78,6 +79,50 @@ long last_note_stamp = 0; /* To generate unique timestamps on notes */
 
 static bool next_board( CHAR_DATA *ch );
 int board_number( const BOARD_DATA *board );
+
+/*
+ * Format a board entry with MXP clickable link.
+ * Click switches to the board and shows note list.
+ * Returns display_text unchanged if MXP not enabled.
+ */
+static char *mxp_board_link( CHAR_DATA *ch, int board_num, char *display_text, const char *board_desc ) {
+	static char buf[MAX_STRING_LENGTH];
+	char escaped_desc[256];
+
+	if ( ch->desc == NULL || !ch->desc->mxp_enabled )
+		return display_text;
+
+	mxp_escape_string( escaped_desc, board_desc, sizeof( escaped_desc ) );
+
+	snprintf( buf, sizeof( buf ),
+		MXP_SECURE_LINE "<SEND href=\"board %d\" hint=\"%s\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED,
+		board_num, escaped_desc, display_text );
+
+	return buf;
+}
+
+/*
+ * Format a note entry with MXP clickable link.
+ * Click reads the specified note.
+ * Returns display_text unchanged if MXP not enabled.
+ */
+static char *mxp_note_link( CHAR_DATA *ch, int note_num, char *display_text, const char *author, const char *subject ) {
+	static char buf[MAX_STRING_LENGTH];
+	char hint[384];
+	char escaped_hint[512];
+
+	if ( ch->desc == NULL || !ch->desc->mxp_enabled )
+		return display_text;
+
+	snprintf( hint, sizeof( hint ), "Author: %s - %s", author, subject );
+	mxp_escape_string( escaped_hint, hint, sizeof( escaped_hint ) );
+
+	snprintf( buf, sizeof( buf ),
+		MXP_SECURE_LINE "<SEND href=\"note read %d\" hint=\"%s\">" MXP_LOCK_LOCKED "%s" MXP_SECURE_LINE "</SEND>" MXP_LOCK_LOCKED,
+		note_num, escaped_hint, display_text );
+
+	return buf;
+}
 
 /* recycle a note */
 void free_note( NOTE_DATA *note ) {
@@ -500,12 +545,15 @@ static void do_nlist( CHAR_DATA *ch, char *argument ) {
 	for ( p = ch->pcdata->board->note_first; p; p = p->next ) {
 		num++;
 		if ( is_note_to( ch, p ) ) {
+			char row_text[256];
+
 			has_shown++; /* note that we want to see X VISIBLE note, not just last X */
 			if ( !show || ( ( count - show ) < has_shown ) ) {
-				sprintf( buf, BOLD "%3d" NO_COLOR ">" BLUE BOLD "%c" NO_COLOR YELLOW BOLD "%-13s" NO_COLOR YELLOW " %s" NO_COLOR " \n\r",
+				sprintf( row_text, BOLD "%3d" NO_COLOR ">" BLUE BOLD "%c" NO_COLOR YELLOW BOLD "%-13s" NO_COLOR YELLOW " %s" NO_COLOR,
 					num,
 					last_note < p->date_stamp ? '*' : ' ',
 					p->sender, p->subject );
+				sprintf( buf, "%s \n\r", mxp_note_link( ch, num, row_text, p->sender, p->subject ) );
 				send_to_char( buf, ch );
 			}
 		}
@@ -565,7 +613,7 @@ void do_note( CHAR_DATA *ch, char *argument ) {
 	board personal or board 4 */
 void do_board( CHAR_DATA *ch, char *argument ) {
 	int i, count, number;
-	char buf[200];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) )
 		return;
@@ -573,6 +621,7 @@ void do_board( CHAR_DATA *ch, char *argument ) {
 	if ( !argument[0] ) /* show boards */
 	{
 		int unread;
+		char row_text[256];
 
 		count = 1;
 		send_to_char( "\n\r", ch );
@@ -580,9 +629,10 @@ void do_board( CHAR_DATA *ch, char *argument ) {
 		for ( i = 0; i < MAX_BOARD; i++ ) {
 			unread = unread_notes( ch, &boards[i] ); /* how many unread notes? */
 			if ( unread != BOARD_NOACCESS ) {		 /* watch out for the non-portable &%c !!! */
-				sprintf( buf, BOLD "%2d" NO_COLOR "> " GREEN BOLD "%12s" NO_COLOR " [%4d" NO_COLOR "] " YELLOW "%s" NO_COLOR "\n\r",
+				sprintf( row_text, BOLD "%2d" NO_COLOR "> " GREEN BOLD "%12s" NO_COLOR " [%4d" NO_COLOR "] " YELLOW "%s" NO_COLOR,
 					count, boards[i].short_name,
 					unread, boards[i].long_name );
+				sprintf( buf, "%s\n\r", mxp_board_link( ch, count, row_text, boards[i].long_name ) );
 				send_to_char( buf, ch );
 				count++;
 			} /* if has access */
@@ -621,6 +671,7 @@ void do_board( CHAR_DATA *ch, char *argument ) {
 					? "You can only read here"
 					: "You can both read and write here" );
 			send_to_char( buf, ch );
+			do_nlist( ch, "" ); /* automatically show notes after switching */
 		} else /* so such board */
 			send_to_char( "No such board.\n\r", ch );
 
@@ -650,6 +701,7 @@ void do_board( CHAR_DATA *ch, char *argument ) {
 			? "You can only read here"
 			: "You can both read and write here" );
 	send_to_char( buf, ch );
+	do_nlist( ch, "" ); /* automatically show notes after switching */
 }
 
 /* Send a note to someone on the personal board */
