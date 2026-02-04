@@ -483,6 +483,7 @@ void boot_db( bool fCopyOver ) {
 		load_gameconfig();
 		load_balance();
 		load_ability_config();
+		db_game_load_class_display();
 		db_game_close_boot_connections();
 	}
 

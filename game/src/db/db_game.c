@@ -49,6 +49,16 @@ typedef struct pretitle_entry {
 static PRETITLE_ENTRY *pretitle_entries = NULL;
 static int pretitle_count = 0;
 
+/* In-memory cache for class display config */
+#define MAX_CACHED_BRACKETS     32
+#define MAX_CACHED_GENERATIONS  256
+
+static CLASS_BRACKET bracket_cache[MAX_CACHED_BRACKETS];
+static int bracket_count = 0;
+
+static CLASS_GENERATION gen_cache[MAX_CACHED_GENERATIONS];
+static int gen_count = 0;
+
 /* Schema for help.db */
 static const char *HELP_SCHEMA_SQL =
 	"CREATE TABLE IF NOT EXISTS helps ("
@@ -160,7 +170,23 @@ static const char *GAME_SCHEMA_SQL =
 	"  pretitle      TEXT NOT NULL,"
 	"  set_by        TEXT NOT NULL,"
 	"  set_date      INTEGER NOT NULL"
-	");";
+	");"
+
+	"CREATE TABLE IF NOT EXISTS class_brackets ("
+	"  class_id      INTEGER PRIMARY KEY,"
+	"  class_name    TEXT NOT NULL,"
+	"  open_bracket  TEXT NOT NULL,"
+	"  close_bracket TEXT NOT NULL"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS class_generations ("
+	"  id            INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  class_id      INTEGER NOT NULL,"
+	"  generation    INTEGER NOT NULL,"
+	"  title         TEXT NOT NULL,"
+	"  UNIQUE(class_id, generation)"
+	");"
+	"CREATE INDEX IF NOT EXISTS idx_class_gen ON class_generations(class_id, generation);";
 
 
 /*
@@ -2008,4 +2034,344 @@ void db_game_list_pretitles( CHAR_DATA *ch ) {
 
 	snprintf( buf, sizeof( buf ), "#wTotal: %d#n\n\r", pretitle_count );
 	send_to_char( buf, ch );
+}
+
+
+/*
+ * Class display config (game.db)
+ * Brackets and generation names for the who list.
+ */
+
+/* Insert default class display entries if tables are empty */
+static void class_display_insert_defaults( void ) {
+	sqlite3_stmt *count_stmt, *br_stmt, *gen_stmt;
+	int count = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Check if brackets table already has entries */
+	if ( sqlite3_prepare_v2( game_db, "SELECT COUNT(*) FROM class_brackets", -1, &count_stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( count_stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( count_stmt, 0 );
+		sqlite3_finalize( count_stmt );
+	}
+
+	if ( count > 0 )
+		return;  /* Already has data */
+
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_brackets (class_id, class_name, open_bracket, close_bracket) VALUES (?,?,?,?)",
+			-1, &br_stmt, NULL ) != SQLITE_OK )
+		return;
+
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_generations (class_id, generation, title) VALUES (?,?,?)",
+			-1, &gen_stmt, NULL ) != SQLITE_OK ) {
+		sqlite3_finalize( br_stmt );
+		return;
+	}
+
+	db_begin( game_db );
+
+#define INSERT_BRACKET( cid, cname, openb, closeb ) \
+	sqlite3_reset( br_stmt ); \
+	sqlite3_bind_int( br_stmt, 1, cid ); \
+	sqlite3_bind_text( br_stmt, 2, cname, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( br_stmt, 3, openb, -1, SQLITE_STATIC ); \
+	sqlite3_bind_text( br_stmt, 4, closeb, -1, SQLITE_STATIC ); \
+	sqlite3_step( br_stmt )
+
+#define INSERT_GEN( cid, gen, title ) \
+	sqlite3_reset( gen_stmt ); \
+	sqlite3_bind_int( gen_stmt, 1, cid ); \
+	sqlite3_bind_int( gen_stmt, 2, gen ); \
+	sqlite3_bind_text( gen_stmt, 3, title, -1, SQLITE_STATIC ); \
+	sqlite3_step( gen_stmt )
+
+	/* Brackets - CLASS_DEMON=1, CLASS_MAGE=2, CLASS_WEREWOLF=4, CLASS_VAMPIRE=8, etc. */
+	INSERT_BRACKET( 1,      "Demon",         "#0[#n",            "#0]#n" );
+	INSERT_BRACKET( 2,      "Mage",          "{{",               "}}" );
+	INSERT_BRACKET( 4,      "Werewolf",      "#y((#n",           "#y))#n" );
+	INSERT_BRACKET( 8,      "Vampire",       "#R<<#n",           "#R>>#n" );
+	INSERT_BRACKET( 16,     "Samurai",       "#C-=#n",           "#C=-#n" );
+	INSERT_BRACKET( 32,     "Drow",          "#P.o0",            "#P0o.#n" );
+	INSERT_BRACKET( 64,     "Monk",          "#0.x[#n",          "#0]x.#n" );
+	INSERT_BRACKET( 128,    "Ninja",         "#C***#n",          "#C***#n" );
+	INSERT_BRACKET( 256,    "Lich",          "#G>*<#n",          "#G>*<#n" );
+	INSERT_BRACKET( 512,    "Shapeshifter",  "#0[#P*#0]#n",      "#0[#P*#0]#n" );
+	INSERT_BRACKET( 1024,   "Tanarri",       "#y{#n",            "#y}#n" );
+	INSERT_BRACKET( 2048,   "Angel",         "#y.x#0[#n",        "#0]#yx.#n" );
+	INSERT_BRACKET( 4096,   "Undead Knight", "#0|[#n",           "#0]|#n" );
+	INSERT_BRACKET( 8192,   "Spider Droid",  "#p{#0-#p}#n",      "#p{#0-#p}#n" );
+	INSERT_BRACKET( 16384,  "Dirgesinger",   "#x136~#x178[#n",   "#x178]#x136~#n" );
+	INSERT_BRACKET( 32768,  "Siren",         "#x255)#x147(#n",   "#x147)#x255(#n" );
+	INSERT_BRACKET( 65536,  "Psion",         "#x255<#x033|#n",   "#x033|#x255>#n" );
+	INSERT_BRACKET( 131072, "Mindflayer",    "#x135}#x035{#n",   "#x035}#x135{#n" );
+
+	/* Generation titles - Demon (CLASS_DEMON=1) */
+	INSERT_GEN( 1, 1, "#RPit Lord#n" );
+	INSERT_GEN( 1, 2, "#RPit Fiend#n" );
+	INSERT_GEN( 1, 3, "#RGateKeeper#n" );
+	INSERT_GEN( 1, 4, "#RImp Lord#n" );
+	INSERT_GEN( 1, 5, "#RHell Spawn#n" );
+	INSERT_GEN( 1, 6, "#RDemon#n" );
+	INSERT_GEN( 1, 7, "#RSpawnling#n" );
+	INSERT_GEN( 1, 0, "#RImp#n" );  /* Default/fallback */
+
+	/* Generation titles - Mage (CLASS_MAGE=2) */
+	INSERT_GEN( 2, 1, "#CHigh Archmage#n" );
+	INSERT_GEN( 2, 2, "#CArchmage#n" );
+	INSERT_GEN( 2, 3, "#CLord of Spells#n" );
+	INSERT_GEN( 2, 4, "#CHigh Invoker#n" );
+	INSERT_GEN( 2, 5, "#CWizard of War#n" );
+	INSERT_GEN( 2, 6, "#CBattlemage#n" );
+	INSERT_GEN( 2, 7, "#CApprentice#n" );
+	INSERT_GEN( 2, 0, "#CMagician#n" );
+
+	/* Generation titles - Werewolf (CLASS_WEREWOLF=4) */
+	INSERT_GEN( 4, 1, "#LChieftain#n" );
+	INSERT_GEN( 4, 2, "#LTribe Shaman#n" );
+	INSERT_GEN( 4, 3, "#LPack Leader#n" );
+	INSERT_GEN( 4, 4, "#LFenris Wolf#n" );
+	INSERT_GEN( 4, 5, "#LStalker#n" );
+	INSERT_GEN( 4, 6, "#LHunter#n" );
+	INSERT_GEN( 4, 7, "#LPup of Gaia#n" );
+	INSERT_GEN( 4, 0, "#LHalfbreed Bastard#n" );
+
+	/* Generation titles - Vampire (CLASS_VAMPIRE=8) */
+	INSERT_GEN( 8, 1, "#RI#0nner #RC#0ircle#n" );
+	INSERT_GEN( 8, 2, "#RV#0ampire #RJ#0usticar#n" );
+	INSERT_GEN( 8, 3, "#RV#0ampire #RP#0rince#n" );
+	INSERT_GEN( 8, 4, "#RV#0ampire #RA#0ncilla#n" );
+	INSERT_GEN( 8, 5, "#RV#0ampire #RA#0rchon#n" );
+	INSERT_GEN( 8, 6, "#RV#0ampire#n" );
+	INSERT_GEN( 8, 7, "#RV#0ampire #RA#0narch#n" );
+	INSERT_GEN( 8, 0, "#RB#0loodsucker#n" );
+
+	/* Generation titles - Samurai (CLASS_SAMURAI=16) */
+	INSERT_GEN( 16, 1, "#RSho#ygun#n" );
+	INSERT_GEN( 16, 2, "#RKata#yna Mas#Rter#n" );
+	INSERT_GEN( 16, 3, "#RSamu#yrai Mas#Rter#n" );
+	INSERT_GEN( 16, 4, "#RSamu#yrai El#Rite#n" );
+	INSERT_GEN( 16, 5, "#RSamu#yrai#n" );
+	INSERT_GEN( 16, 0, "#RTrai#ynee#n" );
+
+	/* Generation titles - Drow (CLASS_DROW=32) */
+	INSERT_GEN( 32, 1, "#0Matron Mother#n" );
+	INSERT_GEN( 32, 2, "#0Weaponmaster#n" );
+	INSERT_GEN( 32, 3, "#0High Priestess#n" );
+	INSERT_GEN( 32, 4, "#0Favored of Lloth#n" );
+	INSERT_GEN( 32, 5, "#0Black Widow#n" );
+	INSERT_GEN( 32, 6, "#0Drow#n" );
+	INSERT_GEN( 32, 7, "#0Drow Male#n" );
+	INSERT_GEN( 32, 0, "#0Drider#n" );
+
+	/* Generation titles - Monk (CLASS_MONK=64) */
+	INSERT_GEN( 64, 1, "#cAbbot#n" );
+	INSERT_GEN( 64, 2, "#cHigh Priest#n" );
+	INSERT_GEN( 64, 3, "#cPriest#n" );
+	INSERT_GEN( 64, 4, "#cFather#n" );
+	INSERT_GEN( 64, 5, "#cMonk#n" );
+	INSERT_GEN( 64, 6, "#cBrother#n" );
+	INSERT_GEN( 64, 7, "#cAcolyte#n" );
+	INSERT_GEN( 64, 0, "#cFanatic#n" );
+
+	/* Generation titles - Ninja (CLASS_NINJA=128) */
+	INSERT_GEN( 128, 1, "#yMaster Assassin#n" );
+	INSERT_GEN( 128, 2, "#yExpert Assassin#n" );
+	INSERT_GEN( 128, 3, "#yShadowlord#n" );
+	INSERT_GEN( 128, 4, "#yShadow Warrior#n" );
+	INSERT_GEN( 128, 5, "#yShadow#n" );
+	INSERT_GEN( 128, 6, "#yNinja#n" );
+	INSERT_GEN( 128, 7, "#yNinja Apprentice#n" );
+	INSERT_GEN( 128, 0, "#yThug#n" );
+
+	/* Generation titles - Lich (CLASS_LICH=256) */
+	INSERT_GEN( 256, 1, "#7Demilich#n" );
+	INSERT_GEN( 256, 2, "#7Lich Lord#n" );
+	INSERT_GEN( 256, 3, "#7Power Lich#n" );
+	INSERT_GEN( 256, 4, "#7Ancient Lich#n" );
+	INSERT_GEN( 256, 0, "#7Lich#n" );
+
+	/* Generation titles - Shapeshifter (CLASS_SHAPESHIFTER=512) */
+	INSERT_GEN( 512, 1, "#RSpawn of Malaug#n" );
+	INSERT_GEN( 512, 2, "#RShadowmaster#n" );
+	INSERT_GEN( 512, 3, "#RMalaugrym Elder#n" );
+	INSERT_GEN( 512, 4, "#RMalaugrym#n" );
+	INSERT_GEN( 512, 5, "#RShapeshifter#n" );
+	INSERT_GEN( 512, 6, "#RDoppleganger#n" );
+	INSERT_GEN( 512, 7, "#RMass of tentacles#n" );
+	INSERT_GEN( 512, 0, "#RPlay-Doh#n" );
+
+	/* Generation titles - Tanarri (CLASS_TANARRI=1024) */
+	INSERT_GEN( 1024, 1, "#RTanar'ri Balor#n" );
+	INSERT_GEN( 1024, 2, "#RTanar'ri Marilith#n" );
+	INSERT_GEN( 1024, 3, "#RGreater Tanar'ri#n" );
+	INSERT_GEN( 1024, 4, "#RTrue Tanar'ri#n" );
+	INSERT_GEN( 1024, 5, "#RTanar'ri#n" );
+	INSERT_GEN( 1024, 0, "#RCambion#n" );
+
+	/* Generation titles - Angel (CLASS_ANGEL=2048) */
+	INSERT_GEN( 2048, 1, "#7Arch Angel#n" );
+	INSERT_GEN( 2048, 2, "#7Cherubim#n" );
+	INSERT_GEN( 2048, 3, "#7Seraphim#n" );
+	INSERT_GEN( 2048, 4, "#7Guardian Angel#n" );
+	INSERT_GEN( 2048, 5, "#7Angel#n" );
+	INSERT_GEN( 2048, 0, "#7Nephalim#n" );
+
+	/* Generation titles - Undead Knight (CLASS_UNDEAD_KNIGHT=4096) */
+	INSERT_GEN( 4096, 1, "#LFallen Paladin#n" );
+	INSERT_GEN( 4096, 2, "#LUndead Lord#n" );
+	INSERT_GEN( 4096, 3, "#LUndead Knight#n" );
+	INSERT_GEN( 4096, 4, "#LUndead Knight#n" );
+	INSERT_GEN( 4096, 5, "#LUndead Knight#n" );
+	INSERT_GEN( 4096, 0, "#LSkeleton Knight#n" );
+
+	/* Generation titles - Spider Droid (CLASS_DROID=8192) */
+	INSERT_GEN( 8192, 1, "#0Drider Lord#n" );
+	INSERT_GEN( 8192, 2, "#0Master of the Web#n" );
+	INSERT_GEN( 8192, 0, "#0Spider Droid#n" );
+
+	/* Generation titles - Dirgesinger (CLASS_DIRGESINGER=16384) */
+	INSERT_GEN( 16384, 1, "#x178War Cantor#n" );
+	INSERT_GEN( 16384, 2, "#x178Battle Bard#n" );
+	INSERT_GEN( 16384, 3, "#x178Dirgesinger#n" );
+	INSERT_GEN( 16384, 4, "#x178War Chanter#n" );
+	INSERT_GEN( 16384, 5, "#x178Chanter#n" );
+	INSERT_GEN( 16384, 0, "#x178Hummer#n" );
+
+	/* Generation titles - Siren (CLASS_SIREN=32768) */
+	INSERT_GEN( 32768, 1, "#x255Archsiren#n" );
+	INSERT_GEN( 32768, 2, "#x255Diva of Doom#n" );
+	INSERT_GEN( 32768, 3, "#x255Songweaver#n" );
+	INSERT_GEN( 32768, 4, "#x255Voice of Ruin#n" );
+	INSERT_GEN( 32768, 0, "#x255Siren#n" );
+
+	/* Generation titles - Psion (CLASS_PSION=65536) */
+	INSERT_GEN( 65536, 1, "#CMind Lord#n" );
+	INSERT_GEN( 65536, 2, "#CPsychic Master#n" );
+	INSERT_GEN( 65536, 3, "#CPsion#n" );
+	INSERT_GEN( 65536, 4, "#CMentalist#n" );
+	INSERT_GEN( 65536, 5, "#CAdept#n" );
+	INSERT_GEN( 65536, 0, "#CAwakened#n" );
+
+	/* Generation titles - Mindflayer (CLASS_MINDFLAYER=131072) */
+	INSERT_GEN( 131072, 1, "#GElder Brain#n" );
+	INSERT_GEN( 131072, 2, "#GMind Tyrant#n" );
+	INSERT_GEN( 131072, 3, "#GIllithid#n" );
+	INSERT_GEN( 131072, 4, "#GBrain Eater#n" );
+	INSERT_GEN( 131072, 0, "#GMindflayer#n" );
+
+#undef INSERT_BRACKET
+#undef INSERT_GEN
+
+	db_commit( game_db );
+	sqlite3_finalize( br_stmt );
+	sqlite3_finalize( gen_stmt );
+
+	log_string( "  Inserted default class display configuration." );
+}
+
+/*
+ * Load class display config from database into memory.
+ * Call this during boot after db_game_init().
+ */
+void db_game_load_class_display( void ) {
+	sqlite3_stmt *stmt;
+	char buf[256];
+	int i;
+
+	if ( !game_db )
+		return;
+
+	/* Clear existing bracket cache */
+	for ( i = 0; i < bracket_count; i++ ) {
+		if ( bracket_cache[i].class_name )   free_string( bracket_cache[i].class_name );
+		if ( bracket_cache[i].open_bracket ) free_string( bracket_cache[i].open_bracket );
+		if ( bracket_cache[i].close_bracket ) free_string( bracket_cache[i].close_bracket );
+	}
+	bracket_count = 0;
+
+	/* Clear existing generation cache */
+	for ( i = 0; i < gen_count; i++ ) {
+		if ( gen_cache[i].title ) free_string( gen_cache[i].title );
+	}
+	gen_count = 0;
+
+	/* Insert defaults if tables are empty */
+	class_display_insert_defaults();
+
+	/* Load brackets */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, class_name, open_bracket, close_bracket "
+			"FROM class_brackets ORDER BY class_id",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+		while ( sqlite3_step( stmt ) == SQLITE_ROW && bracket_count < MAX_CACHED_BRACKETS ) {
+			bracket_cache[bracket_count].class_id      = sqlite3_column_int( stmt, 0 );
+			bracket_cache[bracket_count].class_name    = str_dup( col_text( stmt, 1 ) );
+			bracket_cache[bracket_count].open_bracket  = str_dup( col_text( stmt, 2 ) );
+			bracket_cache[bracket_count].close_bracket = str_dup( col_text( stmt, 3 ) );
+			bracket_count++;
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	/* Load generations */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, generation, title "
+			"FROM class_generations ORDER BY class_id, generation DESC",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+		while ( sqlite3_step( stmt ) == SQLITE_ROW && gen_count < MAX_CACHED_GENERATIONS ) {
+			gen_cache[gen_count].class_id   = sqlite3_column_int( stmt, 0 );
+			gen_cache[gen_count].generation = sqlite3_column_int( stmt, 1 );
+			gen_cache[gen_count].title      = str_dup( col_text( stmt, 2 ) );
+			gen_count++;
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	snprintf( buf, sizeof( buf ),
+		"  Loaded %d class brackets, %d generation titles.", bracket_count, gen_count );
+	log_string( buf );
+}
+
+/*
+ * Get bracket config for a class.
+ * Returns NULL if not found (caller should use default brackets).
+ */
+const CLASS_BRACKET *db_game_get_bracket( int class_id ) {
+	int i;
+
+	for ( i = 0; i < bracket_count; i++ ) {
+		if ( bracket_cache[i].class_id == class_id )
+			return &bracket_cache[i];
+	}
+
+	return NULL;
+}
+
+/*
+ * Get generation title for a class and generation.
+ * Returns NULL if not found (caller should use default title).
+ *
+ * Lookup priority:
+ *   1. Exact match for (class_id, generation)
+ *   2. Fallback to (class_id, 0) if no exact match
+ *   3. NULL if neither found
+ */
+const char *db_game_get_generation_title( int class_id, int generation ) {
+	int i;
+	const char *fallback = NULL;
+
+	for ( i = 0; i < gen_count; i++ ) {
+		if ( gen_cache[i].class_id == class_id ) {
+			if ( gen_cache[i].generation == generation )
+				return gen_cache[i].title;
+			if ( gen_cache[i].generation == 0 )
+				fallback = gen_cache[i].title;
+		}
+	}
+
+	return fallback;
 }

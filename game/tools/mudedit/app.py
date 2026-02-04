@@ -18,7 +18,8 @@ from .db.repository import (
     KingdomsRepository, BansRepository, DisabledCommandsRepository,
     TopBoardRepository, LeaderboardRepository, NotesRepository, BugsRepository,
     SuperAdminsRepository, ImmortalPretitlesRepository,
-    PlayerRepository
+    PlayerRepository,
+    ClassBracketsRepository, ClassGenerationsRepository
 )
 from .nav.tree import NavigationTree
 from .panels import (
@@ -27,7 +28,7 @@ from .panels import (
     GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel, AudioConfigPanel,
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
-    PlayerEditorPanel
+    PlayerEditorPanel, ClassDisplayPanel
 )
 
 
@@ -384,6 +385,16 @@ class MudEditorApp:
                 return ImmortalPretitlesPanel(
                     self.notebook,
                     repository,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'class_display':
+                brackets_repo = ClassBracketsRepository(conn)
+                generations_repo = ClassGenerationsRepository(conn)
+                return ClassDisplayPanel(
+                    self.notebook,
+                    brackets_repo,
+                    generations_repo,
                     on_status=self._set_status
                 )
 

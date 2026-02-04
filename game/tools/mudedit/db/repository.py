@@ -874,3 +874,70 @@ class ImmortalPretitlesRepository(BaseRepository):
             (name,)
         ).fetchone()
         return dict(row) if row else None
+
+
+class ClassBracketsRepository(BaseRepository):
+    """Repository for class_brackets table - who list brackets by class."""
+
+    # Class ID to name mapping (matches C defines in class.h)
+    CLASS_NAMES = {
+        1: 'Demon',
+        2: 'Mage',
+        4: 'Werewolf',
+        8: 'Vampire',
+        16: 'Samurai',
+        32: 'Drow',
+        64: 'Monk',
+        128: 'Ninja',
+        256: 'Lich',
+        512: 'Shapeshifter',
+        1024: 'Tanarri',
+        2048: 'Angel',
+        4096: 'Undead Knight',
+        8192: 'Spider Droid',
+        16384: 'Dirgesinger',
+        32768: 'Siren',
+        65536: 'Psion',
+        131072: 'Mindflayer',
+    }
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_brackets', 'class_id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all class brackets ordered by class_name."""
+        return super().list_all(order_by or 'class_name')
+
+
+class ClassGenerationsRepository(BaseRepository):
+    """Repository for class_generations table - generation titles by class."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_generations', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all generation titles ordered by class_id and generation."""
+        return super().list_all(order_by or 'class_id, generation DESC')
+
+    def get_by_class(self, class_id: int) -> List[Dict]:
+        """Get all generation titles for a specific class."""
+        rows = self.conn.execute(
+            "SELECT * FROM class_generations WHERE class_id = ? ORDER BY generation DESC",
+            (class_id,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_by_class_and_gen(self, class_id: int, generation: int) -> Optional[Dict]:
+        """Get a specific generation entry."""
+        row = self.conn.execute(
+            "SELECT * FROM class_generations WHERE class_id = ? AND generation = ?",
+            (class_id, generation)
+        ).fetchone()
+        return dict(row) if row else None
+
+    def get_classes_with_titles(self) -> List[int]:
+        """Get list of class IDs that have generation titles."""
+        rows = self.conn.execute(
+            "SELECT DISTINCT class_id FROM class_generations ORDER BY class_id"
+        ).fetchall()
+        return [row['class_id'] for row in rows]

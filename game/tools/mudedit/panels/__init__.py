@@ -16,6 +16,7 @@ from .game_panels import (
     SuperAdminsPanel, ImmortalPretitlesPanel
 )
 from .player import PlayerEditorPanel
+from .class_display import ClassDisplayPanel
 
 __all__ = [
     'HelpEditorPanel',
@@ -38,4 +39,5 @@ __all__ = [
     'SuperAdminsPanel',
     'ImmortalPretitlesPanel',
     'PlayerEditorPanel',
+    'ClassDisplayPanel',
 ]

@@ -78,6 +78,20 @@ void db_game_set_pretitle( const char *name, const char *pretitle, const char *s
 void db_game_delete_pretitle( const char *name );
 void db_game_list_pretitles( CHAR_DATA *ch );
 
+/* Class display config (game.db) - brackets and generation names for who list */
+typedef struct class_bracket {
+	int    class_id;       /* CLASS_* constant (1, 2, 4, 8, ...) */
+	char   *class_name;    /* Human-readable name ("Vampire", "Werewolf") */
+	char   *open_bracket;  /* Opening bracket with colors, e.g., "#R<<#n" */
+	char   *close_bracket; /* Closing bracket with colors, e.g., "#R>>#n" */
+} CLASS_BRACKET;
+
+typedef struct class_generation {
+	int    class_id;       /* CLASS_* constant */
+	int    generation;     /* 1-8 for specific gen, 0 for default/fallback */
+	char   *title;         /* Generation title with colors, e.g., "#RI#0nner #RC#0ircle#n" */
+} CLASS_GENERATION;
+
 /* Audio config (game.db) - MCMP audio file mappings */
 typedef struct audio_entry {
 	char   *category;      /* "ambient", "footstep", "combat", etc. */
@@ -99,5 +113,10 @@ AUDIO_ENTRY *audio_config_find( const char *category, const char *trigger_key );
 /* Sector-indexed audio lookup arrays (for fast ambient/footstep access) */
 extern AUDIO_ENTRY *audio_ambient[SECT_MAX];
 extern AUDIO_ENTRY *audio_footstep[SECT_MAX];
+
+/* Class display config (game.db) - brackets and generation names for who list */
+void db_game_load_class_display( void );
+const CLASS_BRACKET *db_game_get_bracket( int class_id );
+const char *db_game_get_generation_title( int class_id, int generation );
 
 #endif /* DB_GAME_H */
