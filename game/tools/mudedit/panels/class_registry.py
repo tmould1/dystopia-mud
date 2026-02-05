@@ -50,7 +50,7 @@ class ClassRegistryPanel(ttk.Frame):
 
         self.class_tree = ttk.Treeview(
             tree_frame,
-            columns=('class_id', 'class_name', 'keyword', 'type', 'armor', 'score'),
+            columns=('class_id', 'class_name', 'keyword', 'type'),
             show='headings',
             selectmode='browse'
         )
@@ -58,14 +58,10 @@ class ClassRegistryPanel(ttk.Frame):
         self.class_tree.heading('class_name', text='Name')
         self.class_tree.heading('keyword', text='Keyword')
         self.class_tree.heading('type', text='Type')
-        self.class_tree.heading('armor', text='Armor')
-        self.class_tree.heading('score', text='Score')
         self.class_tree.column('class_id', width=50, stretch=False)
         self.class_tree.column('class_name', width=100)
         self.class_tree.column('keyword', width=80)
-        self.class_tree.column('type', width=60, stretch=False)
-        self.class_tree.column('armor', width=45, stretch=False)
-        self.class_tree.column('score', width=45, stretch=False)
+        self.class_tree.column('type', width=80, stretch=False)
 
         scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.class_tree.yview)
         self.class_tree.configure(yscrollcommand=scrollbar.set)
@@ -146,35 +142,6 @@ class ClassRegistryPanel(ttk.Frame):
         self.requirements_var.trace_add('write', lambda *_: self._on_change())
         ttk.Entry(row, textvariable=self.requirements_var, width=40, font=('Consolas', 10)).pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-        # Database flags section
-        flags_frame = ttk.LabelFrame(right_frame, text="Database Flags")
-        flags_frame.pack(fill=tk.X, padx=4, pady=4)
-
-        row = ttk.Frame(flags_frame)
-        row.pack(fill=tk.X, padx=8, pady=4)
-
-        self.has_armor_var = tk.BooleanVar(value=True)
-        self.has_armor_check = ttk.Checkbutton(
-            row, text="Has Class Armor", variable=self.has_armor_var,
-            command=self._on_change
-        )
-        self.has_armor_check.pack(side=tk.LEFT, padx=(0, 20))
-
-        self.has_score_var = tk.BooleanVar(value=True)
-        self.has_score_check = ttk.Checkbutton(
-            row, text="Has Score Stats", variable=self.has_score_var,
-            command=self._on_change
-        )
-        self.has_score_check.pack(side=tk.LEFT)
-
-        row = ttk.Frame(flags_frame)
-        row.pack(fill=tk.X, padx=8, pady=(0, 4))
-        ttk.Label(
-            row,
-            text="Uncheck if armor/score handled in code. Checked = validation expects database entries.",
-            foreground='gray'
-        ).pack(side=tk.LEFT)
-
         # Selfclass section
         selfclass_frame = ttk.LabelFrame(right_frame, text="Selfclass Message")
         selfclass_frame.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
@@ -203,11 +170,9 @@ class ClassRegistryPanel(ttk.Frame):
 
         for entry in entries:
             class_type = "Base" if entry['upgrade_class'] is None else "Upgrade"
-            has_armor = "yes" if entry.get('has_class_armor', 1) else "no"
-            has_score = "yes" if entry.get('has_score_stats', 1) else "no"
             self.class_tree.insert('', tk.END, iid=str(entry['class_id']),
                                    values=(entry['class_id'], entry['class_name'],
-                                           entry['keyword'], class_type, has_armor, has_score))
+                                           entry['keyword'], class_type))
 
         self.on_status(f"Loaded {len(entries)} class registry entries")
 
@@ -242,10 +207,6 @@ class ClassRegistryPanel(ttk.Frame):
                         break
 
             self.requirements_var.set(entry['requirements'] or '')
-
-            # Load database flags (default True if columns don't exist yet)
-            self.has_armor_var.set(entry.get('has_class_armor', 1) == 1)
-            self.has_score_var.set(entry.get('has_score_stats', 1) == 1)
 
             self.message_text.delete('1.0', tk.END)
             self.message_text.insert('1.0', entry['selfclass_message'])
@@ -293,9 +254,7 @@ class ClassRegistryPanel(ttk.Frame):
             'selfclass_message': selfclass_message,
             'display_order': display_order,
             'upgrade_class': upgrade_class,
-            'requirements': requirements,
-            'has_class_armor': 1 if self.has_armor_var.get() else 0,
-            'has_score_stats': 1 if self.has_score_var.get() else 0
+            'requirements': requirements
         })
 
         self.unsaved = False
