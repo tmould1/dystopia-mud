@@ -438,16 +438,16 @@ void move_char( CHAR_DATA *ch, int door ) {
 		}
 	}
 
-	do_look( ch, "auto" );
-
-	/* Show automap if enabled (skip for screen readers - not accessible) */
+	/* Show automap before room description (skip for screen readers) */
 	if ( !IS_NPC( ch ) && IS_SET( ch->act, PLR_AUTOMAP )
 		&& !IS_SET( ch->act, PLR_SCREENREADER ) )
 		show_automap( ch );
 
-	/* Send GMCP Room.Info (screen readers can use client accessibility) */
+	/* Send GMCP Room.Info */
 	if ( !IS_NPC( ch ) && ch->desc != NULL && ch->desc->gmcp_enabled )
 		gmcp_send_room_info( ch );
+
+	do_look( ch, "auto" );
 
 	for ( fch = in_room->people; fch != NULL; fch = fch_next ) {
 		fch_next = fch->next_in_room;
