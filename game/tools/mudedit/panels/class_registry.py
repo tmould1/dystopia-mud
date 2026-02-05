@@ -162,10 +162,11 @@ class ClassRegistryPanel(ttk.Frame):
 
         entries = self.registry_repo.list_all()
 
-        # Build upgrade class options
+        # Build upgrade class options - only base classes can be upgraded from
         self.upgrade_options = {'(None - Base Class)': None}
         for entry in entries:
-            self.upgrade_options[f"{entry['class_name']} ({entry['class_id']})"] = entry['class_id']
+            if entry['upgrade_class'] is None:  # Only include base classes
+                self.upgrade_options[f"{entry['class_name']} ({entry['class_id']})"] = entry['class_id']
         self.upgrade_combo['values'] = list(self.upgrade_options.keys())
 
         for entry in entries:
