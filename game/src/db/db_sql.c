@@ -741,6 +741,12 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		iHash = vnum % MAX_KEY_HASH;
 		pRoomIndex->next = room_index_hash[iHash];
 		room_index_hash[iHash] = pRoomIndex;
+
+		/* Link room into area's room list for efficient reset iteration */
+		pRoomIndex->next_in_area = pArea->room_first;
+		pArea->room_first = pRoomIndex;
+		pArea->room_count++;
+
 		top_room++;
 		if ( top_vnum_room < vnum )
 			top_vnum_room = vnum;

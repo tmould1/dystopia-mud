@@ -126,6 +126,16 @@ AREA_DATA *new_area( void ) {
 	pArea->max_mob_level = 0;
 	pArea->avg_difficulty = 0;
 	pArea->difficulty_tier = 0;
+	pArea->is_hidden = FALSE;
+	pArea->needs_reset = FALSE;
+
+	/* Room list for efficient reset iteration */
+	pArea->room_first = NULL;
+	pArea->room_count = 0;
+
+	/* Per-area profiling (cleared by profile reset) */
+	pArea->profile_reset_count = 0;
+	pArea->profile_reset_time_us = 0;
 
 	return pArea;
 }

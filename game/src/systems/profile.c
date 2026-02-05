@@ -96,6 +96,7 @@ void profile_init( void ) {
  * Reset all statistics (but keep configuration)
  */
 void profile_reset( void ) {
+    AREA_DATA *pArea;
     bool was_enabled = profile_stats.enabled;
     bool was_verbose = profile_stats.verbose;
     long threshold = profile_stats.threshold_us;
@@ -108,6 +109,12 @@ void profile_reset( void ) {
     profile_stats.threshold_us = threshold;
     profile_stats.tick_multiplier = tick_mult;
     profile_stats.sample_start_time = current_time;
+
+    /* Clear per-area profiling stats */
+    for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+        pArea->profile_reset_count = 0;
+        pArea->profile_reset_time_us = 0;
+    }
 }
 
 /*
@@ -365,6 +372,53 @@ void profile_report( CHAR_DATA *ch ) {
                 m->name, m->call_count,
                 avg_us / 1000.0, m->max_us / 1000.0, pct );
             send_to_char( buf, ch );
+        }
+    }
+
+    /* Per-area reset statistics - show top areas by reset time */
+    {
+        AREA_DATA *pArea;
+        AREA_DATA *top_areas[5] = {NULL, NULL, NULL, NULL, NULL};
+        int top_count = 0;
+        int j;
+
+        /* Find top 5 areas by reset time */
+        for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+            if ( pArea->profile_reset_count == 0 )
+                continue;
+
+            /* Insert into sorted top list */
+            for ( j = 0; j < 5; j++ ) {
+                if ( top_areas[j] == NULL ||
+                     pArea->profile_reset_time_us > top_areas[j]->profile_reset_time_us ) {
+                    /* Shift down */
+                    int k;
+                    for ( k = 4; k > j; k-- )
+                        top_areas[k] = top_areas[k-1];
+                    top_areas[j] = pArea;
+                    if ( top_count < 5 ) top_count++;
+                    break;
+                }
+            }
+        }
+
+        if ( top_count > 0 ) {
+            send_to_char( "\n\r#CArea Reset Statistics:#n (top by total time)\n\r", ch );
+            send_to_char( "  Area                    Resets  Rooms  Total(ms)  Avg(ms)\n\r", ch );
+            send_to_char( "  ----------------------  ------  -----  ---------  -------\n\r", ch );
+
+            for ( j = 0; j < top_count && top_areas[j] != NULL; j++ ) {
+                pArea = top_areas[j];
+                double total_ms = pArea->profile_reset_time_us / 1000.0;
+                double avg_ms = pArea->profile_reset_count > 0
+                    ? total_ms / pArea->profile_reset_count : 0.0;
+                snprintf( buf, sizeof( buf ), "  %-22s  %6ld  %5d  %9.2f  %7.2f\n\r",
+                    pArea->name ? pArea->name : "Unknown",
+                    pArea->profile_reset_count,
+                    pArea->room_count,
+                    total_ms, avg_ms );
+                send_to_char( buf, ch );
+            }
         }
     }
 }

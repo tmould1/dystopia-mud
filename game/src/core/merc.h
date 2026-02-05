@@ -2667,6 +2667,15 @@ struct area_data {
 	int avg_difficulty;	 /* Calculated difficulty score */
 	int difficulty_tier; /* 0=trivial,1=easy,2=normal,3=hard,4=deadly */
 	bool is_hidden;		 /* Hidden from player areas list */
+	bool needs_reset;	 /* Deferred reset: true when area should reset on player entry */
+
+	/* Room list for efficient area reset (avoids sparse vnum iteration) */
+	ROOM_INDEX_DATA *room_first;  /* Head of linked list of rooms in this area */
+	int room_count;               /* Number of rooms in this area */
+
+	/* Per-area profiling statistics (reset with profile reset) */
+	long profile_reset_count;     /* Times this area was reset during profiling */
+	long profile_reset_time_us;   /* Total microseconds spent resetting this area */
 };
 
 /*
@@ -2702,6 +2711,9 @@ struct room_index_data {
 	sh_int track_dir[5];
 	sh_int sector_type;
 	sh_int tick_timer[MAX_RTIMER];
+
+	/* Area room list linkage for efficient reset iteration */
+	ROOM_INDEX_DATA *next_in_area;  /* Next room in same area */
 };
 
 /*

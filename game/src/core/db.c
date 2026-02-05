@@ -687,7 +687,7 @@ void area_update( void ) {
 		/*
 		 * Check for PC's.
 		 */
-		if ( pArea->nplayer > 0 && pArea->age == 15 - 1 ) {
+		if ( pArea->nplayer > 0 && pArea->age == 15 - 1 && profile_stats.tick_multiplier <= 1 ) {
 			for ( pch = char_list; pch != NULL; pch = pch->next ) {
 				if ( !IS_NPC( pch ) && IS_AWAKE( pch ) && pch->in_room != NULL && pch->in_room->area == pArea ) {
 					send_to_char( "You hear the sound of a bell in the distance.\n\r", pch );
@@ -701,13 +701,21 @@ void area_update( void ) {
 		/*
 		 * Check age and reset.
 		 * Note: Mud School resets every 3 minutes (not 15).
+		 * Deferred reset: If no players, mark for reset on entry instead.
 		 */
-		if ( pArea->nplayer == 0 || pArea->age >= 15 ) {
+		if ( pArea->age >= 15 ) {
 			ROOM_INDEX_DATA *pRoomIndex;
 
-			PROFILE_START( "area_reset" );
-			reset_area( pArea );
-			PROFILE_END( "area_reset" );
+			if ( pArea->nplayer > 0 ) {
+				/* Players present - reset immediately */
+				PROFILE_START( "area_reset" );
+				reset_area( pArea );
+				PROFILE_END( "area_reset" );
+				pArea->needs_reset = FALSE;
+			} else {
+				/* No players - defer reset until someone enters */
+				pArea->needs_reset = TRUE;
+			}
 			pArea->age = number_range( 0, 3 );
 			pRoomIndex = get_room_index( ROOM_VNUM_SCHOOL );
 			if ( pRoomIndex != NULL && pArea == pRoomIndex->area )
@@ -951,11 +959,43 @@ void reset_room( ROOM_INDEX_DATA *pRoom ) {
  */
 void reset_area( AREA_DATA *pArea ) {
 	ROOM_INDEX_DATA *pRoom;
-	int vnum;
+	int room_count = 0;
+	struct timeval start_time, end_time;
 
-	for ( vnum = pArea->lvnum; vnum <= pArea->uvnum; vnum++ ) {
-		if ( ( pRoom = get_room_index( vnum ) ) )
-			reset_room( pRoom );
+	/* Track per-area reset timing when profiling is enabled */
+	if ( profile_stats.enabled )
+		gettimeofday( &start_time, NULL );
+
+	/*
+	 * Use the area's room list for efficient iteration.
+	 * This avoids iterating sparse vnum ranges (e.g., 2-30073 with only 3324 rooms).
+	 */
+	for ( pRoom = pArea->room_first; pRoom != NULL; pRoom = pRoom->next_in_area ) {
+		room_count++;
+		PROFILE_START( "reset_room" );
+		reset_room( pRoom );
+		PROFILE_END( "reset_room" );
+	}
+
+	/* Update per-area profiling stats */
+	if ( profile_stats.enabled ) {
+		long elapsed_us;
+		gettimeofday( &end_time, NULL );
+		elapsed_us = ( end_time.tv_sec - start_time.tv_sec ) * 1000000
+		           + ( end_time.tv_usec - start_time.tv_usec );
+		pArea->profile_reset_count++;
+		pArea->profile_reset_time_us += elapsed_us;
+	}
+
+	/* Debug: Log areas with many rooms */
+	if ( profile_stats.verbose && room_count > 500 ) {
+		char debug_buf[256];
+		int vnum_range = pArea->uvnum - pArea->lvnum + 1;
+		snprintf( debug_buf, sizeof( debug_buf ),
+			"AREA RESET: %s - vnum range %d-%d (%d span), %d rooms reset (list)",
+			pArea->name ? pArea->name : "Unknown",
+			pArea->lvnum, pArea->uvnum, vnum_range, room_count );
+		log_string( debug_buf );
 	}
 
 	return;

@@ -13,6 +13,7 @@
 #include <string.h>
 #include "gmcp.h"
 #include "mcmp.h"
+#include "profile.h"
 #include "../db/db_game.h"
 
 extern GAMECONFIG_DATA game_config;
@@ -113,6 +114,10 @@ void mcmp_play( DESCRIPTOR_DATA *d, const char *name, const char *type,
 	int len;
 
 	if ( !mcmp_enabled( d ) || name == NULL )
+		return;
+
+	/* Suppress audio during accelerated profiling */
+	if ( profile_stats.tick_multiplier > 1 )
 		return;
 
 	len = snprintf( buf, sizeof( buf ), "{\"name\":\"%s\"", name );

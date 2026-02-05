@@ -221,18 +221,42 @@ int socket_write( int fd, const void *buf, size_t len ) {
 /* ============================================
  * SECTION 5: Time Functions
  * gettimeofday implementation for Windows
+ * Uses QueryPerformanceCounter for microsecond precision
  * ============================================ */
 
+/* Static variables for high-resolution timer */
+static LARGE_INTEGER qpc_frequency = {0};
+static LARGE_INTEGER qpc_start = {0};
+static time_t qpc_start_time = 0;
+static int qpc_initialized = 0;
+
 int win32_gettimeofday( struct timeval *tp, struct timezone *tzp ) {
-	struct _timeb tb;
+	LARGE_INTEGER now;
+	LONGLONG elapsed_us;
 
 	if ( !tp ) return -1;
 
-	_ftime( &tb );
-	tp->tv_sec = (long) tb.time;
-	tp->tv_usec = tb.millitm * 1000;
+	/* Initialize on first call */
+	if ( !qpc_initialized ) {
+		QueryPerformanceFrequency( &qpc_frequency );
+		QueryPerformanceCounter( &qpc_start );
+		qpc_start_time = time( NULL );
+		qpc_initialized = 1;
+	}
+
+	/* Get current counter value */
+	QueryPerformanceCounter( &now );
+
+	/* Calculate microseconds elapsed since start */
+	elapsed_us = ( ( now.QuadPart - qpc_start.QuadPart ) * 1000000 ) / qpc_frequency.QuadPart;
+
+	/* Convert to timeval */
+	tp->tv_sec = (long)( qpc_start_time + elapsed_us / 1000000 );
+	tp->tv_usec = (long)( elapsed_us % 1000000 );
 
 	if ( tzp ) {
+		struct _timeb tb;
+		_ftime( &tb );
 		tzp->tz_minuteswest = tb.timezone;
 		tzp->tz_dsttime = tb.dstflag;
 	}

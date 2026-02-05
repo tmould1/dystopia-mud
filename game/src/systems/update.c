@@ -574,12 +574,9 @@ void mobile_update( void ) {
 					}
 				}
 			}
-			/* When no players in area, reduce movement to 1/4 frequency */
-			{
-				int move_chance = ( ch->in_room->area->nplayer > 0 ) ? 5 : 1;
-				if ( !IS_SET( ch->act, ACT_SENTINEL ) && ( door = number_bits( 5 ) ) <= move_chance && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) && ( ch->hunting == NULL || strlen( ch->hunting ) < 2 ) && ( ( !IS_SET( ch->act, ACT_STAY_AREA ) && ch->level < 900 ) || pexit->to_room->area == ch->in_room->area ) ) {
-					move_char( ch, door );
-				}
+			/* Random movement */
+			if ( !IS_SET( ch->act, ACT_SENTINEL ) && ( door = number_bits( 5 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) && ( ch->hunting == NULL || strlen( ch->hunting ) < 2 ) && ( ( !IS_SET( ch->act, ACT_STAY_AREA ) && ch->level < 900 ) || pexit->to_room->area == ch->in_room->area ) ) {
+				move_char( ch, door );
 			}
 			if ( ch->hit < ch->max_hit / 2 && ( door = number_bits( 3 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_AFFECTED( ch, AFF_WEBBED ) && ch->level < 900 && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) ) {
 				CHAR_DATA *rch;
@@ -651,8 +648,10 @@ void weather_update( void ) {
 				if ( ch->fighting == NULL && !IS_SET( ch->newbits, NEW_NATURAL ) && ch->monkab[SPIRIT] >= 2 )
 					SET_BIT( ch->newbits, NEW_NATURAL );
 
-				send_to_char( "You hear a clock in the distance strike midnight.\n\r", ch );
-				mcmp_time_of_day( ch, time_info.hour );
+				if ( profile_stats.tick_multiplier <= 1 ) {
+					send_to_char( "You hear a clock in the distance strike midnight.\n\r", ch );
+					mcmp_time_of_day( ch, time_info.hour );
+				}
 				if ( IS_EXTRA( ch, EXTRA_ROT ) ) {
 					send_to_char( "Your flesh feels better.\n\r", ch );
 					REMOVE_BIT( ch->extra, EXTRA_ROT );

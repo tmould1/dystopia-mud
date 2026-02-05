@@ -786,8 +786,14 @@ void char_to_room( CHAR_DATA *ch, ROOM_INDEX_DATA *pRoomIndex ) {
 	ch->next_in_room = pRoomIndex->people;
 	pRoomIndex->people = ch;
 
-	if ( !IS_NPC(ch) && ch->in_room->area != NULL )
+	if ( !IS_NPC(ch) && ch->in_room->area != NULL ) {
 		++ch->in_room->area->nplayer;
+		/* Deferred reset: trigger when first player enters area */
+		if ( ch->in_room->area->nplayer == 1 && ch->in_room->area->needs_reset ) {
+			reset_area( ch->in_room->area );
+			ch->in_room->area->needs_reset = FALSE;
+		}
+	}
 
 	if ( ( obj = get_eq_char( ch, WEAR_WIELD ) ) != NULL && obj->item_type == ITEM_LIGHT && obj->value[2] != 0 )
 		++ch->in_room->light;
