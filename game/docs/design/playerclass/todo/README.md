@@ -1,12 +1,11 @@
 # Proposed Player Classes
 
-This folder contains design documents for **5 new class pairs** (10 classes total) that fill fantasy gaps in the current Dystopia class roster. These are proposals awaiting implementation - when ready, documents can be moved to the main `classes/` folder.
+This folder contains design documents for **4 new class pairs** (8 classes total) that fill fantasy gaps in the current Dystopia class roster. These are proposals awaiting implementation - when ready, documents can be moved to the main `classes/` folder.
 
 ## Overview
 
 | Base Class | Upgrade Class | Fantasy Niche | Status |
 |------------|---------------|---------------|--------|
-| [Psion](psion.md) | [Mindflayer](mindflayer.md) | Psionic/Mental powers | Proposed |
 | [Cultist](cultist.md) | [Voidborn](voidborn.md) | Eldritch horror | Proposed |
 | [Artificer](artificer.md) | [Mechanist](mechanist.md) | Technology/Gadgets | Proposed |
 | [Dragonkin](dragonkin.md) | [Wyrm](wyrm.md) | Draconic heritage | Proposed |
@@ -14,13 +13,12 @@ This folder contains design documents for **5 new class pairs** (10 classes tota
 
 ## Gaps Being Filled
 
-The current class roster covers undead (Vampire, Lich), primal beasts (Werewolf, Shapeshifter), infernal (Demon, Tanar'ri), divine (Monk, Angel), martial (Ninja, Samurai), arcane (Mage), dark elves (Drow, Spider Droid), and sonic/bard (Dirgesinger, Siren).
+The current class roster covers undead (Vampire, Lich), primal beasts (Werewolf, Shapeshifter), infernal (Demon, Tanar'ri), divine (Monk, Angel), martial (Ninja, Samurai), arcane (Mage), dark elves (Drow, Spider Droid), sonic/bard (Dirgesinger, Siren), and psionic (Psion, Mindflayer).
 
-These new classes address missing archetypes:
+These new classes address remaining missing archetypes:
 
 | Gap | Solution | Why It's Unique |
 |-----|----------|-----------------|
-| **No mind-based combat** | Psion/Mindflayer | Mental damage bypasses physical armor entirely |
 | **No Lovecraftian horror** | Cultist/Voidborn | Risk/reward Corruption mechanic with self-damage |
 | **No tech class** (Spider Droid is Drow-locked) | Artificer/Mechanist | Gadgets, turrets, drones, cybernetic implants |
 | **No dragon theme** | Dragonkin/Wyrm | Elemental form-shifting during combat |
@@ -29,12 +27,6 @@ These new classes address missing archetypes:
 ## Resource Systems
 
 Each class pair has a unique resource that defines its playstyle:
-
-### Focus (Psion/Mindflayer)
-- Builds through meditation and combat concentration
-- Powers mental attacks that ignore armor
-- Higher focus = stronger psychic abilities
-- Standard build/spend mechanic
 
 ### Corruption (Cultist/Voidborn)
 - **Risk/Reward**: High corruption boosts damage but causes self-damage
@@ -114,11 +106,10 @@ Implants provide passive bonuses and can be changed out of combat.
 
 ### Thrall/Summon Systems
 
-Several classes feature minion mechanics:
+Several proposed classes feature minion mechanics:
 
 | Class | Minion Type | Max Count | Notable Feature |
 |-------|-------------|-----------|-----------------|
-| Mindflayer | Enthralled NPCs | 3 | Hivemind links them for coordinated attacks |
 | Artificer | Turrets | 2 | Stationary, room-bound |
 | Mechanist | Combat Drones | 4 | Follow between rooms |
 | Voidborn | Void Creatures | 2 | Summoned from beyond |
@@ -130,8 +121,6 @@ Each class has a distinct two-color palette for visual identity:
 
 | Class | Accent | Primary | Theme |
 |-------|--------|---------|-------|
-| Psion | Deep violet | Bright purple | Mental energy |
-| Mindflayer | Dark indigo | Pale violet-gray | Alien intellect |
 | Cultist | Dark teal | Sickly green | Cosmic horror |
 | Voidborn | Void black | Eldritch purple | Space between stars |
 | Artificer | Electric blue | Chrome silver | Technology |
@@ -145,11 +134,10 @@ Each class has a distinct two-color palette for visual identity:
 
 Suggested order based on uniqueness and complexity:
 
-1. **Psion/Mindflayer** - Mental damage is completely new, relatively straightforward mechanics
-2. **Cultist/Voidborn** - Corruption risk/reward is novel but self-contained
-3. **Artificer/Mechanist** - Turrets/drones need entity management, moderate complexity
-4. **Dragonkin/Wyrm** - Form system requires significant UI work for form-locked abilities
-5. **Chronomancer/Paradox** - Flux balance and timeline abilities are most complex
+1. **Cultist/Voidborn** - Corruption risk/reward is novel but self-contained
+2. **Artificer/Mechanist** - Turrets/drones need entity management, moderate complexity
+3. **Dragonkin/Wyrm** - Form system requires significant UI work for form-locked abilities
+4. **Chronomancer/Paradox** - Flux balance and timeline abilities are most complex
 
 ## Document Structure
 
@@ -169,7 +157,7 @@ Each class document follows the established format:
 To implement a class from this folder:
 
 1. Read the [Implementing a New Class](../implementing-a-new-class.md) guide
-2. Assign class constant (next power-of-2 after 32768)
+2. Assign class constant (next power-of-2 after 131072, which is CLASS_MINDFLAYER)
 3. Assign equipment vnum range (non-overlapping)
 4. Create source files following the documented structure
 5. Move the design doc from `todo/` to `classes/` when complete

@@ -40,7 +40,7 @@ Mindflayer inherits the Focus system from Psion with a higher cap and faster bui
 ch->rage  // Current focus (0-150 for Mindflayer)
 ```
 
-**Building Focus**:
+**Building Focus** (`mindflayer.c:773-785`):
 - Combat: +2 per game tick while fighting (vs +1 for Psion)
 - Mind Feed: +15 on successful consumption
 - Meditation: +15 (vs +10 for Psion)
@@ -51,7 +51,7 @@ ch->rage  // Current focus (0-150 for Mindflayer)
 
 ### Shared Psion Abilities
 
-Mindflayer retains access to the `psifocus` status display command and `psimeditate`. All other Psion abilities are replaced by Mindflayer-specific powers.
+Mindflayer retains access to the `psifocus` status display command (`psion.c:20-62`) and `psimeditate` (`psion.c:67-94`). All other Psion abilities are replaced by Mindflayer-specific powers.
 
 **Note**: Commands are named `psifocus` and `psimeditate` to avoid conflicts with existing Samurai `focus` and act_move.c `meditate` commands.
 
@@ -70,11 +70,11 @@ Mindflayer abilities are organized into 3 trainable categories. Stored in `ch->p
 |-------|----------|-----------|-------|-----------|
 | MIND_TRAIN_DOMINATION (10) | Domination | 4 | Mind control | Enthral, Puppet, Hivemind, Mass Domination |
 | MIND_TRAIN_CONSUMPTION (11) | Consumption | 3 | Mental drain | Mind Feed, Memory Drain, Intellect Devour |
-| MIND_TRAIN_PSIONIC (12) | Psionic Storm | 3 | Area devastation | Psychic Maelstrom, Mind Blast, Reality Fracture |
+| MIND_TRAIN_PSIONIC (12) | Psionic Storm | 3 | Area devastation | Psychic Maelstrom, Psiblast, Reality Fracture |
 
 **Training Cost**: `(current_level + 1) * 50` primal per level
 
-**Training Command**: `mindtrain` - Display current levels and improve categories
+**Training Command**: `mindtrain` (`mindflayer.c:20-109`) - Display current levels and improve categories
 
 ### Domination (Mind Control)
 
@@ -103,7 +103,7 @@ Mindflayer abilities are organized into 3 trainable categories. Stored in `ch->p
 
 ## Abilities
 
-### Enthral - Mind Control
+### Enthral - Mind Control (`mindflayer.c:128-209`)
 
 Dominates an NPC's mind, forcing them to serve you. Sets AFF_CHARM, master, and leader.
 
@@ -119,7 +119,7 @@ Dominates an NPC's mind, forcing them to serve you. Sets AFF_CHARM, master, and 
 
 **Mechanic**: Higher level NPCs have a chance to resist based on their level vs Mindflayer's generation.
 
-### Puppet - Direct Control
+### Puppet - Direct Control (`mindflayer.c:214-260`)
 
 Take over an enthralled NPC completely, issuing commands they must obey.
 
@@ -132,7 +132,7 @@ Take over an enthralled NPC completely, issuing commands they must obey.
 
 **Commands**: `puppet <thrall> <command>` - thrall executes the command (attack, flee, get, drop, etc.)
 
-### Hivemind - Coordinated Thralls
+### Hivemind - Coordinated Thralls (`mindflayer.c:265-305`)
 
 Links all enthralled NPCs into a mental network, improving their combat effectiveness.
 
@@ -148,7 +148,7 @@ Links all enthralled NPCs into a mental network, improving their combat effectiv
 - Thralls coordinate attacks (if one attacks, all attack same target)
 - Thralls share damage taken (distributed across all)
 
-### Mass Domination - AoE Charm
+### Mass Domination - AoE Charm (`mindflayer.c:310-379`)
 
 Attempt to enthral all NPCs in the room simultaneously.
 
@@ -163,7 +163,7 @@ Attempt to enthral all NPCs in the room simultaneously.
 
 **Mechanic**: Each NPC rolls separately. Those who succeed are enthralled. Max thralls limit still applies.
 
-### Mind Feed - Mental Consumption
+### Mind Feed - Mental Consumption (`mindflayer.c:384-428`)
 
 Drains psychic energy from a target, healing the Mindflayer and building Focus.
 
@@ -177,7 +177,7 @@ Drains psychic energy from a target, healing the Mindflayer and building Focus.
 | Damage Type | Mental | |
 | Requires | Fighting, Consumption 1 | |
 
-### Memory Drain - Buff Strip
+### Memory Drain - Buff Strip (`mindflayer.c:433-477`)
 
 Tears through the target's memories, removing active buffs and temporarily sealing abilities.
 
@@ -194,7 +194,7 @@ Tears through the target's memories, removing active buffs and temporarily seali
 
 **Ability Seal**: Target cannot use class abilities for duration (mana costs doubled, cooldowns extended).
 
-### Intellect Devour - Ultimate Consumption
+### Intellect Devour - Ultimate Consumption (`mindflayer.c:482-535`)
 
 Consumes a portion of the target's very intellect, dealing massive damage and potentially reducing their maximum HP.
 
@@ -211,7 +211,7 @@ Consumes a portion of the target's very intellect, dealing massive damage and po
 
 **Max HP Reduction**: NPCs only. Reduces target's maximum HP by 5% for duration. Does not stack.
 
-### Psychic Maelstrom - AoE Mental Storm
+### Psychic Maelstrom - AoE Mental Storm (`mindflayer.c:540-596`)
 
 Unleashes a whirlwind of psychic energy hitting all enemies in combat, with a chance to confuse.
 
@@ -225,7 +225,7 @@ Unleashes a whirlwind of psychic energy hitting all enemies in combat, with a ch
 | Damage Type | Mental | |
 | Requires | Fighting, Psionic Storm 1 | |
 
-### Psiblast - Cone Stun
+### Psiblast - Cone Stun (`mindflayer.c:601-659`)
 
 Projects a cone of psionic force that stuns and damages all enemies in front of the Mindflayer. Command: `psiblast`
 
@@ -242,7 +242,7 @@ Projects a cone of psionic force that stuns and damages all enemies in front of 
 | Damage Type | Mental | |
 | Requires | Fighting, Psionic Storm 2 | |
 
-### Reality Fracture - Ultimate Psionic Attack
+### Reality Fracture - Ultimate Psionic Attack (`mindflayer.c:664-720`)
 
 Tears at the fabric of reality around the Mindflayer's enemies, dealing devastating mental damage and potentially driving them mad.
 
@@ -259,29 +259,38 @@ Tears at the fabric of reality around the Mindflayer's enemies, dealing devastat
 
 **Madness**: Affected NPCs attack random targets in the room (including each other) for duration.
 
+### Dismiss - Release Thrall (`mindflayer.c:725-761`)
+
+Releases an enthralled NPC from your mental control.
+
+| Property | Value |
+|----------|-------|
+| Syntax | `dismiss <thrall>` |
+| Requires | Target must be your thrall |
+
 ## Mindflayer Armor
 
-Create equipment via `mindflayerarmor <piece>`:
+Create equipment via `mindflayerarmor <piece>` (`mindflayer.c:766-768`):
 
 **Cost**: 60 primal per piece
 
 | Piece | Vnum | Wear Slot |
 |-------|------|-----------|
-| mind scepter | TBD | Wield |
-| ring of thoughts | TBD | Finger |
-| neural collar | TBD | Neck |
-| flayer robes | TBD | Torso |
-| cerebral crown | TBD | Head |
-| leggings | TBD | Legs |
-| hovering sandals | TBD | Feet |
-| tentacle gloves | TBD | Hands |
-| psionic vambraces | TBD | Arms |
-| mind shroud | TBD | About Body |
-| elder sash | TBD | Waist |
-| brain bangle | TBD | Wrist |
-| third eye lens | TBD | Face |
+| mind scepter | (classeq.db) | Wield |
+| ring of thoughts | (classeq.db) | Finger |
+| neural collar | (classeq.db) | Neck |
+| flayer robes | (classeq.db) | Torso |
+| cerebral crown | (classeq.db) | Head |
+| leggings | (classeq.db) | Legs |
+| hovering sandals | (classeq.db) | Feet |
+| tentacle gloves | (classeq.db) | Hands |
+| psionic vambraces | (classeq.db) | Arms |
+| mind shroud | (classeq.db) | About Body |
+| elder sash | (classeq.db) | Waist |
+| brain bangle | (classeq.db) | Wrist |
+| third eye lens | (classeq.db) | Face |
 
-**Equipment Stats** (proposed):
+**Equipment Stats** (from `classeq.db`):
 - Weapons: +35 hitroll, +35 damroll
 - Armor: +30 hitroll, +30 damroll, -35 AC
 
@@ -308,8 +317,9 @@ if ( hivemind active )
 - Thralls persist until duration expires, they die, or Mindflayer dismisses them (`dismiss <thrall>`)
 - Thralls do not grant XP when they kill
 - Thralls share Mindflayer's enemy list
+- Helper function: `count_thralls()` (`mindflayer.c:114-123`)
 
-### Tick Update
+### Tick Update (`mindflayer.c:773-803`)
 
 Per-tick processing:
 1. Focus build (+2 fighting, cap 150) or decay (-1 not fighting)
@@ -317,6 +327,7 @@ Per-tick processing:
 3. Thrall duration countdown (each thrall)
 4. Hivemind duration countdown
 5. Memory seal effect countdown on targets
+6. Thrall count update
 
 ## Data Storage Summary
 
@@ -324,8 +335,8 @@ Per-tick processing:
 |-------|----------|---------|
 | class | ch->class | CLASS_MINDFLAYER bit (131072) |
 | focus | ch->rage | Current focus (0-150) |
-| hivemind | ch->pcdata->powers[0] | Hivemind ticks remaining |
-| thrall_count | ch->pcdata->powers[1] | Number of active thralls |
+| hivemind | ch->pcdata->powers[6] | Hivemind ticks remaining |
+| thrall_count | ch->pcdata->powers[7] | Number of active thralls |
 | domination | ch->pcdata->powers[10] | Domination training level (0-4) |
 | consumption | ch->pcdata->powers[11] | Consumption training level (0-3) |
 | psionic_storm | ch->pcdata->powers[12] | Psionic Storm training level (0-3) |

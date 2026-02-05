@@ -26,6 +26,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [Monk](classes/monk.md) - Chi, mantras, and combos
 - [Ninja](classes/ninja.md) - Principles and belts
 - [Dirgesinger](classes/dirgesinger.md) - Sonic martial bard
+- [Psion](classes/psion.md) - Mental powers, Focus resource
 
 ### Upgrade Class Documentation
 - [Tanar'ri](classes/tanarri.md) - Upgraded from Demon, Blood Wars powers
@@ -36,6 +37,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [Angel](classes/angel.md) - Upgraded from Monk, divine powers
 - [Lich](classes/lich.md) - Upgraded from Battlemage, undead sorcery
 - [Siren](classes/siren.md) - Upgraded from Dirgesinger, voice of domination
+- [Mindflayer](classes/mindflayer.md) - Upgraded from Psion, mental domination
 
 ## Upgrade Paths
 
@@ -49,6 +51,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Monk | Angel | 50K hp, 35K mana/move, 40K qp, gen 1 |
 | Battlemage | Lich | 50K hp, 35K mana/move, 40K qp, gen 1 |
 | Dirgesinger | Siren | 50K hp, 35K mana/move, 40K qp, gen 1 |
+| Psion | Mindflayer | 50K hp, 35K mana/move, 40K qp, gen 1 |
 
 ## Quick Reference
 
@@ -65,6 +68,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Monk | CLASS_MONK | 64 |
 | Ninja | CLASS_NINJA | 128 |
 | Dirgesinger | CLASS_DIRGESINGER | 16384 |
+| Psion | CLASS_PSION | 65536 |
 
 **Upgrade Classes:**
 | Class | Constant | Bit Value |
@@ -77,6 +81,7 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Undead Knight | CLASS_UNDEAD_KNIGHT | 4096 |
 | Spider Droid | CLASS_DROID | 8192 |
 | Siren | CLASS_SIREN | 32768 |
+| Mindflayer | CLASS_MINDFLAYER | 131072 |
 
 ### Key Source Files
 - `src/class.h` - Class constants and definitions

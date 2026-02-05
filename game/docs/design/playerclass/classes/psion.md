@@ -41,7 +41,7 @@ Focus is the concentration resource that powers Psion abilities, stored in `ch->
 ch->rage  // Current focus (0-100 for Psion, 0-150 for Mindflayer)
 ```
 
-**Building Focus**:
+**Building Focus** (`psion.c:651-667`):
 - Meditation: `psimeditate` command grants +10 Focus (out of combat only)
 - Combat: +1 per game tick while fighting (passive concentration)
 - Thought Shield: +3 when absorbing damage
@@ -51,11 +51,11 @@ ch->rage  // Current focus (0-100 for Psion, 0-150 for Mindflayer)
 - -2 per tick when not fighting and not meditating
 - Meditation prevents decay
 
-**Peak Tracking**: Highest focus reached stored in `ch->pcdata->stats[PSION_FOCUS_PEAK]`
+**Peak Tracking**: Highest focus reached stored in `ch->pcdata->stats[PSION_PEAK_FOCUS]` (`psion.c:669-671`)
 
 ### Focus Display
 
-Command: `psifocus`
+Command: `psifocus` (`psion.c:20-62`)
 - Shows current/max focus
 - Lists all active psionic effects with remaining durations
 - Available to both Psion and Mindflayer
@@ -82,7 +82,7 @@ Psion abilities are organized into 3 trainable categories. Each category has 3 l
 
 **Training Cost**: `(current_level + 1) * 40` primal per level
 
-**Training Command**: `psitrain` - Display current levels and improve categories
+**Training Command**: `psitrain` (`psion.c:99-187`) - Display current levels and improve categories
 
 ### Telepathy (Detection/Defense)
 
@@ -110,7 +110,7 @@ Psion abilities are organized into 3 trainable categories. Each category has 3 l
 
 ## Abilities
 
-### Psimeditate - Focus Recovery
+### Psimeditate - Focus Recovery (`psion.c:67-94`)
 
 Out-of-combat ability to build Focus through concentration. Command: `psimeditate`
 
@@ -124,7 +124,7 @@ Out-of-combat ability to build Focus through concentration. Command: `psimeditat
 
 **Mechanic**: Cannot be interrupted. Prevents Focus decay while active. Standing or sitting only.
 
-### Mindscan - Mental Detection
+### Mindscan - Mental Detection (`psion.c:192-248`)
 
 Reveals hidden creatures and reads surface thoughts of a target.
 
@@ -139,7 +139,7 @@ Reveals hidden creatures and reads surface thoughts of a target.
 - Grants AFF_DETECT_HIDDEN and AFF_DETECT_INVIS for duration
 - When targeting a specific creature: reveals their current HP%, mana%, and fighting target
 
-### Thought Shield - Mental Defense
+### Thought Shield - Mental Defense (`psion.c:253-284`)
 
 Creates a psychic barrier that absorbs mental damage and builds Focus.
 
@@ -153,7 +153,7 @@ Creates a psychic barrier that absorbs mental damage and builds Focus.
 
 **Mechanic**: Only absorbs mental/psychic damage types. Physical damage passes through normally.
 
-### Mental Link - Telepathic Bond
+### Mental Link - Telepathic Bond (`psion.c:289-341`)
 
 Creates a mental bond with an ally, enabling telepathic communication and buff sharing.
 
@@ -170,7 +170,7 @@ Creates a mental bond with an ally, enabling telepathic communication and buff s
 - When Psion casts a self-buff, linked ally receives 50% duration version
 - Only one link active at a time
 
-### Force Push - Telekinetic Attack
+### Force Push - Telekinetic Attack (`psion.c:346-396`)
 
 Slams the target with telekinetic force, dealing damage and potentially knocking them back.
 
@@ -184,7 +184,7 @@ Slams the target with telekinetic force, dealing damage and potentially knocking
 | Disarm Chance | 15% | `psion.forcepush.disarm_chance` |
 | Requires | Fighting, Telekinesis 1 | |
 
-### Levitate - Telekinetic Flight
+### Levitate - Telekinetic Flight (`psion.c:401-432`)
 
 Lifts the Psion into the air, granting flight and evasion bonuses.
 
@@ -201,7 +201,7 @@ Lifts the Psion into the air, granting flight and evasion bonuses.
 - Immune to ground-based attacks (earthquake, etc.)
 - Cannot be tripped or knocked down
 
-### Kinetic Barrier - Force Shield
+### Kinetic Barrier - Force Shield (`psion.c:438-478`)
 
 Creates a telekinetic shield that absorbs physical damage.
 
@@ -216,7 +216,7 @@ Creates a telekinetic shield that absorbs physical damage.
 
 **Mechanic**: Only absorbs physical damage. Mental damage passes through. Cannot stack with Thought Shield (must choose one).
 
-### Mind Spike - Basic Mental Attack
+### Mind Spike - Basic Mental Attack (`psion.c:483-524`)
 
 Drives a spike of psychic energy into the target's mind.
 
@@ -229,7 +229,7 @@ Drives a spike of psychic energy into the target's mind.
 | Damage Type | Mental (bypasses armor) | |
 | Requires | Fighting, Psychic Combat 1 | |
 
-### Psychic Scream - AoE Mental Attack
+### Psychic Scream - AoE Mental Attack (`psion.c:529-582`)
 
 Unleashes a wave of psychic energy hitting all enemies in combat with the Psion.
 
@@ -243,7 +243,7 @@ Unleashes a wave of psychic energy hitting all enemies in combat with the Psion.
 | Damage Type | Mental (bypasses armor) | |
 | Requires | Fighting, Psychic Combat 2 | |
 
-### Brain Burn - Heavy Mental Strike
+### Brain Burn - Heavy Mental Strike (`psion.c:587-639`)
 
 Overloads the target's mind with psychic fire, dealing heavy damage with a chance to stun.
 
@@ -260,27 +260,27 @@ Overloads the target's mind with psychic fire, dealing heavy damage with a chanc
 
 ## Psion Armor
 
-Create equipment via `psionarmor <piece>`:
+Create equipment via `psionarmor <piece>` (`psion.c:644-646`):
 
 **Cost**: 60 primal per piece
 
 | Piece | Vnum | Wear Slot |
 |-------|------|-----------|
-| psychic focus | TBD | Wield |
-| ring | TBD | Finger |
-| amulet | TBD | Neck |
-| mindweave robe | TBD | Torso |
-| psionic circlet | TBD | Head |
-| leggings | TBD | Legs |
-| sandals | TBD | Feet |
-| gloves | TBD | Hands |
-| bracers | TBD | Arms |
-| cloak | TBD | About Body |
-| sash | TBD | Waist |
-| wristband | TBD | Wrist |
-| third eye gem | TBD | Face |
+| psychic focus | (classeq.db) | Wield |
+| ring | (classeq.db) | Finger |
+| amulet | (classeq.db) | Neck |
+| mindweave robe | (classeq.db) | Torso |
+| psionic circlet | (classeq.db) | Head |
+| leggings | (classeq.db) | Legs |
+| sandals | (classeq.db) | Feet |
+| gloves | (classeq.db) | Hands |
+| bracers | (classeq.db) | Arms |
+| cloak | (classeq.db) | About Body |
+| sash | (classeq.db) | Waist |
+| wristband | (classeq.db) | Wrist |
+| third eye gem | (classeq.db) | Face |
 
-**Equipment Stats** (proposed):
+**Equipment Stats** (from `classeq.db`):
 - Weapons: +35 hitroll, +35 damroll
 - Armor: +30 hitroll, +30 damroll, -35 AC
 
@@ -311,7 +311,7 @@ Mental damage abilities:
 3. Cannot be blocked, parried, or dodged
 4. Not affected by sanctuary (pure mental assault)
 
-### Tick Update
+### Tick Update (`psion.c:651-716`)
 
 Per-tick processing:
 1. Focus build (+1 fighting) or decay (-2 not fighting, unless meditating)

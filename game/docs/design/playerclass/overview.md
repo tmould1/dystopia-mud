@@ -23,6 +23,7 @@ Available via `selfclass` command at level 3 (Avatar):
 - Monk
 - Battlemage (requires 5K mana and 100 in all spell colors)
 - Dirgesinger
+- Psion
 
 ### Upgrade Classes
 Achieved by upgrading from a maxed base class:
@@ -37,6 +38,7 @@ Achieved by upgrading from a maxed base class:
 | Monk | Angel |
 | Battlemage | Lich |
 | Dirgesinger | Siren |
+| Psion | Mindflayer |
 
 **Source**: `src/systems/upgrade.c`, `gamedata/db/game/base_help.db` (UPGRADE help entry)
 
@@ -97,6 +99,7 @@ bool is_upgrade(CHAR_DATA *ch) {
     if (IS_CLASS(ch, CLASS_LICH))          return TRUE;
     if (IS_CLASS(ch, CLASS_SHAPESHIFTER))  return TRUE;
     if (IS_CLASS(ch, CLASS_SIREN))         return TRUE;
+    if (IS_CLASS(ch, CLASS_MINDFLAYER))    return TRUE;
     return FALSE;
 }
 ```
@@ -181,6 +184,10 @@ struct pc_data {
 
 // Base Classes (continued)
 #define CLASS_DIRGESINGER 16384
+#define CLASS_PSION       65536
+
+// Upgrade Classes (continued)
+#define CLASS_MINDFLAYER 131072
 ```
 
 ### Checking Class Membership
@@ -223,6 +230,8 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 | Undead Knight | NECROMANCY, INVOCATION, SPIRIT | undead_knight.h |
 | Dirgesinger | Buff durations, DOT stacks, training levels (0-13) | dirgesinger.h |
 | Siren | Echoshield, Crescendo stage (6-7) | dirgesinger.h |
+| Psion | Shield durations, training levels (10-12) | psion.h |
+| Mindflayer | Hivemind, thrall count, training levels (10-12) | psion.h |
 
 ## File Organization
 
@@ -245,6 +254,7 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 - `src/monk.c`, `src/monk2.c` - Monk abilities
 - `src/ninja.c` - Ninja abilities
 - `src/dirgesinger.c`, `src/dirgesinger.h` - Dirgesinger powers
+- `src/classes/psion.c`, `src/classes/psion.h` - Psion powers
 
 **Upgrade Classes:**
 - `src/tanarri.c`, `src/tanarri.h` - Tanar'ri powers
@@ -255,6 +265,7 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 - `src/angel.c`, `src/angel.h` - Angel powers
 - `src/lich.c`, `src/lich.h` - Lich powers
 - `src/siren.c` - Siren powers
+- `src/classes/mindflayer.c` - Mindflayer powers
 
 ## Design Considerations
 
