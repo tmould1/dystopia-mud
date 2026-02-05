@@ -295,6 +295,53 @@ void do_koutcast( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 
+void do_kleave( CHAR_DATA *ch, char *argument ) {
+	DESCRIPTOR_DATA *d;
+	char arg[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	int kingdom;
+
+	one_argument( argument, arg );
+
+	if ( IS_NPC( ch ) ) return;
+
+	if ( ch->pcdata->kingdom == 0 ) {
+		send_to_char( "You are not a member of any kingdom.\n\r", ch );
+		return;
+	}
+
+	/* Require confirmation */
+	if ( str_cmp( arg, "confirm" ) ) {
+		send_to_char( "Type 'kleave confirm' to leave your kingdom.\n\r", ch );
+
+		/* Warn leaders and generals */
+		if ( !str_cmp( ch->name, kingdom_table[ch->pcdata->kingdom].leader ) )
+			send_to_char( "#RWARNING: You are the kingdom leader!#n\n\r", ch );
+		else if ( !str_cmp( ch->name, kingdom_table[ch->pcdata->kingdom].general ) )
+			send_to_char( "#RWARNING: You are the kingdom general!#n\n\r", ch );
+		return;
+	}
+
+	kingdom = ch->pcdata->kingdom;
+
+	/* Notify kingdom members before leaving */
+	snprintf( buf, sizeof( buf ), "#R%s has left the kingdom.#n\n\r", ch->name );
+	for ( d = descriptor_list; d != NULL; d = d->next ) {
+		if ( d->connected == CON_PLAYING && d->character != NULL
+			&& !IS_NPC( d->character )
+			&& d->character->pcdata->kingdom == kingdom
+			&& d->character != ch )
+		{
+			send_to_char( buf, d->character );
+		}
+	}
+
+	/* Leave the kingdom */
+	ch->pcdata->kingdom = 0;
+	send_to_char( "You have left the kingdom.\n\r", ch );
+	return;
+}
+
 void do_kstats( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];

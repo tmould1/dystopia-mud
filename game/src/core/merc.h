@@ -3603,6 +3603,7 @@ DECLARE_DO_FUN( do_wantkingdom );
 DECLARE_DO_FUN( do_kset );
 DECLARE_DO_FUN( do_koutcast );
 DECLARE_DO_FUN( do_kstats );
+DECLARE_DO_FUN( do_kleave );
 DECLARE_DO_FUN( do_kingset );
 
 DECLARE_DO_FUN( do_leader );

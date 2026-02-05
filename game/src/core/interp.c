@@ -1213,6 +1213,7 @@ const struct cmd_type cmd_table[] =
 		{ "kinduct", do_kinduct, POS_STANDING, 2, LOG_NORMAL, 0, 0, 0 },
 		{ "kset", do_kset, POS_STANDING, 2, LOG_NORMAL, 0, 0, 0 },
 		{ "koutcast", do_koutcast, POS_STANDING, 2, LOG_NORMAL, 0, 0, 0 },
+		{ "kleave", do_kleave, POS_DEAD, 2, LOG_NORMAL, 0, 0, 0 },
 
 		/* Arena stuff - Jobo */
 
