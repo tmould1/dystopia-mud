@@ -461,6 +461,7 @@ void mobile_update( void ) {
 			continue;
 		}
 		if ( !IS_NPC( ch ) ) {
+			PROFILE_START( "mob_player_upd" );
 			update_morted_timer( ch );
 			update_sit_safe_counter( ch );
 			update_drunks( ch );
@@ -527,15 +528,30 @@ void mobile_update( void ) {
 				if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) && ch->hit > 0 )
 					update_arti_regen( ch );
 			}
+			PROFILE_END( "mob_player_upd" );
 		} else // This is for the mobs
 		{
-			if ( IS_AFFECTED( ch, AFF_CHARM ) ) continue;
+			PROFILE_START( "mob_npc_ai" );
+			if ( IS_AFFECTED( ch, AFF_CHARM ) ) {
+				PROFILE_END( "mob_npc_ai" );
+				continue;
+			}
 			if ( ch->spec_fun != 0 ) {
-				if ( ( *ch->spec_fun )( ch ) ) continue;
-				if ( ch == NULL ) continue;
+				PROFILE_START( "mob_spec_fun" );
+				if ( ( *ch->spec_fun )( ch ) ) {
+					PROFILE_END( "mob_spec_fun" );
+					PROFILE_END( "mob_npc_ai" );
+					continue;
+				}
+				PROFILE_END( "mob_spec_fun" );
+				if ( ch == NULL ) {
+					PROFILE_END( "mob_npc_ai" );
+					continue;
+				}
 			}
 			if ( ch->position != POS_STANDING ) {
 				do_stand( ch, "" );
+				PROFILE_END( "mob_npc_ai" );
 				continue;
 			}
 			if ( IS_SET( ch->act, ACT_SCAVENGER ) && ch->in_room->contents != NULL && number_bits( 2 ) == 0 ) {
@@ -551,12 +567,19 @@ void mobile_update( void ) {
 				if ( obj_best ) {
 					obj_from_room( obj_best );
 					obj_to_char( obj_best, ch );
-					act( "$n picks $p up.", ch, obj_best, NULL, TO_ROOM );
-					act( "You pick $p up.", ch, obj_best, NULL, TO_CHAR );
+					/* Only show messages if players can see */
+					if ( ch->in_room->area->nplayer > 0 ) {
+						act( "$n picks $p up.", ch, obj_best, NULL, TO_ROOM );
+						act( "You pick $p up.", ch, obj_best, NULL, TO_CHAR );
+					}
 				}
 			}
-			if ( !IS_SET( ch->act, ACT_SENTINEL ) && ( door = number_bits( 5 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) && ( ch->hunting == NULL || strlen( ch->hunting ) < 2 ) && ( ( !IS_SET( ch->act, ACT_STAY_AREA ) && ch->level < 900 ) || pexit->to_room->area == ch->in_room->area ) ) {
-				move_char( ch, door );
+			/* When no players in area, reduce movement to 1/4 frequency */
+			{
+				int move_chance = ( ch->in_room->area->nplayer > 0 ) ? 5 : 1;
+				if ( !IS_SET( ch->act, ACT_SENTINEL ) && ( door = number_bits( 5 ) ) <= move_chance && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) && ( ch->hunting == NULL || strlen( ch->hunting ) < 2 ) && ( ( !IS_SET( ch->act, ACT_STAY_AREA ) && ch->level < 900 ) || pexit->to_room->area == ch->in_room->area ) ) {
+					move_char( ch, door );
+				}
 			}
 			if ( ch->hit < ch->max_hit / 2 && ( door = number_bits( 3 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_AFFECTED( ch, AFF_WEBBED ) && ch->level < 900 && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) ) {
 				CHAR_DATA *rch;
@@ -573,6 +596,7 @@ void mobile_update( void ) {
 				if ( !found )
 					move_char( ch, door );
 			}
+			PROFILE_END( "mob_npc_ai" );
 		}
 	}
 

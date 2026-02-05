@@ -16,6 +16,9 @@
  ***************************************************************************/
 
 #include <sys/types.h>
+#if !defined( WIN32 )
+#include <sys/time.h>
+#endif
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +27,7 @@
 #include "merc.h"
 #include "garou.h"
 #include "../db/db_game.h"
+#include "../systems/profile.h"
 
 bool check_social args( ( CHAR_DATA * ch, char *command,
 	char *argument ) );
@@ -1718,7 +1722,33 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 	sprintf( log_buf, "%s %s BY %s", cmd_table[cmd].name, argument, ch->name );
 	last_command = str_dup( log_buf );
 
-	( *cmd_table[cmd].do_fun )( ch, argument );
+	/* Profile command execution and log slow commands */
+	{
+		struct timeval cmd_start, cmd_end;
+		bool was_profiling = profile_stats.enabled;
+
+		if ( was_profiling )
+			gettimeofday( &cmd_start, NULL );
+
+		PROFILE_START("cmd_dispatch");
+		( *cmd_table[cmd].do_fun )( ch, argument );
+		PROFILE_END("cmd_dispatch");
+
+		/* Only check timing if profiling was enabled BEFORE command ran */
+		if ( was_profiling ) {
+			long elapsed_us;
+			gettimeofday( &cmd_end, NULL );
+			elapsed_us = ( cmd_end.tv_sec - cmd_start.tv_sec ) * 1000000
+			           + ( cmd_end.tv_usec - cmd_start.tv_usec );
+			if ( elapsed_us > PROFILE_CMD_THRESHOLD_US ) {
+				sprintf( log_buf, "SLOW CMD: %s by %s took %ldms",
+					cmd_table[cmd].name,
+					IS_NPC(ch) ? ch->short_descr : ch->name,
+					elapsed_us / 1000 );
+				log_string( log_buf );
+			}
+		}
+	}
 
 	tail_chain();
 	return;

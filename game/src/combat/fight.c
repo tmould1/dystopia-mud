@@ -71,6 +71,17 @@ void violence_update( void ) {
 	PROFILE_START( "violence_update" );
 
 	for ( ch = char_list; ch != NULL; ch = ch->next ) {
+		/* Quick skip: no violence-related state */
+		if ( ch->fighting == NULL
+		     && ch->blinkykill == NULL
+		     && ch->embracing == NULL
+		     && ch->embraced == NULL
+		     && !IS_SET( ch->monkstuff, MONK_DEATH | MONK_HEAL )
+		     && ch->fight_timer == 0
+		     && ( !IS_CLASS( ch, CLASS_DEMON ) || ch->rage == 0 ) ) {
+			continue;
+		}
+
 		victim = ch->blinkykill;
 
 		if ( victim != NULL ) {
@@ -168,6 +179,10 @@ void violence_update( void ) {
 			}
 		}
 		if ( ( victim = ch->fighting ) == NULL || ch->in_room == NULL ) continue;
+
+		/* Actual combat processing */
+		PROFILE_START( "violence_combat" );
+
 		if ( !IS_NPC( ch ) && !IS_NPC( victim ) && !is_safe( ch, victim ) && !is_safe( victim, ch ) ) {
 			if ( ch->fight_timer < 10 )
 				ch->fight_timer = 10;
@@ -231,6 +246,8 @@ void violence_update( void ) {
 				}
 			}
 		}
+
+		PROFILE_END( "violence_combat" );
 	}
 
 	PROFILE_END( "violence_update" );

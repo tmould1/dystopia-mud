@@ -77,6 +77,8 @@ void profile_init( void ) {
     profile_stats.tick_min_us = LONG_MAX;
     profile_stats.enabled = FALSE;  /* Disabled by default */
     profile_stats.verbose = FALSE;
+    profile_stats.tick_multiplier = 1;  /* Normal speed */
+    profile_stats.sample_start_time = current_time;
 
     /* Initialize marker min values */
     for ( i = 0; i < PROFILE_MAX_MARKERS; i++ ) {
@@ -97,12 +99,15 @@ void profile_reset( void ) {
     bool was_enabled = profile_stats.enabled;
     bool was_verbose = profile_stats.verbose;
     long threshold = profile_stats.threshold_us;
+    int tick_mult = profile_stats.tick_multiplier;
 
     profile_init();
 
     profile_stats.enabled = was_enabled;
     profile_stats.verbose = was_verbose;
     profile_stats.threshold_us = threshold;
+    profile_stats.tick_multiplier = tick_mult;
+    profile_stats.sample_start_time = current_time;
 }
 
 /*
@@ -283,6 +288,18 @@ void profile_report( CHAR_DATA *ch ) {
         profile_stats.threshold_us / 1000 );
     send_to_char( buf, ch );
 
+    /* Speed and timing info */
+    {
+        int mult = profile_stats.tick_multiplier > 0 ? profile_stats.tick_multiplier : 1;
+        int effective_pps = PULSE_PER_SECOND * mult;
+        time_t real_elapsed = current_time - profile_stats.sample_start_time;
+        time_t effective_elapsed = real_elapsed * mult;
+
+        snprintf( buf, sizeof( buf ), "Speed: #C%dx#n (%d pulses/sec)  |  Real: %lds  |  Effective: %lds\n\r",
+            mult, effective_pps, (long)real_elapsed, (long)effective_elapsed );
+        send_to_char( buf, ch );
+    }
+
     if ( profile_stats.tick_count == 0 ) {
         send_to_char( "\n\rNo data collected yet.\n\r", ch );
         return;
@@ -294,8 +311,12 @@ void profile_report( CHAR_DATA *ch ) {
     send_to_char( "\n\r#CTick Statistics:#n\n\r", ch );
     snprintf( buf, sizeof( buf ), "  Ticks measured: %ld\n\r", profile_stats.tick_count );
     send_to_char( buf, ch );
-    snprintf( buf, sizeof( buf ), "  Average: %.2fms  (expected: %.2fms)\n\r",
-        avg_tick_us / 1000.0, PROFILE_EXPECTED_PULSE_US / 1000.0 );
+    {
+        int mult = profile_stats.tick_multiplier > 0 ? profile_stats.tick_multiplier : 1;
+        double expected_us = 1000000.0 / ( PULSE_PER_SECOND * mult );
+        snprintf( buf, sizeof( buf ), "  Average: %.2fms  (expected: %.2fms at %dx)\n\r",
+            avg_tick_us / 1000.0, expected_us / 1000.0, mult );
+    }
     send_to_char( buf, ch );
     snprintf( buf, sizeof( buf ), "  Min: %.2fms  Max: %.2fms\n\r",
         profile_stats.tick_min_us / 1000.0, profile_stats.tick_max_us / 1000.0 );
@@ -307,8 +328,24 @@ void profile_report( CHAR_DATA *ch ) {
 
     /* Function breakdown */
     if ( profile_stats.marker_count > 0 ) {
+        long total_work_us = 0;
+        const char *pct_basis = "tick";
+
+        /* Find game_loop_work marker to use as percentage basis */
+        for ( i = 0; i < profile_stats.marker_count; i++ ) {
+            if ( !strcmp( profile_stats.markers[i].name, "game_loop_work" ) ) {
+                total_work_us = profile_stats.markers[i].total_us;
+                pct_basis = "loop";
+                break;
+            }
+        }
+        /* Fall back to tick time if no game_loop marker */
+        if ( total_work_us == 0 )
+            total_work_us = profile_stats.tick_total_us;
+
         send_to_char( "\n\r#CFunction Breakdown:#n\n\r", ch );
-        send_to_char( "  Name                 Calls     Avg(ms)   Max(ms)  Total%%\n\r", ch );
+        snprintf( buf, sizeof( buf ), "  Name                 Calls     Avg(ms)   Max(ms)  %%(%s)\n\r", pct_basis );
+        send_to_char( buf, ch );
         send_to_char( "  -------------------  --------  --------  -------  ------\n\r", ch );
 
         for ( i = 0; i < profile_stats.marker_count; i++ ) {
@@ -320,8 +357,8 @@ void profile_report( CHAR_DATA *ch ) {
                 continue;
 
             avg_us = m->total_us / m->call_count;
-            pct = ( profile_stats.tick_total_us > 0 )
-                ? 100.0 * m->total_us / profile_stats.tick_total_us
+            pct = ( total_work_us > 0 )
+                ? 100.0 * m->total_us / total_work_us
                 : 0.0;
 
             snprintf( buf, sizeof( buf ), "  %-19s  %8ld  %8.2f  %7.2f  %5.1f%%\n\r",
@@ -354,7 +391,7 @@ void profile_report_brief( CHAR_DATA *ch ) {
 }
 
 /*
- * Admin command: profile [on|off|reset|verbose|threshold <ms>|report|brief]
+ * Admin command: profile [on|off|reset|verbose|threshold <ms>|speed <1-16>|report|brief]
  */
 void do_profile( CHAR_DATA *ch, char *argument ) {
     char arg[MAX_INPUT_LENGTH];
@@ -422,5 +459,30 @@ void do_profile( CHAR_DATA *ch, char *argument ) {
         return;
     }
 
-    send_to_char( "Usage: profile [on|off|reset|verbose|threshold <ms>|report|brief]\n\r", ch );
+    if ( !str_cmp( arg, "speed" ) ) {
+        int mult;
+        argument = one_argument( argument, arg );
+        if ( arg[0] == '\0' || !is_number( arg ) ) {
+            snprintf( buf, sizeof( buf ), "Current speed: %dx (%d pulses/sec)\n\r"
+                "Usage: profile speed <1-16>\n\r",
+                profile_stats.tick_multiplier > 0 ? profile_stats.tick_multiplier : 1,
+                PULSE_PER_SECOND * ( profile_stats.tick_multiplier > 0 ? profile_stats.tick_multiplier : 1 ) );
+            send_to_char( buf, ch );
+            return;
+        }
+        mult = atoi( arg );
+        if ( mult < 1 || mult > 512 ) {
+            send_to_char( "Speed multiplier must be 1-512.\n\r", ch );
+            return;
+        }
+        profile_stats.tick_multiplier = mult;
+        snprintf( buf, sizeof( buf ), "Tick speed set to %dx (effective %d pulses/sec).\n\r",
+            mult, PULSE_PER_SECOND * mult );
+        send_to_char( buf, ch );
+        snprintf( buf, sizeof( buf ), "%s set profile speed to %dx", ch->name, mult );
+        log_string( buf );
+        return;
+    }
+
+    send_to_char( "Usage: profile [on|off|reset|verbose|threshold <ms>|speed <1-16>|report|brief]\n\r", ch );
 }

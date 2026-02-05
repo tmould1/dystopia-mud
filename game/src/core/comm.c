@@ -53,6 +53,7 @@
 
 #include "merc.h"
 #include "../db/db_game.h"
+#include "../systems/profile.h"
 
 #if defined( WIN32 )
 #include <sys/timeb.h> /*for _ftime(), uses _timeb struct*/
@@ -542,6 +543,8 @@ void game_loop( int control ) {
 			abort();
 #endif
 
+		PROFILE_START("game_loop_work");
+
 		/*
 		 * Poll all active descriptors.
 		 */
@@ -673,6 +676,8 @@ void game_loop( int control ) {
 			}
 		}
 
+		PROFILE_END("game_loop_work");
+
 		/*
 		 * Synchronize to a clock.
 		 * Sleep( last_time + 1/PULSE_PER_SECOND - now ).
@@ -683,9 +688,10 @@ void game_loop( int control ) {
 			struct timeval now_time;
 			long secDelta;
 			long usecDelta;
+			int effective_pps = PULSE_PER_SECOND * ( profile_stats.tick_multiplier > 0 ? profile_stats.tick_multiplier : 1 );
 
 			gettimeofday( &now_time, NULL );
-			usecDelta = ( (int) last_time.tv_usec ) - ( (int) now_time.tv_usec ) + 1000000 / PULSE_PER_SECOND;
+			usecDelta = ( (int) last_time.tv_usec ) - ( (int) now_time.tv_usec ) + 1000000 / effective_pps;
 			secDelta = ( (int) last_time.tv_sec ) - ( (int) now_time.tv_sec );
 			while ( usecDelta < 0 ) {
 				usecDelta += 1000000;
@@ -712,7 +718,8 @@ void game_loop( int control ) {
 		{
 			struct _timeb start_time;
 			struct _timeb end_time;
-			int pulse_ms = 1000 / PULSE_PER_SECOND;
+			int effective_pps = PULSE_PER_SECOND * ( profile_stats.tick_multiplier > 0 ? profile_stats.tick_multiplier : 1 );
+			int pulse_ms = 1000 / effective_pps;
 			int elapsed_ms;
 
 			_ftime( &start_time );

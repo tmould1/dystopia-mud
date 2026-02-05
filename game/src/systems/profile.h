@@ -34,6 +34,9 @@
 /* Default threshold for warning (microseconds) - 300ms */
 #define PROFILE_DEFAULT_THRESHOLD_US  300000
 
+/* Threshold for slow command warnings (microseconds) - 100ms */
+#define PROFILE_CMD_THRESHOLD_US      100000
+
 /* Minimum interval between warnings (seconds) to avoid spam */
 #define PROFILE_WARNING_INTERVAL      60
 
@@ -68,6 +71,8 @@ typedef struct profile_stats_data {
     long            threshold_us;           /* Warning threshold (microseconds) */
     bool            enabled;                /* Profiling enabled/disabled */
     bool            verbose;                /* Log individual overbudget ticks */
+    int             tick_multiplier;        /* Speed multiplier (1=normal, 2=2x, etc) */
+    time_t          sample_start_time;      /* When profiling/reset started */
 
     /* Rate limiting for warnings */
     time_t          last_warning_time;      /* Last time a warning was logged */

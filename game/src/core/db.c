@@ -705,7 +705,9 @@ void area_update( void ) {
 		if ( pArea->nplayer == 0 || pArea->age >= 15 ) {
 			ROOM_INDEX_DATA *pRoomIndex;
 
+			PROFILE_START( "area_reset" );
 			reset_area( pArea );
+			PROFILE_END( "area_reset" );
 			pArea->age = number_range( 0, 3 );
 			pRoomIndex = get_room_index( ROOM_VNUM_SCHOOL );
 			if ( pRoomIndex != NULL && pArea == pRoomIndex->area )
