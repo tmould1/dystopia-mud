@@ -205,3 +205,8 @@ systemctl restart stunnel@dystopia
 EOF
 sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/stunnel-reload.sh
 ```
+
+
+## Feedback from Experts
+
+Just use let's encrypt and make sure you have a daemon to update it
