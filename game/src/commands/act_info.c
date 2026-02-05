@@ -3898,13 +3898,13 @@ void do_commands( CHAR_DATA *ch, char *argument ) {
 				col = 0;
 				for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {
 					if ( cmd_table[cmd].level == 3 && cmd_table[cmd].race == 0 && cmd_table[cmd].discipline == 0 && can_interpret( ch, cmd ) > 0 ) {
-						snprintf( buf, sizeof( buf ), "%-14s", cmd_table[cmd].name );
+						snprintf( buf, sizeof( buf ), "%-17s", cmd_table[cmd].name );
 						send_to_char( buf, ch );
-						if ( ++col % 6 == 0 )
+						if ( ++col % 5 == 0 )
 							send_to_char( "\n\r", ch );
 					}
 				}
-				if ( col % 6 != 0 )
+				if ( col % 5 != 0 )
 					send_to_char( "\n\r", ch );
 			}
 
@@ -3924,13 +3924,13 @@ void do_commands( CHAR_DATA *ch, char *argument ) {
 				col = 0;
 				for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {
 					if ( cmd_table[cmd].level == 3 && ( cmd_table[cmd].race > 0 || cmd_table[cmd].discipline > 0 ) && can_interpret( ch, cmd ) > 0 ) {
-						snprintf( buf, sizeof( buf ), "%-14s", cmd_table[cmd].name );
+						snprintf( buf, sizeof( buf ), "%-17s", cmd_table[cmd].name );
 						send_to_char( buf, ch );
-						if ( ++col % 6 == 0 )
+						if ( ++col % 5 == 0 )
 							send_to_char( "\n\r", ch );
 					}
 				}
-				if ( col % 6 != 0 )
+				if ( col % 5 != 0 )
 					send_to_char( "\n\r", ch );
 			}
 
@@ -3958,14 +3958,14 @@ void do_commands( CHAR_DATA *ch, char *argument ) {
 		col = 0;
 		for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {
 			if ( cmd_table[cmd].level == level && can_interpret( ch, cmd ) > 0 ) {
-				snprintf( buf, sizeof( buf ), "%-14s", cmd_table[cmd].name );
+				snprintf( buf, sizeof( buf ), "%-17s", cmd_table[cmd].name );
 				send_to_char( buf, ch );
-				if ( ++col % 6 == 0 )
+				if ( ++col % 5 == 0 )
 					send_to_char( "\n\r", ch );
 			}
 		}
 
-		if ( col % 6 != 0 )
+		if ( col % 5 != 0 )
 			send_to_char( "\n\r", ch );
 	}
 
