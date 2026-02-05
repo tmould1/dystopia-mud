@@ -62,6 +62,17 @@ static void pad_to_visible_width( char *dest, size_t destsize, const char *src, 
 }
 
 /*
+ * Add a player line to a who list buffer.
+ * Centralized formatting ensures consistent column alignment.
+ */
+static void who_add_player_line( char *buf, size_t bufsize, const char *padded_title,
+	const char *pkratio, const char *kav, const char *playername, const char *faith ) {
+	snprintf( buf + strlen( buf ), bufsize - strlen( buf ),
+		" %s %-6s %-24s %s %s\n\r",
+		padded_title, pkratio, kav, playername, faith );
+}
+
+/*
  * Build a dynamic width banner for do_who.
  * Format: endcap + fill*N + center_text + fill*N + endcap
  * Uses game_config.banner_endcap and game_config.banner_fill.
@@ -2901,89 +2912,72 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 		 */
 
 		if ( gch->level > 6 ) {
-			snprintf( buf1 + strlen( buf1 ), sizeof( buf1 ) - strlen( buf1 ), " %s %-6s %-24s %s %s\n\r",
-				padded_title, pkratio, kav, playername, faith );
+			who_add_player_line( buf1, sizeof( buf1 ), padded_title, pkratio, kav, playername, faith );
 			a1 = TRUE;
 		} else if ( gch->level >= 3 && gch->level <= 6 ) {
 			if ( mightRate > 3500 ) {
-				snprintf( buf2 + strlen( buf2 ), sizeof( buf2 ) - strlen( buf2 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf2, sizeof( buf2 ), padded_title, pkratio, kav, playername, faith );
 				a2 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 3250 ) {
-				snprintf( buf3 + strlen( buf3 ), sizeof( buf3 ) - strlen( buf3 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf3, sizeof( buf3 ), padded_title, pkratio, kav, playername, faith );
 				a3 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 3000 ) {
-				snprintf( buf4 + strlen( buf4 ), sizeof( buf4 ) - strlen( buf4 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf4, sizeof( buf4 ), padded_title, pkratio, kav, playername, faith );
 				a4 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 2750 ) {
-				snprintf( buf5 + strlen( buf5 ), sizeof( buf5 ) - strlen( buf5 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf5, sizeof( buf5 ), padded_title, pkratio, kav, playername, faith );
 				a5 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 2500 ) {
-				snprintf( buf6 + strlen( buf6 ), sizeof( buf6 ) - strlen( buf6 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf6, sizeof( buf6 ), padded_title, pkratio, kav, playername, faith );
 				a6 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 2250 ) {
-				snprintf( buf7 + strlen( buf7 ), sizeof( buf7 ) - strlen( buf7 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf7, sizeof( buf7 ), padded_title, pkratio, kav, playername, faith );
 				a7 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 2000 ) {
-				snprintf( buf8 + strlen( buf8 ), sizeof( buf8 ) - strlen( buf8 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf8, sizeof( buf8 ), padded_title, pkratio, kav, playername, faith );
 				a8 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 1750 ) {
-				snprintf( buf9 + strlen( buf9 ), sizeof( buf9 ) - strlen( buf9 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf9, sizeof( buf9 ), padded_title, pkratio, kav, playername, faith );
 				a9 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 1500 ) {
-				snprintf( buf10 + strlen( buf10 ), sizeof( buf10 ) - strlen( buf10 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf10, sizeof( buf10 ), padded_title, pkratio, kav, playername, faith );
 				a10 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 1250 ) {
-				snprintf( buf11 + strlen( buf11 ), sizeof( buf11 ) - strlen( buf11 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf11, sizeof( buf11 ), padded_title, pkratio, kav, playername, faith );
 				a11 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 1000 ) {
-				snprintf( buf12 + strlen( buf12 ), sizeof( buf12 ) - strlen( buf12 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf12, sizeof( buf12 ), padded_title, pkratio, kav, playername, faith );
 				a12 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 750 ) {
-				snprintf( buf13 + strlen( buf13 ), sizeof( buf13 ) - strlen( buf13 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf13, sizeof( buf13 ), padded_title, pkratio, kav, playername, faith );
 				a13 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate > 500 ) {
-				snprintf( buf14 + strlen( buf14 ), sizeof( buf14 ) - strlen( buf14 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf14, sizeof( buf14 ), padded_title, pkratio, kav, playername, faith );
 				a14 = TRUE;
 				avatars = TRUE;
 			} else if ( mightRate >= 150 ) {
-				snprintf( buf15 + strlen( buf15 ), sizeof( buf15 ) - strlen( buf15 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf15, sizeof( buf15 ), padded_title, pkratio, kav, playername, faith );
 				a15 = TRUE;
 				avatars = TRUE;
 			} else {
-				snprintf( buf16 + strlen( buf16 ), sizeof( buf16 ) - strlen( buf16 ), " %-16s %-6s %-24s %s %s\n\r",
-					title, pkratio, kav, playername, faith );
+				who_add_player_line( buf16, sizeof( buf16 ), padded_title, pkratio, kav, playername, faith );
 				a16 = TRUE;
 				avatars = TRUE;
 			}
 		} else if ( gch->level < 3 ) {
-			snprintf( buf17 + strlen( buf17 ), sizeof( buf17 ) - strlen( buf17 ), " %s %-6s %-24s %s %s\n\r",
-				padded_title, pkratio, kav, playername, faith );
+			who_add_player_line( buf17, sizeof( buf17 ), padded_title, pkratio, kav, playername, faith );
 			a17 = TRUE;
 		}
 	}
