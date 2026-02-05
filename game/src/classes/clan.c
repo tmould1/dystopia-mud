@@ -1511,6 +1511,37 @@ void do_shadowsight( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 
+static void clear_class_state( CHAR_DATA *victim ) {
+	int i;
+
+	/* Clear stats, transformations, affects, and unequip items */
+	do_clearstats2( victim, "" );
+
+	/* Clear all disciplines (mark as unavailable) */
+	for ( i = 0; i < MAX_DISCIPLINES; i++ )
+		victim->power[i] = -2;
+
+	/* Clear class-specific fields */
+	victim->beast = 15;
+	victim->warp = 0;
+	victim->rage = 0;
+	victim->generation = 0;
+	victim->cclan = 0;
+
+	/* Clear PC-specific class data */
+	if ( victim->pcdata != NULL ) {
+		victim->pcdata->disc_points = 0;
+		victim->pcdata->disc_research = 0;
+		victim->pcdata->rank = 0;
+		victim->pcdata->demonic_a = 0;
+		victim->pcdata->wolf = 0;
+		for ( i = 0; i < 3; i++ )
+			victim->pcdata->stage[i] = 0;
+		for ( i = 0; i < 2; i++ )
+			victim->pcdata->wolfform[i] = 0;
+	}
+}
+
 void do_class( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	char arg1[MAX_INPUT_LENGTH];
@@ -1532,6 +1563,10 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "That player is not here.\n\r", ch );
 		return;
 	}
+
+	/* Clear old class state before assigning new class */
+	clear_class_state( victim );
+
 	if ( !str_cmp( arg2, "demon" ) ) {
 		victim->class = CLASS_DEMON;
 		set_learnable_disciplines( victim );
@@ -1591,41 +1626,8 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 		victim->class = CLASS_MINDFLAYER;
 		send_to_char( "You are now a Mindflayer!\n\r", victim );
 	} else if ( !str_cmp( arg2, "none" ) ) {
-		int i;
-
-		/* Clear stats, transformations, affects, and unequip items */
-		do_clearstats2( victim, "" );
-
-		/* Clear the class */
 		victim->class = 0;
-
-		/* Clear all disciplines (mark as unavailable) */
-		for ( i = 0; i < MAX_DISCIPLINES; i++ )
-			victim->power[i] = -2;
-
-		/* Clear class-specific fields */
-		victim->beast = 15;
-		victim->warp = 0;
-		victim->rage = 0;
-		victim->generation = 0;
-		victim->cclan = 0;
-
-		/* Clear PC-specific class data */
-		if ( victim->pcdata != NULL ) {
-			victim->pcdata->disc_points = 0;
-			victim->pcdata->disc_research = 0;
-			victim->pcdata->rank = 0;
-			victim->pcdata->demonic_a = 0;
-			victim->pcdata->wolf = 0;
-			for ( i = 0; i < 3; i++ )
-				victim->pcdata->stage[i] = 0;
-			for ( i = 0; i < 2; i++ )
-				victim->pcdata->wolfform[i] = 0;
-		}
-
-		/* Save the character */
 		save_char_obj( victim );
-
 		send_to_char( "Your class has been removed.\n\r", victim );
 	} else {
 		do_class( ch, "" );
