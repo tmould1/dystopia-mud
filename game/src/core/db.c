@@ -442,6 +442,7 @@ void boot_db( bool fCopyOver ) {
 	 * Must happen before area loading since help_greeting is needed early.
 	 */
 	db_game_init();
+	db_class_init();
 	db_game_load_helps();
 
 	/*
@@ -491,13 +492,13 @@ void boot_db( bool fCopyOver ) {
 		load_gameconfig();
 		load_balance();
 		load_ability_config();
-		db_game_load_class_registry();  /* Must load first - other class tables reference it */
-		db_game_load_class_display();
-		db_game_load_class_aura();
-		db_game_load_class_armor();
-		db_game_load_class_starting();
-		db_game_load_class_score();
-		db_game_load_class_vnum_ranges();
+		db_class_load_registry();  /* Must load first - other class tables reference it */
+		db_class_load_display();
+		db_class_load_aura();
+		db_class_load_armor();
+		db_class_load_starting();
+		db_class_load_score();
+		db_class_load_vnum_ranges();
 		db_game_close_boot_connections();
 	}
 

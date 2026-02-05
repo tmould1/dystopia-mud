@@ -123,7 +123,8 @@ class MudEditorApp:
                  "Available databases:\n"
                  "  - Help Files: Edit in-game help documentation\n"
                  "  - Areas: Edit rooms, mobiles, objects, and resets\n"
-                 "  - Game Config: Edit server configuration\n"
+                 "  - Game Config: Edit server configuration (game.db)\n"
+                 "  - Class Config: Edit class configuration (class.db)\n"
                  "  - Players: View player data (read-only recommended)",
             justify=tk.LEFT,
             font=('Consolas', 11)
@@ -398,7 +399,18 @@ class MudEditorApp:
                     on_status=self._set_status
                 )
 
-            elif entity_type == 'class_display':
+            else:
+                return self._create_placeholder_panel(
+                    f"Game Config: {entity_type}",
+                    f"Table: {entity_type}\n\n"
+                    "This editor is not yet implemented."
+                )
+
+        elif category == 'class':
+            # Class configuration from class.db
+            conn = self.db_manager.get_connection(db_path)
+
+            if entity_type == 'class_display':
                 brackets_repo = ClassBracketsRepository(conn)
                 generations_repo = ClassGenerationsRepository(conn)
                 return ClassDisplayPanel(
@@ -419,7 +431,9 @@ class MudEditorApp:
             elif entity_type == 'class_armor':
                 config_repo = ClassArmorConfigRepository(conn)
                 pieces_repo = ClassArmorPiecesRepository(conn)
-                ability_repo = AbilityConfigRepository(conn)
+                # ability_config is in game.db
+                game_conn = self.db_manager.get_connection(self.db_manager.get_game_db_path())
+                ability_repo = AbilityConfigRepository(game_conn)
                 return ClassArmorPanel(
                     self.notebook,
                     config_repo,
@@ -463,7 +477,7 @@ class MudEditorApp:
 
             else:
                 return self._create_placeholder_panel(
-                    f"Game Config: {entity_type}",
+                    f"Class Config: {entity_type}",
                     f"Table: {entity_type}\n\n"
                     "This editor is not yet implemented."
                 )

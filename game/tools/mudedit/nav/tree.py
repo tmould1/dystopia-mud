@@ -19,7 +19,8 @@ class NavigationTree(ttk.Frame):
     Displays a hierarchical tree of:
     - Help Files
     - Areas (with sub-items for each entity type)
-    - Game Config
+    - Game Config (game.db)
+    - Class Config (class.db)
     - Players
     """
 
@@ -125,16 +126,25 @@ class NavigationTree(ttk.Frame):
                 ('disabled_commands', 'Disabled Commands'),
                 ('super_admins', 'Super Admins'),
                 ('immortal_pretitles', 'Immortal Pretitles'),
-                ('class_display', 'Class Display'),
-                ('class_auras', 'Class Auras'),
-                ('class_armor', 'Class Armor'),
-                ('class_starting', 'Class Starting'),
-                ('class_score_stats', 'Class Score Stats'),
-                ('class_registry', 'Class Registry'),
-                ('class_vnum_ranges', 'Class Vnum Ranges'),
             ]:
                 node_id = self.tree.insert(game_node, tk.END, text=label)
                 self._node_data[node_id] = ('game', game_db, table_name)
+
+        # Class Config (separate database)
+        class_node = self.tree.insert('', tk.END, text='Class Config', open=False)
+        class_db = self.db_manager.get_class_db_path()
+        if class_db.exists():
+            for table_name, label in [
+                ('class_registry', 'Class Registry'),
+                ('class_display', 'Display (Brackets/Generations)'),
+                ('class_auras', 'Auras'),
+                ('class_armor', 'Armor'),
+                ('class_starting', 'Starting Values'),
+                ('class_score_stats', 'Score Stats'),
+                ('class_vnum_ranges', 'Vnum Ranges'),
+            ]:
+                node_id = self.tree.insert(class_node, tk.END, text=label)
+                self._node_data[node_id] = ('class', class_db, table_name)
 
         # Players
         players_node = self.tree.insert('', tk.END, text='Players', open=False)

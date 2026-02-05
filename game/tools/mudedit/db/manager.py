@@ -95,6 +95,10 @@ class DatabaseManager:
         """Get the path to the game configuration database."""
         return self.db_root / 'game' / 'game.db'
 
+    def get_class_db_path(self) -> Path:
+        """Get the path to the class configuration database."""
+        return self.db_root / 'game' / 'class.db'
+
     def list_area_dbs(self) -> List[Path]:
         """
         List all area database files.

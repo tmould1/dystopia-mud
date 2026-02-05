@@ -6,6 +6,7 @@ A Tkinter-based GUI editor for all MUD SQLite database files:
 - Help files (gamedata/db/game/*.db)
 - Area files (gamedata/db/areas/*.db)
 - Game configuration (gamedata/db/game/game.db)
+- Class configuration (gamedata/db/game/class.db)
 - Player files (gamedata/db/players/*.db)
 
 Usage:

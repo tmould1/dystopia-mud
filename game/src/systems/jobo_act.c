@@ -217,9 +217,9 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 			newbie_count++;
 		} else {
 			/* Find class in registry and count */
-			reg_count = db_game_get_registry_count();
+			reg_count = db_class_get_registry_count();
 			for ( i = 0; i < reg_count; i++ ) {
-				reg = db_game_get_registry_by_index( i );
+				reg = db_class_get_registry_by_index( i );
 				if ( reg && gch->class == reg->class_id ) {
 					class_counts[i]++;
 					break;
@@ -234,12 +234,12 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 	send_to_char( "#LOnline Players by Class :#n\n\r\n\r", ch );
 
 	/* Display classes in 4-column rows using registry labels */
-	reg_count = db_game_get_registry_count();
+	reg_count = db_class_get_registry_count();
 	col = 0;
 	line[0] = '\0';
 
 	for ( i = 0; i < reg_count; i++ ) {
-		reg = db_game_get_registry_by_index( i );
+		reg = db_class_get_registry_by_index( i );
 		if ( !reg ) continue;
 
 		/* Format: #GLabel#n : count (padded to 17 chars total per column) */
@@ -596,7 +596,7 @@ void do_mastery( CHAR_DATA *ch, char *argument ) {
 	}
 
 	/* Look up mastery vnum from database */
-	vnum_range = db_game_get_vnum_range_by_id( ch->class );
+	vnum_range = db_class_get_vnum_range_by_id( ch->class );
 	if ( vnum_range == NULL || vnum_range->mastery_vnum == 0 ) {
 		send_to_char( "Your class mastery is not done yet, write a note on the idea board.\n\r", ch );
 		return;

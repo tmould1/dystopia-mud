@@ -843,8 +843,8 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 		int aura_idx;
 		const CLASS_AURA *aura;
 
-		for ( aura_idx = 0; aura_idx < db_game_get_aura_count(); aura_idx++ ) {
-			aura = db_game_get_aura_by_index( aura_idx );
+		for ( aura_idx = 0; aura_idx < db_class_get_aura_count(); aura_idx++ ) {
+			aura = db_class_get_aura_by_index( aura_idx );
 			if ( aura == NULL )
 				continue;
 
@@ -2053,8 +2053,8 @@ static void show_class_score_stats( CHAR_DATA *ch ) {
 	if ( IS_NPC( ch ) || ch->class == 0 )
 		return;
 
-	stats = db_game_get_score_stats( ch->class );
-	count = db_game_get_score_stat_count( ch->class );
+	stats = db_class_get_score_stats( ch->class );
+	count = db_class_get_score_stat_count( ch->class );
 
 	if ( stats == NULL || count == 0 )
 		return;
@@ -2847,7 +2847,7 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 			strcpy( openb, "" );
 			strcpy( closeb, "" );
 		} else {
-			const CLASS_BRACKET *bracket = db_game_get_bracket( gch->class );
+			const CLASS_BRACKET *bracket = db_class_get_bracket( gch->class );
 			if ( bracket ) {
 				strcpy( openb, bracket->open_bracket );
 				strcpy( closeb, bracket->close_bracket );
@@ -2859,11 +2859,11 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 
 		/*
 		 * and then the class name.
-		 * Generation titles are now loaded from game.db for easy customization.
+		 * Generation titles are now loaded from class.db for easy customization.
 		 * Pad to 24 visible characters for consistent column alignment.
 		 */
 		if ( gch->class > 0 ) {
-			const char *gen_title = db_game_get_generation_title( gch->class, gch->generation );
+			const char *gen_title = db_class_get_generation_title( gch->class, gch->generation );
 			if ( gen_title ) {
 				char kav_raw[MAX_STRING_LENGTH];
 				sprintf( kav_raw, "%s%s%s", openb, gen_title, closeb );

@@ -27,7 +27,7 @@ void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id ) {
 		return;
 
 	/* Get armor config for this class */
-	config = db_game_get_armor_config( class_id );
+	config = db_class_get_armor_config( class_id );
 	if ( config == NULL ) {
 		send_to_char( "Your class does not have armor configuration.\n\r", ch );
 		return;
@@ -64,7 +64,7 @@ void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id ) {
 	}
 
 	/* Look up the vnum for this piece */
-	vnum = db_game_get_armor_vnum( class_id, arg );
+	vnum = db_class_get_armor_vnum( class_id, arg );
 	if ( vnum == 0 ) {
 		/* Invalid piece - show usage */
 		send_to_char( config->usage_message, ch );

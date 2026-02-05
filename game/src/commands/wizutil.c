@@ -178,7 +178,7 @@ void set_pc_name( CHAR_DATA *ch, char *title ) {
  * Sets beast, level, and calls set_learnable_disciplines() based on class_starting table.
  */
 static void apply_class_starting( CHAR_DATA *ch, int class_id ) {
-	const CLASS_STARTING *start = db_game_get_starting( class_id );
+	const CLASS_STARTING *start = db_class_get_starting( class_id );
 	if ( start == NULL )
 		return;
 
@@ -219,7 +219,7 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 	}
 
 	/* Look up class by keyword */
-	reg = db_game_get_registry_by_keyword( arg1 );
+	reg = db_class_get_registry_by_keyword( arg1 );
 
 	if ( !reg ) {
 		/* Invalid keyword - show help */
