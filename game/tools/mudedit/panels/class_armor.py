@@ -9,6 +9,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from typing import Callable, Optional
 
+from ..db.repository import get_class_name
+
 
 class ClassArmorPanel(ttk.Frame):
     """
@@ -205,7 +207,7 @@ class ClassArmorPanel(ttk.Frame):
 
         entries = self.config_repo.list_all()
         for entry in entries:
-            class_name = self.config_repo.get_class_name(entry['class_id'])
+            class_name = get_class_name(entry['class_id'])
             self.config_tree.insert(
                 '', tk.END, iid=str(entry['class_id']),
                 values=(entry['class_id'], class_name)
@@ -229,7 +231,7 @@ class ClassArmorPanel(ttk.Frame):
 
         entry = self.config_repo.get_by_id(class_id)
         if entry:
-            class_name = self.config_repo.get_class_name(class_id)
+            class_name = get_class_name(class_id)
             self.class_label.config(text=class_name)
             self.cost_key_var.set(entry['acfg_cost_key'])
             self.usage_var.set(entry['usage_message'])
