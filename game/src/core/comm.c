@@ -1706,7 +1706,7 @@ static const char *lookup_color( char code ) {
 }
 
 void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
-	static char output[32000];
+	static char output[65536];  /* 64KB - increased for MXP/color expansion */
 	char *ptr;
 	char *output_end;
 	int i = 0;
@@ -1931,7 +1931,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 	while ( d->outtop + length >= d->outsize ) {
 		char *obuf;
 
-		if ( d->outsize >= 32000 ) {
+		if ( d->outsize >= 262144 ) {  /* 256KB - increased for MXP markup */
 			bug( "Buffer overflow. Closing.", 0 );
 			close_socket( d );
 			return;

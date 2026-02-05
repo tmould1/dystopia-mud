@@ -441,23 +441,28 @@ static void db_game_migrate_vnum_ranges( void ) {
 
 	/* Use INSERT OR IGNORE to add any missing class vnum ranges.
 	 * This allows us to add new classes over time without affecting existing data.
+	 * mastery_vnum is looked up by do_mastery() in jobo_act.c
 	 */
 	if ( sqlite3_exec( game_db,
 			"INSERT OR IGNORE INTO class_vnum_ranges (class_id, armor_vnum_start, armor_vnum_end, mastery_vnum, description) VALUES "
-			"(4096, 29975, 29991, NULL, 'Undead Knight armor'),"      /* CLASS_UNDEAD_KNIGHT */
-			"(64, 33020, 33039, NULL, 'Monk armor'),"                 /* CLASS_MONK */
-			"(8, 33040, 33059, NULL, 'Vampire armor'),"               /* CLASS_VAMPIRE */
-			"(128, 33080, 33099, NULL, 'Ninja armor'),"               /* CLASS_NINJA */
-			"(4, 33100, 33119, NULL, 'Werewolf armor'),"              /* CLASS_WEREWOLF */
-			"(8192, 33140, 33159, NULL, 'Spider Droid armor'),"       /* CLASS_DROID */
-			"(512, 33160, 33175, NULL, 'Shapeshifter armor'),"        /* CLASS_SHAPESHIFTER */
-			"(2048, 33180, 33199, NULL, 'Angel armor'),"              /* CLASS_ANGEL */
-			"(1024, 33200, 33219, NULL, 'Tanarri armor'),"            /* CLASS_TANARRI */
-			"(256, 33220, 33239, NULL, 'Lich armor'),"                /* CLASS_LICH */
-			"(16384, 33320, 33332, 33333, 'Dirgesinger armor and mastery'),"  /* CLASS_DIRGESINGER */
-			"(32768, 33340, 33352, 33353, 'Siren armor and mastery'),"        /* CLASS_SIREN */
-			"(65536, 33360, 33372, NULL, 'Psion armor (shared with Mindflayer)'),"  /* CLASS_PSION */
-			"(131072, 33380, 33392, NULL, 'Mindflayer-exclusive armor')",    /* CLASS_MINDFLAYER */
+			"(1, 0, 0, 33134, 'Demon mastery'),"                      /* CLASS_DEMON */
+			"(2, 0, 0, 33014, 'Mage mastery'),"                       /* CLASS_MAGE */
+			"(4, 33100, 33119, 33112, 'Werewolf armor'),"             /* CLASS_WEREWOLF */
+			"(8, 33040, 33059, 33054, 'Vampire armor'),"              /* CLASS_VAMPIRE */
+			"(16, 0, 0, 33177, 'Samurai mastery'),"                   /* CLASS_SAMURAI */
+			"(32, 0, 0, 33074, 'Drow mastery'),"                      /* CLASS_DROW */
+			"(64, 33020, 33039, 33032, 'Monk armor'),"                /* CLASS_MONK */
+			"(128, 33080, 33099, 33094, 'Ninja armor'),"              /* CLASS_NINJA */
+			"(256, 33220, 33239, 33233, 'Lich armor'),"               /* CLASS_LICH */
+			"(512, 33160, 33175, 33174, 'Shapeshifter armor'),"       /* CLASS_SHAPESHIFTER */
+			"(1024, 33200, 33219, 33213, 'Tanarri armor'),"           /* CLASS_TANARRI */
+			"(2048, 33180, 33199, 33193, 'Angel armor'),"             /* CLASS_ANGEL */
+			"(4096, 29975, 29991, 29989, 'Undead Knight armor'),"     /* CLASS_UNDEAD_KNIGHT */
+			"(8192, 33140, 33159, 33153, 'Spider Droid armor'),"      /* CLASS_DROID */
+			"(16384, 33320, 33332, 33333, 'Dirgesinger armor'),"      /* CLASS_DIRGESINGER */
+			"(32768, 33340, 33352, 33353, 'Siren armor'),"            /* CLASS_SIREN */
+			"(65536, 33360, 33372, 33293, 'Psion armor'),"            /* CLASS_PSION */
+			"(131072, 33380, 33392, 33313, 'Mindflayer armor')",      /* CLASS_MINDFLAYER */
 			NULL, NULL, &errmsg ) != SQLITE_OK ) {
 		/* Not a critical error - entries may already exist */
 		if ( errmsg ) { sqlite3_free( errmsg ); errmsg = NULL; }

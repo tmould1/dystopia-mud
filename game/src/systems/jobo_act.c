@@ -570,6 +570,7 @@ void do_pkpowers( CHAR_DATA *ch, char *argument ) {
 /* Mastery command to gain mastery items */
 
 void do_mastery( CHAR_DATA *ch, char *argument ) {
+	const CLASS_VNUM_RANGE *vnum_range;
 	OBJ_INDEX_DATA *pObjIndex;
 	OBJ_DATA *obj;
 	int vnum;
@@ -593,46 +594,14 @@ void do_mastery( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Maybe you should grandmaster your stances first.\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_MAGE ) )
-		vnum = 33014;
-	else if ( IS_CLASS( ch, CLASS_WEREWOLF ) )
-		vnum = 33112;
-	else if ( IS_CLASS( ch, CLASS_NINJA ) )
-		vnum = 33094;
-	else if ( IS_CLASS( ch, CLASS_MONK ) )
-		vnum = 33032;
-	else if ( IS_CLASS( ch, CLASS_DROW ) )
-		vnum = 33074;
-	else if ( IS_CLASS( ch, CLASS_DEMON ) )
-		vnum = 33134;
-	else if ( IS_CLASS( ch, CLASS_VAMPIRE ) )
-		vnum = 33054;
-	else if ( IS_CLASS( ch, CLASS_DROID ) )
-		vnum = 33153;
-	else if ( IS_CLASS( ch, CLASS_SAMURAI ) )
-		vnum = 33177;
-	else if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) )
-		vnum = 29989;
-	else if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) )
-		vnum = 33174;
-	else if ( IS_CLASS( ch, CLASS_ANGEL ) )
-		vnum = 33193;
-	else if ( IS_CLASS( ch, CLASS_TANARRI ) )
-		vnum = 33213;
-	else if ( IS_CLASS( ch, CLASS_LICH ) )
-		vnum = 33233;
-	else if ( IS_CLASS( ch, CLASS_DIRGESINGER ) )
-		vnum = 33333;
-	else if ( IS_CLASS( ch, CLASS_SIREN ) )
-		vnum = 33353;
-	else if ( IS_CLASS( ch, CLASS_PSION ) )
-		vnum = 33293;
-	else if ( IS_CLASS( ch, CLASS_MINDFLAYER ) )
-		vnum = 33313;
-	else {
+
+	/* Look up mastery vnum from database */
+	vnum_range = db_game_get_vnum_range_by_id( ch->class );
+	if ( vnum_range == NULL || vnum_range->mastery_vnum == 0 ) {
 		send_to_char( "Your class mastery is not done yet, write a note on the idea board.\n\r", ch );
 		return;
 	}
+	vnum = vnum_range->mastery_vnum;
 	if ( ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
 		send_to_char( "Missing object, inform Jobo.\n\r", ch );
 		return;
