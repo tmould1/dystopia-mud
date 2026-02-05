@@ -25,6 +25,7 @@
 #endif
 #include "merc.h"
 #include "mcmp.h"
+#include "profile.h"
 #include "../core/ability_config.h"
 
 /*
@@ -164,6 +165,8 @@ void char_update( void ) {
 	bool is_obj;
 	time_t save_time;
 	int count = 0, i;
+
+	PROFILE_START( "char_update" );
 
 	save_time = current_time;
 
@@ -430,6 +433,7 @@ void char_update( void ) {
 		}
 	}
 
+	PROFILE_END( "char_update" );
 	return;
 }
 
@@ -443,6 +447,8 @@ void mobile_update( void ) {
 	CHAR_DATA *ch_next;
 	EXIT_DATA *pexit;
 	int door;
+
+	PROFILE_START( "mobile_update" );
 
 	/* Examine all mobs. */
 	for ( ch = char_list; ch != NULL; ch = ch_next ) {
@@ -569,6 +575,8 @@ void mobile_update( void ) {
 			}
 		}
 	}
+
+	PROFILE_END( "mobile_update" );
 	return;
 }
 
@@ -877,6 +885,8 @@ void obj_update( void ) {
 	OBJ_DATA *obj;
 	OBJ_DATA *obj_next;
 
+	PROFILE_START( "obj_update" );
+
 	for ( obj = object_list; obj != NULL; obj = obj_next ) {
 		CHAR_DATA *rch;
 		char *message;
@@ -964,6 +974,7 @@ void obj_update( void ) {
 			 */
 			if ( !bugObj ) {
 				bug( "obj_update: obj %d not in object_list. Terminating obj_update.", obj->pIndexData->vnum );
+				PROFILE_END( "obj_update" );
 				return;
 			}
 			extract_obj( obj );
@@ -971,6 +982,7 @@ void obj_update( void ) {
 		}
 	}
 
+	PROFILE_END( "obj_update" );
 	return;
 }
 
@@ -1084,6 +1096,8 @@ void ww_update( void ) {
 	CHAR_DATA *victim;
 	int dam = 0;
 
+	PROFILE_START( "ww_update" );
+
 	for ( d = descriptor_list; d != NULL; d = d->next ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || IS_CLASS( victim, CLASS_WEREWOLF ) ) {
 			continue;
@@ -1105,6 +1119,7 @@ void ww_update( void ) {
 		update_pos( victim );
 	}
 
+	PROFILE_END( "ww_update" );
 	return;
 }
 
@@ -1121,6 +1136,8 @@ void update_handler( void ) {
 	static int pulse_ww;
 	static int pulse_embrace;
 	static int pulse_minute;
+
+	PROFILE_TICK_START();
 
 	/* need to do this each cycle - Jobo */
 	recycle_descriptors();
@@ -1173,6 +1190,8 @@ void update_handler( void ) {
 		}
 	}
 	tail_chain();
+
+	PROFILE_TICK_END();
 	return;
 }
 

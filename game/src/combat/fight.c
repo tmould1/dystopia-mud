@@ -25,6 +25,7 @@
 #include "dirgesinger.h"
 #include "psion.h"
 #include "../systems/mcmp.h"
+#include "../systems/profile.h"
 
 #define MAX_SLAY_TYPES 3
 #define MONK_AUTODROP  12
@@ -66,6 +67,8 @@ void violence_update( void ) {
 	CHAR_DATA *rch;
 	CHAR_DATA *rch_next;
 	CHAR_DATA *mount;
+
+	PROFILE_START( "violence_update" );
 
 	for ( ch = char_list; ch != NULL; ch = ch->next ) {
 		victim = ch->blinkykill;
@@ -229,6 +232,8 @@ void violence_update( void ) {
 			}
 		}
 	}
+
+	PROFILE_END( "violence_update" );
 	return;
 }
 

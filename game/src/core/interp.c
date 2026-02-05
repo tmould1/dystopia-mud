@@ -312,6 +312,7 @@ const struct cmd_type cmd_table[] =
 		{ "gensteal", do_gensteal, POS_STANDING, 3, LOG_NORMAL, 0, 0, 0 },
 		{ "setstance", do_setstance, POS_STANDING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "mudstat", do_mudstat, POS_DEAD, 2, LOG_NORMAL, 0, 0, 0 },
+		{ "profile", do_profile, POS_DEAD, 10, LOG_ALWAYS, 0, 0, 0 },
 		{ "level", do_level, POS_FIGHTING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "top", do_top, POS_FIGHTING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "topclear", do_topclear, POS_DEAD, 12, LOG_NORMAL, 0, 0, 0 },

@@ -24,6 +24,7 @@
 #include <time.h>
 #include "merc.h"
 #include "../systems/mcmp.h"
+#include "../systems/profile.h"
 #include "../db/db_sql.h"
 #include "../db/db_game.h"
 #include "../db/db_player.h"
@@ -375,6 +376,13 @@ void boot_db( bool fCopyOver ) {
 	}
 
 	/*
+	 * Init profiling system.
+	 */
+	{
+		profile_init();
+	}
+
+	/*
 	 * Set time and weather.
 	 */
 	{
@@ -667,6 +675,8 @@ void fix_exits( void ) {
 void area_update( void ) {
 	AREA_DATA *pArea;
 
+	PROFILE_START( "area_update" );
+
 	for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
 		CHAR_DATA *pch;
 
@@ -702,6 +712,7 @@ void area_update( void ) {
 		}
 	}
 
+	PROFILE_END( "area_update" );
 	return;
 }
 

@@ -3922,6 +3922,7 @@ DECLARE_DO_FUN( do_setstance );
 DECLARE_DO_FUN( do_multicheck );
 
 DECLARE_DO_FUN( do_mudstat );
+DECLARE_DO_FUN( do_profile );
 DECLARE_DO_FUN( do_scry );
 DECLARE_DO_FUN( do_pkscry );
 DECLARE_DO_FUN( do_pkmind );
