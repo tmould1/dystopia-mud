@@ -481,6 +481,17 @@ void boot_db( bool fCopyOver ) {
 		fix_exits();
 		fBootDb = FALSE;
 		area_update();
+
+		/* Initial population: Reset all areas once to spawn mobiles before players connect.
+		 * This bypasses the deferred reset logic which would skip empty areas. */
+		{
+			AREA_DATA *pArea;
+			for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+				reset_area( pArea );
+				pArea->needs_reset = FALSE;
+			}
+		}
+
 		calculate_all_area_difficulties();
 		load_bans();
 		load_topboard();
