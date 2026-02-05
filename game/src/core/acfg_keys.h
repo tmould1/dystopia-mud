@@ -943,6 +943,7 @@
     ACFG_X(SIREN_ARIAOFUNMAKING_RESONANCE_COST               , "siren.ariaofunmaking.resonance_cost",         60) \
     ACFG_X(SIREN_ARIAOFUNMAKING_COOLDOWN                     , "siren.ariaofunmaking.cooldown",         15) \
     ACFG_X(SIREN_ARIAOFUNMAKING_PVP_RESIST_PCT               , "siren.ariaofunmaking.pvp_resist_pct",         50) \
+    ACFG_X(SIREN_SIRENARMOR_PRIMAL_COST                      , "siren.sirenarmor.primal_cost",         60) \
     ACFG_X(PSION_DAMCAP_BASE                                 , "psion.damcap.base",        150) \
     ACFG_X(PSION_DAMCAP_FOCUS_MULT                           , "psion.damcap.focus_mult",          6) \
     ACFG_X(PSION_DAMCAP_THOUGHTSHIELD                        , "psion.damcap.thoughtshield",        100) \
@@ -993,6 +994,7 @@
     ACFG_X(PSION_PSYCHICSCREAM_FOCUS_REQ                     , "psion.psychicscream.focus_req",         25) \
     ACFG_X(PSION_BRAINBURN_FOCUS_REQ                         , "psion.brainburn.focus_req",         35) \
     ACFG_X(PSION_BRAINBURN_STUN_CHANCE                       , "psion.brainburn.stun_chance",         20) \
+    ACFG_X(PSION_PSIONARMOR_PRIMAL_COST                      , "psion.psionarmor.primal_cost",         60) \
     ACFG_X(MINDFLAYER_DAMCAP_FOCUS_MULT                      , "mindflayer.damcap.focus_mult",          8) \
     ACFG_X(MINDFLAYER_DAMCAP_HIVEMIND                        , "mindflayer.damcap.hivemind",        200) \
     ACFG_X(MINDFLAYER_FOCUS_MAX                              , "mindflayer.focus.max",        150) \
@@ -1049,7 +1051,8 @@
     ACFG_X(MINDFLAYER_MINDBLAST_FOCUS_COST                   , "mindflayer.mindblast.focus_cost",         30) \
     ACFG_X(MINDFLAYER_MINDBLAST_COOLDOWN                     , "mindflayer.mindblast.cooldown",          8) \
     ACFG_X(MINDFLAYER_MINDBLAST_STUN_DURATION                , "mindflayer.mindblast.stun_duration",          2) \
-    ACFG_X(MINDFLAYER_REALITYFRACTURE_FOCUS_COST             , "mindflayer.realityfracture.focus_cost",         80)
+    ACFG_X(MINDFLAYER_REALITYFRACTURE_FOCUS_COST             , "mindflayer.realityfracture.focus_cost",         80) \
+    ACFG_X(MINDFLAYER_MINDFLAYERARMOR_PRIMAL_COST            , "mindflayer.mindflayerarmor.primal_cost",        150)
 
 
 /* Generate enum from X-macro */
