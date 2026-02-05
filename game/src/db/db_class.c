@@ -3,8 +3,8 @@
  *
  *  Manages class.db stored in gamedata/db/game/ containing:
  *    - class_registry, class_brackets, class_generations, class_auras
- *    - class_armor_config, class_armor_pieces, class_starting
- *    - class_score_stats, class_vnum_ranges
+ *    - class_armor_config (includes mastery_vnum), class_armor_pieces
+ *    - class_starting, class_score_stats
  *
  *  Data is pre-populated in the shipped database; this file only loads
  *  and provides access to that data.
@@ -32,7 +32,6 @@ static sqlite3 *class_db = NULL;
 #define MAX_CACHED_STARTING       32
 #define MAX_CACHED_SCORE_STATS   128
 #define MAX_CACHED_REGISTRY       32
-#define MAX_CACHED_VNUM_RANGES    32
 
 /* In-memory caches */
 static CLASS_BRACKET bracket_cache[MAX_CACHED_BRACKETS];
@@ -58,9 +57,6 @@ static int score_stats_count = 0;
 
 static CLASS_REGISTRY_ENTRY registry_cache[MAX_CACHED_REGISTRY];
 static int registry_count = 0;
-
-static CLASS_VNUM_RANGE vnum_range_cache[MAX_CACHED_VNUM_RANGES];
-static int vnum_range_count = 0;
 
 
 /*
@@ -264,7 +260,7 @@ void db_class_load_armor( void ) {
 
 	/* Load armor configs */
 	if ( sqlite3_prepare_v2( class_db,
-			"SELECT class_id, acfg_cost_key, usage_message, act_to_char, act_to_room "
+			"SELECT class_id, acfg_cost_key, usage_message, act_to_char, act_to_room, mastery_vnum "
 			"FROM class_armor_config ORDER BY class_id",
 			-1, &stmt, NULL ) == SQLITE_OK ) {
 		while ( sqlite3_step( stmt ) == SQLITE_ROW && armor_config_count < MAX_CACHED_ARMOR_CONFIGS ) {
@@ -273,6 +269,7 @@ void db_class_load_armor( void ) {
 			armor_config_cache[armor_config_count].usage_message = str_dup( col_text( stmt, 2 ) );
 			armor_config_cache[armor_config_count].act_to_char   = str_dup( col_text( stmt, 3 ) );
 			armor_config_cache[armor_config_count].act_to_room   = str_dup( col_text( stmt, 4 ) );
+			armor_config_cache[armor_config_count].mastery_vnum  = sqlite3_column_type( stmt, 5 ) == SQLITE_NULL ? 0 : sqlite3_column_int( stmt, 5 );
 			armor_config_count++;
 		}
 		sqlite3_finalize( stmt );
@@ -529,90 +526,3 @@ const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_index( int index ) {
 }
 
 
-/***************************************************************************
- * Class Vnum Ranges (class_vnum_ranges)
- ***************************************************************************/
-
-void db_class_load_vnum_ranges( void ) {
-	sqlite3_stmt *stmt;
-	char buf[256];
-	const char *text;
-	int i;
-
-	if ( !class_db )
-		return;
-
-	for ( i = 0; i < vnum_range_count; i++ ) {
-		if ( vnum_range_cache[i].description )
-			free_string( vnum_range_cache[i].description );
-	}
-	vnum_range_count = 0;
-
-	if ( sqlite3_prepare_v2( class_db,
-			"SELECT class_id, armor_vnum_start, armor_vnum_end, mastery_vnum, description "
-			"FROM class_vnum_ranges ORDER BY armor_vnum_start",
-			-1, &stmt, NULL ) == SQLITE_OK ) {
-		while ( sqlite3_step( stmt ) == SQLITE_ROW && vnum_range_count < MAX_CACHED_VNUM_RANGES ) {
-			CLASS_VNUM_RANGE *entry = &vnum_range_cache[vnum_range_count];
-
-			entry->class_id        = sqlite3_column_int( stmt, 0 );
-			entry->armor_vnum_start = sqlite3_column_int( stmt, 1 );
-			entry->armor_vnum_end  = sqlite3_column_int( stmt, 2 );
-			entry->mastery_vnum    = sqlite3_column_type( stmt, 3 ) == SQLITE_NULL ? 0 : sqlite3_column_int( stmt, 3 );
-
-			text = (const char *)sqlite3_column_text( stmt, 4 );
-			entry->description     = text ? str_dup( text ) : NULL;
-
-			vnum_range_count++;
-		}
-		sqlite3_finalize( stmt );
-	}
-
-	snprintf( buf, sizeof( buf ), "  Loaded %d class vnum ranges.", vnum_range_count );
-	log_string( buf );
-}
-
-int db_class_get_vnum_range_count( void ) {
-	return vnum_range_count;
-}
-
-const CLASS_VNUM_RANGE *db_class_get_vnum_range_by_id( int class_id ) {
-	int i;
-	for ( i = 0; i < vnum_range_count; i++ ) {
-		if ( vnum_range_cache[i].class_id == class_id )
-			return &vnum_range_cache[i];
-	}
-	return NULL;
-}
-
-const CLASS_VNUM_RANGE *db_class_get_vnum_range_by_index( int index ) {
-	if ( index < 0 || index >= vnum_range_count )
-		return NULL;
-	return &vnum_range_cache[index];
-}
-
-bool db_class_check_vnum_overlap( int start, int end, int exclude_class_id ) {
-	int i;
-	for ( i = 0; i < vnum_range_count; i++ ) {
-		if ( vnum_range_cache[i].class_id == exclude_class_id )
-			continue;
-		if ( start <= vnum_range_cache[i].armor_vnum_end &&
-		     end >= vnum_range_cache[i].armor_vnum_start )
-			return TRUE;
-	}
-	return FALSE;
-}
-
-int db_class_get_next_available_vnum( int range_size ) {
-	int candidate = 33400;
-	int i;
-
-	for ( i = 0; i < vnum_range_count; i++ ) {
-		int end = vnum_range_cache[i].armor_vnum_end;
-		if ( vnum_range_cache[i].mastery_vnum > end )
-			end = vnum_range_cache[i].mastery_vnum;
-		if ( end >= candidate )
-			candidate = end + 20;
-	}
-	return candidate;
-}

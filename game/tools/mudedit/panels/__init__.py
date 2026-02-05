@@ -18,11 +18,10 @@ from .game_panels import (
 from .player import PlayerEditorPanel
 from .class_display import ClassDisplayPanel
 from .class_aura import ClassAuraPanel
-from .class_armor import ClassArmorPanel
+from .class_equipment import ClassEquipmentPanel
 from .class_starting import ClassStartingPanel
 from .class_score import ClassScorePanel
 from .class_registry import ClassRegistryPanel
-from .class_vnum_ranges import ClassVnumRangesPanel
 
 __all__ = [
     'HelpEditorPanel',
@@ -47,9 +46,8 @@ __all__ = [
     'PlayerEditorPanel',
     'ClassDisplayPanel',
     'ClassAuraPanel',
-    'ClassArmorPanel',
+    'ClassEquipmentPanel',
     'ClassStartingPanel',
     'ClassScorePanel',
     'ClassRegistryPanel',
-    'ClassVnumRangesPanel',
 ]

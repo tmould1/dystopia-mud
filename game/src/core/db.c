@@ -506,10 +506,9 @@ void boot_db( bool fCopyOver ) {
 		db_class_load_registry();  /* Must load first - other class tables reference it */
 		db_class_load_display();
 		db_class_load_aura();
-		db_class_load_armor();
+		db_class_load_armor();  /* Also loads mastery_vnum */
 		db_class_load_starting();
 		db_class_load_score();
-		db_class_load_vnum_ranges();
 		db_game_close_boot_connections();
 	}
 

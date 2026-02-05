@@ -138,10 +138,9 @@ class NavigationTree(ttk.Frame):
                 ('class_registry', 'Class Registry'),
                 ('class_display', 'Display (Brackets/Generations)'),
                 ('class_auras', 'Auras'),
-                ('class_armor', 'Armor'),
+                ('class_equipment', 'Equipment'),
                 ('class_starting', 'Starting Values'),
                 ('class_score_stats', 'Score Stats'),
-                ('class_vnum_ranges', 'Vnum Ranges'),
             ]:
                 node_id = self.tree.insert(class_node, tk.END, text=label)
                 self._node_data[node_id] = ('class', class_db, table_name)

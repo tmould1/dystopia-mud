@@ -6,11 +6,10 @@
  *    - class_brackets: WHO list display brackets/colors
  *    - class_generations: Generation titles (Vampire/Werewolf/Demon)
  *    - class_auras: Room presence text
- *    - class_armor_config: Armor creation command config
+ *    - class_armor_config: Armor creation command config (includes mastery vnum)
  *    - class_armor_pieces: Individual armor piece vnums
  *    - class_starting: Starting values (beast, level, disciplines)
  *    - class_score_stats: Custom score display stats
- *    - class_vnum_ranges: Equipment vnum tracking
  ***************************************************************************/
 
 #ifndef DB_CLASS_H
@@ -51,6 +50,7 @@ typedef struct class_armor_config {
 	char   *usage_message;   /* Message showing available pieces */
 	char   *act_to_char;     /* Message to player when creating, e.g., "$p appears in your hands." */
 	char   *act_to_room;     /* Message to room when creating, e.g., "$p appears in $n's hands." */
+	int    mastery_vnum;     /* Mastery item vnum (or 0 if none) */
 } CLASS_ARMOR_CONFIG;
 
 typedef struct class_armor_piece {
@@ -79,14 +79,6 @@ typedef struct class_registry_entry {
 	char   *requirements;    /* optional prereq description */
 } CLASS_REGISTRY_ENTRY;
 
-/* Class vnum ranges - equipment vnum tracking to prevent conflicts */
-typedef struct class_vnum_range {
-	int    class_id;         /* CLASS_* constant */
-	int    armor_vnum_start; /* First armor vnum (or 0 if none) */
-	int    armor_vnum_end;   /* Last armor vnum (or 0 if none) */
-	int    mastery_vnum;     /* Mastery item vnum (or 0 if none) */
-	char   *description;     /* Optional description */
-} CLASS_VNUM_RANGE;
 
 /* Helper macro for base class check */
 #define IS_BASE_CLASS(reg) ((reg)->upgrade_class == 0)
@@ -165,13 +157,6 @@ const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_id( int class_id );
 const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_keyword( const char *keyword );
 const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_index( int index );
 
-/* Class vnum ranges - equipment vnum tracking */
-void db_class_load_vnum_ranges( void );
-int db_class_get_vnum_range_count( void );
-const CLASS_VNUM_RANGE *db_class_get_vnum_range_by_id( int class_id );
-const CLASS_VNUM_RANGE *db_class_get_vnum_range_by_index( int index );
-bool db_class_check_vnum_overlap( int start, int end, int exclude_class_id );
-int db_class_get_next_available_vnum( int range_size );
 
 /* Class score stats - customizable score display per class */
 void db_class_load_score( void );

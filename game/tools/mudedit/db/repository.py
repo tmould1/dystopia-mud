@@ -1037,6 +1037,75 @@ class ClassArmorPiecesRepository(BaseRepository):
         ).fetchone()
         return dict(row) if row else None
 
+    def get_vnum_range_for_class(self, class_id: int) -> Tuple[int, int]:
+        """Get the computed VNUM range for a class's armor pieces.
+
+        Returns:
+            Tuple of (min_vnum, max_vnum), or (0, 0) if no pieces
+        """
+        pieces = self.get_by_class(class_id)
+        if not pieces:
+            return (0, 0)
+        vnums = [p['vnum'] for p in pieces]
+        return (min(vnums), max(vnums))
+
+    def get_all_vnums(self) -> List[int]:
+        """Get all VNUMs used by any armor piece across all classes."""
+        rows = self.conn.execute(
+            "SELECT DISTINCT vnum FROM class_armor_pieces ORDER BY vnum"
+        ).fetchall()
+        return [row['vnum'] for row in rows]
+
+    def check_vnum_overlap(self, vnum: int, exclude_class_id: Optional[int] = None) -> List[Dict]:
+        """Check if a VNUM is already used by another class.
+
+        Args:
+            vnum: VNUM to check
+            exclude_class_id: Class ID to exclude from check
+
+        Returns:
+            List of pieces that use this VNUM (from other classes)
+        """
+        if exclude_class_id is not None:
+            rows = self.conn.execute(
+                "SELECT * FROM class_armor_pieces WHERE vnum = ? AND class_id != ?",
+                (vnum, exclude_class_id)
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                "SELECT * FROM class_armor_pieces WHERE vnum = ?",
+                (vnum,)
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_next_available_vnum(self, config_repo: 'ClassArmorConfigRepository', range_size: int = 20) -> int:
+        """Get the next available VNUM that doesn't conflict with existing pieces.
+
+        Considers both armor piece VNUMs and mastery VNUMs from config.
+
+        Args:
+            config_repo: ClassArmorConfigRepository to check mastery VNUMs
+            range_size: Size of contiguous range needed (default 20)
+
+        Returns:
+            Start vnum for the next available range
+        """
+        # Get all armor piece VNUMs
+        all_vnums = self.get_all_vnums()
+
+        # Get all mastery VNUMs from configs
+        configs = config_repo.list_all()
+        for cfg in configs:
+            if cfg.get('mastery_vnum') and cfg['mastery_vnum'] > 0:
+                all_vnums.append(cfg['mastery_vnum'])
+
+        if not all_vnums:
+            return 33400  # Default starting point
+
+        max_vnum = max(all_vnums)
+        # Add padding between ranges
+        return max_vnum + 20
+
 
 class ClassStartingRepository(BaseRepository):
     """Repository for class_starting table - starting values for class selection."""
@@ -1108,67 +1177,3 @@ class ClassRegistryRepository(BaseRepository):
         return [dict(row) for row in rows]
 
 
-class ClassVnumRangesRepository(BaseRepository):
-    """Repository for class_vnum_ranges table - equipment vnum tracking per class."""
-
-    def __init__(self, conn: sqlite3.Connection):
-        super().__init__(conn, 'class_vnum_ranges', 'class_id')
-
-    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
-        """List all vnum ranges ordered by armor_vnum_start."""
-        return super().list_all(order_by or 'armor_vnum_start')
-
-    def check_overlap(self, start: int, end: int, exclude_class_id: Optional[int] = None) -> List[Dict]:
-        """Check for overlapping vnum ranges.
-
-        Args:
-            start: Start of vnum range to check
-            end: End of vnum range to check
-            exclude_class_id: Class ID to exclude from check (for editing existing)
-
-        Returns:
-            List of overlapping entries
-        """
-        if exclude_class_id is not None:
-            rows = self.conn.execute(
-                """SELECT * FROM class_vnum_ranges
-                   WHERE class_id != ?
-                   AND armor_vnum_start <= ?
-                   AND armor_vnum_end >= ?
-                   ORDER BY armor_vnum_start""",
-                (exclude_class_id, end, start)
-            ).fetchall()
-        else:
-            rows = self.conn.execute(
-                """SELECT * FROM class_vnum_ranges
-                   WHERE armor_vnum_start <= ?
-                   AND armor_vnum_end >= ?
-                   ORDER BY armor_vnum_start""",
-                (end, start)
-            ).fetchall()
-        return [dict(row) for row in rows]
-
-    def get_next_available_vnum(self, range_size: int = 20) -> int:
-        """Get the next available vnum that can fit a range of the given size.
-
-        Args:
-            range_size: Size of vnum range needed (default 20)
-
-        Returns:
-            Start vnum for the next available range
-        """
-        rows = self.conn.execute(
-            """SELECT armor_vnum_end, mastery_vnum FROM class_vnum_ranges
-               ORDER BY armor_vnum_end DESC LIMIT 1"""
-        ).fetchall()
-
-        if not rows:
-            return 33400  # Default starting point if no ranges exist
-
-        max_vnum = rows[0]['armor_vnum_end']
-        mastery = rows[0]['mastery_vnum']
-        if mastery and mastery > max_vnum:
-            max_vnum = mastery
-
-        # Add some padding between ranges
-        return max_vnum + 20

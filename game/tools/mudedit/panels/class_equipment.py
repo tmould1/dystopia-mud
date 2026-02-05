@@ -1,22 +1,23 @@
 """
-Class Armor editor panel.
+Class Equipment editor panel.
 
-Provides interface for editing class armor configurations and pieces
-with the ability to manage armor cost settings and individual armor piece vnums.
+Unified editor for class armor configurations, armor pieces, and mastery items.
+Combines the former class_armor and class_vnum_ranges panels into a single view.
 """
 
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from typing import Callable, Optional
 
-from ..db.repository import get_class_name
+from ..db.repository import get_class_name, CLASS_NAMES
 
 
-class ClassArmorPanel(ttk.Frame):
+class ClassEquipmentPanel(ttk.Frame):
     """
-    Editor panel for class armor configuration and pieces.
+    Unified editor panel for class equipment (armor config, pieces, mastery).
 
-    Shows armor configs on left, with config details and piece list on right.
+    Shows armor configs on left, with config details, pieces, and computed
+    VNUM range on right.
     """
 
     def __init__(
@@ -57,7 +58,6 @@ class ClassArmorPanel(ttk.Frame):
             entries = self.ability_config_repo.list_all()
             for entry in entries:
                 key = entry.get('key', '')
-                # Match keys containing "armor" and ending with "cost"
                 if 'armor' in key.lower() and key.endswith('_cost'):
                     keys.append(key)
         except Exception:
@@ -90,7 +90,7 @@ class ClassArmorPanel(ttk.Frame):
         main_paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
 
         # Left: config list
-        left_frame = ttk.LabelFrame(main_paned, text="Classes with Armor")
+        left_frame = ttk.LabelFrame(main_paned, text="Classes with Equipment")
         main_paned.add(left_frame, weight=1)
 
         tree_frame = ttk.Frame(left_frame)
@@ -175,13 +175,38 @@ class ClassArmorPanel(ttk.Frame):
         )
         self.to_room_entry.pack(side=tk.LEFT, padx=(4, 8))
 
-        ttk.Button(
-            row3, text="Save Config", command=self._save_config
-        ).pack(side=tk.LEFT, padx=8)
+        # Row 4: Mastery vnum
+        row4 = ttk.Frame(config_frame)
+        row4.pack(fill=tk.X, padx=8, pady=4)
 
-        # Pieces section
-        pieces_frame = ttk.LabelFrame(right_frame, text="Armor Pieces")
-        pieces_frame.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+        ttk.Label(row4, text="Mastery VNUM:").pack(side=tk.LEFT)
+        self.mastery_var = tk.StringVar()
+        self.mastery_var.trace_add('write', lambda *_: self._on_config_change())
+        self.mastery_var.trace_add('write', lambda *_: self._update_mastery_preview())
+        self.mastery_entry = ttk.Entry(
+            row4, textvariable=self.mastery_var, width=10, font=('Consolas', 10)
+        )
+        self.mastery_entry.pack(side=tk.LEFT, padx=(4, 4))
+
+        self.mastery_preview_var = tk.StringVar(value="")
+        ttk.Label(
+            row4, textvariable=self.mastery_preview_var,
+            font=('Consolas', 9), foreground='#0066cc'
+        ).pack(side=tk.LEFT, padx=(0, 16))
+
+        ttk.Label(row4, text="(0 for none)", foreground='gray').pack(side=tk.LEFT)
+
+        ttk.Button(
+            row4, text="Save Config", command=self._save_config
+        ).pack(side=tk.RIGHT, padx=8)
+
+        # Pieces section with computed range
+        pieces_outer = ttk.Frame(right_frame)
+        pieces_outer.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        # Left side: pieces
+        pieces_frame = ttk.LabelFrame(pieces_outer, text="Armor Pieces")
+        pieces_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Pieces list
         pieces_list_frame = ttk.Frame(pieces_frame)
@@ -199,7 +224,7 @@ class ClassArmorPanel(ttk.Frame):
         self.pieces_tree.heading('object_name', text='Object Name')
         self.pieces_tree.column('keyword', width=100)
         self.pieces_tree.column('vnum', width=70)
-        self.pieces_tree.column('object_name', width=200)
+        self.pieces_tree.column('object_name', width=180)
 
         pieces_scroll = ttk.Scrollbar(
             pieces_list_frame, orient=tk.VERTICAL, command=self.pieces_tree.yview
@@ -210,6 +235,16 @@ class ClassArmorPanel(ttk.Frame):
 
         self.pieces_tree.bind('<<TreeviewSelect>>', self._on_piece_select)
 
+        # Custom armor note (shown when no pieces defined)
+        self.custom_armor_label = ttk.Label(
+            pieces_frame,
+            text="This class uses a custom armor system.\nArmor pieces are not managed here.",
+            foreground='#666666',
+            font=('TkDefaultFont', 9, 'italic'),
+            justify=tk.CENTER
+        )
+        # Hidden by default, shown when no pieces
+
         # Piece edit row
         piece_edit = ttk.Frame(pieces_frame)
         piece_edit.pack(fill=tk.X, padx=8, pady=4)
@@ -218,41 +253,74 @@ class ClassArmorPanel(ttk.Frame):
         self.piece_kw_var = tk.StringVar()
         self.piece_kw_var.trace_add('write', lambda *_: self._on_piece_change())
         self.piece_kw_entry = ttk.Entry(
-            piece_edit, textvariable=self.piece_kw_var, width=15, font=('Consolas', 10)
+            piece_edit, textvariable=self.piece_kw_var, width=12, font=('Consolas', 10)
         )
-        self.piece_kw_entry.pack(side=tk.LEFT, padx=(4, 16))
+        self.piece_kw_entry.pack(side=tk.LEFT, padx=(4, 12))
 
         ttk.Label(piece_edit, text="VNUM:").pack(side=tk.LEFT)
         self.piece_vnum_var = tk.StringVar()
         self.piece_vnum_var.trace_add('write', lambda *_: self._on_piece_change())
         self.piece_vnum_var.trace_add('write', lambda *_: self._update_object_preview())
         self.piece_vnum_entry = ttk.Entry(
-            piece_edit, textvariable=self.piece_vnum_var, width=10, font=('Consolas', 10)
+            piece_edit, textvariable=self.piece_vnum_var, width=8, font=('Consolas', 10)
         )
         self.piece_vnum_entry.pack(side=tk.LEFT, padx=(4, 4))
 
-        # Object name preview label
         self.object_name_var = tk.StringVar(value="")
         self.object_name_label = ttk.Label(
             piece_edit, textvariable=self.object_name_var,
-            font=('Consolas', 9), foreground='#0066cc', width=30
+            font=('Consolas', 9), foreground='#0066cc', width=20
         )
         self.object_name_label.pack(side=tk.LEFT, padx=(0, 8))
 
+        # Piece buttons
+        piece_btn_frame = ttk.Frame(pieces_frame)
+        piece_btn_frame.pack(fill=tk.X, padx=8, pady=(0, 4))
+
         ttk.Button(
-            piece_edit, text="Save Piece", command=self._save_piece
+            piece_btn_frame, text="Save Piece", command=self._save_piece
         ).pack(side=tk.LEFT, padx=2)
         ttk.Button(
-            piece_edit, text="New", command=self._new_piece
+            piece_btn_frame, text="New", command=self._new_piece
         ).pack(side=tk.LEFT, padx=2)
         ttk.Button(
-            piece_edit, text="Del", command=self._delete_piece
+            piece_btn_frame, text="Delete", command=self._delete_piece
         ).pack(side=tk.LEFT, padx=2)
 
+        # Right side: computed range and utilities
+        range_frame = ttk.LabelFrame(pieces_outer, text="VNUM Range")
+        range_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(8, 0))
+
+        # Computed range display
+        self.range_label = ttk.Label(
+            range_frame, text="-", font=('Consolas', 11, 'bold'),
+            foreground='#006600'
+        )
+        self.range_label.pack(padx=12, pady=8)
+
+        self.piece_count_label = ttk.Label(
+            range_frame, text="(0 pieces)", foreground='gray'
+        )
+        self.piece_count_label.pack(padx=12, pady=(0, 8))
+
+        ttk.Separator(range_frame, orient=tk.HORIZONTAL).pack(fill=tk.X, padx=8)
+
+        ttk.Button(
+            range_frame, text="Check Overlap", command=self._check_overlap
+        ).pack(padx=12, pady=8)
+
+        ttk.Separator(range_frame, orient=tk.HORIZONTAL).pack(fill=tk.X, padx=8)
+
+        ttk.Label(range_frame, text="Next Available:", foreground='gray').pack(padx=12, pady=(8, 0))
+        self.next_avail_label = ttk.Label(
+            range_frame, text="-", font=('Consolas', 10, 'bold')
+        )
+        self.next_avail_label.pack(padx=12, pady=(0, 8))
+
         # Help text
-        help_text = "Changes require server restart to take effect."
         ttk.Label(
-            pieces_frame, text=help_text, foreground='gray'
+            right_frame, text="Changes require server restart to take effect.",
+            foreground='gray'
         ).pack(anchor=tk.W, padx=8, pady=(0, 4))
 
     def _load_configs(self):
@@ -267,7 +335,32 @@ class ClassArmorPanel(ttk.Frame):
                 values=(entry['class_id'], class_name)
             )
 
-        self.on_status(f"Loaded {len(entries)} armor configurations")
+        self._update_next_available()
+        self.on_status(f"Loaded {len(entries)} class equipment configurations")
+
+    def _update_next_available(self):
+        """Update the next available VNUM display."""
+        try:
+            next_vnum = self.pieces_repo.get_next_available_vnum(self.config_repo)
+            self.next_avail_label.config(text=str(next_vnum))
+        except Exception:
+            self.next_avail_label.config(text="-")
+
+    def _update_computed_range(self):
+        """Update the computed VNUM range display."""
+        if self.current_class_id is None:
+            self.range_label.config(text="-")
+            self.piece_count_label.config(text="(0 pieces)")
+            return
+
+        vnum_range = self.pieces_repo.get_vnum_range_for_class(self.current_class_id)
+        if vnum_range[0] == 0 and vnum_range[1] == 0:
+            self.range_label.config(text="No pieces")
+        else:
+            self.range_label.config(text=f"{vnum_range[0]} - {vnum_range[1]}")
+
+        piece_count = len(self._pieces)
+        self.piece_count_label.config(text=f"({piece_count} pieces)")
 
     def _on_config_select(self, event):
         """Handle config selection."""
@@ -291,9 +384,12 @@ class ClassArmorPanel(ttk.Frame):
             self.usage_var.set(entry['usage_message'])
             self.to_char_var.set(entry['act_to_char'])
             self.to_room_var.set(entry['act_to_room'])
+            mastery = entry.get('mastery_vnum', 0) or 0
+            self.mastery_var.set(str(mastery))
             self.unsaved_config = False
 
         self._load_pieces_for_class(class_id)
+        self._update_computed_range()
         self.on_status(f"Editing {class_name}")
 
     def _load_pieces_for_class(self, class_id: int):
@@ -307,6 +403,12 @@ class ClassArmorPanel(ttk.Frame):
                 '', tk.END, iid=str(piece['id']),
                 values=(piece['keyword'], piece['vnum'], obj_name)
             )
+
+        # Show/hide custom armor note based on whether there are pieces
+        if not self._pieces:
+            self.custom_armor_label.pack(padx=8, pady=8)
+        else:
+            self.custom_armor_label.pack_forget()
 
         # Clear piece editor
         self.piece_kw_var.set("")
@@ -325,11 +427,28 @@ class ClassArmorPanel(ttk.Frame):
             vnum = int(vnum_str)
             obj_name = self._lookup_object_name(vnum)
             if obj_name:
-                self.object_name_var.set(f"→ {obj_name}")
+                self.object_name_var.set(f"-> {obj_name}")
             else:
-                self.object_name_var.set("(object not found)")
+                self.object_name_var.set("(not found)")
         except ValueError:
             self.object_name_var.set("")
+
+    def _update_mastery_preview(self):
+        """Update the mastery object name preview."""
+        vnum_str = self.mastery_var.get().strip()
+        if not vnum_str or vnum_str == '0':
+            self.mastery_preview_var.set("")
+            return
+
+        try:
+            vnum = int(vnum_str)
+            obj_name = self._lookup_object_name(vnum)
+            if obj_name:
+                self.mastery_preview_var.set(f"-> {obj_name}")
+            else:
+                self.mastery_preview_var.set("(not found)")
+        except ValueError:
+            self.mastery_preview_var.set("")
 
     def _on_piece_select(self, event):
         """Handle piece selection."""
@@ -348,7 +467,6 @@ class ClassArmorPanel(ttk.Frame):
         if piece:
             self.piece_kw_var.set(piece['keyword'])
             self.piece_vnum_var.set(str(piece['vnum']))
-            # Trigger object preview update
             self._update_object_preview()
             self.unsaved_piece = False
 
@@ -371,6 +489,11 @@ class ClassArmorPanel(ttk.Frame):
         to_char = self.to_char_var.get().strip()
         to_room = self.to_room_var.get().strip()
 
+        try:
+            mastery = int(self.mastery_var.get().strip())
+        except ValueError:
+            mastery = 0
+
         if not cost_key or not usage:
             messagebox.showwarning(
                 "Required Fields", "Cost key and usage message are required."
@@ -381,10 +504,12 @@ class ClassArmorPanel(ttk.Frame):
             'acfg_cost_key': cost_key,
             'usage_message': usage,
             'act_to_char': to_char or "$p appears in your hands.",
-            'act_to_room': to_room or "$p appears in $n's hands."
+            'act_to_room': to_room or "$p appears in $n's hands.",
+            'mastery_vnum': mastery if mastery > 0 else 0
         })
 
         self.unsaved_config = False
+        self._update_next_available()
         self.on_status("Config saved. Restart server to apply.")
 
     def _save_piece(self):
@@ -412,6 +537,8 @@ class ClassArmorPanel(ttk.Frame):
         self.unsaved_piece = False
         if self.current_class_id:
             self._load_pieces_for_class(self.current_class_id)
+            self._update_computed_range()
+            self._update_next_available()
             # Re-select
             self.pieces_tree.selection_set(str(self.current_piece_id))
 
@@ -450,6 +577,8 @@ class ClassArmorPanel(ttk.Frame):
         })
 
         self._load_pieces_for_class(self.current_class_id)
+        self._update_computed_range()
+        self._update_next_available()
         self.pieces_tree.selection_set(str(new_id))
         self._on_piece_select(None)
 
@@ -469,12 +598,58 @@ class ClassArmorPanel(ttk.Frame):
 
         if self.current_class_id:
             self._load_pieces_for_class(self.current_class_id)
+            self._update_computed_range()
+            self._update_next_available()
 
         self.piece_kw_var.set("")
         self.piece_vnum_var.set("")
         self.unsaved_piece = False
 
         self.on_status("Piece deleted.")
+
+    def _check_overlap(self):
+        """Check for overlapping VNUMs with other classes."""
+        if self.current_class_id is None:
+            messagebox.showwarning("No Selection", "Please select a class first.")
+            return
+
+        overlaps = []
+        # Check each piece VNUM
+        for piece in self._pieces:
+            conflicts = self.pieces_repo.check_vnum_overlap(
+                piece['vnum'], self.current_class_id
+            )
+            for conflict in conflicts:
+                overlaps.append(
+                    f"  VNUM {piece['vnum']} ({piece['keyword']}) conflicts with "
+                    f"{get_class_name(conflict['class_id'])} ({conflict['keyword']})"
+                )
+
+        # Check mastery VNUM
+        try:
+            mastery = int(self.mastery_var.get().strip())
+            if mastery > 0:
+                mastery_conflicts = self.pieces_repo.check_vnum_overlap(
+                    mastery, self.current_class_id
+                )
+                for conflict in mastery_conflicts:
+                    overlaps.append(
+                        f"  Mastery VNUM {mastery} conflicts with "
+                        f"{get_class_name(conflict['class_id'])} ({conflict['keyword']})"
+                    )
+        except ValueError:
+            pass
+
+        if overlaps:
+            messagebox.showwarning(
+                "Overlaps Found",
+                f"Found {len(overlaps)} VNUM conflict(s):\n\n" + "\n".join(overlaps)
+            )
+        else:
+            messagebox.showinfo(
+                "No Overlaps",
+                "No VNUM conflicts found with other classes."
+            )
 
     def check_unsaved(self) -> bool:
         """Check for unsaved changes before closing."""

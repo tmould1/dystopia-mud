@@ -570,7 +570,7 @@ void do_pkpowers( CHAR_DATA *ch, char *argument ) {
 /* Mastery command to gain mastery items */
 
 void do_mastery( CHAR_DATA *ch, char *argument ) {
-	const CLASS_VNUM_RANGE *vnum_range;
+	const CLASS_ARMOR_CONFIG *armor_config;
 	OBJ_INDEX_DATA *pObjIndex;
 	OBJ_DATA *obj;
 	int vnum;
@@ -595,13 +595,13 @@ void do_mastery( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	/* Look up mastery vnum from database */
-	vnum_range = db_class_get_vnum_range_by_id( ch->class );
-	if ( vnum_range == NULL || vnum_range->mastery_vnum == 0 ) {
+	/* Look up mastery vnum from armor config */
+	armor_config = db_class_get_armor_config( ch->class );
+	if ( armor_config == NULL || armor_config->mastery_vnum == 0 ) {
 		send_to_char( "Your class mastery is not done yet, write a note on the idea board.\n\r", ch );
 		return;
 	}
-	vnum = vnum_range->mastery_vnum;
+	vnum = armor_config->mastery_vnum;
 	if ( ( pObjIndex = get_obj_index( vnum ) ) == NULL ) {
 		send_to_char( "Missing object, inform Jobo.\n\r", ch );
 		return;

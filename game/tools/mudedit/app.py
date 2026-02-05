@@ -23,7 +23,7 @@ from .db.repository import (
     PlayerRepository,
     ClassBracketsRepository, ClassGenerationsRepository, ClassAurasRepository,
     ClassArmorConfigRepository, ClassArmorPiecesRepository, ClassStartingRepository,
-    ClassScoreStatsRepository, ClassRegistryRepository, ClassVnumRangesRepository
+    ClassScoreStatsRepository, ClassRegistryRepository
 )
 from .nav.tree import NavigationTree
 from .panels import (
@@ -32,8 +32,8 @@ from .panels import (
     GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel, AudioConfigPanel,
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
-    PlayerEditorPanel, ClassDisplayPanel, ClassAuraPanel, ClassArmorPanel,
-    ClassStartingPanel, ClassScorePanel, ClassRegistryPanel, ClassVnumRangesPanel
+    PlayerEditorPanel, ClassDisplayPanel, ClassAuraPanel, ClassEquipmentPanel,
+    ClassStartingPanel, ClassScorePanel, ClassRegistryPanel
 )
 
 
@@ -428,13 +428,13 @@ class MudEditorApp:
                     on_status=self._set_status
                 )
 
-            elif entity_type == 'class_armor':
+            elif entity_type == 'class_equipment':
                 config_repo = ClassArmorConfigRepository(conn)
                 pieces_repo = ClassArmorPiecesRepository(conn)
                 # ability_config is in game.db
                 game_conn = self.db_manager.get_connection(self.db_manager.get_game_db_path())
                 ability_repo = AbilityConfigRepository(game_conn)
-                return ClassArmorPanel(
+                return ClassEquipmentPanel(
                     self.notebook,
                     config_repo,
                     pieces_repo,
@@ -464,14 +464,6 @@ class MudEditorApp:
                 return ClassRegistryPanel(
                     self.notebook,
                     registry_repo,
-                    on_status=self._set_status
-                )
-
-            elif entity_type == 'class_vnum_ranges':
-                vnum_ranges_repo = ClassVnumRangesRepository(conn)
-                return ClassVnumRangesPanel(
-                    self.notebook,
-                    vnum_ranges_repo,
                     on_status=self._set_status
                 )
 
