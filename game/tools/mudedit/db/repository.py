@@ -1106,3 +1106,69 @@ class ClassRegistryRepository(BaseRepository):
             "SELECT * FROM class_registry WHERE upgrade_class IS NOT NULL ORDER BY display_order, class_id"
         ).fetchall()
         return [dict(row) for row in rows]
+
+
+class ClassVnumRangesRepository(BaseRepository):
+    """Repository for class_vnum_ranges table - equipment vnum tracking per class."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'class_vnum_ranges', 'class_id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all vnum ranges ordered by armor_vnum_start."""
+        return super().list_all(order_by or 'armor_vnum_start')
+
+    def check_overlap(self, start: int, end: int, exclude_class_id: Optional[int] = None) -> List[Dict]:
+        """Check for overlapping vnum ranges.
+
+        Args:
+            start: Start of vnum range to check
+            end: End of vnum range to check
+            exclude_class_id: Class ID to exclude from check (for editing existing)
+
+        Returns:
+            List of overlapping entries
+        """
+        if exclude_class_id is not None:
+            rows = self.conn.execute(
+                """SELECT * FROM class_vnum_ranges
+                   WHERE class_id != ?
+                   AND armor_vnum_start <= ?
+                   AND armor_vnum_end >= ?
+                   ORDER BY armor_vnum_start""",
+                (exclude_class_id, end, start)
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                """SELECT * FROM class_vnum_ranges
+                   WHERE armor_vnum_start <= ?
+                   AND armor_vnum_end >= ?
+                   ORDER BY armor_vnum_start""",
+                (end, start)
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_next_available_vnum(self, range_size: int = 20) -> int:
+        """Get the next available vnum that can fit a range of the given size.
+
+        Args:
+            range_size: Size of vnum range needed (default 20)
+
+        Returns:
+            Start vnum for the next available range
+        """
+        rows = self.conn.execute(
+            """SELECT armor_vnum_end, mastery_vnum FROM class_vnum_ranges
+               ORDER BY armor_vnum_end DESC LIMIT 1"""
+        ).fetchall()
+
+        if not rows:
+            return 33400  # Default starting point if no ranges exist
+
+        max_vnum = rows[0]['armor_vnum_end']
+        mastery = rows[0]['mastery_vnum']
+        if mastery and mastery > max_vnum:
+            max_vnum = mastery
+
+        # Add some padding between ranges
+        return max_vnum + 20

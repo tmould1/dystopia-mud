@@ -93,6 +93,16 @@ static int score_stats_count = 0;
 static CLASS_REGISTRY_ENTRY registry_cache[MAX_CACHED_REGISTRY];
 static int registry_count = 0;
 
+/* In-memory cache for class vnum ranges */
+#define MAX_CACHED_VNUM_RANGES  32
+
+static CLASS_VNUM_RANGE vnum_range_cache[MAX_CACHED_VNUM_RANGES];
+static int vnum_range_count = 0;
+
+/* Forward declarations */
+static void db_game_migrate_schema( void );
+static void db_game_migrate_vnum_ranges( void );
+
 /* Schema for help.db */
 static const char *HELP_SCHEMA_SQL =
 	"CREATE TABLE IF NOT EXISTS helps ("
@@ -221,11 +231,21 @@ static const char *GAME_SCHEMA_SQL =
 	"CREATE INDEX IF NOT EXISTS idx_class_keyword ON class_registry(keyword);"
 	"CREATE INDEX IF NOT EXISTS idx_class_keyword_alt ON class_registry(keyword_alt);"
 
+	"CREATE TABLE IF NOT EXISTS class_vnum_ranges ("
+	"  class_id          INTEGER PRIMARY KEY REFERENCES class_registry(class_id),"
+	"  armor_vnum_start  INTEGER NOT NULL DEFAULT 0,"
+	"  armor_vnum_end    INTEGER NOT NULL DEFAULT 0,"
+	"  mastery_vnum      INTEGER DEFAULT 0,"
+	"  description       TEXT"
+	");"
+
 	"CREATE TABLE IF NOT EXISTS class_brackets ("
 	"  class_id      INTEGER PRIMARY KEY REFERENCES class_registry(class_id),"
 	"  class_name    TEXT NOT NULL,"
 	"  open_bracket  TEXT NOT NULL,"
-	"  close_bracket TEXT NOT NULL"
+	"  close_bracket TEXT NOT NULL,"
+	"  accent_color  TEXT,"
+	"  primary_color TEXT"
 	");"
 
 	"CREATE TABLE IF NOT EXISTS class_generations ("
@@ -332,6 +352,115 @@ void db_game_init( void ) {
 			if ( errmsg ) sqlite3_free( errmsg );
 			errmsg = NULL;
 		}
+		/* Run schema migrations for existing databases */
+		db_game_migrate_schema();
+	}
+}
+
+/*
+ * Migrate existing game.db schemas by adding new columns.
+ * Uses ALTER TABLE which is safe on existing data.
+ * Called during db_game_init() after schema creation.
+ */
+static void db_game_migrate_schema( void ) {
+	sqlite3_stmt *stmt;
+	int has_accent_color = FALSE;
+	int has_vnum_ranges = FALSE;
+	char *errmsg = NULL;
+
+	if ( !game_db )
+		return;
+
+	/* Check if class_brackets has accent_color column */
+	if ( sqlite3_prepare_v2( game_db, "PRAGMA table_info(class_brackets)", -1, &stmt, NULL ) == SQLITE_OK ) {
+		while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+			const char *col_name = (const char *)sqlite3_column_text( stmt, 1 );
+			if ( col_name && !strcmp( col_name, "accent_color" ) ) {
+				has_accent_color = TRUE;
+				break;
+			}
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	/* Add accent_color and primary_color columns if missing */
+	if ( !has_accent_color ) {
+		log_string( "  Migrating class_brackets: adding accent_color, primary_color columns" );
+		if ( sqlite3_exec( game_db,
+				"ALTER TABLE class_brackets ADD COLUMN accent_color TEXT",
+				NULL, NULL, &errmsg ) != SQLITE_OK ) {
+			if ( errmsg ) { sqlite3_free( errmsg ); errmsg = NULL; }
+		}
+		if ( sqlite3_exec( game_db,
+				"ALTER TABLE class_brackets ADD COLUMN primary_color TEXT",
+				NULL, NULL, &errmsg ) != SQLITE_OK ) {
+			if ( errmsg ) { sqlite3_free( errmsg ); errmsg = NULL; }
+		}
+	}
+
+	/* Check if class_vnum_ranges table exists */
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT name FROM sqlite_master WHERE type='table' AND name='class_vnum_ranges'",
+			-1, &stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+			has_vnum_ranges = TRUE;
+		}
+		sqlite3_finalize( stmt );
+	}
+
+	/* Create class_vnum_ranges table if missing */
+	if ( !has_vnum_ranges ) {
+		log_string( "  Migrating game.db: creating class_vnum_ranges table" );
+		if ( sqlite3_exec( game_db,
+				"CREATE TABLE IF NOT EXISTS class_vnum_ranges ("
+				"  class_id          INTEGER PRIMARY KEY REFERENCES class_registry(class_id),"
+				"  armor_vnum_start  INTEGER NOT NULL DEFAULT 0,"
+				"  armor_vnum_end    INTEGER NOT NULL DEFAULT 0,"
+				"  mastery_vnum      INTEGER DEFAULT 0,"
+				"  description       TEXT"
+				")",
+				NULL, NULL, &errmsg ) != SQLITE_OK ) {
+			bug( "db_game_migrate_schema: failed to create class_vnum_ranges", 0 );
+			if ( errmsg ) { sqlite3_free( errmsg ); errmsg = NULL; }
+		}
+	}
+
+	/* Migrate missing vnum ranges - insert if class_id doesn't exist */
+	db_game_migrate_vnum_ranges();
+}
+
+/*
+ * Insert missing vnum range entries for classes that have equipment.
+ * Uses INSERT OR IGNORE to skip existing entries.
+ */
+static void db_game_migrate_vnum_ranges( void ) {
+	char *errmsg = NULL;
+
+	if ( !game_db )
+		return;
+
+	/* Use INSERT OR IGNORE to add any missing class vnum ranges.
+	 * This allows us to add new classes over time without affecting existing data.
+	 */
+	if ( sqlite3_exec( game_db,
+			"INSERT OR IGNORE INTO class_vnum_ranges (class_id, armor_vnum_start, armor_vnum_end, mastery_vnum, description) VALUES "
+			"(4096, 29975, 29991, NULL, 'Undead Knight armor'),"      /* CLASS_UNDEAD_KNIGHT */
+			"(64, 33020, 33039, NULL, 'Monk armor'),"                 /* CLASS_MONK */
+			"(8, 33040, 33059, NULL, 'Vampire armor'),"               /* CLASS_VAMPIRE */
+			"(128, 33080, 33099, NULL, 'Ninja armor'),"               /* CLASS_NINJA */
+			"(4, 33100, 33119, NULL, 'Werewolf armor'),"              /* CLASS_WEREWOLF */
+			"(8192, 33140, 33159, NULL, 'Spider Droid armor'),"       /* CLASS_DROID */
+			"(512, 33160, 33175, NULL, 'Shapeshifter armor'),"        /* CLASS_SHAPESHIFTER */
+			"(2048, 33180, 33199, NULL, 'Angel armor'),"              /* CLASS_ANGEL */
+			"(1024, 33200, 33219, NULL, 'Tanarri armor'),"            /* CLASS_TANARRI */
+			"(256, 33220, 33239, NULL, 'Lich armor'),"                /* CLASS_LICH */
+			"(16384, 33320, 33332, 33333, 'Dirgesinger armor and mastery'),"  /* CLASS_DIRGESINGER */
+			"(32768, 33340, 33352, 33353, 'Siren armor and mastery'),"        /* CLASS_SIREN */
+			"(65536, 33360, 33372, NULL, 'Psion armor (shared with Mindflayer)'),"  /* CLASS_PSION */
+			"(131072, 33380, 33392, NULL, 'Mindflayer-exclusive armor')",    /* CLASS_MINDFLAYER */
+			NULL, NULL, &errmsg ) != SQLITE_OK ) {
+		/* Not a critical error - entries may already exist */
+		if ( errmsg ) { sqlite3_free( errmsg ); errmsg = NULL; }
 	}
 }
 
@@ -2153,7 +2282,7 @@ static void class_display_insert_defaults( void ) {
 		return;  /* Already has data */
 
 	if ( sqlite3_prepare_v2( game_db,
-			"INSERT INTO class_brackets (class_id, class_name, open_bracket, close_bracket) VALUES (?,?,?,?)",
+			"INSERT INTO class_brackets (class_id, class_name, open_bracket, close_bracket, accent_color, primary_color) VALUES (?,?,?,?,?,?)",
 			-1, &br_stmt, NULL ) != SQLITE_OK )
 		return;
 
@@ -2166,12 +2295,14 @@ static void class_display_insert_defaults( void ) {
 
 	db_begin( game_db );
 
-#define INSERT_BRACKET( cid, cname, openb, closeb ) \
+#define INSERT_BRACKET( cid, cname, openb, closeb, accent, primary ) \
 	sqlite3_reset( br_stmt ); \
 	sqlite3_bind_int( br_stmt, 1, cid ); \
 	sqlite3_bind_text( br_stmt, 2, cname, -1, SQLITE_STATIC ); \
 	sqlite3_bind_text( br_stmt, 3, openb, -1, SQLITE_STATIC ); \
 	sqlite3_bind_text( br_stmt, 4, closeb, -1, SQLITE_STATIC ); \
+	if ( accent ) sqlite3_bind_text( br_stmt, 5, accent, -1, SQLITE_STATIC ); else sqlite3_bind_null( br_stmt, 5 ); \
+	if ( primary ) sqlite3_bind_text( br_stmt, 6, primary, -1, SQLITE_STATIC ); else sqlite3_bind_null( br_stmt, 6 ); \
 	sqlite3_step( br_stmt )
 
 #define INSERT_GEN( cid, gen, title ) \
@@ -2181,25 +2312,26 @@ static void class_display_insert_defaults( void ) {
 	sqlite3_bind_text( gen_stmt, 3, title, -1, SQLITE_STATIC ); \
 	sqlite3_step( gen_stmt )
 
-	/* Brackets - CLASS_DEMON=1, CLASS_MAGE=2, CLASS_WEREWOLF=4, CLASS_VAMPIRE=8, etc. */
-	INSERT_BRACKET( 1,      "Demon",         "#0[#n",            "#0]#n" );
-	INSERT_BRACKET( 2,      "Mage",          "{{",               "}}" );
-	INSERT_BRACKET( 4,      "Werewolf",      "#y((#n",           "#y))#n" );
-	INSERT_BRACKET( 8,      "Vampire",       "#R<<#n",           "#R>>#n" );
-	INSERT_BRACKET( 16,     "Samurai",       "#C-=#n",           "#C=-#n" );
-	INSERT_BRACKET( 32,     "Drow",          "#P.o0",            "#P0o.#n" );
-	INSERT_BRACKET( 64,     "Monk",          "#0.x[#n",          "#0]x.#n" );
-	INSERT_BRACKET( 128,    "Ninja",         "#C***#n",          "#C***#n" );
-	INSERT_BRACKET( 256,    "Lich",          "#G>*<#n",          "#G>*<#n" );
-	INSERT_BRACKET( 512,    "Shapeshifter",  "#0[#P*#0]#n",      "#0[#P*#0]#n" );
-	INSERT_BRACKET( 1024,   "Tanarri",       "#y{#n",            "#y}#n" );
-	INSERT_BRACKET( 2048,   "Angel",         "#y.x#0[#n",        "#0]#yx.#n" );
-	INSERT_BRACKET( 4096,   "Undead Knight", "#0|[#n",           "#0]|#n" );
-	INSERT_BRACKET( 8192,   "Spider Droid",  "#p{#0-#p}#n",      "#p{#0-#p}#n" );
-	INSERT_BRACKET( 16384,  "Dirgesinger",   "#x136~#x178[#n",   "#x178]#x136~#n" );
-	INSERT_BRACKET( 32768,  "Siren",         "#x255)#x147(#n",   "#x147)#x255(#n" );
-	INSERT_BRACKET( 65536,  "Psion",         "#x255<#x033|#n",   "#x033|#x255>#n" );
-	INSERT_BRACKET( 131072, "Mindflayer",    "#x135}#x035{#n",   "#x035}#x135{#n" );
+	/* Brackets - CLASS_* constants with accent/primary colors for conflict detection */
+	/* accent = bracket/decorative color, primary = title/name color */
+	INSERT_BRACKET( 1,      "Demon",         "#0[#n",            "#0]#n",           "#0",    "#R" );
+	INSERT_BRACKET( 2,      "Mage",          "{{",               "}}",              NULL,    "#C" );
+	INSERT_BRACKET( 4,      "Werewolf",      "#y((#n",           "#y))#n",          "#y",    "#L" );
+	INSERT_BRACKET( 8,      "Vampire",       "#R<<#n",           "#R>>#n",          "#R",    "#R" );
+	INSERT_BRACKET( 16,     "Samurai",       "#C-=#n",           "#C=-#n",          "#C",    "#R" );
+	INSERT_BRACKET( 32,     "Drow",          "#P.o0",            "#P0o.#n",         "#P",    "#0" );
+	INSERT_BRACKET( 64,     "Monk",          "#0.x[#n",          "#0]x.#n",         "#0",    "#c" );
+	INSERT_BRACKET( 128,    "Ninja",         "#C***#n",          "#C***#n",         "#C",    "#y" );
+	INSERT_BRACKET( 256,    "Lich",          "#G>*<#n",          "#G>*<#n",         "#G",    "#7" );
+	INSERT_BRACKET( 512,    "Shapeshifter",  "#0[#P*#0]#n",      "#0[#P*#0]#n",     "#P",    "#R" );
+	INSERT_BRACKET( 1024,   "Tanarri",       "#y{#n",            "#y}#n",           "#y",    "#y" );
+	INSERT_BRACKET( 2048,   "Angel",         "#y.x#0[#n",        "#0]#yx.#n",       "#y",    "#0" );
+	INSERT_BRACKET( 4096,   "Undead Knight", "#0|[#n",           "#0]|#n",          "#0",    "#0" );
+	INSERT_BRACKET( 8192,   "Spider Droid",  "#p{#0-#p}#n",      "#p{#0-#p}#n",     "#p",    "#0" );
+	INSERT_BRACKET( 16384,  "Dirgesinger",   "#x136~#x178[#n",   "#x178]#x136~#n",  "#x136", "#x178" );
+	INSERT_BRACKET( 32768,  "Siren",         "#x039~#x147(#n",   "#x147)#x039~#n",  "#x039", "#x147" );
+	INSERT_BRACKET( 65536,  "Psion",         "#x039<#x033|#n",   "#x033|#x039>#n",  "#x033", "#x039" );
+	INSERT_BRACKET( 131072, "Mindflayer",    "#x035~#x029{#n",   "#x029}#x035~#n",  "#x029", "#x035" );
 
 	/* Generation titles - Demon (CLASS_DEMON=1) */
 	INSERT_GEN( 1, 1, "#RPit Lord#n" );
@@ -2382,6 +2514,8 @@ void db_game_load_class_display( void ) {
 		if ( bracket_cache[i].class_name )   free_string( bracket_cache[i].class_name );
 		if ( bracket_cache[i].open_bracket ) free_string( bracket_cache[i].open_bracket );
 		if ( bracket_cache[i].close_bracket ) free_string( bracket_cache[i].close_bracket );
+		if ( bracket_cache[i].accent_color ) free_string( bracket_cache[i].accent_color );
+		if ( bracket_cache[i].primary_color ) free_string( bracket_cache[i].primary_color );
 	}
 	bracket_count = 0;
 
@@ -2396,14 +2530,19 @@ void db_game_load_class_display( void ) {
 
 	/* Load brackets */
 	if ( sqlite3_prepare_v2( game_db,
-			"SELECT class_id, class_name, open_bracket, close_bracket "
+			"SELECT class_id, class_name, open_bracket, close_bracket, accent_color, primary_color "
 			"FROM class_brackets ORDER BY class_id",
 			-1, &stmt, NULL ) == SQLITE_OK ) {
 		while ( sqlite3_step( stmt ) == SQLITE_ROW && bracket_count < MAX_CACHED_BRACKETS ) {
+			const char *text;
 			bracket_cache[bracket_count].class_id      = sqlite3_column_int( stmt, 0 );
 			bracket_cache[bracket_count].class_name    = str_dup( col_text( stmt, 1 ) );
 			bracket_cache[bracket_count].open_bracket  = str_dup( col_text( stmt, 2 ) );
 			bracket_cache[bracket_count].close_bracket = str_dup( col_text( stmt, 3 ) );
+			text = (const char *)sqlite3_column_text( stmt, 4 );
+			bracket_cache[bracket_count].accent_color  = text ? str_dup( text ) : NULL;
+			text = (const char *)sqlite3_column_text( stmt, 5 );
+			bracket_cache[bracket_count].primary_color = text ? str_dup( text ) : NULL;
 			bracket_count++;
 		}
 		sqlite3_finalize( stmt );
@@ -3647,4 +3786,190 @@ const CLASS_REGISTRY_ENTRY *db_game_get_registry_by_index( int index ) {
 		return NULL;
 
 	return &registry_cache[index];
+}
+
+/* ==========================================================================
+ *                         CLASS VNUM RANGES FUNCTIONS
+ * ==========================================================================
+ */
+
+/*
+ * Insert default vnum range entries if table is empty.
+ * Only includes classes that have equipment (Dirgesinger, Siren, Psion, Mindflayer).
+ */
+static void class_vnum_ranges_insert_defaults( void ) {
+	sqlite3_stmt *count_stmt = NULL;
+	sqlite3_stmt *insert_stmt = NULL;
+	int count = 0;
+
+	/* Check if table is empty */
+	if ( sqlite3_prepare_v2( game_db, "SELECT COUNT(*) FROM class_vnum_ranges", -1, &count_stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( count_stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( count_stmt, 0 );
+		sqlite3_finalize( count_stmt );
+	}
+
+	if ( count > 0 )
+		return;  /* Table has data, don't insert defaults */
+
+	/* Prepare insert statement */
+	if ( sqlite3_prepare_v2( game_db,
+			"INSERT INTO class_vnum_ranges (class_id, armor_vnum_start, armor_vnum_end, mastery_vnum, description) "
+			"VALUES (?,?,?,?,?)",
+			-1, &insert_stmt, NULL ) != SQLITE_OK )
+		return;
+
+	/* Helper macro for inserting vnum ranges */
+	#define INSERT_VNUM_RANGE( cid, start, end, mastery, desc ) \
+		sqlite3_bind_int( insert_stmt, 1, cid ); \
+		sqlite3_bind_int( insert_stmt, 2, start ); \
+		sqlite3_bind_int( insert_stmt, 3, end ); \
+		if ( mastery > 0 ) sqlite3_bind_int( insert_stmt, 4, mastery ); else sqlite3_bind_null( insert_stmt, 4 ); \
+		if ( desc ) sqlite3_bind_text( insert_stmt, 5, desc, -1, SQLITE_STATIC ); else sqlite3_bind_null( insert_stmt, 5 ); \
+		sqlite3_step( insert_stmt ); \
+		sqlite3_reset( insert_stmt );
+
+	/* Vnum ranges from handler.c equipment restrictions - ordered by start vnum */
+	INSERT_VNUM_RANGE( CLASS_UNDEAD_KNIGHT, 29975, 29991, 0,     "Undead Knight armor" );
+	INSERT_VNUM_RANGE( CLASS_MONK,          33020, 33039, 0,     "Monk armor" );
+	INSERT_VNUM_RANGE( CLASS_VAMPIRE,       33040, 33059, 0,     "Vampire armor" );
+	INSERT_VNUM_RANGE( CLASS_NINJA,         33080, 33099, 0,     "Ninja armor" );
+	INSERT_VNUM_RANGE( CLASS_WEREWOLF,      33100, 33119, 0,     "Werewolf armor" );
+	INSERT_VNUM_RANGE( CLASS_DROID,         33140, 33159, 0,     "Spider Droid armor" );
+	INSERT_VNUM_RANGE( CLASS_SHAPESHIFTER,  33160, 33175, 0,     "Shapeshifter armor" );
+	INSERT_VNUM_RANGE( CLASS_ANGEL,         33180, 33199, 0,     "Angel armor" );
+	INSERT_VNUM_RANGE( CLASS_TANARRI,       33200, 33219, 0,     "Tanarri armor" );
+	INSERT_VNUM_RANGE( CLASS_LICH,          33220, 33239, 0,     "Lich armor" );
+	INSERT_VNUM_RANGE( CLASS_DIRGESINGER,   33320, 33332, 33333, "Dirgesinger armor and mastery" );
+	INSERT_VNUM_RANGE( CLASS_SIREN,         33340, 33352, 33353, "Siren armor and mastery" );
+	INSERT_VNUM_RANGE( CLASS_PSION,         33360, 33372, 0,     "Psion armor (shared with Mindflayer)" );
+	INSERT_VNUM_RANGE( CLASS_MINDFLAYER,    33380, 33392, 0,     "Mindflayer-exclusive armor" );
+
+	#undef INSERT_VNUM_RANGE
+
+	sqlite3_finalize( insert_stmt );
+}
+
+/*
+ * Load class vnum ranges from database into memory cache.
+ */
+void db_game_load_class_vnum_ranges( void ) {
+	sqlite3_stmt *stmt = NULL;
+	char buf[MAX_STRING_LENGTH];
+	const char *text;
+	int i;
+
+	if ( game_db == NULL ) {
+		log_string( "db_game_load_class_vnum_ranges: game_db not open" );
+		return;
+	}
+
+	/* Clear existing cache */
+	for ( i = 0; i < vnum_range_count; i++ ) {
+		if ( vnum_range_cache[i].description )
+			free_string( vnum_range_cache[i].description );
+	}
+	vnum_range_count = 0;
+
+	class_vnum_ranges_insert_defaults();
+
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT class_id, armor_vnum_start, armor_vnum_end, mastery_vnum, description "
+			"FROM class_vnum_ranges ORDER BY armor_vnum_start",
+			-1, &stmt, NULL ) != SQLITE_OK ) {
+		log_string( "db_game_load_class_vnum_ranges: failed to prepare select" );
+		return;
+	}
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW && vnum_range_count < MAX_CACHED_VNUM_RANGES ) {
+		CLASS_VNUM_RANGE *entry = &vnum_range_cache[vnum_range_count];
+
+		entry->class_id        = sqlite3_column_int( stmt, 0 );
+		entry->armor_vnum_start = sqlite3_column_int( stmt, 1 );
+		entry->armor_vnum_end  = sqlite3_column_int( stmt, 2 );
+		entry->mastery_vnum    = sqlite3_column_type( stmt, 3 ) == SQLITE_NULL ? 0 : sqlite3_column_int( stmt, 3 );
+
+		text = (const char *)sqlite3_column_text( stmt, 4 );
+		entry->description     = text ? str_dup( text ) : NULL;
+
+		vnum_range_count++;
+	}
+
+	sqlite3_finalize( stmt );
+
+	sprintf( buf, "Loaded %d class vnum ranges from database.", vnum_range_count );
+	log_string( buf );
+}
+
+/*
+ * Get count of vnum range entries.
+ */
+int db_game_get_vnum_range_count( void ) {
+	return vnum_range_count;
+}
+
+/*
+ * Get vnum range entry by class_id.
+ */
+const CLASS_VNUM_RANGE *db_game_get_vnum_range_by_id( int class_id ) {
+	int i;
+
+	for ( i = 0; i < vnum_range_count; i++ ) {
+		if ( vnum_range_cache[i].class_id == class_id )
+			return &vnum_range_cache[i];
+	}
+
+	return NULL;
+}
+
+/*
+ * Get vnum range entry by index (for iteration).
+ */
+const CLASS_VNUM_RANGE *db_game_get_vnum_range_by_index( int index ) {
+	if ( index < 0 || index >= vnum_range_count )
+		return NULL;
+
+	return &vnum_range_cache[index];
+}
+
+/*
+ * Check if a vnum range overlaps with any existing range.
+ * exclude_class_id: class to exclude from check (for updating existing entry)
+ * Returns TRUE if overlap found, FALSE if safe.
+ */
+bool db_game_check_vnum_overlap( int start, int end, int exclude_class_id ) {
+	int i;
+
+	for ( i = 0; i < vnum_range_count; i++ ) {
+		if ( vnum_range_cache[i].class_id == exclude_class_id )
+			continue;
+
+		/* Check if ranges overlap */
+		if ( start <= vnum_range_cache[i].armor_vnum_end &&
+		     end >= vnum_range_cache[i].armor_vnum_start )
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+/*
+ * Get the next available vnum range that doesn't conflict.
+ * Returns the start of an available range of at least 'range_size' vnums.
+ */
+int db_game_get_next_available_vnum( int range_size ) {
+	int candidate = 33400;  /* Start after existing class equipment */
+	int i;
+
+	/* Find highest used vnum and add buffer */
+	for ( i = 0; i < vnum_range_count; i++ ) {
+		int end = vnum_range_cache[i].armor_vnum_end;
+		if ( vnum_range_cache[i].mastery_vnum > end )
+			end = vnum_range_cache[i].mastery_vnum;
+
+		if ( end >= candidate )
+			candidate = end + 20;  /* Leave gap of 20 between ranges */
+	}
+
+	return candidate;
 }

@@ -101,7 +101,28 @@ class ClassDisplayPanel(ttk.Frame):
         self.close_entry = ttk.Entry(row1, textvariable=self.close_var, width=15, font=('Consolas', 10))
         self.close_entry.pack(side=tk.LEFT, padx=(4, 8))
 
-        ttk.Button(row1, text="Save Brackets", command=self._save_brackets).pack(side=tk.LEFT, padx=8)
+        # Row 1b: Color codes (accent/primary) - for reference/validation
+        row1b = ttk.Frame(edit_frame)
+        row1b.pack(fill=tk.X, padx=8, pady=2)
+
+        ttk.Label(row1b, text="Colors:").pack(side=tk.LEFT)
+        ttk.Label(row1b, text="Accent:", foreground='gray').pack(side=tk.LEFT, padx=(8, 0))
+        self.accent_var = tk.StringVar()
+        self.accent_var.trace_add('write', lambda *_: self._on_bracket_change())
+        self.accent_entry = ttk.Entry(row1b, textvariable=self.accent_var, width=10, font=('Consolas', 10))
+        self.accent_entry.pack(side=tk.LEFT, padx=(4, 12))
+
+        ttk.Label(row1b, text="Primary:", foreground='gray').pack(side=tk.LEFT)
+        self.primary_var = tk.StringVar()
+        self.primary_var.trace_add('write', lambda *_: self._on_bracket_change())
+        self.primary_entry = ttk.Entry(row1b, textvariable=self.primary_var, width=10, font=('Consolas', 10))
+        self.primary_entry.pack(side=tk.LEFT, padx=(4, 8))
+
+        ttk.Button(row1b, text="Save Brackets", command=self._save_brackets).pack(side=tk.LEFT, padx=8)
+
+        # Color help tooltip
+        color_help = ttk.Label(row1b, text="(e.g., #R, #x136 - for validation/reference)", foreground='gray')
+        color_help.pack(side=tk.LEFT, padx=(8, 0))
 
         # Row 2: Generation selection + title edit (inline)
         row2 = ttk.Frame(edit_frame)
@@ -176,6 +197,9 @@ class ClassDisplayPanel(ttk.Frame):
             self.class_label.config(text=entry['class_name'])
             self.open_var.set(entry['open_bracket'])
             self.close_var.set(entry['close_bracket'])
+            # Load color fields (may be None if not yet in database)
+            self.accent_var.set(entry.get('accent_color') or '')
+            self.primary_var.set(entry.get('primary_color') or '')
             self.unsaved_brackets = False
 
         # Load generations into combo (this also selects first gen and sets title)
@@ -316,18 +340,28 @@ class ClassDisplayPanel(ttk.Frame):
                     self.preview_text.insert(tk.END, plain_text)
 
     def _save_brackets(self):
-        """Save current brackets."""
+        """Save current brackets and colors."""
         if self.current_class_id is None:
             messagebox.showwarning("No Selection", "Please select a class first.")
             return
 
         open_bracket = self.open_var.get().strip()
         close_bracket = self.close_var.get().strip()
+        accent_color = self.accent_var.get().strip() or None
+        primary_color = self.primary_var.get().strip() or None
 
-        self.brackets_repo.update(self.current_class_id, {
+        update_data = {
             'open_bracket': open_bracket,
             'close_bracket': close_bracket
-        })
+        }
+
+        # Only include colors if the columns exist in the database
+        # The repository will silently ignore unknown columns
+        if accent_color is not None or primary_color is not None:
+            update_data['accent_color'] = accent_color
+            update_data['primary_color'] = primary_color
+
+        self.brackets_repo.update(self.current_class_id, update_data)
 
         self.unsaved_brackets = False
         self.on_status("Brackets saved. Restart server to apply.")

@@ -497,6 +497,7 @@ void boot_db( bool fCopyOver ) {
 		db_game_load_class_armor();
 		db_game_load_class_starting();
 		db_game_load_class_score();
+		db_game_load_class_vnum_ranges();
 		db_game_close_boot_connections();
 	}
 

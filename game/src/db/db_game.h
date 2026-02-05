@@ -84,6 +84,8 @@ typedef struct class_bracket {
 	char   *class_name;    /* Human-readable name ("Vampire", "Werewolf") */
 	char   *open_bracket;  /* Opening bracket with colors, e.g., "#R<<#n" */
 	char   *close_bracket; /* Closing bracket with colors, e.g., "#R>>#n" */
+	char   *accent_color;  /* Summary: bracket/decorative color, e.g., "#x136" */
+	char   *primary_color; /* Summary: title/name color, e.g., "#x178" */
 } CLASS_BRACKET;
 
 typedef struct class_generation {
@@ -132,6 +134,15 @@ typedef struct class_registry_entry {
 	int    upgrade_class;    /* 0=base class, else class_id this upgrades FROM */
 	char   *requirements;    /* optional prereq description */
 } CLASS_REGISTRY_ENTRY;
+
+/* Class vnum ranges (game.db) - equipment vnum tracking to prevent conflicts */
+typedef struct class_vnum_range {
+	int    class_id;         /* CLASS_* constant */
+	int    armor_vnum_start; /* First armor vnum (or 0 if none) */
+	int    armor_vnum_end;   /* Last armor vnum (or 0 if none) */
+	int    mastery_vnum;     /* Mastery item vnum (or 0 if none) */
+	char   *description;     /* Optional description */
+} CLASS_VNUM_RANGE;
 
 /* Helper macro for base class check */
 #define IS_BASE_CLASS(reg) ((reg)->upgrade_class == 0)
@@ -184,6 +195,14 @@ int db_game_get_registry_count( void );
 const CLASS_REGISTRY_ENTRY *db_game_get_registry_by_id( int class_id );
 const CLASS_REGISTRY_ENTRY *db_game_get_registry_by_keyword( const char *keyword );
 const CLASS_REGISTRY_ENTRY *db_game_get_registry_by_index( int index );
+
+/* Class vnum ranges (game.db) - equipment vnum tracking */
+void db_game_load_class_vnum_ranges( void );
+int db_game_get_vnum_range_count( void );
+const CLASS_VNUM_RANGE *db_game_get_vnum_range_by_id( int class_id );
+const CLASS_VNUM_RANGE *db_game_get_vnum_range_by_index( int index );
+bool db_game_check_vnum_overlap( int start, int end, int exclude_class_id );
+int db_game_get_next_available_vnum( int range_size );
 
 /* Class score stats (game.db) - customizable score display per class */
 typedef enum {

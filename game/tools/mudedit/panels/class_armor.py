@@ -24,6 +24,8 @@ class ClassArmorPanel(ttk.Frame):
         parent,
         config_repo,
         pieces_repo,
+        ability_config_repo=None,
+        db_manager=None,
         on_status: Optional[Callable[[str], None]] = None,
         **kwargs
     ):
@@ -31,6 +33,8 @@ class ClassArmorPanel(ttk.Frame):
 
         self.config_repo = config_repo
         self.pieces_repo = pieces_repo
+        self.ability_config_repo = ability_config_repo
+        self.db_manager = db_manager
         self.on_status = on_status or (lambda msg: None)
 
         self.current_class_id: Optional[int] = None
@@ -38,9 +42,47 @@ class ClassArmorPanel(ttk.Frame):
         self.unsaved_config = False
         self.unsaved_piece = False
         self._pieces = []
+        self._cost_keys = self._load_cost_keys()
 
         self._build_ui()
         self._load_configs()
+
+    def _load_cost_keys(self) -> list:
+        """Load ability config keys that are armor-related cost keys."""
+        if not self.ability_config_repo:
+            return []
+
+        keys = []
+        try:
+            entries = self.ability_config_repo.list_all()
+            for entry in entries:
+                key = entry.get('key', '')
+                # Match keys containing "armor" and ending with "cost"
+                if 'armor' in key.lower() and key.endswith('_cost'):
+                    keys.append(key)
+        except Exception:
+            pass
+
+        return sorted(keys)
+
+    def _lookup_object_name(self, vnum: int) -> Optional[str]:
+        """Look up an object name from area databases by vnum."""
+        if not self.db_manager:
+            return None
+
+        try:
+            for area_db in self.db_manager.list_area_dbs():
+                conn = self.db_manager.get_connection(area_db)
+                row = conn.execute(
+                    "SELECT short_descr FROM objects WHERE vnum = ?",
+                    (vnum,)
+                ).fetchone()
+                if row:
+                    return row['short_descr']
+        except Exception:
+            pass
+
+        return None
 
     def _build_ui(self):
         """Build the panel UI."""
@@ -95,10 +137,11 @@ class ClassArmorPanel(ttk.Frame):
         ttk.Label(row1, text="ACFG Cost Key:").pack(side=tk.LEFT)
         self.cost_key_var = tk.StringVar()
         self.cost_key_var.trace_add('write', lambda *_: self._on_config_change())
-        self.cost_key_entry = ttk.Entry(
-            row1, textvariable=self.cost_key_var, width=40, font=('Consolas', 10)
+        self.cost_key_combo = ttk.Combobox(
+            row1, textvariable=self.cost_key_var, width=40, font=('Consolas', 10),
+            values=self._cost_keys
         )
-        self.cost_key_entry.pack(side=tk.LEFT, padx=(4, 8), fill=tk.X, expand=True)
+        self.cost_key_combo.pack(side=tk.LEFT, padx=(4, 8), fill=tk.X, expand=True)
 
         # Row 2: Usage message
         row2 = ttk.Frame(config_frame)
@@ -146,15 +189,17 @@ class ClassArmorPanel(ttk.Frame):
 
         self.pieces_tree = ttk.Treeview(
             pieces_list_frame,
-            columns=('keyword', 'vnum'),
+            columns=('keyword', 'vnum', 'object_name'),
             show='headings',
             selectmode='browse',
             height=8
         )
         self.pieces_tree.heading('keyword', text='Keyword')
         self.pieces_tree.heading('vnum', text='VNUM')
-        self.pieces_tree.column('keyword', width=150)
-        self.pieces_tree.column('vnum', width=80)
+        self.pieces_tree.heading('object_name', text='Object Name')
+        self.pieces_tree.column('keyword', width=100)
+        self.pieces_tree.column('vnum', width=70)
+        self.pieces_tree.column('object_name', width=200)
 
         pieces_scroll = ttk.Scrollbar(
             pieces_list_frame, orient=tk.VERTICAL, command=self.pieces_tree.yview
@@ -180,10 +225,19 @@ class ClassArmorPanel(ttk.Frame):
         ttk.Label(piece_edit, text="VNUM:").pack(side=tk.LEFT)
         self.piece_vnum_var = tk.StringVar()
         self.piece_vnum_var.trace_add('write', lambda *_: self._on_piece_change())
+        self.piece_vnum_var.trace_add('write', lambda *_: self._update_object_preview())
         self.piece_vnum_entry = ttk.Entry(
             piece_edit, textvariable=self.piece_vnum_var, width=10, font=('Consolas', 10)
         )
-        self.piece_vnum_entry.pack(side=tk.LEFT, padx=(4, 8))
+        self.piece_vnum_entry.pack(side=tk.LEFT, padx=(4, 4))
+
+        # Object name preview label
+        self.object_name_var = tk.StringVar(value="")
+        self.object_name_label = ttk.Label(
+            piece_edit, textvariable=self.object_name_var,
+            font=('Consolas', 9), foreground='#0066cc', width=30
+        )
+        self.object_name_label.pack(side=tk.LEFT, padx=(0, 8))
 
         ttk.Button(
             piece_edit, text="Save Piece", command=self._save_piece
@@ -248,15 +302,34 @@ class ClassArmorPanel(ttk.Frame):
         self._pieces = self.pieces_repo.get_by_class(class_id)
 
         for piece in self._pieces:
+            obj_name = self._lookup_object_name(piece['vnum']) or '(not found)'
             self.pieces_tree.insert(
                 '', tk.END, iid=str(piece['id']),
-                values=(piece['keyword'], piece['vnum'])
+                values=(piece['keyword'], piece['vnum'], obj_name)
             )
 
         # Clear piece editor
         self.piece_kw_var.set("")
         self.piece_vnum_var.set("")
+        self.object_name_var.set("")
         self.unsaved_piece = False
+
+    def _update_object_preview(self):
+        """Update the object name preview when vnum changes."""
+        vnum_str = self.piece_vnum_var.get().strip()
+        if not vnum_str:
+            self.object_name_var.set("")
+            return
+
+        try:
+            vnum = int(vnum_str)
+            obj_name = self._lookup_object_name(vnum)
+            if obj_name:
+                self.object_name_var.set(f"→ {obj_name}")
+            else:
+                self.object_name_var.set("(object not found)")
+        except ValueError:
+            self.object_name_var.set("")
 
     def _on_piece_select(self, event):
         """Handle piece selection."""
@@ -275,6 +348,8 @@ class ClassArmorPanel(ttk.Frame):
         if piece:
             self.piece_kw_var.set(piece['keyword'])
             self.piece_vnum_var.set(str(piece['vnum']))
+            # Trigger object preview update
+            self._update_object_preview()
             self.unsaved_piece = False
 
     def _on_config_change(self):

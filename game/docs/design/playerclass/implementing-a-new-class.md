@@ -60,13 +60,14 @@ Most class display and configuration is now database-driven. Use MudEdit (`pytho
 | Table | MudEdit Panel | What to Add | Notes |
 |-------|---------------|-------------|-------|
 | `class_registry` | Class Registry | Class metadata: name, keyword, mudstat label, selfclass message | **Add first** - other tables reference this |
-| `class_brackets` | Class Display | WHO list brackets with colors | e.g., `#R<<#n` and `#R>>#n` |
+| `class_brackets` | Class Display | WHO list brackets with colors | e.g., `#R<<#n` and `#R>>#n` - includes accent/primary colors |
 | `class_generations` | Class Display | Generation-based titles (1-13 + default) | One row per generation level |
 | `class_auras` | Class Aura | Room presence text shown when looking | e.g., `#y(#LVampire#y)#n ` |
 | `class_starting` | Class Starting | Starting beast/level values | Vampire: 30 beast, Monk/Mage: level 3 |
 | `class_score_stats` | Class Score | Custom stats shown in `score` command | Uses STAT_SOURCE enum for value lookup |
 | `class_armor_config` | Class Armor | Armor creation messages and primal cost key | Generic `do_classarmor` uses this |
 | `class_armor_pieces` | Class Armor | Keyword-to-vnum mapping for armor pieces | e.g., "ring" → vnum 12345 |
+| `class_vnum_ranges` | Class Vnum Ranges | Equipment vnum range tracking | Prevents vnum conflicts between classes |
 
 **Important:** Add `class_registry` entry FIRST, before other tables. Foreign key constraints reference it.
 
@@ -242,7 +243,8 @@ Combat integration determines how your class performs in the core gameplay loop.
 **Planning Checklist:**
 Before starting this phase, verify:
 - [ ] Phase 6 complete - combat integration works
-- [ ] `gamedata/db/areas/classeq.db` - identify existing vnum ranges to avoid overlap
+- [ ] Use MudEdit Class Vnum Ranges panel to check existing ranges and find next available
+- [ ] Run `python game/tools/validate_classes.py` to confirm no overlaps
 - [ ] Design document specifies equipment slots and stat themes
 - [ ] Decide on armor piece names and keywords
 
@@ -250,7 +252,8 @@ Before starting this phase, verify:
 Class equipment provides progression and identity. The vnum range you choose is permanent, so check existing ranges carefully. Equipment restrictions prevent other classes from using your gear.
 
 **Implementation Steps:**
-1. **Define equipment vnums** - Pick a contiguous range that doesn't overlap existing ranges. Add the objects to `classeq.db`.
+1. **Reserve your vnum range** - Open MudEdit → Class Vnum Ranges panel. Click "Next Available" to see the suggested starting vnum, then add an entry for your class before creating armor objects.
+2. **Define equipment vnums** - Pick a contiguous range that doesn't overlap existing ranges. Add the objects to `classeq.db`.
 2. **Configure armor via MudEdit** - Open the Class Armor panel:
    - Add a `class_armor_config` entry with:
      - `acfg_cost_key`: Key for primal cost lookup (e.g., `"classname.armor.practice_cost"`)
@@ -273,14 +276,15 @@ Class equipment provides progression and identity. The vnum range you choose is 
 **Planning Checklist:**
 Before starting this phase, verify:
 - [ ] Phase 7 complete - equipment works correctly
-- [ ] Choose your class color scheme (accent and primary colors)
+- [ ] Run `python game/tools/validate_classes.py` to check for color conflicts
+- [ ] Choose your class color scheme (accent and primary colors) - must be unique
 - [ ] Plan generation-based title progression (13 levels + default)
 
 **Why this phase matters:**
 Display integration controls how your class appears everywhere in the game: who list, room descriptions, score command. Most of this is now database-driven via MudEdit, making it much simpler to add.
 
 **Implementation Steps (MudEdit - no code changes):**
-1. **Add who list brackets** - Class Display panel → class_brackets table. Add `open_bracket`/`close_bracket` with your color scheme.
+1. **Add who list brackets** - Class Display panel → class_brackets table. Add `open_bracket`/`close_bracket` with your color scheme. Also fill in `accent_color` and `primary_color` fields for validation/documentation.
 2. **Add who list titles** - Class Display panel → class_generations table. Add 13 generation entries + a generation 0 default.
 3. **Add room aura prefix** - Class Aura panel → class_auras table. Add the class tag shown when looking at players.
 4. **Add score display** - Class Score panel → class_score_stats table. Add entries for each custom stat (use STAT_SOURCE enum).
@@ -519,6 +523,60 @@ When choosing x256 colors (`#xNNN`), test them on both dark and light terminal b
 
 Use two colors per class: an **accent** color (for decorative elements like tildes and brackets) and a **primary** color (for class name, titles, ability highlights). This gives the class visual identity on the who list and in ability messages.
 
+### Checking Existing Class Brackets and Colors
+
+Before finalizing your color scheme, check existing class brackets to avoid visual conflicts. Classes with similar bracket styles + color combinations become hard to distinguish on the WHO list.
+
+**1. Run the validation script:**
+```bash
+cd game/tools
+python validate_classes.py
+```
+
+This script checks:
+- CLASS_* constants match database entries
+- No duplicate accent_color + primary_color combinations
+- No duplicate bracket combinations
+- No overlapping equipment vnum ranges
+
+**2. Check existing color schemes (from class_brackets table):**
+
+| Class | Brackets | Accent | Primary |
+|-------|----------|--------|---------|
+| Vampire | `<< >>` | `#R` | `#R` |
+| Werewolf | `(( ))` | `#y` | `#L` |
+| Dirgesinger | `~[ ]~` | `#x136` | `#x178` |
+| Siren | `~( )~` | `#x039` | `#x147` |
+| Psion | `<\| \|>` | `#x033` | `#x039` |
+| Mindflayer | `~{ }~` | `#x029` | `#x035` |
+
+**3. Avoid these combinations:**
+- Gold/bronze tones (`#x178`, `#x220`) with `[ ]` brackets - too similar to Dirgesinger
+- Lavender/teal (`#x147`, `#x039`) with `( )` brackets - too similar to Siren
+- Blue/cyan (`#x033`, `#x039`) with `<| |>` brackets - too similar to Psion
+- Green/teal (`#x029`, `#x035`) with `{ }` brackets - too similar to Mindflayer
+
+**4. Use unique bracket styles:**
+Consider using a unique bracket character combination rather than reusing common brackets if your color scheme might be confused with existing classes. Examples:
+- `<* *>` - dragon fang style
+- `~~ ~~` - wave style
+- `{{ }}` - curly braces
+- `<> <>` - chevron style
+
+**5. Update MudEdit after choosing colors:**
+The `class_brackets` table stores both brackets AND the accent/primary color summary. When adding your class via MudEdit's Class Display panel, fill in the accent_color and primary_color fields for documentation and validation purposes.
+
+### Equipment Vnum Range Conflicts
+
+Each class with armor equipment needs a contiguous vnum range in `classeq.db`. Use the Class Vnum Ranges panel in MudEdit to:
+
+1. **Check existing ranges** - View which vnums are already allocated
+2. **Find next available** - Click "Next Available" to see suggested starting vnum
+3. **Track your allocation** - Add an entry for your class before creating armor objects
+4. **Detect conflicts** - The panel warns if ranges overlap
+
+The validation script (`validate_classes.py`) also checks for vnum overlaps and reports the next available starting point.
+
 ### Build File Regeneration
 
 After adding or removing any `.c` or `.h` file, regenerate the build files:
@@ -624,14 +682,17 @@ These are configured in `game.db` via MudEdit - no code changes needed:
 
 ```
 class_registry      +1 entry  (name, keyword, mudstat label, selfclass message)  ← ADD FIRST
-class_brackets      +1 entry  (WHO list open/close brackets with colors)
+class_brackets      +1 entry  (WHO list open/close brackets with accent/primary colors)
 class_generations   +14 entries (generation titles 1-13 + default)
 class_auras         +1 entry  (room presence text)
 class_starting      +1 entry  (starting beast/level values)
 class_score_stats   +N entries (custom score display stats)
 class_armor_config  +1 entry  (armor creation messages)
 class_armor_pieces  +N entries (keyword-to-vnum mapping)
+class_vnum_ranges   +1 entry  (equipment vnum range tracking)  ← ADD BEFORE creating armor
 ```
+
+**Validation:** Run `python game/tools/validate_classes.py` after adding entries to verify no conflicts.
 
 ### Data Files
 
@@ -655,13 +716,14 @@ act_info.c       +1 block  (class_name only - display is DB-driven)
 
 **Database (MudEdit):**
 ```
-class_registry   +1 entry  (set upgrade_class to base class_id)
-class_brackets   +1 entry
+class_registry    +1 entry  (set upgrade_class to base class_id)
+class_brackets    +1 entry  (unique color scheme)
 class_generations +14 entries
-class_auras      +1 entry
-class_starting   +1 entry
+class_auras       +1 entry
+class_starting    +1 entry
 class_score_stats +N entries
-class_armor_*    (if upgrade has different armor)
+class_armor_*     (if upgrade has different armor)
+class_vnum_ranges +1 entry  (if upgrade has separate equipment)
 ```
 
 **Note:** Upgrade classes set `upgrade_class` in class_registry to the base class's class_id (not NULL). This marks them as upgrade classes, making them unavailable via `selfclass`.

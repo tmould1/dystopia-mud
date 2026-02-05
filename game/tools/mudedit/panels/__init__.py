@@ -22,6 +22,7 @@ from .class_armor import ClassArmorPanel
 from .class_starting import ClassStartingPanel
 from .class_score import ClassScorePanel
 from .class_registry import ClassRegistryPanel
+from .class_vnum_ranges import ClassVnumRangesPanel
 
 __all__ = [
     'HelpEditorPanel',
@@ -50,4 +51,5 @@ __all__ = [
     'ClassStartingPanel',
     'ClassScorePanel',
     'ClassRegistryPanel',
+    'ClassVnumRangesPanel',
 ]

@@ -5,9 +5,11 @@ Provides the main window with navigation tree and tabbed editor panels.
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, scrolledtext
 from pathlib import Path
 from typing import Dict, Optional, Tuple
+import io
+import sys
 
 from .db.manager import DatabaseManager
 from .db.repository import (
@@ -21,7 +23,7 @@ from .db.repository import (
     PlayerRepository,
     ClassBracketsRepository, ClassGenerationsRepository, ClassAurasRepository,
     ClassArmorConfigRepository, ClassArmorPiecesRepository, ClassStartingRepository,
-    ClassScoreStatsRepository, ClassRegistryRepository
+    ClassScoreStatsRepository, ClassRegistryRepository, ClassVnumRangesRepository
 )
 from .nav.tree import NavigationTree
 from .panels import (
@@ -31,7 +33,7 @@ from .panels import (
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
     PlayerEditorPanel, ClassDisplayPanel, ClassAuraPanel, ClassArmorPanel,
-    ClassStartingPanel, ClassScorePanel, ClassRegistryPanel
+    ClassStartingPanel, ClassScorePanel, ClassRegistryPanel, ClassVnumRangesPanel
 )
 
 
@@ -173,6 +175,11 @@ class MudEditorApp:
         menubar.add_cascade(label="View", menu=view_menu)
         view_menu.add_command(label="Expand All", command=self.nav_tree.expand_all)
         view_menu.add_command(label="Collapse All", command=self.nav_tree.collapse_all)
+
+        # Tools menu
+        tools_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Tools", menu=tools_menu)
+        tools_menu.add_command(label="Validate Classes...", command=self._run_validation)
 
         # Help menu
         help_menu = tk.Menu(menubar, tearoff=0)
@@ -412,10 +419,13 @@ class MudEditorApp:
             elif entity_type == 'class_armor':
                 config_repo = ClassArmorConfigRepository(conn)
                 pieces_repo = ClassArmorPiecesRepository(conn)
+                ability_repo = AbilityConfigRepository(conn)
                 return ClassArmorPanel(
                     self.notebook,
                     config_repo,
                     pieces_repo,
+                    ability_config_repo=ability_repo,
+                    db_manager=self.db_manager,
                     on_status=self._set_status
                 )
 
@@ -440,6 +450,14 @@ class MudEditorApp:
                 return ClassRegistryPanel(
                     self.notebook,
                     registry_repo,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'class_vnum_ranges':
+                vnum_ranges_repo = ClassVnumRangesRepository(conn)
+                return ClassVnumRangesPanel(
+                    self.notebook,
+                    vnum_ranges_repo,
                     on_status=self._set_status
                 )
 
@@ -593,6 +611,137 @@ class MudEditorApp:
     def _set_status(self, message: str):
         """Set the status bar message."""
         self.status_var.set(message)
+
+    def _run_validation(self):
+        """Run class validation and show results in a dialog."""
+        # Import validation functions
+        try:
+            from . import validate_classes_runner
+        except ImportError:
+            # Fall back to direct import from parent tools directory
+            pass
+
+        # Capture output
+        output = io.StringIO()
+        old_stdout = sys.stdout
+        sys.stdout = output
+
+        try:
+            # Get paths
+            db_path = self.db_manager.get_game_db_path()
+            # From mudedit/app.py -> tools -> game -> src/classes/class.h
+            class_h_path = Path(__file__).parent.parent.parent / 'src' / 'classes' / 'class.h'
+
+            # Import and run validation functions
+            tools_dir = Path(__file__).parent.parent
+            sys.path.insert(0, str(tools_dir))
+            try:
+                import validate_classes as vc
+
+                print("Validating class registry...")
+                print(f"  Database: {db_path}")
+                print(f"  class.h: {class_h_path}")
+
+                # Load data
+                class_h_constants = vc.parse_class_h(str(class_h_path))
+                db_registry = vc.get_class_registry(str(db_path))
+                brackets = vc.get_class_brackets(str(db_path))
+                vnum_ranges = vc.get_vnum_ranges(str(db_path))
+                armor_config = vc.get_armor_config(str(db_path))
+                armor_pieces = vc.get_armor_pieces(str(db_path))
+
+                # Run checks
+                total_errors = 0
+                total_warnings = 0
+
+                errors, warnings = vc.check_constants(class_h_constants, db_registry)
+                total_errors += errors
+                total_warnings += warnings
+
+                total_errors += vc.check_color_conflicts(brackets)
+                total_errors += vc.check_bracket_duplicates(brackets)
+                total_errors += vc.check_vnum_overlaps(vnum_ranges, db_registry)
+
+                errors, warnings = vc.check_armor_consistency(
+                    db_registry, vnum_ranges, armor_config, armor_pieces
+                )
+                total_errors += errors
+                total_warnings += warnings
+
+                errors, warnings = vc.check_registry_completeness(
+                    str(db_path), db_registry, brackets, armor_config
+                )
+                total_errors += errors
+                total_warnings += warnings
+
+                # Summary
+                print("\n" + "=" * 50)
+                if total_errors == 0 and total_warnings == 0:
+                    print("PASS: All checks passed!")
+                else:
+                    print(f"RESULT: {total_errors} errors, {total_warnings} warnings")
+
+            finally:
+                sys.path.remove(str(tools_dir))
+
+        except Exception as e:
+            print(f"\nERROR: {e}")
+            import traceback
+            traceback.print_exc()
+        finally:
+            sys.stdout = old_stdout
+
+        # Show results in a dialog
+        result_text = output.getvalue()
+        self._show_validation_results(result_text)
+
+    def _show_validation_results(self, text: str):
+        """Show validation results in a scrollable dialog."""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Class Validation Results")
+        dialog.geometry("700x500")
+        dialog.transient(self.root)
+
+        # Text widget with scrollbar
+        text_widget = scrolledtext.ScrolledText(
+            dialog,
+            wrap=tk.WORD,
+            font=('Consolas', 10),
+            padx=10,
+            pady=10
+        )
+        text_widget.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        text_widget.insert(tk.END, text)
+        text_widget.config(state=tk.DISABLED)
+
+        # Apply color tags based on content
+        text_widget.config(state=tk.NORMAL)
+        text_widget.tag_configure('pass', foreground='green')
+        text_widget.tag_configure('error', foreground='red')
+        text_widget.tag_configure('warning', foreground='orange')
+        text_widget.tag_configure('ok', foreground='#006600')
+
+        # Highlight lines
+        for i, line in enumerate(text.split('\n'), 1):
+            line_start = f"{i}.0"
+            line_end = f"{i}.end"
+            if 'PASS:' in line:
+                text_widget.tag_add('pass', line_start, line_end)
+            elif 'ERROR:' in line or 'ERROR' in line:
+                text_widget.tag_add('error', line_start, line_end)
+            elif 'WARNING:' in line or 'WARNING' in line:
+                text_widget.tag_add('warning', line_start, line_end)
+            elif '  OK:' in line:
+                text_widget.tag_add('ok', line_start, line_end)
+
+        text_widget.config(state=tk.DISABLED)
+
+        # Close button
+        btn_frame = ttk.Frame(dialog)
+        btn_frame.pack(fill=tk.X, padx=5, pady=5)
+        ttk.Button(btn_frame, text="Close", command=dialog.destroy).pack(side=tk.RIGHT)
+
+        dialog.focus_set()
 
     def _show_about(self):
         """Show about dialog."""
