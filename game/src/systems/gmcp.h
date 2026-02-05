@@ -20,6 +20,7 @@
 #define GMCP_PACKAGE_CHAR_STATUS ( 1 << 3 ) /* Char.Status - level/class */
 #define GMCP_PACKAGE_CHAR_INFO	   ( 1 << 4 ) /* Char.Info - name/race */
 #define GMCP_PACKAGE_CLIENT_MEDIA  ( 1 << 5 ) /* Client.Media - MCMP sounds */
+#define GMCP_PACKAGE_ROOM_INFO	   ( 1 << 6 ) /* Room.Info - room/exit data */
 
 /*
  * Telnet negotiation strings (defined in gmcp.c)
@@ -56,5 +57,8 @@ void gmcp_send_char_data( CHAR_DATA *ch );
 
 /* Send Client.GUI for Mudlet auto-install package */
 void gmcp_send_gui( DESCRIPTOR_DATA *d );
+
+/* Send Room.Info with current room details and exits */
+void gmcp_send_room_info( CHAR_DATA *ch );
 
 #endif /* GMCP_H */

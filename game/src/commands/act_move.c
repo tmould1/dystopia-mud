@@ -440,6 +440,15 @@ void move_char( CHAR_DATA *ch, int door ) {
 
 	do_look( ch, "auto" );
 
+	/* Show automap if enabled (skip for screen readers - not accessible) */
+	if ( !IS_NPC( ch ) && IS_SET( ch->act, PLR_AUTOMAP )
+		&& !IS_SET( ch->act, PLR_SCREENREADER ) )
+		show_automap( ch );
+
+	/* Send GMCP Room.Info (screen readers can use client accessibility) */
+	if ( !IS_NPC( ch ) && ch->desc != NULL && ch->desc->gmcp_enabled )
+		gmcp_send_room_info( ch );
+
 	for ( fch = in_room->people; fch != NULL; fch = fch_next ) {
 		fch_next = fch->next_in_room;
 		if ( ( mount = fch->mount ) != NULL && mount == ch && IS_SET( fch->mounted, IS_MOUNT ) ) {

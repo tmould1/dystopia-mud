@@ -1946,6 +1946,7 @@ struct kill_data {
 #define PLR_SCREENREADER 256		// Screen reader accessibility mode
 #define PLR_PREFER_MCMP	4194304		// User prefers MCMP (Client.Media) enabled
 #define PLR_PREFER_MXP	2147483648U // User prefers MXP enabled
+#define PLR_AUTOMAP		8388608		// Auto-show map on movement
 
 /*New bits for playrs (Infidel)*/
 #define NEW_SLAM		 1
@@ -4705,7 +4706,11 @@ void gmcp_send_vitals( CHAR_DATA *ch );
 void gmcp_send_status( CHAR_DATA *ch );
 void gmcp_send_info( CHAR_DATA *ch );
 void gmcp_send_char_data( CHAR_DATA *ch );
+void gmcp_send_room_info( CHAR_DATA *ch );
 void gmcp_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int len );
+
+/* act_map.c */
+void show_automap( CHAR_DATA *ch );
 
 /* naws.c */
 void naws_init( DESCRIPTOR_DATA *d );

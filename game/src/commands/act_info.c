@@ -4230,6 +4230,11 @@ void do_config( CHAR_DATA *ch, char *argument ) {
 				? "[+MCMP     ] MCMP sound protocol preferred (auto-enabled if client supports).\n\r"
 				: "[-mcmp     ] MCMP sound protocol not preferred.\n\r",
 			ch );
+
+		send_to_char( IS_SET( ch->act, PLR_AUTOMAP )
+				? "[+AUTOMAP  ] Automap shown on movement.\n\r"
+				: "[-automap  ] Automap not shown on movement.\n\r",
+			ch );
 	} else {
 		bool fSet;
 		int bit;
@@ -4275,6 +4280,8 @@ void do_config( CHAR_DATA *ch, char *argument ) {
 			bit = PLR_SCREENREADER;
 		else if ( !str_cmp( arg + 1, "mcmp" ) )
 			bit = PLR_PREFER_MCMP;
+		else if ( !str_cmp( arg + 1, "automap" ) )
+			bit = PLR_AUTOMAP;
 		else {
 			send_to_char( "Config which option?\n\r", ch );
 			return;

@@ -326,6 +326,97 @@ void gmcp_send_char_data( CHAR_DATA *ch ) {
 }
 
 /*
+ * Get sector type name for Room.Info
+ */
+static const char *get_sector_name( int sector ) {
+	switch ( sector ) {
+	case SECT_INSIDE:
+		return "inside";
+	case SECT_CITY:
+		return "city";
+	case SECT_FIELD:
+		return "field";
+	case SECT_FOREST:
+		return "forest";
+	case SECT_HILLS:
+		return "hills";
+	case SECT_MOUNTAIN:
+		return "mountain";
+	case SECT_WATER_SWIM:
+		return "water_swim";
+	case SECT_WATER_NOSWIM:
+		return "water_noswim";
+	case SECT_AIR:
+		return "air";
+	case SECT_DESERT:
+		return "desert";
+	default:
+		return "unknown";
+	}
+}
+
+/*
+ * Send Room.Info with current room details and exits
+ * Format follows IRE/Aardwolf standard for maximum client compatibility:
+ * {"num": 12345, "name": "Room Name", "area": "Area Name",
+ *  "terrain": "city", "exits": {"n": 12344, "s": 12336}}
+ */
+void gmcp_send_room_info( CHAR_DATA *ch ) {
+	char buf[MAX_STRING_LENGTH];
+	char exits_buf[512];
+	char name_buf[256];
+	char area_buf[256];
+	ROOM_INDEX_DATA *room;
+	EXIT_DATA *pexit;
+	int dir;
+	bool first_exit = TRUE;
+	const char *dir_names[] = { "n", "e", "s", "w", "u", "d" };
+
+	if ( ch == NULL || ch->desc == NULL || !ch->desc->gmcp_enabled )
+		return;
+
+	if ( !( ch->desc->gmcp_packages & GMCP_PACKAGE_ROOM_INFO ) )
+		return;
+
+	room = ch->in_room;
+	if ( room == NULL )
+		return;
+
+	/* Build exits JSON object */
+	strcpy( exits_buf, "{" );
+	for ( dir = 0; dir < 6; dir++ ) {
+		pexit = room->exit[dir];
+		if ( pexit != NULL && pexit->to_room != NULL ) {
+			char exit_entry[64];
+			snprintf( exit_entry, sizeof( exit_entry ), "%s\"%s\":%d",
+				first_exit ? "" : ",",
+				dir_names[dir],
+				pexit->to_room->vnum );
+			strcat( exits_buf, exit_entry );
+			first_exit = FALSE;
+		}
+	}
+	strcat( exits_buf, "}" );
+
+	/* Copy escaped strings to avoid static buffer issues */
+	strncpy( name_buf, json_escape( room->name ), sizeof( name_buf ) - 1 );
+	name_buf[sizeof( name_buf ) - 1] = '\0';
+	strncpy( area_buf, json_escape( room->area ? room->area->name : "Unknown" ),
+		sizeof( area_buf ) - 1 );
+	area_buf[sizeof( area_buf ) - 1] = '\0';
+
+	snprintf( buf, sizeof( buf ),
+		"{\"num\":%d,\"name\":\"%s\",\"area\":\"%s\",\"terrain\":\"%s\",\"exits\":%s}",
+		room->vnum,
+		name_buf,
+		area_buf,
+		get_sector_name( room->sector_type ),
+		exits_buf );
+
+	gmcp_send( ch->desc, "Room.Info", buf );
+}
+
+/*
  * Parse a package name and version from Core.Supports.Set
  * Format: "Package.Name version" or just "Package.Name"
  * Returns the package flag if recognized, 0 otherwise
@@ -350,6 +441,10 @@ static int parse_package_support( const char *pkg ) {
 			GMCP_PACKAGE_CHAR_STATUS | GMCP_PACKAGE_CHAR_INFO;
 	if ( !strncmp( pkg, "Client.Media", 12 ) )
 		return GMCP_PACKAGE_CLIENT_MEDIA;
+	if ( !strncmp( pkg, "Room.Info", 9 ) )
+		return GMCP_PACKAGE_ROOM_INFO;
+	if ( !strncmp( pkg, "Room", 4 ) )
+		return GMCP_PACKAGE_ROOM_INFO;
 	if ( !strncmp( pkg, "Core", 4 ) )
 		return GMCP_PACKAGE_CORE;
 
@@ -459,13 +554,14 @@ void do_gmcp( CHAR_DATA *ch, char *argument ) {
 	snprintf( buf, sizeof( buf ),
 		"GMCP Status:\n\r"
 		"  Enabled: Yes\n\r"
-		"  Packages: %s%s%s%s%s%s\n\r",
+		"  Packages: %s%s%s%s%s%s%s\n\r",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CORE ) ? "Core " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR ) ? "Char " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_VITALS ) ? "Char.Vitals " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_STATUS ) ? "Char.Status " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_INFO ) ? "Char.Info " : "",
-		( ch->desc->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ? "Client.Media " : "" );
+		( ch->desc->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ? "Client.Media " : "",
+		( ch->desc->gmcp_packages & GMCP_PACKAGE_ROOM_INFO ) ? "Room.Info " : "" );
 
 	send_to_char( buf, ch );
 }

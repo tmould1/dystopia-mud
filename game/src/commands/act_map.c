@@ -447,3 +447,123 @@ void do_amap( CHAR_DATA *ch, char *argument ) {
 		ch->in_room->area ? ch->in_room->area->name : "Unknown" );
 	send_to_char( buf, ch );
 }
+
+/*
+ * Show automap with standardized delimiters for client parsing.
+ * Called from move_char() when PLR_AUTOMAP is set.
+ * Uses fixed radius of 3 (7x7 grid) for consistent output.
+ *
+ * Output format (for client regex parsing):
+ *   [AUTOMAP vnum=12345 area="Area Name"]
+ *   ... map content ...
+ *   [/AUTOMAP]
+ */
+void show_automap( CHAR_DATA *ch ) {
+	MAP_DATA map;
+	char buf[MAX_STRING_LENGTH];
+	char line[MAX_STRING_LENGTH];
+	int radius = 3; /* Fixed 7x7 grid */
+	int center = radius;
+	int size = radius * 2 + 1;
+	int x, y;
+
+	if ( ch == NULL || ch->in_room == NULL )
+		return;
+
+	if ( IS_NPC( ch ) )
+		return;
+
+	/* Initialize and fill map */
+	memset( &map, 0, sizeof( map ) );
+	fill_map_bfs( ch->in_room, &map, center, center, radius );
+
+	/* Start delimiter with room info for client parsing */
+	snprintf( buf, sizeof( buf ), "[AUTOMAP vnum=%d area=\"%s\"]\n\r",
+		ch->in_room->vnum,
+		ch->in_room->area ? ch->in_room->area->name : "Unknown" );
+	send_to_char( buf, ch );
+
+	/* Draw from top (north) to bottom (south) */
+	for ( y = size - 1; y >= 0; y-- ) {
+		/* Room row with horizontal exits */
+		strcpy( line, "" );
+		for ( x = 0; x < size; x++ ) {
+			int cell = map.cell[x][y];
+			bool up = map.has_up[x][y];
+			bool down = map.has_down[x][y];
+			int exit_e = map.exit_e[x][y];
+			int exit_w_next = ( x + 1 < size ) ? map.exit_w[x + 1][y] : 0;
+
+			if ( cell == MAP_EMPTY ) {
+				strcat( line, "   " );
+			} else {
+				char room_str[32];
+
+				if ( cell == MAP_PLAYER )
+					snprintf( room_str, sizeof( room_str ), "#G[@]#n" );
+				else if ( cell == MAP_DEAD_END )
+					snprintf( room_str, sizeof( room_str ), "#R[!]#n" );
+				else {
+					char ud_char = ' ';
+					if ( up && down )
+						ud_char = '*';
+					else if ( up )
+						ud_char = '^';
+					else if ( down )
+						ud_char = 'v';
+					snprintf( room_str, sizeof( room_str ), "#C[%c]#n", ud_char );
+				}
+
+				strcat( line, room_str );
+			}
+
+			/* Horizontal exit connector */
+			if ( x < size - 1 ) {
+				int next_cell = map.cell[x + 1][y];
+				if ( ( cell != MAP_EMPTY && next_cell != MAP_EMPTY ) &&
+					( exit_e > 0 || exit_w_next > 0 ) ) {
+					int type = ( exit_e > exit_w_next ) ? exit_e : exit_w_next;
+					if ( type == 3 )
+						strcat( line, "#R~#n" );
+					else if ( type == 2 )
+						strcat( line, "#Y-#n" );
+					else
+						strcat( line, "#w-#n" );
+				} else {
+					strcat( line, " " );
+				}
+			}
+		}
+		snprintf( buf, sizeof( buf ), "%s\n\r", line );
+		send_to_char( buf, ch );
+
+		/* Vertical exit line between rows */
+		if ( y > 0 ) {
+			strcpy( line, "" );
+			for ( x = 0; x < size; x++ ) {
+				int exit_s = map.exit_s[x][y];
+				int exit_n_below = map.exit_n[x][y - 1];
+
+				if ( exit_s > 0 || exit_n_below > 0 ) {
+					int type = ( exit_s > exit_n_below ) ? exit_s : exit_n_below;
+					if ( type == 3 )
+						strcat( line, " #R~#n " );
+					else if ( type == 2 )
+						strcat( line, " #Yv#n " );
+					else
+						strcat( line, " #w|#n " );
+				} else {
+					strcat( line, "   " );
+				}
+
+				if ( x < size - 1 )
+					strcat( line, " " );
+			}
+			snprintf( buf, sizeof( buf ), "%s\n\r", line );
+			send_to_char( buf, ch );
+		}
+	}
+
+	/* End delimiter */
+	send_to_char( "[/AUTOMAP]\n\r", ch );
+}
