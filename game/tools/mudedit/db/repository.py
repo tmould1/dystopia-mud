@@ -809,14 +809,14 @@ class PlayerRepository:
         return result
 
     def update_player_array(self, name: str, values: List[int]) -> bool:
-        """Update a player array."""
+        """Update or insert a player array."""
         data_str = ' '.join(str(v) for v in values)
-        cursor = self.conn.execute(
-            "UPDATE player_arrays SET data = ? WHERE name = ?",
-            (data_str, name)
+        self.conn.execute(
+            "INSERT OR REPLACE INTO player_arrays (name, data) VALUES (?, ?)",
+            (name, data_str)
         )
         self.conn.commit()
-        return cursor.rowcount > 0
+        return True
 
 
 class AudioConfigRepository(BaseRepository):

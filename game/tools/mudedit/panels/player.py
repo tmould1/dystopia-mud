@@ -23,6 +23,32 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from mudlib.models import CLASS_TABLE
 
 
+# Weapon proficiency names (index -> name)
+WEAPON_NAMES = {
+    0: 'Unarmed', 1: 'Slice', 2: 'Stab', 3: 'Slash', 4: 'Whip',
+    5: 'Claw', 6: 'Blast', 7: 'Pound', 8: 'Crush', 9: 'Grep',
+    10: 'Bite', 11: 'Pierce', 12: 'Suck',
+}
+
+# Spell proficiency names (index -> name)
+SPELL_NAMES = {
+    0: 'Purple (General)', 1: 'Red', 2: 'Blue', 3: 'Green', 4: 'Yellow',
+}
+
+# Stance proficiency names (index -> name) - required for mastery
+STANCE_NAMES = {
+    1: 'Viper', 2: 'Crane', 3: 'Crab', 4: 'Mongoose', 5: 'Bull',
+    6: 'Mantis', 7: 'Dragon', 8: 'Tiger', 9: 'Monkey', 10: 'Swallow',
+}
+
+# Super stance names (optional display)
+SUPER_STANCE_NAMES = {
+    13: 'SS1', 14: 'SS2', 15: 'SS3', 16: 'SS4', 17: 'SS5',
+}
+
+MASTERY_THRESHOLD = 200
+
+
 class PlayerEditorPanel(ttk.Frame):
     """
     Editor panel for player data.
@@ -68,6 +94,7 @@ class PlayerEditorPanel(ttk.Frame):
         # Build tabs
         self._build_info_tab()
         self._build_stats_tab()
+        self._build_mastery_tab()
         self._build_skills_tab()
         self._build_aliases_tab()
         self._build_affects_tab()
@@ -297,6 +324,109 @@ class PlayerEditorPanel(ttk.Frame):
         ttk.Label(row, text="Alignment:", width=15).pack(side=tk.LEFT)
         self.alignment_var = tk.IntVar()
         ttk.Spinbox(row, from_=-1000, to=1000, width=10, textvariable=self.alignment_var).pack(side=tk.LEFT)
+
+    def _build_mastery_tab(self):
+        """Build the mastery/level tab for weapon, spell, and stance proficiencies."""
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Level/Mastery")
+
+        # Use canvas for scrolling (pattern from _build_info_tab)
+        canvas = tk.Canvas(frame)
+        scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=canvas.yview)
+        scrollable = ttk.Frame(canvas)
+
+        scrollable.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox('all')))
+        canvas.create_window((0, 0), window=scrollable, anchor=tk.NW)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Info banner
+        info = ttk.Label(scrollable,
+            text="Mastery requires all weapons, spells, and stances (1-10) >= 200",
+            foreground='blue')
+        info.pack(fill=tk.X, padx=8, pady=4)
+
+        # Main content frame (horizontal layout for weapons and spells)
+        main_frame = ttk.Frame(scrollable)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        # Left side: Weapons
+        weapons_frame = ttk.LabelFrame(main_frame, text="Weapon Proficiencies (wpn)")
+        weapons_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        self.wpn_vars = {}
+        for idx, name in WEAPON_NAMES.items():
+            row = ttk.Frame(weapons_frame)
+            row.pack(fill=tk.X, padx=4, pady=1)
+            ttk.Label(row, text=f"{name} ({idx}):", width=15).pack(side=tk.LEFT)
+            var = tk.IntVar()
+            ttk.Spinbox(row, from_=0, to=10000, width=8, textvariable=var).pack(side=tk.LEFT)
+            self.wpn_vars[idx] = var
+
+        # Right side: Spells
+        spells_frame = ttk.LabelFrame(main_frame, text="Spell Proficiencies (spl)")
+        spells_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=4, pady=4)
+
+        self.spl_vars = {}
+        for idx, name in SPELL_NAMES.items():
+            row = ttk.Frame(spells_frame)
+            row.pack(fill=tk.X, padx=4, pady=1)
+            ttk.Label(row, text=f"{name} ({idx}):", width=18).pack(side=tk.LEFT)
+            var = tk.IntVar()
+            ttk.Spinbox(row, from_=0, to=10000, width=8, textvariable=var).pack(side=tk.LEFT)
+            self.spl_vars[idx] = var
+
+        # Stances section (below main_frame)
+        stances_frame = ttk.LabelFrame(scrollable, text="Stance Proficiencies (stance) - Required for Mastery")
+        stances_frame.pack(fill=tk.X, padx=8, pady=4)
+
+        self.stance_vars = {}
+
+        # Regular stances in a grid (2 rows of 5)
+        stance_grid = ttk.Frame(stances_frame)
+        stance_grid.pack(fill=tk.X, padx=4, pady=4)
+
+        col = 0
+        row_idx = 0
+        for idx, name in STANCE_NAMES.items():
+            cell = ttk.Frame(stance_grid)
+            cell.grid(row=row_idx, column=col, padx=4, pady=2, sticky='w')
+            ttk.Label(cell, text=f"{name} ({idx}):").pack(side=tk.LEFT)
+            var = tk.IntVar()
+            ttk.Spinbox(cell, from_=0, to=10000, width=6, textvariable=var).pack(side=tk.LEFT, padx=(2, 0))
+            self.stance_vars[idx] = var
+            col += 1
+            if col >= 5:
+                col = 0
+                row_idx += 1
+
+        # Super stances section
+        super_stances_frame = ttk.LabelFrame(scrollable, text="Super Stances (optional)")
+        super_stances_frame.pack(fill=tk.X, padx=8, pady=4)
+
+        ss_grid = ttk.Frame(super_stances_frame)
+        ss_grid.pack(fill=tk.X, padx=4, pady=4)
+
+        col = 0
+        for idx, name in SUPER_STANCE_NAMES.items():
+            cell = ttk.Frame(ss_grid)
+            cell.grid(row=0, column=col, padx=4, pady=2, sticky='w')
+            ttk.Label(cell, text=f"{name} ({idx}):").pack(side=tk.LEFT)
+            var = tk.IntVar()
+            ttk.Spinbox(cell, from_=0, to=10000, width=6, textvariable=var).pack(side=tk.LEFT, padx=(2, 0))
+            self.stance_vars[idx] = var
+            col += 1
+
+        # Buttons
+        btn_frame = ttk.Frame(scrollable)
+        btn_frame.pack(fill=tk.X, padx=8, pady=8)
+
+        ttk.Button(btn_frame, text="Set All to 200 (Mastery Ready)",
+                   command=self._set_all_to_mastery).pack(side=tk.LEFT, padx=(0, 8))
+        ttk.Button(btn_frame, text="Save Mastery Values",
+                   command=self._save_mastery).pack(side=tk.LEFT)
 
     def _build_skills_tab(self):
         """Build the skills tab."""
@@ -531,6 +661,9 @@ class PlayerEditorPanel(ttk.Frame):
             if i < len(attr_perm):
                 var.set(attr_perm[i])
 
+        # Load mastery data (wpn, spl, stance arrays)
+        self._load_mastery_data()
+
         # Load skills
         self._load_skills()
 
@@ -582,6 +715,71 @@ class PlayerEditorPanel(ttk.Frame):
             self.repository.update_skill(skill_name, value)
             self._load_skills()
             self.on_status(f"Updated skill: {skill_name} = {value}")
+
+    def _load_mastery_data(self):
+        """Load mastery-related arrays from the database."""
+        arrays = self.repository.get_player_arrays()
+
+        # Load weapon proficiencies (wpn array has 13 elements)
+        wpn = arrays.get('wpn', [0] * 13)
+        for idx in range(13):
+            if idx in self.wpn_vars and idx < len(wpn):
+                self.wpn_vars[idx].set(wpn[idx])
+
+        # Load spell proficiencies (spl array has 5 elements)
+        spl = arrays.get('spl', [0] * 5)
+        for idx in range(5):
+            if idx in self.spl_vars and idx < len(spl):
+                self.spl_vars[idx].set(spl[idx])
+
+        # Load stance proficiencies (stance array has 24 elements)
+        stance = arrays.get('stance', [0] * 24)
+        for idx in self.stance_vars:
+            if idx < len(stance):
+                self.stance_vars[idx].set(stance[idx])
+
+    def _save_mastery(self):
+        """Save mastery values to the database."""
+        arrays = self.repository.get_player_arrays()
+
+        # Build wpn array (13 elements)
+        wpn = arrays.get('wpn', [0] * 13)
+        for idx in range(13):
+            if idx in self.wpn_vars:
+                wpn[idx] = self.wpn_vars[idx].get()
+        self.repository.update_player_array('wpn', wpn)
+
+        # Build spl array (5 elements)
+        spl = arrays.get('spl', [0] * 5)
+        for idx in range(5):
+            if idx in self.spl_vars:
+                spl[idx] = self.spl_vars[idx].get()
+        self.repository.update_player_array('spl', spl)
+
+        # Build stance array (24 elements, preserve unedited indices)
+        stance = arrays.get('stance', [0] * 24)
+        for idx in self.stance_vars:
+            stance[idx] = self.stance_vars[idx].get()
+        self.repository.update_player_array('stance', stance)
+
+        self.on_status("Mastery values saved")
+
+    def _set_all_to_mastery(self):
+        """Set all proficiency values to 200 (mastery threshold)."""
+        # Set all weapons to 200
+        for var in self.wpn_vars.values():
+            var.set(MASTERY_THRESHOLD)
+
+        # Set all spells to 200
+        for var in self.spl_vars.values():
+            var.set(MASTERY_THRESHOLD)
+
+        # Set stances 1-10 to 200 (mastery requirement)
+        for idx in range(1, 11):
+            if idx in self.stance_vars:
+                self.stance_vars[idx].set(MASTERY_THRESHOLD)
+
+        self.on_status("All mastery-required values set to 200")
 
     def _load_aliases(self):
         """Load aliases into the tree."""
@@ -734,6 +932,20 @@ class PlayerEditorPanel(ttk.Frame):
         # Update attributes
         attr_perm = [self.attr_vars[i].get() for i in range(5)]
         self.repository.update_player_array('attr_perm', attr_perm)
+
+        # Update mastery arrays (wpn, spl, stance)
+        wpn = [self.wpn_vars[i].get() for i in range(13)]
+        self.repository.update_player_array('wpn', wpn)
+
+        spl = [self.spl_vars[i].get() for i in range(5)]
+        self.repository.update_player_array('spl', spl)
+
+        # Preserve existing stance values, update only the ones we're editing
+        arrays = self.repository.get_player_arrays()
+        stance = arrays.get('stance', [0] * 24)
+        for idx in self.stance_vars:
+            stance[idx] = self.stance_vars[idx].get()
+        self.repository.update_player_array('stance', stance)
 
         self.unsaved = False
         self.on_status(f"Saved player: {self.player_name}")
