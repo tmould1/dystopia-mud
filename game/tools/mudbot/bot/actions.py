@@ -324,3 +324,226 @@ class BotActions:
     def last_stats(self) -> Optional[VitalStats]:
         """Get last known stats."""
         return self._last_stats
+
+    # =========================================================================
+    # Equipment Actions
+    # =========================================================================
+
+    async def inventory(self) -> str:
+        """
+        Get inventory listing.
+
+        Returns:
+            Inventory text response.
+        """
+        response = await self.bot.send_and_read("inventory", timeout=5.0)
+        logger.debug(f"[{self.bot.config.name}] Inventory response: {response[:300] if response else 'None'}...")
+        return response or ""
+
+    async def rewear_all(self) -> int:
+        """
+        Re-equip all items from inventory.
+
+        This is used after stat clear (e.g., after selfclass) when all
+        equipment is removed. Sends 'wear all' to equip everything.
+
+        Returns:
+            Number of items equipped (approximate based on response).
+        """
+        logger.info(f"[{self.bot.config.name}] Re-equipping all gear...")
+
+        # First, try 'wear all' which should equip everything possible
+        response = await self.bot.send_and_read("wear all", timeout=5.0)
+        if not response:
+            return 0
+
+        # Count "you wear" and "you wield" lines
+        response_lower = response.lower()
+        count = response_lower.count("you wear") + response_lower.count("you wield")
+        logger.info(f"[{self.bot.config.name}] Equipped {count} items")
+        return count
+
+    async def wield_weapon(self, weapon_keyword: str = "weapon") -> bool:
+        """
+        Wield a weapon from inventory.
+
+        Args:
+            weapon_keyword: Keyword for weapon in inventory.
+
+        Returns:
+            True if weapon was wielded.
+        """
+        response = await self.bot.send_and_read(f"wield {weapon_keyword}", timeout=3.0)
+        if response:
+            return "you wield" in response.lower()
+        return False
+
+    # =========================================================================
+    # Stance Actions
+    # =========================================================================
+
+    async def set_autostance(self, stance: str = "bull") -> bool:
+        """
+        Set automatic combat stance.
+
+        Args:
+            stance: Stance name (bull, crab, crane, viper, mongoose, etc.)
+
+        Returns:
+            True if autostance was set successfully.
+        """
+        logger.info(f"[{self.bot.config.name}] Setting autostance to: {stance}")
+        response = await self.bot.send_and_read(f"autostance {stance}", timeout=3.0)
+
+        if response:
+            response_lower = response.lower()
+            # Success patterns
+            if stance.lower() in response_lower or "autodrop" in response_lower:
+                logger.info(f"[{self.bot.config.name}] Autostance set to {stance}")
+                return True
+            # Error patterns
+            if "don't know" in response_lower or "invalid" in response_lower:
+                logger.warning(f"[{self.bot.config.name}] Invalid stance: {stance}")
+                return False
+
+        return True  # Assume success if no clear error
+
+    # =========================================================================
+    # Navigation Actions
+    # =========================================================================
+
+    async def recall(self) -> bool:
+        """
+        Recall to starting point (temple/recall room).
+
+        Returns:
+            True if recall was successful.
+        """
+        logger.info(f"[{self.bot.config.name}] Recalling...")
+        response = await self.bot.send_and_read("recall", timeout=5.0)
+
+        if response:
+            response_lower = response.lower()
+            # Failure patterns
+            if "cannot recall" in response_lower or "failed" in response_lower:
+                logger.warning(f"[{self.bot.config.name}] Recall failed")
+                return False
+
+        return True
+
+    async def follow_path(self, path: list[str]) -> bool:
+        """
+        Follow a sequence of directions.
+
+        Args:
+            path: List of directions (e.g., ['down', 'south', 'south', 'east'])
+
+        Returns:
+            True if entire path was followed successfully.
+        """
+        logger.info(f"[{self.bot.config.name}] Following path: {' -> '.join(path[:5])}{'...' if len(path) > 5 else ''}")
+
+        for i, direction in enumerate(path):
+            if not await self.move(direction):
+                logger.warning(f"[{self.bot.config.name}] Path blocked at step {i+1}: {direction}")
+                return False
+            await asyncio.sleep(0.3)  # Brief delay between moves
+
+        logger.info(f"[{self.bot.config.name}] Path complete ({len(path)} moves)")
+        return True
+
+    # =========================================================================
+    # Extended Training Actions
+    # =========================================================================
+
+    async def train_stat(self, stat: str, target: int) -> bool:
+        """
+        Train a stat (hp, mana, move) until reaching target value.
+
+        Args:
+            stat: Stat to train ('hp', 'mana', 'move')
+            target: Target value to reach.
+
+        Returns:
+            True if target was reached, False if training failed (out of exp).
+        """
+        stat_lower = stat.lower()
+        stat_name_map = {
+            'hp': ('max_hp', 'hit points'),
+            'mana': ('max_mana', 'mana'),
+            'move': ('max_move', 'movement'),
+        }
+
+        if stat_lower not in stat_name_map:
+            logger.error(f"[{self.bot.config.name}] Unknown stat: {stat}")
+            return False
+
+        attr_name, display_name = stat_name_map[stat_lower]
+        logger.info(f"[{self.bot.config.name}] Training {display_name} to {target}")
+
+        while True:
+            # Get current stats
+            stats = await self.score()
+            if not stats:
+                logger.error(f"[{self.bot.config.name}] Cannot get stats")
+                return False
+
+            current_value = getattr(stats, attr_name, 0)
+            if current_value >= target:
+                logger.info(f"[{self.bot.config.name}] {display_name.title()} target reached: {current_value}")
+                return True
+
+            logger.debug(f"[{self.bot.config.name}] Training {stat}: {current_value}/{target}")
+
+            # Train the stat
+            result = await self.train(stat_lower)
+            if not result['success']:
+                logger.warning(f"[{self.bot.config.name}] {display_name.title()} training failed: {result.get('error')}")
+                return False
+
+            await asyncio.sleep(0.2)
+
+    async def train_all_stats(self, hp_target: int, mana_target: int, move_target: int) -> dict:
+        """
+        Train HP, mana, and movement to target values.
+
+        Args:
+            hp_target: Target max HP.
+            mana_target: Target max mana.
+            move_target: Target max movement.
+
+        Returns:
+            Dict with 'hp_done', 'mana_done', 'move_done' booleans.
+        """
+        logger.info(f"[{self.bot.config.name}] Training all stats to HP={hp_target}, Mana={mana_target}, Move={move_target}")
+
+        result = {
+            'hp_done': False,
+            'mana_done': False,
+            'move_done': False,
+        }
+
+        # Check current stats
+        stats = await self.score()
+        if not stats:
+            return result
+
+        # Train HP if needed
+        if stats.max_hp < hp_target:
+            result['hp_done'] = await self.train_stat('hp', hp_target)
+        else:
+            result['hp_done'] = True
+
+        # Train mana if needed
+        if stats.max_mana < mana_target:
+            result['mana_done'] = await self.train_stat('mana', mana_target)
+        else:
+            result['mana_done'] = True
+
+        # Train move if needed
+        if stats.max_move < move_target:
+            result['move_done'] = await self.train_stat('move', move_target)
+        else:
+            result['move_done'] = True
+
+        return result

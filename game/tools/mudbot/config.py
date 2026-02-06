@@ -120,9 +120,17 @@ class CommanderConfig:
 class ProgressionConfig:
     """Configuration for avatar progression bot."""
 
-    # Progression targets
+    # Progression targets (avatar phase)
     kills_needed: int = 5         # Monsters to kill before training
-    hp_target: int = 2000         # HP required for avatar training
+    hp_target: int = 2000         # HP required for avatar training (initial)
+
+    # Extended training targets (post-selfclass)
+    extended_hp_target: int = 6000   # HP target after class selection
+    mana_target: int = 6000          # Mana target after class selection
+    move_target: int = 6000          # Movement target after class selection
+
+    # Autostance setting
+    autostance: str = "bull"         # Default combat stance
 
     # Combat settings
     target_monster: str = "monster"  # Monster keyword to kill
@@ -131,6 +139,17 @@ class ProgressionConfig:
     # Navigation (room vnums for school area)
     school_entrance: int = 3700
     arena_room: Optional[int] = None  # Will be discovered
+
+    # Black Dragon's Lair farming location
+    # Path from recall: down, 2x south, 6x east, 2x south, 2x down, north
+    farm_path: List[str] = field(default_factory=lambda: [
+        'down', 'south', 'south',
+        'east', 'east', 'east', 'east', 'east', 'east',
+        'south', 'south', 'down', 'down', 'north'
+    ])
+    farm_monsters: List[str] = field(default_factory=lambda: [
+        'hobgoblin', 'shaman'
+    ])
 
     # Safety
     min_hp_to_fight: int = 50     # Don't fight if HP below this

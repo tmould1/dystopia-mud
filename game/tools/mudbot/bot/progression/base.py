@@ -179,6 +179,42 @@ class ClassProgressionBot(MudBot, ABC):
             "transformation" in response_lower
         )
 
+    def is_stat_clear_message(self, response: str) -> bool:
+        """
+        Check if response contains stat clear message.
+
+        After selfclass, stats are cleared and player must re-equip.
+        Message: "Your stats have been cleared. Please rewear your equipment."
+
+        Args:
+            response: Server response text.
+
+        Returns:
+            True if stat clear message detected.
+        """
+        response_lower = response.lower()
+        return (
+            "stats have been cleared" in response_lower or
+            "please rewear your equipment" in response_lower
+        )
+
+    async def handle_stat_clear(self) -> bool:
+        """
+        Handle stat clear after selfclass by re-equipping all gear.
+
+        This should be called after selfclass when stats are cleared.
+
+        Returns:
+            True if gear was re-equipped successfully.
+        """
+        logger.info(f"[{self.config.name}] Handling stat clear - re-equipping gear...")
+
+        # Re-wear all equipment
+        equipped = await self.actions.rewear_all()
+        logger.info(f"[{self.config.name}] Re-equipped {equipped} items")
+
+        return equipped > 0
+
     async def create_armor(self, piece: str) -> bool:
         """
         Create a class armor piece.

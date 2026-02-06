@@ -78,6 +78,9 @@ class PromptDetector:
         # Existing character flow
         (BotState.ENTERING_OLD_PASSWORD, r"Please enter password"),
 
+        # MOTD / continue prompts (both new and existing characters)
+        (BotState.READING_MOTD, r"Press \[ENTER\]|press enter to continue|hit enter|<ENTER>"),
+
         # Error states
         (BotState.ERROR, r"Illegal name|Name already exists|Too short|Too long"),
     ]
@@ -88,8 +91,15 @@ class PromptDetector:
         (BotState.PLAYING, r"<\d+hp \d+m \d+mv>"),
         # Welcome message after login (this MUD has no default prompt)
         (BotState.PLAYING, r"Welcome to Dystopia"),
-        # Room description indicators (Exits line)
+        # Reconnection messages
+        (BotState.PLAYING, r"Reconnecting\.|already playing|taking over"),
+        # Room description indicators (Exits line) - both bracket and screenreader formats
         (BotState.PLAYING, r"\[Exits?:"),
+        (BotState.PLAYING, r"Exits?:\s*(?:north|south|east|west|up|down|none)"),
+        # Score output indicator (seen after login)
+        (BotState.PLAYING, r"Hit Points:|You have \d+/\d+ hit"),
+        # Common room elements that indicate we're in the game
+        (BotState.PLAYING, r"is standing here|is here|lying here|resting here"),
         # Combat indicator
         (BotState.FIGHTING, r"You (?:hit|miss|attack)|attacks you|hits you|misses you"),
         # Death

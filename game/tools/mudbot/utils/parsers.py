@@ -68,6 +68,15 @@ class ScoreParser:
     # Example: "Level: 2" or "You are level 2"
     LEVEL_PATTERN = re.compile(r"Level:\s*(\d+)|level\s+(\d+)", re.IGNORECASE)
 
+    # Avatar status detection - Dystopia shows "Avatar" or "You are an Avatar" instead of level 3
+    # Look for "Avatar" in various contexts that indicate avatar status
+    AVATAR_STATUS_PATTERN = re.compile(
+        r"You are an Avatar|Status:\s*Avatar|Class:\s*Avatar|"
+        r"\bAvatar\b.*level|Level:.*\bAvatar\b|"
+        r"^\s*Avatar\s*$|You are Avatar|Rank:.*Avatar",
+        re.IGNORECASE | re.MULTILINE
+    )
+
     # Alternative HP pattern from prompt: <100hp 100m 100mv>
     PROMPT_PATTERN = re.compile(r"<(\d+)hp (\d+)m (\d+)mv>")
 
@@ -121,6 +130,10 @@ class ScoreParser:
         if level_match:
             level_str = level_match.group(1) or level_match.group(2)
             stats.level = int(level_str)
+
+        # Check for avatar status (level 3) - Dystopia shows "Avatar" as text
+        if self.AVATAR_STATUS_PATTERN.search(text):
+            stats.level = max(stats.level, 3)  # At least level 3 if avatar
 
         return stats
 
@@ -294,19 +307,37 @@ class TrainParser:
     # Avatar success
     AVATAR_SUCCESS = re.compile(r"You become an avatar", re.IGNORECASE)
 
+    # Already avatar (not a failure - treat as success)
+    # Various messages that indicate character is already avatar or past avatar
+    ALREADY_AVATAR = re.compile(
+        r"already an avatar|you are an avatar|already avatar|"
+        r"not a mortal|must be mortal|cannot train avatar|"
+        r"only mortals|you are not mortal|past that point|"
+        r"beyond avatar|already transcended",
+        re.IGNORECASE
+    )
+
     # HP increase
     HP_INCREASE = re.compile(r"You now have (\d+) hit points", re.IGNORECASE)
+
+    # Mana increase
+    MANA_INCREASE = re.compile(r"You now have (\d+) mana", re.IGNORECASE)
+
+    # Move increase
+    MOVE_INCREASE = re.compile(r"You now have (\d+) movement", re.IGNORECASE)
 
     def parse(self, text: str) -> Dict[str, Any]:
         """
         Parse training output.
 
         Returns:
-            Dict with 'success', 'new_hp', 'became_avatar' keys.
+            Dict with 'success', 'new_hp', 'new_mana', 'new_move', 'became_avatar' keys.
         """
         result = {
             'success': False,
             'new_hp': None,
+            'new_mana': None,
+            'new_move': None,
             'became_avatar': False,
             'error': None,
         }
@@ -316,10 +347,29 @@ class TrainParser:
             result['became_avatar'] = True
             return result
 
+        # Already an avatar - treat as success (not a failure)
+        if self.ALREADY_AVATAR.search(text):
+            result['success'] = True
+            result['became_avatar'] = True
+            result['already_avatar'] = True
+            return result
+
         hp_match = self.HP_INCREASE.search(text)
         if hp_match:
             result['success'] = True
             result['new_hp'] = int(hp_match.group(1))
+            return result
+
+        mana_match = self.MANA_INCREASE.search(text)
+        if mana_match:
+            result['success'] = True
+            result['new_mana'] = int(mana_match.group(1))
+            return result
+
+        move_match = self.MOVE_INCREASE.search(text)
+        if move_match:
+            result['success'] = True
+            result['new_move'] = int(move_match.group(1))
             return result
 
         if self.TRAIN_SUCCESS.search(text):
@@ -331,3 +381,27 @@ class TrainParser:
             result['error'] = text.strip()
 
         return result
+
+
+class StatClearParser:
+    """
+    Parse stat clear messages (e.g., after selfclass).
+    """
+
+    # Pattern for stat clear message
+    STAT_CLEAR = re.compile(
+        r"stats have been cleared|Please rewear your equipment",
+        re.IGNORECASE
+    )
+
+    def is_stat_cleared(self, text: str) -> bool:
+        """
+        Check if the stat clear message is present.
+
+        Args:
+            text: Server response text.
+
+        Returns:
+            True if stat clear message detected.
+        """
+        return bool(self.STAT_CLEAR.search(text))

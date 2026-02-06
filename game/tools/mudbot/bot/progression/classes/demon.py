@@ -30,7 +30,22 @@ class DemonState(Enum):
     # Class selection
     SELECTING_CLASS = auto()
 
-    # Discipline progression
+    # Post-selfclass setup (new)
+    HANDLING_STAT_CLEAR = auto()
+    REWEARING_EQUIPMENT = auto()
+    SETTING_AUTOSTANCE = auto()
+
+    # Extended stat training (new) - train HP/mana/move to 6k
+    CHECKING_EXTENDED_STATS = auto()
+    FARMING_EXTENDED_STATS = auto()
+    TRAINING_EXTENDED_HP = auto()
+    TRAINING_MANA = auto()
+    TRAINING_MOVE = auto()
+
+    # Navigation to advanced farming location (new)
+    NAVIGATING_TO_FARM = auto()
+
+    # Discipline progression (at Black Dragon's Lair)
     CHECKING_DISCIPLINES = auto()
     STARTING_RESEARCH = auto()
     FARMING_DISCIPLINE_POINTS = auto()
@@ -141,32 +156,82 @@ class DemonProgressionBot(ClassProgressionBot, AvatarProgressionMixin):
     def _check_selfclass_success(self, response: str) -> bool:
         """Check for demon-specific selfclass success patterns."""
         response_lower = response.lower()
-        return (
-            "eyes glow red" in response_lower or
+        # Success patterns for becoming a demon
+        if ("eyes glow red" in response_lower or
             "become a demon" in response_lower or
-            "demonic" in response_lower
-        )
+            "demonic" in response_lower):
+            return True
+        # Already a demon or already have a class - treat as success
+        if ("already a demon" in response_lower or
+            "already have a class" in response_lower or
+            "you are a demon" in response_lower or
+            "already" in response_lower and "demon" in response_lower):
+            return True
+        return False
 
     async def _run_full_progression(self) -> bool:
         """Run complete demon progression from start to finish."""
-        # Phase 1: Avatar progression
+        # Phase 1: Avatar progression (level 1 -> 3, train HP to 2000)
         if not await self.run_avatar_progression():
             logger.error(f"[{self.config.name}] Avatar progression failed")
             return False
 
         # Phase 2: Select demon class
-        if not await self.select_class():
-            logger.error(f"[{self.config.name}] Failed to select demon class")
-            return False
+        logger.info(f"[{self.config.name}] Selecting demon class...")
+        response = await self.send_and_read(f"selfclass demon", timeout=5.0)
+
+        if not response:
+            logger.warning(f"[{self.config.name}] No response from selfclass command")
+            # Try continuing anyway - might already be a demon
+        elif not self._check_selfclass_success(response):
+            logger.warning(f"[{self.config.name}] Selfclass response not recognized: {response[:200]}")
+            # Check if there's an error message
+            response_lower = response.lower()
+            if "must be avatar" in response_lower:
+                logger.error(f"[{self.config.name}] Must be avatar to selfclass - avatar progression incomplete")
+                return False
+            if "huh?" in response_lower or "unknown command" in response_lower:
+                logger.error(f"[{self.config.name}] Selfclass command not recognized")
+                return False
+            # Unknown response - try continuing (might already be a demon)
+            logger.info(f"[{self.config.name}] Assuming already a demon, continuing...")
+        else:
+            logger.info(f"[{self.config.name}] Successfully became a demon!")
+
+        self._is_class_selected = True
+
+        # Check for stat clear message and handle it
+        if response and self.is_stat_clear_message(response):
+            logger.info(f"[{self.config.name}] Stats cleared, handling post-selfclass setup...")
+            await self._handle_post_selfclass_setup()
+        else:
+            # Even if no stat clear message, still do post-selfclass setup
+            # (autostance is useful regardless)
+            logger.info(f"[{self.config.name}] Running post-selfclass setup...")
+            await self._handle_post_selfclass_setup()
 
         # Phase 3: Demon-specific progression
         return await self.run_class_progression()
+
+    async def _handle_post_selfclass_setup(self) -> None:
+        """Handle stat clear, re-equip, autostance after selfclass."""
+        # Re-wear all equipment
+        self.demon_state = DemonState.REWEARING_EQUIPMENT
+        equipped = await self.actions.rewear_all()
+        logger.info(f"[{self.config.name}] Re-equipped {equipped} items")
+
+        # Set autostance
+        self.demon_state = DemonState.SETTING_AUTOSTANCE
+        stance = self.prog_config.autostance if hasattr(self.prog_config, 'autostance') else 'bull'
+        await self.actions.set_autostance(stance)
+        logger.info(f"[{self.config.name}] Autostance set to {stance}")
 
     async def run_class_progression(self) -> bool:
         """Execute demon-specific progression."""
         logger.info(f"[{self.config.name}] Starting demon progression")
 
-        self.demon_state = DemonState.CHECKING_DISCIPLINES
+        # Start with extended stats training (hp/mana/move to 6k)
+        self.demon_state = DemonState.CHECKING_EXTENDED_STATS
 
         while self._demon_state not in (DemonState.COMPLETE, DemonState.FAILED):
             try:
@@ -185,8 +250,33 @@ class DemonProgressionBot(ClassProgressionBot, AvatarProgressionMixin):
 
     async def _demon_tick(self) -> None:
         """Execute one step of demon progression."""
+        # Post-selfclass setup states
         if self._demon_state == DemonState.SELECTING_CLASS:
             await self._select_class()
+        elif self._demon_state == DemonState.HANDLING_STAT_CLEAR:
+            await self._handle_stat_clear_state()
+        elif self._demon_state == DemonState.REWEARING_EQUIPMENT:
+            await self._rewear_equipment_state()
+        elif self._demon_state == DemonState.SETTING_AUTOSTANCE:
+            await self._set_autostance_state()
+
+        # Extended stat training states
+        elif self._demon_state == DemonState.CHECKING_EXTENDED_STATS:
+            await self._check_extended_stats()
+        elif self._demon_state == DemonState.FARMING_EXTENDED_STATS:
+            await self._farm_extended_stats()
+        elif self._demon_state == DemonState.TRAINING_EXTENDED_HP:
+            await self._train_extended_hp()
+        elif self._demon_state == DemonState.TRAINING_MANA:
+            await self._train_mana()
+        elif self._demon_state == DemonState.TRAINING_MOVE:
+            await self._train_move()
+
+        # Navigation to advanced farming location
+        elif self._demon_state == DemonState.NAVIGATING_TO_FARM:
+            await self._navigate_to_farm()
+
+        # Discipline progression states
         elif self._demon_state == DemonState.CHECKING_DISCIPLINES:
             await self._check_disciplines()
         elif self._demon_state == DemonState.STARTING_RESEARCH:
@@ -213,9 +303,238 @@ class DemonProgressionBot(ClassProgressionBot, AvatarProgressionMixin):
     async def _select_class(self) -> None:
         """Select demon class."""
         if await self.select_class():
-            self.demon_state = DemonState.CHECKING_DISCIPLINES
+            self.demon_state = DemonState.CHECKING_EXTENDED_STATS
         else:
             self.demon_state = DemonState.FAILED
+
+    # =========================================================================
+    # Post-Selfclass Setup States
+    # =========================================================================
+
+    async def _handle_stat_clear_state(self) -> None:
+        """Handle stat clear after selfclass."""
+        await self.handle_stat_clear()
+        self.demon_state = DemonState.REWEARING_EQUIPMENT
+
+    async def _rewear_equipment_state(self) -> None:
+        """Re-wear all equipment after stat clear."""
+        equipped = await self.actions.rewear_all()
+        logger.info(f"[{self.config.name}] Re-equipped {equipped} items")
+        self.demon_state = DemonState.SETTING_AUTOSTANCE
+
+    async def _set_autostance_state(self) -> None:
+        """Set autostance for combat."""
+        stance = self.prog_config.autostance if hasattr(self.prog_config, 'autostance') else 'bull'
+        await self.actions.set_autostance(stance)
+        logger.info(f"[{self.config.name}] Autostance set to {stance}")
+        self.demon_state = DemonState.CHECKING_EXTENDED_STATS
+
+    # =========================================================================
+    # Extended Stat Training States (HP/Mana/Move to 6k)
+    # =========================================================================
+
+    def _get_extended_hp_target(self) -> int:
+        """Get extended HP target from config or default."""
+        if hasattr(self.prog_config, 'extended_hp_target'):
+            return self.prog_config.extended_hp_target
+        return 6000
+
+    def _get_mana_target(self) -> int:
+        """Get mana target from config or default."""
+        if hasattr(self.prog_config, 'mana_target'):
+            return self.prog_config.mana_target
+        return 6000
+
+    def _get_move_target(self) -> int:
+        """Get move target from config or default."""
+        if hasattr(self.prog_config, 'move_target'):
+            return self.prog_config.move_target
+        return 6000
+
+    async def _check_extended_stats(self) -> None:
+        """Check if extended stat training is needed."""
+        stats = await self.actions.score()
+        if not stats:
+            logger.error(f"[{self.config.name}] Cannot get stats")
+            self.demon_state = DemonState.FAILED
+            return
+
+        hp_target = self._get_extended_hp_target()
+        mana_target = self._get_mana_target()
+        move_target = self._get_move_target()
+
+        logger.info(f"[{self.config.name}] Stats: HP={stats.max_hp}/{hp_target}, "
+                    f"Mana={stats.max_mana}/{mana_target}, Move={stats.max_move}/{move_target}")
+
+        # Check if all stats are at target
+        if (stats.max_hp >= hp_target and
+            stats.max_mana >= mana_target and
+            stats.max_move >= move_target):
+            logger.info(f"[{self.config.name}] All extended stats at target!")
+            self.demon_state = DemonState.NAVIGATING_TO_FARM
+            return
+
+        # Need to train stats - check if we need more exp first
+        if stats.max_hp < hp_target:
+            # Try training HP first
+            result = await self.actions.train("hp")
+            if result['success']:
+                return  # Stay in this state to check again
+            else:
+                # Out of exp, need to farm
+                self.demon_state = DemonState.FARMING_EXTENDED_STATS
+                return
+
+        elif stats.max_mana < mana_target:
+            self.demon_state = DemonState.TRAINING_MANA
+        elif stats.max_move < move_target:
+            self.demon_state = DemonState.TRAINING_MOVE
+
+    async def _farm_extended_stats(self) -> None:
+        """Farm arena for exp to train extended stats."""
+        # Initialize avatar state for arena farming if needed
+        if not hasattr(self, '_avatar_state') or self._avatar_state == AvatarState.START:
+            self.__init_avatar_state__()
+            self.avatar_state = AvatarState.FINDING_ARENA
+
+        # If avatar farming completed a cycle, reset for next iteration
+        if self._avatar_state in (AvatarState.AVATAR_COMPLETE, AvatarState.FAILED,
+                                   AvatarState.SAVING, AvatarState.TRAINING_HP,
+                                   AvatarState.TRAINING_AVATAR):
+            # These states indicate we've finished a farming cycle or hit avatar training
+            # Reset and continue farming
+            self._kills = 0
+            self._kill_attempts = 0
+            self.avatar_state = AvatarState.FINDING_ARENA
+
+        # Run one iteration of avatar farming
+        await self._avatar_tick()
+
+        # After a kill, check if we can train stats
+        if self._kills > 0:
+            # Try to train some stats
+            stats = await self.actions.score()
+            if stats:
+                hp_target = self._get_extended_hp_target()
+                mana_target = self._get_mana_target()
+                move_target = self._get_move_target()
+
+                # Train whichever stat is low
+                if stats.max_hp < hp_target:
+                    result = await self.actions.train("hp")
+                    if result['success']:
+                        self._kills = 0  # Reset for next round
+                elif stats.max_mana < mana_target:
+                    result = await self.actions.train("mana")
+                    if result['success']:
+                        self._kills = 0
+                elif stats.max_move < move_target:
+                    result = await self.actions.train("move")
+                    if result['success']:
+                        self._kills = 0
+
+                # Check if we're done
+                stats = await self.actions.score()
+                if stats:
+                    if (stats.max_hp >= hp_target and
+                        stats.max_mana >= mana_target and
+                        stats.max_move >= move_target):
+                        logger.info(f"[{self.config.name}] Extended stat training complete!")
+                        self.demon_state = DemonState.NAVIGATING_TO_FARM
+
+    async def _train_extended_hp(self) -> None:
+        """Train HP to extended target."""
+        hp_target = self._get_extended_hp_target()
+        result = await self.actions.train("hp")
+
+        if not result['success']:
+            # Out of exp, need to farm
+            self.demon_state = DemonState.FARMING_EXTENDED_STATS
+            return
+
+        # Check if target reached
+        stats = await self.actions.score()
+        if stats and stats.max_hp >= hp_target:
+            logger.info(f"[{self.config.name}] HP target {hp_target} reached!")
+            self.demon_state = DemonState.CHECKING_EXTENDED_STATS
+
+    async def _train_mana(self) -> None:
+        """Train mana to target."""
+        mana_target = self._get_mana_target()
+        result = await self.actions.train("mana")
+
+        if not result['success']:
+            # Out of exp, need to farm
+            self.demon_state = DemonState.FARMING_EXTENDED_STATS
+            return
+
+        # Check if target reached
+        stats = await self.actions.score()
+        if stats and stats.max_mana >= mana_target:
+            logger.info(f"[{self.config.name}] Mana target {mana_target} reached!")
+            self.demon_state = DemonState.CHECKING_EXTENDED_STATS
+
+    async def _train_move(self) -> None:
+        """Train movement to target."""
+        move_target = self._get_move_target()
+        result = await self.actions.train("move")
+
+        if not result['success']:
+            # Out of exp, need to farm
+            self.demon_state = DemonState.FARMING_EXTENDED_STATS
+            return
+
+        # Check if target reached
+        stats = await self.actions.score()
+        if stats and stats.max_move >= move_target:
+            logger.info(f"[{self.config.name}] Move target {move_target} reached!")
+            self.demon_state = DemonState.CHECKING_EXTENDED_STATS
+
+    # =========================================================================
+    # Navigation to Advanced Farming Location
+    # =========================================================================
+
+    async def _navigate_to_farm(self) -> None:
+        """Navigate to Black Dragon's Lair for discipline farming."""
+        logger.info(f"[{self.config.name}] Navigating to Black Dragon's Lair...")
+
+        # First recall to starting point
+        if not await self.actions.recall():
+            logger.warning(f"[{self.config.name}] Recall failed, trying to continue anyway")
+
+        await asyncio.sleep(1.0)
+
+        # Get farm path from config or use default
+        farm_path = self.prog_config.farm_path if hasattr(self.prog_config, 'farm_path') else [
+            'down', 'south', 'south',
+            'east', 'east', 'east', 'east', 'east', 'east',
+            'south', 'south', 'down', 'down', 'north'
+        ]
+
+        # Follow the path
+        if await self.actions.follow_path(farm_path):
+            logger.info(f"[{self.config.name}] Arrived at Black Dragon's Lair!")
+            # Update arena monsters for this location
+            self._update_farm_monsters()
+            self.demon_state = DemonState.CHECKING_DISCIPLINES
+        else:
+            logger.warning(f"[{self.config.name}] Navigation failed, trying disciplines anyway")
+            self.demon_state = DemonState.CHECKING_DISCIPLINES
+
+    def _update_farm_monsters(self) -> None:
+        """Update monster list for Black Dragon's Lair farming."""
+        # Update the ARENA_MONSTERS class attribute with farm monsters
+        farm_monsters = self.prog_config.farm_monsters if hasattr(self.prog_config, 'farm_monsters') else [
+            'hobgoblin', 'shaman'
+        ]
+        # Store original and use new list
+        if not hasattr(self, '_original_arena_monsters'):
+            self._original_arena_monsters = self.ARENA_MONSTERS.copy()
+        self.ARENA_MONSTERS = farm_monsters
+
+    # =========================================================================
+    # Discipline Progression States
+    # =========================================================================
 
     async def _check_disciplines(self) -> None:
         """Check discipline levels and decide next action."""
@@ -267,10 +586,19 @@ class DemonProgressionBot(ClassProgressionBot, AvatarProgressionMixin):
             self.demon_state = DemonState.TRAINING_DISCIPLINE
             return
 
-        # Use avatar's farming infrastructure
-        # Reset kills counter and farm
-        self._kills = 0
-        self.avatar_state = AvatarState.FINDING_ARENA
+        # Initialize avatar state for farming if not already in progress
+        # Only reset if we're in START state or not initialized
+        if not hasattr(self, '_avatar_state') or self._avatar_state == AvatarState.START:
+            self.__init_avatar_state__()
+            self.avatar_state = AvatarState.FINDING_ARENA
+
+        # If avatar farming completed a cycle (back to FINDING_ARENA after kills),
+        # that's fine - let it continue
+        # But if we hit AVATAR_COMPLETE or FAILED, reset for next farming cycle
+        if self._avatar_state in (AvatarState.AVATAR_COMPLETE, AvatarState.FAILED):
+            self._kills = 0
+            self._kill_attempts = 0
+            self.avatar_state = AvatarState.FINDING_ARENA
 
         # Run one iteration of avatar farming
         await self._avatar_tick()

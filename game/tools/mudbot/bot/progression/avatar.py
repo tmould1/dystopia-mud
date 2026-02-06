@@ -65,6 +65,7 @@ class AvatarProgressionMixin:
         self._avatar_state = AvatarState.START
         self._kills = 0
         self._kill_attempts = 0
+        self._avatar_train_failures = 0  # Track failed avatar training attempts
         self._exploration_path: list[str] = []
         self._in_arena = False
         self._current_target: Optional[str] = None
@@ -335,8 +336,20 @@ class AvatarProgressionMixin:
     async def _train_avatar(self: "ClassProgressionBot") -> None:
         """Attempt to become an avatar."""
         stats = await self.actions.score()
-        if stats and stats.max_hp < self._get_hp_target():
+        if not stats:
+            logger.error(f"[{self.config.name}] Cannot get stats for avatar training")
+            self.avatar_state = AvatarState.FAILED
+            return
+
+        # Check if already an avatar (level 3+)
+        if stats.level >= 3:
+            logger.info(f"[{self.config.name}] Already an avatar (level {stats.level})!")
+            self.avatar_state = AvatarState.AVATAR_COMPLETE
+            return
+
+        if stats.max_hp < self._get_hp_target():
             logger.warning(f"[{self.config.name}] HP too low for avatar: {stats.max_hp}")
+            self._avatar_train_failures = 0  # Reset on HP change
             self.avatar_state = AvatarState.TRAINING_HP
             return
 
@@ -344,5 +357,13 @@ class AvatarProgressionMixin:
             logger.info(f"[{self.config.name}] AVATAR PROGRESSION COMPLETE!")
             self.avatar_state = AvatarState.AVATAR_COMPLETE
         else:
-            logger.error(f"[{self.config.name}] Avatar training failed")
-            self.avatar_state = AvatarState.TRAINING_HP
+            self._avatar_train_failures += 1
+            logger.warning(f"[{self.config.name}] Avatar training failed (attempt {self._avatar_train_failures})")
+
+            # If we've failed 3+ times with sufficient HP, assume we're already an avatar
+            # This handles cases where the MUD's response doesn't match our patterns
+            if self._avatar_train_failures >= 3:
+                logger.info(f"[{self.config.name}] Multiple avatar training failures with HP={stats.max_hp} - assuming already avatar")
+                self.avatar_state = AvatarState.AVATAR_COMPLETE
+            else:
+                self.avatar_state = AvatarState.TRAINING_HP
