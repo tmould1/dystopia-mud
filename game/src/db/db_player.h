@@ -24,5 +24,11 @@ bool db_player_load_short( DESCRIPTOR_DATA *d, char *name );
 /* Check if a player .db file exists */
 bool db_player_exists( const char *name );
 
-#endif /* DB_PLAYER_H */
+/* Background save support */
+void db_player_wait_pending( int timeout_ms );
+int  db_player_pending_count( void );
+
+/* Character initialization for loading */
 CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name );
+
+#endif /* DB_PLAYER_H */

@@ -47,6 +47,7 @@ typedef struct {
 #define PTHREAD_MUTEX_NEEDS_INIT 1
 
 /* Mutex operations as macros */
+#define pthread_mutex_init(m, attr) win32_mutex_init(m)
 #define pthread_mutex_lock(m)    EnterCriticalSection(m)
 #define pthread_mutex_unlock(m)  LeaveCriticalSection(m)
 #define pthread_mutex_destroy(m) DeleteCriticalSection(m)

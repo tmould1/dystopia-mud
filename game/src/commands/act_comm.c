@@ -25,6 +25,7 @@
 #include "gmcp.h"
 #include "../systems/mcmp.h"
 #include "../db/db_game.h"
+#include "../db/db_player.h"
 
 extern GAMECONFIG_DATA game_config;
 
@@ -1320,7 +1321,10 @@ void do_quit( CHAR_DATA *ch, char *argument ) {
 		free_note( ch->pcdata->in_progress );
 
 	d = ch->desc;
+	/* Force save (bypass rate limit) and wait for background write */
+	ch->save_time = 0;
 	save_char_obj( ch );
+	db_player_wait_pending( 5000 );  /* Wait up to 5 seconds */
 	if ( ch->pcdata->obj_vnum != 0 )
 		act( "$n slowly fades out of existance.", ch, NULL, NULL, TO_ROOM );
 	else
@@ -1347,6 +1351,8 @@ void do_save( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You must kill at least 5 mobs before you can save.\n\r", ch );
 		return;
 	}
+	/* Reset save_time to force through rate limit for manual saves */
+	ch->save_time = 0;
 	save_char_obj( ch );
 	save_char_obj_backup( ch );
 	send_to_char( "Saved.\n\r", ch );

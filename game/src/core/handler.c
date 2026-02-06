@@ -160,6 +160,9 @@ int can_carry_w( CHAR_DATA *ch ) {
 bool is_name( char *str, char *namelist ) {
 	char name[MAX_INPUT_LENGTH], part[MAX_INPUT_LENGTH];
 	char *list, *string;
+	char *p;
+	char first;
+	bool found_potential;
 
 	/* fix crash on NULL namelist */
 	if ( namelist == NULL || namelist[0] == '\0' )
@@ -167,6 +170,25 @@ bool is_name( char *str, char *namelist ) {
 
 	/* fixed to prevent is_name on "" returning TRUE */
 	if ( str[0] == '\0' )
+		return FALSE;
+
+	/* Quick first-character check: scan namelist for any word starting with same char */
+	first = LOWER( str[0] );
+	p = namelist;
+	found_potential = FALSE;
+	while ( *p ) {
+		if ( LOWER( *p ) == first ) {
+			found_potential = TRUE;
+			break;
+		}
+		/* Skip to end of current word */
+		while ( *p && *p != ' ' )
+			p++;
+		/* Skip whitespace to next word */
+		while ( *p == ' ' )
+			p++;
+	}
+	if ( !found_potential )
 		return FALSE;
 
 	string = str;

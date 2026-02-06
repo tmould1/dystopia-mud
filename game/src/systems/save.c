@@ -19,6 +19,7 @@
 #include <string.h>
 #include "merc.h"
 #include "compat.h"
+#include "profile.h"
 #include "../db/db_player.h"
 
 extern char mud_db_dir[MUD_PATH_MAX];
@@ -69,6 +70,10 @@ void save_char_obj( CHAR_DATA *ch ) {
 
 	if ( ch->desc != NULL && ch->desc->original != NULL )
 		ch = ch->desc->original;
+
+	/* Rate limit: 5 second cooldown between saves (for auto-save spam) */
+	if ( current_time - ch->save_time < 5 )
+		return;
 
 	/* Only update leaderboards when combat stats have changed */
 	if ( ch->pcdata->stats_dirty ) {

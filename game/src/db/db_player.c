@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../systems/profile.h"
+#include "../core/compat.h"
 
 /* External globals */
 extern char mud_db_dir[MUD_PATH_MAX];
@@ -20,6 +22,21 @@ extern time_t current_time;
 
 /* Directory for player databases */
 static char mud_db_players_dir[MUD_PATH_MAX] = "";
+
+/*
+ * Background save infrastructure.
+ * Uses sqlite3_serialize to capture database state in main thread,
+ * then writes to disk in background thread.
+ */
+typedef struct {
+	char            path[MUD_PATH_MAX];     /* Full path to player .db file */
+	unsigned char  *data;                   /* Serialized database */
+	sqlite3_int64   size;                   /* Size of serialized data */
+} PLAYER_SAVE_TASK;
+
+/* Pending save tracking for graceful shutdown */
+static int              pending_saves = 0;
+static pthread_mutex_t  save_mutex;
 
 
 /*
@@ -236,6 +253,65 @@ static const char *PLAYER_SCHEMA_SQL =
 
 
 /*
+ * Background thread function for async player saves.
+ * Writes pre-serialized database data to disk.
+ */
+static void *player_save_thread( void *arg ) {
+	PLAYER_SAVE_TASK *task = (PLAYER_SAVE_TASK *)arg;
+	FILE *fp;
+
+	/* Write serialized data directly to file */
+	fp = fopen( task->path, "wb" );
+	if ( fp != NULL ) {
+		fwrite( task->data, 1, task->size, fp );
+		fclose( fp );
+	}
+
+	/* Free resources */
+	sqlite3_free( task->data );
+	free( task );
+
+	/* Decrement pending saves counter */
+	pthread_mutex_lock( &save_mutex );
+	pending_saves--;
+	pthread_mutex_unlock( &save_mutex );
+
+	return NULL;
+}
+
+/*
+ * Wait for all pending background saves to complete.
+ * Called during quit/shutdown to ensure data is written.
+ */
+void db_player_wait_pending( int timeout_ms ) {
+	int waited = 0;
+
+	while ( pending_saves > 0 && waited < timeout_ms ) {
+#ifdef WIN32
+		Sleep( 10 );
+#else
+		usleep( 10000 );
+#endif
+		waited += 10;
+	}
+
+	if ( pending_saves > 0 ) {
+		char buf[128];
+		sprintf( buf, "db_player_wait_pending: %d saves still pending after %dms",
+			pending_saves, timeout_ms );
+		log_string( buf );
+	}
+}
+
+/*
+ * Get count of pending background saves.
+ */
+int db_player_pending_count( void ) {
+	return pending_saves;
+}
+
+
+/*
  * Build path to a player's .db file.
  * Returns 0 on success, -1 on truncation.
  */
@@ -318,6 +394,7 @@ static int format_short_array( char *buf, size_t bufsize, const sh_int *arr, int
  * Much faster than 26 individual INSERT statements.
  */
 static void save_all_arrays( sqlite3 *db, CHAR_DATA *ch ) {
+	PROFILE_START( "save_arrays" );
 	/* Pre-allocated buffers for each array's data string */
 	char power[512], stance[256], gifts[256], paradox[64], monkab[64], damcap[64];
 	char wpn[128], spl[64], cmbt[128], loc_hp[64], chi_buf[64], focus_buf[64];
@@ -438,6 +515,7 @@ static void save_all_arrays( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_step( stmt );
 		sqlite3_finalize( stmt );
 	}
+	PROFILE_END( "save_arrays" );
 }
 
 
@@ -476,6 +554,9 @@ static void load_short_array( const char *data, sh_int *arr, int count ) {
  */
 void db_player_init( void ) {
 	char backup_dir[MUD_PATH_MAX];
+
+	/* Initialize mutex for background save tracking */
+	pthread_mutex_init( &save_mutex, NULL );
 
 	if ( snprintf( mud_db_players_dir, sizeof( mud_db_players_dir ), "%s%splayers",
 			mud_db_dir, PATH_SEPARATOR ) >= (int)sizeof( mud_db_players_dir ) ) {
@@ -522,6 +603,7 @@ bool db_player_exists( const char *name ) {
  * reconstructed using nest levels on load.
  */
 static void save_objects( sqlite3 *db, CHAR_DATA *ch ) {
+	PROFILE_START( "save_objects" );
 	sqlite3_stmt *obj_stmt = NULL;
 	sqlite3_stmt *aff_stmt = NULL;
 	sqlite3_stmt *ed_stmt = NULL;
@@ -702,28 +784,21 @@ static void save_objects( sqlite3 *db, CHAR_DATA *ch ) {
 	sqlite3_finalize( obj_stmt );
 	sqlite3_finalize( aff_stmt );
 	sqlite3_finalize( ed_stmt );
+	PROFILE_END( "save_objects" );
 }
 
 
 /*
- * Save full character + inventory to SQLite database.
+ * Internal: Save player data to an already-open database handle.
+ * Used by both sync and async save paths.
  */
-void db_player_save( CHAR_DATA *ch ) {
-	sqlite3 *db;
+static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 	sqlite3_stmt *stmt;
 	int sn, i;
 	AFFECT_DATA *paf;
 	ALIAS_DATA *ali;
 
-	if ( IS_NPC( ch ) || ch->level < 2 )
-		return;
-
-	db = db_player_open( ch->pcdata->switchname );
-	if ( !db )
-		return;
-
-	db_begin( db );
-
+	PROFILE_START( "save_delete_all" );
 	/* Clear all tables for full rewrite (batched for efficiency) */
 	sqlite3_exec( db,
 		"DELETE FROM player;"
@@ -736,7 +811,7 @@ void db_player_save( CHAR_DATA *ch ) {
 		"DELETE FROM obj_affects;"
 		"DELETE FROM obj_extra_descr",
 		NULL, NULL, NULL );
-
+	PROFILE_END( "save_delete_all" );
 	/* ================================================================
 	 * Player table - single row with all scalar fields
 	 * ================================================================ */
@@ -918,12 +993,14 @@ void db_player_save( CHAR_DATA *ch ) {
 		sqlite3_step( stmt );
 		sqlite3_finalize( stmt );
 	}
+	PROFILE_END( "save_player_row" );
 
 	/* ================================================================
 	 * Integer arrays (batched for efficiency - 27 arrays in 1 INSERT)
 	 * ================================================================ */
 	save_all_arrays( db, ch );
 
+	PROFILE_START( "save_skills" );
 	/* ================================================================
 	 * Skills (only non-zero)
 	 * ================================================================ */
@@ -941,7 +1018,9 @@ void db_player_save( CHAR_DATA *ch ) {
 			sqlite3_finalize( stmt );
 		}
 	}
+	PROFILE_END( "save_skills" );
 
+	PROFILE_START( "save_aliases" );
 	/* ================================================================
 	 * Aliases
 	 * ================================================================ */
@@ -957,7 +1036,9 @@ void db_player_save( CHAR_DATA *ch ) {
 			sqlite3_finalize( stmt );
 		}
 	}
+	PROFILE_END( "save_aliases" );
 
+	PROFILE_START( "save_affects" );
 	/* ================================================================
 	 * Character affects
 	 * ================================================================ */
@@ -980,7 +1061,9 @@ void db_player_save( CHAR_DATA *ch ) {
 			sqlite3_finalize( stmt );
 		}
 	}
+	PROFILE_END( "save_affects" );
 
+	PROFILE_START( "save_boards" );
 	/* ================================================================
 	 * Board timestamps (only save non-zero timestamps)
 	 * ================================================================ */
@@ -998,6 +1081,7 @@ void db_player_save( CHAR_DATA *ch ) {
 			sqlite3_finalize( stmt );
 		}
 	}
+	PROFILE_END( "save_boards" );
 
 	/* ================================================================
 	 * Objects (inventory + equipment)
@@ -1008,9 +1092,98 @@ void db_player_save( CHAR_DATA *ch ) {
 	/* Schema version */
 	sqlite3_exec( db, "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '1')",
 		NULL, NULL, NULL );
+}
 
+
+/*
+ * Save full character + inventory to SQLite database.
+ * Uses background thread for disk I/O to avoid blocking game loop.
+ */
+void db_player_save( CHAR_DATA *ch ) {
+	sqlite3 *db = NULL;
+	PLAYER_SAVE_TASK *task = NULL;
+	unsigned char *serialized = NULL;
+	sqlite3_int64 size = 0;
+	char path[MUD_PATH_MAX];
+	pthread_t thread;
+	pthread_attr_t attr;
+
+	if ( IS_NPC( ch ) || ch->level < 2 )
+		return;
+
+	PROFILE_START( "db_player_save" );
+
+	/* Build path for background thread */
+	if ( db_player_path( ch->pcdata->switchname, path, sizeof( path ) ) < 0 ) {
+		PROFILE_END( "db_player_save" );
+		return;
+	}
+
+	/* Open in-memory database with schema */
+	if ( sqlite3_open( ":memory:", &db ) != SQLITE_OK ) {
+		PROFILE_END( "db_player_save" );
+		return;
+	}
+
+	if ( sqlite3_exec( db, PLAYER_SCHEMA_SQL, NULL, NULL, NULL ) != SQLITE_OK ) {
+		sqlite3_close( db );
+		PROFILE_END( "db_player_save" );
+		return;
+	}
+
+	/* Serialize player data to in-memory database */
+	db_begin( db );
+	db_player_save_to_db( db, ch );
 	db_commit( db );
+
+	/* Serialize the in-memory database to a byte buffer */
+	serialized = sqlite3_serialize( db, "main", &size, 0 );
 	sqlite3_close( db );
+
+	if ( serialized == NULL || size == 0 ) {
+		if ( serialized ) sqlite3_free( serialized );
+		PROFILE_END( "db_player_save" );
+		return;
+	}
+
+	/* Create task for background thread */
+	task = (PLAYER_SAVE_TASK *)malloc( sizeof( PLAYER_SAVE_TASK ) );
+	if ( task == NULL ) {
+		sqlite3_free( serialized );
+		PROFILE_END( "db_player_save" );
+		return;
+	}
+
+	strncpy( task->path, path, sizeof( task->path ) - 1 );
+	task->path[sizeof( task->path ) - 1] = '\0';
+	task->data = serialized;
+	task->size = size;
+
+	/* Increment pending saves counter */
+	pthread_mutex_lock( &save_mutex );
+	pending_saves++;
+	pthread_mutex_unlock( &save_mutex );
+
+	/* Launch background thread to write file */
+	pthread_attr_init( &attr );
+	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
+
+	if ( pthread_create( &thread, &attr, player_save_thread, task ) != 0 ) {
+		/* Thread creation failed - do synchronous write as fallback */
+		FILE *fp = fopen( path, "wb" );
+		if ( fp != NULL ) {
+			fwrite( serialized, 1, size, fp );
+			fclose( fp );
+		}
+		sqlite3_free( serialized );
+		free( task );
+
+		pthread_mutex_lock( &save_mutex );
+		pending_saves--;
+		pthread_mutex_unlock( &save_mutex );
+	}
+
+	PROFILE_END( "db_player_save" );
 }
 
 

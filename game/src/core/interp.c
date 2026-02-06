@@ -239,6 +239,50 @@ pthread_mutex_t memory_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 /*
+ * Command state restriction lookup tables.
+ * Arrays are sorted for binary search. Use is_cmd_allowed_in_state() for lookups.
+ */
+static const char *cmd_allow_headless[] = {
+	"'", ".", ":", "ashes", "cast", "chat", "emote", "exits", "fangs", "horns",
+	"humanform", "immtalk", "inventory", "leap", "lifespan", "look", "nightsight",
+	"obj", "order", "oreturn", "plasma", "quit", "relevel", "roll", "safe", "save",
+	"say", "scan", "score", "spy", "tell", "truesight", "where", "who"
+};
+static const int cmd_allow_headless_count = sizeof(cmd_allow_headless) / sizeof(cmd_allow_headless[0]);
+
+static const char *cmd_allow_earthmeld[] = {
+	"burrow", "clandisc", "earthmeld", "exits", "immune", "inventory", "look",
+	"relevel", "safe", "save", "scan", "score", "shadowsight", "spy", "upkeep",
+	"vclan", "wake", "where", "who"
+};
+static const int cmd_allow_earthmeld_count = sizeof(cmd_allow_earthmeld) / sizeof(cmd_allow_earthmeld[0]);
+
+static const char *cmd_allow_embrace[] = {
+	"'", ".", "berserk", "chat", "diablerize", "goto", "inventory", "kill", "look",
+	"reboot", "relevel", "report", "restore", "save", "say", "score", "testemb", "who"
+};
+static const int cmd_allow_embrace_count = sizeof(cmd_allow_embrace) / sizeof(cmd_allow_embrace[0]);
+
+static const char *cmd_allow_tied[] = {
+	"'", ".", "call", "change", "chat", "claws", "darkness", "drink", "exits",
+	"fangs", "flex", "goto", "immune", "introduce", "inventory", "look", "nightsight",
+	"order", "regenerate", "relevel", "report", "restore", "safe", "save", "say",
+	"scan", "score", "shadowplane", "shadowsight", "shield", "shout", "sleep", "spy",
+	"tell", "upkeep", "vclan", "wake", "where", "who", "yell"
+};
+static const int cmd_allow_tied_count = sizeof(cmd_allow_tied) / sizeof(cmd_allow_tied[0]);
+
+/* Binary search for command name in sorted array */
+static int cmd_name_cmp( const void *a, const void *b ) {
+	return str_cmp( *(const char **)a, *(const char **)b );
+}
+
+static bool is_cmd_in_list( const char *cmd_name, const char **list, int count ) {
+	return bsearch( &cmd_name, list, count, sizeof(char *), cmd_name_cmp ) != NULL;
+}
+
+
+/*
  * Command table.
  */
 const struct cmd_type cmd_table[] =
@@ -1370,250 +1414,39 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 	trust = get_trust( ch );
 	for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {
 		if ( command[0] == cmd_table[cmd].name[0] && !str_prefix( command, cmd_table[cmd].name ) && cmd_table[cmd].level <= trust ) {
+			/* State-based command restrictions using binary search O(log n) instead of 100+ str_cmp() calls */
 			if ( IS_HEAD( ch, LOST_HEAD ) || IS_EXTRA( ch, EXTRA_OSWITCH ) ) {
-				if ( !str_cmp( cmd_table[cmd].name, "say" ) )
+				if ( is_cmd_in_list( cmd_table[cmd].name, cmd_allow_headless, cmd_allow_headless_count ) )
 					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "'" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "immtalk" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, ":" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "chat" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "." ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "look" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "save" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "exits" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "emote" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "tell" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "order" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "who" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "where" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "relevel" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "safe" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "scan" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "spy" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "score" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "save" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "inventory" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "oreturn" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "roll" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "leap" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "lifespan" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "nightsight" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "truesight" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "horns" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "fangs" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "cast" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "plasma" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "ashes" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "obj" ) &&
-					!IS_NPC( ch ) && ch->pcdata->obj_vnum != 0 )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "quit" ) &&
-					!IS_NPC( ch ) && ch->pcdata->obj_vnum != 0 )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "humanform" ) &&
-					!IS_NPC( ch ) && ch->pcdata->obj_vnum != 0 )
+				/* Special cases requiring obj_vnum check */
+				else if ( !IS_NPC( ch ) && ch->pcdata->obj_vnum != 0 &&
+					( !str_cmp( cmd_table[cmd].name, "obj" ) ||
+					  !str_cmp( cmd_table[cmd].name, "quit" ) ||
+					  !str_cmp( cmd_table[cmd].name, "humanform" ) ) )
 					found = TRUE;
 				else {
 					send_to_char( "Not without a body!\n\r", ch );
 					return;
 				}
 			} else if ( IS_EXTRA( ch, EXTRA_EARTHMELD ) ) {
-				if ( !str_cmp( cmd_table[cmd].name, "earthmeld" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "burrow" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "look" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "save" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "exits" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "wake" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "inventory" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "who" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "where" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "relevel" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "safe" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "scan" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "spy" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "shadowsight" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "vclan" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "upkeep" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "score" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "immune" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "clandisc" ) )
+				if ( is_cmd_in_list( cmd_table[cmd].name, cmd_allow_earthmeld, cmd_allow_earthmeld_count ) )
 					found = TRUE;
 				else {
 					send_to_char( "Not while in the ground.\n\r", ch );
 					return;
 				}
 			} else if ( ch->embracing != NULL || ch->embraced != NULL ) {
-				if ( !str_cmp( cmd_table[cmd].name, "say" ) )
+				if ( is_cmd_in_list( cmd_table[cmd].name, cmd_allow_embrace, cmd_allow_embrace_count ) )
 					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "'" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "chat" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "." ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "look" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "inventory" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "who" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "relevel" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "score" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "report" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "goto" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "kill" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "berserk" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "testemb" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "reboot" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "save" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "diablerize" ) && ch->embracing != NULL )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "restore" ) )
+				/* diablerize requires embracing (not embraced) */
+				else if ( ch->embracing != NULL && !str_cmp( cmd_table[cmd].name, "diablerize" ) )
 					found = TRUE;
 				else {
 					send_to_char( "Not while in an embrace.\n\r", ch );
 					return;
 				}
-			}
-
-			else if ( IS_EXTRA( ch, TIED_UP ) ) {
-				if ( !str_cmp( cmd_table[cmd].name, "say" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "'" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "chat" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "." ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "yell" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "shout" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "look" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "call" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "save" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "exits" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "inventory" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "tell" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "restore" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "order" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "who" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "where" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "introduce" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "relevel" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "safe" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "scan" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "spy" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "darkness" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "sleep" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "wake" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "fangs" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "claws" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "nightsight" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "shadowsight" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "shadowplane" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "regenerate" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "shield" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "vclan" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "upkeep" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "score" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "immune" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "report" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "goto" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "flex" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "change" ) )
-					found = TRUE;
-				else if ( !str_cmp( cmd_table[cmd].name, "drink" ) )
+			} else if ( IS_EXTRA( ch, TIED_UP ) ) {
+				if ( is_cmd_in_list( cmd_table[cmd].name, cmd_allow_tied, cmd_allow_tied_count ) )
 					found = TRUE;
 				else {
 					send_to_char( "Not while tied up.\n\r", ch );
