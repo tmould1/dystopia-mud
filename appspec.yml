@@ -8,6 +8,8 @@ files:
     destination: /usr/local/mudder/INSTANCE_NAME/gamedata/db/areas/
   - source: db/game/base_help.db
     destination: /usr/local/mudder/INSTANCE_NAME/gamedata/db/game/
+  - source: db/game/class.db
+    destination: /usr/local/mudder/INSTANCE_NAME/gamedata/db/game/
   - source: doc
     destination: /usr/local/mudder/INSTANCE_NAME/gamedata/doc/
 
