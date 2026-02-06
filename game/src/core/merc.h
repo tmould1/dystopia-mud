@@ -2470,6 +2470,7 @@ struct pc_data {
 	int security; /* OLC - Builder security */
 	int bounty;
 	sh_int explevel; /* FTUE: 0=never MUD, 1=MUD not Dystopia, 2=veteran */
+	bool stats_dirty; /* TRUE when pkill/pdeath/etc changed, triggers leaderboard update */
 };
 
 /*

@@ -2061,6 +2061,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 
 		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) {
 			ch->mkill += 1;
+			ch->pcdata->stats_dirty = TRUE;
 
 			if ( IS_CLASS( ch, CLASS_DEMON ) || IS_CLASS( ch, CLASS_DROW ) || IS_CLASS( ch, CLASS_DROID ) || IS_CLASS( ch, CLASS_TANARRI ) ) {
 				if ( IS_NPC( victim ) && !IS_SET( victim->act, ACT_NOEXP ) ) {
@@ -2080,6 +2081,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		}
 		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) {
 			victim->mdeath = victim->mdeath + 1;
+			victim->pcdata->stats_dirty = TRUE;
 		}
 		mcmp_combat_death( ch, victim );
 		raw_kill( victim );
@@ -4841,6 +4843,8 @@ void do_decapitate( CHAR_DATA *ch, char *argument ) {
 	if ( ch->pcdata->mean_paradox_counter > 0 ) ch->pcdata->mean_paradox_counter--;
 	ch->pkill = ch->pkill + 1;
 	victim->pdeath = victim->pdeath + 1;
+	ch->pcdata->stats_dirty = TRUE;
+	victim->pcdata->stats_dirty = TRUE;
 	if ( !IS_CLASS( victim, CLASS_NINJA ) ) victim->rage = 0;
 	victim->level = 2;
 	decap_message( ch, victim );

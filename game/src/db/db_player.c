@@ -287,42 +287,157 @@ static sqlite3 *db_player_open( const char *name ) {
 
 
 /*
- * Save an integer array as a space-separated string to player_arrays.
+ * Format an integer array as a space-separated string into buffer.
+ * Returns number of chars written (excluding null terminator).
  */
-static void save_int_array( sqlite3 *db, sqlite3_stmt *stmt,
-	const char *name, const int *arr, int count )
-{
-	char buf[2048];
+static int format_int_array( char *buf, size_t bufsize, const int *arr, int count ) {
 	int pos = 0;
 	int i;
-
-	for ( i = 0; i < count; i++ ) {
+	for ( i = 0; i < count && pos < (int)bufsize - 12; i++ ) {
 		if ( i > 0 )
 			buf[pos++] = ' ';
-		pos += snprintf( buf + pos, sizeof( buf ) - pos, "%d", arr[i] );
-		if ( pos >= (int)sizeof( buf ) - 1 )
-			break;
+		pos += snprintf( buf + pos, bufsize - pos, "%d", arr[i] );
 	}
 	buf[pos] = '\0';
-
-	sqlite3_reset( stmt );
-	sqlite3_bind_text( stmt, 1, name, -1, SQLITE_STATIC );
-	sqlite3_bind_text( stmt, 2, buf, -1, SQLITE_TRANSIENT );
-	sqlite3_step( stmt );
+	return pos;
 }
 
-
 /*
- * Save a short int array as space-separated string.
+ * Format a short int array as a space-separated string into buffer.
  */
-static void save_short_array( sqlite3 *db, sqlite3_stmt *stmt,
-	const char *name, const sh_int *arr, int count )
-{
+static int format_short_array( char *buf, size_t bufsize, const sh_int *arr, int count ) {
 	int temp[64];
 	int i;
 	for ( i = 0; i < count && i < 64; i++ )
 		temp[i] = arr[i];
-	save_int_array( db, stmt, name, temp, count );
+	return format_int_array( buf, bufsize, temp, count );
+}
+
+/*
+ * Batch save all character arrays in a single multi-row INSERT.
+ * Much faster than 26 individual INSERT statements.
+ */
+static void save_all_arrays( sqlite3 *db, CHAR_DATA *ch ) {
+	/* Pre-allocated buffers for each array's data string */
+	char power[512], stance[256], gifts[256], paradox[64], monkab[64], damcap[64];
+	char wpn[128], spl[64], cmbt[128], loc_hp[64], chi_buf[64], focus_buf[64];
+	char attr_perm[64], attr_mod[64], cond[64], fake[128];
+	char language[64], stage[64], wolfform[64], score[128], genes[128];
+	char powers[256], stats[128], disc_a[128];
+	char stat_ab[64], stat_am[64], stat_dur[64];
+	sqlite3_stmt *stmt;
+	int i;
+
+	/* Build temporary arrays for PC_DATA fields */
+	int t_attr_perm[5], t_attr_mod[5], t_cond[3], t_fake[8];
+	int t_stat_ab[4], t_stat_am[4], t_stat_dur[4];
+
+	t_attr_perm[0] = ch->pcdata->perm_str;
+	t_attr_perm[1] = ch->pcdata->perm_int;
+	t_attr_perm[2] = ch->pcdata->perm_wis;
+	t_attr_perm[3] = ch->pcdata->perm_dex;
+	t_attr_perm[4] = ch->pcdata->perm_con;
+
+	t_attr_mod[0] = ch->pcdata->mod_str;
+	t_attr_mod[1] = ch->pcdata->mod_int;
+	t_attr_mod[2] = ch->pcdata->mod_wis;
+	t_attr_mod[3] = ch->pcdata->mod_dex;
+	t_attr_mod[4] = ch->pcdata->mod_con;
+
+	t_cond[0] = ch->pcdata->condition[0];
+	t_cond[1] = ch->pcdata->condition[1];
+	t_cond[2] = ch->pcdata->condition[2];
+
+	t_fake[0] = ch->pcdata->fake_skill;
+	t_fake[1] = ch->pcdata->fake_stance;
+	t_fake[2] = ch->pcdata->fake_hit;
+	t_fake[3] = ch->pcdata->fake_dam;
+	t_fake[4] = ch->pcdata->fake_ac;
+	t_fake[5] = ch->pcdata->fake_hp;
+	t_fake[6] = ch->pcdata->fake_mana;
+	t_fake[7] = ch->pcdata->fake_move;
+
+	for ( i = 0; i < 4; i++ ) {
+		t_stat_ab[i] = ch->pcdata->stat_ability[i];
+		t_stat_am[i] = ch->pcdata->stat_amount[i];
+		t_stat_dur[i] = ch->pcdata->stat_duration[i];
+	}
+
+	/* Format all arrays to strings */
+	format_int_array( power, sizeof(power), ch->power, MAX_DISCIPLINES );
+	format_int_array( stance, sizeof(stance), ch->stance, 24 );
+	format_int_array( gifts, sizeof(gifts), ch->gifts, 21 );
+	format_int_array( paradox, sizeof(paradox), ch->paradox, 3 );
+	format_int_array( monkab, sizeof(monkab), ch->monkab, 4 );
+	format_int_array( damcap, sizeof(damcap), ch->damcap, 2 );
+
+	format_short_array( wpn, sizeof(wpn), ch->wpn, 13 );
+	format_short_array( spl, sizeof(spl), ch->spl, 5 );
+	format_short_array( cmbt, sizeof(cmbt), ch->cmbt, 8 );
+	format_short_array( loc_hp, sizeof(loc_hp), ch->loc_hp, 7 );
+	format_short_array( chi_buf, sizeof(chi_buf), ch->chi, 2 );
+	format_short_array( focus_buf, sizeof(focus_buf), ch->focus, 2 );
+
+	format_int_array( attr_perm, sizeof(attr_perm), t_attr_perm, 5 );
+	format_int_array( attr_mod, sizeof(attr_mod), t_attr_mod, 5 );
+	format_int_array( cond, sizeof(cond), t_cond, 3 );
+	format_int_array( fake, sizeof(fake), t_fake, 8 );
+
+	format_int_array( language, sizeof(language), ch->pcdata->language, 2 );
+	format_short_array( stage, sizeof(stage), ch->pcdata->stage, 3 );
+	format_short_array( wolfform, sizeof(wolfform), ch->pcdata->wolfform, 2 );
+	format_int_array( score, sizeof(score), ch->pcdata->score, 6 );
+	format_int_array( genes, sizeof(genes), ch->pcdata->genes, 10 );
+	format_int_array( powers, sizeof(powers), ch->pcdata->powers, 20 );
+	format_int_array( stats, sizeof(stats), ch->pcdata->stats, 12 );
+	format_short_array( disc_a, sizeof(disc_a), ch->pcdata->disc_a, 11 );
+
+	format_int_array( stat_ab, sizeof(stat_ab), t_stat_ab, 4 );
+	format_int_array( stat_am, sizeof(stat_am), t_stat_am, 4 );
+	format_int_array( stat_dur, sizeof(stat_dur), t_stat_dur, 4 );
+
+	/* Single multi-row INSERT for all 26 arrays */
+	if ( sqlite3_prepare_v2( db,
+		"INSERT INTO player_arrays (name, data) VALUES "
+		"('power',?),('stance',?),('gifts',?),('paradox',?),('monkab',?),('damcap',?),"
+		"('wpn',?),('spl',?),('cmbt',?),('loc_hp',?),('chi',?),('focus',?),"
+		"('attr_perm',?),('attr_mod',?),('condition',?),('fake_con',?),"
+		"('language',?),('stage',?),('wolfform',?),('score',?),('genes',?),"
+		"('powers',?),('stats',?),('disc_a',?),"
+		"('stat_ability',?),('stat_amount',?),('stat_duration',?)",
+		-1, &stmt, NULL ) == SQLITE_OK ) {
+
+		sqlite3_bind_text( stmt, 1, power, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 2, stance, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 3, gifts, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 4, paradox, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 5, monkab, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 6, damcap, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 7, wpn, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 8, spl, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 9, cmbt, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 10, loc_hp, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 11, chi_buf, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 12, focus_buf, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 13, attr_perm, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 14, attr_mod, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 15, cond, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 16, fake, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 17, language, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 18, stage, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 19, wolfform, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 20, score, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 21, genes, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 22, powers, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 23, stats, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 24, disc_a, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 25, stat_ab, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 26, stat_am, -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, 27, stat_dur, -1, SQLITE_STATIC );
+
+		sqlite3_step( stmt );
+		sqlite3_finalize( stmt );
+	}
 }
 
 
@@ -805,89 +920,9 @@ void db_player_save( CHAR_DATA *ch ) {
 	}
 
 	/* ================================================================
-	 * Integer arrays
+	 * Integer arrays (batched for efficiency - 27 arrays in 1 INSERT)
 	 * ================================================================ */
-	{
-		const char *arr_sql = "INSERT INTO player_arrays (name, data) VALUES (?,?)";
-
-		if ( sqlite3_prepare_v2( db, arr_sql, -1, &stmt, NULL ) == SQLITE_OK ) {
-			/* CHAR_DATA int arrays */
-			save_int_array( db, stmt, "power", ch->power, MAX_DISCIPLINES );
-			save_int_array( db, stmt, "stance", ch->stance, 24 );
-			save_int_array( db, stmt, "gifts", ch->gifts, 21 );
-			save_int_array( db, stmt, "paradox", ch->paradox, 3 );
-			save_int_array( db, stmt, "monkab", ch->monkab, 4 );
-			save_int_array( db, stmt, "damcap", ch->damcap, 2 );
-
-			/* CHAR_DATA sh_int arrays */
-			save_short_array( db, stmt, "wpn", ch->wpn, 13 );
-			save_short_array( db, stmt, "spl", ch->spl, 5 );
-			save_short_array( db, stmt, "cmbt", ch->cmbt, 8 );
-			save_short_array( db, stmt, "loc_hp", ch->loc_hp, 7 );
-			save_short_array( db, stmt, "chi", ch->chi, 2 );
-			save_short_array( db, stmt, "focus", ch->focus, 2 );
-
-			/* PC_DATA arrays */
-			{
-				int attr_perm[5];
-				int attr_mod[5];
-				int cond[3];
-				int fake[8];
-
-				attr_perm[0] = ch->pcdata->perm_str;
-				attr_perm[1] = ch->pcdata->perm_int;
-				attr_perm[2] = ch->pcdata->perm_wis;
-				attr_perm[3] = ch->pcdata->perm_dex;
-				attr_perm[4] = ch->pcdata->perm_con;
-				save_int_array( db, stmt, "attr_perm", attr_perm, 5 );
-
-				attr_mod[0] = ch->pcdata->mod_str;
-				attr_mod[1] = ch->pcdata->mod_int;
-				attr_mod[2] = ch->pcdata->mod_wis;
-				attr_mod[3] = ch->pcdata->mod_dex;
-				attr_mod[4] = ch->pcdata->mod_con;
-				save_int_array( db, stmt, "attr_mod", attr_mod, 5 );
-
-				cond[0] = ch->pcdata->condition[0];
-				cond[1] = ch->pcdata->condition[1];
-				cond[2] = ch->pcdata->condition[2];
-				save_int_array( db, stmt, "condition", cond, 3 );
-
-				fake[0] = ch->pcdata->fake_skill;
-				fake[1] = ch->pcdata->fake_stance;
-				fake[2] = ch->pcdata->fake_hit;
-				fake[3] = ch->pcdata->fake_dam;
-				fake[4] = ch->pcdata->fake_ac;
-				fake[5] = ch->pcdata->fake_hp;
-				fake[6] = ch->pcdata->fake_mana;
-				fake[7] = ch->pcdata->fake_move;
-				save_int_array( db, stmt, "fake_con", fake, 8 );
-			}
-
-			save_int_array( db, stmt, "language", ch->pcdata->language, 2 );
-			save_short_array( db, stmt, "stage", ch->pcdata->stage, 3 );
-			save_short_array( db, stmt, "wolfform", ch->pcdata->wolfform, 2 );
-			save_int_array( db, stmt, "score", ch->pcdata->score, 6 );
-			save_int_array( db, stmt, "genes", ch->pcdata->genes, 10 );
-			save_int_array( db, stmt, "powers", ch->pcdata->powers, 20 );
-			save_int_array( db, stmt, "stats", ch->pcdata->stats, 12 );
-			save_short_array( db, stmt, "disc_a", ch->pcdata->disc_a, 11 );
-
-			{
-				int stat_ab[4], stat_am[4], stat_dur[4];
-				for ( i = 0; i < 4; i++ ) {
-					stat_ab[i] = ch->pcdata->stat_ability[i];
-					stat_am[i] = ch->pcdata->stat_amount[i];
-					stat_dur[i] = ch->pcdata->stat_duration[i];
-				}
-				save_int_array( db, stmt, "stat_ability", stat_ab, 4 );
-				save_int_array( db, stmt, "stat_amount", stat_am, 4 );
-				save_int_array( db, stmt, "stat_duration", stat_dur, 4 );
-			}
-
-			sqlite3_finalize( stmt );
-		}
-	}
+	save_all_arrays( db, ch );
 
 	/* ================================================================
 	 * Skills (only non-zero)
@@ -1042,6 +1077,7 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	ch->pcdata->last_decap[1] = str_dup( "" );
 	ch->pcdata->title = str_dup( "" );
 	ch->pcdata->bounty = 0;
+	ch->pcdata->stats_dirty = FALSE;
 	ch->pcdata->conception = str_dup( "" );
 	ch->pcdata->parents = str_dup( "" );
 	ch->pcdata->cparents = str_dup( "" );

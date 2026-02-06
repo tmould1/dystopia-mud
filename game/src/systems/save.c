@@ -37,8 +37,12 @@ void save_char_obj( CHAR_DATA *ch ) {
 	if ( ch->desc != NULL && ch->desc->original != NULL )
 		ch = ch->desc->original;
 
-	check_leaderboard( ch );
-	update_top_board( ch );
+	/* Only update leaderboards when combat stats have changed */
+	if ( ch->pcdata->stats_dirty ) {
+		check_leaderboard( ch );
+		update_top_board( ch );
+		ch->pcdata->stats_dirty = FALSE;
+	}
 
 	ch->save_time = current_time;
 	db_player_save( ch );
