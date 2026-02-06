@@ -492,49 +492,30 @@ static void save_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_bind_text( obj_stmt, 4, safe_str( obj->short_descr ), -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( obj_stmt, 5, safe_str( obj->description ), -1, SQLITE_TRANSIENT );
 
-		/* Power strings - save NULL for default/empty */
-		if ( obj->chpoweron && strlen( obj->chpoweron ) > 1
-				&& str_cmp( obj->chpoweron, "(null)" ) )
-			sqlite3_bind_text( obj_stmt, 6, obj->chpoweron, -1, SQLITE_TRANSIENT );
-		else
-			sqlite3_bind_null( obj_stmt, 6 );
+		/* Power strings - save NULL for default/empty
+		 * Use str[0] && str[1] instead of strlen() > 1 for O(1) check */
+#define BIND_POWER_STR( col, s ) \
+		if ( (s) && (s)[0] && (s)[1] && str_cmp( (s), "(null)" ) ) \
+			sqlite3_bind_text( obj_stmt, col, (s), -1, SQLITE_TRANSIENT ); \
+		else \
+			sqlite3_bind_null( obj_stmt, col )
 
-		if ( obj->chpoweroff && strlen( obj->chpoweroff ) > 1
-				&& str_cmp( obj->chpoweroff, "(null)" ) )
-			sqlite3_bind_text( obj_stmt, 7, obj->chpoweroff, -1, SQLITE_TRANSIENT );
-		else
-			sqlite3_bind_null( obj_stmt, 7 );
+		BIND_POWER_STR( 6, obj->chpoweron );
+		BIND_POWER_STR( 7, obj->chpoweroff );
+		BIND_POWER_STR( 8, obj->chpoweruse );
+		BIND_POWER_STR( 9, obj->victpoweron );
+		BIND_POWER_STR( 10, obj->victpoweroff );
+		BIND_POWER_STR( 11, obj->victpoweruse );
 
-		if ( obj->chpoweruse && strlen( obj->chpoweruse ) > 1
-				&& str_cmp( obj->chpoweruse, "(null)" ) )
-			sqlite3_bind_text( obj_stmt, 8, obj->chpoweruse, -1, SQLITE_TRANSIENT );
-		else
-			sqlite3_bind_null( obj_stmt, 8 );
+#undef BIND_POWER_STR
 
-		if ( obj->victpoweron && strlen( obj->victpoweron ) > 1
-				&& str_cmp( obj->victpoweron, "(null)" ) )
-			sqlite3_bind_text( obj_stmt, 9, obj->victpoweron, -1, SQLITE_TRANSIENT );
-		else
-			sqlite3_bind_null( obj_stmt, 9 );
-
-		if ( obj->victpoweroff && strlen( obj->victpoweroff ) > 1
-				&& str_cmp( obj->victpoweroff, "(null)" ) )
-			sqlite3_bind_text( obj_stmt, 10, obj->victpoweroff, -1, SQLITE_TRANSIENT );
-		else
-			sqlite3_bind_null( obj_stmt, 10 );
-
-		if ( obj->victpoweruse && strlen( obj->victpoweruse ) > 1
-				&& str_cmp( obj->victpoweruse, "(null)" ) )
-			sqlite3_bind_text( obj_stmt, 11, obj->victpoweruse, -1, SQLITE_TRANSIENT );
-		else
-			sqlite3_bind_null( obj_stmt, 11 );
-
-		if ( obj->questmaker && strlen( obj->questmaker ) > 1 )
+		/* Quest strings - no "(null)" check needed */
+		if ( obj->questmaker && obj->questmaker[0] && obj->questmaker[1] )
 			sqlite3_bind_text( obj_stmt, 12, obj->questmaker, -1, SQLITE_TRANSIENT );
 		else
 			sqlite3_bind_null( obj_stmt, 12 );
 
-		if ( obj->questowner && strlen( obj->questowner ) > 1 )
+		if ( obj->questowner && obj->questowner[0] && obj->questowner[1] )
 			sqlite3_bind_text( obj_stmt, 13, obj->questowner, -1, SQLITE_TRANSIENT );
 		else
 			sqlite3_bind_null( obj_stmt, 13 );
@@ -628,16 +609,18 @@ void db_player_save( CHAR_DATA *ch ) {
 
 	db_begin( db );
 
-	/* Clear all tables for full rewrite */
-	sqlite3_exec( db, "DELETE FROM player", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM player_arrays", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM skills", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM aliases", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM affects", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM boards", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM objects", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM obj_affects", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM obj_extra_descr", NULL, NULL, NULL );
+	/* Clear all tables for full rewrite (batched for efficiency) */
+	sqlite3_exec( db,
+		"DELETE FROM player;"
+		"DELETE FROM player_arrays;"
+		"DELETE FROM skills;"
+		"DELETE FROM aliases;"
+		"DELETE FROM affects;"
+		"DELETE FROM boards;"
+		"DELETE FROM objects;"
+		"DELETE FROM obj_affects;"
+		"DELETE FROM obj_extra_descr",
+		NULL, NULL, NULL );
 
 	/* ================================================================
 	 * Player table - single row with all scalar fields
@@ -964,12 +947,14 @@ void db_player_save( CHAR_DATA *ch ) {
 	}
 
 	/* ================================================================
-	 * Board timestamps
+	 * Board timestamps (only save non-zero timestamps)
 	 * ================================================================ */
 	{
 		const char *bd_sql = "INSERT INTO boards (board_name, last_note) VALUES (?,?)";
 		if ( sqlite3_prepare_v2( db, bd_sql, -1, &stmt, NULL ) == SQLITE_OK ) {
 			for ( i = 0; i < MAX_BOARD; i++ ) {
+				if ( ch->pcdata->last_note[i] == 0 )
+					continue;
 				sqlite3_reset( stmt );
 				sqlite3_bind_text( stmt, 1, boards[i].short_name, -1, SQLITE_STATIC );
 				sqlite3_bind_int64( stmt, 2, (sqlite3_int64)ch->pcdata->last_note[i] );
