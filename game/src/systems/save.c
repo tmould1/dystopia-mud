@@ -58,10 +58,9 @@ void save_char_obj_backup( CHAR_DATA *ch ) {
 	if ( ch->desc != NULL && ch->desc->original != NULL )
 		ch = ch->desc->original;
 
-	/* Ensure the main .db is up-to-date */
-	db_player_save( ch );
-
-	/* Copy the .db file to backup/ directory under db/players/ */
+	/* Copy the .db file to backup/ directory under db/players/
+	 * Note: Caller (do_save) must call save_char_obj() first to ensure
+	 * the .db file is up-to-date before copying. */
 	if ( snprintf( src, sizeof( src ), "%s%splayers%s%s.db",
 		mud_db_dir, PATH_SEPARATOR, PATH_SEPARATOR,
 		capitalize( ch->pcdata->switchname ) ) >= (int)sizeof( src ) ) {

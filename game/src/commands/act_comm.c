@@ -1347,8 +1347,8 @@ void do_save( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You must kill at least 5 mobs before you can save.\n\r", ch );
 		return;
 	}
-	save_char_obj_backup( ch );
 	save_char_obj( ch );
+	save_char_obj_backup( ch );
 	send_to_char( "Saved.\n\r", ch );
 	return;
 }

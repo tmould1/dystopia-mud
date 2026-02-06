@@ -204,6 +204,9 @@ void db_game_init( void ) {
 			if ( errmsg ) sqlite3_free( errmsg );
 			errmsg = NULL;
 		}
+		/* WAL mode for faster writes */
+		sqlite3_exec( live_help_db, "PRAGMA journal_mode=WAL", NULL, NULL, NULL );
+		sqlite3_exec( live_help_db, "PRAGMA synchronous=NORMAL", NULL, NULL, NULL );
 	}
 
 	/* Open game.db */
@@ -222,6 +225,12 @@ void db_game_init( void ) {
 		}
 		/* Run schema migrations for existing databases */
 		db_game_migrate_schema();
+
+		/* WAL mode: eliminates journal file create/delete per transaction.
+		 * synchronous=NORMAL: fsync only at WAL checkpoints, not every commit.
+		 * Together these reduce write latency ~5-10x vs defaults. */
+		sqlite3_exec( game_db, "PRAGMA journal_mode=WAL", NULL, NULL, NULL );
+		sqlite3_exec( game_db, "PRAGMA synchronous=NORMAL", NULL, NULL, NULL );
 	}
 }
 
@@ -281,6 +290,10 @@ static sqlite3 *db_game_open_for_write( void ) {
 		return NULL;
 	}
 
+	/* WAL mode for faster writes (matches db_game_init settings) */
+	sqlite3_exec( db, "PRAGMA journal_mode=WAL", NULL, NULL, NULL );
+	sqlite3_exec( db, "PRAGMA synchronous=NORMAL", NULL, NULL, NULL );
+
 	return db;
 }
 
@@ -306,6 +319,10 @@ static sqlite3 *db_game_open_live_help_for_write( void ) {
 		if ( db ) sqlite3_close( db );
 		return NULL;
 	}
+
+	/* WAL mode for faster writes */
+	sqlite3_exec( db, "PRAGMA journal_mode=WAL", NULL, NULL, NULL );
+	sqlite3_exec( db, "PRAGMA synchronous=NORMAL", NULL, NULL, NULL );
 
 	return db;
 }
