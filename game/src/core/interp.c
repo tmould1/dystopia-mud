@@ -1726,9 +1726,16 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 	{
 		struct timeval cmd_start, cmd_end;
 		bool was_profiling = profile_stats.enabled;
+		char cmd_player_name[MAX_INPUT_LENGTH];
 
-		if ( was_profiling )
+		/* Capture name BEFORE command runs (quit frees the character) */
+		if ( was_profiling ) {
+			strncpy( cmd_player_name,
+				IS_NPC(ch) ? ch->short_descr : ch->name,
+				sizeof( cmd_player_name ) - 1 );
+			cmd_player_name[sizeof( cmd_player_name ) - 1] = '\0';
 			gettimeofday( &cmd_start, NULL );
+		}
 
 		PROFILE_START("cmd_dispatch");
 		( *cmd_table[cmd].do_fun )( ch, argument );
@@ -1742,8 +1749,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 			           + ( cmd_end.tv_usec - cmd_start.tv_usec );
 			if ( elapsed_us > PROFILE_CMD_THRESHOLD_US ) {
 				sprintf( log_buf, "SLOW CMD: %s by %s took %ldms",
-					cmd_table[cmd].name,
-					IS_NPC(ch) ? ch->short_descr : ch->name,
+					cmd_table[cmd].name, cmd_player_name,
 					elapsed_us / 1000 );
 				log_string( log_buf );
 			}
