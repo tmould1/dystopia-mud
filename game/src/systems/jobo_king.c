@@ -212,11 +212,11 @@ void imm_kset( CHAR_DATA *ch, char *argument ) {
 
 	argument = one_argument( argument, arg1 );
 	argument = one_argument( argument, arg2 );
-	one_argument( argument, arg3 );
+	one_argument_case( argument, arg3 );
 
 	if ( arg1[0] == '\0' || arg2[0] == '\0' || arg3[0] == '\0' ) {
 		send_to_char( "Syntax       : kset <kingdom> <field> <value>\n\r", ch );
-		send_to_char( "Valid fields : leader, name, whoname, kills, deaths\n\r", ch );
+		send_to_char( "Valid fields : leader, name, whoname, general, kills, deaths\n\r", ch );
 		return;
 	}
 	if ( !is_number( arg1 ) ) {
@@ -238,8 +238,11 @@ void imm_kset( CHAR_DATA *ch, char *argument ) {
 		kingdom_table[i].name = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "whoname" ) ) {
 		free_string( kingdom_table[i].whoname );
-		arg3[0] = UPPER( arg3[0] );
 		kingdom_table[i].whoname = str_dup( arg3 );
+	} else if ( !str_cmp( arg2, "general" ) ) {
+		free_string( kingdom_table[i].general );
+		arg3[0] = UPPER( arg3[0] );
+		kingdom_table[i].general = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "kills" ) ) {
 		kingdom_table[i].kills = atoi( arg3 );
 	} else if ( !str_cmp( arg2, "deaths" ) ) {
