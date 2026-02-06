@@ -1,0 +1,43 @@
+# Shared Configuration for Mudbot
+# Settings used by all class progression bots
+
+# Avatar progression (shared by all classes)
+avatar:
+  hp_target: 2000
+  kills_needed: 5
+  min_hp_to_fight: 50
+  max_kill_attempts: 20
+  arena_monsters:
+    - fox
+    - rabbit
+    - snail
+    - bear
+    - beast
+    - wolf
+    - lizard
+    - boar
+  explore_directions:
+    - south
+    - north
+    - east
+    - west
+
+# Combat settings
+combat:
+  min_hp_to_fight: 500
+  flee_threshold: 100
+  regen_wait_seconds: 30
+  combat_timeout: 60
+
+# Command delays and timing
+timing:
+  command_delay: 0.5
+  combat_check_interval: 2.0
+  login_settle_delay: 3.0
+  drain_chunk_delay: 1.0
+
+# Discipline progression (shared by vampire/demon/werewolf)
+disciplines:
+  # Points needed per level: (current_level + 1) * 10
+  points_formula: "level_plus_one_times_ten"
+  max_level: 10

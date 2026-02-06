@@ -22,7 +22,7 @@ from tkinter import ttk, scrolledtext, messagebox
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Settings file location (next to gui.py)
 SETTINGS_FILE = Path(__file__).parent / "gui_settings.json"
@@ -32,6 +32,7 @@ try:
     # When run as module (python -m mudbot.gui)
     from .config import BotConfig
     from .bot.avatar_bot import AvatarProgressionBot
+    from .bot import ClassRegistry
 except ImportError:
     # When run directly (python gui.py) - need to fix up imports
     # Add parent directory to allow 'mudbot' package imports
@@ -41,6 +42,7 @@ except ImportError:
 
     from mudbot.config import BotConfig
     from mudbot.bot.avatar_bot import AvatarProgressionBot
+    from mudbot.bot import ClassRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +56,7 @@ class BotEntry:
     """A bot configuration within a server."""
     name: str
     password: str
+    bot_type: str = "avatar"  # "avatar" or class name like "demon"
 
 
 @dataclass
@@ -73,13 +76,20 @@ class ServerConfig:
         return {
             'host': self.host,
             'port': self.port,
-            'bots': [{'name': b.name, 'password': b.password} for b in self.bots]
+            'bots': [{'name': b.name, 'password': b.password, 'bot_type': b.bot_type} for b in self.bots]
         }
 
     @classmethod
     def from_dict(cls, data: dict) -> 'ServerConfig':
         """Create from dictionary."""
-        bots = [BotEntry(name=b['name'], password=b['password']) for b in data.get('bots', [])]
+        bots = [
+            BotEntry(
+                name=b['name'],
+                password=b['password'],
+                bot_type=b.get('bot_type', 'avatar')  # Default to avatar for backwards compat
+            )
+            for b in data.get('bots', [])
+        ]
         return cls(host=data['host'], port=data['port'], bots=bots)
 
 
@@ -88,7 +98,8 @@ class ManagedBot:
     """Container for a managed bot instance."""
     name: str
     server_key: str
-    bot: Optional[AvatarProgressionBot] = None
+    bot_type: str = "avatar"
+    bot: Optional[Any] = None  # Can be AvatarProgressionBot or any ClassProgressionBot
     task: Optional[asyncio.Task] = None
     error: Optional[str] = None
 
@@ -177,8 +188,18 @@ class AsyncBotRunner:
             port=server.port
         )
 
-        # Create bot
-        bot = AvatarProgressionBot(config)
+        # Create bot based on type
+        bot_type = bot_entry.bot_type
+        if bot_type == "avatar":
+            # Use legacy avatar bot
+            bot = AvatarProgressionBot(config)
+        elif ClassRegistry.is_registered(bot_type):
+            # Use class progression bot from registry
+            bot = ClassRegistry.create(bot_type, config)
+        else:
+            logger.error(f"Unknown bot type: {bot_type}")
+            self.status_queue.put(('error', full_key, f"Unknown bot type: {bot_type}"))
+            return
 
         # Set up status callback
         def on_status_change(status: dict):
@@ -187,7 +208,7 @@ class AsyncBotRunner:
         bot.on_status_change = on_status_change
 
         # Create managed container
-        managed = ManagedBot(name=bot_entry.name, server_key=server.key, bot=bot)
+        managed = ManagedBot(name=bot_entry.name, server_key=server.key, bot_type=bot_type, bot=bot)
         self.bots[full_key] = managed
 
         # Post initial status
@@ -374,13 +395,15 @@ class BotManagerGUI(tk.Tk):
         # Bot list frame (hidden initially)
         self.bot_list_frame = ttk.LabelFrame(self.right_frame, text="Bots", padding=5)
 
-        # Bot treeview (name, password masked)
-        columns = ('name', 'password')
+        # Bot treeview (name, type, password masked)
+        columns = ('name', 'type', 'password')
         self.bot_tree = ttk.Treeview(self.bot_list_frame, columns=columns, show='headings', height=5)
         self.bot_tree.heading('name', text='Name')
+        self.bot_tree.heading('type', text='Type')
         self.bot_tree.heading('password', text='Password')
-        self.bot_tree.column('name', width=120)
-        self.bot_tree.column('password', width=100)
+        self.bot_tree.column('name', width=100)
+        self.bot_tree.column('type', width=70)
+        self.bot_tree.column('password', width=80)
 
         bot_scroll = ttk.Scrollbar(self.bot_list_frame, orient=tk.VERTICAL, command=self.bot_tree.yview)
         self.bot_tree.configure(yscrollcommand=bot_scroll.set)
@@ -396,13 +419,26 @@ class BotManagerGUI(tk.Tk):
         self.add_bot_frame = ttk.Frame(self.right_frame)
         ttk.Label(self.add_bot_frame, text="Name:").grid(row=0, column=0, sticky=tk.W)
         self.new_bot_name_var = tk.StringVar()
-        ttk.Entry(self.add_bot_frame, textvariable=self.new_bot_name_var, width=15).grid(row=0, column=1, padx=2)
+        ttk.Entry(self.add_bot_frame, textvariable=self.new_bot_name_var, width=12).grid(row=0, column=1, padx=2)
 
-        ttk.Label(self.add_bot_frame, text="Password:").grid(row=0, column=2, sticky=tk.W, padx=(10, 0))
+        ttk.Label(self.add_bot_frame, text="Password:").grid(row=0, column=2, sticky=tk.W, padx=(5, 0))
         self.new_bot_pass_var = tk.StringVar()
-        ttk.Entry(self.add_bot_frame, textvariable=self.new_bot_pass_var, width=15, show="*").grid(row=0, column=3, padx=2)
+        ttk.Entry(self.add_bot_frame, textvariable=self.new_bot_pass_var, width=12, show="*").grid(row=0, column=3, padx=2)
 
-        ttk.Button(self.add_bot_frame, text="Add Bot", command=self._add_bot).grid(row=0, column=4, padx=(10, 0))
+        ttk.Label(self.add_bot_frame, text="Type:").grid(row=0, column=4, sticky=tk.W, padx=(5, 0))
+        self.new_bot_type_var = tk.StringVar(value="avatar")
+        # Build list of available types: avatar + registered classes
+        bot_types = ["avatar"] + ClassRegistry.available_classes()
+        self.bot_type_combo = ttk.Combobox(
+            self.add_bot_frame,
+            textvariable=self.new_bot_type_var,
+            values=bot_types,
+            width=8,
+            state="readonly"
+        )
+        self.bot_type_combo.grid(row=0, column=5, padx=2)
+
+        ttk.Button(self.add_bot_frame, text="Add Bot", command=self._add_bot).grid(row=0, column=6, padx=(10, 0))
 
         # Start/Stop all buttons
         self.control_frame = ttk.Frame(self.right_frame)
@@ -412,19 +448,19 @@ class BotManagerGUI(tk.Tk):
         # Status frame
         self.status_frame = ttk.LabelFrame(self.right_frame, text="Bot Status", padding=5)
 
-        columns = ('name', 'state', 'progress', 'kills', 'status')
+        columns = ('name', 'type', 'state', 'progress', 'status')
         self.status_tree = ttk.Treeview(self.status_frame, columns=columns, show='headings', height=6)
 
         self.status_tree.heading('name', text='Name')
+        self.status_tree.heading('type', text='Type')
         self.status_tree.heading('state', text='State')
         self.status_tree.heading('progress', text='Progress')
-        self.status_tree.heading('kills', text='Kills')
         self.status_tree.heading('status', text='Status')
 
-        self.status_tree.column('name', width=100)
+        self.status_tree.column('name', width=80)
+        self.status_tree.column('type', width=60)
         self.status_tree.column('state', width=80)
-        self.status_tree.column('progress', width=100)
-        self.status_tree.column('kills', width=60)
+        self.status_tree.column('progress', width=140)
         self.status_tree.column('status', width=100)
 
         status_scroll = ttk.Scrollbar(self.status_frame, orient=tk.VERTICAL, command=self.status_tree.yview)
@@ -567,7 +603,7 @@ class BotManagerGUI(tk.Tk):
         if self.current_server:
             for bot in self.current_server.bots:
                 masked_pw = "*" * min(len(bot.password), 8)
-                self.bot_tree.insert('', tk.END, iid=bot.name, values=(bot.name, masked_pw))
+                self.bot_tree.insert('', tk.END, iid=bot.name, values=(bot.name, bot.bot_type, masked_pw))
 
     def _refresh_status_tree(self):
         """Refresh the status tree for current server."""
@@ -576,6 +612,7 @@ class BotManagerGUI(tk.Tk):
             for bot in self.current_server.bots:
                 full_key = f"{self.current_server.key}:{bot.name}"
                 status = self.bot_statuses.get(full_key, {})
+                status['bot_type'] = bot.bot_type  # Include bot type
                 self._update_status_row(bot.name, status, initialize=True)
 
     # =========================================================================
@@ -589,6 +626,7 @@ class BotManagerGUI(tk.Tk):
 
         name = self.new_bot_name_var.get().strip()
         password = self.new_bot_pass_var.get()
+        bot_type = self.new_bot_type_var.get()
 
         if not name:
             messagebox.showwarning("Invalid Name", "Please enter a bot name.")
@@ -613,12 +651,12 @@ class BotManagerGUI(tk.Tk):
                 return
 
         # Add bot
-        bot_entry = BotEntry(name=name, password=password)
+        bot_entry = BotEntry(name=name, password=password, bot_type=bot_type)
         self.current_server.bots.append(bot_entry)
 
         # Update UI
         masked_pw = "*" * min(len(password), 8)
-        self.bot_tree.insert('', tk.END, iid=name, values=(name, masked_pw))
+        self.bot_tree.insert('', tk.END, iid=name, values=(name, bot_type, masked_pw))
         self.status_tree.insert('', tk.END, iid=name, values=(name, 'IDLE', '-', '-', 'Not started'))
 
         # Clear form
@@ -676,7 +714,7 @@ class BotManagerGUI(tk.Tk):
         if not self.current_server:
             return
         self.runner.restart_bot(self.current_server, bot_entry)
-        self._update_status_row(bot_entry.name, {'progression_state': 'CONNECTING'})
+        self._update_status_row(bot_entry.name, {'progression_state': 'CONNECTING', 'bot_type': bot_entry.bot_type})
 
     def _start_selected(self):
         """Start the selected bot(s) in status tree."""
@@ -763,31 +801,60 @@ class BotManagerGUI(tk.Tk):
         """Update a row in the status table."""
         if not self.status_tree.exists(name):
             if initialize:
-                self.status_tree.insert('', tk.END, iid=name, values=(name, '-', '-', '-', 'Not started'))
+                bot_type = status.get('bot_type', status.get('class', 'avatar'))
+                self.status_tree.insert('', tk.END, iid=name, values=(name, bot_type, '-', '-', 'Not started'))
             else:
                 return
 
         # Build display values
+        bot_type = status.get('bot_type', status.get('class', 'avatar'))
         state = status.get('state', '-')
-        prog_state = status.get('progression_state', '-')
-        kills = f"{status.get('kills', 0)}/{status.get('target_kills', 5)}"
         is_paused = status.get('is_paused', False)
         error = status.get('error')
 
+        # Build progress text based on bot type
+        prog_state = status.get('progression_state', '-')
+        demon_state = status.get('demon_state')
+        avatar_state = status.get('avatar_state')
+
+        # For class bots, show more detailed progress
+        if demon_state:
+            current_disc = status.get('current_discipline', '')
+            disc_levels = status.get('discipline_levels', {})
+            if demon_state in ('FARMING_DISCIPLINE_POINTS', 'STARTING_RESEARCH', 'TRAINING_DISCIPLINE'):
+                progress_text = f"{demon_state}: {current_disc}"
+            elif disc_levels:
+                # Show attack level progress
+                attack_lvl = disc_levels.get('attack', 0)
+                progress_text = f"{demon_state} (Atk:{attack_lvl})"
+            else:
+                progress_text = demon_state
+        elif avatar_state:
+            kills = status.get('kills', 0)
+            target = status.get('target_kills', 5)
+            progress_text = f"{avatar_state} ({kills}/{target})"
+        elif prog_state != '-':
+            kills = status.get('kills', 0)
+            target = status.get('target_kills', 5)
+            progress_text = f"{prog_state} ({kills}/{target})"
+        else:
+            progress_text = '-'
+
         # Determine status text and color tag
+        final_state = demon_state or prog_state
         if error:
-            status_text = f"Error: {error[:20]}"
+            status_text = f"Error: {error[:15]}"
             tag = 'error'
-        elif prog_state == 'COMPLETE':
-            status_text = "Complete ✓"
+        elif final_state == 'COMPLETE':
+            status_text = "Complete"
             tag = 'complete'
-        elif prog_state == 'FAILED':
-            status_text = "Failed ✗"
+        elif final_state == 'FAILED':
+            status_text = "Failed"
             tag = 'error'
         elif is_paused:
             status_text = "Paused"
             tag = 'paused'
-        elif prog_state in ('IDLE', '-'):
+        elif final_state in ('IDLE', '-', None):
             status_text = "Not started"
             tag = ''
         else:
@@ -795,7 +862,7 @@ class BotManagerGUI(tk.Tk):
             tag = 'running'
 
         # Update values
-        self.status_tree.item(name, values=(name, state, prog_state, kills, status_text), tags=(tag,))
+        self.status_tree.item(name, values=(name, bot_type, state, progress_text, status_text), tags=(tag,))
 
     def _append_log(self, message: str):
         """Append a message to the log output."""

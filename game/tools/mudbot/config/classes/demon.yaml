@@ -1,0 +1,287 @@
+# Demon Class Progression Configuration
+# Used by DemonProgressionBot
+
+class_name: demon
+display_name: Demon
+
+# Selfclass requirements
+selfclass:
+  command: "selfclass demon"
+  success_patterns:
+    - "Your eyes glow red"
+    - "You have become a demon"
+    - "demonic transformation"
+  requires_avatar: true
+
+# Progression system type
+progression_type: discipline
+
+# Disciplines with priority order
+# Attack is first because it unlocks combat abilities and graft
+disciplines:
+  - name: attack
+    target_level: 7
+    priority: 1
+    unlocks:
+      2: [claws]
+      3: [tail]
+      4: [horns]
+      5: [wings, graft]
+      7: [blink]
+
+  - name: hellfire
+    target_level: 5
+    priority: 2
+    unlocks:
+      2: [immolate]
+      3: [inferno]
+      7: [seed]
+      8: [hellfire]
+
+  - name: temptation
+    target_level: 5
+    priority: 3
+
+  - name: morphosis
+    target_level: 5
+    priority: 4
+
+  - name: corruption
+    target_level: 5
+    priority: 5
+    unlocks:
+      4: [caustic]
+
+  - name: geluge
+    target_level: 5
+    priority: 6
+    unlocks:
+      1: [freezeweapon]
+      2: [frostbreath]
+      6: [entomb]
+      7: [gust]
+
+  - name: discord
+    target_level: 5
+    priority: 7
+    unlocks:
+      1: [unnerve]
+      4: [chaosport]
+
+  - name: nether
+    target_level: 5
+    priority: 8
+    unlocks:
+      2: [deathsense]
+      4: [leech]
+
+  - name: immunae
+    target_level: 5
+    priority: 9
+
+# Special abilities
+abilities:
+  obtain:
+    command: "obtain"
+    description: "Obtain a random warp mutation"
+    cost_type: demon_points
+    cost: 15000
+    max_uses: 18
+    success_patterns:
+      - "You have obtained a new warp!"
+    failure_patterns:
+      - "You need 15000 demon points"
+      - "already obtained as many warps"
+
+  graft:
+    command: "graft {target}"
+    description: "Graft an extra arm"
+    requires:
+      discipline: attack
+      level: 5
+    max_uses: 2
+    success_patterns:
+      - "You graft an arm onto your body"
+    failure_patterns:
+      - "already have four arms"
+      - "do not have that limb"
+      - "not even an arm"
+
+  inpart:
+    command: "inpart self {power}"
+    description: "Grant demonic powers to self"
+    powers:
+      fangs:
+        cost: 2500
+        description: "Grow fangs"
+      claws:
+        cost: 2500
+        description: "Grow claws"
+      horns:
+        cost: 2500
+        description: "Grow horns"
+      tail:
+        cost: 5000
+        description: "Grow a tail"
+      hooves:
+        cost: 1500
+        description: "Transform feet to hooves"
+      wings:
+        cost: 1000
+        description: "Grow wings"
+      demonform:
+        cost: 25000
+        description: "Full demon form transformation"
+      nightsight:
+        cost: 3000
+        description: "Night vision"
+      truesight:
+        cost: 7500
+        description: "See through illusions"
+      scry:
+        cost: 7500
+        description: "Scrying ability"
+      might:
+        cost: 7500
+        description: "Increased strength"
+      toughness:
+        cost: 7500
+        description: "Increased defense"
+      speed:
+        cost: 7500
+        description: "Increased movement speed"
+      immolate:
+        cost: 2500
+        description: "Flame coating for weapons"
+      inferno:
+        cost: 20000
+        description: "Mass fire attack"
+      caustic:
+        cost: 3000
+        description: "Acid coating for weapons"
+      freezeweapon:
+        cost: 3000
+        description: "Ice coating for weapons"
+      entomb:
+        cost: 20000
+        description: "Create ice walls"
+      unnerve:
+        cost: 5000
+        description: "Stun through fear"
+      leech:
+        cost: 15000
+        description: "Drain life force"
+      blink:
+        cost: 15000
+        description: "Combat teleport"
+      graft:
+        cost: 20000
+        description: "Attach additional arms"
+      travel:
+        cost: 1500
+        description: "Travel through ground"
+      shield:
+        cost: 20000
+        description: "Protective ability"
+
+# Armor creation
+armor:
+  command: "demonarmour {piece}"
+  cost_type: primal
+  cost: 60
+  pieces:
+    - name: plate
+      slot: body
+    - name: helmet
+      slot: head
+    - name: leggings
+      slot: legs
+    - name: boots
+      slot: feet
+    - name: gauntlets
+      slot: hands
+    - name: sleeves
+      slot: arms
+    - name: cape
+      slot: about
+    - name: belt
+      slot: waist
+    - name: collar
+      slot: neck
+    - name: ring
+      slot: finger
+    - name: bracer
+      slot: wrist
+    - name: visor
+      slot: face
+    - name: longsword
+      slot: wield
+    - name: shortsword
+      slot: wield
+
+# Combat ability toggles
+combat_abilities:
+  claws:
+    command: "claws"
+    requires:
+      discipline: attack
+      level: 2
+    toggle: true
+    enable_pattern: "extend|grow"
+    disable_pattern: "retract|shrink"
+
+  horns:
+    command: "horns"
+    requires:
+      discipline: attack
+      level: 4
+    toggle: true
+
+  wings:
+    command: "wings"
+    requires:
+      discipline: attack
+      level: 5
+    toggle: true
+    enable_pattern: "unfold|spread"
+    disable_pattern: "fold"
+
+  tail:
+    command: "tail"
+    requires:
+      discipline: attack
+      level: 3
+    toggle: true
+
+# Message patterns for parsing
+patterns:
+  # Research
+  research_start: "You begin your research into (\\w+)\\."
+  research_complete: "You have finished researching your discipline"
+  may_train: "You may now use the 'train' command"
+  research_already: "You are already researching a discipline"
+  research_cancel: "You stop your research"
+
+  # Training
+  train_success: "Your mastery of (\\w+) increases"
+  train_not_researching: "haven't started researching"
+  train_not_finished: "haven't finished researching"
+
+  # Discipline points
+  discipline_point: "You gained a discipline point"
+
+  # Ability unlocks
+  claws_unlock: "You grow a pair of wicked claws"
+  tail_unlock: "Your spine extends into a long tail"
+  horns_unlock: "horns extend from"
+  wings_unlock: "A pair of leathery wings grow out of your back"
+
+  # Warp system
+  obtain_success: "You have obtained a new warp!"
+  obtain_not_enough: "You need 15000 demon points"
+  obtain_max: "already obtained as many warps"
+
+  # Graft system
+  graft_success: "You graft an arm onto your body"
+  graft_full: "already have four arms"
+  graft_no_arm: "do not have that limb"

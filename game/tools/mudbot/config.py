@@ -3,7 +3,7 @@ Configuration dataclasses for MUD bot.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, List
 
 
 @dataclass
@@ -135,3 +135,45 @@ class ProgressionConfig:
     # Safety
     min_hp_to_fight: int = 50     # Don't fight if HP below this
     flee_threshold: int = 20      # Flee if HP drops below this
+
+
+@dataclass
+class DemonProgressionConfig:
+    """Configuration for demon class progression bot."""
+
+    # Discipline training priority and targets
+    discipline_priority: List[str] = field(default_factory=lambda: [
+        "attack",      # First: unlocks combat abilities + graft
+        "hellfire",    # Fire damage
+        "temptation",  # Social abilities
+        "morphosis",   # Transformation
+        "corruption",  # Debuffs
+        "geluge",      # Ice abilities
+        "discord",     # Chaos abilities
+        "nether",      # Death/darkness
+        "immunae",     # Resistances
+    ])
+    attack_target: int = 7        # Level 7 for blink
+    other_discipline_target: int = 5  # Default target for other disciplines
+
+    # Warp settings
+    max_warps_to_obtain: int = 18  # Max warps (costs 15000 demon points each)
+    obtain_warps: bool = True      # Whether to attempt obtaining warps
+
+    # Graft settings
+    enable_grafting: bool = True
+    max_extra_arms: int = 2       # 3rd and 4th hand
+
+    # Demonarmour settings
+    create_demonarmour: bool = True
+    demonarmour_pieces: List[str] = field(default_factory=lambda: [
+        "plate", "helmet", "leggings", "boots", "gauntlets",
+        "sleeves", "cape", "belt", "collar", "ring",
+        "bracer", "visor", "longsword", "shortsword"
+    ])
+
+    # Combat ability toggles
+    enable_claws: bool = True
+    enable_horns: bool = True
+    enable_wings: bool = True
+    enable_tail: bool = True
