@@ -174,6 +174,7 @@ void db_class_load_score( void );
 int db_class_get_score_stat_count( int class_id );
 const CLASS_SCORE_STAT *db_class_get_score_stats( int class_id );
 int get_stat_value( CHAR_DATA *ch, int stat_source );
+const char *get_stat_value_string( CHAR_DATA *ch, int stat_source );
 
 /* Class equipment restrictions - checks if object vnum is class-restricted */
 void db_class_build_vnum_ranges( void );

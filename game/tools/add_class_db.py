@@ -335,10 +335,10 @@ CLASSES_TO_ADD = [
         },
 
         "score_stats": [
-            {"source": STAT_RAGE, "label": "Draconic Essence", "order": 1,
-             "format": "#x202[#nEssence: #x220%d#x202]#n\\n\\r"},
+            {"source": STAT_RAGE, "label": "Essence", "order": 1,
+             "format": "#x202[#n%s: #x220%d#x202]#n\\n\\r"},
             {"source": STAT_DRAGON_ATTUNEMENT, "label": "Attunement", "order": 2,
-             "format": "#x202[#nAttunement: #x220%d#x202]#n\\n\\r"},
+             "format": "#x202[#n%s: #x220%s#x202]#n\\n\\r"},
         ],
 
         "armor_config": {
@@ -414,10 +414,10 @@ CLASSES_TO_ADD = [
         # Wyrm doesn't need starting - inherits from upgrade
 
         "score_stats": [
-            {"source": STAT_RAGE, "label": "Draconic Essence", "order": 1,
-             "format": "#x202[#nEssence: #x220%d#x202]#n\\n\\r"},
+            {"source": STAT_RAGE, "label": "Essence", "order": 1,
+             "format": "#x202[#n%s: #x220%d#x202]#n\\n\\r"},
             {"source": STAT_DRAGON_ATTUNEMENT, "label": "Attunement", "order": 2,
-             "format": "#x202[#nAttunement: #x220%d#x202]#n\\n\\r"},
+             "format": "#x202[#n%s: #x220%s#x202]#n\\n\\r"},
         ],
 
         "armor_config": {

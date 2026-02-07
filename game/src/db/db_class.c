@@ -453,6 +453,26 @@ int get_stat_value( CHAR_DATA *ch, int stat_source ) {
 	}
 }
 
+/*
+ * Returns string representation for stats that need text display (e.g., attunement).
+ * Returns NULL for stats that should use integer display.
+ */
+const char *get_stat_value_string( CHAR_DATA *ch, int stat_source ) {
+	static const char *attune_names[] = { "Fire", "Frost", "Storm", "Earth" };
+	int val;
+
+	if ( ch == NULL || IS_NPC( ch ) )
+		return NULL;
+
+	if ( stat_source == STAT_DRAGON_ATTUNEMENT ) {
+		val = ch->pcdata->powers[DRAGON_ATTUNEMENT];
+		if ( val < 0 || val > 3 ) val = 0;
+		return attune_names[val];
+	}
+
+	return NULL;
+}
+
 
 /***************************************************************************
  * Class Registry (class_registry)

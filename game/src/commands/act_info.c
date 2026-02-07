@@ -2060,20 +2060,28 @@ static void show_class_score_stats( CHAR_DATA *ch ) {
 		return;
 
 	for ( i = 0; i < count; i++ ) {
-		val = get_stat_value( ch, stats[i].stat_source );
+		const char *str_val = get_stat_value_string( ch, stats[i].stat_source );
 
-		/* Skip display if value is 0 and stat is optional (like siltol) */
-		if ( val == 0 && stats[i].stat_source == STAT_SILTOL )
-			continue;
+		if ( str_val != NULL ) {
+			/* String-based stat (like attunement) - format uses %s %s */
+			snprintf( temp, sizeof( temp ), stats[i].format_string, stats[i].stat_label, str_val );
+		} else {
+			/* Integer-based stat - format uses %s %d */
+			val = get_stat_value( ch, stats[i].stat_source );
 
-		/* Skip gnosis stats if gnosis maximum is 0 */
-		if ( ch->gnosis[GMAXIMUM] == 0 &&
-		     ( stats[i].stat_source == STAT_GNOSIS_CURRENT ||
-		       stats[i].stat_source == STAT_GNOSIS_MAXIMUM ) )
-			continue;
+			/* Skip display if value is 0 and stat is optional (like siltol) */
+			if ( val == 0 && stats[i].stat_source == STAT_SILTOL )
+				continue;
 
-		/* Build display using format string: %s is label, %d is value */
-		snprintf( temp, sizeof( temp ), stats[i].format_string, stats[i].stat_label, val );
+			/* Skip gnosis stats if gnosis maximum is 0 */
+			if ( ch->gnosis[GMAXIMUM] == 0 &&
+			     ( stats[i].stat_source == STAT_GNOSIS_CURRENT ||
+			       stats[i].stat_source == STAT_GNOSIS_MAXIMUM ) )
+				continue;
+
+			/* Build display using format string: %s is label, %d is value */
+			snprintf( temp, sizeof( temp ), stats[i].format_string, stats[i].stat_label, val );
+		}
 
 		/* Convert escaped newlines to actual newlines */
 		{
