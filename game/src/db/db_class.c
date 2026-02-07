@@ -12,6 +12,7 @@
 
 #include "db_util.h"
 #include "db_class.h"
+#include "../classes/dragonkin.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -100,7 +101,6 @@ void db_class_load_display( void ) {
 
 	/* Clear existing caches */
 	for ( i = 0; i < bracket_count; i++ ) {
-		if ( bracket_cache[i].class_name )   free_string( bracket_cache[i].class_name );
 		if ( bracket_cache[i].open_bracket ) free_string( bracket_cache[i].open_bracket );
 		if ( bracket_cache[i].close_bracket ) free_string( bracket_cache[i].close_bracket );
 		if ( bracket_cache[i].accent_color ) free_string( bracket_cache[i].accent_color );
@@ -115,18 +115,17 @@ void db_class_load_display( void ) {
 
 	/* Load brackets */
 	if ( sqlite3_prepare_v2( class_db,
-			"SELECT class_id, class_name, open_bracket, close_bracket, accent_color, primary_color "
+			"SELECT class_id, open_bracket, close_bracket, accent_color, primary_color "
 			"FROM class_brackets ORDER BY class_id",
 			-1, &stmt, NULL ) == SQLITE_OK ) {
 		while ( sqlite3_step( stmt ) == SQLITE_ROW && bracket_count < MAX_CACHED_BRACKETS ) {
 			const char *text;
 			bracket_cache[bracket_count].class_id      = sqlite3_column_int( stmt, 0 );
-			bracket_cache[bracket_count].class_name    = str_dup( col_text( stmt, 1 ) );
-			bracket_cache[bracket_count].open_bracket  = str_dup( col_text( stmt, 2 ) );
-			bracket_cache[bracket_count].close_bracket = str_dup( col_text( stmt, 3 ) );
-			text = (const char *)sqlite3_column_text( stmt, 4 );
+			bracket_cache[bracket_count].open_bracket  = str_dup( col_text( stmt, 1 ) );
+			bracket_cache[bracket_count].close_bracket = str_dup( col_text( stmt, 2 ) );
+			text = (const char *)sqlite3_column_text( stmt, 3 );
 			bracket_cache[bracket_count].accent_color  = text ? str_dup( text ) : NULL;
-			text = (const char *)sqlite3_column_text( stmt, 5 );
+			text = (const char *)sqlite3_column_text( stmt, 4 );
 			bracket_cache[bracket_count].primary_color = text ? str_dup( text ) : NULL;
 			bracket_count++;
 		}
@@ -434,6 +433,8 @@ int get_stat_value( CHAR_DATA *ch, int stat_source ) {
 		case STAT_SHAPE_COUNTER:  return ch->pcdata->powers[SHAPE_COUNTER];
 		case STAT_PHASE_COUNTER:  return ch->pcdata->powers[PHASE_COUNTER];
 		case STAT_HARA_KIRI:      return ch->pcdata->powers[HARA_KIRI];
+		case STAT_DRAGON_ATTUNEMENT:  return ch->pcdata->powers[DRAGON_ATTUNEMENT];
+		case STAT_DRAGON_ESSENCE_PEAK: return ch->pcdata->stats[DRAGON_ESSENCE_PEAK];
 		default:                  return 0;
 	}
 }
@@ -525,4 +526,101 @@ const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_index( int index ) {
 	return &registry_cache[index];
 }
 
+
+/***************************************************************************
+ * Class Equipment Restrictions (derived from armor pieces)
+ ***************************************************************************/
+
+#define MAX_VNUM_RANGES 32
+
+static CLASS_VNUM_RANGE vnum_range_cache[MAX_VNUM_RANGES];
+static int vnum_range_count = 0;
+
+/*
+ * Build vnum ranges from loaded armor pieces.
+ * Call this AFTER db_class_load_armor() during boot.
+ */
+void db_class_build_vnum_ranges( void ) {
+	char buf[256];
+	int i;
+	int current_class = 0;
+	int vnum_min = 0, vnum_max = 0;
+
+	vnum_range_count = 0;
+
+	/* armor_piece_cache is already sorted by class_id from SQL ORDER BY */
+	for ( i = 0; i < armor_piece_count; i++ ) {
+		if ( armor_piece_cache[i].class_id != current_class ) {
+			/* Save previous range if we had one */
+			if ( current_class != 0 && vnum_range_count < MAX_VNUM_RANGES ) {
+				vnum_range_cache[vnum_range_count].class_id   = current_class;
+				vnum_range_cache[vnum_range_count].vnum_start = vnum_min;
+				vnum_range_cache[vnum_range_count].vnum_end   = vnum_max;
+				vnum_range_count++;
+			}
+
+			/* Start new class */
+			current_class = armor_piece_cache[i].class_id;
+			vnum_min = armor_piece_cache[i].vnum;
+			vnum_max = armor_piece_cache[i].vnum;
+		} else {
+			/* Update range */
+			if ( armor_piece_cache[i].vnum < vnum_min )
+				vnum_min = armor_piece_cache[i].vnum;
+			if ( armor_piece_cache[i].vnum > vnum_max )
+				vnum_max = armor_piece_cache[i].vnum;
+		}
+	}
+
+	/* Don't forget the last class */
+	if ( current_class != 0 && vnum_range_count < MAX_VNUM_RANGES ) {
+		vnum_range_cache[vnum_range_count].class_id   = current_class;
+		vnum_range_cache[vnum_range_count].vnum_start = vnum_min;
+		vnum_range_cache[vnum_range_count].vnum_end   = vnum_max;
+		vnum_range_count++;
+	}
+
+	snprintf( buf, sizeof( buf ), "  Built %d class equipment vnum ranges.", vnum_range_count );
+	log_string( buf );
+}
+
+/*
+ * Check if an object is class-restricted equipment that the character cannot use.
+ * Returns TRUE if the character should be zapped (restricted), FALSE if allowed.
+ */
+bool db_class_is_equipment_restricted( CHAR_DATA *ch, OBJ_DATA *obj ) {
+	int i;
+	int vnum;
+
+	if ( ch == NULL || obj == NULL || obj->pIndexData == NULL )
+		return FALSE;
+
+	/* NPCs are always restricted from class equipment */
+	if ( IS_NPC( ch ) ) {
+		vnum = obj->pIndexData->vnum;
+		for ( i = 0; i < vnum_range_count; i++ ) {
+			if ( vnum >= vnum_range_cache[i].vnum_start &&
+			     vnum <= vnum_range_cache[i].vnum_end )
+				return TRUE;
+		}
+		return FALSE;
+	}
+
+	vnum = obj->pIndexData->vnum;
+
+	/* Check each class vnum range */
+	for ( i = 0; i < vnum_range_count; i++ ) {
+		if ( vnum >= vnum_range_cache[i].vnum_start &&
+		     vnum <= vnum_range_cache[i].vnum_end ) {
+			/* Object is in this class's range - check if character is that class */
+			if ( !IS_CLASS( ch, vnum_range_cache[i].class_id ) )
+				return TRUE;  /* Not the right class - restricted */
+			else
+				return FALSE; /* Is the right class - allowed */
+		}
+	}
+
+	/* Not class equipment */
+	return FALSE;
+}
 

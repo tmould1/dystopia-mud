@@ -21,14 +21,13 @@
  * Struct Definitions
  *--------------------------------------------------------------------------*/
 
-/* Class display config - brackets and generation names for who list */
+/* Class display config - brackets and colors for who list / selfclass */
 typedef struct class_bracket {
 	int    class_id;       /* CLASS_* constant (1, 2, 4, 8, ...) */
-	char   *class_name;    /* Human-readable name ("Vampire", "Werewolf") */
 	char   *open_bracket;  /* Opening bracket with colors, e.g., "#R<<#n" */
 	char   *close_bracket; /* Closing bracket with colors, e.g., "#R>>#n" */
-	char   *accent_color;  /* Summary: bracket/decorative color, e.g., "#x136" */
-	char   *primary_color; /* Summary: title/name color, e.g., "#x178" */
+	char   *accent_color;  /* Bracket/decorative color, e.g., "#x136" */
+	char   *primary_color; /* Name color for selfclass, e.g., "#x178" */
 } CLASS_BRACKET;
 
 typedef struct class_generation {
@@ -108,6 +107,8 @@ typedef enum {
 	STAT_SHAPE_COUNTER,     /* ch->pcdata->powers[SHAPE_COUNTER] */
 	STAT_PHASE_COUNTER,     /* ch->pcdata->powers[PHASE_COUNTER] */
 	STAT_HARA_KIRI,         /* ch->pcdata->powers[HARA_KIRI] */
+	STAT_DRAGON_ATTUNEMENT, /* ch->pcdata->powers[DRAGON_ATTUNEMENT] */
+	STAT_DRAGON_ESSENCE_PEAK, /* ch->pcdata->stats[DRAGON_ESSENCE_PEAK] */
 	STAT_MAX
 } STAT_SOURCE;
 
@@ -119,6 +120,13 @@ typedef struct class_score_stat {
 	char   *format_string;   /* Full format string with %d placeholder, e.g., "#R[#n%s: #C%d#R]\n\r" */
 	int    display_order;    /* Order within class (lower = first) */
 } CLASS_SCORE_STAT;
+
+/* Class vnum range - derived from armor pieces for equipment restrictions */
+typedef struct class_vnum_range {
+	int    class_id;         /* CLASS_* constant */
+	int    vnum_start;       /* Lowest vnum in range */
+	int    vnum_end;         /* Highest vnum in range */
+} CLASS_VNUM_RANGE;
 
 /*--------------------------------------------------------------------------
  * Function Declarations
@@ -163,5 +171,9 @@ void db_class_load_score( void );
 int db_class_get_score_stat_count( int class_id );
 const CLASS_SCORE_STAT *db_class_get_score_stats( int class_id );
 int get_stat_value( CHAR_DATA *ch, int stat_source );
+
+/* Class equipment restrictions - checks if object vnum is class-restricted */
+void db_class_build_vnum_ranges( void );
+bool db_class_is_equipment_restricted( CHAR_DATA *ch, OBJ_DATA *obj );
 
 #endif /* DB_CLASS_H */
