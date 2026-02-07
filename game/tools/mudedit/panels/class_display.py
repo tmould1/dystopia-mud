@@ -257,6 +257,7 @@ class ClassDisplayPanel(ttk.Frame):
         """Update the combined preview."""
         open_b = self.open_var.get().strip()
         close_b = self.close_var.get().strip()
+        primary_color = self.primary_var.get().strip()
         title = self.title_var.get().strip() or "#nNo Title#n"
 
         # Build preview lines for ALL generations
@@ -271,15 +272,20 @@ class ClassDisplayPanel(ttk.Frame):
                 # If this is the currently selected generation, use the editor value
                 if self.current_gen_id and entry['id'] == self.current_gen_id:
                     gen_title = title
+                # Apply primary_color to title if title doesn't have embedded colors
+                if primary_color and '#' not in gen_title:
+                    gen_title = f"{primary_color}{gen_title}"
                 combined = f"{open_b}{gen_title}{close_b}"
                 gen_label = f"Gen {gen}" if gen > 0 else "Default"
                 preview_lines.append((f"{gen_label:>8}: ", combined))
 
             if not entries:
-                combined = f"{open_b}{title}{close_b}"
+                preview_title = f"{primary_color}{title}" if primary_color and '#' not in title else title
+                combined = f"{open_b}{preview_title}{close_b}"
                 preview_lines.append(("Preview: ", combined))
         else:
-            combined = f"{open_b}{title}{close_b}"
+            preview_title = f"{primary_color}{title}" if primary_color and '#' not in title else title
+            combined = f"{open_b}{preview_title}{close_b}"
             preview_lines.append(("Preview: ", combined))
 
         # Render preview
