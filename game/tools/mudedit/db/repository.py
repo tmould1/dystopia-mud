@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 # =============================================================================
-# Shared Constants - Class ID to name mapping (matches C defines in class.h)
+# Shared Constants - Class ID to name mapping (fallback, prefer DB lookup)
 # =============================================================================
 CLASS_NAMES = {
     1: 'Demon',
@@ -30,7 +30,12 @@ CLASS_NAMES = {
     32768: 'Siren',
     65536: 'Psion',
     131072: 'Mindflayer',
+    262144: 'Dragonkin',
+    524288: 'Wyrm',
 }
+
+# Cache for class names loaded from database
+_class_name_cache: Dict[int, str] = {}
 
 # Stat source enum mapping (matches C STAT_SOURCE enum in db_game.h)
 STAT_SOURCES = {
