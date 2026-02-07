@@ -25,7 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 
 void do_ride( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
@@ -38,7 +38,7 @@ void do_ride( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->move < acfg( ACFG_UNDEAD_KNIGHT_RIDE_MOVE_COST ) ) {
+	if ( ch->move < cfg( CFG_ABILITY_UNDEAD_KNIGHT_RIDE_MOVE_COST ) ) {
 		stc( "You do not have enough vitality to do that!\n\r", ch );
 		return;
 	}
@@ -86,7 +86,7 @@ void do_ride( CHAR_DATA *ch, char *argument ) {
 	}
 	act( "$n rides toward you on $n's skeleton steed!\n\r", ch, NULL, NULL, TO_ROOM );
 	do_look( ch, "auto" );
-	use_move( ch, acfg( ACFG_UNDEAD_KNIGHT_RIDE_MOVE_COST ) );
+	use_move( ch, cfg( CFG_ABILITY_UNDEAD_KNIGHT_RIDE_MOVE_COST ) );
 	return;
 }
 
@@ -100,16 +100,16 @@ void do_unholyrite( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_UNDEAD_KNIGHT_UNHOLYRITE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_UNDEAD_KNIGHT_UNHOLYRITE_MANA_COST ) ) {
 		send_to_char( "You don't have the mystical energies to make the rite.\n\r", ch );
 		return;
 	}
 	if ( ch->hit < ch->max_hit ) {
-		heal_char( ch, number_range( acfg( ACFG_UNDEAD_KNIGHT_UNHOLYRITE_HEAL_MIN ), acfg( ACFG_UNDEAD_KNIGHT_UNHOLYRITE_HEAL_MAX ) ) );
+		heal_char( ch, number_range( cfg( CFG_ABILITY_UNDEAD_KNIGHT_UNHOLYRITE_HEAL_MIN ), cfg( CFG_ABILITY_UNDEAD_KNIGHT_UNHOLYRITE_HEAL_MAX ) ) );
 		send_to_char( "You make a blood sacrifice to the god of Death.\n\r", ch );
 	}
-	use_mana( ch, acfg( ACFG_UNDEAD_KNIGHT_UNHOLYRITE_MANA_COST ) );
-	WAIT_STATE( ch, acfg( ACFG_UNDEAD_KNIGHT_UNHOLYRITE_COOLDOWN ) );
+	use_mana( ch, cfg( CFG_ABILITY_UNDEAD_KNIGHT_UNHOLYRITE_MANA_COST ) );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_UNDEAD_KNIGHT_UNHOLYRITE_COOLDOWN ) );
 }
 
 void do_aura( CHAR_DATA *ch, char *argument ) {
@@ -127,7 +127,7 @@ void do_aura( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg, "bog" ) ) {
-		if ( ch->pcdata->powers[NECROMANCY] < acfg( ACFG_UNDEAD_KNIGHT_AURA_BOG_LEVEL_REQ ) ) {
+		if ( ch->pcdata->powers[NECROMANCY] < cfg( CFG_ABILITY_UNDEAD_KNIGHT_AURA_BOG_LEVEL_REQ ) ) {
 			send_to_char( "You don't have that aura yet.\n\r", ch );
 			return;
 		}
@@ -142,25 +142,25 @@ void do_aura( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 	if ( !str_cmp( arg, "might" ) ) {
-		if ( ch->pcdata->powers[NECROMANCY] < acfg( ACFG_UNDEAD_KNIGHT_AURA_MIGHT_LEVEL_REQ ) ) {
+		if ( ch->pcdata->powers[NECROMANCY] < cfg( CFG_ABILITY_UNDEAD_KNIGHT_AURA_MIGHT_LEVEL_REQ ) ) {
 			send_to_char( "You don't have that aura yet.\n\r", ch );
 			return;
 		}
 		if ( IS_SET( ch->pcdata->powers[AURAS], MIGHT_AURA ) ) {
 			REMOVE_BIT( ch->pcdata->powers[AURAS], MIGHT_AURA );
 			send_to_char( "Your aura of might fades.\n\r", ch );
-			ch->damroll -= acfg( ACFG_UNDEAD_KNIGHT_AURA_MIGHT_DAMROLL_BONUS );
-			ch->hitroll -= acfg( ACFG_UNDEAD_KNIGHT_AURA_MIGHT_HITROLL_BONUS );
+			ch->damroll -= cfg( CFG_ABILITY_UNDEAD_KNIGHT_AURA_MIGHT_DAMROLL_BONUS );
+			ch->hitroll -= cfg( CFG_ABILITY_UNDEAD_KNIGHT_AURA_MIGHT_HITROLL_BONUS );
 			return;
 		} else {
 			send_to_char( "An aura of might surrounds you.\n\r", ch );
 			SET_BIT( ch->pcdata->powers[AURAS], MIGHT_AURA );
-			ch->damroll += acfg( ACFG_UNDEAD_KNIGHT_AURA_MIGHT_DAMROLL_BONUS );
-			ch->hitroll += acfg( ACFG_UNDEAD_KNIGHT_AURA_MIGHT_HITROLL_BONUS );
+			ch->damroll += cfg( CFG_ABILITY_UNDEAD_KNIGHT_AURA_MIGHT_DAMROLL_BONUS );
+			ch->hitroll += cfg( CFG_ABILITY_UNDEAD_KNIGHT_AURA_MIGHT_HITROLL_BONUS );
 			return;
 		}
 	} else if ( !str_cmp( arg, "death" ) ) {
-		if ( ch->pcdata->powers[NECROMANCY] < acfg( ACFG_UNDEAD_KNIGHT_AURA_DEATH_LEVEL_REQ ) ) {
+		if ( ch->pcdata->powers[NECROMANCY] < cfg( CFG_ABILITY_UNDEAD_KNIGHT_AURA_DEATH_LEVEL_REQ ) ) {
 			send_to_char( "You don't have that aura yet.\n\r", ch );
 			return;
 		}
@@ -174,7 +174,7 @@ void do_aura( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	} else if ( !str_cmp( arg, "fear" ) ) {
-		if ( ch->pcdata->powers[NECROMANCY] < acfg( ACFG_UNDEAD_KNIGHT_AURA_FEAR_LEVEL_REQ ) ) {
+		if ( ch->pcdata->powers[NECROMANCY] < cfg( CFG_ABILITY_UNDEAD_KNIGHT_AURA_FEAR_LEVEL_REQ ) ) {
 			send_to_char( "You don't have that aura yet.\n\r", ch );
 			return;
 		}
@@ -210,43 +210,43 @@ void do_gain( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( !str_cmp( arg, "necromancy" ) ) /* most powers over death */
 	{
-		if ( ch->pcdata->powers[NECROMANCY] >= acfg( ACFG_UNDEAD_KNIGHT_GAIN_NECROMANCY_MAX_LEVEL ) ) {
+		if ( ch->pcdata->powers[NECROMANCY] >= cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_NECROMANCY_MAX_LEVEL ) ) {
 			send_to_char( "You have mastered the art of necromancy.\n\r", ch );
 			return;
-		} else if ( ch->practice < ch->pcdata->powers[NECROMANCY] * acfg( ACFG_UNDEAD_KNIGHT_GAIN_NECROMANCY_COST_MULTIPLIER ) + acfg( ACFG_UNDEAD_KNIGHT_GAIN_NECROMANCY_COST_MULTIPLIER ) ) {
+		} else if ( ch->practice < ch->pcdata->powers[NECROMANCY] * cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_NECROMANCY_COST_MULTIPLIER ) + cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_NECROMANCY_COST_MULTIPLIER ) ) {
 			send_to_char( "Your control over the forces of life and death is not powerful enough.\n\r", ch );
 			return;
 		} else {
-			ch->practice -= ch->pcdata->powers[NECROMANCY] * acfg( ACFG_UNDEAD_KNIGHT_GAIN_NECROMANCY_COST_MULTIPLIER ) + acfg( ACFG_UNDEAD_KNIGHT_GAIN_NECROMANCY_COST_MULTIPLIER );
+			ch->practice -= ch->pcdata->powers[NECROMANCY] * cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_NECROMANCY_COST_MULTIPLIER ) + cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_NECROMANCY_COST_MULTIPLIER );
 			send_to_char( "Death and life is yours to command.\n\r", ch );
 			ch->pcdata->powers[NECROMANCY] += 1;
 			return;
 		}
 	} else if ( !str_cmp( arg, "invocation" ) ) /* attacks like powerwords */
 	{
-		if ( ch->pcdata->powers[INVOCATION] >= acfg( ACFG_UNDEAD_KNIGHT_GAIN_INVOCATION_MAX_LEVEL ) ) {
+		if ( ch->pcdata->powers[INVOCATION] >= cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_INVOCATION_MAX_LEVEL ) ) {
 			send_to_char( "You have mastered the art of invocation.\n\r", ch );
 			return;
-		} else if ( ch->practice < ch->pcdata->powers[INVOCATION] * acfg( ACFG_UNDEAD_KNIGHT_GAIN_INVOCATION_COST_MULTIPLIER ) + acfg( ACFG_UNDEAD_KNIGHT_GAIN_INVOCATION_COST_MULTIPLIER ) ) {
+		} else if ( ch->practice < ch->pcdata->powers[INVOCATION] * cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_INVOCATION_COST_MULTIPLIER ) + cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_INVOCATION_COST_MULTIPLIER ) ) {
 			send_to_char( "You are not ready to advance in your magical studies.\n\r", ch );
 			return;
 		} else {
-			ch->practice -= ch->pcdata->powers[INVOCATION] * acfg( ACFG_UNDEAD_KNIGHT_GAIN_INVOCATION_COST_MULTIPLIER ) + acfg( ACFG_UNDEAD_KNIGHT_GAIN_INVOCATION_COST_MULTIPLIER );
+			ch->practice -= ch->pcdata->powers[INVOCATION] * cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_INVOCATION_COST_MULTIPLIER ) + cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_INVOCATION_COST_MULTIPLIER );
 			send_to_char( "Your mastery of the ancient arts increase.\n\r", ch );
 			ch->pcdata->powers[INVOCATION] += 1;
 			return;
 		}
 	} else if ( !str_cmp( arg, "spirit" ) ) /* toughness */
 	{
-		if ( ch->pcdata->powers[UNDEAD_SPIRIT] >= acfg( ACFG_UNDEAD_KNIGHT_GAIN_SPIRIT_MAX_LEVEL ) ) {
+		if ( ch->pcdata->powers[UNDEAD_SPIRIT] >= cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_SPIRIT_MAX_LEVEL ) ) {
 			send_to_char( "You have completely bound your spirit to this vessel.\n\r", ch );
 			return;
 		}
-		if ( ch->practice < ch->pcdata->powers[UNDEAD_SPIRIT] * acfg( ACFG_UNDEAD_KNIGHT_GAIN_SPIRIT_COST_MULTIPLIER ) + acfg( ACFG_UNDEAD_KNIGHT_GAIN_SPIRIT_COST_MULTIPLIER ) ) {
+		if ( ch->practice < ch->pcdata->powers[UNDEAD_SPIRIT] * cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_SPIRIT_COST_MULTIPLIER ) + cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_SPIRIT_COST_MULTIPLIER ) ) {
 			send_to_char( "You are not ready to bind more of your spirit yet.\n\r", ch );
 			return;
 		} else {
-			ch->practice -= ch->pcdata->powers[UNDEAD_SPIRIT] * acfg( ACFG_UNDEAD_KNIGHT_GAIN_SPIRIT_COST_MULTIPLIER ) + acfg( ACFG_UNDEAD_KNIGHT_GAIN_SPIRIT_COST_MULTIPLIER );
+			ch->practice -= ch->pcdata->powers[UNDEAD_SPIRIT] * cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_SPIRIT_COST_MULTIPLIER ) + cfg( CFG_ABILITY_UNDEAD_KNIGHT_GAIN_SPIRIT_COST_MULTIPLIER );
 			send_to_char( "You channel more of your spirit from the abyss into this body.\n\r", ch );
 			ch->pcdata->powers[UNDEAD_SPIRIT] += 1;
 			return;
@@ -261,15 +261,15 @@ void do_weaponpractice( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You are not one of the undead!!!\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[WEAPONSKILL] >= acfg( ACFG_UNDEAD_KNIGHT_WEAPONPRACTICE_MAX_LEVEL ) ) {
+	if ( ch->pcdata->powers[WEAPONSKILL] >= cfg( CFG_ABILITY_UNDEAD_KNIGHT_WEAPONPRACTICE_MAX_LEVEL ) ) {
 		send_to_char( "You have already mastered the art of combat.\n\r", ch );
 		return;
 	}
-	if ( ch->practice < ch->pcdata->powers[WEAPONSKILL] * acfg( ACFG_UNDEAD_KNIGHT_WEAPONPRACTICE_COST_MULTIPLIER ) + acfg( ACFG_UNDEAD_KNIGHT_WEAPONPRACTICE_COST_MULTIPLIER ) ) {
+	if ( ch->practice < ch->pcdata->powers[WEAPONSKILL] * cfg( CFG_ABILITY_UNDEAD_KNIGHT_WEAPONPRACTICE_COST_MULTIPLIER ) + cfg( CFG_ABILITY_UNDEAD_KNIGHT_WEAPONPRACTICE_COST_MULTIPLIER ) ) {
 		send_to_char( "You are not ready to train your weaponskill.\n\r", ch );
 		return;
 	} else {
-		ch->practice -= ch->pcdata->powers[WEAPONSKILL] * acfg( ACFG_UNDEAD_KNIGHT_WEAPONPRACTICE_COST_MULTIPLIER ) + acfg( ACFG_UNDEAD_KNIGHT_WEAPONPRACTICE_COST_MULTIPLIER );
+		ch->practice -= ch->pcdata->powers[WEAPONSKILL] * cfg( CFG_ABILITY_UNDEAD_KNIGHT_WEAPONPRACTICE_COST_MULTIPLIER ) + cfg( CFG_ABILITY_UNDEAD_KNIGHT_WEAPONPRACTICE_COST_MULTIPLIER );
 		send_to_char( "You feel your skills with weapons increase as you make your bloodsacrifice.\n\r", ch );
 		ch->hit = 1;
 		ch->mana = 1;
@@ -301,7 +301,7 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Valid powerwords are kill,stun,blind and flames.\n\r", ch );
 		return;
 	}
-	if ( !str_cmp( arg, "stun" ) && ch->pcdata->powers[INVOCATION] >= acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_STUN_LEVEL_REQ ) ) {
+	if ( !str_cmp( arg, "stun" ) && ch->pcdata->powers[INVOCATION] >= cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_STUN_LEVEL_REQ ) ) {
 		if ( !( arg2[0] == '\0' ) || ch->fighting != NULL ) {
 			if ( arg2[0] == '\0' )
 				victim = ch->fighting;
@@ -317,15 +317,15 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 			act( "$n points his finger at $N and says '#rFREEZE!!!#n'.", ch, NULL, victim, TO_NOTVICT );
 			act( "You point your finger at $N and say '#rFREEZE!!!#n'.", ch, NULL, victim, TO_CHAR );
 			act( "$n points his finger at $N and says '#rFREEZE!!!#n'.", ch, NULL, victim, TO_VICT );
-			WAIT_STATE( victim, acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_STUN_VICTIM_COOLDOWN ) );
-			WAIT_STATE( ch, acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_STUN_CASTER_COOLDOWN ) );
+			WAIT_STATE( victim, cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_STUN_VICTIM_COOLDOWN ) );
+			WAIT_STATE( ch, cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_STUN_CASTER_COOLDOWN ) );
 			ch->pcdata->powers[POWER_TICK] = 4;
 			return;
 		} else {
 			send_to_char( "Stun whom?\n\r", ch );
 			return;
 		}
-	} else if ( !str_cmp( arg, "blind" ) && ch->pcdata->powers[INVOCATION] >= acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_BLIND_LEVEL_REQ ) ) {
+	} else if ( !str_cmp( arg, "blind" ) && ch->pcdata->powers[INVOCATION] >= cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_BLIND_LEVEL_REQ ) ) {
 		if ( !( arg2[0] == '\0' ) || ch->fighting != NULL ) {
 			if ( arg2[0] == '\0' )
 				victim = ch->fighting;
@@ -349,17 +349,17 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 			af.type = skill_lookup( "blindness" );
 			af.location = APPLY_HITROLL;
 			af.modifier = -4;
-			af.duration = acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_BLIND_DURATION );
+			af.duration = cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_BLIND_DURATION );
 			af.bitvector = AFF_BLIND;
 			affect_to_char( victim, &af );
-			WAIT_STATE( ch, acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_BLIND_COOLDOWN ) );
+			WAIT_STATE( ch, cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_BLIND_COOLDOWN ) );
 			ch->pcdata->powers[POWER_TICK] = 3;
 			return;
 		} else {
 			send_to_char( "Blind whom?\n\r", ch );
 			return;
 		}
-	} else if ( !str_cmp( arg, "kill" ) && ch->pcdata->powers[INVOCATION] >= acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_KILL_LEVEL_REQ ) ) {
+	} else if ( !str_cmp( arg, "kill" ) && ch->pcdata->powers[INVOCATION] >= cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_LEVEL_REQ ) ) {
 		if ( !( arg2[0] == '\0' ) ) {
 			if ( ( victim = get_char_room( ch, arg2 ) ) == NULL ) {
 				send_to_char( "They are not here.\n\r", ch );
@@ -383,8 +383,8 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 			}
 			if ( !IS_NPC( victim ) || victim->level > 100 ) {
 				int dam = (int) ( victim->hit * .1 );
-				if ( IS_NPC( victim ) && dam > acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_KILL_NPC_DAM_CAP ) ) dam = acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_KILL_NPC_DAM_CAP );
-				if ( !IS_NPC( victim ) && dam > acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_KILL_PC_DAM_CAP ) ) dam = acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_KILL_PC_DAM_CAP );
+				if ( IS_NPC( victim ) && dam > cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_NPC_DAM_CAP ) ) dam = cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_NPC_DAM_CAP );
+				if ( !IS_NPC( victim ) && dam > cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_PC_DAM_CAP ) ) dam = cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_PC_DAM_CAP );
 				hurt_person( ch, victim, dam );
 				sprintf( buf1, "$n's powerword strikes $N [#C%d#n]", dam );
 				sprintf( buf2, "Your powerword strikes $N [#C%d#n]", dam );
@@ -404,7 +404,7 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "Kill whom?\n\r", ch );
 			return;
 		}
-	} else if ( !str_cmp( arg, "flames" ) && ch->pcdata->powers[INVOCATION] >= acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_FLAMES_LEVEL_REQ ) ) {
+	} else if ( !str_cmp( arg, "flames" ) && ch->pcdata->powers[INVOCATION] >= cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_FLAMES_LEVEL_REQ ) ) {
 		if ( ch->pcdata->powers[POWER_TICK] > 0 ) {
 			send_to_char( "You cannot cast another powerword yet.\n\r", ch );
 			return;
@@ -421,7 +421,7 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 			}
 			ich = ich_next;
 		}
-		WAIT_STATE( ch, acfg( ACFG_UNDEAD_KNIGHT_POWERWORD_FLAMES_COOLDOWN ) );
+		WAIT_STATE( ch, cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_FLAMES_COOLDOWN ) );
 		ch->pcdata->powers[POWER_TICK] = 2;
 		return;
 	} else {

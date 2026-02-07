@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 #include "psion.h"
 
 /* Forward declarations for update functions */
@@ -81,7 +81,7 @@ void do_psimeditate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	WAIT_STATE( ch, acfg( ACFG_PSION_MEDITATE_COOLDOWN ) );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_PSION_MEDITATE_COOLDOWN ) );
 
 	focus_gain = IS_CLASS( ch, CLASS_MINDFLAYER ) ? 15 : 10;
 	focus_cap = IS_CLASS( ch, CLASS_MINDFLAYER ) ? 150 : 100;
@@ -202,23 +202,23 @@ void do_mindscan( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You haven't trained Telepathy yet. See #x039psitrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_MINDSCAN_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_MINDSCAN_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_MINDSCAN_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_MINDSCAN_FOCUS_REQ ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
 	one_argument( argument, arg );
 
-	ch->mana -= acfg( ACFG_PSION_MINDSCAN_MANA_COST );
+	ch->mana -= cfg( CFG_ABILITY_PSION_MINDSCAN_MANA_COST );
 	WAIT_STATE( ch, 4 );
 
 	/* If no argument, grant detection aura */
 	if ( arg[0] == '\0' ) {
-		ch->pcdata->powers[PSION_MINDSCAN] = acfg( ACFG_PSION_MINDSCAN_DURATION );
+		ch->pcdata->powers[PSION_MINDSCAN] = cfg( CFG_ABILITY_PSION_MINDSCAN_DURATION );
 		SET_BIT( ch->affected_by, AFF_DETECT_HIDDEN );
 		SET_BIT( ch->affected_by, AFF_DETECT_INVIS );
 		send_to_char( "You extend your psychic senses, detecting hidden presences.\n\r", ch );
@@ -259,7 +259,7 @@ void do_thoughtshield( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Telepathy level 2. See #x039psitrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_THOUGHTSHIELD_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_THOUGHTSHIELD_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
@@ -272,11 +272,11 @@ void do_thoughtshield( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_PSION_THOUGHTSHIELD_MANA_COST );
+	ch->mana -= cfg( CFG_ABILITY_PSION_THOUGHTSHIELD_MANA_COST );
 	WAIT_STATE( ch, 4 );
 
-	ch->pcdata->powers[PSION_THOUGHT_SHIELD] = acfg( ACFG_PSION_THOUGHTSHIELD_DURATION );
-	ch->pcdata->stats[PSION_THOUGHT_SHIELD_HP] = acfg( ACFG_PSION_THOUGHTSHIELD_ABSORB_AMOUNT );
+	ch->pcdata->powers[PSION_THOUGHT_SHIELD] = cfg( CFG_ABILITY_PSION_THOUGHTSHIELD_DURATION );
+	ch->pcdata->stats[PSION_THOUGHT_SHIELD_HP] = cfg( CFG_ABILITY_PSION_THOUGHTSHIELD_ABSORB_AMOUNT );
 
 	send_to_char( "You erect a psychic barrier around your mind.\n\r", ch );
 	act( "A faint shimmer surrounds $n's head.", ch, NULL, NULL, TO_ROOM );
@@ -298,11 +298,11 @@ void do_mentallink( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Telepathy level 3. See #x039psitrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_MENTALLINK_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_MENTALLINK_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_MENTALLINK_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_MENTALLINK_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
@@ -327,11 +327,11 @@ void do_mentallink( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_PSION_MENTALLINK_MANA_COST );
-	ch->rage -= acfg( ACFG_PSION_MENTALLINK_FOCUS_COST );
+	ch->mana -= cfg( CFG_ABILITY_PSION_MENTALLINK_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_PSION_MENTALLINK_FOCUS_COST );
 	WAIT_STATE( ch, 4 );
 
-	ch->pcdata->powers[PSION_MENTAL_LINK] = acfg( ACFG_PSION_MENTALLINK_DURATION );
+	ch->pcdata->powers[PSION_MENTAL_LINK] = cfg( CFG_ABILITY_PSION_MENTALLINK_DURATION );
 	ch->pcdata->powers[PSION_LINKED_PLAYER] = 1; /* Just track that link is active */
 
 	act( "You establish a telepathic link with $N.", ch, NULL, victim, TO_CHAR );
@@ -359,18 +359,18 @@ void do_forcepush( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_FORCEPUSH_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_FORCEPUSH_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_FORCEPUSH_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_FORCEPUSH_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_PSION_FORCEPUSH_MANA_COST );
-	ch->rage -= acfg( ACFG_PSION_FORCEPUSH_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_PSION_FORCEPUSH_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_PSION_FORCEPUSH_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_PSION_FORCEPUSH_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_PSION_FORCEPUSH_COOLDOWN ) );
 
 	dam = number_range( 80, 160 );
 	dam += ch->rage * 2;
@@ -380,14 +380,14 @@ void do_forcepush( CHAR_DATA *ch, char *argument ) {
 	act( "$n unleashes a telekinetic blast at $N!", ch, NULL, victim, TO_NOTVICT );
 
 	/* Knockback chance */
-	if ( number_percent() < acfg( ACFG_PSION_FORCEPUSH_KNOCKBACK_CHANCE ) ) {
+	if ( number_percent() < cfg( CFG_ABILITY_PSION_FORCEPUSH_KNOCKBACK_CHANCE ) ) {
 		act( "$N is knocked back by the force!", ch, NULL, victim, TO_CHAR );
 		act( "You are knocked back by the telekinetic force!", ch, NULL, victim, TO_VICT );
 		/* Could add flee effect here */
 	}
 
 	/* Disarm chance */
-	if ( number_percent() < acfg( ACFG_PSION_FORCEPUSH_DISARM_CHANCE ) ) {
+	if ( number_percent() < cfg( CFG_ABILITY_PSION_FORCEPUSH_DISARM_CHANCE ) ) {
 		do_disarm( ch, "" );
 	}
 
@@ -407,11 +407,11 @@ void do_levitate( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Telekinesis level 2. See #x039psitrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_LEVITATE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_LEVITATE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_LEVITATE_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_LEVITATE_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
@@ -420,11 +420,11 @@ void do_levitate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_PSION_LEVITATE_MANA_COST );
-	ch->rage -= acfg( ACFG_PSION_LEVITATE_FOCUS_COST );
+	ch->mana -= cfg( CFG_ABILITY_PSION_LEVITATE_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_PSION_LEVITATE_FOCUS_COST );
 	WAIT_STATE( ch, 4 );
 
-	ch->pcdata->powers[PSION_LEVITATE] = acfg( ACFG_PSION_LEVITATE_DURATION );
+	ch->pcdata->powers[PSION_LEVITATE] = cfg( CFG_ABILITY_PSION_LEVITATE_DURATION );
 	SET_BIT( ch->affected_by, AFF_FLYING );
 
 	send_to_char( "You lift yourself off the ground with telekinetic power.\n\r", ch );
@@ -444,15 +444,15 @@ void do_kineticbarrier( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Telekinesis level 3. See #x039psitrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_KINETICBARRIER_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_KINETICBARRIER_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_KINETICBARRIER_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_KINETICBARRIER_FOCUS_REQ ) ) {
 		send_to_char( "You need at least %d Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_KINETICBARRIER_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_KINETICBARRIER_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
@@ -465,12 +465,12 @@ void do_kineticbarrier( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_PSION_KINETICBARRIER_MANA_COST );
-	ch->rage -= acfg( ACFG_PSION_KINETICBARRIER_FOCUS_COST );
+	ch->mana -= cfg( CFG_ABILITY_PSION_KINETICBARRIER_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_PSION_KINETICBARRIER_FOCUS_COST );
 	WAIT_STATE( ch, 4 );
 
-	ch->pcdata->powers[PSION_KINETIC_BARRIER] = acfg( ACFG_PSION_KINETICBARRIER_DURATION );
-	ch->pcdata->stats[PSION_KINETIC_BARRIER_HP] = acfg( ACFG_PSION_KINETICBARRIER_ABSORB_AMOUNT );
+	ch->pcdata->powers[PSION_KINETIC_BARRIER] = cfg( CFG_ABILITY_PSION_KINETICBARRIER_DURATION );
+	ch->pcdata->stats[PSION_KINETIC_BARRIER_HP] = cfg( CFG_ABILITY_PSION_KINETICBARRIER_ABSORB_AMOUNT );
 
 	send_to_char( "You form a telekinetic barrier around yourself.\n\r", ch );
 	act( "A shimmering force field surrounds $n.", ch, NULL, NULL, TO_ROOM );
@@ -497,13 +497,13 @@ void do_mindspike( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_MINDSPIKE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_MINDSPIKE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_PSION_MINDSPIKE_MANA_COST );
-	WAIT_STATE( ch, acfg( ACFG_PSION_MINDSPIKE_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_PSION_MINDSPIKE_MANA_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_PSION_MINDSPIKE_COOLDOWN ) );
 
 	dam = number_range( 100, 200 );
 	dam += ch->rage * 2;
@@ -517,7 +517,7 @@ void do_mindspike( CHAR_DATA *ch, char *argument ) {
 
 	/* Gain focus */
 	focus_cap = IS_CLASS( ch, CLASS_MINDFLAYER ) ? 150 : 100;
-	ch->rage = UMIN( ch->rage + acfg( ACFG_PSION_MINDSPIKE_FOCUS_GAIN ), focus_cap );
+	ch->rage = UMIN( ch->rage + cfg( CFG_ABILITY_PSION_MINDSPIKE_FOCUS_GAIN ), focus_cap );
 
 	damage( ch, victim, dam, gsn_punch );
 	return;
@@ -543,22 +543,22 @@ void do_psychicscream( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_PSYCHICSCREAM_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_PSYCHICSCREAM_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_PSYCHICSCREAM_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_PSYCHICSCREAM_FOCUS_REQ ) ) {
 		send_to_char( "You need more Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_PSYCHICSCREAM_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_PSYCHICSCREAM_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_PSION_PSYCHICSCREAM_MANA_COST );
-	ch->rage -= acfg( ACFG_PSION_PSYCHICSCREAM_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_PSION_PSYCHICSCREAM_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_PSION_PSYCHICSCREAM_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_PSION_PSYCHICSCREAM_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_PSION_PSYCHICSCREAM_COOLDOWN ) );
 
 	act( "You unleash a devastating psychic scream!", ch, NULL, NULL, TO_CHAR );
 	act( "$n unleashes a devastating psychic scream!", ch, NULL, NULL, TO_ROOM );
@@ -600,22 +600,22 @@ void do_brainburn( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_PSION_BRAINBURN_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_PSION_BRAINBURN_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_BRAINBURN_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_BRAINBURN_FOCUS_REQ ) ) {
 		send_to_char( "You need more Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_PSION_BRAINBURN_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_PSION_BRAINBURN_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_PSION_BRAINBURN_MANA_COST );
-	ch->rage -= acfg( ACFG_PSION_BRAINBURN_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_PSION_BRAINBURN_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_PSION_BRAINBURN_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_PSION_BRAINBURN_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_PSION_BRAINBURN_COOLDOWN ) );
 
 	dam = number_range( 300, 500 );
 	dam += ch->rage * 4;
@@ -628,7 +628,7 @@ void do_brainburn( CHAR_DATA *ch, char *argument ) {
 	act( "$N screams as $n unleashes psychic fire into their mind!", ch, NULL, victim, TO_NOTVICT );
 
 	/* Stun chance */
-	if ( number_percent() < acfg( ACFG_PSION_BRAINBURN_STUN_CHANCE ) ) {
+	if ( number_percent() < cfg( CFG_ABILITY_PSION_BRAINBURN_STUN_CHANCE ) ) {
 		act( "$N's mind is overwhelmed - they are stunned!", ch, NULL, victim, TO_CHAR );
 		act( "Your mind is overwhelmed - you are stunned!", ch, NULL, victim, TO_VICT );
 		WAIT_STATE( victim, 24 ); /* 2 rounds */

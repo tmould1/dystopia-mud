@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "cfg.h"
 
 void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	OBJ_DATA *wield;
@@ -29,7 +30,7 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	int dice1;
 	int dice2;
 	int trapper;
-	int max_skl = balance.wpn_cap_default;
+	int max_skl = cfg( CFG_COMBAT_WPN_CAP_DEFAULT );
 
 	dice1 = number_percent();
 	dice2 = number_percent();
@@ -37,23 +38,23 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	if ( IS_NPC( ch ) ) return;
 
 	if ( IS_CLASS( ch, CLASS_DROW ) && ( IS_SET( ch->special, SPC_DROW_WAR ) || ch->generation < 3 ) )
-		max_skl = balance.wpn_cap_drow;
+		max_skl = cfg( CFG_COMBAT_WPN_CAP_DROW );
 	else if ( ch->class == CLASS_WEREWOLF )
-		max_skl = balance.wpn_cap_werewolf;
+		max_skl = cfg( CFG_COMBAT_WPN_CAP_WEREWOLF );
 	else if ( ch->class == CLASS_MONK )
-		max_skl = balance.wpn_cap_monk;
+		max_skl = cfg( CFG_COMBAT_WPN_CAP_MONK );
 	else if ( IS_CLASS( ch, CLASS_ANGEL ) )
-		max_skl = balance.wpn_cap_angel;
+		max_skl = cfg( CFG_COMBAT_WPN_CAP_ANGEL );
 	else if ( IS_CLASS( ch, CLASS_LICH ) )
-		max_skl = balance.wpn_cap_lich;
+		max_skl = cfg( CFG_COMBAT_WPN_CAP_LICH );
 	else if ( IS_CLASS( ch, CLASS_DROID ) && ( ch->pcdata->powers[CYBORG_LIMBS] > 3 ) )
-		max_skl = balance.wpn_cap_droid;
+		max_skl = cfg( CFG_COMBAT_WPN_CAP_DROID );
 	else if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) )
-		max_skl = UMAX( balance.wpn_cap_default, ch->pcdata->powers[WEAPONSKILL] * 50 );
+		max_skl = UMAX( cfg( CFG_COMBAT_WPN_CAP_DEFAULT ), ch->pcdata->powers[WEAPONSKILL] * 50 );
 	else if ( IS_CLASS( ch, CLASS_SAMURAI ) )
-		max_skl = balance.wpn_cap_samurai;
+		max_skl = cfg( CFG_COMBAT_WPN_CAP_SAMURAI );
 	else if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) || IS_CLASS( ch, CLASS_TANARRI ) )
-		max_skl = balance.wpn_cap_shape;
+		max_skl = cfg( CFG_COMBAT_WPN_CAP_SHAPE );
 
 	if ( right_hand == 1 )
 		wield = get_eq_char( ch, WEAR_WIELD );
@@ -74,12 +75,12 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	dtype -= 1000;
 
 	if ( ch->generation == 2 )
-		max_skl += max_skl * balance.wpn_gen2_bonus / 100;
+		max_skl += max_skl * cfg( CFG_COMBAT_WPN_GEN2_BONUS ) / 100;
 	else if ( ch->generation == 1 )
-		max_skl += max_skl * balance.wpn_gen1_bonus / 100;
-	if ( max_skl > balance.wpn_cap_hard_cap ) max_skl = balance.wpn_cap_hard_cap;
+		max_skl += max_skl * cfg( CFG_COMBAT_WPN_GEN1_BONUS ) / 100;
+	if ( max_skl > cfg( CFG_COMBAT_WPN_CAP_HARD_CAP ) ) max_skl = cfg( CFG_COMBAT_WPN_CAP_HARD_CAP );
 
-	if ( ch->level < 3 && ch->class != CLASS_MONK && ch->class != CLASS_WEREWOLF ) max_skl = balance.wpn_cap_low_level;
+	if ( ch->level < 3 && ch->class != CLASS_MONK && ch->class != CLASS_WEREWOLF ) max_skl = cfg( CFG_COMBAT_WPN_CAP_LOW_LEVEL );
 	if ( ch->wpn[dtype] >= max_skl ) return;
 	trapper = ch->wpn[dtype];
 	if ( ( dice1 > ch->wpn[dtype] || dice2 > ch->wpn[dtype] ) || ( dice1 >= 99 || dice2 >= 99 ) )

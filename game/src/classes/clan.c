@@ -22,7 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 #include "../db/db_player.h"
 
 /*
@@ -228,7 +228,7 @@ void do_smother( CHAR_DATA *ch, char *argument ) {
 		act( "You try to smother the flames around $N but fail!", ch, NULL, victim, TO_CHAR );
 		act( "$n tries to smother the flames around you but fails!", ch, NULL, victim, TO_VICT );
 		act( "$n tries to smother the flames around $N but fails!", ch, NULL, victim, TO_NOTVICT );
-		if ( number_percent() > acfg( ACFG_CLAN_SMOTHER_SPARK_CHANCE ) && !IS_AFFECTED( ch, AFF_FLAMING ) ) {
+		if ( number_percent() > cfg( CFG_ABILITY_CLAN_SMOTHER_SPARK_CHANCE ) && !IS_AFFECTED( ch, AFF_FLAMING ) ) {
 			act( "A spark of flame from $N's body sets you on fire!", ch, NULL, victim, TO_CHAR );
 			act( "A spark of flame from your body sets $n on fire!", ch, NULL, victim, TO_VICT );
 			act( "A spark of flame from $N's body sets $n on fire!", ch, NULL, victim, TO_NOTVICT );
@@ -290,7 +290,7 @@ void do_coil( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_SERP] < acfg( ACFG_CLAN_COIL_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_SERP] < cfg( CFG_ABILITY_CLAN_COIL_LEVEL_REQ ) ) {
 		send_to_char( "You require level 8 Serpentis to use Body Coil.\n\r", ch );
 		return;
 	}
@@ -312,12 +312,12 @@ void do_tide( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_THAU] < acfg( ACFG_CLAN_TIDE_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_THAU] < cfg( CFG_ABILITY_CLAN_TIDE_LEVEL_REQ ) ) {
 		send_to_char( "You require level 5 Thaumaturgy to use Tide of Vitae.\n\r", ch );
 		return;
 	}
 
-	if ( ch->practice < acfg( ACFG_CLAN_TIDE_PRIMAL_COST ) ) {
+	if ( ch->practice < cfg( CFG_ABILITY_CLAN_TIDE_PRIMAL_COST ) ) {
 		send_to_char( "You require at least 10 primal to use Tide of Vitae.\n\r", ch );
 		return;
 	}
@@ -327,7 +327,7 @@ void do_tide( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	SET_BIT( ch->newbits, NEW_TIDE );
-	ch->practice -= acfg( ACFG_CLAN_TIDE_PRIMAL_COST );
+	ch->practice -= cfg( CFG_ABILITY_CLAN_TIDE_PRIMAL_COST );
 	send_to_char( "You feel a tide of vitae rush over you.\n\r", ch );
 }
 
@@ -339,7 +339,7 @@ void do_flash( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < acfg( ACFG_CLAN_FLASH_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_CLAN_FLASH_LEVEL_REQ ) ) {
 		send_to_char( "You require level 9 Quietus to use Flashing Speed.\n\r", ch );
 		return;
 	}
@@ -347,13 +347,13 @@ void do_flash( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You are already moving swiftly.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < acfg( ACFG_CLAN_FLASH_BLOOD_COST ) ) {
+	if ( ch->pcdata->condition[COND_THIRST] < cfg( CFG_ABILITY_CLAN_FLASH_BLOOD_COST ) ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
 	SET_BIT( ch->extra, EXTRA_FLASH );
-	ch->power[DISC_VAMP_CELE] += acfg( ACFG_CLAN_FLASH_CELE_BONUS );
-	ch->pcdata->condition[COND_THIRST] -= acfg( ACFG_CLAN_FLASH_BLOOD_COST );
+	ch->power[DISC_VAMP_CELE] += cfg( CFG_ABILITY_CLAN_FLASH_CELE_BONUS );
+	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_CLAN_FLASH_BLOOD_COST );
 	sprintf( buf, "%s starts moving with lightening speed.", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You start moving with lightening speed.\n\r", ch );
@@ -369,7 +369,7 @@ void do_death( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < acfg( ACFG_CLAN_DEATH_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_CLAN_DEATH_LEVEL_REQ ) ) {
 		send_to_char( "You require level 5 Quietus to use Silence of Death.\n\r", ch );
 		return;
 	}
@@ -384,12 +384,12 @@ void do_death( CHAR_DATA *ch, char *argument ) {
 		SET_RTIMER( ch->in_room, RTIMER_SILENCE, 0 );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < acfg( ACFG_CLAN_DEATH_BLOOD_COST ) ) {
+	if ( ch->pcdata->condition[COND_THIRST] < cfg( CFG_ABILITY_CLAN_DEATH_BLOOD_COST ) ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
-	ch->pcdata->condition[COND_THIRST] -= acfg( ACFG_CLAN_DEATH_BLOOD_COST );
-	SET_RTIMER( inroom, RTIMER_SILENCE, acfg( ACFG_CLAN_DEATH_SILENCE_DURATION ) );
+	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_CLAN_DEATH_BLOOD_COST );
+	SET_RTIMER( inroom, RTIMER_SILENCE, cfg( CFG_ABILITY_CLAN_DEATH_SILENCE_DURATION ) );
 	sprintf( buf, "A look of concentration passes over %s's face.\n\r", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "A look of concentration passes over your face.\n\r", ch );
@@ -405,11 +405,11 @@ void do_acid( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DOMI] < acfg( ACFG_CLAN_ACID_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_DOMI] < cfg( CFG_ABILITY_CLAN_ACID_LEVEL_REQ ) ) {
 		send_to_char( "You require level 9 Vicissitude to use Acid Blood.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < acfg( ACFG_CLAN_ACID_BLOOD_REQ ) ) {
+	if ( ch->pcdata->condition[COND_THIRST] < cfg( CFG_ABILITY_CLAN_ACID_BLOOD_REQ ) ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
@@ -438,7 +438,7 @@ void do_forget( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DOMI] < acfg( ACFG_CLAN_FORGET_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_DOMI] < cfg( CFG_ABILITY_CLAN_FORGET_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 8 in Dominate to use Forgetful Mind.\n\r", ch );
 		return;
 	}
@@ -464,12 +464,12 @@ void do_forget( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You can only use Forgetful Mind on Avatar's or lower.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < acfg( ACFG_CLAN_FORGET_BLOOD_COST ) ) {
+	if ( ch->pcdata->condition[COND_THIRST] < cfg( CFG_ABILITY_CLAN_FORGET_BLOOD_COST ) ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
 
-	if ( ch->practice < acfg( ACFG_CLAN_FORGET_PRIMAL_COST ) ) {
+	if ( ch->practice < cfg( CFG_ABILITY_CLAN_FORGET_PRIMAL_COST ) ) {
 		send_to_char( "You need 25 primal to use Forgetful Mind.\n\r", ch );
 		return;
 	}
@@ -477,11 +477,11 @@ void do_forget( CHAR_DATA *ch, char *argument ) {
 	act( "You close your eyes and concentrate on $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n closes $s eyes and concentrates on you.", ch, NULL, victim, TO_VICT );
 	act( "$n closes $s eyes and cencentrates on $N.", ch, NULL, victim, TO_NOTVICT );
-	ch->pcdata->condition[COND_THIRST] -= acfg( ACFG_CLAN_FORGET_BLOOD_COST );
-	ch->practice -= acfg( ACFG_CLAN_FORGET_PRIMAL_COST );
-	WAIT_STATE( ch, acfg( ACFG_CLAN_FORGET_COOLDOWN ) );
+	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_CLAN_FORGET_BLOOD_COST );
+	ch->practice -= cfg( CFG_ABILITY_CLAN_FORGET_PRIMAL_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_CLAN_FORGET_COOLDOWN ) );
 
-	if ( number_percent() > acfg( ACFG_CLAN_FORGET_SUCCESS_CHANCE ) ) {
+	if ( number_percent() > cfg( CFG_ABILITY_CLAN_FORGET_SUCCESS_CHANCE ) ) {
 		send_to_char( "You failed.\n\r", ch );
 		return;
 	}
@@ -587,7 +587,7 @@ void do_rot( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_VICI] < acfg( ACFG_CLAN_ROT_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_ROT_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at level 2 in Thanatosis to use Putrefaction.\n\r", ch );
 		return;
 	}
@@ -621,8 +621,8 @@ void do_rot( CHAR_DATA *ch, char *argument ) {
 	act( "You close your eyes and concentrate on $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n closes $s eyes and concentrates on you.", ch, NULL, victim, TO_VICT );
 	act( "$n closes $s eyes and cencentrates on $N.", ch, NULL, victim, TO_NOTVICT );
-	WAIT_STATE( ch, acfg( ACFG_CLAN_ROT_COOLDOWN ) );
-	if ( number_percent() < acfg( ACFG_CLAN_ROT_SUCCESS_CHANCE ) ) {
+	WAIT_STATE( ch, cfg( CFG_ABILITY_CLAN_ROT_COOLDOWN ) );
+	if ( number_percent() < cfg( CFG_ABILITY_CLAN_ROT_SUCCESS_CHANCE ) ) {
 		send_to_char( "You failed.\n\r", ch );
 		return;
 	}
@@ -643,7 +643,7 @@ void do_dragon( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_VICI] < acfg( ACFG_CLAN_DRAGON_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_DRAGON_LEVEL_REQ ) ) {
 		send_to_char( "You must have at least level 8 Vicissitude to use Dragon Breath.\n\r", ch );
 		return;
 	}
@@ -655,18 +655,18 @@ void do_dragon( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You must be in Dragonform to use Dragonbreath.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->condition[COND_THIRST] < acfg( ACFG_CLAN_DRAGON_BLOOD_COST ) ) {
+	if ( ch->pcdata->condition[COND_THIRST] < cfg( CFG_ABILITY_CLAN_DRAGON_BLOOD_COST ) ) {
 		send_to_char( "You have insufficient blood.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_CLAN_DRAGON_COOLDOWN ) );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_CLAN_DRAGON_COOLDOWN ) );
 	if ( !IS_NPC( victim ) ) {
 		dam = ch->power[DISC_VAMP_VICI] * 50;
 	}
 	if ( IS_NPC( victim ) ) {
 		dam = ch->power[DISC_VAMP_VICI] * 200;
 	}
-	ch->pcdata->condition[COND_THIRST] -= acfg( ACFG_CLAN_DRAGON_BLOOD_COST );
+	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_CLAN_DRAGON_BLOOD_COST );
 	if ( ( !IS_NPC( victim ) ) && IS_CLASS( victim, CLASS_VAMPIRE ) ) {
 		dam = (int) ( dam * 1.5 );
 	}
@@ -695,7 +695,7 @@ void do_awe( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_PRES] < acfg( ACFG_CLAN_AWE_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_PRES] < cfg( CFG_ABILITY_CLAN_AWE_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 1 in Presence to you Awe.\n\r", ch );
 		return;
 	}
@@ -722,7 +722,7 @@ void do_plasma( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_VICI] < acfg( ACFG_CLAN_PLASMA_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_PLASMA_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 5 in Vicissitude to use Plasma Form.\n\r", ch );
 		return;
 	}
@@ -775,7 +775,7 @@ void do_taste( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_THAU] < acfg( ACFG_CLAN_TASTE_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_THAU] < cfg( CFG_ABILITY_CLAN_TASTE_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 1 in Thaumaturgy to use Taste of Blood.\n\r", ch );
 		return;
 	}
@@ -887,7 +887,7 @@ void do_shadowstep( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_OBTE] < acfg( ACFG_CLAN_SHADOWSTEP_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_OBTE] < cfg( CFG_ABILITY_CLAN_SHADOWSTEP_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 4 in Obtenebration to use this power.\n\r", ch );
 		return;
 	}
@@ -959,7 +959,7 @@ void do_earthmeld( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_PROT] < acfg( ACFG_CLAN_EARTHMELD_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_PROT] < cfg( CFG_ABILITY_CLAN_EARTHMELD_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 4 Protean to use Earthmeld.\n\r", ch );
 		return;
 	}
@@ -1004,7 +1004,7 @@ void do_serenity( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "huh?.\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_ANIM] < acfg( ACFG_CLAN_SERENITY_LEVEL_REQ ) ) {
+	if ( ch->power[DISC_VAMP_ANIM] < cfg( CFG_ABILITY_CLAN_SERENITY_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 2 in Animalism to use Song of Serenity.\n\r", ch );
 		return;
 	}
@@ -1539,6 +1539,12 @@ static void clear_class_state( CHAR_DATA *victim ) {
 			victim->pcdata->stage[i] = 0;
 		for ( i = 0; i < 2; i++ )
 			victim->pcdata->wolfform[i] = 0;
+
+		/* Clear class-specific powers and stats (dragonkin, angel, samurai, etc.) */
+		for ( i = 0; i < 20; i++ )
+			victim->pcdata->powers[i] = 0;
+		for ( i = 0; i < 12; i++ )
+			victim->pcdata->stats[i] = 0;
 	}
 }
 

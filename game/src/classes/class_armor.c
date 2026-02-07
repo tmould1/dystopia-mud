@@ -7,7 +7,7 @@
 
 #include "merc.h"
 #include "../db/db_game.h"
-#include "../core/ability_config.h"
+#include "../core/cfg.h"
 
 /*
  * Generic class armor creation function.
@@ -46,14 +46,20 @@ void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id ) {
 		return;
 	}
 
-	/* Check primal cost - convert string key from DB to enum */
+	/* Check primal cost - convert string key from DB to cfg enum */
 	{
-		acfg_key_t cost_key = acfg_key_from_string( config->acfg_cost_key );
-		if ( cost_key == ACFG_COUNT ) {
-			log_string( "class_armor: invalid acfg key in database" );
+		char full_key[128];
+		cfg_key_t cost_key;
+
+		/* DB stores keys like "vampire.vampirearmor.practice_cost", prepend "ability." */
+		snprintf( full_key, sizeof( full_key ), "ability.%s", config->acfg_cost_key );
+		cost_key = cfg_key_from_string( full_key );
+
+		if ( cost_key == CFG_COUNT ) {
+			log_string( "class_armor: invalid cfg key in database" );
 			cost = 60;  /* Fallback default */
 		} else {
-			cost = acfg( cost_key );
+			cost = cfg( cost_key );
 		}
 	}
 	if ( !IS_IMMORTAL( ch ) && ch->practice < cost ) {

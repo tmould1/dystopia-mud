@@ -58,13 +58,9 @@ void db_game_save_bans( void );
 void db_game_load_disabled( void );
 void db_game_save_disabled( void );
 
-/* Balance config (game.db) */
-void db_game_load_balance( void );
-void db_game_save_balance( void );
-
-/* Ability config (game.db) */
-void db_game_load_ability_config( void );
-void db_game_save_ability_config( void );
+/* Unified config (game.db) */
+void db_game_load_cfg( void );
+void db_game_save_cfg( void );
 
 /* Super admins (game.db) - character names with relevel access */
 bool db_game_is_super_admin( const char *name );

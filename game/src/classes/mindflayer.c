@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 #include "psion.h"
 
 /* Forward declarations for update functions */
@@ -138,15 +138,15 @@ void do_enthral( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You haven't trained Domination yet. See #x035mindtrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_ENTHRAL_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_ENTHRAL_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_ENTHRAL_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_ENTHRAL_FOCUS_REQ ) ) {
 		send_to_char( "You need more Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_ENTHRAL_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_ENTHRAL_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
@@ -174,7 +174,7 @@ void do_enthral( CHAR_DATA *ch, char *argument ) {
 	}
 
 	thrall_count = count_thralls( ch );
-	if ( thrall_count >= acfg( ACFG_MINDFLAYER_ENTHRAL_MAX_THRALLS ) ) {
+	if ( thrall_count >= cfg( CFG_ABILITY_MINDFLAYER_ENTHRAL_MAX_THRALLS ) ) {
 		send_to_char( "You already have the maximum number of thralls.\n\r", ch );
 		return;
 	}
@@ -183,13 +183,13 @@ void do_enthral( CHAR_DATA *ch, char *argument ) {
 	if ( victim->level > ch->level + 10 && number_percent() < 50 ) {
 		act( "$N resists your mental domination!", ch, NULL, victim, TO_CHAR );
 		act( "You resist $n's attempt to dominate your mind!", ch, NULL, victim, TO_VICT );
-		ch->mana -= acfg( ACFG_MINDFLAYER_ENTHRAL_MANA_COST ) / 2;
+		ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_ENTHRAL_MANA_COST ) / 2;
 		WAIT_STATE( ch, 12 );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_ENTHRAL_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_ENTHRAL_FOCUS_COST );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_ENTHRAL_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_ENTHRAL_FOCUS_COST );
 	WAIT_STATE( ch, 8 );
 
 	/* Apply charm */
@@ -224,11 +224,11 @@ void do_puppet( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Domination level 2. See #x035mindtrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_PUPPET_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_PUPPET_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_PUPPET_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_PUPPET_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
@@ -251,8 +251,8 @@ void do_puppet( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_PUPPET_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_PUPPET_FOCUS_COST );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_PUPPET_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_PUPPET_FOCUS_COST );
 
 	act( "You puppet $N's actions.", ch, NULL, victim, TO_CHAR );
 	interpret( victim, arg2 );
@@ -273,11 +273,11 @@ void do_hivemind( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Domination level 3. See #x035mindtrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_HIVEMIND_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_HIVEMIND_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_HIVEMIND_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_HIVEMIND_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
@@ -293,11 +293,11 @@ void do_hivemind( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_HIVEMIND_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_HIVEMIND_FOCUS_COST );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_HIVEMIND_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_HIVEMIND_FOCUS_COST );
 	WAIT_STATE( ch, 8 );
 
-	ch->pcdata->powers[MIND_HIVEMIND] = acfg( ACFG_MINDFLAYER_HIVEMIND_DURATION );
+	ch->pcdata->powers[MIND_HIVEMIND] = cfg( CFG_ABILITY_MINDFLAYER_HIVEMIND_DURATION );
 
 	send_to_char( "You link your thralls into a unified hivemind.\n\r", ch );
 	act( "$n's eyes glow as a psychic network forms between their thralls.", ch, NULL, NULL, TO_ROOM );
@@ -322,30 +322,30 @@ void do_massdomination( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Domination level 4. See #x035mindtrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_MASSDOMINATION_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_MASSDOMINATION_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_MASSDOMINATION_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_MASSDOMINATION_FOCUS_REQ ) ) {
 		send_to_char( "You need more Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_MASSDOMINATION_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_MASSDOMINATION_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
 	thrall_count = count_thralls( ch );
-	max_thralls = acfg( ACFG_MINDFLAYER_ENTHRAL_MAX_THRALLS );
+	max_thralls = cfg( CFG_ABILITY_MINDFLAYER_ENTHRAL_MAX_THRALLS );
 
 	if ( thrall_count >= max_thralls ) {
 		send_to_char( "You already have the maximum number of thralls.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_MASSDOMINATION_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_MASSDOMINATION_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_MINDFLAYER_MASSDOMINATION_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_MASSDOMINATION_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_MASSDOMINATION_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_MINDFLAYER_MASSDOMINATION_COOLDOWN ) );
 
 	act( "You unleash a wave of psychic domination!", ch, NULL, NULL, TO_CHAR );
 	act( "$n unleashes a wave of psychic domination!", ch, NULL, NULL, TO_ROOM );
@@ -358,7 +358,7 @@ void do_massdomination( CHAR_DATA *ch, char *argument ) {
 		if ( IS_AFFECTED( victim, AFF_CHARM ) ) continue;
 		if ( thrall_count >= max_thralls ) break;
 
-		if ( number_percent() < acfg( ACFG_MINDFLAYER_MASSDOMINATION_SUCCESS_RATE ) ) {
+		if ( number_percent() < cfg( CFG_ABILITY_MINDFLAYER_MASSDOMINATION_SUCCESS_RATE ) ) {
 			SET_BIT( victim->affected_by, AFF_CHARM );
 			victim->master = ch;
 			victim->leader = ch;
@@ -398,13 +398,13 @@ void do_mindfeed( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_MINDFEED_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_MINDFEED_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_MINDFEED_MANA_COST );
-	WAIT_STATE( ch, acfg( ACFG_MINDFLAYER_MINDFEED_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_MINDFEED_MANA_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_MINDFLAYER_MINDFEED_COOLDOWN ) );
 
 	dam = number_range( 150, 300 );
 	dam += ch->rage * 2;
@@ -413,11 +413,11 @@ void do_mindfeed( CHAR_DATA *ch, char *argument ) {
 	dam = dam * ( 100 - UMIN( get_curr_int( victim ) / 10, 50 ) ) / 100;
 
 	/* Heal based on damage */
-	heal = dam * acfg( ACFG_MINDFLAYER_MINDFEED_HEAL_PCT ) / 100;
+	heal = dam * cfg( CFG_ABILITY_MINDFLAYER_MINDFEED_HEAL_PCT ) / 100;
 	ch->hit = UMIN( ch->hit + heal, ch->max_hit );
 
 	/* Gain focus */
-	ch->rage = UMIN( ch->rage + acfg( ACFG_MINDFLAYER_MINDFEED_FOCUS_GAIN ), 150 );
+	ch->rage = UMIN( ch->rage + cfg( CFG_ABILITY_MINDFLAYER_MINDFEED_FOCUS_GAIN ), 150 );
 
 	act( "You sink psychic tendrils into $N's mind, draining their essence!", ch, NULL, victim, TO_CHAR );
 	act( "Psychic tendrils tear into your mind as $n feeds on your essence!", ch, NULL, victim, TO_VICT );
@@ -445,22 +445,22 @@ void do_memorydrain( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_MEMORYDRAIN_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_MEMORYDRAIN_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_MEMORYDRAIN_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_MEMORYDRAIN_FOCUS_REQ ) ) {
 		send_to_char( "You need more Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_MEMORYDRAIN_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_MEMORYDRAIN_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_MEMORYDRAIN_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_MEMORYDRAIN_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_MINDFLAYER_MEMORYDRAIN_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_MEMORYDRAIN_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_MEMORYDRAIN_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_MINDFLAYER_MEMORYDRAIN_COOLDOWN ) );
 
 	act( "You tear through $N's memories, shredding their mental defenses!", ch, NULL, victim, TO_CHAR );
 	act( "$n tears through your memories! Your mind feels violated!", ch, NULL, victim, TO_VICT );
@@ -495,22 +495,22 @@ void do_intellectdevour( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_INTELLECTDEVOUR_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_INTELLECTDEVOUR_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_INTELLECTDEVOUR_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_INTELLECTDEVOUR_FOCUS_REQ ) ) {
 		send_to_char( "You need more Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_INTELLECTDEVOUR_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_INTELLECTDEVOUR_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_INTELLECTDEVOUR_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_INTELLECTDEVOUR_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_MINDFLAYER_INTELLECTDEVOUR_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_INTELLECTDEVOUR_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_INTELLECTDEVOUR_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_MINDFLAYER_INTELLECTDEVOUR_COOLDOWN ) );
 
 	dam = number_range( 400, 700 );
 	dam += ch->rage * 5;
@@ -524,7 +524,7 @@ void do_intellectdevour( CHAR_DATA *ch, char *argument ) {
 
 	/* Max HP reduction for NPCs only */
 	if ( IS_NPC( victim ) ) {
-		int reduction = victim->max_hit * acfg( ACFG_MINDFLAYER_INTELLECTDEVOUR_MAXHP_REDUCTION ) / 100;
+		int reduction = victim->max_hit * cfg( CFG_ABILITY_MINDFLAYER_INTELLECTDEVOUR_MAXHP_REDUCTION ) / 100;
 		victim->max_hit -= reduction;
 		if ( victim->hit > victim->max_hit )
 			victim->hit = victim->max_hit;
@@ -554,18 +554,18 @@ void do_psychicmaelstrom( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_PSYCHICMAELSTROM_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_PSYCHICMAELSTROM_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_PSYCHICMAELSTROM_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_PSYCHICMAELSTROM_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_PSYCHICMAELSTROM_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_PSYCHICMAELSTROM_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_MINDFLAYER_PSYCHICMAELSTROM_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_PSYCHICMAELSTROM_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_PSYCHICMAELSTROM_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_MINDFLAYER_PSYCHICMAELSTROM_COOLDOWN ) );
 
 	act( "You unleash a psychic maelstrom!", ch, NULL, NULL, TO_CHAR );
 	act( "$n unleashes a psychic maelstrom!", ch, NULL, NULL, TO_ROOM );
@@ -585,7 +585,7 @@ void do_psychicmaelstrom( CHAR_DATA *ch, char *argument ) {
 		dam = dam * ( 100 - UMIN( get_curr_int( victim ) / 10, 50 ) ) / 100;
 
 		/* Confusion chance */
-		if ( number_percent() < acfg( ACFG_MINDFLAYER_PSYCHICMAELSTROM_CONFUSE_CHANCE ) ) {
+		if ( number_percent() < cfg( CFG_ABILITY_MINDFLAYER_PSYCHICMAELSTROM_CONFUSE_CHANCE ) ) {
 			act( "$N is confused by the psychic assault!", ch, NULL, victim, TO_CHAR );
 			/* Could trigger flee here */
 		}
@@ -615,22 +615,22 @@ void do_psiblast( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_MINDBLAST_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_MINDBLAST_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_MINDBLAST_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_MINDBLAST_FOCUS_REQ ) ) {
 		send_to_char( "You need more Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_MINDBLAST_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_MINDBLAST_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_MINDBLAST_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_MINDBLAST_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_MINDFLAYER_MINDBLAST_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_MINDBLAST_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_MINDBLAST_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_MINDFLAYER_MINDBLAST_COOLDOWN ) );
 
 	act( "You project a devastating cone of psionic force!", ch, NULL, NULL, TO_CHAR );
 	act( "$n projects a devastating cone of psionic force!", ch, NULL, NULL, TO_ROOM );
@@ -651,7 +651,7 @@ void do_psiblast( CHAR_DATA *ch, char *argument ) {
 
 		/* Stun */
 		act( "$N is stunned by the mind blast!", ch, NULL, victim, TO_CHAR );
-		WAIT_STATE( victim, acfg( ACFG_MINDFLAYER_MINDBLAST_STUN_DURATION ) * 12 );
+		WAIT_STATE( victim, cfg( CFG_ABILITY_MINDFLAYER_MINDBLAST_STUN_DURATION ) * 12 );
 
 		damage( ch, victim, dam, gsn_punch );
 	}
@@ -678,22 +678,22 @@ void do_realityfracture( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_MINDFLAYER_REALITYFRACTURE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_MINDFLAYER_REALITYFRACTURE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_REALITYFRACTURE_FOCUS_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_REALITYFRACTURE_FOCUS_REQ ) ) {
 		send_to_char( "You need more Focus.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_MINDFLAYER_REALITYFRACTURE_FOCUS_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_MINDFLAYER_REALITYFRACTURE_FOCUS_COST ) ) {
 		send_to_char( "You don't have enough Focus.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_MINDFLAYER_REALITYFRACTURE_MANA_COST );
-	ch->rage -= acfg( ACFG_MINDFLAYER_REALITYFRACTURE_FOCUS_COST );
-	WAIT_STATE( ch, acfg( ACFG_MINDFLAYER_REALITYFRACTURE_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_MINDFLAYER_REALITYFRACTURE_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_MINDFLAYER_REALITYFRACTURE_FOCUS_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_MINDFLAYER_REALITYFRACTURE_COOLDOWN ) );
 
 	act( "#x035You tear at the very fabric of reality!#n", ch, NULL, NULL, TO_CHAR );
 	act( "#x035$n tears at the very fabric of reality!#n", ch, NULL, NULL, TO_ROOM );

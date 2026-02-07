@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 #include "dirgesinger.h"
 
 /* Forward declarations for update functions */
@@ -73,14 +73,14 @@ void do_warcry( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_WARCRY_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_WARCRY_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_DIRGESINGER_WARCRY_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DIRGESINGER_WARCRY_MANA_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DIRGESINGER_WARCRY_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_WARCRY_MANA_COST );
 
-	dam = number_range( acfg( ACFG_DIRGESINGER_WARCRY_DAM_BONUS_MIN ), acfg( ACFG_DIRGESINGER_WARCRY_DAM_BONUS_MAX ) );
+	dam = number_range( cfg( CFG_ABILITY_DIRGESINGER_WARCRY_DAM_BONUS_MIN ), cfg( CFG_ABILITY_DIRGESINGER_WARCRY_DAM_BONUS_MAX ) );
 	dam += ch->rage * 2;
 
 	act( "You unleash a thunderous warcry at $N!", ch, NULL, victim, TO_CHAR );
@@ -89,7 +89,7 @@ void do_warcry( CHAR_DATA *ch, char *argument ) {
 
 	/* Build resonance */
 	resonance_cap = IS_CLASS( ch, CLASS_SIREN ) ? 150 : 100;
-	ch->rage = UMIN( ch->rage + acfg( ACFG_DIRGESINGER_WARCRY_RESONANCE_GAIN ), resonance_cap );
+	ch->rage = UMIN( ch->rage + cfg( CFG_ABILITY_DIRGESINGER_WARCRY_RESONANCE_GAIN ), resonance_cap );
 
 	damage( ch, victim, dam, gsn_punch );
 	return;
@@ -116,19 +116,19 @@ void do_shatter( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_SHATTER_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_SHATTER_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_DIRGESINGER_SHATTER_RESONANCE_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_DIRGESINGER_SHATTER_RESONANCE_REQ ) ) {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You need at least %d resonance to use shatter.\n\r", acfg( ACFG_DIRGESINGER_SHATTER_RESONANCE_REQ ) );
+		sprintf( buf, "You need at least %d resonance to use shatter.\n\r", cfg( CFG_ABILITY_DIRGESINGER_SHATTER_RESONANCE_REQ ) );
 		send_to_char( buf, ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_DIRGESINGER_SHATTER_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DIRGESINGER_SHATTER_MANA_COST );
-	ch->rage -= acfg( ACFG_DIRGESINGER_SHATTER_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DIRGESINGER_SHATTER_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_SHATTER_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_DIRGESINGER_SHATTER_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	dam = number_range( 200, 400 ) + ch->rage * 3;
@@ -140,7 +140,7 @@ void do_shatter( CHAR_DATA *ch, char *argument ) {
 	damage( ch, victim, dam, gsn_punch );
 
 	/* Disarm chance - knock weapon to ground, never destroy */
-	if ( number_percent() < acfg( ACFG_DIRGESINGER_SHATTER_DISARM_CHANCE ) ) {
+	if ( number_percent() < cfg( CFG_ABILITY_DIRGESINGER_SHATTER_DISARM_CHANCE ) ) {
 		if ( ( obj = get_eq_char( victim, WEAR_WIELD ) ) != NULL ) {
 			act( "The sonic blast knocks $p from $N's grasp!", ch, obj, victim, TO_CHAR );
 			act( "The sonic blast knocks $p from your grasp!", ch, obj, victim, TO_VICT );
@@ -167,12 +167,12 @@ void do_battlehymn( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Your battle hymn is already resonating.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_BATTLEHYMN_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_BATTLEHYMN_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	ch->mana -= acfg( ACFG_DIRGESINGER_BATTLEHYMN_MANA_COST );
-	ch->pcdata->powers[DIRGE_BATTLEHYMN_ACTIVE] = acfg( ACFG_DIRGESINGER_BATTLEHYMN_DURATION );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_BATTLEHYMN_MANA_COST );
+	ch->pcdata->powers[DIRGE_BATTLEHYMN_ACTIVE] = cfg( CFG_ABILITY_DIRGESINGER_BATTLEHYMN_DURATION );
 
 	act( "You begin a fierce battle hymn, sonic energy crackling around your fists!", ch, NULL, NULL, TO_CHAR );
 	act( "$n begins a fierce battle hymn, sonic energy crackling around $s fists!", ch, NULL, NULL, TO_ROOM );
@@ -198,17 +198,17 @@ void do_dirge( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_DIRGE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_DIRGE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->powers[DIRGE_DIRGE_STACKS] >= acfg( ACFG_DIRGESINGER_DIRGE_MAX_STACKS ) ) {
+	if ( ch->pcdata->powers[DIRGE_DIRGE_STACKS] >= cfg( CFG_ABILITY_DIRGESINGER_DIRGE_MAX_STACKS ) ) {
 		send_to_char( "Your dirge has reached maximum intensity.\n\r", ch );
 		return;
 	}
-	ch->mana -= acfg( ACFG_DIRGESINGER_DIRGE_MANA_COST );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_DIRGE_MANA_COST );
 	ch->pcdata->powers[DIRGE_DIRGE_STACKS]++;
-	ch->pcdata->powers[DIRGE_DIRGE_TICKS] = acfg( ACFG_DIRGESINGER_DIRGE_DURATION );
+	ch->pcdata->powers[DIRGE_DIRGE_TICKS] = cfg( CFG_ABILITY_DIRGESINGER_DIRGE_DURATION );
 
 	/* Build resonance */
 	resonance_cap = IS_CLASS( ch, CLASS_SIREN ) ? 150 : 100;
@@ -245,19 +245,19 @@ void do_thunderclap( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_THUNDERCLAP_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_DIRGESINGER_THUNDERCLAP_RESONANCE_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_RESONANCE_REQ ) ) {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You need at least %d resonance to use thunderclap.\n\r", acfg( ACFG_DIRGESINGER_THUNDERCLAP_RESONANCE_REQ ) );
+		sprintf( buf, "You need at least %d resonance to use thunderclap.\n\r", cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_RESONANCE_REQ ) );
 		send_to_char( buf, ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_DIRGESINGER_THUNDERCLAP_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DIRGESINGER_THUNDERCLAP_MANA_COST );
-	ch->rage -= acfg( ACFG_DIRGESINGER_THUNDERCLAP_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	act( "You clap your hands together, unleashing a devastating sonic shockwave!", ch, NULL, NULL, TO_CHAR );
@@ -292,13 +292,13 @@ void do_ironsong( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Your ironsong barrier is already active.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_IRONSONG_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_IRONSONG_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	ch->mana -= acfg( ACFG_DIRGESINGER_IRONSONG_MANA_COST );
-	ch->pcdata->powers[DIRGE_IRONSONG_ACTIVE] = acfg( ACFG_DIRGESINGER_IRONSONG_DURATION );
-	ch->pcdata->stats[DIRGE_ARMOR_BONUS] = acfg( ACFG_DIRGESINGER_IRONSONG_ABSORB_AMOUNT );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_IRONSONG_MANA_COST );
+	ch->pcdata->powers[DIRGE_IRONSONG_ACTIVE] = cfg( CFG_ABILITY_DIRGESINGER_IRONSONG_DURATION );
+	ch->pcdata->stats[DIRGE_ARMOR_BONUS] = cfg( CFG_ABILITY_DIRGESINGER_IRONSONG_ABSORB_AMOUNT );
 
 	act( "You weave a protective song of iron, a shimmering sonic barrier surrounding you!", ch, NULL, NULL, TO_CHAR );
 	act( "$n weaves a protective song, a shimmering sonic barrier surrounding $m!", ch, NULL, NULL, TO_ROOM );
@@ -321,12 +321,12 @@ void do_cadence( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You are already moving to an accelerated cadence.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_CADENCE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_CADENCE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	ch->mana -= acfg( ACFG_DIRGESINGER_CADENCE_MANA_COST );
-	ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] = acfg( ACFG_DIRGESINGER_CADENCE_DURATION );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_CADENCE_MANA_COST );
+	ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] = cfg( CFG_ABILITY_DIRGESINGER_CADENCE_DURATION );
 
 	act( "You begin a rapid cadence, your movements blurring with speed!", ch, NULL, NULL, TO_CHAR );
 	act( "$n begins a rapid cadence, $s movements blurring with speed!", ch, NULL, NULL, TO_ROOM );
@@ -351,13 +351,13 @@ void do_dissonance( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_DISSONANCE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_DISSONANCE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_DIRGESINGER_DISSONANCE_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DIRGESINGER_DISSONANCE_MANA_COST );
-	ch->pcdata->powers[DIRGE_DISSONANCE_TICKS] = acfg( ACFG_DIRGESINGER_DISSONANCE_DURATION );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DIRGESINGER_DISSONANCE_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_DISSONANCE_MANA_COST );
+	ch->pcdata->powers[DIRGE_DISSONANCE_TICKS] = cfg( CFG_ABILITY_DIRGESINGER_DISSONANCE_DURATION );
 
 	act( "You weave a discordant melody, scrambling $N's concentration!", ch, NULL, victim, TO_CHAR );
 	act( "$n weaves a discordant melody, scrambling your concentration!", ch, NULL, victim, TO_VICT );
@@ -381,20 +381,20 @@ void do_rally( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Iron Voice level 2 to use rally. See #Rsongtrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_RALLY_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_RALLY_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_DIRGESINGER_RALLY_RESONANCE_REQ ) ) {
-		sprintf( buf, "You need at least %d resonance to rally your allies.\n\r", acfg( ACFG_DIRGESINGER_RALLY_RESONANCE_REQ ) );
+	if ( ch->rage < cfg( CFG_ABILITY_DIRGESINGER_RALLY_RESONANCE_REQ ) ) {
+		sprintf( buf, "You need at least %d resonance to rally your allies.\n\r", cfg( CFG_ABILITY_DIRGESINGER_RALLY_RESONANCE_REQ ) );
 		send_to_char( buf, ch );
 		return;
 	}
-	ch->mana -= acfg( ACFG_DIRGESINGER_RALLY_MANA_COST );
-	ch->rage -= acfg( ACFG_DIRGESINGER_RALLY_RESONANCE_COST );
+	ch->mana -= cfg( CFG_ABILITY_DIRGESINGER_RALLY_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_DIRGESINGER_RALLY_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
-	heal = acfg( ACFG_DIRGESINGER_RALLY_HEAL_AMOUNT );
+	heal = cfg( CFG_ABILITY_DIRGESINGER_RALLY_HEAL_AMOUNT );
 
 	act( "You raise your voice in an inspiring rally, healing wounds around you!", ch, NULL, NULL, TO_CHAR );
 	act( "$n raises $s voice in an inspiring rally!", ch, NULL, NULL, TO_ROOM );
@@ -425,7 +425,7 @@ void do_warsong( CHAR_DATA *ch, char *argument ) {
 		act( "$n's warsong fades into silence.", ch, NULL, NULL, TO_ROOM );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_DIRGESINGER_WARSONG_MANA_DRAIN_PER_TICK ) * 2 ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DIRGESINGER_WARSONG_MANA_DRAIN_PER_TICK ) * 2 ) {
 		send_to_char( "You don't have enough mana to sustain a warsong.\n\r", ch );
 		return;
 	}
@@ -559,7 +559,7 @@ void update_dirgesinger( CHAR_DATA *ch ) {
 	/* Dirge DOT processing */
 	if ( ch->pcdata->powers[DIRGE_DIRGE_TICKS] > 0 ) {
 		if ( ch->fighting != NULL ) {
-			int dot_dam = acfg( ACFG_DIRGESINGER_DIRGE_TICK_DAMAGE ) * ch->pcdata->powers[DIRGE_DIRGE_STACKS];
+			int dot_dam = cfg( CFG_ABILITY_DIRGESINGER_DIRGE_TICK_DAMAGE ) * ch->pcdata->powers[DIRGE_DIRGE_STACKS];
 			damage( ch, ch->fighting, dot_dam, gsn_punch );
 		}
 		ch->pcdata->powers[DIRGE_DIRGE_TICKS]--;
@@ -592,7 +592,7 @@ void update_dirgesinger( CHAR_DATA *ch ) {
 
 	/* Warsong sustained mana drain */
 	if ( ch->pcdata->powers[DIRGE_WARSONG_ACTIVE] == 1 ) {
-		int drain = acfg( ACFG_DIRGESINGER_WARSONG_MANA_DRAIN_PER_TICK );
+		int drain = cfg( CFG_ABILITY_DIRGESINGER_WARSONG_MANA_DRAIN_PER_TICK );
 		if ( ch->mana >= drain )
 			ch->mana -= drain;
 		else {

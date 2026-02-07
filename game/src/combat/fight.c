@@ -21,7 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 #include "dirgesinger.h"
 #include "psion.h"
 #include "dragonkin.h"
@@ -1027,7 +1027,7 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		/* Dirgesinger cadence: extra attacks when active */
 		if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) &&
 			ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] > 0 )
-			count += acfg( ACFG_DIRGESINGER_CADENCE_EXTRA_ATTACKS );
+			count += cfg( CFG_ABILITY_DIRGESINGER_CADENCE_EXTRA_ATTACKS );
 		/* Dragonkin/Wyrm: Storm attunement + Might 3 = extra attack */
 		if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_DRAGONKIN ) || IS_CLASS( ch, CLASS_WYRM ) ) &&
 			ch->pcdata->powers[DRAGON_ATTUNEMENT] == ATTUNE_STORM &&
@@ -1260,8 +1260,8 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	 * Bonuses.
 	 */
 	dam += char_damroll( ch );
-	if ( !IS_AWAKE( victim ) ) dam *= balance.sleep_damage_multiplier;
-	if ( !IS_NPC( ch ) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12 ) dam = dam + ( dam * ( UMIN( balance.wpn_dam_skill_cap, ( ch->wpn[dt - 1000] + 1 ) ) / balance.wpn_dam_divisor ) );
+	if ( !IS_AWAKE( victim ) ) dam *= cfg( CFG_COMBAT_SLEEP_DAMAGE_MULTIPLIER );
+	if ( !IS_NPC( ch ) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12 ) dam = dam + ( dam * ( UMIN( cfg( CFG_COMBAT_WPN_DAM_SKILL_CAP ), ( ch->wpn[dt - 1000] + 1 ) ) / cfg( CFG_COMBAT_WPN_DAM_DIVISOR ) ) );
 
 	/* Other Resistances */
 
@@ -1271,7 +1271,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	}
 
 	/* damage reduction */
-	if ( !IS_NPC( ch ) && !IS_NPC( victim ) ) dam /= balance.pvp_damage_divisor; /* slow down pk */
+	if ( !IS_NPC( ch ) && !IS_NPC( victim ) ) dam /= cfg( CFG_COMBAT_PVP_DAMAGE_DIVISOR ); /* slow down pk */
 	if ( IS_NPC( ch ) && dam > 2000 ) dam = 2000 + ( dam - 2000 ) / 2; /* mob damage >2000 halved */
 	if ( dam <= 0 ) dam = 5;
 
@@ -1279,7 +1279,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	if ( !IS_NPC( ch ) ) {
 		int ulvl = ch->pcdata->upgrade_level;
 		if ( ulvl >= 1 && ulvl <= 5 )
-			dam = dam * balance.upgrade_dmg[ulvl - 1] / 100;
+			dam = dam * cfg_upgrade_dmg( ulvl ) / 100;
 	}
 
 	/*
@@ -1289,7 +1289,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 		dam *= ( 1 + ch->power[DISC_VAMP_POTE] / 15 );
 
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_TANARRI ) ) {
-		if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT ) ) dam = dam * balance.dmg_mult_tanarri_might / 100;
+		if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT ) ) dam = dam * cfg( CFG_COMBAT_DMG_MULT_TANARRI_MIGHT ) / 100;
 	}
 
 	/*
@@ -1298,8 +1298,8 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_ANGEL ) ) dam *= ( 1 + ch->pcdata->powers[ANGEL_JUSTICE] / 10 );
 
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) && IS_DEMPOWER( ch, DEM_MIGHT ) )
-		dam = dam * balance.dmg_mult_demon_might / 100;
-	if ( !IS_NPC( ch ) && !IS_NPC( victim ) && IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) && IS_CLASS( victim, CLASS_SHAPESHIFTER ) ) dam = dam * balance.dmg_mult_uk_vs_shape / 100;
+		dam = dam * cfg( CFG_COMBAT_DMG_MULT_DEMON_MIGHT ) / 100;
+	if ( !IS_NPC( ch ) && !IS_NPC( victim ) && IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) && IS_CLASS( victim, CLASS_SHAPESHIFTER ) ) dam = dam * cfg( CFG_COMBAT_DMG_MULT_UK_VS_SHAPE ) / 100;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MAGE ) ) {
 		if ( dt == gsn_mageshield && ch->pcdata->powers[PINVOKE] > 6 ) dam = (int) ( dam * 1.4 );
 		if ( dt == gsn_mageshield && ch->pcdata->powers[PINVOKE] > 9 ) dam = (int) ( dam * 1.4 );
@@ -1307,10 +1307,10 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_NINJA ) ) {
 		int belt = ch->pcdata->rank;
 		if ( belt >= BELT_ONE && belt <= BELT_TEN )
-			dam = dam * balance.dmg_mult_ninja_belt[belt - BELT_ONE] / 100;
+			dam = dam * cfg_ninja_belt_mult( belt - BELT_ONE + 1 ) / 100;
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_STRONGARMS ) )
-		dam = dam * balance.dmg_mult_demon_strongarms / 100;
+		dam = dam * cfg( CFG_COMBAT_DMG_MULT_DEMON_STRONGARMS ) / 100;
 
 	if ( IS_NPC( victim ) ) {
 
@@ -1367,7 +1367,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	/* Wyrm: ancientwrath damage bonus */
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WYRM ) &&
 		ch->pcdata->powers[DRAGON_ANCIENTWRATH] > 0 )
-		dam = dam * ( 100 + acfg( ACFG_WYRM_ANCIENTWRATH_DAMAGE_BONUS ) ) / 100;
+		dam = dam * ( 100 + cfg( CFG_ABILITY_WYRM_ANCIENTWRATH_DAMAGE_BONUS ) ) / 100;
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SHAPESHIFTER ) ) {
 		if ( victim->pcdata->powers[SHAPE_FORM] == FAERIE_FORM && victim->pcdata->powers[FAERIE_LEVEL] > 0 ) {
 			int growl = number_range( 1, 50 );
@@ -1575,7 +1575,7 @@ int cap_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 	}
 	/* Wyrm: base damage reduction + bonus in wyrmform */
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WYRM ) ) {
-		dam = dam * ( 100 - acfg( ACFG_WYRM_DAMAGE_REDUCTION ) ) / 100;
+		dam = dam * ( 100 - cfg( CFG_ABILITY_WYRM_DAMAGE_REDUCTION ) ) / 100;
 		if ( victim->pcdata->powers[DRAGON_WYRMFORM] > 0 )
 			dam = dam * 80 / 100;  /* Additional 20% DR in wyrmform */
 	}
@@ -1645,170 +1645,170 @@ bool can_bypass( CHAR_DATA *ch, CHAR_DATA *victim ) {
 }
 
 void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
-	int max_dam = balance.base_damcap;
+	int max_dam = cfg( CFG_COMBAT_BASE_DAMCAP );
 	int i = 0;
 
 	if ( !IS_NPC( ch ) ) {
-		if ( ch->pcdata->upgrade_level > 0 ) max_dam += ch->pcdata->upgrade_level * balance.upgrade_damcap_per_level;
-		if ( ch->generation >= 1 && ch->generation <= 5 ) max_dam += balance.gen_damcap[ch->generation - 1];
+		if ( ch->pcdata->upgrade_level > 0 ) max_dam += ch->pcdata->upgrade_level * cfg( CFG_PROGRESSION_UPGRADE_DAMCAP_PER_LEVEL );
+		if ( ch->generation >= 1 && ch->generation <= 5 ) max_dam += cfg_gen_damcap( ch->generation );
 		if ( IS_CLASS( ch, CLASS_MAGE ) ) {
-			if ( IS_ITEMAFF( ch, ITEMA_BEAST ) ) max_dam += balance.damcap_mage_beast;
-			max_dam += balance.damcap_mage;
+			if ( IS_ITEMAFF( ch, ITEMA_BEAST ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_MAGE_BEAST );
+			max_dam += cfg( CFG_COMBAT_DAMCAP_MAGE );
 		}
 		if ( IS_CLASS( ch, CLASS_TANARRI ) ) {
 			if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT ) ) max_dam += 500;
-			max_dam += ch->pcdata->rank * balance.damcap_tanarri_per_rank;
+			max_dam += ch->pcdata->rank * cfg( CFG_COMBAT_DAMCAP_TANARRI_PER_RANK );
 		}
 		if ( IS_CLASS( ch, CLASS_LICH ) ) {
-			max_dam += balance.damcap_lich_base;
-			if ( ch->pcdata->powers[CON_LORE] > 4 ) max_dam += balance.damcap_lich_lore;
-			if ( ch->pcdata->powers[DEATH_LORE] > 4 ) max_dam += balance.damcap_lich_lore;
-			if ( ch->pcdata->powers[LIFE_LORE] > 4 ) max_dam += balance.damcap_lich_lore;
-			if ( ch->pcdata->powers[NECROMANTIC] > 4 ) max_dam += balance.damcap_lich_lore;
-			if ( ch->pcdata->powers[CHAOS_MAGIC] > 4 ) max_dam += balance.damcap_lich_lore;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_LICH_BASE );
+			if ( ch->pcdata->powers[CON_LORE] > 4 ) max_dam += cfg( CFG_COMBAT_DAMCAP_LICH_LORE );
+			if ( ch->pcdata->powers[DEATH_LORE] > 4 ) max_dam += cfg( CFG_COMBAT_DAMCAP_LICH_LORE );
+			if ( ch->pcdata->powers[LIFE_LORE] > 4 ) max_dam += cfg( CFG_COMBAT_DAMCAP_LICH_LORE );
+			if ( ch->pcdata->powers[NECROMANTIC] > 4 ) max_dam += cfg( CFG_COMBAT_DAMCAP_LICH_LORE );
+			if ( ch->pcdata->powers[CHAOS_MAGIC] > 4 ) max_dam += cfg( CFG_COMBAT_DAMCAP_LICH_LORE );
 		}
 		if ( IS_CLASS( ch, CLASS_ANGEL ) ) {
-			max_dam += ch->pcdata->powers[ANGEL_JUSTICE] * balance.damcap_angel_per_power;
-			max_dam += ch->pcdata->powers[ANGEL_PEACE] * balance.damcap_angel_per_power;
-			max_dam += ch->pcdata->powers[ANGEL_HARMONY] * balance.damcap_angel_per_power;
-			max_dam += ch->pcdata->powers[ANGEL_LOVE] * balance.damcap_angel_per_power;
+			max_dam += ch->pcdata->powers[ANGEL_JUSTICE] * cfg( CFG_COMBAT_DAMCAP_ANGEL_PER_POWER );
+			max_dam += ch->pcdata->powers[ANGEL_PEACE] * cfg( CFG_COMBAT_DAMCAP_ANGEL_PER_POWER );
+			max_dam += ch->pcdata->powers[ANGEL_HARMONY] * cfg( CFG_COMBAT_DAMCAP_ANGEL_PER_POWER );
+			max_dam += ch->pcdata->powers[ANGEL_LOVE] * cfg( CFG_COMBAT_DAMCAP_ANGEL_PER_POWER );
 		}
 		if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) {
-			max_dam += balance.damcap_shape_base;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_SHAPE_BASE );
 			if ( ch->pcdata->powers[SHAPE_FORM] == TIGER_FORM )
-				max_dam += ch->pcdata->powers[TIGER_LEVEL] * balance.damcap_shape_tiger;
+				max_dam += ch->pcdata->powers[TIGER_LEVEL] * cfg( CFG_COMBAT_DAMCAP_SHAPE_TIGER );
 			else if ( ch->pcdata->powers[SHAPE_FORM] == HYDRA_FORM )
-				max_dam += ch->pcdata->powers[HYDRA_LEVEL] * balance.damcap_shape_hydra;
+				max_dam += ch->pcdata->powers[HYDRA_LEVEL] * cfg( CFG_COMBAT_DAMCAP_SHAPE_HYDRA );
 			else if ( ch->pcdata->powers[SHAPE_FORM] == BULL_FORM )
-				max_dam += ch->pcdata->powers[BULL_LEVEL] * balance.damcap_shape_bull;
+				max_dam += ch->pcdata->powers[BULL_LEVEL] * cfg( CFG_COMBAT_DAMCAP_SHAPE_BULL );
 			else if ( ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM )
-				max_dam += ch->pcdata->powers[FAERIE_LEVEL] * balance.damcap_shape_faerie;
+				max_dam += ch->pcdata->powers[FAERIE_LEVEL] * cfg( CFG_COMBAT_DAMCAP_SHAPE_FAERIE );
 		}
 		if ( IS_CLASS( ch, CLASS_DROW ) ) {
-			max_dam += balance.damcap_drow_base;
-			if ( IS_SET( ch->newbits, NEW_DROWHATE ) ) max_dam += balance.damcap_drow_hate;
-			if ( IS_SET( ch->newbits, NEW_DFORM ) ) max_dam += balance.damcap_drow_form;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_DROW_BASE );
+			if ( IS_SET( ch->newbits, NEW_DROWHATE ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROW_HATE );
+			if ( IS_SET( ch->newbits, NEW_DFORM ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROW_FORM );
 		}
 		if ( IS_CLASS( ch, CLASS_DEMON ) && ch->in_room != NULL ) {
 			max_dam += ch->power[DISC_DAEM_ATTA] * 50;
-			max_dam += balance.damcap_demon_base;
-			if ( ch->pcdata->souls > 0 ) max_dam += UMIN( balance.damcap_demon_soul_cap, balance.damcap_demon_soul_mult * ch->pcdata->souls );
-			if ( ch->in_room->vnum >= 93420 && ch->in_room->vnum <= 93426 ) max_dam += balance.damcap_demon_hell;
-			max_dam += ( ch->pcdata->stats[DEMON_POWER] * balance.damcap_demon_power_mult );
+			max_dam += cfg( CFG_COMBAT_DAMCAP_DEMON_BASE );
+			if ( ch->pcdata->souls > 0 ) max_dam += UMIN( cfg( CFG_COMBAT_DAMCAP_DEMON_SOUL_CAP ), cfg( CFG_COMBAT_DAMCAP_DEMON_SOUL_MULT ) * ch->pcdata->souls );
+			if ( ch->in_room->vnum >= 93420 && ch->in_room->vnum <= 93426 ) max_dam += cfg( CFG_COMBAT_DAMCAP_DEMON_HELL );
+			max_dam += ( ch->pcdata->stats[DEMON_POWER] * cfg( CFG_COMBAT_DAMCAP_DEMON_POWER_MULT ) );
 		}
 		if ( IS_CLASS( ch, CLASS_DROID ) ) {
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 0 ) max_dam += balance.damcap_droid_per_limb;
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 1 ) max_dam += balance.damcap_droid_per_limb;
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 2 ) max_dam += balance.damcap_droid_per_limb;
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 3 ) max_dam += balance.damcap_droid_per_limb;
-			if ( ch->pcdata->powers[CYBORG_LIMBS] > 4 ) max_dam += balance.damcap_droid_per_limb;
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 0 ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROID_PER_LIMB );
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 1 ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROID_PER_LIMB );
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 2 ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROID_PER_LIMB );
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 3 ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROID_PER_LIMB );
+			if ( ch->pcdata->powers[CYBORG_LIMBS] > 4 ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROID_PER_LIMB );
 		}
 		if ( IS_CLASS( ch, CLASS_MONK ) ) {
-			max_dam += ( ch->monkab[COMBAT] * balance.damcap_monk_combat_mult );
-			if ( ch->chi[CURRENT] > 0 ) max_dam += ch->chi[CURRENT] * balance.damcap_monk_chi_mult;
+			max_dam += ( ch->monkab[COMBAT] * cfg( CFG_COMBAT_DAMCAP_MONK_COMBAT_MULT ) );
+			if ( ch->chi[CURRENT] > 0 ) max_dam += ch->chi[CURRENT] * cfg( CFG_COMBAT_DAMCAP_MONK_CHI_MULT );
 		}
 		if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-			max_dam += ( ch->rage * balance.damcap_vamp_rage_mult );
+			max_dam += ( ch->rage * cfg( CFG_COMBAT_DAMCAP_VAMP_RAGE_MULT ) );
 			if ( ch->power[DISC_VAMP_POTE] > 0 )
-				max_dam += ( ch->power[DISC_VAMP_POTE] * balance.damcap_vamp_pote_mult );
+				max_dam += ( ch->power[DISC_VAMP_POTE] * cfg( CFG_COMBAT_DAMCAP_VAMP_POTE_MULT ) );
 			if ( ch->pcdata->rank == AGE_TRUEBLOOD )
-				max_dam += balance.damcap_vamp_trueblood;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_VAMP_TRUEBLOOD );
 			else if ( ch->pcdata->rank == AGE_LA_MAGRA )
-				max_dam += balance.damcap_vamp_lamagra;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_VAMP_LAMAGRA );
 			else if ( ch->pcdata->rank == AGE_METHUSELAH )
-				max_dam += balance.damcap_vamp_methuselah;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_VAMP_METHUSELAH );
 			else if ( ch->pcdata->rank == AGE_ELDER )
-				max_dam += balance.damcap_vamp_elder;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_VAMP_ELDER );
 			else if ( ch->pcdata->rank == AGE_ANCILLA )
-				max_dam += balance.damcap_vamp_ancilla;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_VAMP_ANCILLA );
 		}
 		if ( IS_CLASS( ch, CLASS_NINJA ) ) {
-			max_dam += ( ch->rage * balance.damcap_ninja_rage_mult );
+			max_dam += ( ch->rage * cfg( CFG_COMBAT_DAMCAP_NINJA_RAGE_MULT ) );
 			if ( ch->pcdata->powers[NPOWER_CHIKYU] >= 6 && ch->pcdata->powers[HARA_KIRI] > 0 )
-				max_dam += balance.damcap_ninja_chikyu_high;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_NINJA_CHIKYU_HIGH );
 			if ( ch->pcdata->powers[NPOWER_CHIKYU] >= 2 )
-				max_dam += balance.damcap_ninja_chikyu_low;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_NINJA_CHIKYU_LOW );
 		}
 		if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 			if ( ch->rage > 99 ) {
-				max_dam += ch->rage * balance.damcap_ww_rage_mult;
-				max_dam += balance.damcap_ww_high_rage;
+				max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_WW_RAGE_MULT );
+				max_dam += cfg( CFG_COMBAT_DAMCAP_WW_HIGH_RAGE );
 			}
-			if ( ch->power[DISC_WERE_PAIN] > 9 ) max_dam += balance.damcap_ww_pain;
+			if ( ch->power[DISC_WERE_PAIN] > 9 ) max_dam += cfg( CFG_COMBAT_DAMCAP_WW_PAIN );
 		}
 		if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) )
-			max_dam += ch->pcdata->powers[WEAPONSKILL] * balance.damcap_uk_wpn_mult;
+			max_dam += ch->pcdata->powers[WEAPONSKILL] * cfg( CFG_COMBAT_DAMCAP_UK_WPN_MULT );
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && ( get_eq_char( ch, WEAR_WIELD ) != NULL ) ) {
 			for ( i = 0; i < 13; i++ )
-				if ( ch->wpn[i] >= 1000 ) max_dam += balance.damcap_samurai_per_wpn;
-			max_dam += balance.damcap_samurai_base;
+				if ( ch->wpn[i] >= 1000 ) max_dam += cfg( CFG_COMBAT_DAMCAP_SAMURAI_PER_WPN );
+			max_dam += cfg( CFG_COMBAT_DAMCAP_SAMURAI_BASE );
 		}
 		/* Dirgesinger/Siren: resonance-based damcap bonus + battlehymn */
 		if ( IS_CLASS( ch, CLASS_DIRGESINGER ) ) {
-			max_dam += balance.damcap_dirgesinger_base;
-			max_dam += ch->rage * balance.damcap_dirgesinger_res_mult;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_DIRGESINGER_BASE );
+			max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_DIRGESINGER_RES_MULT );
 			if ( ch->pcdata->powers[DIRGE_BATTLEHYMN_ACTIVE] > 0 )
-				max_dam += balance.damcap_dirgesinger_battlehymn;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_DIRGESINGER_BATTLEHYMN );
 		}
 		if ( IS_CLASS( ch, CLASS_SIREN ) ) {
-			max_dam += ch->rage * balance.damcap_siren_res_mult;
+			max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_SIREN_RES_MULT );
 			if ( ch->pcdata->powers[DIRGE_ECHOSHIELD_ACTIVE] > 0 )
-				max_dam += balance.damcap_siren_echoshield;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_SIREN_ECHOSHIELD );
 		}
 		/* Psion: focus-based damcap bonus + thought shield */
 		if ( IS_CLASS( ch, CLASS_PSION ) ) {
-			max_dam += acfg( ACFG_PSION_DAMCAP_BASE );
-			max_dam += ch->rage * acfg( ACFG_PSION_DAMCAP_FOCUS_MULT );
+			max_dam += cfg( CFG_ABILITY_PSION_DAMCAP_BASE );
+			max_dam += ch->rage * cfg( CFG_ABILITY_PSION_DAMCAP_FOCUS_MULT );
 			if ( ch->pcdata->powers[PSION_THOUGHT_SHIELD] > 0 )
-				max_dam += acfg( ACFG_PSION_DAMCAP_THOUGHTSHIELD );
+				max_dam += cfg( CFG_ABILITY_PSION_DAMCAP_THOUGHTSHIELD );
 		}
 		/* Mindflayer: enhanced focus-based damcap + hivemind */
 		if ( IS_CLASS( ch, CLASS_MINDFLAYER ) ) {
-			max_dam += ch->rage * acfg( ACFG_MINDFLAYER_DAMCAP_FOCUS_MULT );
+			max_dam += ch->rage * cfg( CFG_ABILITY_MINDFLAYER_DAMCAP_FOCUS_MULT );
 			if ( ch->pcdata->powers[MIND_HIVEMIND] > 0 )
-				max_dam += acfg( ACFG_MINDFLAYER_DAMCAP_HIVEMIND );
+				max_dam += cfg( CFG_ABILITY_MINDFLAYER_DAMCAP_HIVEMIND );
 		}
 		/* Dragonkin: essence-based damcap + dragonhide */
 		if ( IS_CLASS( ch, CLASS_DRAGONKIN ) ) {
-			max_dam += balance.damcap_dragonkin_base;
-			max_dam += ch->rage * balance.damcap_dragonkin_essence_mult;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_DRAGONKIN_BASE );
+			max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_DRAGONKIN_ESSENCE_MULT );
 			if ( ch->pcdata->powers[DRAGON_DRAGONHIDE] )
-				max_dam += balance.damcap_dragonkin_dragonhide;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_DRAGONKIN_DRAGONHIDE );
 		}
 		/* Wyrm: enhanced essence scaling + wyrmform */
 		if ( IS_CLASS( ch, CLASS_WYRM ) ) {
-			max_dam += balance.damcap_dragonkin_base;
-			max_dam += ch->rage * balance.damcap_wyrm_essence_mult;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_DRAGONKIN_BASE );
+			max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_WYRM_ESSENCE_MULT );
 			if ( ch->pcdata->powers[DRAGON_WYRMFORM] > 0 )
-				max_dam += balance.damcap_wyrm_wyrmform;
+				max_dam += cfg( CFG_COMBAT_DAMCAP_WYRM_WYRMFORM );
 		}
 	}
-	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += balance.damcap_artifact;
+	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_ARTIFACT );
 
 	if ( IS_NPC( victim ) || victim->stance[0] != STANCE_MONKEY ) {
 		if ( ch->stance[0] == STANCE_BULL )
-			max_dam += balance.damcap_stance_bull;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_STANCE_BULL );
 		else if ( ch->stance[0] == STANCE_DRAGON )
-			max_dam += balance.damcap_stance_dragon;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_STANCE_DRAGON );
 		else if ( ch->stance[0] == STANCE_WOLF )
-			max_dam += balance.damcap_stance_wolf;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_STANCE_WOLF );
 		else if ( ch->stance[0] == STANCE_TIGER )
-			max_dam += balance.damcap_stance_tiger;
+			max_dam += cfg( CFG_COMBAT_DAMCAP_STANCE_TIGER );
 		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_3 ) )
-			max_dam += balance.damcap_superstance[0];
+			max_dam += cfg_superstance_cap( 3 );
 		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_2 ) )
-			max_dam += balance.damcap_superstance[1];
+			max_dam += cfg_superstance_cap( 2 );
 		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_1 ) )
-			max_dam += balance.damcap_superstance[2];
+			max_dam += cfg_superstance_cap( 1 );
 	}
 
 	if ( !IS_NPC( victim ) && ch->stance[0] != STANCE_MONKEY ) {
 		if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_3 ) )
-			max_dam -= balance.damcap_rev_superstance[0];
+			max_dam -= cfg_rev_superstance_cap( 3 );
 		else if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_2 ) )
-			max_dam -= balance.damcap_rev_superstance[1];
+			max_dam -= cfg_rev_superstance_cap( 2 );
 		else if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_1 ) )
-			max_dam -= balance.damcap_rev_superstance[2];
+			max_dam -= cfg_rev_superstance_cap( 1 );
 	}
 
 	/* Max Dam Reductions */
@@ -1822,20 +1822,20 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			max_dam += ( 250 - silver_tol );
 		/* Vampies */
 		if ( !IS_NPC( ch ) && ( IS_CLASS( victim, CLASS_VAMPIRE ) ) )
-			max_dam -= ( victim->power[DISC_VAMP_FORT] * balance.damcap_vamp_fort_mult );
+			max_dam -= ( victim->power[DISC_VAMP_FORT] * cfg( CFG_COMBAT_DAMCAP_VAMP_FORT_MULT ) );
 		if ( IS_NPC( ch ) || ch->stance[0] != STANCE_MONKEY ) {
 			if ( victim->stance[0] == STANCE_CRAB )
-				max_dam -= balance.damcap_stance_crab;
+				max_dam -= cfg( CFG_COMBAT_DAMCAP_STANCE_CRAB );
 			else if ( victim->stance[0] == STANCE_DRAGON )
-				max_dam -= balance.damcap_stance_dragon_def;
+				max_dam -= cfg( CFG_COMBAT_DAMCAP_STANCE_DRAGON_DEF );
 			else if ( victim->stance[0] == STANCE_SWALLOW )
-				max_dam -= balance.damcap_stance_swallow;
+				max_dam -= cfg( CFG_COMBAT_DAMCAP_STANCE_SWALLOW );
 		}
 		if ( IS_CLASS( victim, CLASS_DEMON ) && ( victim->in_room->vnum >= 93420 && victim->in_room->vnum <= 93426 ) )
 			max_dam = (int) ( max_dam * 0.5 );
 	}
 
-	if ( ch->level >= LEVEL_BUILDER ) max_dam = balance.builder_damcap;
+	if ( ch->level >= LEVEL_BUILDER ) max_dam = cfg( CFG_COMBAT_BUILDER_DAMCAP );
 	ch->damcap[DAM_CAP] = max_dam;
 	ch->damcap[DAM_CHANGE] = 0;
 	return;
@@ -1984,7 +1984,7 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 	/* Siren Echoshield: reflect portion of damage as sonic */
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SIREN ) &&
 		victim->pcdata->powers[DIRGE_ECHOSHIELD_ACTIVE] > 0 && dam > 0 ) {
-		int reflect = dam * acfg( ACFG_SIREN_ECHOSHIELD_REFLECT_PCT ) / 100;
+		int reflect = dam * cfg( CFG_ABILITY_SIREN_ECHOSHIELD_REFLECT_PCT ) / 100;
 		if ( reflect > 0 ) {
 			hurt_person( victim, ch, reflect );
 			act( "Your echoshield reverberates, reflecting sonic energy back at $N!", victim, NULL, ch, TO_CHAR );

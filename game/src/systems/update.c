@@ -26,7 +26,7 @@
 #include "merc.h"
 #include "mcmp.h"
 #include "profile.h"
-#include "../core/ability_config.h"
+#include "../core/cfg.h"
 
 /*
  * Local functions.
@@ -376,11 +376,11 @@ void char_update( void ) {
 
 			/* Sun damage values are configurable via ability config */
 			if ( IS_POLYAFF( ch, POLY_SERPENT ) )
-				ch->hit = ch->hit - acfg( ACFG_VAMPIRE_SUN_DAMAGE_SERPENT );
+				ch->hit = ch->hit - cfg( CFG_ABILITY_VAMPIRE_SUN_DAMAGE_SERPENT );
 			else
 				ch->hit = ch->hit - number_range(
-					acfg( ACFG_VAMPIRE_SUN_DAMAGE_MIN ),
-					acfg( ACFG_VAMPIRE_SUN_DAMAGE_MAX ) );
+					cfg( CFG_ABILITY_VAMPIRE_SUN_DAMAGE_MIN ),
+					cfg( CFG_ABILITY_VAMPIRE_SUN_DAMAGE_MAX ) );
 			update_pos( ch );
 		}
 
@@ -614,7 +614,7 @@ void weather_update( void ) {
 	buf[0] = '\0';
 
 	/* Use time_scale to slow down day cycle (default 5 = ~60 min day) */
-	if ( ++time_info.tick < balance.time_scale )
+	if ( ++time_info.tick < cfg( CFG_WORLD_TIME_SCALE ) )
 		goto weather_change;
 	time_info.tick = 0;
 

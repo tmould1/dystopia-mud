@@ -23,6 +23,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "cfg.h"
 #include "../systems/mcmp.h"
 #include "../systems/profile.h"
 #include "../db/db_sql.h"
@@ -501,8 +502,7 @@ void boot_db( bool fCopyOver ) {
 		save_notes();
 		load_disabled();
 		load_gameconfig();
-		load_balance();
-		load_ability_config();
+		load_cfg();  /* Unified config system */
 		db_class_load_registry();  /* Must load first - other class tables reference it */
 		db_class_load_display();
 		db_class_load_aura();

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 #include "dragonkin.h"
 
 /* Forward declarations for update functions */
@@ -45,7 +45,7 @@ void do_wyrmbreath( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	cost = acfg( ACFG_WYRM_WYRMBREATH_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_WYRMBREATH_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence for wyrmbreath.\n\r", cost );
 		send_to_char( buf, ch );
@@ -56,12 +56,12 @@ void do_wyrmbreath( CHAR_DATA *ch, char *argument ) {
 	attack_name = wyrm_attune_name( attune );
 
 	ch->rage -= cost;
-	dam = acfg( ACFG_WYRM_WYRMBREATH_BASE_DAMAGE ) +
-	      ( ch->rage * acfg( ACFG_WYRM_WYRMBREATH_ESSENCE_MULT ) );
+	dam = cfg( CFG_ABILITY_WYRM_WYRMBREATH_BASE_DAMAGE ) +
+	      ( ch->rage * cfg( CFG_ABILITY_WYRM_WYRMBREATH_ESSENCE_MULT ) );
 
 	/* Primordial bonus */
 	if ( ch->pcdata->powers[WYRM_TRAIN_ASCENSION] >= 3 )
-		dam = dam * ( 100 + acfg( ACFG_WYRM_PRIMORDIAL_DAMAGE_MULT ) ) / 100;
+		dam = dam * ( 100 + cfg( CFG_ABILITY_WYRM_PRIMORDIAL_DAMAGE_MULT ) ) / 100;
 
 	act( "You rear back and unleash a devastating torrent of $t!", ch, attack_name, NULL, TO_CHAR );
 	act( "$n rears back and unleashes a devastating torrent of $t!", ch, attack_name, NULL, TO_ROOM );
@@ -97,7 +97,7 @@ void do_cataclysm( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	cost = acfg( ACFG_WYRM_CATACLYSM_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_CATACLYSM_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence for cataclysm.\n\r", cost );
 		send_to_char( buf, ch );
@@ -105,11 +105,11 @@ void do_cataclysm( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->rage -= cost;
-	dam = acfg( ACFG_WYRM_CATACLYSM_BASE_DAMAGE );
+	dam = cfg( CFG_ABILITY_WYRM_CATACLYSM_BASE_DAMAGE );
 
 	/* Primordial bonus */
 	if ( ch->pcdata->powers[WYRM_TRAIN_ASCENSION] >= 3 )
-		dam = dam * ( 100 + acfg( ACFG_WYRM_PRIMORDIAL_DAMAGE_MULT ) ) / 100;
+		dam = dam * ( 100 + cfg( CFG_ABILITY_WYRM_PRIMORDIAL_DAMAGE_MULT ) ) / 100;
 
 	send_to_char( "#RYou call forth a cataclysm of elemental destruction!#n\n\r", ch );
 	act( "$n calls forth a cataclysm of elemental destruction!", ch, NULL, NULL, TO_ROOM );
@@ -164,7 +164,7 @@ void do_annihilate( CHAR_DATA *ch, char *argument ) {
 
 	if ( is_safe( ch, victim ) ) return;
 
-	cost = acfg( ACFG_WYRM_ANNIHILATE_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_ANNIHILATE_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence for annihilate.\n\r", cost );
 		send_to_char( buf, ch );
@@ -172,17 +172,17 @@ void do_annihilate( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->rage -= cost;
-	dam = acfg( ACFG_WYRM_ANNIHILATE_BASE_DAMAGE );
+	dam = cfg( CFG_ABILITY_WYRM_ANNIHILATE_BASE_DAMAGE );
 
 	/* Execute bonus: more damage when target is low HP */
-	if ( victim->hit * 100 / victim->max_hit <= acfg( ACFG_WYRM_ANNIHILATE_EXECUTE_THRESHOLD ) ) {
-		dam = dam * ( 100 + acfg( ACFG_WYRM_ANNIHILATE_EXECUTE_BONUS ) ) / 100;
+	if ( victim->hit * 100 / victim->max_hit <= cfg( CFG_ABILITY_WYRM_ANNIHILATE_EXECUTE_THRESHOLD ) ) {
+		dam = dam * ( 100 + cfg( CFG_ABILITY_WYRM_ANNIHILATE_EXECUTE_BONUS ) ) / 100;
 		send_to_char( "#RYou sense your prey's weakness and strike to annihilate!#n\n\r", ch );
 	}
 
 	/* Primordial bonus */
 	if ( ch->pcdata->powers[WYRM_TRAIN_ASCENSION] >= 3 )
-		dam = dam * ( 100 + acfg( ACFG_WYRM_PRIMORDIAL_DAMAGE_MULT ) ) / 100;
+		dam = dam * ( 100 + cfg( CFG_ABILITY_WYRM_PRIMORDIAL_DAMAGE_MULT ) ) / 100;
 
 	act( "You focus your draconic fury and strike to annihilate $N!", ch, NULL, victim, TO_CHAR );
 	act( "$n focuses draconic fury and strikes to annihilate you!", ch, NULL, victim, TO_VICT );
@@ -211,7 +211,7 @@ void do_apocalypse( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	cost = acfg( ACFG_WYRM_APOCALYPSE_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_APOCALYPSE_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence for apocalypse.\n\r", cost );
 		send_to_char( buf, ch );
@@ -219,11 +219,11 @@ void do_apocalypse( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->rage -= cost;
-	dam = acfg( ACFG_WYRM_APOCALYPSE_BASE_DAMAGE );
+	dam = cfg( CFG_ABILITY_WYRM_APOCALYPSE_BASE_DAMAGE );
 
 	/* Primordial bonus */
 	if ( ch->pcdata->powers[WYRM_TRAIN_ASCENSION] >= 3 )
-		dam = dam * ( 100 + acfg( ACFG_WYRM_PRIMORDIAL_DAMAGE_MULT ) ) / 100;
+		dam = dam * ( 100 + cfg( CFG_ABILITY_WYRM_PRIMORDIAL_DAMAGE_MULT ) ) / 100;
 
 	send_to_char( "#x160You unleash the APOCALYPSE!#n\n\r", ch );
 	act( "#x160$n unleashes the APOCALYPSE!#n", ch, NULL, NULL, TO_ROOM );
@@ -259,7 +259,7 @@ void do_dragonfear( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	cost = acfg( ACFG_WYRM_DRAGONFEAR_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_DRAGONFEAR_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence for dragonfear.\n\r", cost );
 		send_to_char( buf, ch );
@@ -267,7 +267,7 @@ void do_dragonfear( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->rage -= cost;
-	stun_chance = acfg( ACFG_WYRM_DRAGONFEAR_STUN_CHANCE );
+	stun_chance = cfg( CFG_ABILITY_WYRM_DRAGONFEAR_STUN_CHANCE );
 
 	send_to_char( "#x160You unleash your terrifying draconic presence!#n\n\r", ch );
 	act( "$n unleashes a wave of terrifying draconic presence!", ch, NULL, NULL, TO_ROOM );
@@ -311,7 +311,7 @@ void do_terrainshift( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	cost = acfg( ACFG_WYRM_TERRAINSHIFT_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_TERRAINSHIFT_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence for terrainshift.\n\r", cost );
 		send_to_char( buf, ch );
@@ -372,7 +372,7 @@ void do_dragonlord( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	cost = acfg( ACFG_WYRM_DRAGONLORD_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_DRAGONLORD_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence for dragonlord.\n\r", cost );
 		send_to_char( buf, ch );
@@ -424,7 +424,7 @@ void do_wyrmform( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	cost = acfg( ACFG_WYRM_WYRMFORM_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_WYRMFORM_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence to transform.\n\r", cost );
 		send_to_char( buf, ch );
@@ -432,7 +432,7 @@ void do_wyrmform( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->rage -= cost;
-	duration = acfg( ACFG_WYRM_WYRMFORM_DURATION );
+	duration = cfg( CFG_ABILITY_WYRM_WYRMFORM_DURATION );
 	ch->pcdata->powers[DRAGON_WYRMFORM] = duration;
 
 	send_to_char( "#x220Your body surges with primordial power as you transform into a massive dragon!#n\n\r", ch );
@@ -470,7 +470,7 @@ void do_ancientwrath( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	cost = acfg( ACFG_WYRM_ANCIENTWRATH_ESSENCE_COST );
+	cost = cfg( CFG_ABILITY_WYRM_ANCIENTWRATH_ESSENCE_COST );
 	if ( ch->rage < cost ) {
 		snprintf( buf, sizeof( buf ), "You need %d Essence for ancient wrath.\n\r", cost );
 		send_to_char( buf, ch );
@@ -478,7 +478,7 @@ void do_ancientwrath( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->rage -= cost;
-	duration = acfg( ACFG_WYRM_ANCIENTWRATH_DURATION );
+	duration = cfg( CFG_ABILITY_WYRM_ANCIENTWRATH_DURATION );
 	ch->pcdata->powers[DRAGON_ANCIENTWRATH] = duration;
 
 	send_to_char( "#RYour ancient draconic fury ignites!#n\n\r", ch );
@@ -601,7 +601,7 @@ void update_wyrm( CHAR_DATA *ch ) {
 
 	/* Primordial passive: bonus essence regen */
 	if ( ch->pcdata->powers[WYRM_TRAIN_ASCENSION] >= 3 ) {
-		int regen = acfg( ACFG_WYRM_PRIMORDIAL_ESSENCE_REGEN );
+		int regen = cfg( CFG_ABILITY_WYRM_PRIMORDIAL_ESSENCE_REGEN );
 		if ( ch->rage < WYRM_ESSENCE_MAX )
 			ch->rage = UMIN( ch->rage + regen, WYRM_ESSENCE_MAX );
 	}

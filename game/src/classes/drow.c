@@ -21,7 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 
 /*
  * Local functions.
@@ -121,64 +121,64 @@ void do_grant( CHAR_DATA *ch, char *argument ) {
 
 	if ( !str_cmp( arg2, "drowfire" ) ) {
 		inpart = DPOWER_DROWFIRE;
-		cost = acfg( ACFG_DROW_GRANT_DROWFIRE_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_DROWFIRE_COST );
 	} else if ( !str_cmp( arg2, "darkness" ) ) {
 		inpart = DPOWER_DARKNESS;
-		cost = acfg( ACFG_DROW_GRANT_DARKNESS_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_DARKNESS_COST );
 	} else if ( !str_cmp( arg2, "drowsight" ) ) {
 		inpart = DPOWER_DROWSIGHT;
-		cost = acfg( ACFG_DROW_GRANT_DROWSIGHT_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_DROWSIGHT_COST );
 	} else if ( !str_cmp( arg2, "spiderarms" ) ) {
 		inpart = DPOWER_ARMS;
-		cost = acfg( ACFG_DROW_GRANT_SPIDERARMS_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_SPIDERARMS_COST );
 	} else if ( !str_cmp( arg2, "web" ) ) {
 		inpart = DPOWER_WEB;
-		cost = acfg( ACFG_DROW_GRANT_WEB_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_WEB_COST );
 	} else if ( !str_cmp( arg2, "spiderform" ) ) {
 		inpart = DPOWER_SPIDERFORM;
-		cost = acfg( ACFG_DROW_GRANT_SPIDERFORM_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_SPIDERFORM_COST );
 	} else if ( !str_cmp( arg2, "drowhate" ) ) {
 		inpart = DPOWER_DROWHATE;
-		cost = acfg( ACFG_DROW_GRANT_DROWHATE_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_DROWHATE_COST );
 	} else if ( !str_cmp( arg2, "drowshield" ) ) {
 		inpart = DPOWER_DROWSHIELD;
-		cost = acfg( ACFG_DROW_GRANT_DROWSHIELD_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_DROWSHIELD_COST );
 	} else if ( !str_cmp( arg2, "levitation" ) ) {
 		inpart = DPOWER_LEVITATION;
-		cost = acfg( ACFG_DROW_GRANT_LEVITATION_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_LEVITATION_COST );
 	} else if ( !str_cmp( arg2, "shadowwalk" ) ) {
 		inpart = DPOWER_SHADOWWALK;
-		cost = acfg( ACFG_DROW_GRANT_SHADOWWALK_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_SHADOWWALK_COST );
 	} else if ( !str_cmp( arg2, "garotte" ) ) {
 		inpart = DPOWER_GAROTTE;
-		cost = acfg( ACFG_DROW_GRANT_GAROTTE_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_GAROTTE_COST );
 	} else if ( !str_cmp( arg2, "dgarotte" ) ) {
 		inpart = DPOWER_DGAROTTE;
-		cost = acfg( ACFG_DROW_GRANT_DGAROTTE_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_DGAROTTE_COST );
 	} else if ( !str_cmp( arg2, "drowpoison" ) ) {
 		inpart = DPOWER_DROWPOISON;
-		cost = acfg( ACFG_DROW_GRANT_DROWPOISON_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_DROWPOISON_COST );
 	} else if ( !str_cmp( arg2, "glamour" ) ) {
 		inpart = DPOWER_GLAMOUR;
-		cost = acfg( ACFG_DROW_GRANT_GLAMOUR_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_GLAMOUR_COST );
 	} else if ( !str_cmp( arg2, "confuse" ) ) {
 		inpart = DPOWER_CONFUSE;
-		cost = acfg( ACFG_DROW_GRANT_CONFUSE_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_CONFUSE_COST );
 	} else if ( !str_cmp( arg2, "earthshatter" ) ) {
 		inpart = DPOWER_EARTHSHATTER;
-		cost = acfg( ACFG_DROW_GRANT_EARTHSHATTER_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_EARTHSHATTER_COST );
 	} else if ( !str_cmp( arg2, "speed" ) ) {
 		inpart = DPOWER_SPEED;
-		cost = acfg( ACFG_DROW_GRANT_SPEED_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_SPEED_COST );
 	} else if ( !str_cmp( arg2, "toughskin" ) ) {
 		inpart = DPOWER_TOUGHSKIN;
-		cost = acfg( ACFG_DROW_GRANT_TOUGHSKIN_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_TOUGHSKIN_COST );
 	} else if ( !str_cmp( arg2, "darktendrils" ) ) {
 		inpart = DPOWER_DARKTENDRILS;
-		cost = acfg( ACFG_DROW_GRANT_DARKTENDRILS_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_DARKTENDRILS_COST );
 	} else if ( !str_cmp( arg2, "fightdance" ) ) {
 		inpart = DPOWER_FIGHTDANCE;
-		cost = acfg( ACFG_DROW_GRANT_FIGHTDANCE_COST );
+		cost = cfg( CFG_ABILITY_DROW_GRANT_FIGHTDANCE_COST );
 	} else {
 		send_to_char( "Syntax: Grant <person> <power>\n\r", ch );
 		send_to_char( "#pDrowfire #0(#r2500#0)#n,  #pDarkness #0(#r7500#0)#n,  #pDrowpoison #0(#r2500#0)#n.\n\r", ch );
@@ -191,7 +191,7 @@ void do_grant( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Warrior (0), Mage (0), Cleric (0).\n\r", ch );
 		return;
 	}
-	if ( !( ch == victim ) ) cost *= acfg( ACFG_DROW_GRANT_OTHER_MULTIPLIER );
+	if ( !( ch == victim ) ) cost *= cfg( CFG_ABILITY_DROW_GRANT_OTHER_MULTIPLIER );
 
 	if ( IS_SET( victim->pcdata->powers[1], inpart ) ) {
 		send_to_char( "They have already got that power.\n\r", ch );
@@ -237,7 +237,7 @@ void do_chaosblast( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	if ( ch->mana < acfg( ACFG_DROW_CHAOSBLAST_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DROW_CHAOSBLAST_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
@@ -248,8 +248,8 @@ void do_chaosblast( CHAR_DATA *ch, char *argument ) {
 	act( "You concentrate your power on $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n concentrates $s power on you.", ch, NULL, victim, TO_VICT );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
-	WAIT_STATE( ch, acfg( ACFG_DROW_CHAOSBLAST_COOLDOWN ) );
-	use_mana( ch, acfg( ACFG_DROW_CHAOSBLAST_MANA_COST ) );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DROW_CHAOSBLAST_COOLDOWN ) );
+	use_mana( ch, cfg( CFG_ABILITY_DROW_CHAOSBLAST_MANA_COST ) );
 	return;
 }
 
@@ -308,7 +308,7 @@ void do_drowcreate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->practice < acfg( ACFG_DROW_DROWCREATE_PRIMAL_COST ) ) {
+	if ( ch->practice < cfg( CFG_ABILITY_DROW_DROWCREATE_PRIMAL_COST ) ) {
 		send_to_char( "It costs 60 points of primal to create a piece of drow armour.\n\r", ch );
 		return;
 	}
@@ -318,7 +318,7 @@ void do_drowcreate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	ch->practice -= acfg( ACFG_DROW_DROWCREATE_PRIMAL_COST );
+	ch->practice -= cfg( CFG_ABILITY_DROW_DROWCREATE_PRIMAL_COST );
 	obj = create_object( pObjIndex, 50 );
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	obj_to_char( obj, ch );
@@ -355,7 +355,7 @@ void do_drowfire( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DROW_DROWFIRE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DROW_DROWFIRE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
@@ -364,8 +364,8 @@ void do_drowfire( CHAR_DATA *ch, char *argument ) {
 	spelltype = skill_table[sn].target;
 	level = (int) ( ch->spl[spelltype] * 1.5 );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
-	WAIT_STATE( ch, acfg( ACFG_DROW_DROWFIRE_COOLDOWN ) );
-	use_mana( ch, acfg( ACFG_DROW_DROWFIRE_MANA_COST ) );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DROW_DROWFIRE_COOLDOWN ) );
+	use_mana( ch, cfg( CFG_ABILITY_DROW_DROWFIRE_MANA_COST ) );
 	return;
 }
 void do_heal( CHAR_DATA *ch, char *argument ) {
@@ -376,16 +376,16 @@ void do_heal( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DROW_HEAL_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DROW_HEAL_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	use_mana( ch, acfg( ACFG_DROW_HEAL_MANA_COST ) );
+	use_mana( ch, cfg( CFG_ABILITY_DROW_HEAL_MANA_COST ) );
 	heal_char( ch, ch->spl[BLUE_MAGIC] * 3 );
 	send_to_char( "Lloth heals you.\n\r", ch );
 	act( "$n is healed by Lloth.", ch, NULL, NULL, TO_ROOM );
-	WAIT_STATE( ch, acfg( ACFG_DROW_HEAL_COOLDOWN ) );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DROW_HEAL_COOLDOWN ) );
 	return;
 }
 
@@ -429,7 +429,7 @@ void do_shadowwalk( CHAR_DATA *ch, char *argument ) {
 	}
 	location = victim->in_room;
 
-	if ( ch->move < acfg( ACFG_DROW_SHADOWWALK_MOVE_COST ) ) {
+	if ( ch->move < cfg( CFG_ABILITY_DROW_SHADOWWALK_MOVE_COST ) ) {
 		send_to_char( "You are too tired to go shadowwalking.\n\r", ch );
 		return;
 	}
@@ -444,7 +444,7 @@ void do_shadowwalk( CHAR_DATA *ch, char *argument ) {
 
 	act( "You walk into the shadows.", ch, NULL, NULL, TO_CHAR );
 	act( "$n walks into the shadows.", ch, NULL, NULL, TO_ROOM );
-	use_move( ch, acfg( ACFG_DROW_SHADOWWALK_MOVE_COST ) );
+	use_move( ch, cfg( CFG_ABILITY_DROW_SHADOWWALK_MOVE_COST ) );
 	char_from_room( ch );
 	char_to_room( ch, location );
 	do_look( ch, "auto" );
@@ -535,13 +535,13 @@ void do_spiderform( CHAR_DATA *ch, char *argument ) {
 		stc( "You return to your normal form.\n\r", ch );
 		free_string( ch->morph );
 		ch->morph = str_dup( "" );
-		ch->hitroll -= acfg( ACFG_DROW_SPIDERFORM_HITROLL_BONUS );
-		ch->damroll -= acfg( ACFG_DROW_SPIDERFORM_DAMROLL_BONUS );
-		ch->armor += acfg( ACFG_DROW_SPIDERFORM_ARMOR_BONUS );
+		ch->hitroll -= cfg( CFG_ABILITY_DROW_SPIDERFORM_HITROLL_BONUS );
+		ch->damroll -= cfg( CFG_ABILITY_DROW_SPIDERFORM_DAMROLL_BONUS );
+		ch->armor += cfg( CFG_ABILITY_DROW_SPIDERFORM_ARMOR_BONUS );
 		REMOVE_BIT( ch->newbits, NEW_DFORM );
 		REMOVE_BIT( ch->newbits, THIRD_HAND );
 		REMOVE_BIT( ch->newbits, FOURTH_HAND );
-		WAIT_STATE( ch, acfg( ACFG_DROW_SPIDERFORM_REVERT_COOLDOWN ) );
+		WAIT_STATE( ch, cfg( CFG_ABILITY_DROW_SPIDERFORM_REVERT_COOLDOWN ) );
 		return;
 	}
 
@@ -552,9 +552,9 @@ void do_spiderform( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "%s the giant mylochar", ch->name );
 		free_string( ch->morph );
 		ch->morph = str_dup( buf );
-		ch->hitroll += acfg( ACFG_DROW_SPIDERFORM_HITROLL_BONUS );
-		ch->damroll += acfg( ACFG_DROW_SPIDERFORM_DAMROLL_BONUS );
-		ch->armor -= acfg( ACFG_DROW_SPIDERFORM_ARMOR_BONUS );
+		ch->hitroll += cfg( CFG_ABILITY_DROW_SPIDERFORM_HITROLL_BONUS );
+		ch->damroll += cfg( CFG_ABILITY_DROW_SPIDERFORM_DAMROLL_BONUS );
+		ch->armor -= cfg( CFG_ABILITY_DROW_SPIDERFORM_ARMOR_BONUS );
 		SET_BIT( ch->newbits, NEW_DFORM );
 		SET_BIT( ch->newbits, THIRD_HAND );
 		SET_BIT( ch->newbits, FOURTH_HAND );
@@ -728,14 +728,14 @@ void do_darkness( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DROW_DARKNESS_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DROW_DARKNESS_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana to summon the darkness.\n\r", ch );
 		return;
 	}
 
 	send_to_char( "You summon a globe of darkness.\n\r", ch );
 	act( "$n summons a globe of darkness.", ch, NULL, NULL, TO_ROOM );
-	use_mana( ch, acfg( ACFG_DROW_DARKNESS_MANA_COST ) );
+	use_mana( ch, cfg( CFG_ABILITY_DROW_DARKNESS_MANA_COST ) );
 	if ( IS_SET( ch->extra, TIED_UP ) ) {
 		REMOVE_BIT( ch->extra, TIED_UP );
 		blah = TRUE;
@@ -831,7 +831,7 @@ void do_confuse( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->move < acfg( ACFG_DROW_CONFUSE_MOVE_COST ) ) {
+	if ( ch->move < cfg( CFG_ABILITY_DROW_CONFUSE_MOVE_COST ) ) {
 		send_to_char( "You need 75 move to confuse your opponent.\n\r", ch );
 		return;
 	}
@@ -840,16 +840,16 @@ void do_confuse( CHAR_DATA *ch, char *argument ) {
 	act( "You attempt to confuse $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n attempts to confuse $N.", ch, NULL, victim, TO_NOTVICT );
 
-	use_move( ch, acfg( ACFG_DROW_CONFUSE_MOVE_COST ) );
+	use_move( ch, cfg( CFG_ABILITY_DROW_CONFUSE_MOVE_COST ) );
 
-	if ( number_percent() > acfg( ACFG_DROW_CONFUSE_FAIL_THRESHOLD ) ) {
+	if ( number_percent() > cfg( CFG_ABILITY_DROW_CONFUSE_FAIL_THRESHOLD ) ) {
 		send_to_char( "You failed.\n\r", ch );
 		return;
 	}
 
 	else {
 		do_flee( victim, "" );
-		WAIT_STATE( ch, acfg( ACFG_DROW_CONFUSE_COOLDOWN ) );
+		WAIT_STATE( ch, cfg( CFG_ABILITY_DROW_CONFUSE_COOLDOWN ) );
 		return;
 	}
 
@@ -869,13 +869,13 @@ void do_earthshatter( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DROW_EARTHSHATTER_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DROW_EARTHSHATTER_MANA_COST ) ) {
 		send_to_char( "You need more mana.\n\r", ch );
 		return;
 	}
 
 	level = ch->spl[PURPLE_MAGIC];
-	use_mana( ch, acfg( ACFG_DROW_EARTHSHATTER_MANA_COST ) );
+	use_mana( ch, cfg( CFG_ABILITY_DROW_EARTHSHATTER_MANA_COST ) );
 
 	send_to_char( "You summon the power of the underworld, shattering the earth.\n\r", ch );
 	act( "$n causes the earth to shatter", ch, NULL, NULL, TO_ROOM );
@@ -890,6 +890,6 @@ void do_earthshatter( CHAR_DATA *ch, char *argument ) {
 			dam /= 2;
 		damage( ch, vch, dam, skill_lookup( "earthquake" ) );
 	}
-	WAIT_STATE( ch, acfg( ACFG_DROW_EARTHSHATTER_COOLDOWN ) );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DROW_EARTHSHATTER_COOLDOWN ) );
 	return;
 }

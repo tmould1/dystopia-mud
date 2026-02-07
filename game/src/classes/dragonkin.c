@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 #include "dragonkin.h"
 
 /* Forward declarations for update functions */
@@ -152,8 +152,8 @@ void do_essencemeditate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	WAIT_STATE( ch, acfg( ACFG_DRAGONKIN_MEDITATE_COOLDOWN ) );
-	gain = IS_CLASS( ch, CLASS_WYRM ) ? 20 : acfg( ACFG_DRAGONKIN_MEDITATE_GAIN );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DRAGONKIN_MEDITATE_COOLDOWN ) );
+	gain = IS_CLASS( ch, CLASS_WYRM ) ? 20 : cfg( CFG_ABILITY_DRAGONKIN_MEDITATE_GAIN );
 	ch->rage = UMIN( ch->rage + gain, essence_max );
 
 	act( "You meditate, channeling draconic power within.", ch, NULL, NULL, TO_CHAR );
@@ -189,20 +189,20 @@ void do_dragonbreath( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DRAGONKIN_DRAGONBREATH_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	if ( ch->rage < acfg( ACFG_DRAGONKIN_DRAGONBREATH_ESSENCE_COST ) ) {
-		sprintf( buf, "You need at least %d Essence to use dragonbreath.\n\r", acfg( ACFG_DRAGONKIN_DRAGONBREATH_ESSENCE_COST ) );
+	if ( ch->rage < cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_ESSENCE_COST ) ) {
+		sprintf( buf, "You need at least %d Essence to use dragonbreath.\n\r", cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_ESSENCE_COST ) );
 		send_to_char( buf, ch );
 		return;
 	}
 
-	WAIT_STATE( ch, acfg( ACFG_DRAGONKIN_DRAGONBREATH_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DRAGONKIN_DRAGONBREATH_MANA_COST );
-	ch->rage -= acfg( ACFG_DRAGONKIN_DRAGONBREATH_ESSENCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_ESSENCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	attune = ch->pcdata->powers[DRAGON_ATTUNEMENT];
@@ -224,7 +224,7 @@ void do_dragonbreath( CHAR_DATA *ch, char *argument ) {
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
 		if ( IS_NPC( vch ) && vch->fighting != ch ) continue;
 
-		dam = number_range( acfg( ACFG_DRAGONKIN_DRAGONBREATH_DAM_MIN ), acfg( ACFG_DRAGONKIN_DRAGONBREATH_DAM_MAX ) );
+		dam = number_range( cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_DAM_MIN ), cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_DAM_MAX ) );
 		dam += ch->rage * 2;
 		dam += ch->pcdata->powers[DRAGON_TRAIN_BREATH] * 50;
 
@@ -259,26 +259,26 @@ void do_searingblast( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DRAGONKIN_SEARINGBLAST_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	if ( ch->rage < acfg( ACFG_DRAGONKIN_SEARINGBLAST_ESSENCE_COST ) ) {
-		sprintf( buf, "You need at least %d Essence to use Searing Blast.\n\r", acfg( ACFG_DRAGONKIN_SEARINGBLAST_ESSENCE_COST ) );
+	if ( ch->rage < cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_ESSENCE_COST ) ) {
+		sprintf( buf, "You need at least %d Essence to use Searing Blast.\n\r", cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_ESSENCE_COST ) );
 		send_to_char( buf, ch );
 		return;
 	}
 
-	WAIT_STATE( ch, acfg( ACFG_DRAGONKIN_SEARINGBLAST_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DRAGONKIN_SEARINGBLAST_MANA_COST );
-	ch->rage -= acfg( ACFG_DRAGONKIN_SEARINGBLAST_ESSENCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_ESSENCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	attune = ch->pcdata->powers[DRAGON_ATTUNEMENT];
 	if ( attune < 0 || attune > 3 ) attune = 0;
 
-	dam = number_range( acfg( ACFG_DRAGONKIN_SEARINGBLAST_DAM_MIN ), acfg( ACFG_DRAGONKIN_SEARINGBLAST_DAM_MAX ) );
+	dam = number_range( cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_DAM_MIN ), cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_DAM_MAX ) );
 	dam += ch->rage * 3;
 	dam += ch->pcdata->powers[DRAGON_TRAIN_BREATH] * 75;
 
@@ -292,7 +292,7 @@ void do_searingblast( CHAR_DATA *ch, char *argument ) {
 	/* Apply DoT - stack up to max */
 	if ( ch->pcdata->powers[DRAGON_DOT_STACKS] < 5 ) {
 		ch->pcdata->powers[DRAGON_DOT_STACKS]++;
-		ch->pcdata->powers[DRAGON_DOT_TICKS] = acfg( ACFG_DRAGONKIN_SEARINGBLAST_DOT_DURATION );
+		ch->pcdata->powers[DRAGON_DOT_TICKS] = cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_DOT_DURATION );
 		send_to_char( "The elemental energy lingers, burning your foe!\n\r", ch );
 	}
 
@@ -332,20 +332,20 @@ void do_infernalstorm( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DRAGONKIN_INFERNALSTORM_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	if ( ch->rage < acfg( ACFG_DRAGONKIN_INFERNALSTORM_ESSENCE_COST ) ) {
-		sprintf( buf, "You need at least %d Essence to unleash Infernal Storm.\n\r", acfg( ACFG_DRAGONKIN_INFERNALSTORM_ESSENCE_COST ) );
+	if ( ch->rage < cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_ESSENCE_COST ) ) {
+		sprintf( buf, "You need at least %d Essence to unleash Infernal Storm.\n\r", cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_ESSENCE_COST ) );
 		send_to_char( buf, ch );
 		return;
 	}
 
-	WAIT_STATE( ch, acfg( ACFG_DRAGONKIN_INFERNALSTORM_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DRAGONKIN_INFERNALSTORM_MANA_COST );
-	ch->rage -= acfg( ACFG_DRAGONKIN_INFERNALSTORM_ESSENCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_ESSENCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	attune = ch->pcdata->powers[DRAGON_ATTUNEMENT];
@@ -367,7 +367,7 @@ void do_infernalstorm( CHAR_DATA *ch, char *argument ) {
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
 		if ( IS_NPC( vch ) && vch->fighting != ch ) continue;
 
-		dam = number_range( acfg( ACFG_DRAGONKIN_INFERNALSTORM_DAM_MIN ), acfg( ACFG_DRAGONKIN_INFERNALSTORM_DAM_MAX ) );
+		dam = number_range( cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_DAM_MIN ), cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_DAM_MAX ) );
 		dam += ch->rage * 4;
 		dam += ch->pcdata->powers[DRAGON_TRAIN_BREATH] * 100;
 
@@ -397,16 +397,16 @@ void do_scaleshield( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DRAGONKIN_SCALESHIELD_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DRAGONKIN_SCALESHIELD_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_DRAGONKIN_SCALESHIELD_MANA_COST );
-	ch->pcdata->powers[DRAGON_SCALESHIELD] = acfg( ACFG_DRAGONKIN_SCALESHIELD_DURATION );
+	ch->mana -= cfg( CFG_ABILITY_DRAGONKIN_SCALESHIELD_MANA_COST );
+	ch->pcdata->powers[DRAGON_SCALESHIELD] = cfg( CFG_ABILITY_DRAGONKIN_SCALESHIELD_DURATION );
 
 	/* Base absorb + bonus from training level */
-	absorb_amount = acfg( ACFG_DRAGONKIN_SCALESHIELD_ABSORB );
+	absorb_amount = cfg( CFG_ABILITY_DRAGONKIN_SCALESHIELD_ABSORB );
 	absorb_amount += ch->pcdata->powers[DRAGON_TRAIN_SCALES] * 500;
 	ch->pcdata->stats[DRAGON_SCALESHIELD_HP] = absorb_amount;
 
@@ -461,13 +461,13 @@ void do_primalwarding( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DRAGONKIN_PRIMALWARDING_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DRAGONKIN_PRIMALWARDING_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_DRAGONKIN_PRIMALWARDING_MANA_COST );
-	ch->pcdata->powers[DRAGON_PRIMALWARDING] = acfg( ACFG_DRAGONKIN_PRIMALWARDING_DURATION );
+	ch->mana -= cfg( CFG_ABILITY_DRAGONKIN_PRIMALWARDING_MANA_COST );
+	ch->pcdata->powers[DRAGON_PRIMALWARDING] = cfg( CFG_ABILITY_DRAGONKIN_PRIMALWARDING_DURATION );
 
 	act( "You invoke the ancient warding of dragons, surrounding yourself with elemental protection!", ch, NULL, NULL, TO_CHAR );
 	act( "$n invokes an ancient draconic ward, shimmering with elemental energy!", ch, NULL, NULL, TO_ROOM );
@@ -500,18 +500,18 @@ void do_dragonclaw( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DRAGONKIN_DRAGONCLAW_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DRAGONKIN_DRAGONCLAW_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	WAIT_STATE( ch, acfg( ACFG_DRAGONKIN_DRAGONCLAW_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DRAGONKIN_DRAGONCLAW_MANA_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DRAGONKIN_DRAGONCLAW_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DRAGONKIN_DRAGONCLAW_MANA_COST );
 
 	attune = ch->pcdata->powers[DRAGON_ATTUNEMENT];
 	if ( attune < 0 || attune > 3 ) attune = 0;
 
-	dam = number_range( acfg( ACFG_DRAGONKIN_DRAGONCLAW_DAM_MIN ), acfg( ACFG_DRAGONKIN_DRAGONCLAW_DAM_MAX ) );
+	dam = number_range( cfg( CFG_ABILITY_DRAGONKIN_DRAGONCLAW_DAM_MIN ), cfg( CFG_ABILITY_DRAGONKIN_DRAGONCLAW_DAM_MAX ) );
 	dam += ch->rage * 2;
 	dam += ch->pcdata->powers[DRAGON_TRAIN_MIGHT] * 30;
 
@@ -549,13 +549,13 @@ void do_drakewings( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DRAGONKIN_DRAKEWINGS_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DRAGONKIN_DRAKEWINGS_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_DRAGONKIN_DRAKEWINGS_MANA_COST );
-	ch->pcdata->powers[DRAGON_DRAKEWINGS] = acfg( ACFG_DRAGONKIN_DRAKEWINGS_DURATION );
+	ch->mana -= cfg( CFG_ABILITY_DRAGONKIN_DRAKEWINGS_MANA_COST );
+	ch->pcdata->powers[DRAGON_DRAKEWINGS] = cfg( CFG_ABILITY_DRAGONKIN_DRAKEWINGS_DURATION );
 
 	/* Grant flight */
 	SET_BIT( ch->affected_by, AFF_FLYING );
@@ -589,23 +589,23 @@ void do_dragonrush( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->mana < acfg( ACFG_DRAGONKIN_DRAGONRUSH_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	if ( ch->rage < acfg( ACFG_DRAGONKIN_DRAGONRUSH_ESSENCE_COST ) ) {
-		sprintf( buf, "You need at least %d Essence to use Dragonrush.\n\r", acfg( ACFG_DRAGONKIN_DRAGONRUSH_ESSENCE_COST ) );
+	if ( ch->rage < cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_ESSENCE_COST ) ) {
+		sprintf( buf, "You need at least %d Essence to use Dragonrush.\n\r", cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_ESSENCE_COST ) );
 		send_to_char( buf, ch );
 		return;
 	}
 
-	WAIT_STATE( ch, acfg( ACFG_DRAGONKIN_DRAGONRUSH_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_DRAGONKIN_DRAGONRUSH_MANA_COST );
-	ch->rage -= acfg( ACFG_DRAGONKIN_DRAGONRUSH_ESSENCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_ESSENCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
-	dam = number_range( acfg( ACFG_DRAGONKIN_DRAGONRUSH_DAM_MIN ), acfg( ACFG_DRAGONKIN_DRAGONRUSH_DAM_MAX ) );
+	dam = number_range( cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_DAM_MIN ), cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_DAM_MAX ) );
 	dam += ch->rage * 3;
 	dam += ch->pcdata->powers[DRAGON_TRAIN_MIGHT] * 60;
 
@@ -726,12 +726,12 @@ void update_dragonkin( CHAR_DATA *ch ) {
 
 	/* Combat: gain Essence */
 	if ( ch->fighting != NULL ) {
-		int gain = IS_CLASS( ch, CLASS_WYRM ) ? 4 : acfg( ACFG_DRAGONKIN_ESSENCE_COMBAT_GAIN );
+		int gain = IS_CLASS( ch, CLASS_WYRM ) ? 4 : cfg( CFG_ABILITY_DRAGONKIN_ESSENCE_COMBAT_GAIN );
 		ch->rage = UMIN( ch->rage + gain, essence_max );
 	}
 	/* Out of combat: decay Essence */
 	else if ( ch->rage > 0 ) {
-		int decay = IS_CLASS( ch, CLASS_WYRM ) ? 1 : acfg( ACFG_DRAGONKIN_ESSENCE_DECAY_RATE );
+		int decay = IS_CLASS( ch, CLASS_WYRM ) ? 1 : cfg( CFG_ABILITY_DRAGONKIN_ESSENCE_DECAY_RATE );
 		ch->rage = UMAX( ch->rage - decay, 0 );
 	}
 

@@ -1329,8 +1329,7 @@ const struct cmd_type cmd_table[] =
 		{ "mcmptest",    do_mcmptest,    POS_DEAD, 8, LOG_NORMAL, 0, 0, 0 },
 		{ "gameconfig",  do_gameconfig,  POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "audioconfig", do_audioconfig, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
-		{ "balance",     do_balance,     POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
-		{ "ability",     do_ability,     POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
+		{ "cfg",         do_cfg,         POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 
 		/*
 		 * End of list.

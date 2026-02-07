@@ -9,7 +9,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
-#include "ability_config.h"
+#include "cfg.h"
 #include "dirgesinger.h"
 
 /* Forward declarations for update functions */
@@ -35,19 +35,19 @@ void do_bansheewail( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_BANSHEEWAIL_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_SIREN_BANSHEEWAIL_RESONANCE_REQ ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_RESONANCE_REQ ) ) {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You need at least %d resonance to unleash a banshee wail.\n\r", acfg( ACFG_SIREN_BANSHEEWAIL_RESONANCE_REQ ) );
+		sprintf( buf, "You need at least %d resonance to unleash a banshee wail.\n\r", cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_RESONANCE_REQ ) );
 		send_to_char( buf, ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_SIREN_BANSHEEWAIL_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_SIREN_BANSHEEWAIL_MANA_COST );
-	ch->rage -= acfg( ACFG_SIREN_BANSHEEWAIL_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	act( "You open your mouth and release an unearthly #Rbanshee wail#n!", ch, NULL, NULL, TO_CHAR );
@@ -61,7 +61,7 @@ void do_bansheewail( CHAR_DATA *ch, char *argument ) {
 		if ( IS_NPC( vch ) && vch->fighting != ch ) continue;
 
 		/* Instakill weak mobs */
-		if ( IS_NPC( vch ) && vch->max_hit < acfg( ACFG_SIREN_BANSHEEWAIL_INSTAKILL_THRESHOLD ) ) {
+		if ( IS_NPC( vch ) && vch->max_hit < cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_INSTAKILL_THRESHOLD ) ) {
 			act( "The wail tears $N apart!", ch, NULL, vch, TO_CHAR );
 			act( "The wail tears you apart!", ch, NULL, vch, TO_VICT );
 			raw_kill( vch );
@@ -93,17 +93,17 @@ void do_soulrend( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_SOULREND_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_SOULREND_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_SIREN_SOULREND_RESONANCE_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_SIREN_SOULREND_RESONANCE_COST ) ) {
 		send_to_char( "You don't have enough resonance.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_SIREN_SOULREND_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_SIREN_SOULREND_MANA_COST );
-	ch->rage -= acfg( ACFG_SIREN_SOULREND_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_SIREN_SOULREND_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_SOULREND_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_SIREN_SOULREND_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	dam = number_range( 250, 500 ) + ch->rage * 3;
@@ -114,7 +114,7 @@ void do_soulrend( CHAR_DATA *ch, char *argument ) {
 
 	/* Split damage: bypass_pct goes direct to HP, rest through normal damage */
 	{
-		int bypass_pct = acfg( ACFG_SIREN_SOULREND_BYPASS_PCT );
+		int bypass_pct = cfg( CFG_ABILITY_SIREN_SOULREND_BYPASS_PCT );
 		int spirit_dam = dam * bypass_pct / 100;
 		int normal_dam = dam - spirit_dam;
 		damage( ch, victim, normal_dam, gsn_punch );
@@ -150,12 +150,12 @@ void do_crescendo( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_CRESCENDO_MANA_PER_STAGE ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_CRESCENDO_MANA_PER_STAGE ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
 
-	ch->mana -= acfg( ACFG_SIREN_CRESCENDO_MANA_PER_STAGE );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_CRESCENDO_MANA_PER_STAGE );
 	stage = ch->pcdata->powers[DIRGE_CRESCENDO_STAGE];
 
 	if ( stage < 3 ) {
@@ -181,7 +181,7 @@ void do_crescendo( CHAR_DATA *ch, char *argument ) {
 
 	/* Stage 3 -> Finale: devastating release */
 	ch->pcdata->powers[DIRGE_CRESCENDO_STAGE] = 0;
-	dam = number_range( 400, 800 ) * acfg( ACFG_SIREN_CRESCENDO_FINALE_DAM_MULT );
+	dam = number_range( 400, 800 ) * cfg( CFG_ABILITY_SIREN_CRESCENDO_FINALE_DAM_MULT );
 	dam += ch->rage * 5;
 
 	/* Consume all resonance for the finale */
@@ -215,17 +215,17 @@ void do_cacophony( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_CACOPHONY_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_CACOPHONY_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_SIREN_CACOPHONY_RESONANCE_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_SIREN_CACOPHONY_RESONANCE_COST ) ) {
 		send_to_char( "You don't have enough resonance.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_SIREN_CACOPHONY_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_SIREN_CACOPHONY_MANA_COST );
-	ch->rage -= acfg( ACFG_SIREN_CACOPHONY_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_SIREN_CACOPHONY_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_CACOPHONY_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_SIREN_CACOPHONY_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	act( "You unleash a cacophony of maddening dissonance!", ch, NULL, NULL, TO_CHAR );
@@ -288,11 +288,11 @@ void do_enthrall( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "They are already charmed.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_ENTHRALL_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_ENTHRALL_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_SIREN_ENTHRALL_RESONANCE_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_SIREN_ENTHRALL_RESONANCE_COST ) ) {
 		send_to_char( "You don't have enough resonance.\n\r", ch );
 		return;
 	}
@@ -300,8 +300,8 @@ void do_enthrall( CHAR_DATA *ch, char *argument ) {
 		/* Reuse a field to count enthralled - or just check followers */
 	}
 
-	ch->mana -= acfg( ACFG_SIREN_ENTHRALL_MANA_COST );
-	ch->rage -= acfg( ACFG_SIREN_ENTHRALL_RESONANCE_COST );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_ENTHRALL_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_SIREN_ENTHRALL_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	if ( victim->fighting != NULL ) stop_fighting( victim, TRUE );
@@ -331,17 +331,17 @@ void do_sirensong( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need Domination level 2 to use siren song. See #Rvoicetrain#n.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_SIRENSONG_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_SIRENSONG_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_SIREN_SIRENSONG_RESONANCE_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_SIREN_SIRENSONG_RESONANCE_COST ) ) {
 		send_to_char( "You don't have enough resonance.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_SIREN_SIRENSONG_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_SIREN_SIRENSONG_MANA_COST );
-	ch->rage -= acfg( ACFG_SIREN_SIRENSONG_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_SIREN_SIRENSONG_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_SIRENSONG_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_SIREN_SIRENSONG_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	act( "You sing an enchanting siren song that fills the room!", ch, NULL, NULL, TO_CHAR );
@@ -392,17 +392,17 @@ void do_commandvoice( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You cannot command yourself.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_COMMANDVOICE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_COMMANDVOICE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_SIREN_COMMANDVOICE_RESONANCE_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_SIREN_COMMANDVOICE_RESONANCE_COST ) ) {
 		send_to_char( "You don't have enough resonance.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_SIREN_COMMANDVOICE_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_SIREN_COMMANDVOICE_MANA_COST );
-	ch->rage -= acfg( ACFG_SIREN_COMMANDVOICE_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_SIREN_COMMANDVOICE_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_COMMANDVOICE_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_SIREN_COMMANDVOICE_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	act( "You speak with the #x147Command Voice#n, compelling $N!", ch, NULL, victim, TO_CHAR );
@@ -445,24 +445,24 @@ void do_mesmerize( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_MESMERIZE_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_MESMERIZE_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_SIREN_MESMERIZE_RESONANCE_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_SIREN_MESMERIZE_RESONANCE_COST ) ) {
 		send_to_char( "You don't have enough resonance.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_SIREN_MESMERIZE_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_SIREN_MESMERIZE_MANA_COST );
-	ch->rage -= acfg( ACFG_SIREN_MESMERIZE_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_SIREN_MESMERIZE_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_MESMERIZE_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_SIREN_MESMERIZE_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	act( "You sing a hypnotic melody, mesmerizing $N!", ch, NULL, victim, TO_CHAR );
 	act( "$n sings a hypnotic melody, and you are unable to move!", ch, NULL, victim, TO_VICT );
 	act( "$n sings a hypnotic melody, mesmerizing $N!", ch, NULL, victim, TO_NOTVICT );
 
-	WAIT_STATE( victim, acfg( ACFG_SIREN_MESMERIZE_STUN_DURATION ) * PULSE_VIOLENCE );
+	WAIT_STATE( victim, cfg( CFG_ABILITY_SIREN_MESMERIZE_STUN_DURATION ) * PULSE_VIOLENCE );
 	return;
 }
 
@@ -482,12 +482,12 @@ void do_echoshield( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Your echoshield is already active.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_ECHOSHIELD_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_ECHOSHIELD_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	ch->mana -= acfg( ACFG_SIREN_ECHOSHIELD_MANA_COST );
-	ch->pcdata->powers[DIRGE_ECHOSHIELD_ACTIVE] = acfg( ACFG_SIREN_ECHOSHIELD_DURATION );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_ECHOSHIELD_MANA_COST );
+	ch->pcdata->powers[DIRGE_ECHOSHIELD_ACTIVE] = cfg( CFG_ABILITY_SIREN_ECHOSHIELD_DURATION );
 
 	act( "You surround yourself with an #x147echoshield#n of reverberating sound!", ch, NULL, NULL, TO_CHAR );
 	act( "$n surrounds $mself with an #x147echoshield#n of reverberating sound!", ch, NULL, NULL, TO_ROOM );
@@ -515,17 +515,17 @@ void do_ariaofunmaking( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You aren't fighting anyone.\n\r", ch );
 		return;
 	}
-	if ( ch->mana < acfg( ACFG_SIREN_ARIAOFUNMAKING_MANA_COST ) ) {
+	if ( ch->mana < cfg( CFG_ABILITY_SIREN_ARIAOFUNMAKING_MANA_COST ) ) {
 		send_to_char( "You don't have enough mana.\n\r", ch );
 		return;
 	}
-	if ( ch->rage < acfg( ACFG_SIREN_ARIAOFUNMAKING_RESONANCE_COST ) ) {
+	if ( ch->rage < cfg( CFG_ABILITY_SIREN_ARIAOFUNMAKING_RESONANCE_COST ) ) {
 		send_to_char( "You don't have enough resonance.\n\r", ch );
 		return;
 	}
-	WAIT_STATE( ch, acfg( ACFG_SIREN_ARIAOFUNMAKING_COOLDOWN ) );
-	ch->mana -= acfg( ACFG_SIREN_ARIAOFUNMAKING_MANA_COST );
-	ch->rage -= acfg( ACFG_SIREN_ARIAOFUNMAKING_RESONANCE_COST );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_SIREN_ARIAOFUNMAKING_COOLDOWN ) );
+	ch->mana -= cfg( CFG_ABILITY_SIREN_ARIAOFUNMAKING_MANA_COST );
+	ch->rage -= cfg( CFG_ABILITY_SIREN_ARIAOFUNMAKING_RESONANCE_COST );
 	if ( ch->rage < 0 ) ch->rage = 0;
 
 	act( "You sing the #RAria of Unmaking#n, stripping $N's protections!", ch, NULL, victim, TO_CHAR );
@@ -541,7 +541,7 @@ void do_ariaofunmaking( CHAR_DATA *ch, char *argument ) {
 	}
 
 	/* PvP resist: players have a chance to resist protection stripping */
-	if ( !IS_NPC( victim ) && number_percent() <= acfg( ACFG_SIREN_ARIAOFUNMAKING_PVP_RESIST_PCT ) ) {
+	if ( !IS_NPC( victim ) && number_percent() <= cfg( CFG_ABILITY_SIREN_ARIAOFUNMAKING_PVP_RESIST_PCT ) ) {
 		send_to_char( "Your target's willpower resists the unmaking of their protections!\n\r", ch );
 	} else {
 		if ( IS_AFFECTED( victim, AFF_SANCTUARY ) ) {

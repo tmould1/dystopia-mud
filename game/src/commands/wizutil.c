@@ -203,12 +203,13 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( !IS_NPC( ch ) && ch->class != 0 ) {
-		send_to_char( "You already have a class.\n\r", ch );
-		return;
-	}
 	if ( ch->level < 3 ) {
 		send_to_char( "You must be avatar to selfclass.\n\r", ch );
+		return;
+	}
+
+	if ( ch->class != 0 ) {
+		send_to_char( "You already have a class.\n\r", ch );
 		return;
 	}
 
@@ -279,6 +280,23 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 
 	/* Apply class */
 	do_clearstats2( ch, "" );
+
+	/* Clear class-specific fields before applying new class */
+	{
+		int i;
+		ch->beast = 15;
+		ch->warp = 0;
+		ch->rage = 0;
+		ch->generation = 0;
+		ch->cclan = 0;
+
+		/* Clear pcdata powers and stats arrays (used by dragonkin, angel, samurai, etc.) */
+		for ( i = 0; i < 20; i++ )
+			ch->pcdata->powers[i] = 0;
+		for ( i = 0; i < 12; i++ )
+			ch->pcdata->stats[i] = 0;
+	}
+
 	ch->class = reg->class_id;
 	apply_class_starting( ch, reg->class_id );
 	send_to_char( reg->selfclass_message, ch );

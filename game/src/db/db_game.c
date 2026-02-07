@@ -7,7 +7,7 @@
 
 #include "db_util.h"
 #include "db_game.h"
-#include "../core/ability_config.h"
+#include "../core/cfg.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +23,6 @@ extern TOP_BOARD top_board[MAX_TOP_PLAYERS + 1];
 extern LEADER_BOARD leader_board;
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
-extern BALANCE_DATA balance;
 extern BOARD_DATA boards[];
 extern BAN_DATA *ban_list;
 extern DISABLED_DATA *disabled_first;
@@ -133,6 +132,11 @@ static const char *GAME_SCHEMA_SQL =
 	");"
 
 	"CREATE TABLE IF NOT EXISTS ability_config ("
+	"  key   TEXT PRIMARY KEY,"
+	"  value INTEGER NOT NULL"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS config ("
 	"  key   TEXT PRIMARY KEY,"
 	"  value INTEGER NOT NULL"
 	");"
@@ -1132,84 +1136,11 @@ void db_game_save_disabled( void ) {
 
 
 /*
- * Balance config (game.db)
- * Key-value pairs for combat balance tuning constants.
- *
- * Uses the balance_map defined in balance.c to iterate all fields.
+ * Unified config (game.db)
  */
-typedef struct balance_entry {
-	const char *key;
-	int        *field;
-} balance_entry_t;
-
-extern balance_entry_t balance_map[];
-
-void db_game_load_balance( void ) {
+void db_game_load_cfg( void ) {
 	sqlite3_stmt *stmt;
-	const char *sql = "SELECT key, value FROM balance_config";
-	int i;
-
-	if ( !game_db )
-		return;
-
-	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
-		return;
-
-	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		const char *key = col_text( stmt, 0 );
-		const char *val = col_text( stmt, 1 );
-
-		for ( i = 0; balance_map[i].key != NULL; i++ ) {
-			if ( !str_cmp( key, balance_map[i].key ) ) {
-				*balance_map[i].field = atoi( val );
-				break;
-			}
-		}
-	}
-
-	sqlite3_finalize( stmt );
-}
-
-void db_game_save_balance( void ) {
-	sqlite3 *db;
-	sqlite3_stmt *stmt;
-	const char *sql = "INSERT OR REPLACE INTO balance_config (key, value) VALUES (?,?)";
-	char buf[64];
-	int i;
-
-	db = db_game_open_for_write();
-	if ( !db )
-		return;
-
-	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK ) {
-		sqlite3_close( db );
-		return;
-	}
-
-	db_begin( db );
-
-	for ( i = 0; balance_map[i].key != NULL; i++ ) {
-		sqlite3_reset( stmt );
-		snprintf( buf, sizeof( buf ), "%d", *balance_map[i].field );
-		sqlite3_bind_text( stmt, 1, balance_map[i].key, -1, SQLITE_STATIC );
-		sqlite3_bind_text( stmt, 2, buf, -1, SQLITE_TRANSIENT );
-		sqlite3_step( stmt );
-	}
-
-	sqlite3_finalize( stmt );
-	db_commit( db );
-	sqlite3_close( db );
-}
-
-
-/*
- * Ability config (game.db)
- * Per-ability balance constants.  Uses the acfg_table defined in
- * ability_config.c to iterate all entries.
- */
-void db_game_load_ability_config( void ) {
-	sqlite3_stmt *stmt;
-	const char *sql = "SELECT key, value FROM ability_config";
+	const char *sql = "SELECT key, value FROM config";
 	char buf[MAX_STRING_LENGTH];
 	int count = 0;
 
@@ -1222,10 +1153,10 @@ void db_game_load_ability_config( void ) {
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 		const char *key_str = col_text( stmt, 0 );
 		int val             = sqlite3_column_int( stmt, 1 );
-		acfg_key_t key      = acfg_key_from_string( key_str );
+		cfg_key_t key       = cfg_key_from_string( key_str );
 
-		if ( key != ACFG_COUNT ) {
-			acfg_set( key, val );
+		if ( key != CFG_COUNT ) {
+			cfg_set( key, val );
 			count++;
 		}
 	}
@@ -1234,15 +1165,15 @@ void db_game_load_ability_config( void ) {
 
 	if ( count > 0 ) {
 		snprintf( buf, sizeof( buf ),
-			"  Loaded %d ability config overrides from game.db", count );
+			"  Loaded %d config overrides from game.db", count );
 		log_string( buf );
 	}
 }
 
-void db_game_save_ability_config( void ) {
+void db_game_save_cfg( void ) {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	const char *sql = "INSERT OR REPLACE INTO ability_config (key, value) VALUES (?,?)";
+	const char *sql = "INSERT OR REPLACE INTO config (key, value) VALUES (?,?)";
 	int i, total;
 
 	db = db_game_open_for_write();
@@ -1257,9 +1188,9 @@ void db_game_save_ability_config( void ) {
 	db_begin( db );
 
 	/* Only save values that differ from defaults */
-	total = acfg_count();
+	total = cfg_count();
 	for ( i = 0; i < total; i++ ) {
-		acfg_entry_t *e = acfg_entry_by_index( i );
+		cfg_entry_t *e = cfg_entry_by_index( i );
 		if ( !e || e->value == e->default_value )
 			continue;
 		sqlite3_reset( stmt );
