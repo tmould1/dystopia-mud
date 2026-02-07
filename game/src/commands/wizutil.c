@@ -224,10 +224,12 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 
 			bracket = db_class_get_bracket( reg->class_id );
 			if ( bracket && bracket->open_bracket && bracket->close_bracket ) {
-				/* Format: open + primary + name + close (close_bracket includes its own colors) */
+				/* Get title_color from generation (sourced from brackets.primary_color) */
+				const CLASS_GENERATION *gen = db_class_get_generation( reg->class_id, 0 );
+				const char *color = ( gen && gen->title_color ) ? gen->title_color : "";
 				snprintf( buf, sizeof( buf ), "%s%s%s%s",
 					bracket->open_bracket,
-					bracket->primary_color ? bracket->primary_color : "",
+					color,
 					reg->class_name,
 					bracket->close_bracket );
 			} else {

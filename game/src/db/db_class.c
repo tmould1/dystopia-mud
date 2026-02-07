@@ -110,6 +110,7 @@ void db_class_load_display( void ) {
 
 	for ( i = 0; i < gen_count; i++ ) {
 		if ( gen_cache[i].title ) free_string( gen_cache[i].title );
+		if ( gen_cache[i].title_color ) free_string( gen_cache[i].title_color );
 	}
 	gen_count = 0;
 
@@ -132,15 +133,20 @@ void db_class_load_display( void ) {
 		sqlite3_finalize( stmt );
 	}
 
-	/* Load generations */
+	/* Load generations - join with brackets to get title_color from primary_color */
 	if ( sqlite3_prepare_v2( class_db,
-			"SELECT class_id, generation, title "
-			"FROM class_generations ORDER BY class_id, generation DESC",
+			"SELECT g.class_id, g.generation, g.title, b.primary_color "
+			"FROM class_generations g "
+			"LEFT JOIN class_brackets b ON g.class_id = b.class_id "
+			"ORDER BY g.class_id, g.generation DESC",
 			-1, &stmt, NULL ) == SQLITE_OK ) {
 		while ( sqlite3_step( stmt ) == SQLITE_ROW && gen_count < MAX_CACHED_GENERATIONS ) {
+			const char *text;
 			gen_cache[gen_count].class_id   = sqlite3_column_int( stmt, 0 );
 			gen_cache[gen_count].generation = sqlite3_column_int( stmt, 1 );
 			gen_cache[gen_count].title      = str_dup( col_text( stmt, 2 ) );
+			text = (const char *)sqlite3_column_text( stmt, 3 );
+			gen_cache[gen_count].title_color = text ? str_dup( text ) : NULL;
 			gen_count++;
 		}
 		sqlite3_finalize( stmt );
@@ -161,15 +167,20 @@ const CLASS_BRACKET *db_class_get_bracket( int class_id ) {
 }
 
 const char *db_class_get_generation_title( int class_id, int generation ) {
+	const CLASS_GENERATION *gen = db_class_get_generation( class_id, generation );
+	return gen ? gen->title : NULL;
+}
+
+const CLASS_GENERATION *db_class_get_generation( int class_id, int generation ) {
 	int i;
-	const char *fallback = NULL;
+	const CLASS_GENERATION *fallback = NULL;
 
 	for ( i = 0; i < gen_count; i++ ) {
 		if ( gen_cache[i].class_id == class_id ) {
 			if ( gen_cache[i].generation == generation )
-				return gen_cache[i].title;
+				return &gen_cache[i];
 			if ( gen_cache[i].generation == 0 )
-				fallback = gen_cache[i].title;
+				fallback = &gen_cache[i];
 		}
 	}
 	return fallback;
@@ -524,6 +535,11 @@ const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_index( int index ) {
 	if ( index < 0 || index >= registry_count )
 		return NULL;
 	return &registry_cache[index];
+}
+
+const char *db_class_get_name( int class_id ) {
+	const CLASS_REGISTRY_ENTRY *reg = db_class_get_registry_by_id( class_id );
+	return reg ? reg->class_name : "Hero";
 }
 
 

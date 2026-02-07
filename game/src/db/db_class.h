@@ -33,7 +33,8 @@ typedef struct class_bracket {
 typedef struct class_generation {
 	int    class_id;       /* CLASS_* constant */
 	int    generation;     /* 1-8 for specific gen, 0 for default/fallback */
-	char   *title;         /* Generation title with colors, e.g., "#RI#0nner #RC#0ircle#n" */
+	char   *title;         /* Generation title (plain text, e.g., "Inner Circle") */
+	char   *title_color;   /* Color code for title, e.g., "#x220" (from class_brackets.primary_color) */
 } CLASS_GENERATION;
 
 typedef struct class_aura {
@@ -142,6 +143,7 @@ void db_class_close( void );
 void db_class_load_display( void );
 const CLASS_BRACKET *db_class_get_bracket( int class_id );
 const char *db_class_get_generation_title( int class_id, int generation );
+const CLASS_GENERATION *db_class_get_generation( int class_id, int generation );
 
 /* Class aura config - room aura text for class display */
 void db_class_load_aura( void );
@@ -164,6 +166,7 @@ int db_class_get_registry_count( void );
 const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_id( int class_id );
 const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_keyword( const char *keyword );
 const CLASS_REGISTRY_ENTRY *db_class_get_registry_by_index( int index );
+const char *db_class_get_name( int class_id );
 
 
 /* Class score stats - customizable score display per class */

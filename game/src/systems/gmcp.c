@@ -22,6 +22,7 @@
 #include "gmcp.h"
 #include "mcmp.h"
 #include "class.h"
+#include "../db/db_class.h"
 
 /*
  * Telnet negotiation strings for GMCP
@@ -44,28 +45,6 @@ bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
 /* External data */
 extern GAMECONFIG_DATA game_config;
 
-/*
- * Get class name from class bitmask
- */
-static const char *get_class_name( int class_bits ) {
-	if ( class_bits & CLASS_DEMON ) return "Demon";
-	if ( class_bits & CLASS_MAGE ) return "Mage";
-	if ( class_bits & CLASS_WEREWOLF ) return "Werewolf";
-	if ( class_bits & CLASS_VAMPIRE ) return "Vampire";
-	if ( class_bits & CLASS_SAMURAI ) return "Samurai";
-	if ( class_bits & CLASS_DROW ) return "Drow";
-	if ( class_bits & CLASS_MONK ) return "Monk";
-	if ( class_bits & CLASS_NINJA ) return "Ninja";
-	if ( class_bits & CLASS_LICH ) return "Lich";
-	if ( class_bits & CLASS_SHAPESHIFTER ) return "Shapeshifter";
-	if ( class_bits & CLASS_TANARRI ) return "Tanarri";
-	if ( class_bits & CLASS_ANGEL ) return "Angel";
-	if ( class_bits & CLASS_UNDEAD_KNIGHT ) return "Undead Knight";
-	if ( class_bits & CLASS_DROID ) return "Droid";
-	if ( class_bits & CLASS_DIRGESINGER ) return "Dirgesinger";
-	if ( class_bits & CLASS_SIREN ) return "Siren";
-	return "None";
-}
 
 /*
  * Get position name
@@ -246,7 +225,7 @@ void gmcp_send_status( CHAR_DATA *ch ) {
 		return;
 
 	/* Copy escaped strings to avoid static buffer issues */
-	strncpy( class_buf, json_escape( get_class_name( ch->class ) ), sizeof( class_buf ) - 1 );
+	strncpy( class_buf, json_escape( db_class_get_name( ch->class ) ), sizeof( class_buf ) - 1 );
 	class_buf[sizeof( class_buf ) - 1] = '\0';
 	strncpy( pos_buf, json_escape( get_pos_name( ch->position ) ), sizeof( pos_buf ) - 1 );
 	pos_buf[sizeof( pos_buf ) - 1] = '\0';

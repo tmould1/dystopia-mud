@@ -2859,14 +2859,15 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 
 		/*
 		 * and then the class name.
-		 * Generation titles are now loaded from class.db for easy customization.
+		 * Generation titles are loaded from class.db with title_color from brackets.
 		 * Pad to 24 visible characters for consistent column alignment.
 		 */
 		if ( gch->class > 0 ) {
-			const char *gen_title = db_class_get_generation_title( gch->class, gch->generation );
-			if ( gen_title ) {
+			const CLASS_GENERATION *gen = db_class_get_generation( gch->class, gch->generation );
+			if ( gen && gen->title ) {
 				char kav_raw[MAX_STRING_LENGTH];
-				sprintf( kav_raw, "%s%s%s", openb, gen_title, closeb );
+				const char *color = gen->title_color ? gen->title_color : "";
+				sprintf( kav_raw, "%s%s%s%s", openb, color, gen->title, closeb );
 				pad_to_visible_width( kav, sizeof( kav ), kav_raw, 24 );
 			} else {
 				pad_to_visible_width( kav, sizeof( kav ), "#nNone#n", 24 );
@@ -3820,30 +3821,6 @@ void do_spells( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 
-/* Helper to get class name from class bitfield */
-static const char *get_class_name( int class_bits ) {
-	if ( class_bits & CLASS_VAMPIRE ) return "Vampire";
-	if ( class_bits & CLASS_WEREWOLF ) return "Werewolf";
-	if ( class_bits & CLASS_DEMON ) return "Demon";
-	if ( class_bits & CLASS_MAGE ) return "Mage";
-	if ( class_bits & CLASS_MONK ) return "Monk";
-	if ( class_bits & CLASS_NINJA ) return "Ninja";
-	if ( class_bits & CLASS_DROW ) return "Drow";
-	if ( class_bits & CLASS_SAMURAI ) return "Samurai";
-	if ( class_bits & CLASS_LICH ) return "Lich";
-	if ( class_bits & CLASS_SHAPESHIFTER ) return "Shapeshifter";
-	if ( class_bits & CLASS_TANARRI ) return "Tanarri";
-	if ( class_bits & CLASS_ANGEL ) return "Angel";
-	if ( class_bits & CLASS_UNDEAD_KNIGHT ) return "Undead Knight";
-	if ( class_bits & CLASS_DROID ) return "Spider Droid";
-	if ( class_bits & CLASS_DIRGESINGER ) return "Dirgesinger";
-	if ( class_bits & CLASS_SIREN ) return "Siren";
-	if ( class_bits & CLASS_PSION ) return "Psion";
-	if ( class_bits & CLASS_MINDFLAYER ) return "Mindflayer";
-	if ( class_bits & CLASS_DRAGONKIN ) return "Dragonkin";
-	if ( class_bits & CLASS_WYRM ) return "Wyrm";
-	return "Hero";
-}
 
 /*
  * Contributed by Alander.
@@ -3915,7 +3892,7 @@ void do_commands( CHAR_DATA *ch, char *argument ) {
 
 			if ( found ) {
 				snprintf( buf, sizeof( buf ), "\n\r#C--- %s Commands (Level 3) ---#n\n\r",
-					get_class_name( ch->class ) );
+					db_class_get_name( ch->class ) );
 				send_to_char( buf, ch );
 				col = 0;
 				for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {

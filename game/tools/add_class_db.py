@@ -77,17 +77,16 @@ def insert_class_data(conn, class_data, dry_run=False):
     if "brackets" in class_data:
         brk = class_data["brackets"]
         sql = """INSERT OR REPLACE INTO class_brackets
-                 (class_id, class_name, open_bracket, close_bracket, accent_color, primary_color)
-                 VALUES (?, ?, ?, ?, ?, ?)"""
+                 (class_id, open_bracket, close_bracket, accent_color, primary_color)
+                 VALUES (?, ?, ?, ?, ?)"""
         params = (
             class_id,
-            class_name,
             brk.get("open", "#n[#n"),
             brk.get("close", "#n]#n"),
             brk.get("accent"),
             brk.get("primary")
         )
-        print(f"  - class_brackets: {params[2]}...{params[3]}")
+        print(f"  - class_brackets: {params[1]}...{params[2]}")
         if not dry_run:
             cursor.execute(sql, params)
 
@@ -296,21 +295,23 @@ CLASSES_TO_ADD = [
         },
 
         # Generation 0 = default (lowest), then 1 = highest gen, counting up
+        # NOTE: Generation titles should NOT include color codes - primary_color
+        # from brackets is applied automatically when displaying in WHO/selfclass.
         "generations": [
-            "#x220Hatchling#n",       # 0 - default
-            "#x220Dragon Primarch#n", # 1 - highest
-            "#x220Dragon Emperor#n",  # 2
-            "#x220Dragon Sovereign#n",# 3
-            "#x220Dragon Lord#n",     # 4
-            "#x220Dragon Ascendant#n",# 5
-            "#x220Ancient Dragon#n",  # 6
-            "#x220Elder Dragon#n",    # 7
-            "#x220Dragon#n",          # 8
-            "#x220Young Dragon#n",    # 9
-            "#x220Drake#n",           # 10
-            "#x220Fledgling#n",       # 11
-            "#x220Whelp#n",           # 12
-            "#x220Hatchling#n",       # 13 - lowest specific gen
+            "Hatchling",       # 0 - default
+            "Dragon Primarch", # 1 - highest
+            "Dragon Emperor",  # 2
+            "Dragon Sovereign",# 3
+            "Dragon Lord",     # 4
+            "Dragon Ascendant",# 5
+            "Ancient Dragon",  # 6
+            "Elder Dragon",    # 7
+            "Dragon",          # 8
+            "Young Dragon",    # 9
+            "Drake",           # 10
+            "Fledgling",       # 11
+            "Whelp",           # 12
+            "Hatchling",       # 13 - lowest specific gen
         ],
 
         "aura": {
@@ -381,18 +382,20 @@ CLASSES_TO_ADD = [
             "primary": "#x220"
         },
 
+        # NOTE: Generation titles should NOT include color codes - primary_color
+        # from brackets is applied automatically when displaying in WHO/selfclass.
         "generations": [
-            "#x220Young Wyrm#n",        # 0 - default
-            "#x220Primordial Wyrm#n",   # 1 - highest
-            "#x220World Wyrm#n",        # 2
-            "#x220Cataclysm Wyrm#n",    # 3
-            "#x220Apocalypse Wyrm#n",   # 4
-            "#x220Doom Wyrm#n",         # 5
-            "#x220Ancient Wyrm#n",      # 6
-            "#x220Great Wyrm#n",        # 7
-            "#x220Elder Wyrm#n",        # 8
-            "#x220Wyrm#n",              # 9
-            "#x220Young Wyrm#n",        # 10
+            "Young Wyrm",        # 0 - default
+            "Primordial Wyrm",   # 1 - highest
+            "World Wyrm",        # 2
+            "Cataclysm Wyrm",    # 3
+            "Apocalypse Wyrm",   # 4
+            "Doom Wyrm",         # 5
+            "Ancient Wyrm",      # 6
+            "Great Wyrm",        # 7
+            "Elder Wyrm",        # 8
+            "Wyrm",              # 9
+            "Young Wyrm",        # 10
         ],
 
         "aura": {
