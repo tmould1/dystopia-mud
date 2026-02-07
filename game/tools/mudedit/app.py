@@ -478,10 +478,17 @@ class MudEditorApp:
             conn = self.db_manager.get_connection(db_path)
             repository = PlayerRepository(conn)
             player_name = db_path.stem
+            tab_id = f"{category}:{db_path.stem}:{entity_type}"
+
+            def on_player_delete(path=db_path, tid=tab_id):
+                self._delete_player_file(path, tid)
+
             return PlayerEditorPanel(
                 self.notebook,
                 repository,
                 player_name,
+                db_path=db_path,
+                on_delete=on_player_delete,
                 on_status=self._set_status
             )
 
@@ -617,6 +624,34 @@ class MudEditorApp:
     def _set_status(self, message: str):
         """Set the status bar message."""
         self.status_var.set(message)
+
+    def _delete_player_file(self, db_path: Path, tab_id: str):
+        """Delete a player database file."""
+        player_name = db_path.stem
+
+        # Close database connection first
+        self.db_manager.close_connection(db_path)
+
+        # Delete the file
+        try:
+            db_path.unlink()
+        except OSError as e:
+            messagebox.showerror("Error", f"Failed to delete player file: {e}")
+            return
+
+        # Close the tab
+        if tab_id in self._open_tabs:
+            _, _, _, panel = self._open_tabs[tab_id]
+            # Find tab index
+            for i, tab_widget in enumerate(self.notebook.tabs()):
+                if self.notebook.nametowidget(tab_widget) == panel:
+                    self.notebook.forget(i)
+                    break
+            del self._open_tabs[tab_id]
+
+        # Refresh navigation tree
+        self.nav_tree.refresh()
+        self.status_var.set(f"Deleted player: {player_name}")
 
     def _run_validation(self):
         """Run class validation and show results in a dialog."""

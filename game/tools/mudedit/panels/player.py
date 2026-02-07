@@ -7,6 +7,7 @@ Password is write-only for security.
 
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
+from pathlib import Path
 from typing import Callable, Dict, List, Optional
 import hashlib
 import sys
@@ -65,6 +66,8 @@ class PlayerEditorPanel(ttk.Frame):
         parent,
         repository,
         player_name: str,
+        db_path: Optional[Path] = None,
+        on_delete: Optional[Callable[[], None]] = None,
         on_status: Optional[Callable[[str], None]] = None,
         **kwargs
     ):
@@ -72,6 +75,8 @@ class PlayerEditorPanel(ttk.Frame):
 
         self.repository = repository
         self.player_name = player_name
+        self.db_path = db_path
+        self.on_delete = on_delete
         self.on_status = on_status or (lambda msg: None)
 
         self.unsaved = False
@@ -106,6 +111,7 @@ class PlayerEditorPanel(ttk.Frame):
         btn_frame.pack(fill=tk.X, padx=8, pady=4)
         ttk.Button(btn_frame, text="Save Changes", command=self._save).pack(side=tk.LEFT, padx=(0, 4))
         ttk.Button(btn_frame, text="Reload", command=self._load_player).pack(side=tk.LEFT)
+        ttk.Button(btn_frame, text="Delete Player", command=self._delete_player).pack(side=tk.RIGHT)
 
     def _build_info_tab(self):
         """Build the basic info tab."""
@@ -949,6 +955,25 @@ class PlayerEditorPanel(ttk.Frame):
 
         self.unsaved = False
         self.on_status(f"Saved player: {self.player_name}")
+
+    def _delete_player(self):
+        """Delete this player after confirmation."""
+        if not self.on_delete:
+            messagebox.showwarning("Warning", "Delete not available")
+            return
+
+        # Require typing player name for safety
+        confirm = simpledialog.askstring(
+            "Confirm Delete",
+            f"This will permanently delete {self.player_name}.\n\n"
+            f"Type the player name to confirm:",
+            parent=self
+        )
+
+        if confirm and confirm.lower() == self.player_name.lower():
+            self.on_delete()
+        elif confirm is not None:
+            messagebox.showerror("Error", "Name did not match. Deletion cancelled.")
 
     def check_unsaved(self) -> bool:
         if self.unsaved:
