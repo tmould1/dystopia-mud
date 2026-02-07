@@ -1556,7 +1556,7 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "#rClasses:#n\n\r", ch );
 		send_to_char( "None, Demon, Drow, Werewolf, Monk, Vampire, Mage, Ninja, Druid, Hobbit, Giant, Draconian.\n\r", ch );
 		send_to_char( "Tanarri, Shapeshifter, Spiderdroid, Samurai, Undeadknight, Angel, Lich, Fae, Drone.\n\r", ch );
-		send_to_char( "Dirgesinger, Siren, Psion, Mindflayer.\n\r", ch );
+		send_to_char( "Dirgesinger, Siren, Psion, Mindflayer, Dragonkin, Wyrm.\n\r", ch );
 		return;
 	}
 	if ( ( victim = get_char_world( ch, arg1 ) ) == NULL ) {
@@ -1625,6 +1625,12 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 	} else if ( !str_cmp( arg2, "mindflayer" ) ) {
 		victim->class = CLASS_MINDFLAYER;
 		send_to_char( "You are now a Mindflayer!\n\r", victim );
+	} else if ( !str_cmp( arg2, "dragonkin" ) ) {
+		victim->class = CLASS_DRAGONKIN;
+		send_to_char( "You are now a Dragonkin!\n\r", victim );
+	} else if ( !str_cmp( arg2, "wyrm" ) ) {
+		victim->class = CLASS_WYRM;
+		send_to_char( "You are now a Wyrm!\n\r", victim );
 	} else if ( !str_cmp( arg2, "none" ) ) {
 		victim->class = 0;
 		save_char_obj( victim );

@@ -24,6 +24,7 @@
 #include "ability_config.h"
 #include "dirgesinger.h"
 #include "psion.h"
+#include "dragonkin.h"
 #include "../systems/mcmp.h"
 #include "../systems/profile.h"
 
@@ -1027,6 +1028,15 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) ) &&
 			ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] > 0 )
 			count += acfg( ACFG_DIRGESINGER_CADENCE_EXTRA_ATTACKS );
+		/* Dragonkin/Wyrm: Storm attunement + Might 3 = extra attack */
+		if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_DRAGONKIN ) || IS_CLASS( ch, CLASS_WYRM ) ) &&
+			ch->pcdata->powers[DRAGON_ATTUNEMENT] == ATTUNE_STORM &&
+			ch->pcdata->powers[DRAGON_TRAIN_MIGHT] >= 3 )
+			count += 1;
+		/* Wyrm: wyrmform grants extra attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WYRM ) &&
+			ch->pcdata->powers[DRAGON_WYRMFORM] > 0 )
+			count += 2;
 		if ( IS_ITEMAFF( ch, ITEMA_SPEED ) ) count += 2;
 	} else {
 		if ( !IS_NPC( ch ) )
@@ -1354,6 +1364,10 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_BEAR] > 5 )
 		dam = (int) ( dam * 1.2 );
+	/* Wyrm: ancientwrath damage bonus */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WYRM ) &&
+		ch->pcdata->powers[DRAGON_ANCIENTWRATH] > 0 )
+		dam = dam * ( 100 + acfg( ACFG_WYRM_ANCIENTWRATH_DAMAGE_BONUS ) ) / 100;
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SHAPESHIFTER ) ) {
 		if ( victim->pcdata->powers[SHAPE_FORM] == FAERIE_FORM && victim->pcdata->powers[FAERIE_LEVEL] > 0 ) {
 			int growl = number_range( 1, 50 );
@@ -1559,6 +1573,12 @@ int cap_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		} else
 			dam = dam;
 	}
+	/* Wyrm: base damage reduction + bonus in wyrmform */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WYRM ) ) {
+		dam = dam * ( 100 - acfg( ACFG_WYRM_DAMAGE_REDUCTION ) ) / 100;
+		if ( victim->pcdata->powers[DRAGON_WYRMFORM] > 0 )
+			dam = dam * 80 / 100;  /* Additional 20% DR in wyrmform */
+	}
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_MONK ) ) {
 		if ( victim->monkab[BODY] >= 2 ) dam = (int) ( dam / 1.5 );
 		if ( victim->chi[CURRENT] > 0 ) {
@@ -1748,6 +1768,20 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( ch->pcdata->powers[MIND_HIVEMIND] > 0 )
 				max_dam += acfg( ACFG_MINDFLAYER_DAMCAP_HIVEMIND );
 		}
+		/* Dragonkin: essence-based damcap + dragonhide */
+		if ( IS_CLASS( ch, CLASS_DRAGONKIN ) ) {
+			max_dam += balance.damcap_dragonkin_base;
+			max_dam += ch->rage * balance.damcap_dragonkin_essence_mult;
+			if ( ch->pcdata->powers[DRAGON_DRAGONHIDE] )
+				max_dam += balance.damcap_dragonkin_dragonhide;
+		}
+		/* Wyrm: enhanced essence scaling + wyrmform */
+		if ( IS_CLASS( ch, CLASS_WYRM ) ) {
+			max_dam += balance.damcap_dragonkin_base;
+			max_dam += ch->rage * balance.damcap_wyrm_essence_mult;
+			if ( ch->pcdata->powers[DRAGON_WYRMFORM] > 0 )
+				max_dam += balance.damcap_wyrm_wyrmform;
+		}
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += balance.damcap_artifact;
 
@@ -1931,6 +1965,20 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			victim->pcdata->stats[DIRGE_ARMOR_BONUS] = 0;
 			victim->pcdata->powers[DIRGE_IRONSONG_ACTIVE] = 0;
 			send_to_char( "Your ironsong barrier shatters!\n\r", victim );
+		}
+	}
+	/* Dragonkin/Wyrm Scaleshield: dragon scales absorb damage */
+	if ( !IS_NPC( victim ) && ( IS_CLASS( victim, CLASS_DRAGONKIN ) || IS_CLASS( victim, CLASS_WYRM ) ) &&
+		victim->pcdata->powers[DRAGON_SCALESHIELD] > 0 && victim->pcdata->stats[DRAGON_SCALESHIELD_HP] > 0 ) {
+		if ( dam <= victim->pcdata->stats[DRAGON_SCALESHIELD_HP] ) {
+			victim->pcdata->stats[DRAGON_SCALESHIELD_HP] -= dam;
+			send_to_char( "Your dragon scales absorb the blow!\n\r", victim );
+			dam = 0;
+		} else {
+			dam -= victim->pcdata->stats[DRAGON_SCALESHIELD_HP];
+			victim->pcdata->stats[DRAGON_SCALESHIELD_HP] = 0;
+			victim->pcdata->powers[DRAGON_SCALESHIELD] = 0;
+			send_to_char( "Your dragon scales shatter under the assault!\n\r", victim );
 		}
 	}
 	/* Siren Echoshield: reflect portion of damage as sonic */

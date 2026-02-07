@@ -22,6 +22,7 @@
 #include <time.h>
 #include "merc.h"
 #include "gmcp.h"
+#include "../db/db_class.h"
 
 AFFECT_DATA *affect_free;
 
@@ -1014,102 +1015,7 @@ void equip_char( CHAR_DATA *ch, OBJ_DATA *obj, int iWear ) {
 			return;
 		}
 
-	/* Monk EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33020 && obj->pIndexData->vnum <= 33039 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_MONK ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* vampire EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33040 && obj->pIndexData->vnum <= 33059 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_VAMPIRE ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Angel EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33180 && obj->pIndexData->vnum <= 33199 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_ANGEL ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Tanar'ri EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33200 && obj->pIndexData->vnum <= 33219 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_TANARRI ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Lich EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33220 && obj->pIndexData->vnum <= 33239 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_LICH ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Ninja EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33080 && obj->pIndexData->vnum <= 33099 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_NINJA ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	if ( ( obj->pIndexData->vnum >= 29740 && obj->pIndexData->vnum <= 29750 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_NINJA ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Shapeshifter EQ */
-
-	if ( ( ( obj->pIndexData->vnum >= 33160 && obj->pIndexData->vnum <= 33175 ) ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	if ( ( obj->pIndexData->vnum == 33176 || obj->pIndexData->vnum == 33177 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_SAMURAI ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Demon EQ */
+	/* Demon EQ (flag-based) */
 
 	if ( ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_DEMON ) ) && IS_SET( obj->spectype, SITEM_DEMONIC ) ) {
 		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
@@ -1120,9 +1026,9 @@ void equip_char( CHAR_DATA *ch, OBJ_DATA *obj, int iWear ) {
 		return;
 	}
 
-	/* Spider Droid Eq */
+	/* Wolf weapon (flag-based) */
 
-	if ( obj->pIndexData->vnum >= 33140 && obj->pIndexData->vnum <= 33159 && !IS_CLASS( ch, CLASS_DROID ) ) {
+	if ( IS_SET( obj->spectype, SITEM_WOLFWEAPON ) && !IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
 		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
 		obj_from_char( obj );
@@ -1131,64 +1037,11 @@ void equip_char( CHAR_DATA *ch, OBJ_DATA *obj, int iWear ) {
 		return;
 	}
 
-	/* Death Knight EQ */
-
-	if ( obj->pIndexData->vnum >= 29975 && obj->pIndexData->vnum <= 29991 && !IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Dirgesinger EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33320 && obj->pIndexData->vnum <= 33339 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_DIRGESINGER ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Siren EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33340 && obj->pIndexData->vnum <= 33359 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_SIREN ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Psion EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33360 && obj->pIndexData->vnum <= 33379 ) && ( IS_NPC( ch ) || ( !IS_CLASS( ch, CLASS_PSION ) && !IS_CLASS( ch, CLASS_MINDFLAYER ) ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Mindflayer EQ */
-
-	if ( ( obj->pIndexData->vnum >= 33380 && obj->pIndexData->vnum <= 33399 ) && ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_MINDFLAYER ) ) ) {
-		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
-		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
-		obj_from_char( obj );
-		obj_to_room( obj, ch->in_room );
-		do_autosave( ch, "" );
-		return;
-	}
-
-	/* Wolf EQ */
-
-	if ( ( IS_SET( obj->spectype, SITEM_WOLFWEAPON ) || ( obj->pIndexData->vnum >= 33100 && obj->pIndexData->vnum <= 33119 ) ) && !IS_CLASS( ch, CLASS_WEREWOLF ) ) {
+	/*
+	 * Database-driven class equipment restrictions.
+	 * Covers all classes with entries in class_armor_pieces table.
+	 */
+	if ( db_class_is_equipment_restricted( ch, obj ) ) {
 		act( "You are zapped by $p and drop it.", ch, obj, NULL, TO_CHAR );
 		act( "$n is zapped by $p and drops it.", ch, obj, NULL, TO_ROOM );
 		obj_from_char( obj );

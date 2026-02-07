@@ -3840,6 +3840,8 @@ static const char *get_class_name( int class_bits ) {
 	if ( class_bits & CLASS_SIREN ) return "Siren";
 	if ( class_bits & CLASS_PSION ) return "Psion";
 	if ( class_bits & CLASS_MINDFLAYER ) return "Mindflayer";
+	if ( class_bits & CLASS_DRAGONKIN ) return "Dragonkin";
+	if ( class_bits & CLASS_WYRM ) return "Wyrm";
 	return "Hero";
 }
 

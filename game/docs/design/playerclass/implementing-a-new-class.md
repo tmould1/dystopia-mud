@@ -65,7 +65,7 @@ Most class display and configuration is now database-driven. Use MudEdit (`pytho
 | `class_auras` | Class Aura | Room presence text shown when looking | e.g., `#y(#LVampire#y)#n ` |
 | `class_starting` | Class Starting | Starting beast/level values | Vampire: 30 beast, Monk/Mage: level 3 |
 | `class_score_stats` | Class Score | Custom stats shown in `score` command | Uses STAT_SOURCE enum for value lookup |
-| `class_armor_config` | Class Armor | Armor creation messages and primal cost key | Generic `do_classarmor` uses this |
+| `class_armor_config` | Class Armor | Armor creation messages, primal cost key, mastery_vnum (REQUIRED) | Generic `do_classarmor` uses this |
 | `class_armor_pieces` | Class Armor | Keyword-to-vnum mapping for armor pieces | e.g., "ring" → vnum 12345 |
 | `class_vnum_ranges` | Class Vnum Ranges | Equipment vnum range tracking | Prevents vnum conflicts between classes |
 
@@ -238,7 +238,7 @@ Combat integration determines how your class performs in the core gameplay loop.
 - [ ] Extra attacks trigger under the correct conditions
 - [ ] Build succeeds with no warnings
 
-### Phase 7: Class Equipment
+### Phase 7: Class Equipment (including Mastery Item)
 
 **Planning Checklist:**
 Before starting this phase, verify:
@@ -247,26 +247,50 @@ Before starting this phase, verify:
 - [ ] Run `python game/tools/validate_classes.py` to confirm no overlaps
 - [ ] Design document specifies equipment slots and stat themes
 - [ ] Decide on armor piece names and keywords
+- [ ] Design mastery item stats that match class theme
 
 **Why this phase matters:**
-Class equipment provides progression and identity. The vnum range you choose is permanent, so check existing ranges carefully. Equipment restrictions prevent other classes from using your gear.
+Class equipment provides progression and identity. The vnum range you choose is permanent, so check existing ranges carefully. Equipment restrictions prevent other classes from using your gear. **The mastery item is a required component of class equipment, not optional polish.**
 
 **Implementation Steps:**
 1. **Reserve your vnum range** - Open MudEdit → Class Vnum Ranges panel. Click "Next Available" to see the suggested starting vnum, then add an entry for your class before creating armor objects.
-2. **Define equipment vnums** - Pick a contiguous range that doesn't overlap existing ranges. Add the objects to `classeq.db`.
-2. **Configure armor via MudEdit** - Open the Class Armor panel:
+2. **Define equipment vnums** - Pick a contiguous range that doesn't overlap existing ranges. The range should include:
+   - 13 armor pieces (one per slot)
+   - 1 mastery item (held item with enhanced stats)
+3. **Add equipment to `classeq.db`** - Use the Python helper functions in `add_classeq_db.py`:
+   - `armor_piece()` - Standard armor with AC and hit/dam bonuses
+   - `mastery_piece()` - Held item with higher hit/dam, no AC (required!)
+
+   Example mastery piece:
+   ```python
+   mastery_piece('dragonkin heart shard dragon',
+                 '#x202<*#x220a pulsing dragon heart shard#x202*>#n',
+                 'A shard of crystallized dragon essence pulses with power here.',
+                 hitroll=50, damroll=50)
+   ```
+4. **Configure armor via MudEdit** - Open the Class Armor panel:
    - Add a `class_armor_config` entry with:
      - `acfg_cost_key`: Key for primal cost lookup (e.g., `"classname.armor.practice_cost"`)
+     - `mastery_vnum`: The vnum of the mastery item (REQUIRED - not 0)
      - `usage_message`: Text showing available pieces
      - `act_to_char` / `act_to_room`: Messages when creating armor
    - Add `class_armor_pieces` entries mapping keywords to vnums (e.g., "ring" → 12345)
-3. **Add equipment restrictions to `handler.c`** - Prevent other classes from equipping your class gear by checking vnum ranges.
-4. **Add `acfg` default in `ability_config.c`** - Set the primal cost for armor creation.
+5. **Add equipment restrictions to `handler.c`** - Prevent other classes from equipping your class gear by checking vnum ranges.
+6. **Add `acfg` default in `ability_config.c`** - Set the primal cost for armor creation.
 
 **Note:** The armor command itself (`do_classarmor_generic` in `class_armor.c`) is shared by all classes. You do NOT need to write a custom armor command - just configure the database entries.
 
+**Mastery Item Requirements:**
+- Wear location: HOLD (not armor slot)
+- Stats: Higher hit/dam than regular armor pieces (typically +50/+50 for base class, +75/+75 for upgrade class)
+- No AC value (it's not armor)
+- Uses `questowner` binding rather than class restrictions
+- Created via the `mastery` command (requires completion of class progression)
+
 **Verification:**
-- [ ] All equipment pieces can be created via the armor command
+- [ ] All 13 armor pieces can be created via the armor command
+- [ ] Mastery item vnum is set in class_armor_config (not 0)
+- [ ] Mastery command creates the correct item for your class
 - [ ] Equipment has correct stats when examined
 - [ ] Other classes cannot equip your class gear (test with a different class character)
 - [ ] Primal costs are deducted correctly
@@ -307,23 +331,58 @@ Display integration controls how your class appears everywhere in the game: who 
 Before starting this phase, verify:
 - [ ] Phase 8 complete - display works correctly
 - [ ] Draft help text before inserting into database
-- [ ] Review existing class help entries for format consistency
+- [ ] Review existing class help entries for format consistency (see Dirgesinger as example)
 - [ ] List all system-specific topics that need separate help entries
 
 **Why this phase matters:**
 Help entries are how players learn to use your class. Well-written help with proper cross-references makes the class accessible. The CLASSES help entry is the first thing new players see when choosing a class.
 
+**Required Help Entries:**
+Each class needs these help entries in `gamedata/db/game/base_help.db`:
+
+| Entry | Required | Purpose |
+|-------|----------|---------|
+| `help <classname>` | Yes | Main class overview, abilities, training paths, key commands |
+| `help <resource>` | If unique | Resource system explanation (e.g., RESONANCE, ESSENCE, FOCUS) |
+| `help <system>` | If unique | Class-specific mechanics (e.g., ATTUNEMENT, ECHOES) |
+| Update `help classes` | Yes | Add class to selectable classes list (base) or upgrade section |
+
+**Help Entry Format:**
+Use existing entries as templates. Key elements:
+- Class-colored header with decorative brackets
+- Core Systems section explaining resource mechanics
+- Training Paths section listing ability trees
+- Key Commands section with all player commands
+- See also footer with cross-references
+
 **Implementation Steps:**
-1. **Create main class help entry** - Overview, abilities list, key commands. Use class colors. Keyword should be the class name.
-2. **Create system-specific help entries** - If the class has unique systems (e.g., "RESONANCE", "FOCUS"), create separate help entries.
-3. **Add "See also:" footers** - Cross-reference related topics at the bottom of each help entry.
-4. **Update CLASSES help entry** - Add the new class name to the list of available classes.
+1. **Create main class help entry** - Add to `helps` table in base_help.db:
+   - `keyword`: Class name (e.g., "DRAGONKIN DRAGONKINS")
+   - `text`: Formatted help text with color codes
+   - Use class bracket colors for headers (e.g., `#x202` / `#x220` for Dragonkin)
+2. **Create resource help entry** - If class uses `ch->rage` or other unique resource:
+   - Explain how resource builds/decays
+   - List abilities that consume vs generate resource
+3. **Create system-specific help entries** - For unique mechanics:
+   - Example: ATTUNEMENT for Dragonkin's elemental system
+4. **Update CLASSES help entry** - Add the class to the appropriate section:
+   - Base classes go in main list with bracket decoration
+   - Upgrade classes go in "UPGRADE CLASSES" section
+
+**Example help entry header:**
+```
+#x202<*#x220[#n DRAGONKIN #x220]#x202*>#n
+
+#x250Half-dragon warriors who channel elemental draconic power...#n
+```
 
 **Verification:**
-- [ ] `help <classname>` shows the main help entry
+- [ ] `help <classname>` shows the main help entry with proper formatting
+- [ ] `help <resource>` explains the resource system (if applicable)
 - [ ] All system-specific help entries work
 - [ ] Cross-references link to valid help topics
-- [ ] `help classes` includes the new class
+- [ ] `help classes` includes the new class in correct section
+- [ ] Help colors match class bracket colors
 
 ---
 
@@ -361,36 +420,11 @@ These commands are how players and immortals assign classes. Base classes are av
 - [ ] Welcome message displays correctly (from class_registry.selfclass_message)
 - [ ] `mudstat` shows the new class with correct label
 
-### Phase 11: Mastery Item
+### Phase 11: Documentation
 
 **Planning Checklist:**
 Before starting this phase, verify:
 - [ ] Phase 10 complete - class selection works
-- [ ] `gamedata/db/areas/classeq.db` - pick a vnum outside armor range but documented nearby
-- [ ] Design mastery item stats that match class theme
-
-**Why this phase matters:**
-The mastery item is a prestigious reward for dedicated players. It uses `questowner` binding rather than class restrictions, so it doesn't need handler.c updates.
-
-**Implementation Steps:**
-1. **Create mastery item** - Add to `classeq.db`:
-   - Pick a vnum outside your class armor range (e.g., Dirgesinger armor is 33320-33332, mastery is 33253)
-   - Design stats matching your class theme (mana-focused for casters, HP/combat for melee)
-   - Use your class color scheme in the short description
-2. **Add mastery vnum to `jobo_act.c`** - In `do_mastery()`, add an `else if (IS_CLASS(ch, CLASS_<NAME>))` case with your item vnum.
-
-**Verification:**
-- [ ] Mastery command creates the correct item for your class
-- [ ] Item stats match design document
-- [ ] Item has correct name and description with class colors
-
----
-
-### Phase 12: Documentation
-
-**Planning Checklist:**
-Before starting this phase, verify:
-- [ ] Phase 11 complete - mastery item works
 - [ ] All abilities implemented and tested
 - [ ] Class is fully playable from selection to mastery
 
@@ -408,11 +442,11 @@ Documentation preserves knowledge for future development. The design doc capture
 
 ---
 
-### Phase 13: Upgrade Class
+### Phase 12: Upgrade Class
 
 **Planning Checklist:**
 Before starting this phase, verify:
-- [ ] Phases 1-12 complete for the base class
+- [ ] Phases 1-11 complete for the base class
 - [ ] Design document exists for the upgrade class
 - [ ] Identify which elements are shared vs unique between base and upgrade
 
@@ -422,13 +456,12 @@ Every base class has a corresponding upgrade class. This is a required part of c
 **Implementation Steps:**
 1. **Add upgrade path in `upgrade.c`** - Map base class to upgrade class in the upgrade switch, and add to `is_upgrade()`.
 2. **Add to immortal `do_class`** - Upgrade classes need entries in `clan.c` for immortals to assign them, but NOT in `do_classself` (players can only select base classes).
-3. **Repeat Phases 1-12 for the upgrade class** - The upgrade class needs its own abilities, act_info.c display entries, help entries, and mastery item.
+3. **Repeat Phases 1-11 for the upgrade class** - The upgrade class needs its own abilities, act_info.c display entries, help entries, and equipment (including mastery item).
 
 **Verification:**
 - [ ] `upgrade` command transitions base class to upgrade class correctly
-- [ ] Upgrade class has all display/help/equipment entries
+- [ ] Upgrade class has all display/help/equipment entries (including mastery)
 - [ ] Upgrade abilities work independently of base abilities
-- [ ] Mastery item exists for upgrade class
 
 ## Common Pitfalls
 
@@ -588,9 +621,11 @@ Forgetting this step means the new source file won't be compiled, leading to lin
 ### Class Selection Commands
 
 **`do_classself` (wizutil.c)** - Player self-selection at avatar:
-- **Now database-driven** - Uses `db_game_get_registry_by_keyword()` to look up class
-- **No code changes needed for new base classes** - just add a class_registry entry with `upgrade_class = NULL`
-- The ASCII art display in `do_classself` is still hardcoded (rarely changes)
+- **Fully database-driven** - Uses `db_class_get_registry_by_keyword()` for lookup and `db_class_get_bracket()` for display
+- **No code changes needed for new base classes** - just add entries to:
+  - `class_registry` with `upgrade_class = NULL` (or 0)
+  - `class_brackets` with your bracket decorations
+- The class list display is generated dynamically from all base classes in the database
 - Mage still has a special requirements check in code (5K mana + spell colors)
 
 **`do_class` (clan.c)** - Immortal command to set any player's class:
@@ -673,7 +708,7 @@ update.c         +1 line   (tick update call)
 fight.c          +1-3 blocks (damcap, defense, extra attacks) + #include
 ability_config.c +N lines  (acfg defaults in acfg_table[])
 handler.c        +1 block  (equipment restrictions)
-jobo_act.c       +1 block  (do_mastery vnum mapping only - mudstat is now DB)
+jobo_act.c       +1 block  (do_mastery vnum mapping - uses mastery_vnum from class_armor_config)
 ```
 
 ### Database Entries (via MudEdit)
@@ -687,7 +722,7 @@ class_generations   +14 entries (generation titles 1-13 + default)
 class_auras         +1 entry  (room presence text)
 class_starting      +1 entry  (starting beast/level values)
 class_score_stats   +N entries (custom score display stats)
-class_armor_config  +1 entry  (armor creation messages)
+class_armor_config  +1 entry  (armor creation messages + mastery_vnum - REQUIRED)
 class_armor_pieces  +N entries (keyword-to-vnum mapping)
 class_vnum_ranges   +1 entry  (equipment vnum range tracking)  ← ADD BEFORE creating armor
 ```
@@ -697,7 +732,7 @@ class_vnum_ranges   +1 entry  (equipment vnum range tracking)  ← ADD BEFORE cr
 ### Data Files
 
 ```
-classeq.db       +N entries (class armor + mastery item object definitions)
+classeq.db       +14 entries (13 armor pieces + 1 mastery item - REQUIRED)
 base_help.db     +2-4 entries (class help, system helps, update CLASSES)
 repository.py    +1 line   (add class to CLASS_NAMES dictionary at module top)
 ```

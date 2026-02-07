@@ -27,6 +27,7 @@
 #include <string.h>
 #include "merc.h"
 #include "../db/db_game.h"
+#include "../db/db_class.h"
 
 /*
 ===========================================================================
@@ -193,7 +194,10 @@ static void apply_class_starting( CHAR_DATA *ch, int class_id ) {
 
 void do_classself( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_STRING_LENGTH];
+	char buf[MAX_STRING_LENGTH];
 	const CLASS_REGISTRY_ENTRY *reg;
+	const CLASS_BRACKET *bracket;
+	int i, count, col;
 
 	argument = one_argument( argument, arg1 );
 
@@ -208,13 +212,41 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	/* No argument - show help (ASCII art display kept in code) */
+	/* No argument - show available base classes from database */
 	if ( arg1[0] == '\0' ) {
 		send_to_char( "Classes: Type selfclass <class> to get classed.\n\r\n\r", ch );
-		send_to_char( "#R[#0Demon#R]#n             #y((#LWerewolf#y))#n         #P.o0#0Drow#P0o.#n\n\r", ch );
-		send_to_char( "#C***#yNinja#C***#n         #0<<#RVampire#0>>#n          #0.x[#lMonk#0]x.\n\r", ch );
-		send_to_char( "#n{{#CBattlemage#n}}         #G~#y[#nDirgesinger#y]#G~#n\n\r", ch );
-		send_to_char( "#x093~#x141[#nPsion#x141]#x093~#n\n\r", ch );
+
+		count = db_class_get_registry_count();
+		col = 0;
+		for ( i = 0; i < count; i++ ) {
+			reg = db_class_get_registry_by_index( i );
+			if ( !reg || !IS_BASE_CLASS( reg ) ) continue;
+
+			bracket = db_class_get_bracket( reg->class_id );
+			if ( bracket && bracket->open_bracket && bracket->close_bracket ) {
+				/* Format: open + primary + name + close (close_bracket includes its own colors) */
+				snprintf( buf, sizeof( buf ), "%s%s%s%s",
+					bracket->open_bracket,
+					bracket->primary_color ? bracket->primary_color : "",
+					reg->class_name,
+					bracket->close_bracket );
+			} else {
+				snprintf( buf, sizeof( buf ), "[%s]", reg->class_name );
+			}
+
+			/* Display in columns of 3, padded to 20 visible chars */
+			send_to_char( buf, ch );
+			col++;
+			if ( col >= 3 ) {
+				send_to_char( "\n\r", ch );
+				col = 0;
+			} else {
+				/* Pad to align columns - estimate visible length */
+				int pad = 22 - visible_strlen( buf );
+				while ( pad-- > 0 ) send_to_char( " ", ch );
+			}
+		}
+		if ( col > 0 ) send_to_char( "\n\r", ch );
 		return;
 	}
 

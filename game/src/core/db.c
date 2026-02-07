@@ -507,6 +507,7 @@ void boot_db( bool fCopyOver ) {
 		db_class_load_display();
 		db_class_load_aura();
 		db_class_load_armor();  /* Also loads mastery_vnum */
+		db_class_build_vnum_ranges();  /* Build vnum ranges for equipment restrictions */
 		db_class_load_starting();
 		db_class_load_score();
 		db_game_close_boot_connections();

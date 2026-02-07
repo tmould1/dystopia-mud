@@ -25,26 +25,26 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../db/db_class.h"
 
 /* local functions */
 
 void clearshit args( ( CHAR_DATA * ch ) );
 void upgrade2 args( ( CHAR_DATA * ch ) );
 
+/*
+ * Check if character's class is an upgrade class.
+ * Uses class_registry database - upgrade_class != 0 means it's an upgrade.
+ */
 bool is_upgrade( CHAR_DATA *ch ) {
+	const CLASS_REGISTRY_ENTRY *reg;
+
 	if ( IS_NPC( ch ) ) return FALSE;
 
-	if ( IS_CLASS( ch, CLASS_DROID ) ) return TRUE;
-	if ( IS_CLASS( ch, CLASS_SAMURAI ) ) return TRUE;
-	if ( IS_CLASS( ch, CLASS_TANARRI ) ) return TRUE;
-	if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) ) return TRUE;
-	if ( IS_CLASS( ch, CLASS_ANGEL ) ) return TRUE;
-	if ( IS_CLASS( ch, CLASS_LICH ) ) return TRUE;
-	if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) return TRUE;
-	if ( IS_CLASS( ch, CLASS_SIREN ) ) return TRUE;
-	if ( IS_CLASS( ch, CLASS_MINDFLAYER ) ) return TRUE;
+	reg = db_class_get_registry_by_id( ch->class );
+	if ( reg == NULL ) return FALSE;
 
-	return FALSE;
+	return !IS_BASE_CLASS( reg );
 }
 
 void upgrade2( CHAR_DATA *ch ) {
@@ -125,6 +125,8 @@ void upgrade2( CHAR_DATA *ch ) {
 		sprintf( buf, "Through hardwon battles in the famous Blood Wars, %s has gained skills beyond this world", ch->name );
 	else if ( IS_CLASS( ch, CLASS_SIREN ) )
 		sprintf( buf, "The heavens tremble as %s's voice reaches new heights of power", ch->name );
+	else if ( IS_CLASS( ch, CLASS_WYRM ) )
+		sprintf( buf, "Ancient dragon power flows through %s as they ascend to true Wyrm status", ch->name );
 	else
 		sprintf( buf, "%s have upgraded", ch->name );
 	do_info( ch, buf );
@@ -207,6 +209,9 @@ void do_upgrade( CHAR_DATA *ch, char *argument ) {
 	} else if ( ch->class == CLASS_PSION ) {
 		ch->class = CLASS_MINDFLAYER;
 		sprintf( buf, "%s's mind shatters the boundaries of sanity, becoming a Mindflayer", ch->name );
+	} else if ( ch->class == CLASS_DRAGONKIN ) {
+		ch->class = CLASS_WYRM;
+		sprintf( buf, "%s's draconic blood awakens fully, transforming them into a Wyrm", ch->name );
 	} else
 		return;
 	clearshit( ch );

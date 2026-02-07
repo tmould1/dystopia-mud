@@ -412,6 +412,11 @@ typedef struct balance_data {
 	int   damcap_dirgesinger_battlehymn;
 	int   damcap_siren_res_mult;
 	int   damcap_siren_echoshield;
+	int   damcap_dragonkin_base;
+	int   damcap_dragonkin_essence_mult;
+	int   damcap_dragonkin_dragonhide;
+	int   damcap_wyrm_essence_mult;
+	int   damcap_wyrm_wyrmform;
 	int   damcap_artifact;
 
 	/* Stance damcap bonuses */
@@ -4885,6 +4890,36 @@ DECLARE_DO_FUN( do_psychicmaelstrom );
 DECLARE_DO_FUN( do_psiblast );
 DECLARE_DO_FUN( do_realityfracture );
 DECLARE_DO_FUN( do_dismiss );
+
+/* Dragonkin */
+DECLARE_DO_FUN( do_dragonstatus );
+DECLARE_DO_FUN( do_attune );
+DECLARE_DO_FUN( do_essencemeditate );
+DECLARE_DO_FUN( do_dragonbreath );
+DECLARE_DO_FUN( do_searingblast );
+DECLARE_DO_FUN( do_infernalstorm );
+DECLARE_DO_FUN( do_scaleshield );
+DECLARE_DO_FUN( do_dragonhide );
+DECLARE_DO_FUN( do_primalwarding );
+DECLARE_DO_FUN( do_dragonclaw );
+DECLARE_DO_FUN( do_drakewings );
+DECLARE_DO_FUN( do_dragonrush );
+DECLARE_DO_FUN( do_dragontrain );
+DECLARE_DO_FUN( do_dragonarmor );
+
+/* Wyrm */
+DECLARE_DO_FUN( do_wyrmbreath );
+DECLARE_DO_FUN( do_cataclysm );
+DECLARE_DO_FUN( do_annihilate );
+DECLARE_DO_FUN( do_apocalypse );
+DECLARE_DO_FUN( do_dragonfear );
+DECLARE_DO_FUN( do_terrainshift );
+DECLARE_DO_FUN( do_dragonlord );
+DECLARE_DO_FUN( do_wyrmform );
+DECLARE_DO_FUN( do_ancientwrath );
+DECLARE_DO_FUN( do_primordial );
+DECLARE_DO_FUN( do_wyrmtrain );
+DECLARE_DO_FUN( do_wyrmarmor );
 
 /*
  * Global Constants

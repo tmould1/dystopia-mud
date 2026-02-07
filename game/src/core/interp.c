@@ -1137,6 +1137,41 @@ const struct cmd_type cmd_table[] =
 		{ "realityfracture", do_realityfracture, POS_FIGHTING, 3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
 		{ "dismiss",       do_dismiss,       POS_STANDING,  3, LOG_NORMAL, CLASS_MINDFLAYER, 0, 0 },
 
+		/* Dragonkin */
+
+		{ "dragonstatus",  do_dragonstatus,  POS_DEAD,      3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "attune",        do_attune,        POS_STANDING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "essencemeditate", do_essencemeditate, POS_RESTING, 3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "dragonbreath",  do_dragonbreath,  POS_FIGHTING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "searingblast",  do_searingblast,  POS_FIGHTING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "infernalstorm", do_infernalstorm, POS_FIGHTING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "scaleshield",   do_scaleshield,   POS_STANDING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "dragonhide",    do_dragonhide,    POS_STANDING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "primalwarding", do_primalwarding, POS_STANDING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "dragonclaw",    do_dragonclaw,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "drakewings",    do_drakewings,    POS_STANDING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "dragonrush",    do_dragonrush,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "dragontrain",   do_dragontrain,   POS_STANDING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "dragonarmor",   do_dragonarmor,   POS_STANDING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+
+		/* Wyrm */
+
+		{ "dragonstatus",  do_dragonstatus,  POS_DEAD,      3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "attune",        do_attune,        POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "essencemeditate", do_essencemeditate, POS_RESTING, 3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "wyrmbreath",    do_wyrmbreath,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "cataclysm",     do_cataclysm,     POS_FIGHTING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "annihilate",    do_annihilate,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "apocalypse",    do_apocalypse,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "dragonfear",    do_dragonfear,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "terrainshift",  do_terrainshift,  POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "dragonlord",    do_dragonlord,    POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "wyrmform",      do_wyrmform,      POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "ancientwrath",  do_ancientwrath,  POS_FIGHTING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "primordial",    do_primordial,    POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "wyrmtrain",     do_wyrmtrain,     POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "wyrmarmor",     do_wyrmarmor,     POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+
 		/*
 		 * Immortal commands.
 		 */

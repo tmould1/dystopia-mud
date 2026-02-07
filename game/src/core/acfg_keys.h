@@ -1052,7 +1052,113 @@
     ACFG_X(MINDFLAYER_MINDBLAST_COOLDOWN                     , "mindflayer.mindblast.cooldown",          8) \
     ACFG_X(MINDFLAYER_MINDBLAST_STUN_DURATION                , "mindflayer.mindblast.stun_duration",          2) \
     ACFG_X(MINDFLAYER_REALITYFRACTURE_FOCUS_COST             , "mindflayer.realityfracture.focus_cost",         80) \
-    ACFG_X(MINDFLAYER_MINDFLAYERARMOR_PRIMAL_COST            , "mindflayer.mindflayerarmor.primal_cost",        150)
+    ACFG_X(MINDFLAYER_MINDFLAYERARMOR_PRIMAL_COST            , "mindflayer.mindflayerarmor.primal_cost",        150) \
+    \
+    /* Dragonkin - Essence System */ \
+    ACFG_X(DRAGONKIN_ESSENCE_COMBAT_GAIN                     , "dragonkin.essence.combat_gain",          3) \
+    ACFG_X(DRAGONKIN_ESSENCE_DECAY_RATE                      , "dragonkin.essence.decay_rate",           2) \
+    ACFG_X(DRAGONKIN_MEDITATE_COOLDOWN                       , "dragonkin.meditate.cooldown",            8) \
+    ACFG_X(DRAGONKIN_MEDITATE_GAIN                           , "dragonkin.meditate.gain",               15) \
+    \
+    /* Dragonkin - Dragonbreath */ \
+    ACFG_X(DRAGONKIN_DRAGONBREATH_MANA_COST                  , "dragonkin.dragonbreath.mana_cost",      60) \
+    ACFG_X(DRAGONKIN_DRAGONBREATH_ESSENCE_COST               , "dragonkin.dragonbreath.essence_cost",   20) \
+    ACFG_X(DRAGONKIN_DRAGONBREATH_COOLDOWN                   , "dragonkin.dragonbreath.cooldown",        8) \
+    ACFG_X(DRAGONKIN_DRAGONBREATH_DAM_MIN                    , "dragonkin.dragonbreath.dam_min",       150) \
+    ACFG_X(DRAGONKIN_DRAGONBREATH_DAM_MAX                    , "dragonkin.dragonbreath.dam_max",       300) \
+    \
+    /* Dragonkin - Scaleshield */ \
+    ACFG_X(DRAGONKIN_SCALESHIELD_MANA_COST                   , "dragonkin.scaleshield.mana_cost",       70) \
+    ACFG_X(DRAGONKIN_SCALESHIELD_ABSORB                      , "dragonkin.scaleshield.absorb",        2000) \
+    ACFG_X(DRAGONKIN_SCALESHIELD_DURATION                    , "dragonkin.scaleshield.duration",        15) \
+    \
+    /* Dragonkin - Dragonclaw */ \
+    ACFG_X(DRAGONKIN_DRAGONCLAW_MANA_COST                    , "dragonkin.dragonclaw.mana_cost",        40) \
+    ACFG_X(DRAGONKIN_DRAGONCLAW_COOLDOWN                     , "dragonkin.dragonclaw.cooldown",          4) \
+    ACFG_X(DRAGONKIN_DRAGONCLAW_DAM_MIN                      , "dragonkin.dragonclaw.dam_min",         100) \
+    ACFG_X(DRAGONKIN_DRAGONCLAW_DAM_MAX                      , "dragonkin.dragonclaw.dam_max",         200) \
+    \
+    /* Dragonkin - Searingblast */ \
+    ACFG_X(DRAGONKIN_SEARINGBLAST_MANA_COST                  , "dragonkin.searingblast.mana_cost",      80) \
+    ACFG_X(DRAGONKIN_SEARINGBLAST_ESSENCE_COST               , "dragonkin.searingblast.essence_cost",   30) \
+    ACFG_X(DRAGONKIN_SEARINGBLAST_COOLDOWN                   , "dragonkin.searingblast.cooldown",       10) \
+    ACFG_X(DRAGONKIN_SEARINGBLAST_DAM_MIN                    , "dragonkin.searingblast.dam_min",       200) \
+    ACFG_X(DRAGONKIN_SEARINGBLAST_DAM_MAX                    , "dragonkin.searingblast.dam_max",       400) \
+    ACFG_X(DRAGONKIN_SEARINGBLAST_DOT_DAMAGE                 , "dragonkin.searingblast.dot_damage",     50) \
+    ACFG_X(DRAGONKIN_SEARINGBLAST_DOT_DURATION               , "dragonkin.searingblast.dot_duration",    5) \
+    \
+    /* Dragonkin - Infernalstorm */ \
+    ACFG_X(DRAGONKIN_INFERNALSTORM_MANA_COST                 , "dragonkin.infernalstorm.mana_cost",    150) \
+    ACFG_X(DRAGONKIN_INFERNALSTORM_ESSENCE_COST              , "dragonkin.infernalstorm.essence_cost",  60) \
+    ACFG_X(DRAGONKIN_INFERNALSTORM_COOLDOWN                  , "dragonkin.infernalstorm.cooldown",      15) \
+    ACFG_X(DRAGONKIN_INFERNALSTORM_DAM_MIN                   , "dragonkin.infernalstorm.dam_min",      300) \
+    ACFG_X(DRAGONKIN_INFERNALSTORM_DAM_MAX                   , "dragonkin.infernalstorm.dam_max",      600) \
+    \
+    /* Dragonkin - Dragonhide */ \
+    ACFG_X(DRAGONKIN_DRAGONHIDE_DAM_REDUCTION                , "dragonkin.dragonhide.dam_reduction",    15) \
+    \
+    /* Dragonkin - Primalwarding */ \
+    ACFG_X(DRAGONKIN_PRIMALWARDING_MANA_COST                 , "dragonkin.primalwarding.mana_cost",    100) \
+    ACFG_X(DRAGONKIN_PRIMALWARDING_DURATION                  , "dragonkin.primalwarding.duration",      20) \
+    \
+    /* Dragonkin - Drakewings */ \
+    ACFG_X(DRAGONKIN_DRAKEWINGS_MANA_COST                    , "dragonkin.drakewings.mana_cost",        50) \
+    ACFG_X(DRAGONKIN_DRAKEWINGS_DURATION                     , "dragonkin.drakewings.duration",         30) \
+    \
+    /* Dragonkin - Dragonrush */ \
+    ACFG_X(DRAGONKIN_DRAGONRUSH_MANA_COST                    , "dragonkin.dragonrush.mana_cost",        60) \
+    ACFG_X(DRAGONKIN_DRAGONRUSH_ESSENCE_COST                 , "dragonkin.dragonrush.essence_cost",     25) \
+    ACFG_X(DRAGONKIN_DRAGONRUSH_COOLDOWN                     , "dragonkin.dragonrush.cooldown",          8) \
+    ACFG_X(DRAGONKIN_DRAGONRUSH_DAM_MIN                      , "dragonkin.dragonrush.dam_min",         150) \
+    ACFG_X(DRAGONKIN_DRAGONRUSH_DAM_MAX                      , "dragonkin.dragonrush.dam_max",         350) \
+    \
+    /* Dragonkin Armor */ \
+    ACFG_X(DRAGONKIN_DRAGONARMOR_PRACTICE_COST               , "dragonkin.dragonarmor.practice_cost",   60) \
+    \
+    /* Wyrm Armor */ \
+    ACFG_X(WYRM_WYRMARMOR_PRACTICE_COST                      , "wyrm.wyrmarmor.practice_cost",          60) \
+    \
+    /* Wyrm - Devastation tree */ \
+    ACFG_X(WYRM_WYRMBREATH_ESSENCE_COST                      , "wyrm.wyrmbreath.essence_cost",          25) \
+    ACFG_X(WYRM_WYRMBREATH_BASE_DAMAGE                       , "wyrm.wyrmbreath.base_damage",          800) \
+    ACFG_X(WYRM_WYRMBREATH_ESSENCE_MULT                      , "wyrm.wyrmbreath.essence_mult",          12) \
+    ACFG_X(WYRM_CATACLYSM_ESSENCE_COST                       , "wyrm.cataclysm.essence_cost",           40) \
+    ACFG_X(WYRM_CATACLYSM_BASE_DAMAGE                        , "wyrm.cataclysm.base_damage",           600) \
+    ACFG_X(WYRM_CATACLYSM_FIELD_DAMAGE                       , "wyrm.cataclysm.field_damage",          200) \
+    ACFG_X(WYRM_CATACLYSM_FIELD_DURATION                     , "wyrm.cataclysm.field_duration",          3) \
+    ACFG_X(WYRM_ANNIHILATE_ESSENCE_COST                      , "wyrm.annihilate.essence_cost",          35) \
+    ACFG_X(WYRM_ANNIHILATE_BASE_DAMAGE                       , "wyrm.annihilate.base_damage",         1200) \
+    ACFG_X(WYRM_ANNIHILATE_EXECUTE_THRESHOLD                 , "wyrm.annihilate.execute_threshold",     25) \
+    ACFG_X(WYRM_ANNIHILATE_EXECUTE_BONUS                     , "wyrm.annihilate.execute_bonus",         50) \
+    ACFG_X(WYRM_APOCALYPSE_ESSENCE_COST                      , "wyrm.apocalypse.essence_cost",          60) \
+    ACFG_X(WYRM_APOCALYPSE_BASE_DAMAGE                       , "wyrm.apocalypse.base_damage",         2000) \
+    ACFG_X(WYRM_APOCALYPSE_COOLDOWN                          , "wyrm.apocalypse.cooldown",              30) \
+    \
+    /* Wyrm - Dominion tree */ \
+    ACFG_X(WYRM_DRAGONFEAR_ESSENCE_COST                      , "wyrm.dragonfear.essence_cost",          20) \
+    ACFG_X(WYRM_DRAGONFEAR_DURATION                          , "wyrm.dragonfear.duration",               3) \
+    ACFG_X(WYRM_DRAGONFEAR_STUN_CHANCE                       , "wyrm.dragonfear.stun_chance",           30) \
+    ACFG_X(WYRM_TERRAINSHIFT_ESSENCE_COST                    , "wyrm.terrainshift.essence_cost",        30) \
+    ACFG_X(WYRM_TERRAINSHIFT_DURATION                        , "wyrm.terrainshift.duration",            10) \
+    ACFG_X(WYRM_TERRAINSHIFT_DAMAGE_BONUS                    , "wyrm.terrainshift.damage_bonus",        15) \
+    ACFG_X(WYRM_DRAGONLORD_ESSENCE_COST                      , "wyrm.dragonlord.essence_cost",          25) \
+    ACFG_X(WYRM_DRAGONLORD_DURATION                          , "wyrm.dragonlord.duration",              30) \
+    \
+    /* Wyrm - Ascension tree */ \
+    ACFG_X(WYRM_WYRMFORM_ESSENCE_COST                        , "wyrm.wyrmform.essence_cost",            40) \
+    ACFG_X(WYRM_WYRMFORM_DURATION                            , "wyrm.wyrmform.duration",                20) \
+    ACFG_X(WYRM_WYRMFORM_DAMCAP_BONUS                        , "wyrm.wyrmform.damcap_bonus",           300) \
+    ACFG_X(WYRM_WYRMFORM_EXTRA_ATTACKS                       , "wyrm.wyrmform.extra_attacks",            2) \
+    ACFG_X(WYRM_ANCIENTWRATH_ESSENCE_COST                    , "wyrm.ancientwrath.essence_cost",        25) \
+    ACFG_X(WYRM_ANCIENTWRATH_DURATION                        , "wyrm.ancientwrath.duration",            10) \
+    ACFG_X(WYRM_ANCIENTWRATH_DAMAGE_BONUS                    , "wyrm.ancientwrath.damage_bonus",        25) \
+    ACFG_X(WYRM_PRIMORDIAL_DAMAGE_MULT                       , "wyrm.primordial.damage_mult",           10) \
+    ACFG_X(WYRM_PRIMORDIAL_ESSENCE_REGEN                     , "wyrm.primordial.essence_regen",          5) \
+    \
+    /* Wyrm - Combat bonuses */ \
+    ACFG_X(WYRM_DAMCAP_BASE                                  , "wyrm.damcap.base",                     300) \
+    ACFG_X(WYRM_DAMCAP_ESSENCE_MULT                          , "wyrm.damcap.essence_mult",               7) \
+    ACFG_X(WYRM_DAMAGE_REDUCTION                             , "wyrm.damage_reduction",                 30)
 
 
 /* Generate enum from X-macro */

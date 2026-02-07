@@ -87,6 +87,11 @@ balance_entry_t balance_map[] = {
 	{ "damcap_dirgesinger_battlehymn",&balance.damcap_dirgesinger_battlehymn },
 	{ "damcap_siren_res_mult",        &balance.damcap_siren_res_mult },
 	{ "damcap_siren_echoshield",      &balance.damcap_siren_echoshield },
+	{ "damcap_dragonkin_base",        &balance.damcap_dragonkin_base },
+	{ "damcap_dragonkin_essence_mult",&balance.damcap_dragonkin_essence_mult },
+	{ "damcap_dragonkin_dragonhide",  &balance.damcap_dragonkin_dragonhide },
+	{ "damcap_wyrm_essence_mult",     &balance.damcap_wyrm_essence_mult },
+	{ "damcap_wyrm_wyrmform",         &balance.damcap_wyrm_wyrmform },
 	{ "damcap_artifact",          &balance.damcap_artifact },
 
 	/* Stance damcap bonuses */
@@ -208,6 +213,11 @@ void load_balance( void ) {
 	balance.damcap_dirgesinger_battlehymn = 200;
 	balance.damcap_siren_res_mult        = 7;
 	balance.damcap_siren_echoshield      = 150;
+	balance.damcap_dragonkin_base        = 200;
+	balance.damcap_dragonkin_essence_mult = 5;
+	balance.damcap_dragonkin_dragonhide  = 150;
+	balance.damcap_wyrm_essence_mult     = 7;
+	balance.damcap_wyrm_wyrmform         = 300;
 	balance.damcap_artifact          = 500;
 
 	balance.damcap_stance_bull       = 200;
