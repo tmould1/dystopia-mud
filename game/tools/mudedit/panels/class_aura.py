@@ -10,7 +10,6 @@ from tkinter import ttk, messagebox
 from typing import Callable, Optional
 
 from ..widgets.colors import parse_colored_segments, DEFAULT_FG, PREVIEW_BG, xterm256_to_hex
-from ..db.repository import get_class_name
 
 
 class ClassAuraPanel(ttk.Frame):
@@ -142,9 +141,8 @@ class ClassAuraPanel(ttk.Frame):
 
         entries = self.auras_repo.list_all()
         for entry in entries:
-            class_name = get_class_name(entry['class_id'])
             self.aura_tree.insert('', tk.END, iid=str(entry['class_id']),
-                                   values=(entry['class_id'], class_name, entry['display_order']))
+                                   values=(entry['class_id'], entry['class_name'], entry['display_order']))
 
         self.on_status(f"Loaded {len(entries)} class auras")
 
@@ -163,15 +161,14 @@ class ClassAuraPanel(ttk.Frame):
 
         entry = self.auras_repo.get_by_id(class_id)
         if entry:
-            class_name = get_class_name(class_id)
-            self.class_label.config(text=class_name)
+            self.class_label.config(text=entry['class_name'])
             self.aura_var.set(entry['aura_text'])
             self.tooltip_var.set(entry['mxp_tooltip'])
             self.order_var.set(str(entry['display_order']))
             self.unsaved = False
 
-        self._update_preview()
-        self.on_status(f"Editing {class_name}")
+            self._update_preview()
+            self.on_status(f"Editing {entry['class_name']}")
 
     def _on_change(self):
         """Called when any field changes."""

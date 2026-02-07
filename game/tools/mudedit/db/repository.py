@@ -1016,8 +1016,23 @@ class ClassAurasRepository(BaseRepository):
         super().__init__(conn, 'class_auras', 'class_id')
 
     def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
-        """List all class auras ordered by display_order."""
-        return super().list_all(order_by or 'display_order, class_id')
+        """List all class auras with class_name from registry."""
+        rows = self.conn.execute(
+            "SELECT a.*, r.class_name FROM class_auras a "
+            "JOIN class_registry r ON a.class_id = r.class_id "
+            "ORDER BY a.display_order, a.class_id"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_by_id(self, class_id: int) -> Optional[Dict]:
+        """Get aura entry with class_name from registry."""
+        row = self.conn.execute(
+            "SELECT a.*, r.class_name FROM class_auras a "
+            "JOIN class_registry r ON a.class_id = r.class_id "
+            "WHERE a.class_id = ?",
+            (class_id,)
+        ).fetchone()
+        return dict(row) if row else None
 
 
 class ClassArmorConfigRepository(BaseRepository):
