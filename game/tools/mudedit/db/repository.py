@@ -951,8 +951,23 @@ class ClassBracketsRepository(BaseRepository):
         super().__init__(conn, 'class_brackets', 'class_id')
 
     def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
-        """List all class brackets ordered by class_name."""
-        return super().list_all(order_by or 'class_name')
+        """List all class brackets with class_name from registry."""
+        rows = self.conn.execute(
+            "SELECT b.*, r.class_name FROM class_brackets b "
+            "JOIN class_registry r ON b.class_id = r.class_id "
+            "ORDER BY r.class_name"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_by_id(self, class_id: int) -> Optional[Dict]:
+        """Get bracket entry with class_name from registry."""
+        row = self.conn.execute(
+            "SELECT b.*, r.class_name FROM class_brackets b "
+            "JOIN class_registry r ON b.class_id = r.class_id "
+            "WHERE b.class_id = ?",
+            (class_id,)
+        ).fetchone()
+        return dict(row) if row else None
 
 
 class ClassGenerationsRepository(BaseRepository):
