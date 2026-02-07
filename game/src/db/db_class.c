@@ -205,9 +205,12 @@ void db_class_load_aura( void ) {
 	}
 	aura_count = 0;
 
+	/* Join with class_registry to get class_name for tooltip */
 	if ( sqlite3_prepare_v2( class_db,
-			"SELECT class_id, aura_text, mxp_tooltip, display_order "
-			"FROM class_auras ORDER BY display_order, class_id",
+			"SELECT a.class_id, a.aura_text, r.class_name, a.display_order "
+			"FROM class_auras a "
+			"JOIN class_registry r ON a.class_id = r.class_id "
+			"ORDER BY a.display_order, a.class_id",
 			-1, &stmt, NULL ) == SQLITE_OK ) {
 		while ( sqlite3_step( stmt ) == SQLITE_ROW && aura_count < MAX_CACHED_AURAS ) {
 			aura_cache[aura_count].class_id      = sqlite3_column_int( stmt, 0 );

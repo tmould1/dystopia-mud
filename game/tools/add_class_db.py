@@ -105,7 +105,8 @@ def insert_class_data(conn, class_data, dry_run=False):
                 cursor.execute(sql, params)
         print(f"  - class_generations: {len(class_data['generations'])} titles")
 
-    # 4. class_auras
+    # 4. class_auras (mxp_tooltip derived from class_registry.class_name via JOIN in C code,
+    #    but we still write class_name to satisfy NOT NULL constraint)
     if "aura" in class_data:
         aura = class_data["aura"]
         sql = """INSERT OR REPLACE INTO class_auras
@@ -114,7 +115,7 @@ def insert_class_data(conn, class_data, dry_run=False):
         params = (
             class_id,
             aura.get("text", f"({class_name}) "),
-            aura.get("tooltip", class_name),
+            class_name,  # Not used by C code (uses JOIN), but satisfies NOT NULL constraint
             aura.get("display_order", 10)
         )
         print(f"  - class_auras: {params[1][:30]}...")
@@ -162,6 +163,14 @@ def insert_class_data(conn, class_data, dry_run=False):
     # 7. class_armor_config
     if "armor_config" in class_data:
         armor = class_data["armor_config"]
+
+        # Auto-generate usage_message from armor_pieces if not explicitly set
+        if "usage_message" not in armor and "armor_pieces" in class_data:
+            pieces = class_data["armor_pieces"]
+            keywords = ", ".join(p["keyword"] for p in pieces)
+            command = armor.get("command_name", f"{class_name.lower()}armor")
+            armor["usage_message"] = f"Syntax: {command} <piece>\\n\\rPieces: {keywords}"
+
         sql = """INSERT OR REPLACE INTO class_armor_config
                  (class_id, acfg_cost_key, usage_message, act_to_char, act_to_room, mastery_vnum)
                  VALUES (?, ?, ?, ?, ?, ?)"""
@@ -316,7 +325,6 @@ CLASSES_TO_ADD = [
 
         "aura": {
             "text": "#x202(#x220Dragonkin#x202)#n ",
-            "tooltip": "Dragonkin",
             "display_order": 20
         },
 
@@ -335,7 +343,7 @@ CLASSES_TO_ADD = [
 
         "armor_config": {
             "acfg_cost_key": "dragonkin.dragonarmor.practice_cost",
-            "usage_message": "Syntax: dragonarmor <piece>\\n\\rPieces: fang, ring, tooth, scales, helm, leggings, boots, gauntlets, bracers, cloak, belt, bracer, visage",
+            "command_name": "dragonarmor",  # usage_message auto-generated from armor_pieces
             "act_to_char": "Dragon scales form into $p in your claws.",
             "act_to_room": "Dragon scales form into $p in $n's claws.",
             "mastery_vnum": 33415
@@ -400,7 +408,6 @@ CLASSES_TO_ADD = [
 
         "aura": {
             "text": "#x202(#x220Wyrm#x202)#n ",
-            "tooltip": "Wyrm",
             "display_order": 21
         },
 
@@ -415,7 +422,7 @@ CLASSES_TO_ADD = [
 
         "armor_config": {
             "acfg_cost_key": "wyrm.wyrmarmor.practice_cost",
-            "usage_message": "Syntax: wyrmarmor <piece>\\n\\rPieces: talon, ring, fang, scales, helm, leggings, boots, gauntlets, bracers, cloak, belt, bracer, visage",
+            "command_name": "wyrmarmor",  # usage_message auto-generated from armor_pieces
             "act_to_char": "Ancient scales form into $p in your talons.",
             "act_to_room": "Ancient scales form into $p in $n's talons.",
             "mastery_vnum": 33435
