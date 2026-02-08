@@ -155,6 +155,9 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		}
 
 		argument[0] = UPPER( argument[0] );
+		/* Normalize name: first letter upper, rest lower for case-insensitive uniqueness */
+		for ( int i = 1; argument[i] != '\0'; i++ )
+			argument[i] = LOWER( argument[i] );
 		if ( !check_parse_name( argument ) && strcmp( argument, "Vladd" ) != 0 ) {
 			write_to_buffer( d, " Illegal name, try another.\n\r Enter thy name brave traveler: ", 0 );
 			return;
