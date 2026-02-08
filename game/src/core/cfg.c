@@ -372,7 +372,7 @@ void do_cfg( CHAR_DATA *ch, char *argument ) {
 
 	/* "cfg <prefix>" - show matching entries or subcategories */
 	{
-		int prefix_len = strlen( arg );
+		int prefix_len = (int)strlen( arg );
 		char subcats[64][64];
 		int subcat_counts[64];
 		int num_subcats = 0;
