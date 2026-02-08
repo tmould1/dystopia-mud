@@ -8,7 +8,6 @@ This folder contains design documents for **4 new class pairs** (8 classes total
 |------------|---------------|---------------|--------|
 | [Cultist](cultist.md) | [Voidborn](voidborn.md) | Eldritch horror | Proposed |
 | [Artificer](artificer.md) | [Mechanist](mechanist.md) | Technology/Gadgets | Proposed |
-| [Dragonkin](dragonkin.md) | [Wyrm](wyrm.md) | Draconic heritage | Proposed |
 | [Chronomancer](chronomancer.md) | [Paradox](paradox.md) | Time manipulation | Proposed |
 
 ## Gaps Being Filled
@@ -21,7 +20,6 @@ These new classes address remaining missing archetypes:
 |-----|----------|-----------------|
 | **No Lovecraftian horror** | Cultist/Voidborn | Risk/reward Corruption mechanic with self-damage |
 | **No tech class** (Spider Droid is Drow-locked) | Artificer/Mechanist | Gadgets, turrets, drones, cybernetic implants |
-| **No dragon theme** | Dragonkin/Wyrm | Elemental form-shifting during combat |
 | **No temporal magic** | Chronomancer/Paradox | Unique flux balance mechanic |
 
 ## Resource Systems
@@ -42,12 +40,6 @@ Each class pair has a unique resource that defines its playstyle:
 - `overcharge` pushes beyond limits for bonus damage at risk of backfire
 - Mechanist has no decay (internal reactor)
 
-### Draconic Fury (Dragonkin/Wyrm)
-- Builds rapidly in combat (+3/tick + damage dealt/taken)
-- Decays rapidly out of combat (-4/tick)
-- Fuels breath weapons and draconic abilities
-- Combined with **Elemental Forms** for tactical depth
-
 ### Temporal Flux (Chronomancer/Paradox)
 - **Balance Mechanic**: Starts at center (50/75), drifts back toward center
 - Acceleration abilities push flux UP, Deceleration abilities push flux DOWN
@@ -55,19 +47,6 @@ Each class pair has a unique resource that defines its playstyle:
 - Forces tactical decisions about which abilities to use when
 
 ## Unique Mechanics
-
-### Elemental Forms (Dragonkin/Wyrm)
-
-Dragonkin shift between 4 elemental forms mid-combat:
-
-| Form | Element | Resistance | Vulnerability | Playstyle |
-|------|---------|------------|---------------|-----------|
-| Flame | Fire | +50% Fire | -25% Cold | Aggressive DoTs |
-| Frost | Cold | +50% Cold | -25% Fire | Control/Slows |
-| Storm | Lightning | +50% Lightning | -25% Acid | Burst/Stuns |
-| Venom | Acid | +50% Acid | -25% Lightning | Debuffs/Armor shred |
-
-Each form locks access to specific abilities. Mastery requires knowing when to shift to exploit enemy weaknesses or cover your own vulnerabilities.
 
 ### Corruption Risk/Reward (Cultist/Voidborn)
 
@@ -125,8 +104,6 @@ Each class has a distinct two-color palette for visual identity:
 | Voidborn | Void black | Eldritch purple | Space between stars |
 | Artificer | Electric blue | Chrome silver | Technology |
 | Mechanist | Neon orange | Bright chrome | Advanced tech |
-| Dragonkin | Deep crimson | Bright gold | Draconic nobility |
-| Wyrm | Deep azure | Platinum white | Ancient majesty |
 | Chronomancer | Deep blue | Bright silver | Flow of time |
 | Paradox | Shifting violet | Iridescent white | Broken time |
 
@@ -136,7 +113,6 @@ Suggested order based on uniqueness and complexity:
 
 1. **Cultist/Voidborn** - Corruption risk/reward is novel but self-contained
 2. **Artificer/Mechanist** - Turrets/drones need entity management, moderate complexity
-3. **Dragonkin/Wyrm** - Form system requires significant UI work for form-locked abilities
 4. **Chronomancer/Paradox** - Flux balance and timeline abilities are most complex
 
 ## Document Structure
@@ -144,7 +120,7 @@ Suggested order based on uniqueness and complexity:
 Each class document follows the established format:
 
 1. **Overview** - Theme, source files (TBD), class constant (TBD), upgrade relationship
-2. **Color Scheme** - Visual identity for who list and combat messages
+2. **Color and Bracket Scheme** - Visual identity for who list and combat messages
 3. **Core Mechanics** - Resource system, build/decay, unique mechanics
 4. **Training Categories** - 3-5 categories with 2-4 abilities each
 5. **Abilities** - Detailed tables with costs, cooldowns, damage formulas, requirements
