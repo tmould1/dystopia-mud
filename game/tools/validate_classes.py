@@ -15,7 +15,7 @@ Checks:
 Usage:
     python validate_classes.py [--db-path PATH]
 
-Default database path: ../../gamedata/db/game/game.db
+Default database path: ../../gamedata/db/game/class.db
 """
 
 import argparse
@@ -102,16 +102,18 @@ def get_class_brackets(db_path: str) -> list[dict]:
 
     if has_colors:
         cursor.execute("""
-            SELECT class_id, class_name, open_bracket, close_bracket,
-                   accent_color, primary_color
-            FROM class_brackets
+            SELECT b.class_id, r.class_name, b.open_bracket, b.close_bracket,
+                   b.accent_color, b.primary_color
+            FROM class_brackets b
+            JOIN class_registry r ON b.class_id = r.class_id
         """)
     else:
         print("  NOTE: accent_color/primary_color columns not yet in database")
         print("        Run the server once to auto-migrate existing database")
         cursor.execute("""
-            SELECT class_id, class_name, open_bracket, close_bracket
-            FROM class_brackets
+            SELECT b.class_id, r.class_name, b.open_bracket, b.close_bracket
+            FROM class_brackets b
+            JOIN class_registry r ON b.class_id = r.class_id
         """)
 
     entries = []
@@ -579,7 +581,7 @@ def main():
     """Entry point for class registry validation."""
     parser = argparse.ArgumentParser(description='Validate class registry consistency')
     parser.add_argument('--db-path', type=str,
-                        help='Path to game.db (default: ../../gamedata/db/game/game.db)')
+                        help='Path to class.db (default: ../../gamedata/db/game/class.db)')
     args = parser.parse_args()
 
     # Determine paths relative to script location
@@ -588,7 +590,7 @@ def main():
     if args.db_path:
         db_path = Path(args.db_path)
     else:
-        db_path = script_dir / '../../gamedata/db/game/game.db'
+        db_path = script_dir / '../../gamedata/db/game/class.db'
 
     class_h_path = script_dir / '../src/classes/class.h'
 

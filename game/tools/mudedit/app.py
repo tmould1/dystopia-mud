@@ -669,7 +669,7 @@ class MudEditorApp:
 
         try:
             # Get paths
-            db_path = self.db_manager.get_game_db_path()
+            db_path = self.db_manager.get_class_db_path()
             # From mudedit/app.py -> tools -> game -> src/classes/class.h
             class_h_path = Path(__file__).parent.parent.parent / 'src' / 'classes' / 'class.h'
 
