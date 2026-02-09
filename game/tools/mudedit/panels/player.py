@@ -740,22 +740,22 @@ class PlayerEditorPanel(ttk.Frame):
 
         # Load vampire fields
         self.generation_var.set(player.get('generation', 13))
-        self.blood_var.set(player.get('blood', 0))
+        # Blood is stored in condition array (index 2 = COND_THIRST)
+        condition = arrays.get('condition', [0, 0, 0])
+        if len(condition) >= 3:
+            self.blood_var.set(condition[2])
+        else:
+            self.blood_var.set(0)
 
-        # Load demon fields
-        self.corruption_var.set(player.get('corruption', 0))
-
-        # Load mage fields
-        self.arete_var.set(player.get('arete', 0))
-        self.quintessence_var.set(player.get('quintessence', 0))
-
-        # Load dragonkin fields
-        self.attunement_var.set(player.get('attunement', 0))
-        self.essence_var.set(player.get('essence', 0))
-
-        # Load generic class fields
-        self.origclass_var.set(player.get('origclass', 0))
-        self.tier_var.set(player.get('tier', 0))
+        # Note: These fields are displayed but not yet in the database schema
+        # They will show 0 until schema is updated
+        self.corruption_var.set(0)
+        self.arete_var.set(0)
+        self.quintessence_var.set(0)
+        self.attunement_var.set(0)
+        self.essence_var.set(0)
+        self.origclass_var.set(0)
+        self.tier_var.set(0)
 
         # Refresh visibility
         self._refresh_class_tab()
@@ -777,18 +777,17 @@ class PlayerEditorPanel(ttk.Frame):
         gnosis = [self.gnosis0_var.get(), self.gnosis1_var.get()]
         self.repository.update_player_array('gnosis', gnosis)
 
-        # Save player fields
+        # Save blood via condition array (index 2 = COND_THIRST)
+        condition = arrays.get('condition', [0, 0, 0])
+        while len(condition) < 3:
+            condition.append(0)
+        condition[2] = self.blood_var.get()  # COND_THIRST
+        self.repository.update_player_array('condition', condition)
+
+        # Save player fields (only columns that exist in schema)
         data = {
             'rage': self.rage_var.get(),
             'generation': self.generation_var.get(),
-            'blood': self.blood_var.get(),
-            'corruption': self.corruption_var.get(),
-            'arete': self.arete_var.get(),
-            'quintessence': self.quintessence_var.get(),
-            'attunement': self.attunement_var.get(),
-            'essence': self.essence_var.get(),
-            'origclass': self.origclass_var.get(),
-            'tier': self.tier_var.get(),
         }
         self.repository.update_player(data)
         self.on_status("Class data saved")
@@ -1590,17 +1589,17 @@ class PlayerEditorPanel(ttk.Frame):
         gnosis = [self.gnosis0_var.get(), self.gnosis1_var.get()]
         self.repository.update_player_array('gnosis', gnosis)
 
+        # Save blood via condition array (index 2 = COND_THIRST)
+        condition = arrays.get('condition', [0, 0, 0])
+        while len(condition) < 3:
+            condition.append(0)
+        condition[2] = self.blood_var.get()
+        self.repository.update_player_array('condition', condition)
+
+        # Save class-specific fields (only those that exist in schema)
         class_data = {
             'rage': self.rage_var.get(),
             'generation': self.generation_var.get(),
-            'blood': self.blood_var.get(),
-            'corruption': self.corruption_var.get(),
-            'arete': self.arete_var.get(),
-            'quintessence': self.quintessence_var.get(),
-            'attunement': self.attunement_var.get(),
-            'essence': self.essence_var.get(),
-            'origclass': self.origclass_var.get(),
-            'tier': self.tier_var.get(),
         }
         self.repository.update_player(class_data)
 
