@@ -637,7 +637,7 @@ void game_loop( int control ) {
 						edit_buffer( d->character, d->incomm );
 						break;
 					case CON_PFILE:
-						jope_interp( d->character, d->incomm );
+						pedit_interp( d->character, d->incomm );
 						break;
 					}
 
@@ -956,7 +956,7 @@ void close_socket( DESCRIPTOR_DATA *dclose ) {
 	if ( dclose->character != NULL &&
 		( dclose->connected == CON_PLAYING || dclose->connected == CON_EDITING ) &&
 		IS_NPC( dclose->character ) ) do_return( dclose->character, "" );
-	if ( dclose->connected == CON_PFILE ) jope_done( dclose->character, "" );
+	if ( dclose->connected == CON_PFILE ) pedit_save_offline( dclose->character );
 
 	/*
 	 * Clear snoops
@@ -1004,7 +1004,7 @@ void close_socket2( DESCRIPTOR_DATA *dclose, bool kickoff ) {
 	if ( dclose->character != NULL &&
 		( dclose->connected == CON_PLAYING || dclose->connected == CON_EDITING ) &&
 		IS_NPC( dclose->character ) ) do_return( dclose->character, "" );
-	if ( dclose->connected == CON_PFILE ) jope_done( dclose->character, "" );
+	if ( dclose->connected == CON_PFILE ) pedit_save_offline( dclose->character );
 
 	/*
 	 * Clear snoops

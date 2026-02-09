@@ -3117,39 +3117,6 @@ extern pthread_mutex_t memory_mutex;
  * Defined in act_*.c (mostly).
  */
 
-/*
- * J.O.P.E.
- */
-DECLARE_DO_FUN( do_pfile );
-DECLARE_DO_FUN( jope_done );
-DECLARE_DO_FUN( jope_exp );
-DECLARE_DO_FUN( jope_show );
-DECLARE_DO_FUN( jope_list );
-DECLARE_DO_FUN( jope_spells );
-DECLARE_DO_FUN( jope_stances );
-DECLARE_DO_FUN( jope_weapons );
-DECLARE_DO_FUN( jope_action );
-DECLARE_DO_FUN( jope_inventory );
-DECLARE_DO_FUN( jope_drop );
-DECLARE_DO_FUN( jope_equipment );
-DECLARE_DO_FUN( jope_get );
-DECLARE_DO_FUN( jope_look );
-DECLARE_DO_FUN( jope_remove );
-DECLARE_DO_FUN( jope_wear );
-DECLARE_DO_FUN( jope_newbits );
-DECLARE_DO_FUN( jope_act );
-DECLARE_DO_FUN( jope_qps );
-DECLARE_DO_FUN( jope_primal );
-DECLARE_DO_FUN( jope_level );
-DECLARE_DO_FUN( jope_trust );
-DECLARE_DO_FUN( jope_hit );
-DECLARE_DO_FUN( jope_move );
-DECLARE_DO_FUN( jope_mana );
-DECLARE_DO_FUN( jope_pkill );
-DECLARE_DO_FUN( jope_pdeath );
-DECLARE_DO_FUN( jope_mkill );
-DECLARE_DO_FUN( jope_mdeath );
-
 /* Shop Commands */
 DECLARE_DO_FUN( do_buy );
 DECLARE_DO_FUN( do_sell );
@@ -3728,7 +3695,6 @@ DECLARE_DO_FUN( do_mload );
 DECLARE_DO_FUN( do_mount );
 DECLARE_DO_FUN( do_mortal );
 DECLARE_DO_FUN( do_mortalvamp );
-DECLARE_DO_FUN( do_mset );
 DECLARE_DO_FUN( do_undeny );
 DECLARE_DO_FUN( do_mstat );
 DECLARE_DO_FUN( do_mwhere );
@@ -3742,6 +3708,7 @@ DECLARE_DO_FUN( do_oload );
 DECLARE_DO_FUN( do_open );
 DECLARE_DO_FUN( do_order );
 DECLARE_DO_FUN( do_oreturn );
+DECLARE_DO_FUN( do_pedit );
 DECLARE_DO_FUN( do_outcast );
 DECLARE_DO_FUN( do_reimb );
 DECLARE_DO_FUN( do_reimburse );
@@ -3765,7 +3732,6 @@ DECLARE_DO_FUN( do_press );
 DECLARE_DO_FUN( do_preturn );
 DECLARE_DO_FUN( do_prompt );
 DECLARE_DO_FUN( do_propose );
-DECLARE_DO_FUN( do_pset );
 DECLARE_DO_FUN( do_pull );
 DECLARE_DO_FUN( do_punch );
 DECLARE_DO_FUN( do_purge );
@@ -3885,7 +3851,6 @@ DECLARE_DO_FUN( do_socials );
 DECLARE_DO_FUN( do_south );
 DECLARE_DO_FUN( do_spy );
 DECLARE_DO_FUN( do_spydirection );
-DECLARE_DO_FUN( do_sset );
 DECLARE_DO_FUN( do_stand );
 DECLARE_DO_FUN( do_steal );
 DECLARE_DO_FUN( do_summon );
@@ -4449,11 +4414,10 @@ void update_doubleexp args( (void) );
 void update_doubleqps args( (void) );
 
 /*
- * J.O.P.E.
+ * pedit.c - Unified Player Editor
  */
-bool jope_load_char args( ( CHAR_DATA * ch, char *arg ) );
-void jope_free_char args( ( CHAR_DATA * ch ) );
-void jope_interp args( ( CHAR_DATA * ch, char *argument ) );
+void pedit_interp args( ( CHAR_DATA * ch, char *argument ) );
+void pedit_save_offline args( ( CHAR_DATA * ch ) );
 
 extern int thread_status;
 extern char *last_command;

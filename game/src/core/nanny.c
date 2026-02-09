@@ -1,7 +1,7 @@
 /***************************************************************************
  *  Nanny and login functions extracted from comm.c                        *
  *  Contains: nanny, check_parse_name, check_reconnect, check_kickoff,     *
- *            check_playing, stop_idling                                   *
+ *            check_playing, check_pedit_editing, stop_idling              *
  ***************************************************************************/
 
 #include "merc.h"
@@ -20,6 +20,7 @@ bool check_parse_name( char *name );
 bool check_reconnect( DESCRIPTOR_DATA *d, char *name, bool fConn );
 bool check_kickoff( DESCRIPTOR_DATA *d, char *name, bool fConn );
 bool check_playing( DESCRIPTOR_DATA *d, char *name );
+void check_pedit_editing( const char *name );
 
 /* External function from comm.c */
 bool check_banned( DESCRIPTOR_DATA *d );
@@ -258,6 +259,9 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 
 		if ( check_playing( d, GET_PC_NAME( ch ) ) )
 			return;
+
+		/* If someone is editing this player via pedit, save and close their session */
+		check_pedit_editing( GET_PC_NAME( ch ) );
 
 		if ( ch->level > 1 ) {
 			sprintf( kav, "%s", ch->pcdata->switchname );
@@ -970,6 +974,31 @@ bool check_kickoff( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 	}
 
 	return FALSE;
+}
+
+/*
+ * Check if someone is editing this player via pedit.
+ * If so, save their work and close the edit session so the player can log in.
+ */
+void check_pedit_editing( const char *name ) {
+	CHAR_DATA *ch;
+	char buf[MAX_STRING_LENGTH];
+
+	for ( ch = char_list; ch != NULL; ch = ch->next ) {
+		if ( IS_NPC( ch ) || ch->pcdata == NULL )
+			continue;
+		if ( ch->pcdata->pfile == NULL )
+			continue;
+		if ( str_cmp( name, ch->pcdata->pfile->name ) )
+			continue;
+
+		/* Found an immortal editing this player - save and close */
+		sprintf( buf, "%s is logging in - saving and closing your edit session.\n\r", name );
+		send_to_char( buf, ch );
+		pedit_save_offline( ch );
+		if ( ch->desc && ch->desc->connected == CON_PFILE )
+			ch->desc->connected = CON_PLAYING;
+	}
 }
 
 /*

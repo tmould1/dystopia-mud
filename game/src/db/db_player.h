@@ -24,6 +24,9 @@ bool db_player_load_short( DESCRIPTOR_DATA *d, char *name );
 /* Check if a player .db file exists */
 bool db_player_exists( const char *name );
 
+/* Delete a player's database file permanently */
+bool db_player_delete( const char *name );
+
 /* Background save support */
 void db_player_wait_pending( int timeout_ms );
 int  db_player_pending_count( void );

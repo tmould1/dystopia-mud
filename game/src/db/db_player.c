@@ -592,6 +592,31 @@ bool db_player_exists( const char *name ) {
 	return FALSE;
 }
 
+/*
+ * Delete a player's database file permanently.
+ * Returns TRUE on success, FALSE if file doesn't exist or deletion failed.
+ */
+bool db_player_delete( const char *name ) {
+	char path[MUD_PATH_MAX];
+	char log_buf[MAX_STRING_LENGTH];
+
+	if ( db_player_path( name, path, sizeof( path ) ) < 0 )
+		return FALSE;
+
+	if ( !db_player_exists( name ) )
+		return FALSE;
+
+	if ( remove( path ) == 0 ) {
+		sprintf( log_buf, "Player file deleted: %s", name );
+		log_string( log_buf );
+		return TRUE;
+	}
+
+	sprintf( log_buf, "Failed to delete player file: %s", name );
+	log_string( log_buf );
+	return FALSE;
+}
+
 
 /*
  * Write all inventory objects for a character to the objects table.
