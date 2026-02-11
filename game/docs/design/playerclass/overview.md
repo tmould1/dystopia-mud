@@ -24,6 +24,8 @@ Available via `selfclass` command at level 3 (Avatar):
 - Battlemage (requires 5K mana and 100 in all spell colors)
 - Dirgesinger
 - Psion
+- Dragonkin
+- Artificer
 
 ### Upgrade Classes
 Achieved by upgrading from a maxed base class:
@@ -39,6 +41,8 @@ Achieved by upgrading from a maxed base class:
 | Battlemage | Lich |
 | Dirgesinger | Siren |
 | Psion | Mindflayer |
+| Dragonkin | Wyrm |
+| Artificer | Mechanist |
 
 **Source**: `src/systems/upgrade.c`, `gamedata/db/game/base_help.db` (UPGRADE help entry)
 
@@ -100,6 +104,8 @@ bool is_upgrade(CHAR_DATA *ch) {
     if (IS_CLASS(ch, CLASS_SHAPESHIFTER))  return TRUE;
     if (IS_CLASS(ch, CLASS_SIREN))         return TRUE;
     if (IS_CLASS(ch, CLASS_MINDFLAYER))    return TRUE;
+    if (IS_CLASS(ch, CLASS_WYRM))          return TRUE;
+    if (IS_CLASS(ch, CLASS_MECHANIST))     return TRUE;
     return FALSE;
 }
 ```
@@ -185,9 +191,13 @@ struct pc_data {
 // Base Classes (continued)
 #define CLASS_DIRGESINGER 16384
 #define CLASS_PSION       65536
+#define CLASS_DRAGONKIN  262144
+#define CLASS_ARTIFICER 1048576
 
 // Upgrade Classes (continued)
 #define CLASS_MINDFLAYER 131072
+#define CLASS_WYRM       524288
+#define CLASS_MECHANIST 2097152
 ```
 
 ### Checking Class Membership
@@ -210,13 +220,13 @@ CON_GET_NAME -> CON_CONFIRM_NEW_NAME -> CON_GET_NEW_PASSWORD
     -> [Reach level 3 and use 'selfclass' command]
 ```
 
-### Class Selection (wizutil.c - do_classself)
+### Class Selection (act_info.c - do_classself)
 
-Requirements vary by class:
+Class selection is now DB-driven via the `class_registry` table in `class.db`. Requirements vary by class:
 - **Most classes**: Just need to be Avatar (level 3)
 - **Battlemage**: Requires 5K mana AND 100+ in all five spell colors
 
-Source: `src/wizutil.c:190-274`
+Source: `src/commands/act_info.c`
 
 ## Class Power Storage
 
@@ -232,16 +242,22 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 | Siren | Echoshield, Crescendo stage (6-7) | dirgesinger.h |
 | Psion | Shield durations, training levels (10-12) | psion.h |
 | Mindflayer | Hivemind, thrall count, training levels (10-12) | psion.h |
+| Dragonkin | Breath cooldowns, attunement, training levels (10-12) | dragonkin.h |
+| Wyrm | Ancient powers, breath mastery, training levels (10-12) | dragonkin.h |
+| Artificer | Turret count, buff durations, cooldowns, training levels (10-12) | artificer.h |
+| Mechanist | Drone count, implant types, cooldowns, training levels (10-12) | artificer.h |
 
 ## File Organization
 
 ### Core System Files
-- `src/class.h` - Class constant definitions
-- `src/merc.h` - Data structures
-- `src/upgrade.c` - Upgrade system
-- `src/handler.c` - Discipline initialization
-- `src/interp.c` - Command table with class requirements
-- `src/wizutil.c` - Player self-class selection
+- `src/core/class.h` - Class constant definitions
+- `src/core/merc.h` - Data structures
+- `src/systems/upgrade.c` - Upgrade system
+- `src/core/handler.c` - Discipline initialization
+- `src/core/interp.c` - Command table with class requirements
+- `src/commands/act_info.c` - Player self-class selection (do_classself)
+- `gamedata/db/game/class.db` - Class display, brackets, armor, and score data
+- `gamedata/db/game/base_help.db` - In-game help entries for all classes
 
 ### Class Implementation Files
 
@@ -255,6 +271,8 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 - `src/ninja.c` - Ninja abilities
 - `src/dirgesinger.c`, `src/dirgesinger.h` - Dirgesinger powers
 - `src/classes/psion.c`, `src/classes/psion.h` - Psion powers
+- `src/classes/dragonkin.c`, `src/classes/dragonkin.h` - Dragonkin powers
+- `src/classes/artificer.c`, `src/classes/artificer.h` - Artificer powers
 
 **Upgrade Classes:**
 - `src/tanarri.c`, `src/tanarri.h` - Tanar'ri powers
@@ -266,6 +284,8 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 - `src/lich.c`, `src/lich.h` - Lich powers
 - `src/siren.c` - Siren powers
 - `src/classes/mindflayer.c` - Mindflayer powers
+- `src/classes/wyrm.c` - Wyrm powers
+- `src/classes/mechanist.c` - Mechanist powers
 
 ## Design Considerations
 

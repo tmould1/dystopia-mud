@@ -1,25 +1,23 @@
 # Proposed Player Classes
 
-This folder contains design documents for **4 new class pairs** (8 classes total) that fill fantasy gaps in the current Dystopia class roster. These are proposals awaiting implementation - when ready, documents can be moved to the main `classes/` folder.
+This folder contains design documents for **2 new class pairs** (4 classes total) that fill remaining fantasy gaps in the Dystopia class roster. These are proposals awaiting implementation - when ready, documents should be moved to the main `classes/` folder.
 
 ## Overview
 
 | Base Class | Upgrade Class | Fantasy Niche | Status |
 |------------|---------------|---------------|--------|
 | [Cultist](cultist.md) | [Voidborn](voidborn.md) | Eldritch horror | Proposed |
-| [Artificer](artificer.md) | [Mechanist](mechanist.md) | Technology/Gadgets | Proposed |
 | [Chronomancer](chronomancer.md) | [Paradox](paradox.md) | Time manipulation | Proposed |
 
 ## Gaps Being Filled
 
-The current class roster covers undead (Vampire, Lich), primal beasts (Werewolf, Shapeshifter), infernal (Demon, Tanar'ri), divine (Monk, Angel), martial (Ninja, Samurai), arcane (Mage), dark elves (Drow, Spider Droid), sonic/bard (Dirgesinger, Siren), and psionic (Psion, Mindflayer).
+The current class roster covers undead (Vampire, Lich), primal beasts (Werewolf, Shapeshifter), infernal (Demon, Tanar'ri), divine (Monk, Angel), martial (Ninja, Samurai), arcane (Mage), dark elves (Drow, Spider Droid), sonic/bard (Dirgesinger, Siren), psionic (Psion, Mindflayer), draconic (Dragonkin, Wyrm), and technology (Artificer, Mechanist).
 
 These new classes address remaining missing archetypes:
 
 | Gap | Solution | Why It's Unique |
 |-----|----------|-----------------|
 | **No Lovecraftian horror** | Cultist/Voidborn | Risk/reward Corruption mechanic with self-damage |
-| **No tech class** (Spider Droid is Drow-locked) | Artificer/Mechanist | Gadgets, turrets, drones, cybernetic implants |
 | **No temporal magic** | Chronomancer/Paradox | Unique flux balance mechanic |
 
 ## Resource Systems
@@ -33,12 +31,6 @@ Each class pair has a unique resource that defines its playstyle:
 - 75-99: 2% max HP/tick self-damage
 - 100+: 3% max HP/tick self-damage (Voidborn only)
 - Forces active resource management unlike any other class
-
-### Power Cells (Artificer/Mechanist)
-- Builds through combat and the `charge` command
-- Spent on gadgets, turrets, and tech abilities
-- `overcharge` pushes beyond limits for bonus damage at risk of backfire
-- Mechanist has no decay (internal reactor)
 
 ### Temporal Flux (Chronomancer/Paradox)
 - **Balance Mechanic**: Starts at center (50/75), drifts back toward center
@@ -71,26 +63,12 @@ Unlike standard resources, Corruption actively punishes high values:
 
 Using Quicken (acceleration) pushes you toward Fast, making your next Slow ability weaker. Strategic play involves riding the edges or staying balanced for versatility.
 
-### Implant System (Mechanist)
-
-Mechanist has 3 cybernetic slots with swappable implants:
-
-| Slot | Options | Theme |
-|------|---------|-------|
-| Neural | Combat Processor, Targeting Suite, Threat Analyzer | Reaction/accuracy |
-| Servo | Power Arms, Multi-Tool, Shield Generator | Damage/utility |
-| Core | Armored Chassis, Regenerator, Power Core | Defense/sustain |
-
-Implants provide passive bonuses and can be changed out of combat.
-
 ### Thrall/Summon Systems
 
 Several proposed classes feature minion mechanics:
 
 | Class | Minion Type | Max Count | Notable Feature |
 |-------|-------------|-----------|-----------------|
-| Artificer | Turrets | 2 | Stationary, room-bound |
-| Mechanist | Combat Drones | 4 | Follow between rooms |
 | Voidborn | Void Creatures | 2 | Summoned from beyond |
 | Paradox | Past Self | 1 | Echo of yourself from another timeline |
 
@@ -102,8 +80,6 @@ Each class has a distinct two-color palette for visual identity:
 |-------|--------|---------|-------|
 | Cultist | Dark teal | Sickly green | Cosmic horror |
 | Voidborn | Void black | Eldritch purple | Space between stars |
-| Artificer | Electric blue | Chrome silver | Technology |
-| Mechanist | Neon orange | Bright chrome | Advanced tech |
 | Chronomancer | Deep blue | Bright silver | Flow of time |
 | Paradox | Shifting violet | Iridescent white | Broken time |
 
@@ -112,8 +88,7 @@ Each class has a distinct two-color palette for visual identity:
 Suggested order based on uniqueness and complexity:
 
 1. **Cultist/Voidborn** - Corruption risk/reward is novel but self-contained
-2. **Artificer/Mechanist** - Turrets/drones need entity management, moderate complexity
-4. **Chronomancer/Paradox** - Flux balance and timeline abilities are most complex
+2. **Chronomancer/Paradox** - Flux balance and timeline abilities are most complex
 
 ## Document Structure
 
@@ -133,8 +108,8 @@ Each class document follows the established format:
 To implement a class from this folder:
 
 1. Read the [Implementing a New Class](../implementing-a-new-class.md) guide
-2. Assign class constant (next power-of-2 after 131072, which is CLASS_MINDFLAYER)
-3. Assign equipment vnum range (non-overlapping)
+2. Assign class constant (next power-of-2 after 2097152, which is CLASS_MECHANIST)
+3. Assign equipment vnum range (next available: 33500+)
 4. Create source files following the documented structure
 5. Move the design doc from `todo/` to `classes/` when complete
 6. Update `README.md` and `overview.md` in the parent folder

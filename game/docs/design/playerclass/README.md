@@ -27,6 +27,8 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [Ninja](classes/ninja.md) - Principles and belts
 - [Dirgesinger](classes/dirgesinger.md) - Sonic martial bard
 - [Psion](classes/psion.md) - Mental powers, Focus resource
+- [Dragonkin](classes/dragonkin.md) - Draconic essence, breath weapons
+- [Artificer](classes/artificer.md) - Power cells, turrets, tech gadgets
 
 ### Upgrade Class Documentation
 - [Tanar'ri](classes/tanarri.md) - Upgraded from Demon, Blood Wars powers
@@ -38,6 +40,11 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [Lich](classes/lich.md) - Upgraded from Battlemage, undead sorcery
 - [Siren](classes/siren.md) - Upgraded from Dirgesinger, voice of domination
 - [Mindflayer](classes/mindflayer.md) - Upgraded from Psion, mental domination
+- [Wyrm](classes/wyrm.md) - Upgraded from Dragonkin, ancient dragon
+- [Mechanist](classes/mechanist.md) - Upgraded from Artificer, cybernetic war machine
+
+### Proposed Classes (Not Yet Implemented)
+- [Todo Folder](todo/) - 2 remaining class pairs: Cultist/Voidborn, Chronomancer/Paradox
 
 ## Upgrade Paths
 
@@ -52,6 +59,8 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Battlemage | Lich | 50K hp, 35K mana/move, 40K qp, gen 1 |
 | Dirgesinger | Siren | 50K hp, 35K mana/move, 40K qp, gen 1 |
 | Psion | Mindflayer | 50K hp, 35K mana/move, 40K qp, gen 1 |
+| Dragonkin | Wyrm | 50K hp, 35K mana/move, 40K qp, gen 1 |
+| Artificer | Mechanist | 50K hp, 35K mana/move, 40K qp, gen 1 |
 
 ## Quick Reference
 
@@ -69,6 +78,8 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Ninja | CLASS_NINJA | 128 |
 | Dirgesinger | CLASS_DIRGESINGER | 16384 |
 | Psion | CLASS_PSION | 65536 |
+| Dragonkin | CLASS_DRAGONKIN | 262144 |
+| Artificer | CLASS_ARTIFICER | 1048576 |
 
 **Upgrade Classes:**
 | Class | Constant | Bit Value |
@@ -82,11 +93,15 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Spider Droid | CLASS_DROID | 8192 |
 | Siren | CLASS_SIREN | 32768 |
 | Mindflayer | CLASS_MINDFLAYER | 131072 |
+| Wyrm | CLASS_WYRM | 524288 |
+| Mechanist | CLASS_MECHANIST | 2097152 |
 
 ### Key Source Files
-- `src/class.h` - Class constants and definitions
-- `src/merc.h` - Core data structures (CHAR_DATA, PC_DATA)
-- `src/upgrade.c` - Upgrade system implementation
-- `src/handler.c` - Discipline initialization
-- `src/wizutil.c` - Player self-selection (do_classself)
-- `area/help.are` - In-game help entries for all classes
+- `src/core/class.h` - Class constants and definitions
+- `src/core/merc.h` - Core data structures (CHAR_DATA, PC_DATA)
+- `src/systems/upgrade.c` - Upgrade system implementation
+- `src/core/handler.c` - Discipline initialization
+- `src/core/interp.c` - Command table with class requirements
+- `src/commands/act_info.c` - Player self-selection (do_classself)
+- `gamedata/db/game/base_help.db` - In-game help entries for all classes
+- `gamedata/db/game/class.db` - Class display, brackets, armor, and score data
