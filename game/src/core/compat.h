@@ -31,6 +31,7 @@
  * ============================================ */
 typedef HANDLE pthread_t;
 typedef CRITICAL_SECTION pthread_mutex_t;
+typedef CONDITION_VARIABLE pthread_cond_t;
 
 typedef struct {
     int detach_state;
@@ -51,6 +52,13 @@ typedef struct {
 #define pthread_mutex_lock(m)    EnterCriticalSection(m)
 #define pthread_mutex_unlock(m)  LeaveCriticalSection(m)
 #define pthread_mutex_destroy(m) DeleteCriticalSection(m)
+
+/* Condition variable operations as macros (Windows Vista+) */
+#define pthread_cond_init(c, attr) InitializeConditionVariable(c)
+#define pthread_cond_wait(c, m)    SleepConditionVariableCS(c, m, INFINITE)
+#define pthread_cond_broadcast(c)  WakeAllConditionVariable(c)
+#define pthread_cond_signal(c)     WakeConditionVariable(c)
+#define pthread_cond_destroy(c)    ((void)0)  /* No cleanup needed on Windows */
 
 /* Function prototypes - implemented in compat.c */
 int  win32_pthread_create(pthread_t *thread, const pthread_attr_t *attr,

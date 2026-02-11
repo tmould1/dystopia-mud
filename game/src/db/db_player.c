@@ -37,6 +37,7 @@ typedef struct {
 /* Pending save tracking for graceful shutdown */
 static int              pending_saves = 0;
 static pthread_mutex_t  save_mutex;
+static pthread_cond_t   save_cond;
 
 
 /*
@@ -271,9 +272,12 @@ static void *player_save_thread( void *arg ) {
 	sqlite3_free( task->data );
 	free( task );
 
-	/* Decrement pending saves counter */
+	/* Decrement pending saves counter and signal if all saves complete */
 	pthread_mutex_lock( &save_mutex );
 	pending_saves--;
+	if ( pending_saves == 0 ) {
+		pthread_cond_broadcast( &save_cond );
+	}
 	pthread_mutex_unlock( &save_mutex );
 
 	return NULL;
@@ -282,25 +286,14 @@ static void *player_save_thread( void *arg ) {
 /*
  * Wait for all pending background saves to complete.
  * Called during quit/shutdown to ensure data is written.
+ * Uses condition variable for efficient blocking.
  */
-void db_player_wait_pending( int timeout_ms ) {
-	int waited = 0;
-
-	while ( pending_saves > 0 && waited < timeout_ms ) {
-#ifdef WIN32
-		Sleep( 10 );
-#else
-		usleep( 10000 );
-#endif
-		waited += 10;
+void db_player_wait_pending( void ) {
+	pthread_mutex_lock( &save_mutex );
+	while ( pending_saves > 0 ) {
+		pthread_cond_wait( &save_cond, &save_mutex );
 	}
-
-	if ( pending_saves > 0 ) {
-		char buf[128];
-		sprintf( buf, "db_player_wait_pending: %d saves still pending after %dms",
-			pending_saves, timeout_ms );
-		log_string( buf );
-	}
+	pthread_mutex_unlock( &save_mutex );
 }
 
 /*
@@ -555,8 +548,9 @@ static void load_short_array( const char *data, sh_int *arr, int count ) {
 void db_player_init( void ) {
 	char backup_dir[MUD_PATH_MAX];
 
-	/* Initialize mutex for background save tracking */
+	/* Initialize mutex and condition variable for background save tracking */
 	pthread_mutex_init( &save_mutex, NULL );
+	pthread_cond_init( &save_cond, NULL );
 
 	if ( snprintf( mud_db_players_dir, sizeof( mud_db_players_dir ), "%s%splayers",
 			mud_db_dir, PATH_SEPARATOR ) >= (int)sizeof( mud_db_players_dir ) ) {

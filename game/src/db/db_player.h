@@ -28,7 +28,7 @@ bool db_player_exists( const char *name );
 bool db_player_delete( const char *name );
 
 /* Background save support */
-void db_player_wait_pending( int timeout_ms );
+void db_player_wait_pending( void );
 int  db_player_pending_count( void );
 
 /* Character initialization for loading */

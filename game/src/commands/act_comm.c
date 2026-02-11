@@ -1324,7 +1324,7 @@ void do_quit( CHAR_DATA *ch, char *argument ) {
 	/* Force save (bypass rate limit) and wait for background write */
 	ch->save_time = 0;
 	save_char_obj( ch );
-	db_player_wait_pending( 5000 );  /* Wait up to 5 seconds */
+	db_player_wait_pending();  /* Wait for all pending saves to complete */
 	if ( ch->pcdata->obj_vnum != 0 )
 		act( "$n slowly fades out of existance.", ch, NULL, NULL, TO_ROOM );
 	else

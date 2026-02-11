@@ -22,6 +22,7 @@
 #include <time.h>
 #include "merc.h"
 #include "../db/db_game.h"
+#include "../db/db_player.h"
 #if !defined( WIN32 )
 #include <unistd.h>
 #include <fcntl.h> /* fcntl, F_SETFL, FNDELAY */
@@ -4261,6 +4262,9 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 #endif
+
+	/* Wait for all background saves to complete before exec */
+	db_player_wait_pending();
 
 	fprintf( fp, "-1\n" );
 	fclose( fp );
