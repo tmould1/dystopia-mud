@@ -171,7 +171,6 @@ void do_dragonbreath( CHAR_DATA *ch, char *argument ) {
 	int dam;
 	int attune;
 	int essence_max;
-	const char *breath_types[] = { "fire", "frost", "lightning", "stone shards" };
 	const char *breath_colors[] = { "#Rflames#n", "#Cfrost#n", "#Ylightning#n", "#ystone shards#n" };
 
 	if ( !IS_CLASS( ch, CLASS_DRAGONKIN ) && !IS_CLASS( ch, CLASS_WYRM ) ) {
@@ -314,7 +313,6 @@ void do_infernalstorm( CHAR_DATA *ch, char *argument ) {
 	int dam;
 	int attune;
 	int essence_max;
-	const char *storm_types[] = { "firestorm", "blizzard", "lightning storm", "earthquake" };
 	const char *storm_colors[] = { "#Rfirestorm#n", "#Cblizzard#n", "#Ylightning storm#n", "#yearthquake#n" };
 
 	if ( !IS_CLASS( ch, CLASS_DRAGONKIN ) && !IS_CLASS( ch, CLASS_WYRM ) ) {

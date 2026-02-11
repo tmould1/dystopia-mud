@@ -730,7 +730,7 @@ void do_blaster( CHAR_DATA *ch, char *argument ) {
  * Can target someone to initiate combat, or hits all current combatants
  */
 void do_grenade( CHAR_DATA *ch, char *argument ) {
-	CHAR_DATA *victim;
+	CHAR_DATA *victim = NULL;
 	CHAR_DATA *vch;
 	CHAR_DATA *vch_next;
 	char arg[MAX_INPUT_LENGTH];

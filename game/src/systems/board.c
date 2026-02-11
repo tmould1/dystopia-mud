@@ -553,7 +553,7 @@ static void do_nlist( CHAR_DATA *ch, char *argument ) {
 					num,
 					last_note < p->date_stamp ? '*' : ' ',
 					p->sender, p->subject );
-				sprintf( buf, "%s \n\r", mxp_note_link( ch, num, row_text, p->sender, p->subject ) );
+				snprintf( buf, sizeof( buf ), "%s \n\r", mxp_note_link( ch, num, row_text, p->sender, p->subject ) );
 				send_to_char( buf, ch );
 			}
 		}
@@ -632,7 +632,7 @@ void do_board( CHAR_DATA *ch, char *argument ) {
 				sprintf( row_text, BOLD "%2d" NO_COLOR "> " GREEN BOLD "%12s" NO_COLOR " [%4d" NO_COLOR "] " YELLOW "%s" NO_COLOR,
 					count, boards[i].short_name,
 					unread, boards[i].long_name );
-				sprintf( buf, "%s\n\r", mxp_board_link( ch, count, row_text, boards[i].long_name ) );
+				snprintf( buf, sizeof( buf ), "%s\n\r", mxp_board_link( ch, count, row_text, boards[i].long_name ) );
 				send_to_char( buf, ch );
 				count++;
 			} /* if has access */

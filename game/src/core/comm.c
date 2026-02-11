@@ -1545,7 +1545,7 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 			char hit_str[MAX_INPUT_LENGTH];
 			char mana_str[MAX_INPUT_LENGTH];
 			char move_str[MAX_INPUT_LENGTH];
-			char exp_str[MAX_INPUT_LENGTH];
+			char exp_str[MAX_INPUT_LENGTH + 16];
 			char tmp_str[MAX_INPUT_LENGTH];
 			char resource_str[MAX_INPUT_LENGTH];
 
