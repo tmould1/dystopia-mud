@@ -25,6 +25,7 @@
 #include "../db/db_player.h"
 #include "../db/db_game.h"
 #include "../systems/mxp.h"
+#include "../systems/ttype.h"
 #include "../classes/artificer.h"
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
@@ -4203,6 +4204,11 @@ void do_config( CHAR_DATA *ch, char *argument ) {
 				: "[-xterm    ] Xterm 256-color mode disabled.\n\r",
 			ch );
 
+		send_to_char( IS_EXTRA( ch, EXTRA_TRUECOLOR )
+				? "[+TRUECOLOR] True color (24-bit RGB) mode enabled.\n\r"
+				: "[-truecolor] True color (24-bit RGB) mode disabled.\n\r",
+			ch );
+
 		send_to_char( IS_SET( ch->act, PLR_SCREENREADER )
 				? "[+SCREENRD ] Screen reader accessibility mode on.\n\r"
 				: "[-screenrd ] Screen reader accessibility mode off.\n\r",
@@ -4264,6 +4270,19 @@ void do_config( CHAR_DATA *ch, char *argument ) {
 			bit = PLR_PREFER_MCMP;
 		else if ( !str_cmp( arg + 1, "automap" ) )
 			bit = PLR_AUTOMAP;
+		else if ( !str_cmp( arg + 1, "truecolor" ) || !str_cmp( arg + 1, "tc" ) ) {
+			/* Special case: truecolor uses ch->extra, not ch->act */
+			if ( fSet ) {
+				SET_BIT( ch->extra, EXTRA_TRUECOLOR );
+				SET_BIT( ch->act, PLR_ANSI );
+				SET_BIT( ch->act, PLR_XTERM );
+				send_to_char( "True color (24-bit RGB) mode is now ON.\n\r", ch );
+			} else {
+				REMOVE_BIT( ch->extra, EXTRA_TRUECOLOR );
+				send_to_char( "True color (24-bit RGB) mode is now OFF.\n\r", ch );
+			}
+			return;
+		}
 		else {
 			send_to_char( "Config which option?\n\r", ch );
 			return;
@@ -4278,6 +4297,140 @@ void do_config( CHAR_DATA *ch, char *argument ) {
 			sprintf( buf, "%s is now OFF\n\r", arg + 1 );
 			send_to_char( buf, ch );
 		}
+	}
+
+	return;
+}
+
+void do_truecolor( CHAR_DATA *ch, char *argument ) {
+	if ( IS_NPC( ch ) ) return;
+	if ( IS_EXTRA( ch, EXTRA_TRUECOLOR ) )
+		do_config( ch, "-truecolor" );
+	else
+		do_config( ch, "+truecolor" );
+	return;
+}
+
+void do_colortest( CHAR_DATA *ch, char *argument ) {
+	char buf[MAX_STRING_LENGTH];
+
+	send_to_char( "#7=== Color Mode Test ===#n\n\r\n\r", ch );
+	send_to_char( "#7Standard 16-color:#n\n\r", ch );
+	send_to_char( "  #RBright Red#n  #gDark Green#n  #CBright Cyan#n  "
+		"#5Purple#n  #3Yellow#n  #4Blue#n\n\r\n\r", ch );
+	send_to_char( "#7Xterm 256-color:#n\n\r", ch );
+	send_to_char( "  #x208Color-208#n  #x033Color-033#n  #x171Color-171#n  "
+		"#x082Color-082#n  #x196Color-196#n  #x226Color-226#n\n\r\n\r", ch );
+	send_to_char( "#7True color (24-bit RGB) - colors impossible in 256:#n\n\r", ch );
+	send_to_char( "  #tE0115FCrimson Rose#n  #tCC7040Burnt Sienna#n  "
+		"#t2E8B57Sea Green#n  #t6A5FBFSlate Indigo#n\n\r", ch );
+	send_to_char( "  #tF7C873Champagne Gold#n  #tC08090Dusty Rose#n  "
+		"#t40B0A0Jade Teal#n  #t9B4F96Plum Orchid#n\n\r\n\r", ch );
+	send_to_char( "#7Background colors:#n\n\r", ch );
+	send_to_char( "  #T1A3350#tE8D8C0 Cream on Midnight #n  "
+		"#T4A2040#tF7C873 Gold on Burgundy #n  "
+		"#T2E4A3E#tF0F0F0 Silver on Forest #n\n\r\n\r", ch );
+	send_to_char( "#7Gradient comparison (256-color vs true color):#n\n\r", ch );
+
+	/* 256-color gradient: uses the limited xterm palette */
+	send_to_char( "  #7256:#n ", ch );
+	{
+		/* Red-to-green ramp using xterm color indices */
+		static const int xterm_ramp[] = {
+			196, 196, 202, 202, 208, 208, 214, 214, 220, 220,
+			226, 226, 190, 190, 154, 154, 118, 118, 82, 82,
+			46, 46, 47, 47, 48, 48, 49, 49, 50, 50,
+			51, 51, 45, 45, 39, 39, 33, 33, 27, 27,
+			21, 21, 57, 57, 93, 93, 129, 129, 165, 165,
+			201, 201, 200, 200, 199, 199, 198, 198, 197, 197
+		};
+		int i;
+		for ( i = 0; i < 60; i++ ) {
+			snprintf( buf, sizeof( buf ), "#x%03d|#n", xterm_ramp[i] );
+			send_to_char( buf, ch );
+		}
+	}
+	send_to_char( "\n\r", ch );
+
+	/* True color gradient: smooth rainbow across the full spectrum */
+	send_to_char( "  #7 TC:#n ", ch );
+	{
+		int i;
+		for ( i = 0; i < 60; i++ ) {
+			int r, g, b;
+			/* HSV hue sweep: 0 (red) -> 300 (magenta), full saturation */
+			int hue = ( i * 300 ) / 59; /* 0..300 degrees */
+			int sector = hue / 60;
+			int frac = ( ( hue % 60 ) * 255 ) / 60;
+			switch ( sector ) {
+			case 0: r = 255; g = frac;       b = 0;           break; /* red->yellow */
+			case 1: r = 255 - frac; g = 255; b = 0;           break; /* yellow->green */
+			case 2: r = 0;   g = 255;        b = frac;        break; /* green->cyan */
+			case 3: r = 0;   g = 255 - frac; b = 255;         break; /* cyan->blue */
+			case 4: r = frac; g = 0;          b = 255;         break; /* blue->magenta */
+			default: r = 255; g = 0;          b = 255;         break;
+			}
+			snprintf( buf, sizeof( buf ), "#t%02X%02X%02X|#n", r, g, b );
+			send_to_char( buf, ch );
+		}
+	}
+	send_to_char( "\n\r\n\r", ch );
+
+	/* Health bar comparison */
+	send_to_char( "  #7Health bar (256):#n ", ch );
+	{
+		int i;
+		for ( i = 0; i < 50; i++ ) {
+			int pct = ( i * 100 ) / 49;
+			int idx;
+			if ( pct < 25 )      idx = 196; /* red */
+			else if ( pct < 50 ) idx = 208; /* orange */
+			else if ( pct < 75 ) idx = 226; /* yellow */
+			else                 idx = 46;  /* green */
+			snprintf( buf, sizeof( buf ), "#x%03d=#n", idx );
+			send_to_char( buf, ch );
+		}
+	}
+	send_to_char( "\n\r", ch );
+	send_to_char( "  #7Health bar (TC): #n ", ch );
+	{
+		int i;
+		for ( i = 0; i < 50; i++ ) {
+			int r, g;
+			int pct = ( i * 100 ) / 49;
+			if ( pct < 50 ) {
+				r = 255;
+				g = ( 255 * pct ) / 50;
+			} else {
+				r = ( 255 * ( 100 - pct ) ) / 50;
+				g = 255;
+			}
+			snprintf( buf, sizeof( buf ), "#t%02X%02X00=#n", r, g );
+			send_to_char( buf, ch );
+		}
+	}
+	send_to_char( "\n\r\n\r", ch );
+
+	snprintf( buf, sizeof( buf ),
+		"#7Your mode:#n ANSI=%s, Xterm=%s, TrueColor=%s, ScreenReader=%s\n\r",
+		IS_SET( ch->act, PLR_ANSI ) ? "#2ON#n" : "#roff#n",
+		IS_SET( ch->act, PLR_XTERM ) ? "#2ON#n" : "#roff#n",
+		IS_EXTRA( ch, EXTRA_TRUECOLOR ) ? "#2ON#n" : "#roff#n",
+		IS_SET( ch->act, PLR_SCREENREADER ) ? "#2ON#n" : "#roff#n" );
+	send_to_char( buf, ch );
+
+	if ( ch->desc && ch->desc->ttype_enabled ) {
+		snprintf( buf, sizeof( buf ),
+			"#7TTYPE:#n Client: %s, MTTS: %d%s%s%s%s\n\r",
+			ch->desc->client_name,
+			ch->desc->mtts_flags,
+			( ch->desc->mtts_flags & MTTS_TRUECOLOR ) ? " [TRUECOLOR]" : "",
+			( ch->desc->mtts_flags & MTTS_256_COLORS ) ? " [256COLOR]" : "",
+			( ch->desc->mtts_flags & MTTS_ANSI ) ? " [ANSI]" : "",
+			( ch->desc->mtts_flags & MTTS_SCREEN_READER ) ? " [SCREENRD]" : "" );
+		send_to_char( buf, ch );
+	} else {
+		send_to_char( "#7TTYPE:#n Not detected (client may not support MTTS)\n\r", ch );
 	}
 
 	return;

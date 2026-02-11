@@ -172,7 +172,7 @@ void mssp_send( DESCRIPTOR_DATA *d ) {
 	pos = mssp_add_var( buf, pos, "UTF-8", "0" );
 	pos = mssp_add_var( buf, pos, "VT100", "1" );
 	pos = mssp_add_var( buf, pos, "XTERM 256 COLORS", "1" );
-	pos = mssp_add_var( buf, pos, "XTERM TRUE COLORS", "0" );
+	pos = mssp_add_var( buf, pos, "XTERM TRUE COLORS", "1" );
 
 	/* --- Commercial --- */
 	pos = mssp_add_var( buf, pos, "PAY TO PLAY", "0" );

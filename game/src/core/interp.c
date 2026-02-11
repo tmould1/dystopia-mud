@@ -395,6 +395,8 @@ const struct cmd_type cmd_table[] =
 		{ "password", do_password, POS_DEAD, 0, LOG_NEVER, 0, 0, 0 },
 		{ "title", do_title, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "ansi", do_ansi, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
+		{ "truecolor", do_truecolor, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
+		{ "colortest", do_colortest, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "autoexit", do_autoexit, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "autoloot", do_autoloot, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "autosac", do_autosac, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },

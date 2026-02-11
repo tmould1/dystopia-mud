@@ -585,6 +585,11 @@ struct descriptor_data {
 	bool naws_enabled; /* NAWS negotiation successful */
 	int client_width;  /* Terminal width in columns */
 	int client_height; /* Terminal height in rows */
+	/* ttype: Terminal Type / MTTS support (RFC 1091) */
+	bool ttype_enabled; /* TTYPE negotiation successful */
+	int  ttype_round;   /* Current TTYPE round (1-3) */
+	int  mtts_flags;    /* MTTS capability bitfield */
+	char client_name[64]; /* Terminal/client name from round 1 */
 };
 
 /*
@@ -1923,7 +1928,7 @@ struct kill_data {
 #define EXTRA_BSD		   4194304
 #define EXTRA_EARTHMELD	   8388608
 #define EXTRA_PLASMA	   16777216
-#define EXTRA_POTENCY	   33554432 /* This one is free for use */
+#define EXTRA_TRUECOLOR	   33554432 /* Xterm true color (24-bit RGB) support */
 #define EXTRA_AWE		   67108864
 #define EXTRA_ROT		   134217728
 #define EXTRA_ZOMBIE	   268435456
@@ -2940,6 +2945,7 @@ extern sh_int gsn_multiplearms;
 
 #define IS_NPC( ch )		  ( IS_SET( ( ch )->act, ACT_IS_NPC ) )
 #define IS_SCREENREADER( ch ) ( !IS_NPC( ch ) && IS_SET( ( ch )->act, PLR_SCREENREADER ) )
+#define IS_TRUECOLOR( ch )   ( !IS_NPC( ch ) && IS_EXTRA( ( ch ), EXTRA_TRUECOLOR ) )
 #define IS_JUDGE( ch )	  ( get_trust( ch ) >= LEVEL_JUDGE )
 #define IS_IMMORTAL( ch ) ( get_trust( ch ) >= LEVEL_IMMORTAL )
 #define IS_HERO( ch )	  ( get_trust( ch ) >= LEVEL_HERO )
@@ -3362,6 +3368,8 @@ DECLARE_DO_FUN( do_allow );
 DECLARE_DO_FUN( do_bounty );
 DECLARE_DO_FUN( do_bountylist );
 DECLARE_DO_FUN( do_ansi );
+DECLARE_DO_FUN( do_truecolor );
+DECLARE_DO_FUN( do_colortest );
 DECLARE_DO_FUN( do_areas );
 DECLARE_DO_FUN( do_artifact );
 DECLARE_DO_FUN( do_at );
@@ -4276,6 +4284,7 @@ void write_to_buffer args( ( DESCRIPTOR_DATA * d, const char *txt,
 bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
 bool process_output args( ( DESCRIPTOR_DATA * d, bool fPrompt ) );
 const char *col_scale_code args( ( int current, int max ) );
+const char *col_scale_code_tc args( ( int current, int max, CHAR_DATA *ch ) );
 void send_to_char args( ( const char *txt, CHAR_DATA *ch ) );
 void act args( ( const char *format, CHAR_DATA *ch,
 	const void *arg1, const void *arg2, int type ) );
@@ -4585,6 +4594,11 @@ void show_automap( CHAR_DATA *ch );
 void naws_init( DESCRIPTOR_DATA *d );
 void naws_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int len );
 int naws_get_width( CHAR_DATA *ch );
+
+/* ttype.c */
+void ttype_init( DESCRIPTOR_DATA *d );
+void ttype_request( DESCRIPTOR_DATA *d );
+void ttype_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int len );
 
 /* update.c */
 void gain_exp args( ( CHAR_DATA * ch, int gain ) );

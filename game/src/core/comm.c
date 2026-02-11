@@ -110,6 +110,11 @@ extern const char naws_do[];
 extern const char naws_dont[];
 extern const char naws_will[];
 extern const char naws_wont[];
+/* TTYPE */
+extern const char ttype_do[];
+extern const char ttype_dont[];
+extern const char ttype_will[];
+extern const char ttype_wont[];
 
 void show_string args( ( DESCRIPTOR_DATA * d, char *input ) );
 
@@ -150,6 +155,11 @@ extern const char naws_do[];
 extern const char naws_dont[];
 extern const char naws_will[];
 extern const char naws_wont[];
+/* TTYPE */
+extern const char ttype_do[];
+extern const char ttype_dont[];
+extern const char ttype_will[];
+extern const char ttype_wont[];
 
 void show_string args( ( DESCRIPTOR_DATA * d, char *input ) );
 #endif
@@ -178,6 +188,32 @@ const char *col_scale_code( int current, int max ) {
 	if ( current < 1 ) return "#R";
 	if ( current >= max ) return "#C";
 	return codes[( NUM_SCALE_CODES * current ) / ( max > 0 ? max : 1 )];
+}
+
+/*
+ * True color gradient version: smooth red -> yellow -> green
+ * Falls back to col_scale_code() when ch doesn't have true color.
+ */
+const char *col_scale_code_tc( int current, int max, CHAR_DATA *ch ) {
+	static char tc_buf[16];
+	int pct, r, g;
+
+	if ( !ch || !IS_TRUECOLOR( ch ) )
+		return col_scale_code( current, max );
+
+	pct = ( max > 0 ) ? ( 100 * current / max ) : 0;
+	if ( pct < 0 ) pct = 0;
+	if ( pct > 100 ) pct = 100;
+
+	if ( pct < 50 ) {
+		r = 255;
+		g = ( 255 * pct ) / 50;
+	} else {
+		r = ( 255 * ( 100 - pct ) ) / 50;
+		g = 255;
+	}
+	snprintf( tc_buf, sizeof( tc_buf ), "#t%02X%02X00", r, g );
+	return tc_buf;
 }
 
 void game_loop args( ( int control ) );
@@ -766,6 +802,11 @@ void init_descriptor( DESCRIPTOR_DATA *dnew, int desc ) {
 	dnew->naws_enabled = FALSE;
 	dnew->client_width = NAWS_DEFAULT_WIDTH;
 	dnew->client_height = NAWS_DEFAULT_HEIGHT;
+	/* TTYPE/MTTS defaults */
+	dnew->ttype_enabled = FALSE;
+	dnew->ttype_round   = 0;
+	dnew->mtts_flags    = 0;
+	dnew->client_name[0] = '\0';
 }
 
 void new_descriptor( int control ) {
@@ -894,6 +935,7 @@ void new_descriptor( int control ) {
 	write_to_buffer( dnew, gmcp_will, 0 );		/* GMCP protocol */
 	write_to_buffer( dnew, mxp_will, 0 );		/* MXP rich text */
 	write_to_buffer( dnew, naws_do, 0 );		/* NAWS window size (request) */
+	write_to_buffer( dnew, ttype_do, 0 );		/* TTYPE terminal type (request) */
 
 	/* send greeting */
 	{
@@ -1208,6 +1250,33 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					}
 					i += 3 + sb_len + 1; /* Skip IAC SB NAWS ... IAC SE */
 				}
+				/* TTYPE - client agrees to send terminal type */
+				else if ( !memcmp( &d->inbuf[i], ttype_will, strlen( ttype_will ) ) ) {
+					i += (int) strlen( ttype_will ) - 1;
+					ttype_request( d ); /* Send first TTYPE SEND */
+				} else if ( !memcmp( &d->inbuf[i], ttype_wont, strlen( ttype_wont ) ) ) {
+					i += (int) strlen( ttype_wont ) - 1;
+					d->ttype_enabled = FALSE;
+				}
+				/* TTYPE subnegotiation: IAC SB TTYPE IS <string> IAC SE */
+				else if ( d->inbuf[i + 1] == (signed char) SB &&
+					d->inbuf[i + 2] == (signed char) TELOPT_TTYPE ) {
+					int sb_start = i + 3;
+					int sb_len = 0;
+					while ( sb_len < 256 ) {
+						if ( (unsigned char) d->inbuf[sb_start + sb_len] == IAC &&
+							(unsigned char) d->inbuf[sb_start + sb_len + 1] == SE ) {
+							break;
+						}
+						if ( d->inbuf[sb_start + sb_len] == '\0' )
+							break;
+						sb_len++;
+					}
+					if ( sb_len > 0 ) {
+						ttype_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
+					}
+					i += 3 + sb_len + 1; /* Skip IAC SB TTYPE ... IAC SE */
+				}
 			}
 		}
 		/* Clear buffer after processing telnet-only data */
@@ -1324,6 +1393,33 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					naws_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
 				}
 				i += 3 + sb_len + 1; /* Skip IAC SB NAWS ... IAC SE */
+			}
+			/* TTYPE - client agrees to send terminal type */
+			else if ( !memcmp( &d->inbuf[i], ttype_will, strlen( ttype_will ) ) ) {
+				i += (int) strlen( ttype_will ) - 1;
+				ttype_request( d ); /* Send first TTYPE SEND */
+			} else if ( !memcmp( &d->inbuf[i], ttype_wont, strlen( ttype_wont ) ) ) {
+				i += (int) strlen( ttype_wont ) - 1;
+				d->ttype_enabled = FALSE;
+			}
+			/* TTYPE subnegotiation: IAC SB TTYPE IS <string> IAC SE */
+			else if ( d->inbuf[i + 1] == (signed char) SB &&
+				d->inbuf[i + 2] == (signed char) TELOPT_TTYPE ) {
+				int sb_start = i + 3;
+				int sb_len = 0;
+				while ( sb_len < 256 ) {
+					if ( (unsigned char) d->inbuf[sb_start + sb_len] == IAC &&
+						(unsigned char) d->inbuf[sb_start + sb_len + 1] == SE ) {
+						break;
+					}
+					if ( d->inbuf[sb_start + sb_len] == '\0' )
+						break;
+					sb_len++;
+				}
+				if ( sb_len > 0 ) {
+					ttype_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
+				}
+				i += 3 + sb_len + 1; /* Skip IAC SB TTYPE ... IAC SE */
 			}
 		}
 	}
@@ -1511,6 +1607,12 @@ void retell_protocols( DESCRIPTOR_DATA *d ) {
 	write_to_descriptor( d, (char *) gmcp_wont, (int) strlen( gmcp_wont ) );
 	write_to_descriptor( d, (char *) mxp_wont, (int) strlen( mxp_wont ) );
 	write_to_descriptor( d, (char *) naws_dont, (int) strlen( naws_dont ) ); /* NAWS uses DO/DONT */
+	write_to_descriptor( d, (char *) ttype_dont, (int) strlen( ttype_dont ) ); /* TTYPE uses DO/DONT */
+
+	/* Reset TTYPE state for re-negotiation */
+	d->ttype_enabled = FALSE;
+	d->ttype_round   = 0;
+	d->mtts_flags    = 0;
 
 	/* Now send WILL/DO to offer protocols fresh */
 	/* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
@@ -1520,6 +1622,7 @@ void retell_protocols( DESCRIPTOR_DATA *d ) {
 	write_to_descriptor( d, (char *) gmcp_will, (int) strlen( gmcp_will ) );		   /* GMCP */
 	write_to_descriptor( d, (char *) mxp_will, (int) strlen( mxp_will ) );			   /* MXP */
 	write_to_descriptor( d, (char *) naws_do, (int) strlen( naws_do ) );			   /* NAWS */
+	write_to_descriptor( d, (char *) ttype_do, (int) strlen( ttype_do ) );			   /* TTYPE */
 	return;
 }
 
@@ -1711,6 +1814,88 @@ static const char *lookup_color( char code ) {
 	return NULL;
 }
 
+/*
+ * Parse a hex digit, return 0-15 or -1 on invalid.
+ */
+static int hex_digit( char c ) {
+	if ( c >= '0' && c <= '9' ) return c - '0';
+	if ( c >= 'a' && c <= 'f' ) return c - 'a' + 10;
+	if ( c >= 'A' && c <= 'F' ) return c - 'A' + 10;
+	return -1;
+}
+
+/*
+ * Validate 6 hex digits starting at txt.
+ */
+static bool is_valid_hex_rgb( const char *txt ) {
+	int i;
+	for ( i = 0; i < 6; i++ ) {
+		if ( hex_digit( txt[i] ) < 0 )
+			return FALSE;
+	}
+	return TRUE;
+}
+
+/*
+ * Convert RGB (0-255 each) to nearest xterm-256 color index.
+ * Uses the standard xterm 6x6x6 color cube (indices 16-231)
+ * and grayscale ramp (indices 232-255), picking whichever is closer.
+ */
+static int rgb_to_xterm256( int r, int g, int b ) {
+	static const int cube_vals[] = { 0, 0x5f, 0x87, 0xaf, 0xd7, 0xff };
+	int cr, cg, cb, cube_idx, cube_r, cube_g, cube_b, cube_dist;
+	int gray, gray_idx, gray_val, gray_dist;
+
+	/* Map to 6x6x6 cube index */
+	cr = ( r < 48 ) ? 0 : ( r < 115 ) ? 1 : ( r - 35 ) / 40;
+	cg = ( g < 48 ) ? 0 : ( g < 115 ) ? 1 : ( g - 35 ) / 40;
+	cb = ( b < 48 ) ? 0 : ( b < 115 ) ? 1 : ( b - 35 ) / 40;
+	cube_idx = 16 + 36 * cr + 6 * cg + cb;
+
+	cube_r = cube_vals[cr]; cube_g = cube_vals[cg]; cube_b = cube_vals[cb];
+	cube_dist = ( r - cube_r ) * ( r - cube_r )
+		+ ( g - cube_g ) * ( g - cube_g )
+		+ ( b - cube_b ) * ( b - cube_b );
+
+	/* Check grayscale ramp (232-255, values 8,18,28,...,238) */
+	gray = ( r + g + b ) / 3;
+	gray_idx = ( gray < 4 ) ? 0 : ( gray > 243 ) ? 23 : ( gray - 3 ) / 10;
+	gray_val = 8 + 10 * gray_idx;
+	gray_dist = ( r - gray_val ) * ( r - gray_val )
+		+ ( g - gray_val ) * ( g - gray_val )
+		+ ( b - gray_val ) * ( b - gray_val );
+
+	return ( gray_dist < cube_dist ) ? ( 232 + gray_idx ) : cube_idx;
+}
+
+/*
+ * Convert RGB to nearest ANSI 16-color escape sequence.
+ * Uses luminance and dominant channel heuristics.
+ */
+static const char *rgb_to_ansi16( int r, int g, int b ) {
+	static char ansi_buf[16];
+	int lum, max_ch, threshold, hr, hg, hb, bright, color;
+
+	lum = ( r * 299 + g * 587 + b * 114 ) / 1000;
+	bright = ( lum > 128 ) ? 1 : 0;
+
+	max_ch = ( r > g ) ? ( ( r > b ) ? r : b ) : ( ( g > b ) ? g : b );
+	if ( max_ch < 32 )
+		return bright ? "\033[0;1;30m" : "\033[0;0;30m";
+
+	threshold = max_ch / 3;
+	hr = ( r > threshold ) ? 1 : 0;
+	hg = ( g > threshold ) ? 1 : 0;
+	hb = ( b > threshold ) ? 1 : 0;
+
+	if ( hr && hg && hb && lum > 200 )
+		return "\033[0;1;37m";
+
+	color = 30 + hr + ( hg * 2 ) + ( hb * 4 );
+	snprintf( ansi_buf, sizeof( ansi_buf ), "\033[0;%d;%dm", bright, color );
+	return ansi_buf;
+}
+
 void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 	static char output[65536];  /* 64KB - increased for MXP/color expansion */
 	char *ptr;
@@ -1827,6 +2012,115 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 			} else {
 				txt++;
 			}
+			break;
+		case 't': /* True color foreground: #tRRGGBB */
+			if ( is_valid_hex_rgb( txt + 1 ) ) {
+				int r = ( hex_digit( txt[1] ) << 4 ) | hex_digit( txt[2] );
+				int g = ( hex_digit( txt[3] ) << 4 ) | hex_digit( txt[4] );
+				int b = ( hex_digit( txt[5] ) << 4 ) | hex_digit( txt[6] );
+				if ( use_ansi && wch && IS_TRUECOLOR( wch ) ) {
+					char tc_buf[24];
+					snprintf( tc_buf, sizeof( tc_buf ), "\033[38;2;%d;%d;%dm", r, g, b );
+					{
+						char *new_ptr = buf_append_safe( ptr, tc_buf, output, sizeof(output), 20 );
+						if ( new_ptr == NULL ) {
+							bug( "write_to_buffer: truecolor fg overflow, truncating", 0 );
+							ptr = NULL;
+						} else {
+							ptr = new_ptr;
+						}
+					}
+				} else if ( use_ansi && wch && IS_SET( wch->act, PLR_XTERM ) ) {
+					int idx = rgb_to_xterm256( r, g, b );
+					char xc_buf[16];
+					snprintf( xc_buf, sizeof( xc_buf ), "\033[38;5;%dm", idx );
+					{
+						char *new_ptr = buf_append_safe( ptr, xc_buf, output, sizeof(output), 20 );
+						if ( new_ptr == NULL )
+							ptr = NULL;
+						else
+							ptr = new_ptr;
+					}
+				} else if ( use_ansi ) {
+					const char *a16 = rgb_to_ansi16( r, g, b );
+					char *new_ptr = buf_append_safe( ptr, a16, output, sizeof(output), 20 );
+					if ( new_ptr == NULL )
+						ptr = NULL;
+					else
+						ptr = new_ptr;
+				}
+				txt += 7;
+				i += 6;
+			} else {
+				txt++;
+			}
+			break;
+		case 'T': /* True color background: #TRRGGBB */
+			if ( is_valid_hex_rgb( txt + 1 ) ) {
+				int r = ( hex_digit( txt[1] ) << 4 ) | hex_digit( txt[2] );
+				int g = ( hex_digit( txt[3] ) << 4 ) | hex_digit( txt[4] );
+				int b = ( hex_digit( txt[5] ) << 4 ) | hex_digit( txt[6] );
+				if ( use_ansi && wch && IS_TRUECOLOR( wch ) ) {
+					char tc_buf[24];
+					snprintf( tc_buf, sizeof( tc_buf ), "\033[48;2;%d;%d;%dm", r, g, b );
+					{
+						char *new_ptr = buf_append_safe( ptr, tc_buf, output, sizeof(output), 20 );
+						if ( new_ptr == NULL )
+							ptr = NULL;
+						else
+							ptr = new_ptr;
+					}
+				} else if ( use_ansi && wch && IS_SET( wch->act, PLR_XTERM ) ) {
+					int idx = rgb_to_xterm256( r, g, b );
+					char xc_buf[16];
+					snprintf( xc_buf, sizeof( xc_buf ), "\033[48;5;%dm", idx );
+					{
+						char *new_ptr = buf_append_safe( ptr, xc_buf, output, sizeof(output), 20 );
+						if ( new_ptr == NULL )
+							ptr = NULL;
+						else
+							ptr = new_ptr;
+					}
+				}
+				/* For basic ANSI, strip background silently (no bg support) */
+				txt += 7;
+				i += 6;
+			} else {
+				txt++;
+			}
+			break;
+		case 'X': /* 256-color background: #XNNN */
+			if ( isdigit( txt[1] ) && isdigit( txt[2] ) && isdigit( txt[3] ) ) {
+				if ( use_ansi ) {
+					if ( ptr + 14 < output_end ) {
+						*ptr++ = '\033';
+						*ptr++ = '[';
+						*ptr++ = '4';
+						*ptr++ = '8';
+						*ptr++ = ';';
+						*ptr++ = '5';
+						*ptr++ = ';';
+						*ptr++ = txt[1];
+						*ptr++ = txt[2];
+						*ptr++ = txt[3];
+						*ptr++ = 'm';
+					}
+				}
+				txt += 4;
+				i += 3;
+			} else {
+				txt++;
+			}
+			break;
+		case 'b': /* Reset background only */
+			if ( use_ansi ) {
+				char *new_ptr = buf_append_safe( ptr, "\033[49m", output, sizeof(output), 20 );
+				if ( new_ptr == NULL )
+					ptr = NULL;
+				else
+					ptr = new_ptr;
+			}
+			txt++;
 			break;
 		case 'M': /* MXP Secure line start */
 			if ( d->mxp_enabled && ptr + 4 < output_end ) {

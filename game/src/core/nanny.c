@@ -8,6 +8,7 @@
 #include "../db/db_player.h"
 #include "../systems/gmcp.h"
 #include "../systems/mcmp.h"
+#include "../systems/ttype.h"
 
 /* External variables from comm.c */
 extern char echo_off_str[];
@@ -510,13 +511,20 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		write_to_buffer( d, "   [N]one  - Plain text, no colors\n\r", 0 );
 		write_to_buffer( d, "   [A]NSI  - Standard 16 colors (works with most clients)\n\r", 0 );
 		write_to_buffer( d, "   [X]term - Full 256 colors (modern clients only)\n\r", 0 );
+		write_to_buffer( d, "   [T]rue  - 24-bit RGB true color (Mudlet, TinTin++, etc.)\n\r", 0 );
 		write_to_buffer( d, "   [S]creen reader - Optimized for JAWS, NVDA, VoiceOver\n\r", 0 );
-		write_to_buffer( d, " Your choice (N/A/X/S)? ", 0 );
+		write_to_buffer( d, " Your choice (N/A/X/T/S)? ", 0 );
 		d->connected = CON_GET_NEW_ANSI;
 		break;
 
 	case CON_GET_NEW_ANSI:
 		switch ( argument[0] ) {
+		case 't':
+		case 'T':
+			SET_BIT( ch->act, PLR_ANSI );
+			SET_BIT( ch->act, PLR_XTERM );
+			SET_BIT( ch->extra, EXTRA_TRUECOLOR );
+			break;
 		case 'x':
 		case 'X':
 			SET_BIT( ch->act, PLR_ANSI );
@@ -538,7 +546,7 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		case 'N':
 			break;
 		default:
-			write_to_buffer( d, " Please choose [N]one, [A]NSI, [X]term, or [S]creen reader: ", 0 );
+			write_to_buffer( d, " Please choose [N]one, [A]NSI, [X]term, [T]rue, or [S]creen reader: ", 0 );
 			return;
 		}
 		/* Auto-detect GMCP/MXP/MCMP - enable silently if client negotiated them */
@@ -548,6 +556,25 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 			SET_BIT( ch->act, PLR_PREFER_MXP );
 		if ( d->gmcp_enabled && ( d->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) )
 			SET_BIT( ch->act, PLR_PREFER_MCMP );
+		/* MTTS auto-upgrade: if TTYPE detected higher capabilities, upgrade */
+		if ( d->ttype_enabled && d->mtts_flags > 0 ) {
+			if ( ( d->mtts_flags & MTTS_TRUECOLOR ) && !IS_EXTRA( ch, EXTRA_TRUECOLOR ) ) {
+				SET_BIT( ch->act, PLR_ANSI );
+				SET_BIT( ch->act, PLR_XTERM );
+				SET_BIT( ch->extra, EXTRA_TRUECOLOR );
+			} else if ( ( d->mtts_flags & MTTS_256_COLORS ) && !IS_SET( ch->act, PLR_XTERM ) ) {
+				SET_BIT( ch->act, PLR_ANSI );
+				SET_BIT( ch->act, PLR_XTERM );
+			} else if ( ( d->mtts_flags & MTTS_ANSI ) && !IS_SET( ch->act, PLR_ANSI ) ) {
+				SET_BIT( ch->act, PLR_ANSI );
+			}
+			if ( d->mtts_flags & MTTS_SCREEN_READER ) {
+				SET_BIT( ch->act, PLR_SCREENREADER );
+				SET_BIT( ch->act, PLR_BLANK );
+				SET_BIT( ch->act, PLR_AUTOEXIT );
+				d->mxp_enabled = FALSE;
+			}
+		}
 		/* Character creation finalization */
 		ch->pcdata->perm_str = number_range( 10, 16 );
 		ch->pcdata->perm_int = number_range( 10, 16 );
