@@ -28,6 +28,7 @@ char mud_db_dir[MUD_PATH_MAX] = "";
 /* External globals from db.c that we need to update during loading */
 extern bool fBootDb;
 extern int top_affect;
+extern int top_area;
 extern int top_ed;
 extern int top_exit;
 extern int top_mob_index;
@@ -950,6 +951,7 @@ void db_sql_load_area( const char *area_filename ) {
 	}
 
 	pArea = alloc_perm( sizeof( *pArea ) );
+	top_area++;
 	pArea->name      = str_dup( col_text( stmt, 0 ) );
 	pArea->builders  = str_dup( col_text( stmt, 1 ) );
 	pArea->lvnum     = sqlite3_column_int( stmt, 2 );

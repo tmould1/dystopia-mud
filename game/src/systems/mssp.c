@@ -37,6 +37,12 @@ extern DESCRIPTOR_DATA *descriptor_list;
 extern GAMECONFIG_DATA game_config;
 extern time_t current_time;
 extern time_t boot_time;
+extern int port;
+extern int top_area;
+extern int top_help;
+extern int top_mob_index;
+extern int top_obj_index;
+extern int top_room;
 
 /* MSSP telnet negotiation sequences */
 #if defined( WIN32 )
@@ -82,6 +88,17 @@ static int mssp_add_var( unsigned char *buf, int pos, const char *var, const cha
 }
 
 /*
+ * Add an additional value to the current MSSP variable
+ * Used for multi-value variables (e.g., GENRE with multiple entries)
+ */
+static int mssp_add_val( unsigned char *buf, int pos, const char *val ) {
+	buf[pos++] = MSSP_VAL;
+	while ( *val )
+		buf[pos++] = *val++;
+	return pos;
+}
+
+/*
  * Send MSSP status data to the client
  * Called when client responds with IAC DO MSSP
  */
@@ -95,29 +112,71 @@ void mssp_send( DESCRIPTOR_DATA *d ) {
 	buf[pos++] = SB;
 	buf[pos++] = TELOPT_MSSP;
 
-	/* Game name */
+	/* --- Required --- */
 	pos = mssp_add_var( buf, pos, "NAME", game_config.game_name );
 
-	/* Player count */
 	sprintf( numbuf, "%d", mssp_count_players() );
 	pos = mssp_add_var( buf, pos, "PLAYERS", numbuf );
 
-	/* Uptime in seconds */
-	sprintf( numbuf, "%ld", (long) ( current_time - boot_time ) );
+	sprintf( numbuf, "%ld", (long) boot_time );
 	pos = mssp_add_var( buf, pos, "UPTIME", numbuf );
 
-	/* Port */
-	pos = mssp_add_var( buf, pos, "PORT", "8888" );
+	/* --- Generic --- */
+	sprintf( numbuf, "%d", port );
+	pos = mssp_add_var( buf, pos, "PORT", numbuf );
 
-	/* Codebase lineage */
-	pos = mssp_add_var( buf, pos, "CODEBASE", "Merc/Diku/Dystopia" );
+	pos = mssp_add_var( buf, pos, "CODEBASE", "Diku/Merc/GodWars/Dystopia" );
+	pos = mssp_add_var( buf, pos, "FAMILY", "DikuMUD" );
+	pos = mssp_add_var( buf, pos, "LANGUAGE", "English" );
+	pos = mssp_add_var( buf, pos, "CREATED", "2026" );
 
-	/* Feature flags */
+	/* --- Categorization --- */
+	pos = mssp_add_var( buf, pos, "GENRE", "Fantasy" );
+	pos = mssp_add_val( buf, pos, "Science Fiction" );
+	pos = mssp_add_val( buf, pos, "Horror" );
+
+	pos = mssp_add_var( buf, pos, "SUBGENRE", "Cyberpunk" );
+	pos = mssp_add_val( buf, pos, "Medieval Fantasy" );
+	pos = mssp_add_val( buf, pos, "Multiverse" );
+
+	pos = mssp_add_var( buf, pos, "GAMEPLAY", "Hack and Slash" );
+	pos = mssp_add_var( buf, pos, "GAMESYSTEM", "Custom" );
+	pos = mssp_add_var( buf, pos, "STATUS", "Live" );
+
+	/* --- World --- */
+	sprintf( numbuf, "%d", top_area );
+	pos = mssp_add_var( buf, pos, "AREAS", numbuf );
+
+	sprintf( numbuf, "%d", top_help );
+	pos = mssp_add_var( buf, pos, "HELPFILES", numbuf );
+
+	sprintf( numbuf, "%d", top_mob_index );
+	pos = mssp_add_var( buf, pos, "MOBILES", numbuf );
+
+	sprintf( numbuf, "%d", top_obj_index );
+	pos = mssp_add_var( buf, pos, "OBJECTS", numbuf );
+
+	sprintf( numbuf, "%d", top_room );
+	pos = mssp_add_var( buf, pos, "ROOMS", numbuf );
+
+	pos = mssp_add_var( buf, pos, "CLASSES", "22" );
+	pos = mssp_add_var( buf, pos, "LEVELS", "0" );
+	pos = mssp_add_var( buf, pos, "RACES", "0" );
+
+	/* --- Protocol support --- */
 	pos = mssp_add_var( buf, pos, "ANSI", "1" );
 	pos = mssp_add_var( buf, pos, "MCCP", "1" );
 	pos = mssp_add_var( buf, pos, "GMCP", "1" );
 	pos = mssp_add_var( buf, pos, "MCMP", "1" );
 	pos = mssp_add_var( buf, pos, "MXP", "1" );
+	pos = mssp_add_var( buf, pos, "UTF-8", "0" );
+	pos = mssp_add_var( buf, pos, "VT100", "1" );
+	pos = mssp_add_var( buf, pos, "XTERM 256 COLORS", "1" );
+	pos = mssp_add_var( buf, pos, "XTERM TRUE COLORS", "0" );
+
+	/* --- Commercial --- */
+	pos = mssp_add_var( buf, pos, "PAY TO PLAY", "0" );
+	pos = mssp_add_var( buf, pos, "PAY FOR PERKS", "0" );
 
 	/* End subnegotiation: IAC SE */
 	buf[pos++] = IAC;
