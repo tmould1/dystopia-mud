@@ -29,16 +29,16 @@ If the new class is an upgrade that shares a header with its base class (like Si
 
 | File | What to Add | Notes |
 |------|-------------|-------|
-| `src/core/class.h` | `#define CLASS_<NAME> <bit>` | Must be a unique power-of-2. Next available after 131072 is 262144. |
+| `src/core/class.h` | `#define CLASS_<NAME> <bit>` | Must be a unique power-of-2. Check `class.h` for the current last value and double it. |
 | `src/core/merc.h` | `DECLARE_DO_FUN` for every ability + training command | One line per function (armor command is now generic) |
 | `src/core/interp.c` | Entry in `cmd_table[]` for every player command | Set `race` field to `CLASS_<NAME>` for class-restricted commands |
-| `src/commands/act_info.c` | `class_name()` function, value calc (if using ch->rage) | Only 2-3 locations now - most display is DB-driven |
+| `src/commands/act_info.c` | Value calc (if using ch->rage), "mad frenzy" exclusion (if using ch->rage) | Only 1-2 locations now - `class_name()` is DB-driven via `db_class_get_name()` |
 | `src/classes/clan.c` | `do_class` immortal class-setting command | Add to help text and class-setting switch |
 | `src/systems/upgrade.c` | `is_upgrade()` check (upgrade classes only), upgrade path mapping | Two locations |
 | `src/combat/fight.c` | Damcap bonuses, extra attack hooks, defensive mechanics (barrier, reflect) | Multiple locations, add `#include "<class>.h"` for constants |
 | `src/systems/update.c` | Call to `<class>_update(ch)` in the tick loop | One line in the character update section |
 | `src/core/handler.c` | Equipment vnum restrictions (if class armor exists) | Prevents other classes from using your gear |
-| `src/core/ability_config.c` | Default `acfg` values for all balance-tunable parameters | Add entries to `acfg_table[]` array |
+| `src/core/cfg_keys.h` | Default `cfg()` values for all balance-tunable parameters | Add `CFG_X()` entries using the X-macro system |
 | `src/core/prompt.c` | `%R` prompt variable (if class uses `ch->rage` for resource) | Add class to the `case 'R':` check |
 | `src/systems/save.c` | Verify `pcdata->powers[]` and `pcdata->stats[]` are saved/loaded | Usually already handled generically, but verify |
 | `game/build/Makefile` | Add new `.c` file to the build | Run `GenerateProjectFiles.bat` (Windows) or `.sh` (Linux) instead of editing manually |
@@ -50,7 +50,7 @@ If the new class is an upgrade that shares a header with its base class (like Si
 | File | What to Add |
 |------|-------------|
 | `gamedata/db/game/base_help.db` | Help entry for the class, system-specific help entries, update CLASSES help |
-| `gamedata/db/game/game.db` | Runtime overrides for `acfg` values (defaults are in `ability_config.c`, overrides saved here) |
+| `gamedata/db/game/game.db` | Runtime overrides for `cfg()` values (defaults are in `cfg_keys.h`, overrides saved here via MudEdit) |
 | `gamedata/db/areas/classeq.db` | Equipment stats for class armor pieces and mastery item |
 
 ### Database Tables (via MudEdit)
@@ -72,6 +72,32 @@ Most class display and configuration is now database-driven. Use MudEdit (`pytho
 **Important:** Add `class_registry` entry FIRST, before other tables. Foreign key constraints reference it.
 
 **MudEdit also requires updating `repository.py`:** Add the new class to the `CLASS_NAMES` dictionary at the top of the file (single location - no longer duplicated across classes).
+
+### Python Helper Scripts
+
+Several Python scripts in `game/tools/` automate database insertion for new classes. These are the primary way to populate data — prefer them over manual SQL or MudEdit for bulk operations.
+
+| Script | Purpose | Databases Modified |
+|--------|---------|-------------------|
+| `add_class_db.py` | Insert all `class.db` tables: registry, brackets, generations, auras, starting, score_stats, armor_config, armor_pieces | `gamedata/db/game/class.db` |
+| `add_classeq_db.py` | Insert equipment objects and affects (armor, weapons, mastery items) | `gamedata/db/areas/classeq.db` |
+| `add_<class>_help.py` | Insert help entries and update CLASSES help listing | `gamedata/db/game/base_help.db` |
+
+**Usage pattern:**
+1. Copy an existing class's data block in the script as a template
+2. Update vnums, names, colors, and stats for the new class
+3. Run with `--dry-run` first to preview changes
+4. Run without `--dry-run` to apply
+
+```bash
+cd game/tools
+python add_class_db.py --dry-run    # Preview class.db changes
+python add_class_db.py              # Apply changes
+python add_classeq_db.py            # Add equipment objects
+python add_artificer_help.py        # Add help entries (create per-class)
+```
+
+**Important:** These scripts use `DELETE + INSERT` patterns, making them safe to re-run. Always verify vnums don't conflict with existing ranges before running (see "Equipment Vnum Range Conflicts" in Common Pitfalls).
 
 ## Phase Planning Approach
 
@@ -111,7 +137,7 @@ Before starting this phase, verify:
 The header file defines the permanent data structure for this class. Changing indices later requires dealing with existing player save files, so careful planning upfront saves significant pain.
 
 **Implementation Steps:**
-1. **Pick a class constant bit value** - Must be unique power-of-2 in `class.h`. Next available after 131072 is 262144.
+1. **Pick a class constant bit value** - Must be unique power-of-2 in `class.h`. Check the last `CLASS_*` define and double it.
 2. **Create the header file** (`src/classes/<class>.h`) - Define all `pcdata->powers[]` and `pcdata->stats[]` indices. Separate ability state indices (0-9) from training indices (10+).
 
 **Verification:**
@@ -172,7 +198,7 @@ Before starting this phase, verify:
 - [ ] Phase 3 complete - all stubs compile and commands are registered
 - [ ] Design document specifies ability mechanics, costs, and cooldowns
 - [ ] Identify ability dependencies (which abilities must work before others)
-- [ ] List all `acfg` keys needed for tunable values
+- [ ] List all `cfg()` keys needed for tunable values
 
 **Why this phase matters:**
 This is the core implementation work. Starting with the simplest ability and testing each before moving on catches bugs early and builds confidence in your understanding of the codebase patterns.
@@ -180,11 +206,11 @@ This is the core implementation work. Starting with the simplest ability and tes
 **Implementation Steps:**
 1. **Prioritize abilities by dependency** - Some abilities may depend on others (e.g., a finisher that requires building stacks). Implement foundational abilities first.
 2. **Implement abilities one at a time** - Start with the simplest (usually a basic damage attack). Test each in-game before moving to the next.
-3. **Add `acfg` keys for every tunable value** - Mana costs, cooldowns, damage ranges, durations. Add defaults to `ability_config.c`. This makes balance adjustable at runtime without recompiling.
+3. **Add `cfg()` keys for every tunable value** - Mana costs, cooldowns, damage ranges, durations. Add `CFG_X()` entries to `cfg_keys.h`. This makes balance adjustable at runtime without recompiling.
 
 **Verification:**
 - [ ] Each ability functions correctly in-game
-- [ ] All `acfg` keys have defaults in `ability_config.c`
+- [ ] All `cfg()` keys have defaults in `cfg_keys.h`
 - [ ] No abilities crash or produce unexpected behavior
 - [ ] Mana/resource costs are being deducted correctly
 
@@ -270,13 +296,13 @@ Class equipment provides progression and identity. The vnum range you choose is 
    ```
 4. **Configure armor via MudEdit** - Open the Class Armor panel:
    - Add a `class_armor_config` entry with:
-     - `acfg_cost_key`: Key for primal cost lookup (e.g., `"classname.armor.practice_cost"`)
+     - `acfg_cost_key`: Key for primal cost lookup via `cfg()` (e.g., `"classname.armor.practice_cost"`)
      - `mastery_vnum`: The vnum of the mastery item (REQUIRED - not 0)
      - `usage_message`: Text showing available pieces
      - `act_to_char` / `act_to_room`: Messages when creating armor
    - Add `class_armor_pieces` entries mapping keywords to vnums (e.g., "ring" → 12345)
 5. **Add equipment restrictions to `handler.c`** - Prevent other classes from equipping your class gear by checking vnum ranges.
-6. **Add `acfg` default in `ability_config.c`** - Set the primal cost for armor creation.
+6. **Add `cfg()` default in `cfg_keys.h`** - Add a `CFG_X()` entry for the primal cost for armor creation.
 
 **Note:** The armor command itself (`do_classarmor_generic` in `class_armor.c`) is shared by all classes. You do NOT need to write a custom armor command - just configure the database entries.
 
@@ -315,13 +341,13 @@ Display integration controls how your class appears everywhere in the game: who 
 
 **Implementation Steps (Code - minimal):**
 5. **Add value calculation** (if needed) - If your class uses `ch->rage` for a resource, add it to value calculation in `act_info.c` (search for "Dirgesinger/Siren Resonance").
-6. **Add to `class_name()` function** - Return the class name string in the switch statement.
+6. **Add to "mad frenzy" exclusion** (if class uses `ch->rage`) - Prevents your class's resource from showing as "mad frenzy" in score. Search for "mad frenzy" in `act_info.c` and add `&& !IS_CLASS( ch, CLASS_YOURCLASS )` to the exclusion list.
 
 **Verification:**
 - [ ] Who list shows correct brackets and titles for your class
 - [ ] Looking at a player shows the correct room aura tag
 - [ ] Score command displays custom stats correctly
-- [ ] `class_name()` returns correct string
+- [ ] "Mad frenzy" does NOT appear in score for your class (if using `ch->rage`)
 
 ---
 
@@ -463,6 +489,58 @@ Every base class has a corresponding upgrade class. This is a required part of c
 - [ ] Upgrade class has all display/help/equipment entries (including mastery)
 - [ ] Upgrade abilities work independently of base abilities
 
+### Phase 13: Integration Audit
+
+**Planning Checklist:**
+Before starting this phase, verify:
+- [ ] Phases 1-12 complete for both base and upgrade class
+- [ ] Build compiles with 0 warnings
+- [ ] Both classes are playable in-game
+
+**Why this phase matters:**
+Complex implementations spanning many files and databases are easy to leave incomplete. This phase is a systematic cross-check of every integration point to catch anything missed during development.
+
+**Audit Checklist:**
+
+*Code Integration:*
+- [ ] `class.h` — CLASS_* constant defined with correct power-of-2 bit value
+- [ ] `merc.h` — All `DECLARE_DO_FUN` entries for both base and upgrade abilities
+- [ ] `interp.c` — All `cmd_table` entries with correct `race` (class restriction) field
+- [ ] `fight.c` — Damcap, defense, and extra attack hooks
+- [ ] `update.c` — Tick update call for resource management
+- [ ] `act_info.c` — `ch->rage` value calculation (if using rage) and mad frenzy exclusion
+- [ ] `clan.c` — `do_class` help text and class-setting cases for BOTH classes
+- [ ] `handler.c` — Equipment restrictions for class-specific armor
+- [ ] `jobo_act.c` — `do_mastery` vnum mapping
+- [ ] `prompt.c` — `%R` prompt variable (if using `ch->rage`)
+- [ ] `cfg_keys.h` — All `CFG_X()` entries for tunable values
+- [ ] `upgrade.c` — Upgrade path mapping and `is_upgrade()` check
+- [ ] Build files regenerated (`GenerateProjectFiles.bat`/`.sh`)
+
+*Database Integration:*
+- [ ] `class.db` — All 8 tables populated for both classes (registry, brackets, generations, auras, starting, score_stats, armor_config, armor_pieces)
+- [ ] `classeq.db` — Equipment objects exist at correct vnums (13 pieces + mastery per class)
+- [ ] `base_help.db` — Help entries for both classes, resource system, and CLASSES entry updated
+- [ ] `repository.py` — MudEdit CLASS_NAMES dictionary includes both classes
+
+*Color and Display Verification:*
+- [ ] Class brackets render with correct colors on WHO list
+- [ ] Equipment short_descr displays with correct colors
+- [ ] `help classes` shows both entries with visible colors
+- [ ] `help <classname>` shows formatted help with class colors
+- [ ] Score command shows class-specific stats (not "mad frenzy")
+- [ ] Room aura displays correctly
+
+*Functional Verification:*
+- [ ] `selfclass <base>` works (player command)
+- [ ] `class <player> <base>` works (immortal command)
+- [ ] `class <player> <upgrade>` works (immortal command)
+- [ ] `upgrade` transitions correctly from base to upgrade
+- [ ] `<class>armor <piece>` creates correct equipment at correct vnum
+- [ ] `mastery` works with the mastery vnum
+
+---
+
 ## Common Pitfalls
 
 ### `pcdata->powers[]` Index Conflicts
@@ -493,11 +571,11 @@ Before naming abilities, search the codebase for existing `do_<name>` functions 
 
 Most display features are now database-driven. The `act_info.c` file only needs updates in **2-3** locations:
 
-1. **class_name() function** - Add class name string. Search for `CLASS_SIREN` in `class_name()` and add before `return "Hero"`.
+1. **Value calculation** (if class uses `ch->rage`) - Add `ch->rage` to value if class uses a resource stored there (Focus, Resonance, etc.). Search for "Dirgesinger/Siren Resonance" to find both locations.
 
-2. **Value calculation** (if class uses `ch->rage`) - Add `ch->rage` to value if class uses a resource stored there (Focus, Resonance, etc.). Search for "Dirgesinger/Siren Resonance" to find both locations.
+2. **"mad frenzy" exclusion** (if class uses `ch->rage`) - Update the exclusion list if your class uses `ch->rage` for something other than frenzy (search for "mad frenzy").
 
-3. **"mad frenzy" exclusion** (if class uses `ch->rage`) - Update the exclusion list if your class uses `ch->rage` for something other than frenzy (search for "mad frenzy").
+**Note:** `class_name()` no longer exists. Class names are now DB-driven via `db_class_get_name()` — just add a `class_registry` entry.
 
 **The following are now DATABASE-DRIVEN (via MudEdit):**
 - ~~Room aura prefix~~ → `class_auras` table (Class Aura panel)
@@ -536,15 +614,17 @@ if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || ... || IS_CLASS( ch, C
 This allows players to display their resource in their prompt using `%R`. Without this change, `%R` will show "0" for your class. Players can then configure prompts like:
 - `prompt <%hhp %mm %vmv %RFocus>`
 
-### `acfg` Default Values
+### `cfg()` Default Values
 
-Every `acfg("key")` call must have a corresponding default value in `ability_config.c`. If a key has no default and no entry in `game.db`, `acfg()` logs a warning and returns 0. This can cause abilities to cost 0 mana, deal 0 damage, or have 0-tick cooldowns, which can be difficult to diagnose.
+Every `cfg(CFG_KEY)` call must have a corresponding `CFG_X()` entry in `cfg_keys.h`. Unlike the old `acfg()` system which only warned at runtime, missing `cfg()` keys cause a compile-time error, catching mistakes early.
 
 Pattern for adding defaults:
 ```c
-// In ability_config.c, within the acfg_table[] array:
-{ "classname.ability.mana_cost", 50, 50 },  // key, value, default_value
+// In cfg_keys.h, add a CFG_X entry:
+CFG_X(CLASSNAME_ABILITY_MANA_COST, "classname.ability.mana_cost", 50)
 ```
+
+**Important:** Do NOT run `generate_cfg_keys.py` — it reads from non-existent files and will wipe `cfg_keys.h`. Add entries manually.
 
 ### `raw_kill()` vs Normal Death
 
@@ -552,9 +632,28 @@ If an ability can reduce HP below the death threshold directly (bypassing `damag
 
 ### Color Scheme Selection
 
-When choosing x256 colors (`#xNNN`), test them on both dark and light terminal backgrounds. Some clients render 256-color differently. Stick to colors in the 16-231 range for consistent results. The 232-255 range is grayscale and may not stand out.
+When choosing x256 colors (`#xNNN`), stick to colors in the **16-231** range (the 6x6x6 color cube) for consistent results. **Avoid the 232-255 grayscale range** — these colors are nearly white and will appear colorless on most terminals. Common mistake: `#x250` through `#x255` look identical to default white text.
 
-Use two colors per class: an **accent** color (for decorative elements like tildes and brackets) and a **primary** color (for class name, titles, ability highlights). This gives the class visual identity on the who list and in ability messages.
+Use two colors per class: an **accent** color (for decorative elements like tildes and brackets) and a **primary** color (for class name, titles, ability highlights). Both should be clearly distinguishable from white/default text on a dark background.
+
+**Bracket pattern convention:** Open brackets should end with `#n` (reset) so the display code can apply the primary color to the class name. Close brackets should also end with `#n`. Follow the pattern used by existing classes:
+```
+open:  #xACCENT<*#n     (accent-colored decorations, then reset)
+close: #xACCENT*>#n     (accent-colored decorations, then reset)
+```
+
+**Equipment short_descr pattern:** The full color scheme is embedded inline:
+```
+#xACCENT<*#xPRIMARYitem name#xACCENT*>#n
+```
+Switch BACK to accent color for closing decorations before `#n` reset.
+
+**Testing after insertion:** Always verify colors render in-game after running insertion scripts:
+1. Boot the MUD with updated databases
+2. Check `help classes` — every class line should show visible bracket/name colors
+3. Check equipment creation — `<class>armor <piece>` should show colored short_descr
+4. Check WHO list — brackets and generation title should be colored
+5. If colors appear "white" or "no color," the primary color is too close to default text — pick a more saturated color in the 16-200 range
 
 ### Checking Existing Class Brackets and Colors
 
@@ -601,14 +700,38 @@ The `class_brackets` table stores both brackets AND the accent/primary color sum
 
 ### Equipment Vnum Range Conflicts
 
-Each class with armor equipment needs a contiguous vnum range in `classeq.db`. Use the Class Vnum Ranges panel in MudEdit to:
+Each class with armor equipment needs a contiguous vnum range in `classeq.db`. **Choosing vnums that overlap with existing classes will silently overwrite their equipment.** This is one of the most damaging mistakes possible — always verify before inserting.
 
-1. **Check existing ranges** - View which vnums are already allocated
-2. **Find next available** - Click "Next Available" to see suggested starting vnum
-3. **Track your allocation** - Add an entry for your class before creating armor objects
-4. **Detect conflicts** - The panel warns if ranges overlap
+**Before choosing vnums:**
+1. **Query the database directly** to see what's actually allocated:
+   ```bash
+   cd game/tools
+   python add_classeq_db.py --list-range 33000 34000
+   ```
+2. **Check the validation script** for the next available range:
+   ```bash
+   python validate_classes.py
+   ```
+3. **Use MudEdit** — Class Vnum Ranges panel shows allocations and detects conflicts
 
-The validation script (`validate_classes.py`) also checks for vnum overlaps and reports the next available starting point.
+**Standard allocation pattern:** 13 equipment pieces in a contiguous block, mastery item at offset +15 from the start:
+- Base class:    vnums START to START+12, mastery at START+15
+- Upgrade class: vnums START+20 to START+32, mastery at START+35
+
+**Current allocations (for reference):**
+
+| Class | Equipment Range | Mastery | Notes |
+|-------|----------------|---------|-------|
+| Dirgesinger | 33280-33292 | 33295 | Base class |
+| Siren | 33300-33312 | 33315 | Upgrade |
+| Psion | 33320-33332 | 33335 | Base class (originally 33360) |
+| Mindflayer | 33340-33352 | 33355 | Upgrade (originally 33380) |
+| Dragonkin | 33400-33412 | 33415 | Base class |
+| Wyrm | 33420-33432 | 33435 | Upgrade |
+| Artificer | 33440-33452 | 33455 | Base class |
+| Mechanist | 33460-33472 | 33475 | Upgrade |
+
+**Next available starting vnum:** 33500+
 
 ### Build File Regeneration
 
@@ -690,7 +813,17 @@ See also: RESONANCE, DIRGESINGERARMOR, DIRGESINGER TRAINING
 
 ### Help File Color Codes
 
-Use your class colors in the help entry. Keep the overall structure consistent with other class help entries.
+Use your class accent/primary colors in help entries for visual identity. The CLASSES help entry line should follow the same bracket pattern as your class_brackets:
+
+```
+#xACCENT[=#xPRIMARYClassName#xACCENT=]#n       Short description.
+```
+
+**Common color code mistakes:**
+- Using grayscale colors (#x232-#x255) as primary — these look white/colorless
+- Forgetting `#n` reset at the end of a color sequence
+- Setting the closing decoration in the primary color instead of the accent color
+- Not testing the actual in-game rendering after database insertion
 
 ## Template: Minimal Class Skeleton
 
@@ -702,11 +835,11 @@ A minimal new base class needs these **code** changes:
 class.h          +1 line   (CLASS_FOO define)
 merc.h           +N lines  (DECLARE_DO_FUN per ability)
 interp.c         +N lines  (cmd_table entries)
-act_info.c       +1-3 blocks (class_name, value calc if using ch->rage)
+act_info.c       +1-2 blocks (value calc + mad frenzy exclusion, if using ch->rage)
 clan.c           +2 blocks (do_class help text + class-setting case)
 update.c         +1 line   (tick update call)
 fight.c          +1-3 blocks (damcap, defense, extra attacks) + #include
-ability_config.c +N lines  (acfg defaults in acfg_table[])
+cfg_keys.h       +N lines  (CFG_X() entries for tunable values)
 handler.c        +1 block  (equipment restrictions)
 jobo_act.c       +1 block  (do_mastery vnum mapping - uses mastery_vnum from class_armor_config)
 ```
@@ -745,7 +878,7 @@ The corresponding upgrade class (required for every base class) additionally nee
 ```
 upgrade.c        +2 blocks (is_upgrade check, upgrade path mapping)
 clan.c           +1 block  (do_class class-setting case for immortals)
-act_info.c       +1 block  (class_name only - display is DB-driven)
+act_info.c       +1 block  (mad frenzy exclusion if using ch->rage - class_name is now DB-driven)
 + Standard code changes (merc.h, interp.c, fight.c, etc.) for upgrade abilities
 ```
 

@@ -275,57 +275,49 @@ STAT_DRAGON_ESSENCE_PEAK = 24
 # ============================================================================
 
 # Class IDs (must match class.h defines)
-CLASS_DRAGONKIN = 262144
-CLASS_WYRM = 524288
+CLASS_ARTIFICER = 1048576
+CLASS_MECHANIST = 2097152
 
 CLASSES_TO_ADD = [
     # -------------------------------------------------------------------------
-    # DRAGONKIN (Base Class)
+    # ARTIFICER (Base Class)
     # -------------------------------------------------------------------------
     {
-        "class_id": CLASS_DRAGONKIN,
-        "class_name": "Dragonkin",
+        "class_id": CLASS_ARTIFICER,
+        "class_name": "Artificer",
 
         "registry": {
-            "keyword": "dragonkin",
+            "keyword": "artificer",
             "keyword_alt": None,
-            "mudstat_label": "Dragonkin",
-            "selfclass_message": "Draconic blood awakens within you. Embrace the #x220power of dragons#n.",
-            "display_order": 7,
+            "mudstat_label": "Artificers",
+            "selfclass_message": "Technology bends to your will. You are now an #x117Artificer#n.",
+            "display_order": 8,
             "upgrade_class": None,  # Base class
             "requirements": None
         },
 
         "brackets": {
-            "open": "#x202<*#n",
-            "close": "#n*#x202>#n",
-            "accent": "#x202",
-            "primary": "#x220"
+            "open": "#x037[=#n",
+            "close": "#x037=]#n",
+            "accent": "#x037",
+            "primary": "#x117"
         },
 
         # Generation 0 = default (lowest), then 1 = highest gen, counting up
         # NOTE: Generation titles should NOT include color codes - primary_color
         # from brackets is applied automatically when displaying in WHO/selfclass.
         "generations": [
-            "Hatchling",       # 0 - default
-            "Dragon Primarch", # 1 - highest
-            "Dragon Emperor",  # 2
-            "Dragon Sovereign",# 3
-            "Dragon Lord",     # 4
-            "Dragon Ascendant",# 5
-            "Ancient Dragon",  # 6
-            "Elder Dragon",    # 7
-            "Dragon",          # 8
-            "Young Dragon",    # 9
-            "Drake",           # 10
-            "Fledgling",       # 11
-            "Whelp",           # 12
-            "Hatchling",       # 13 - lowest specific gen
+            "Mechanic",          # 0 - default
+            "Master Engineer",   # 1 - highest
+            "Inventor",          # 2
+            "Artificer",         # 3
+            "Tinkerer",          # 4
+            "Apprentice",        # 5
         ],
 
         "aura": {
-            "text": "#x202(#x220Dragonkin#x202)#n ",
-            "display_order": 20
+            "text": "#x037(#x117Artificer#x037)#n ",
+            "display_order": 22
         },
 
         "starting": {
@@ -335,113 +327,103 @@ CLASSES_TO_ADD = [
         },
 
         "score_stats": [
-            {"source": STAT_RAGE, "label": "Essence", "order": 1,
-             "format": "#x202[#n%s: #x220%d#x202]#n\\n\\r"},
-            {"source": STAT_DRAGON_ATTUNEMENT, "label": "Attunement", "order": 2,
-             "format": "#x202[#n%s: #x220%s#x202]#n\\n\\r"},
+            {"source": STAT_RAGE, "label": "Power Cells", "order": 1,
+             "format": "#x037[#n%s: #x117%d#x037]#n\\n\\r"},
         ],
 
         "armor_config": {
-            "acfg_cost_key": "dragonkin.dragonarmor.practice_cost",
-            "command_name": "dragonarmor",  # usage_message auto-generated from armor_pieces
-            "act_to_char": "Dragon scales form into $p in your claws.",
-            "act_to_room": "Dragon scales form into $p in $n's claws.",
-            "mastery_vnum": 33415
+            "acfg_cost_key": "artificer.artificerarmor.practice_cost",
+            "command_name": "artificerarmor",
+            "act_to_char": "Nano-assemblers construct $p in your hands.",
+            "act_to_room": "Nano-assemblers construct $p in $n's hands.",
+            "mastery_vnum": 33455
         },
 
         "armor_pieces": [
-            {"keyword": "fang", "vnum": 33400},
-            {"keyword": "ring", "vnum": 33401},
-            {"keyword": "tooth", "vnum": 33402},
-            {"keyword": "scales", "vnum": 33403},
-            {"keyword": "helm", "vnum": 33404},
-            {"keyword": "leggings", "vnum": 33405},
-            {"keyword": "boots", "vnum": 33406},
-            {"keyword": "gauntlets", "vnum": 33407},
-            {"keyword": "bracers", "vnum": 33408},
-            {"keyword": "cloak", "vnum": 33409},
-            {"keyword": "belt", "vnum": 33410},
-            {"keyword": "bracer", "vnum": 33411},
-            {"keyword": "visage", "vnum": 33412},
+            {"keyword": "wrench",   "vnum": 33440},
+            {"keyword": "ring",     "vnum": 33441},
+            {"keyword": "collar",   "vnum": 33442},
+            {"keyword": "vest",     "vnum": 33443},
+            {"keyword": "goggles",  "vnum": 33444},
+            {"keyword": "pants",    "vnum": 33445},
+            {"keyword": "boots",    "vnum": 33446},
+            {"keyword": "gloves",   "vnum": 33447},
+            {"keyword": "bracers",  "vnum": 33448},
+            {"keyword": "harness",  "vnum": 33449},
+            {"keyword": "belt",     "vnum": 33450},
+            {"keyword": "wrist",    "vnum": 33451},
+            {"keyword": "mask",     "vnum": 33452},
         ],
     },
 
     # -------------------------------------------------------------------------
-    # WYRM (Upgrade Class from Dragonkin)
+    # MECHANIST (Upgrade Class from Artificer)
     # -------------------------------------------------------------------------
     {
-        "class_id": CLASS_WYRM,
-        "class_name": "Wyrm",
+        "class_id": CLASS_MECHANIST,
+        "class_name": "Mechanist",
 
         "registry": {
-            "keyword": "wyrm",
+            "keyword": "mechanist",
             "keyword_alt": None,
-            "mudstat_label": "Wyrms",
-            "selfclass_message": "Your draconic heritage reaches its apex. You are now a #x220Wyrm#n.",
-            "display_order": 7,
-            "upgrade_class": CLASS_DRAGONKIN,  # Upgrades from Dragonkin
+            "mudstat_label": "Mechanists",
+            "selfclass_message": "Machine and flesh become one. You are now a #x177Mechanist#n.",
+            "display_order": 8,
+            "upgrade_class": CLASS_ARTIFICER,  # Upgrades from Artificer
             "requirements": None
         },
 
         "brackets": {
-            "open": "#x202<#x220*#n",
-            "close": "#n#x220*#x202>#n",
-            "accent": "#x202",
-            "primary": "#x220"
+            "open": "#x127>/#n",
+            "close": "#x127\\<#n",
+            "accent": "#x127",
+            "primary": "#x177"
         },
 
         # NOTE: Generation titles should NOT include color codes - primary_color
         # from brackets is applied automatically when displaying in WHO/selfclass.
         "generations": [
-            "Young Wyrm",        # 0 - default
-            "Primordial Wyrm",   # 1 - highest
-            "World Wyrm",        # 2
-            "Cataclysm Wyrm",    # 3
-            "Apocalypse Wyrm",   # 4
-            "Doom Wyrm",         # 5
-            "Ancient Wyrm",      # 6
-            "Great Wyrm",        # 7
-            "Elder Wyrm",        # 8
-            "Wyrm",              # 9
-            "Young Wyrm",        # 10
+            "Cyborg",          # 0 - default
+            "War Machine",     # 1 - highest
+            "Cyborg Lord",     # 2
+            "Mechanist",       # 3
+            "Augmented",       # 4
         ],
 
         "aura": {
-            "text": "#x202(#x220Wyrm#x202)#n ",
-            "display_order": 21
+            "text": "#x127(#x177Mechanist#x127)#n ",
+            "display_order": 23
         },
 
-        # Wyrm doesn't need starting - inherits from upgrade
+        # Mechanist doesn't need starting - inherits from upgrade
 
         "score_stats": [
-            {"source": STAT_RAGE, "label": "Essence", "order": 1,
-             "format": "#x202[#n%s: #x220%d#x202]#n\\n\\r"},
-            {"source": STAT_DRAGON_ATTUNEMENT, "label": "Attunement", "order": 2,
-             "format": "#x202[#n%s: #x220%s#x202]#n\\n\\r"},
+            {"source": STAT_RAGE, "label": "Power Cells", "order": 1,
+             "format": "#x127[#n%s: #x177%d#x127]#n\\n\\r"},
         ],
 
         "armor_config": {
-            "acfg_cost_key": "wyrm.wyrmarmor.practice_cost",
-            "command_name": "wyrmarmor",  # usage_message auto-generated from armor_pieces
-            "act_to_char": "Ancient scales form into $p in your talons.",
-            "act_to_room": "Ancient scales form into $p in $n's talons.",
-            "mastery_vnum": 33435
+            "acfg_cost_key": "mechanist.mechanistarmor.practice_cost",
+            "command_name": "mechanistarmor",
+            "act_to_char": "Cybernetic fabricators assemble $p before you.",
+            "act_to_room": "Cybernetic fabricators assemble $p before $n.",
+            "mastery_vnum": 33475
         },
 
         "armor_pieces": [
-            {"keyword": "talon", "vnum": 33420},
-            {"keyword": "ring", "vnum": 33421},
-            {"keyword": "fang", "vnum": 33422},
-            {"keyword": "scales", "vnum": 33423},
-            {"keyword": "helm", "vnum": 33424},
-            {"keyword": "leggings", "vnum": 33425},
-            {"keyword": "boots", "vnum": 33426},
-            {"keyword": "gauntlets", "vnum": 33427},
-            {"keyword": "bracers", "vnum": 33428},
-            {"keyword": "cloak", "vnum": 33429},
-            {"keyword": "belt", "vnum": 33430},
-            {"keyword": "bracer", "vnum": 33431},
-            {"keyword": "visage", "vnum": 33432},
+            {"keyword": "cutter",    "vnum": 33460},
+            {"keyword": "ring",      "vnum": 33461},
+            {"keyword": "collar",    "vnum": 33462},
+            {"keyword": "chassis",   "vnum": 33463},
+            {"keyword": "helm",      "vnum": 33464},
+            {"keyword": "leggings",  "vnum": 33465},
+            {"keyword": "boots",     "vnum": 33466},
+            {"keyword": "gauntlets", "vnum": 33467},
+            {"keyword": "mounts",    "vnum": 33468},
+            {"keyword": "harness",   "vnum": 33469},
+            {"keyword": "belt",      "vnum": 33470},
+            {"keyword": "holo",      "vnum": 33471},
+            {"keyword": "visor",     "vnum": 33472},
         ],
     },
 ]

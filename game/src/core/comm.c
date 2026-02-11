@@ -1579,6 +1579,12 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 						ch->pcdata->stats[8] );
 				} else if ( IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) ) {
 					snprintf( resource_str, sizeof( resource_str ), " [#CFoc:%d#n]", ch->rage );
+				} else if ( IS_CLASS( ch, CLASS_DRAGONKIN ) || IS_CLASS( ch, CLASS_WYRM ) ) {
+					const char *attune_short[] = { "Fi", "Fr", "St", "Ea" };
+					int attune = ch->pcdata->powers[0];  /* DRAGON_ATTUNEMENT */
+					if ( attune < 0 || attune > 3 ) attune = 0;
+					snprintf( resource_str, sizeof( resource_str ), " [#rE:%d#n #C%s#n]",
+						ch->rage, attune_short[attune] );
 				}
 			}
 

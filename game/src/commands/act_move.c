@@ -22,6 +22,7 @@
 #include <time.h>
 #include "merc.h"
 #include "../systems/mcmp.h"
+#include "../classes/artificer.h"
 
 void horn args( ( CHAR_DATA * ch ) );
 
@@ -377,8 +378,18 @@ void move_char( CHAR_DATA *ch, int door ) {
 			act( poly, ch, NULL, victim, TO_VICT );
 		}
 	}
+	/* Despawn Artificer turrets before leaving room (sentinel mobs) */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_ARTIFICER ) &&
+		ch->pcdata->powers[ART_TURRET_COUNT] > 0 )
+		artificer_despawn_turrets( ch );
+
 	char_from_room( ch );
 	char_to_room( ch, to_room );
+
+	/* Move Mechanist drones (handles drones in combat that follower system skips) */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MECHANIST ) &&
+		( ch->pcdata->powers[MECH_DRONE_COUNT] > 0 || ch->pcdata->powers[MECH_BOMBER_ACTIVE] ) )
+		mechanist_move_drones( ch, to_room );
 
 	/* MCMP: movement footstep and ambient sounds */
 	if ( !IS_NPC( ch ) ) {
@@ -1768,11 +1779,21 @@ void do_recall( CHAR_DATA *ch, char *argument ) {
 		stop_fighting( ch, TRUE );
 	}
 
+	/* Despawn Artificer turrets before teleporting */
+	if ( IS_CLASS( ch, CLASS_ARTIFICER ) && ch->pcdata->powers[ART_TURRET_COUNT] > 0 )
+		artificer_despawn_turrets( ch );
+
 	act( "$n disappears.", ch, NULL, NULL, TO_ROOM );
 	char_from_room( ch );
 	char_to_room( ch, location );
 	act( "$n appears in the room.", ch, NULL, NULL, TO_ROOM );
 	do_look( ch, "auto" );
+
+	/* Move Mechanist drones to new location */
+	if ( IS_CLASS( ch, CLASS_MECHANIST ) &&
+		( ch->pcdata->powers[MECH_DRONE_COUNT] > 0 || ch->pcdata->powers[MECH_BOMBER_ACTIVE] ) )
+		mechanist_move_drones( ch, ch->in_room );
+
 	if ( ( mount = ch->mount ) == NULL ) return;
 	char_from_room( mount );
 	char_to_room( mount, ch->in_room );

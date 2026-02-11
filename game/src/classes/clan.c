@@ -1563,6 +1563,7 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "None, Demon, Drow, Werewolf, Monk, Vampire, Mage, Ninja, Druid, Hobbit, Giant, Draconian.\n\r", ch );
 		send_to_char( "Tanarri, Shapeshifter, Spiderdroid, Samurai, Undeadknight, Angel, Lich, Fae, Drone.\n\r", ch );
 		send_to_char( "Dirgesinger, Siren, Psion, Mindflayer, Dragonkin, Wyrm.\n\r", ch );
+		send_to_char( "Artificer, Mechanist.\n\r", ch );
 		return;
 	}
 	if ( ( victim = get_char_world( ch, arg1 ) ) == NULL ) {
@@ -1637,6 +1638,12 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 	} else if ( !str_cmp( arg2, "wyrm" ) ) {
 		victim->class = CLASS_WYRM;
 		send_to_char( "You are now a Wyrm!\n\r", victim );
+	} else if ( !str_cmp( arg2, "artificer" ) ) {
+		victim->class = CLASS_ARTIFICER;
+		send_to_char( "You are now an Artificer!\n\r", victim );
+	} else if ( !str_cmp( arg2, "mechanist" ) ) {
+		victim->class = CLASS_MECHANIST;
+		send_to_char( "You are now a Mechanist!\n\r", victim );
 	} else if ( !str_cmp( arg2, "none" ) ) {
 		victim->class = 0;
 		save_char_obj( victim );

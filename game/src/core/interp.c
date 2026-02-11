@@ -1141,6 +1141,7 @@ const struct cmd_type cmd_table[] =
 
 		{ "dragonstatus",  do_dragonstatus,  POS_DEAD,      3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
 		{ "attune",        do_attune,        POS_STANDING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
+		{ "essence",       do_dragonstatus,  POS_DEAD,      3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
 		{ "essencemeditate", do_essencemeditate, POS_RESTING, 3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
 		{ "dragonbreath",  do_dragonbreath,  POS_FIGHTING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
 		{ "searingblast",  do_searingblast,  POS_FIGHTING,  3, LOG_NORMAL, CLASS_DRAGONKIN, 0, 0 },
@@ -1158,6 +1159,7 @@ const struct cmd_type cmd_table[] =
 
 		{ "dragonstatus",  do_dragonstatus,  POS_DEAD,      3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
 		{ "attune",        do_attune,        POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+		{ "essence",       do_dragonstatus,  POS_DEAD,      3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
 		{ "essencemeditate", do_essencemeditate, POS_RESTING, 3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
 		{ "wyrmbreath",    do_wyrmbreath,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
 		{ "cataclysm",     do_cataclysm,     POS_FIGHTING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
@@ -1171,6 +1173,41 @@ const struct cmd_type cmd_table[] =
 		{ "primordial",    do_primordial,    POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
 		{ "wyrmtrain",     do_wyrmtrain,     POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
 		{ "wyrmarmor",     do_wyrmarmor,     POS_STANDING,  3, LOG_NORMAL, CLASS_WYRM, 0, 0 },
+
+		/* Artificer */
+		{ "power",           do_power,           POS_SITTING,   3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "charge",          do_powercharge,     POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "overcharge",      do_overcharge,      POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "turret",          do_turret,          POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "decoy",           do_decoy,           POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "grapple",         do_grapple,         POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "energyblade",     do_energyblade,     POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "blaster",         do_blaster,         POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "grenade",         do_grenade,         POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "forcefield",      do_forcefield,      POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "repairbot",       do_repairbot,       POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "techcloak",       do_artcloak,        POS_STANDING,  3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "techtrain",       do_techtrain,       POS_SITTING,   3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+		{ "artificerarmor",  do_artificerarmor,  POS_SITTING,   3, LOG_NORMAL, CLASS_ARTIFICER, 0, 0 },
+
+		/* Mechanist */
+		{ "power",           do_power,           POS_SITTING,   3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "neuraljack",      do_neuraljack,      POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "servoarms",       do_servoarms,       POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "reactiveplating", do_reactiveplating, POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "combatdrone",     do_combatdrone,     POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "repairswarm",     do_repairswarm,     POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "bomberdrone",     do_bomberdrone,     POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "detonate",        do_artdetonate,     POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "dronearmy",       do_dronearmy,       POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "railgun",         do_railgun,         POS_FIGHTING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "empburst",        do_empburst,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "orbitalstrike",   do_orbitalstrike,   POS_FIGHTING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "cybimplant",      do_mechimplant,     POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "cybtrain",        do_cybtrain,        POS_SITTING,   3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "mechanistarmor",  do_mechanistarmor,  POS_SITTING,   3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "drones",          do_dronestatus,     POS_SITTING,   3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
+		{ "dronerecall",     do_dronerecall,     POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
 
 		/*
 		 * Immortal commands.

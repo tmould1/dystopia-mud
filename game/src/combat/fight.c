@@ -25,6 +25,7 @@
 #include "dirgesinger.h"
 #include "psion.h"
 #include "dragonkin.h"
+#include "artificer.h"
 #include "../systems/mcmp.h"
 #include "../systems/profile.h"
 
@@ -247,6 +248,16 @@ void violence_update( void ) {
 				}
 			}
 		}
+
+		/* Artificer turret attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_ARTIFICER ) &&
+			ch->pcdata->powers[ART_TURRET_COUNT] > 0 && ch->fighting != NULL )
+			artificer_turret_attacks( ch );
+
+		/* Mechanist drone attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MECHANIST ) &&
+			ch->pcdata->powers[MECH_DRONE_COUNT] > 0 && ch->fighting != NULL )
+			mechanist_drone_attacks( ch );
 
 		PROFILE_END( "violence_combat" );
 	}
@@ -1037,6 +1048,14 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WYRM ) &&
 			ch->pcdata->powers[DRAGON_WYRMFORM] > 0 )
 			count += 2;
+		/* Mechanist servo arms: +1 extra attack */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MECHANIST ) &&
+			ch->pcdata->powers[MECH_SERVO_ARMS] > 0 )
+			count += 1;
+		/* Mechanist Multi-Tool implant: +1 extra attack */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MECHANIST ) &&
+			ch->pcdata->powers[MECH_SERVO_IMPLANT] == IMPLANT_SERVO_MULTI_TOOL )
+			count += 1;
 		if ( IS_ITEMAFF( ch, ITEMA_SPEED ) ) count += 2;
 	} else {
 		if ( !IS_NPC( ch ) )
@@ -1311,6 +1330,18 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_STRONGARMS ) )
 		dam = dam * cfg( CFG_COMBAT_DMG_MULT_DEMON_STRONGARMS ) / 100;
+
+	/* Mechanist Servo Arms: flat damage bonus on melee */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MECHANIST ) &&
+		ch->pcdata->powers[MECH_SERVO_ARMS] > 0 &&
+		dt >= TYPE_HIT && dt <= TYPE_HIT + 12 )
+		dam += cfg( CFG_ABILITY_MECHANIST_SERVOARMS_DAM_BONUS );
+
+	/* Mechanist Power Arms implant: flat damage bonus on melee */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MECHANIST ) &&
+		ch->pcdata->powers[MECH_SERVO_IMPLANT] == IMPLANT_SERVO_POWER_ARMS &&
+		dt >= TYPE_HIT && dt <= TYPE_HIT + 12 )
+		dam += cfg( CFG_ABILITY_MECHANIST_IMPLANT_SERVO_POWER_DAM );
 
 	if ( IS_NPC( victim ) ) {
 
@@ -1782,6 +1813,27 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( ch->pcdata->powers[DRAGON_WYRMFORM] > 0 )
 				max_dam += cfg( CFG_COMBAT_DAMCAP_WYRM_WYRMFORM );
 		}
+		/* Artificer: power-based damcap + energy blade + overcharge */
+		if ( IS_CLASS( ch, CLASS_ARTIFICER ) ) {
+			max_dam += cfg( CFG_COMBAT_DAMCAP_ARTIFICER_BASE );
+			max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_ARTIFICER_POWER_MULT );
+			if ( ch->pcdata->powers[ART_ENERGYBLADE] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_ARTIFICER_BLADE );
+			if ( ch->pcdata->powers[ART_OVERCHARGE] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_ARTIFICER_OVERCHARGE );
+		}
+		/* Mechanist: enhanced power scaling + servo arms + drones + implants */
+		if ( IS_CLASS( ch, CLASS_MECHANIST ) ) {
+			max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_MECHANIST_POWER_MULT );
+			if ( ch->pcdata->powers[MECH_SERVO_ARMS] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_MECHANIST_SERVO );
+			if ( ch->pcdata->powers[MECH_DRONE_ARMY] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_MECHANIST_ARMY );
+			max_dam += ch->pcdata->powers[MECH_DRONE_COUNT] * cfg( CFG_COMBAT_DAMCAP_MECHANIST_PER_DRONE );
+			/* Shield Generator implant: +200 damcap */
+			if ( ch->pcdata->powers[MECH_SERVO_IMPLANT] == IMPLANT_SERVO_SHIELD_GEN )
+				max_dam += cfg( CFG_ABILITY_MECHANIST_IMPLANT_SERVO_SHIELD_DAMCAP );
+		}
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_ARTIFACT );
 
@@ -1980,6 +2032,53 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			victim->pcdata->powers[DRAGON_SCALESHIELD] = 0;
 			send_to_char( "Your dragon scales shatter under the assault!\n\r", victim );
 		}
+	}
+	/* Artificer Force Field: energy shield absorbs damage */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_ARTIFICER ) &&
+		victim->pcdata->powers[ART_FORCEFIELD] > 0 && victim->pcdata->stats[ART_STAT_FORCEFIELD_HP] > 0 ) {
+		if ( dam <= victim->pcdata->stats[ART_STAT_FORCEFIELD_HP] ) {
+			victim->pcdata->stats[ART_STAT_FORCEFIELD_HP] -= dam;
+			send_to_char( "Your force field absorbs the blow!\n\r", victim );
+			dam = 0;
+		} else {
+			dam -= victim->pcdata->stats[ART_STAT_FORCEFIELD_HP];
+			victim->pcdata->stats[ART_STAT_FORCEFIELD_HP] = 0;
+			victim->pcdata->powers[ART_FORCEFIELD] = 0;
+			send_to_char( "Your force field shatters!\n\r", victim );
+		}
+	}
+	/* Artificer Decoy: chance to redirect damage to holographic decoy */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_ARTIFICER ) &&
+		victim->pcdata->powers[ART_DECOY] > 0 && victim->pcdata->stats[ART_STAT_DECOY_HP] > 0 &&
+		dam > 0 && number_percent() <= cfg( CFG_ABILITY_ARTIFICER_DECOY_REDIRECT_PCT ) ) {
+		if ( dam <= victim->pcdata->stats[ART_STAT_DECOY_HP] ) {
+			victim->pcdata->stats[ART_STAT_DECOY_HP] -= dam;
+			send_to_char( "The attack strikes your holographic decoy!\n\r", victim );
+			dam = 0;
+		} else {
+			dam -= victim->pcdata->stats[ART_STAT_DECOY_HP];
+			victim->pcdata->stats[ART_STAT_DECOY_HP] = 0;
+			victim->pcdata->powers[ART_DECOY] = 0;
+			send_to_char( "Your holographic decoy flickers and shatters!\n\r", victim );
+		}
+	}
+	/* Mechanist Reactive Plating: damage resistance + melee reflect */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_MECHANIST ) &&
+		victim->pcdata->powers[MECH_REACTIVE_PLATING] > 0 && dam > 0 ) {
+		int resist = dam * cfg( CFG_ABILITY_MECHANIST_REACTIVE_RESIST_PCT ) / 100;
+		dam -= resist;
+		/* Reflect melee damage back to attacker */
+		if ( dt >= TYPE_HIT && dt <= TYPE_HIT + 12 ) {
+			int reflect = dam * cfg( CFG_ABILITY_MECHANIST_REACTIVE_REFLECT_PCT ) / 100;
+			if ( reflect > 0 )
+				hurt_person( victim, ch, reflect );
+		}
+	}
+	/* Mechanist Armored Chassis implant: passive damage resistance */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_MECHANIST ) &&
+		victim->pcdata->powers[MECH_CORE_IMPLANT] == IMPLANT_CORE_ARMORED && dam > 0 ) {
+		int resist = dam * cfg( CFG_ABILITY_MECHANIST_IMPLANT_CORE_ARMORED_RESIST ) / 100;
+		dam -= resist;
 	}
 	/* Siren Echoshield: reflect portion of damage as sonic */
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SIREN ) &&
@@ -2753,6 +2852,13 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		if ( IS_CLASS( victim, CLASS_UNDEAD_KNIGHT ) ) chance += (int) ( victim->pcdata->powers[WEAPONSKILL] * 4.5 );
 		if ( !IS_CLASS( victim, CLASS_WEREWOLF ) && IS_ITEMAFF( victim, ITEMA_AFFMANTIS ) ) chance += 15;
 		if ( IS_CLASS( victim, CLASS_MAGE ) && IS_ITEMAFF( victim, ITEMA_DEFLECTOR ) ) chance += 40;
+		/* Mechanist Neural Jack: dodge bonus */
+		if ( IS_CLASS( victim, CLASS_MECHANIST ) && victim->pcdata->powers[MECH_NEURAL_JACK] > 0 )
+			chance += cfg( CFG_ABILITY_MECHANIST_NEURALJACK_DODGE_PCT );
+		/* Mechanist Combat Processor implant: passive dodge bonus */
+		if ( IS_CLASS( victim, CLASS_MECHANIST ) &&
+			victim->pcdata->powers[MECH_NEURAL_IMPLANT] == IMPLANT_NEURAL_COMBAT_PROC )
+			chance += cfg( CFG_ABILITY_MECHANIST_IMPLANT_NEURAL_COMBAT_DODGE );
 	}
 	if ( chance > 80 )
 		chance = 80;
@@ -3163,6 +3269,28 @@ void raw_kill( CHAR_DATA *victim ) {
 		victim->mounted = IS_ON_FOOT;
 	}
 	if ( IS_NPC( victim ) ) {
+		/* Decrement Artificer turret count if a turret was killed */
+		if ( victim->pIndexData != NULL && victim->wizard != NULL &&
+			!IS_NPC( victim->wizard ) && victim->pIndexData->vnum == VNUM_ART_TURRET &&
+			IS_CLASS( victim->wizard, CLASS_ARTIFICER ) &&
+			victim->wizard->pcdata->powers[ART_TURRET_COUNT] > 0 ) {
+			victim->wizard->pcdata->powers[ART_TURRET_COUNT]--;
+			send_to_char( "One of your turrets has been destroyed!\n\r", victim->wizard );
+		}
+
+		/* Decrement Mechanist drone counts if a drone was killed */
+		if ( victim->pIndexData != NULL && victim->wizard != NULL &&
+			!IS_NPC( victim->wizard ) && IS_CLASS( victim->wizard, CLASS_MECHANIST ) ) {
+			if ( victim->pIndexData->vnum == VNUM_MECH_COMBAT_DRONE &&
+				victim->wizard->pcdata->powers[MECH_DRONE_COUNT] > 0 ) {
+				victim->wizard->pcdata->powers[MECH_DRONE_COUNT]--;
+				send_to_char( "One of your combat drones has been destroyed!\n\r", victim->wizard );
+			} else if ( victim->pIndexData->vnum == VNUM_MECH_BOMBER_DRONE ) {
+				victim->wizard->pcdata->powers[MECH_BOMBER_ACTIVE] = 0;
+				send_to_char( "Your bomber drone has been destroyed!\n\r", victim->wizard );
+			}
+		}
+
 		victim->pIndexData->killed++;
 		kill_table[URANGE( 0, victim->level, MAX_LEVEL - 1 )].killed++;
 		extract_char( victim, TRUE );

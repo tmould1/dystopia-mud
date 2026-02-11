@@ -1336,7 +1336,160 @@
     CFG_X(ABILITY_WYRM_WYRMFORM_DAMCAP_BONUS                     , "ability.wyrm.wyrmform.damcap_bonus",        300) \
     CFG_X(ABILITY_WYRM_WYRMFORM_DURATION                         , "ability.wyrm.wyrmform.duration",         20) \
     CFG_X(ABILITY_WYRM_WYRMFORM_ESSENCE_COST                     , "ability.wyrm.wyrmform.essence_cost",         40) \
-    CFG_X(ABILITY_WYRM_WYRMFORM_EXTRA_ATTACKS                    , "ability.wyrm.wyrmform.extra_attacks",          2)
+    CFG_X(ABILITY_WYRM_WYRMFORM_EXTRA_ATTACKS                    , "ability.wyrm.wyrmform.extra_attacks",          2) \
+    /* ABILITY - ARTIFICER - CHARGE */ \
+    CFG_X(ABILITY_ARTIFICER_CHARGE_MANA_COST                    , "ability.artificer.charge.mana_cost",            30) \
+    CFG_X(ABILITY_ARTIFICER_CHARGE_COOLDOWN                     , "ability.artificer.charge.cooldown",              4) \
+    CFG_X(ABILITY_ARTIFICER_CHARGE_POWER_GAIN                   , "ability.artificer.charge.power_gain",           15) \
+    /* ABILITY - ARTIFICER - OVERCHARGE */ \
+    CFG_X(ABILITY_ARTIFICER_OVERCHARGE_MANA_COST                , "ability.artificer.overcharge.mana_cost",        80) \
+    CFG_X(ABILITY_ARTIFICER_OVERCHARGE_POWER_COST               , "ability.artificer.overcharge.power_cost",       80) \
+    CFG_X(ABILITY_ARTIFICER_OVERCHARGE_DURATION                 , "ability.artificer.overcharge.duration",          8) \
+    /* ABILITY - ARTIFICER - ENERGYBLADE */ \
+    CFG_X(ABILITY_ARTIFICER_ENERGYBLADE_MANA_COST               , "ability.artificer.energyblade.mana_cost",       40) \
+    CFG_X(ABILITY_ARTIFICER_ENERGYBLADE_POWER_COST              , "ability.artificer.energyblade.power_cost",      15) \
+    CFG_X(ABILITY_ARTIFICER_ENERGYBLADE_DURATION                , "ability.artificer.energyblade.duration",        10) \
+    /* ABILITY - ARTIFICER - BLASTER */ \
+    CFG_X(ABILITY_ARTIFICER_BLASTER_MANA_COST                   , "ability.artificer.blaster.mana_cost",           30) \
+    CFG_X(ABILITY_ARTIFICER_BLASTER_POWER_COST                  , "ability.artificer.blaster.power_cost",          10) \
+    CFG_X(ABILITY_ARTIFICER_BLASTER_COOLDOWN                    , "ability.artificer.blaster.cooldown",             4) \
+    CFG_X(ABILITY_ARTIFICER_BLASTER_DAM_MIN                     , "ability.artificer.blaster.dam_min",            100) \
+    CFG_X(ABILITY_ARTIFICER_BLASTER_DAM_MAX                     , "ability.artificer.blaster.dam_max",            200) \
+    /* ABILITY - ARTIFICER - GRENADE */ \
+    CFG_X(ABILITY_ARTIFICER_GRENADE_MANA_COST                   , "ability.artificer.grenade.mana_cost",           50) \
+    CFG_X(ABILITY_ARTIFICER_GRENADE_POWER_COST                  , "ability.artificer.grenade.power_cost",          20) \
+    CFG_X(ABILITY_ARTIFICER_GRENADE_COOLDOWN                    , "ability.artificer.grenade.cooldown",             6) \
+    CFG_X(ABILITY_ARTIFICER_GRENADE_DAM_MIN                     , "ability.artificer.grenade.dam_min",            150) \
+    CFG_X(ABILITY_ARTIFICER_GRENADE_DAM_MAX                     , "ability.artificer.grenade.dam_max",            300) \
+    /* ABILITY - ARTIFICER - FORCEFIELD */ \
+    CFG_X(ABILITY_ARTIFICER_FORCEFIELD_MANA_COST                , "ability.artificer.forcefield.mana_cost",        50) \
+    CFG_X(ABILITY_ARTIFICER_FORCEFIELD_POWER_COST               , "ability.artificer.forcefield.power_cost",       20) \
+    CFG_X(ABILITY_ARTIFICER_FORCEFIELD_DURATION                 , "ability.artificer.forcefield.duration",          8) \
+    CFG_X(ABILITY_ARTIFICER_FORCEFIELD_ABSORB                   , "ability.artificer.forcefield.absorb",          500) \
+    /* ABILITY - ARTIFICER - REPAIRBOT */ \
+    CFG_X(ABILITY_ARTIFICER_REPAIRBOT_MANA_COST                 , "ability.artificer.repairbot.mana_cost",         40) \
+    CFG_X(ABILITY_ARTIFICER_REPAIRBOT_POWER_COST                , "ability.artificer.repairbot.power_cost",        15) \
+    CFG_X(ABILITY_ARTIFICER_REPAIRBOT_DURATION                  , "ability.artificer.repairbot.duration",          10) \
+    CFG_X(ABILITY_ARTIFICER_REPAIRBOT_HEAL_PER_TICK             , "ability.artificer.repairbot.heal_per_tick",    100) \
+    /* ABILITY - ARTIFICER - TECHCLOAK */ \
+    CFG_X(ABILITY_ARTIFICER_TECHCLOAK_MANA_COST                 , "ability.artificer.techcloak.mana_cost",         60) \
+    CFG_X(ABILITY_ARTIFICER_TECHCLOAK_POWER_COST                , "ability.artificer.techcloak.power_cost",        25) \
+    CFG_X(ABILITY_ARTIFICER_TECHCLOAK_DURATION                  , "ability.artificer.techcloak.duration",          12) \
+    CFG_X(ABILITY_ARTIFICER_TECHCLOAK_POWER_DRAIN               , "ability.artificer.techcloak.power_drain",        3) \
+    /* ABILITY - ARTIFICER - TURRET */ \
+    CFG_X(ABILITY_ARTIFICER_TURRET_MANA_COST                    , "ability.artificer.turret.mana_cost",            60) \
+    CFG_X(ABILITY_ARTIFICER_TURRET_POWER_COST                   , "ability.artificer.turret.power_cost",           20) \
+    CFG_X(ABILITY_ARTIFICER_TURRET_DURATION                     , "ability.artificer.turret.duration",             12) \
+    CFG_X(ABILITY_ARTIFICER_TURRET_HP                           , "ability.artificer.turret.hp",                  500) \
+    CFG_X(ABILITY_ARTIFICER_TURRET_DAM_MIN                      , "ability.artificer.turret.dam_min",              50) \
+    CFG_X(ABILITY_ARTIFICER_TURRET_DAM_MAX                      , "ability.artificer.turret.dam_max",              80) \
+    /* ABILITY - ARTIFICER - DECOY */ \
+    CFG_X(ABILITY_ARTIFICER_DECOY_MANA_COST                     , "ability.artificer.decoy.mana_cost",             50) \
+    CFG_X(ABILITY_ARTIFICER_DECOY_POWER_COST                    , "ability.artificer.decoy.power_cost",            15) \
+    CFG_X(ABILITY_ARTIFICER_DECOY_DURATION                      , "ability.artificer.decoy.duration",               6) \
+    CFG_X(ABILITY_ARTIFICER_DECOY_HP                            , "ability.artificer.decoy.hp",                   200) \
+    CFG_X(ABILITY_ARTIFICER_DECOY_REDIRECT_PCT                  , "ability.artificer.decoy.redirect_pct",          40) \
+    /* ABILITY - ARTIFICER - GRAPPLE */ \
+    CFG_X(ABILITY_ARTIFICER_GRAPPLE_MANA_COST                   , "ability.artificer.grapple.mana_cost",           40) \
+    CFG_X(ABILITY_ARTIFICER_GRAPPLE_POWER_COST                  , "ability.artificer.grapple.power_cost",          10) \
+    CFG_X(ABILITY_ARTIFICER_GRAPPLE_COOLDOWN                    , "ability.artificer.grapple.cooldown",             6) \
+    CFG_X(ABILITY_ARTIFICER_GRAPPLE_DAM_MIN                     , "ability.artificer.grapple.dam_min",             50) \
+    CFG_X(ABILITY_ARTIFICER_GRAPPLE_DAM_MAX                     , "ability.artificer.grapple.dam_max",            100) \
+    CFG_X(ABILITY_ARTIFICER_GRAPPLE_DISARM_PCT                  , "ability.artificer.grapple.disarm_pct",          20) \
+    CFG_X(ABILITY_ARTIFICER_GRAPPLE_RANGE                       , "ability.artificer.grapple.range",                5) \
+    /* DAMCAP - ARTIFICER */ \
+    CFG_X(COMBAT_DAMCAP_ARTIFICER_BASE                          , "combat.damcap.artificer.base",                 150) \
+    CFG_X(COMBAT_DAMCAP_ARTIFICER_POWER_MULT                    , "combat.damcap.artificer.power_mult",             5) \
+    CFG_X(COMBAT_DAMCAP_ARTIFICER_BLADE                         , "combat.damcap.artificer.blade",                150) \
+    CFG_X(COMBAT_DAMCAP_ARTIFICER_OVERCHARGE                    , "combat.damcap.artificer.overcharge",            100) \
+    /* DAMCAP - MECHANIST */ \
+    CFG_X(COMBAT_DAMCAP_MECHANIST_POWER_MULT                    , "combat.damcap.mechanist.power_mult",             7) \
+    CFG_X(COMBAT_DAMCAP_MECHANIST_SERVO                         , "combat.damcap.mechanist.servo",                200) \
+    CFG_X(COMBAT_DAMCAP_MECHANIST_ARMY                          , "combat.damcap.mechanist.army",                 150) \
+    CFG_X(COMBAT_DAMCAP_MECHANIST_PER_DRONE                     , "combat.damcap.mechanist.per_drone",             30) \
+    /* ABILITY - MECHANIST - NEURALJACK */ \
+    CFG_X(ABILITY_MECHANIST_NEURALJACK_MANA_COST                , "ability.mechanist.neuraljack.mana_cost",        80) \
+    CFG_X(ABILITY_MECHANIST_NEURALJACK_POWER_COST               , "ability.mechanist.neuraljack.power_cost",       30) \
+    CFG_X(ABILITY_MECHANIST_NEURALJACK_DURATION                 , "ability.mechanist.neuraljack.duration",         12) \
+    CFG_X(ABILITY_MECHANIST_NEURALJACK_DODGE_PCT                , "ability.mechanist.neuraljack.dodge_pct",        20) \
+    /* ABILITY - MECHANIST - SERVOARMS */ \
+    CFG_X(ABILITY_MECHANIST_SERVOARMS_MANA_COST                 , "ability.mechanist.servoarms.mana_cost",         80) \
+    CFG_X(ABILITY_MECHANIST_SERVOARMS_POWER_COST                , "ability.mechanist.servoarms.power_cost",        30) \
+    CFG_X(ABILITY_MECHANIST_SERVOARMS_DURATION                  , "ability.mechanist.servoarms.duration",          12) \
+    CFG_X(ABILITY_MECHANIST_SERVOARMS_DAM_BONUS                 , "ability.mechanist.servoarms.dam_bonus",         50) \
+    /* ABILITY - MECHANIST - REACTIVEPLATING */ \
+    CFG_X(ABILITY_MECHANIST_REACTIVE_MANA_COST                  , "ability.mechanist.reactive.mana_cost",          80) \
+    CFG_X(ABILITY_MECHANIST_REACTIVE_POWER_COST                 , "ability.mechanist.reactive.power_cost",         30) \
+    CFG_X(ABILITY_MECHANIST_REACTIVE_DURATION                   , "ability.mechanist.reactive.duration",           12) \
+    CFG_X(ABILITY_MECHANIST_REACTIVE_RESIST_PCT                 , "ability.mechanist.reactive.resist_pct",         15) \
+    CFG_X(ABILITY_MECHANIST_REACTIVE_REFLECT_PCT                , "ability.mechanist.reactive.reflect_pct",        10) \
+    /* ABILITY - MECHANIST - RAILGUN */ \
+    CFG_X(ABILITY_MECHANIST_RAILGUN_MANA_COST                   , "ability.mechanist.railgun.mana_cost",          100) \
+    CFG_X(ABILITY_MECHANIST_RAILGUN_POWER_REQ                   , "ability.mechanist.railgun.power_req",           50) \
+    CFG_X(ABILITY_MECHANIST_RAILGUN_POWER_COST                  , "ability.mechanist.railgun.power_cost",          40) \
+    CFG_X(ABILITY_MECHANIST_RAILGUN_COOLDOWN                    , "ability.mechanist.railgun.cooldown",             8) \
+    CFG_X(ABILITY_MECHANIST_RAILGUN_DAM_MIN                     , "ability.mechanist.railgun.dam_min",            400) \
+    CFG_X(ABILITY_MECHANIST_RAILGUN_DAM_MAX                     , "ability.mechanist.railgun.dam_max",            600) \
+    /* ABILITY - MECHANIST - EMPBURST */ \
+    CFG_X(ABILITY_MECHANIST_EMPBURST_MANA_COST                  , "ability.mechanist.empburst.mana_cost",         120) \
+    CFG_X(ABILITY_MECHANIST_EMPBURST_POWER_COST                 , "ability.mechanist.empburst.power_cost",         50) \
+    CFG_X(ABILITY_MECHANIST_EMPBURST_COOLDOWN                   , "ability.mechanist.empburst.cooldown",           15) \
+    CFG_X(ABILITY_MECHANIST_EMPBURST_DAM_MIN                    , "ability.mechanist.empburst.dam_min",           200) \
+    CFG_X(ABILITY_MECHANIST_EMPBURST_DAM_MAX                    , "ability.mechanist.empburst.dam_max",           350) \
+    /* ABILITY - MECHANIST - COMBATDRONE */ \
+    CFG_X(ABILITY_MECHANIST_COMBATDRONE_MANA_COST              , "ability.mechanist.combatdrone.mana_cost",       70) \
+    CFG_X(ABILITY_MECHANIST_COMBATDRONE_POWER_COST             , "ability.mechanist.combatdrone.power_cost",      25) \
+    CFG_X(ABILITY_MECHANIST_COMBATDRONE_HP                     , "ability.mechanist.combatdrone.hp",             400) \
+    CFG_X(ABILITY_MECHANIST_COMBATDRONE_DAM_MIN                , "ability.mechanist.combatdrone.dam_min",         60) \
+    CFG_X(ABILITY_MECHANIST_COMBATDRONE_DAM_MAX                , "ability.mechanist.combatdrone.dam_max",        100) \
+    /* ABILITY - MECHANIST - REPAIRSWARM */ \
+    CFG_X(ABILITY_MECHANIST_REPAIRSWARM_MANA_COST              , "ability.mechanist.repairswarm.mana_cost",       90) \
+    CFG_X(ABILITY_MECHANIST_REPAIRSWARM_POWER_COST             , "ability.mechanist.repairswarm.power_cost",      35) \
+    CFG_X(ABILITY_MECHANIST_REPAIRSWARM_DURATION               , "ability.mechanist.repairswarm.duration",        10) \
+    CFG_X(ABILITY_MECHANIST_REPAIRSWARM_HEAL                   , "ability.mechanist.repairswarm.heal",           100) \
+    CFG_X(ABILITY_MECHANIST_REPAIRSWARM_DRONE_HEAL             , "ability.mechanist.repairswarm.drone_heal",      50) \
+    /* ABILITY - MECHANIST - BOMBERDRONE */ \
+    CFG_X(ABILITY_MECHANIST_BOMBERDRONE_MANA_COST              , "ability.mechanist.bomberdrone.mana_cost",      100) \
+    CFG_X(ABILITY_MECHANIST_BOMBERDRONE_POWER_COST             , "ability.mechanist.bomberdrone.power_cost",      40) \
+    CFG_X(ABILITY_MECHANIST_BOMBERDRONE_HP                     , "ability.mechanist.bomberdrone.hp",             200) \
+    CFG_X(ABILITY_MECHANIST_BOMBERDRONE_DAM_MIN                , "ability.mechanist.bomberdrone.dam_min",        300) \
+    CFG_X(ABILITY_MECHANIST_BOMBERDRONE_DAM_MAX                , "ability.mechanist.bomberdrone.dam_max",        500) \
+    /* ABILITY - MECHANIST - DRONEARMY */ \
+    CFG_X(ABILITY_MECHANIST_DRONEARMY_MANA_COST               , "ability.mechanist.dronearmy.mana_cost",       150) \
+    CFG_X(ABILITY_MECHANIST_DRONEARMY_POWER_REQ                , "ability.mechanist.dronearmy.power_req",       100) \
+    CFG_X(ABILITY_MECHANIST_DRONEARMY_POWER_COST               , "ability.mechanist.dronearmy.power_cost",       80) \
+    CFG_X(ABILITY_MECHANIST_DRONEARMY_COOLDOWN                 , "ability.mechanist.dronearmy.cooldown",         30) \
+    CFG_X(ABILITY_MECHANIST_DRONEARMY_DURATION                 , "ability.mechanist.dronearmy.duration",         10) \
+    CFG_X(ABILITY_MECHANIST_DRONEARMY_DAM_BONUS_PCT            , "ability.mechanist.dronearmy.dam_bonus_pct",    50) \
+    CFG_X(ABILITY_MECHANIST_DRONEARMY_HP_BONUS                 , "ability.mechanist.dronearmy.hp_bonus",        200) \
+    /* ABILITY - MECHANIST - ORBITAL STRIKE */ \
+    CFG_X(ABILITY_MECHANIST_ORBITAL_MANA_COST                  , "ability.mechanist.orbital.mana_cost",         200) \
+    CFG_X(ABILITY_MECHANIST_ORBITAL_POWER_REQ                  , "ability.mechanist.orbital.power_req",         120) \
+    CFG_X(ABILITY_MECHANIST_ORBITAL_POWER_COST                 , "ability.mechanist.orbital.power_cost",        100) \
+    CFG_X(ABILITY_MECHANIST_ORBITAL_COOLDOWN                   , "ability.mechanist.orbital.cooldown",           45) \
+    CFG_X(ABILITY_MECHANIST_ORBITAL_DAM_MIN                    , "ability.mechanist.orbital.dam_min",           600) \
+    CFG_X(ABILITY_MECHANIST_ORBITAL_DAM_MAX                    , "ability.mechanist.orbital.dam_max",          1000) \
+    CFG_X(ABILITY_MECHANIST_ORBITAL_AOE_PCT                    , "ability.mechanist.orbital.aoe_pct",            50) \
+    /* ABILITY - MECHANIST - IMPLANT SWAP */ \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_SWAP_CD                    , "ability.mechanist.implant.swap_cd",            10) \
+    /* ABILITY - MECHANIST - NEURAL IMPLANT PASSIVES */ \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_NEURAL_COMBAT_DODGE        , "ability.mechanist.implant.neural.combat_dodge",       15) \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_NEURAL_TARGETING_HITROLL   , "ability.mechanist.implant.neural.targeting_hitroll",   20) \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_NEURAL_TARGETING_DAM_PCT   , "ability.mechanist.implant.neural.targeting_dam_pct",   20) \
+    /* ABILITY - MECHANIST - SERVO IMPLANT PASSIVES */ \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_SERVO_POWER_DAMROLL        , "ability.mechanist.implant.servo.power_damroll",        30) \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_SERVO_POWER_DAM            , "ability.mechanist.implant.servo.power_dam",            50) \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_SERVO_SHIELD_DAMCAP        , "ability.mechanist.implant.servo.shield_damcap",       200) \
+    /* ABILITY - MECHANIST - CORE IMPLANT PASSIVES */ \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_CORE_ARMORED_AC            , "ability.mechanist.implant.core.armored_ac",            50) \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_CORE_ARMORED_RESIST        , "ability.mechanist.implant.core.armored_resist",        10) \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_CORE_REGEN_HP              , "ability.mechanist.implant.core.regen_hp",             100) \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_CORE_POWER_MAX             , "ability.mechanist.implant.core.power_max",             25) \
+    CFG_X(ABILITY_MECHANIST_IMPLANT_CORE_POWER_TICK            , "ability.mechanist.implant.core.power_tick",             1) \
+    /* ABILITY - ARTIFICER - ARMOR */ \
+    CFG_X(ABILITY_ARTIFICER_ARTIFICERARMOR_PRACTICE_COST      , "ability.artificer.artificerarmor.practice_cost",        60) \
+    /* ABILITY - MECHANIST - ARMOR */ \
+    CFG_X(ABILITY_MECHANIST_MECHANISTARMOR_PRACTICE_COST      , "ability.mechanist.mechanistarmor.practice_cost",        60)
 
 
 /* Generate enum from X-macro */

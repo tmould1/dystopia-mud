@@ -4,32 +4,32 @@
 
 Artificers are masters of technology and invention, wielding gadgets, energy weapons, and mechanical companions. They charge Power Cells through combat and crafting, spending them to deploy turrets, fire energy blasters, and erect force fields. Their technological prowess offers utility and versatility unmatched by magic-based classes. This is a **base class** that upgrades to Mechanist.
 
-**Source Files**: `src/classes/artificer.c`, `src/classes/artificer.h` (TBD)
-**Class Constant**: `CLASS_ARTIFICER` (TBD - next available power-of-2)
+**Source Files**: `src/classes/artificer.c`, `src/classes/artificer.h`
+**Class Constant**: `CLASS_ARTIFICER` (1048576 / 2^20)
 **Upgrades To**: Mechanist
 
 ## Color Scheme
 
-Artificer uses an electric blue-silver palette evoking technology and energy:
+Artificer uses a light blue-silver palette evoking technology and precision:
 
 | Element | Code | Color | Usage |
 |---------|------|-------|-------|
-| Accent | `#x039` | Electric blue | Bracket tildes, decorative accents |
+| Accent | `#x044` | Light blue | Bracket edges, decorative accents |
 | Primary | `#x250` | Chrome silver | Class name, titles, ability highlights |
-| Bracket open | `#x039~#x250[` | Blue~Silver[ | Who list open bracket |
-| Bracket close | `#x250]#x039~` | Silver]Blue~ | Who list close bracket |
+| Bracket open | `#x044[#x250=` | Blue[Silver= | Who list open bracket |
+| Bracket close | `=#x250]#x044` | =Silver]Blue | Who list close bracket |
 | Room tag | `#x250(#nArtificer#x250)` | Silver parens | Room display prefix |
 
 **Who List Titles**:
 
 | Generation | Title | Display |
 |------------|-------|---------|
-| 1 | Master Engineer | `#x039~#x250[#x250Master Engineer#n#x250]#x039~` |
-| 2 | Inventor | `#x039~#x250[#x250Inventor#n#x250]#x039~` |
-| 3 | Artificer | `#x039~#x250[#x250Artificer#n#x250]#x039~` |
-| 4 | Tinkerer | `#x039~#x250[#x250Tinkerer#n#x250]#x039~` |
-| 5 | Apprentice | `#x039~#x250[#x250Apprentice#n#x250]#x039~` |
-| default | Mechanic | `#x039~#x250[#x250Mechanic#n#x250]#x039~` |
+| 1 | Master Engineer | `#x044[#x250=#x250Master Engineer#n=#x250]#x044` |
+| 2 | Inventor | `#x044[#x250=#x250Inventor#n=#x250]#x044` |
+| 3 | Artificer | `#x044[#x250=#x250Artificer#n=#x250]#x044` |
+| 4 | Tinkerer | `#x044[#x250=#x250Tinkerer#n=#x250]#x044` |
+| 5 | Apprentice | `#x044[#x250=#x250Apprentice#n=#x250]#x044` |
+| default | Mechanic | `#x044[#x250=#x250Mechanic#n=#x250]#x044` |
 
 ## Core Mechanics
 
@@ -282,19 +282,19 @@ Create equipment via `artificerarmor <piece>`:
 
 | Piece | Vnum | Wear Slot |
 |-------|------|-----------|
-| power wrench | TBD | Wield |
-| circuit ring | TBD | Finger |
-| tech collar | TBD | Neck |
-| engineer vest | TBD | Torso |
-| goggles | TBD | Head |
-| utility pants | TBD | Legs |
-| mag boots | TBD | Feet |
-| work gloves | TBD | Hands |
-| tool bracers | TBD | Arms |
-| equipment harness | TBD | About Body |
-| tool belt | TBD | Waist |
-| wrist computer | TBD | Wrist |
-| welding mask | TBD | Face |
+| power wrench | 33440 | Wield |
+| circuit ring | 33441 | Finger |
+| tech collar | 33442 | Neck |
+| engineer vest | 33443 | Torso |
+| goggles | 33444 | Head |
+| utility pants | 33445 | Legs |
+| mag boots | 33446 | Feet |
+| work gloves | 33447 | Hands |
+| tool bracers | 33448 | Arms |
+| equipment harness | 33449 | About Body |
+| tool belt | 33450 | Waist |
+| wrist computer | 33451 | Wrist |
+| welding mask | 33452 | Face |
 
 **Equipment Stats** (proposed):
 - Weapons: +35 hitroll, +35 damroll
@@ -353,7 +353,7 @@ Per-tick processing:
 
 | Field | Location | Purpose |
 |-------|----------|---------|
-| class | ch->class | CLASS_ARTIFICER bit (TBD) |
+| class | ch->class | CLASS_ARTIFICER bit (1048576) |
 | power_cells | ch->rage | Current power cells (0-100, 0-120 overcharged) |
 | turret_count | ch->pcdata->powers[0] | Number of active turrets |
 | forcefield | ch->pcdata->powers[1] | Force field ticks remaining |

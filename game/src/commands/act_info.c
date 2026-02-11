@@ -25,6 +25,7 @@
 #include "../db/db_player.h"
 #include "../db/db_game.h"
 #include "../systems/mxp.h"
+#include "../classes/artificer.h"
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
@@ -2523,7 +2524,7 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 			send_to_char( buf, ch );
 		}
 
-		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 && !IS_CLASS( ch, CLASS_NINJA ) && !IS_CLASS( ch, CLASS_DIRGESINGER ) && !IS_CLASS( ch, CLASS_SIREN ) && !IS_CLASS( ch, CLASS_PSION ) && !IS_CLASS( ch, CLASS_MINDFLAYER ) ) {
+		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 && !IS_CLASS( ch, CLASS_NINJA ) && !IS_CLASS( ch, CLASS_DIRGESINGER ) && !IS_CLASS( ch, CLASS_SIREN ) && !IS_CLASS( ch, CLASS_PSION ) && !IS_CLASS( ch, CLASS_MINDFLAYER ) && !IS_CLASS( ch, CLASS_ARTIFICER ) && !IS_CLASS( ch, CLASS_MECHANIST ) ) {
 			sprintf( buf, "#R[#nYou are in a mad frenzy, adding #C%d#n Hitroll and Damroll#R]\n\r", ch->rage );
 			stc( buf, ch );
 		}

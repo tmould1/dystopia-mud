@@ -4770,6 +4770,40 @@ DECLARE_DO_FUN( do_primordial );
 DECLARE_DO_FUN( do_wyrmtrain );
 DECLARE_DO_FUN( do_wyrmarmor );
 
+/* Artificer */
+DECLARE_DO_FUN( do_power );
+DECLARE_DO_FUN( do_powercharge );
+DECLARE_DO_FUN( do_overcharge );
+DECLARE_DO_FUN( do_turret );
+DECLARE_DO_FUN( do_decoy );
+DECLARE_DO_FUN( do_grapple );
+DECLARE_DO_FUN( do_energyblade );
+DECLARE_DO_FUN( do_blaster );
+DECLARE_DO_FUN( do_grenade );
+DECLARE_DO_FUN( do_forcefield );
+DECLARE_DO_FUN( do_repairbot );
+DECLARE_DO_FUN( do_artcloak );
+DECLARE_DO_FUN( do_techtrain );
+DECLARE_DO_FUN( do_artificerarmor );
+
+/* Mechanist */
+DECLARE_DO_FUN( do_neuraljack );
+DECLARE_DO_FUN( do_servoarms );
+DECLARE_DO_FUN( do_reactiveplating );
+DECLARE_DO_FUN( do_combatdrone );
+DECLARE_DO_FUN( do_repairswarm );
+DECLARE_DO_FUN( do_bomberdrone );
+DECLARE_DO_FUN( do_artdetonate );
+DECLARE_DO_FUN( do_dronearmy );
+DECLARE_DO_FUN( do_railgun );
+DECLARE_DO_FUN( do_empburst );
+DECLARE_DO_FUN( do_orbitalstrike );
+DECLARE_DO_FUN( do_mechimplant );
+DECLARE_DO_FUN( do_cybtrain );
+DECLARE_DO_FUN( do_mechanistarmor );
+DECLARE_DO_FUN( do_dronestatus );
+DECLARE_DO_FUN( do_dronerecall );
+
 /*
  * Global Constants
  */

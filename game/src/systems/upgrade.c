@@ -212,6 +212,9 @@ void do_upgrade( CHAR_DATA *ch, char *argument ) {
 	} else if ( ch->class == CLASS_DRAGONKIN ) {
 		ch->class = CLASS_WYRM;
 		sprintf( buf, "%s's draconic blood awakens fully, transforming them into a Wyrm", ch->name );
+	} else if ( ch->class == CLASS_ARTIFICER ) {
+		ch->class = CLASS_MECHANIST;
+		sprintf( buf, "%s melds with machine, reborn as a Mechanist", ch->name );
 	} else
 		return;
 	clearshit( ch );

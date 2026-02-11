@@ -4,8 +4,8 @@
 
 Mechanists are cyborg warriors who have integrated technology directly into their bodies. They command drone swarms, fire devastating heavy weapons, and augment themselves with cybernetic implants. Having transcended the limitations of their Artificer origins, they are walking weapons platforms capable of overwhelming force. This is an **upgrade class** obtained by upgrading from Artificer.
 
-**Source Files**: `src/classes/mechanist.c`, `src/classes/artificer.h` (TBD)
-**Class Constant**: `CLASS_MECHANIST` (TBD - next available power-of-2)
+**Source Files**: `src/classes/mechanist.c`, `src/classes/artificer.h`
+**Class Constant**: `CLASS_MECHANIST` (2097152 / 2^21)
 **Upgrades From**: Artificer
 
 ## Color Scheme
@@ -14,21 +14,21 @@ Mechanist uses a neon orange-chrome palette evoking advanced technology and dang
 
 | Element | Code | Color | Usage |
 |---------|------|-------|-------|
-| Accent | `#x208` | Neon orange | Bracket tildes, decorative accents |
+| Accent | `#x208` | Neon orange | Bracket edges, targeting chevrons |
 | Primary | `#x253` | Bright chrome | Class name, titles, ability highlights |
-| Bracket open | `#x208~#x253(` | Orange~Chrome( | Who list open bracket |
-| Bracket close | `#x253)#x208~` | Chrome)Orange~ | Who list close bracket |
+| Bracket open | `#x208>#x253/` | Orange>Chrome/ | Who list open bracket |
+| Bracket close | `#x253\#x208<` | Chrome\Orange< | Who list close bracket |
 | Room tag | `#x253(#nMechanist#x253)` | Chrome parens | Room display prefix |
 
 **Who List Titles**:
 
 | Generation | Title | Display |
 |------------|-------|---------|
-| 1 | War Machine | `#x208~#x253(#x253War Machine#n#x253)#x208~` |
-| 2 | Cyborg Lord | `#x208~#x253(#x253Cyborg Lord#n#x253)#x208~` |
-| 3 | Mechanist | `#x208~#x253(#x253Mechanist#n#x253)#x208~` |
-| 4 | Augmented | `#x208~#x253(#x253Augmented#n#x253)#x208~` |
-| default | Cyborg | `#x208~#x253(#x253Cyborg#n#x253)#x208~` |
+| 1 | War Machine | `#x208>#x253/#x253War Machine#n#x253\#x208<` |
+| 2 | Cyborg Lord | `#x208>#x253/#x253Cyborg Lord#n#x253\#x208<` |
+| 3 | Mechanist | `#x208>#x253/#x253Mechanist#n#x253\#x208<` |
+| 4 | Augmented | `#x208>#x253/#x253Augmented#n#x253\#x208<` |
+| default | Cyborg | `#x208>#x253/#x253Cyborg#n#x253\#x208<` |
 
 ## Core Mechanics
 
@@ -321,19 +321,19 @@ Create equipment via `mechanistarmor <piece>`:
 
 | Piece | Vnum | Wear Slot |
 |-------|------|-----------|
-| plasma cutter | TBD | Wield |
-| data ring | TBD | Finger |
-| neural collar | TBD | Neck |
-| combat chassis | TBD | Torso |
-| targeting helm | TBD | Head |
-| servo leggings | TBD | Legs |
-| thruster boots | TBD | Feet |
-| power gauntlets | TBD | Hands |
-| weapon mounts | TBD | Arms |
-| drone harness | TBD | About Body |
-| ammo belt | TBD | Waist |
-| holo-display | TBD | Wrist |
-| tactical visor | TBD | Face |
+| plasma cutter | 33460 | Wield |
+| data ring | 33461 | Finger |
+| neural collar | 33462 | Neck |
+| combat chassis | 33463 | Torso |
+| targeting helm | 33464 | Head |
+| servo leggings | 33465 | Legs |
+| thruster boots | 33466 | Feet |
+| power gauntlets | 33467 | Hands |
+| weapon mounts | 33468 | Arms |
+| drone harness | 33469 | About Body |
+| ammo belt | 33470 | Waist |
+| holo-display | 33471 | Wrist |
+| tactical visor | 33472 | Face |
 
 **Equipment Stats** (proposed):
 - Weapons: +35 hitroll, +35 damroll
@@ -393,7 +393,7 @@ Per-tick processing:
 
 | Field | Location | Purpose |
 |-------|----------|---------|
-| class | ch->class | CLASS_MECHANIST bit (TBD) |
+| class | ch->class | CLASS_MECHANIST bit (2097152) |
 | power_cells | ch->rage | Current power cells (0-150) |
 | neural_jack | ch->pcdata->powers[0] | Neural Jack ticks remaining |
 | servo_arms | ch->pcdata->powers[1] | Servo Arms ticks remaining |

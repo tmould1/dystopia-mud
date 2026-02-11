@@ -199,10 +199,21 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 			i = buf2;
 			break;
 		case 'R':
-			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) || IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) || IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) ) ) {
+			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) || IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) || IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) || IS_CLASS( ch, CLASS_DRAGONKIN ) || IS_CLASS( ch, CLASS_WYRM ) || IS_CLASS( ch, CLASS_ARTIFICER ) || IS_CLASS( ch, CLASS_MECHANIST ) ) ) {
 				snprintf( buf2, sizeof( buf2 ), "#r%d#n", ch->rage );
 			} else
 				snprintf( buf2, sizeof( buf2 ), "0" );
+			i = buf2;
+			break;
+		case 'E':
+			if ( !IS_NPC( ch ) && ch->pcdata != NULL &&
+				( IS_CLASS( ch, CLASS_DRAGONKIN ) || IS_CLASS( ch, CLASS_WYRM ) ) ) {
+				const char *attune_names[] = { "Fire", "Frost", "Storm", "Earth" };
+				int attune = ch->pcdata->powers[0];  /* DRAGON_ATTUNEMENT */
+				if ( attune < 0 || attune > 3 ) attune = 0;
+				snprintf( buf2, sizeof( buf2 ), "#C%s#n", attune_names[attune] );
+			} else
+				snprintf( buf2, sizeof( buf2 ), " " );
 			i = buf2;
 			break;
 		case 'G':

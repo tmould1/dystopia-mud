@@ -32,6 +32,8 @@ CLASS_NAMES = {
     131072: 'Mindflayer',
     262144: 'Dragonkin',
     524288: 'Wyrm',
+    1048576: 'Artificer',
+    2097152: 'Mechanist',
 }
 
 # Cache for class names loaded from database

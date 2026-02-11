@@ -342,9 +342,89 @@ WYRM_EQUIPMENT = {
                              "#x202<#x220*a primordial dragon core*#x202>#n", 75, 75),
 }
 
+# Artificer Equipment (vnums 33440-33452, mastery at 33455)
+# Stats: Weapon +35/+35, Armor +30/+30/-35 AC, Mastery +50/+50 (base class = Dragonkin tier)
+# Colors: accent #x037 (dark teal), primary #x117 (sky blue)
+ARTIFICER_EQUIPMENT = {
+    "class_name": "Artificer",
+    "vnum_start": 33440,
+    "mastery_vnum": 33455,
+    "pieces": [
+        weapon_piece("artificer wrench power", "artificer wrench power",
+                    "#x037[=#x117a crackling power wrench#x037=]#n", 35, 35),
+        armor_piece("artificer ring circuit", "artificer ring circuit",
+                   "#x037[=#x117a glowing circuit ring#x037=]#n", WEAR_TAKE | WEAR_FINGER, 30, 30, -35),
+        armor_piece("artificer collar tech", "artificer collar tech",
+                   "#x037[=#x117a humming tech collar#x037=]#n", WEAR_TAKE | WEAR_NECK, 30, 30, -35),
+        armor_piece("artificer vest engineer", "artificer vest engineer",
+                   "#x037[=#x117a reinforced engineer vest#x037=]#n", WEAR_TAKE | WEAR_BODY, 30, 30, -35),
+        armor_piece("artificer goggles magnifying", "artificer goggles magnifying",
+                   "#x037[=#x117a pair of magnifying goggles#x037=]#n", WEAR_TAKE | WEAR_HEAD, 30, 30, -35),
+        armor_piece("artificer pants utility", "artificer pants utility",
+                   "#x037[=#x117a pair of utility pants#x037=]#n", WEAR_TAKE | WEAR_LEGS, 30, 30, -35),
+        armor_piece("artificer boots mag", "artificer boots mag",
+                   "#x037[=#x117a pair of mag boots#x037=]#n", WEAR_TAKE | WEAR_FEET, 30, 30, -35),
+        armor_piece("artificer gloves work", "artificer gloves work",
+                   "#x037[=#x117a pair of insulated work gloves#x037=]#n", WEAR_TAKE | WEAR_HANDS, 30, 30, -35),
+        armor_piece("artificer bracers tool", "artificer bracers tool",
+                   "#x037[=#x117a set of tool bracers#x037=]#n", WEAR_TAKE | WEAR_ARMS, 30, 30, -35),
+        armor_piece("artificer harness equipment", "artificer harness equipment",
+                   "#x037[=#x117a heavy equipment harness#x037=]#n", WEAR_TAKE | WEAR_ABOUT, 30, 30, -35),
+        armor_piece("artificer belt tool", "artificer belt tool",
+                   "#x037[=#x117a loaded tool belt#x037=]#n", WEAR_TAKE | WEAR_WAIST, 30, 30, -35),
+        armor_piece("artificer wrist computer", "artificer wrist computer",
+                   "#x037[=#x117a blinking wrist computer#x037=]#n", WEAR_TAKE | WEAR_WRIST, 30, 30, -35),
+        armor_piece("artificer mask welding", "artificer mask welding",
+                   "#x037[=#x117a darkened welding mask#x037=]#n", WEAR_TAKE | WEAR_FACE, 30, 30, -35),
+    ],
+    "mastery": mastery_piece("artificer power core shard", "artificer power core shard",
+                             "#x037[=#x117a pulsing power core shard#x037=]#n", 50, 50),
+}
+
+# Mechanist Equipment (vnums 33460-33472, mastery at 33475)
+# Stats: Weapon +45/+45, Armor +40/+40/-45 AC, Mastery +75/+75 (upgrade class = Wyrm tier)
+# Colors: accent #x127 (dark magenta), primary #x177 (violet)
+MECHANIST_EQUIPMENT = {
+    "class_name": "Mechanist",
+    "vnum_start": 33460,
+    "mastery_vnum": 33475,
+    "pieces": [
+        weapon_piece("mechanist cutter plasma", "mechanist cutter plasma",
+                    "#x127>/#x177a searing plasma cutter#x127\\<#n", 45, 45),
+        armor_piece("mechanist ring data", "mechanist ring data",
+                   "#x127>/#x177a pulsing data ring#x127\\<#n", WEAR_TAKE | WEAR_FINGER, 40, 40, -45),
+        armor_piece("mechanist collar neural", "mechanist collar neural",
+                   "#x127>/#x177a thrumming neural collar#x127\\<#n", WEAR_TAKE | WEAR_NECK, 40, 40, -45),
+        armor_piece("mechanist chassis combat", "mechanist chassis combat",
+                   "#x127>/#x177a hulking combat chassis#x127\\<#n", WEAR_TAKE | WEAR_BODY, 40, 40, -45),
+        armor_piece("mechanist helm targeting", "mechanist helm targeting",
+                   "#x127>/#x177a scanning targeting helm#x127\\<#n", WEAR_TAKE | WEAR_HEAD, 40, 40, -45),
+        armor_piece("mechanist leggings servo", "mechanist leggings servo",
+                   "#x127>/#x177a pair of servo leggings#x127\\<#n", WEAR_TAKE | WEAR_LEGS, 40, 40, -45),
+        armor_piece("mechanist boots thruster", "mechanist boots thruster",
+                   "#x127>/#x177a pair of thruster boots#x127\\<#n", WEAR_TAKE | WEAR_FEET, 40, 40, -45),
+        armor_piece("mechanist gauntlets power", "mechanist gauntlets power",
+                   "#x127>/#x177a pair of power gauntlets#x127\\<#n", WEAR_TAKE | WEAR_HANDS, 40, 40, -45),
+        armor_piece("mechanist mounts weapon", "mechanist mounts weapon",
+                   "#x127>/#x177a set of weapon mounts#x127\\<#n", WEAR_TAKE | WEAR_ARMS, 40, 40, -45),
+        armor_piece("mechanist harness drone", "mechanist harness drone",
+                   "#x127>/#x177a drone control harness#x127\\<#n", WEAR_TAKE | WEAR_ABOUT, 40, 40, -45),
+        armor_piece("mechanist belt ammo", "mechanist belt ammo",
+                   "#x127>/#x177a heavy ammo belt#x127\\<#n", WEAR_TAKE | WEAR_WAIST, 40, 40, -45),
+        armor_piece("mechanist holo display", "mechanist holo display",
+                   "#x127>/#x177a flickering holo-display#x127\\<#n", WEAR_TAKE | WEAR_WRIST, 40, 40, -45),
+        armor_piece("mechanist visor tactical", "mechanist visor tactical",
+                   "#x127>/#x177a glowing tactical visor#x127\\<#n", WEAR_TAKE | WEAR_FACE, 40, 40, -45),
+    ],
+    "mastery": mastery_piece("mechanist core implant", "mechanist core implant",
+                             "#x127>/#x177a thrumming mechanist core#x127\\<#n", 75, 75),
+}
+
 EQUIPMENT_TO_ADD = [
     DRAGONKIN_EQUIPMENT,
     WYRM_EQUIPMENT,
+    ARTIFICER_EQUIPMENT,
+    MECHANIST_EQUIPMENT,
 ]
 
 
