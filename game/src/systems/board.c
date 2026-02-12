@@ -527,7 +527,6 @@ static void do_nlist( CHAR_DATA *ch, char *argument ) {
 	int count = 0, show = 0, num = 0, has_shown = 0;
 	time_t last_note;
 	NOTE_DATA *p;
-	char buf[MAX_STRING_LENGTH];
 
 	if ( is_number( argument ) ) /* first, count the number of notes */
 	{
@@ -553,8 +552,8 @@ static void do_nlist( CHAR_DATA *ch, char *argument ) {
 					num,
 					last_note < p->date_stamp ? '*' : ' ',
 					p->sender, p->subject );
-				snprintf( buf, sizeof( buf ), "%s \n\r", mxp_note_link( ch, num, row_text, p->sender, p->subject ) );
-				send_to_char( buf, ch );
+				send_to_char( mxp_note_link( ch, num, row_text, p->sender, p->subject ), ch );
+				send_to_char( " \n\r", ch );
 			}
 		}
 	}
@@ -632,8 +631,8 @@ void do_board( CHAR_DATA *ch, char *argument ) {
 				sprintf( row_text, BOLD "%2d" NO_COLOR "> " GREEN BOLD "%12s" NO_COLOR " [%4d" NO_COLOR "] " YELLOW "%s" NO_COLOR,
 					count, boards[i].short_name,
 					unread, boards[i].long_name );
-				snprintf( buf, sizeof( buf ), "%s\n\r", mxp_board_link( ch, count, row_text, boards[i].long_name ) );
-				send_to_char( buf, ch );
+				send_to_char( mxp_board_link( ch, count, row_text, boards[i].long_name ), ch );
+				send_to_char( "\n\r", ch );
 				count++;
 			} /* if has access */
 
