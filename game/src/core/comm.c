@@ -1874,7 +1874,7 @@ static bool is_valid_hex_rgb( const char *txt ) {
  * Uses the standard xterm 6x6x6 color cube (indices 16-231)
  * and grayscale ramp (indices 232-255), picking whichever is closer.
  */
-static int rgb_to_xterm256( int r, int g, int b ) {
+int rgb_to_xterm256( int r, int g, int b ) {
 	static const int cube_vals[] = { 0, 0x5f, 0x87, 0xaf, 0xd7, 0xff };
 	int cr, cg, cb, cube_idx, cube_r, cube_g, cube_b, cube_dist;
 	int gray, gray_idx, gray_val, gray_dist;
@@ -1905,7 +1905,7 @@ static int rgb_to_xterm256( int r, int g, int b ) {
  * Convert RGB to nearest ANSI 16-color escape sequence.
  * Uses luminance and dominant channel heuristics.
  */
-static const char *rgb_to_ansi16( int r, int g, int b ) {
+const char *rgb_to_ansi16( int r, int g, int b ) {
 	static char ansi_buf[16];
 	int lum, max_ch, threshold, hr, hg, hb, bright, color;
 

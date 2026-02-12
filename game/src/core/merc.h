@@ -4287,6 +4287,8 @@ bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
 bool process_output args( ( DESCRIPTOR_DATA * d, bool fPrompt ) );
 const char *col_scale_code args( ( int current, int max ) );
 const char *col_scale_code_tc args( ( int current, int max, CHAR_DATA *ch ) );
+int rgb_to_xterm256 args( ( int r, int g, int b ) );
+const char *rgb_to_ansi16 args( ( int r, int g, int b ) );
 void send_to_char args( ( const char *txt, CHAR_DATA *ch ) );
 void act args( ( const char *format, CHAR_DATA *ch,
 	const void *arg1, const void *arg2, int type ) );

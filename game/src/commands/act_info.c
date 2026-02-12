@@ -4360,86 +4360,77 @@ void do_colortest( CHAR_DATA *ch, char *argument ) {
 	send_to_char( "  #T1A3350#tE8D8C0 Cream on Midnight #n  "
 		"#T4A2040#tF7C873 Gold on Burgundy #n  "
 		"#T2E4A3E#tF0F0F0 Silver on Forest #n\n\r\n\r", ch );
-	send_to_char( "#7Gradient comparison (256-color vs true color):#n\n\r", ch );
-
-	/* 256-color gradient: uses the limited xterm palette */
-	send_to_char( "  #7256:#n ", ch );
+	/*
+	 * Gradient & health bar comparisons — same RGB data rendered at each
+	 * color tier using the server's own conversion helpers (rgb_to_ansi16,
+	 * rgb_to_xterm256) to build the ANSI sequences directly.  No flag
+	 * toggling needed; each tier shows the actual degradation path.
+	 */
 	{
-		/* Red-to-green ramp using xterm color indices */
-		static const int xterm_ramp[] = {
-			196, 196, 202, 202, 208, 208, 214, 214, 220, 220,
-			226, 226, 190, 190, 154, 154, 118, 118, 82, 82,
-			46, 46, 47, 47, 48, 48, 49, 49, 50, 50,
-			51, 51, 45, 45, 39, 39, 33, 33, 27, 27,
-			21, 21, 57, 57, 93, 93, 129, 129, 165, 165,
-			201, 201, 200, 200, 199, 199, 198, 198, 197, 197
-		};
-		int i;
-		for ( i = 0; i < 60; i++ ) {
-			snprintf( buf, sizeof( buf ), "#x%03d|#n", xterm_ramp[i] );
+		static const char *tier_labels[] = { " 16", "256", " TC" };
+		int tier;
+
+		send_to_char( "#7Rainbow gradient (16 vs 256 vs true color):#n\n\r", ch );
+
+		for ( tier = 0; tier < 3; tier++ ) {
+			int i;
+			snprintf( buf, sizeof( buf ), "  #7%s:#n ", tier_labels[tier] );
 			send_to_char( buf, ch );
-		}
-	}
-	send_to_char( "\n\r", ch );
 
-	/* True color gradient: smooth rainbow across the full spectrum */
-	send_to_char( "  #7 TC:#n ", ch );
-	{
-		int i;
-		for ( i = 0; i < 60; i++ ) {
-			int r, g, b;
-			/* HSV hue sweep: 0 (red) -> 300 (magenta), full saturation */
-			int hue = ( i * 300 ) / 59; /* 0..300 degrees */
-			int sector = hue / 60;
-			int frac = ( ( hue % 60 ) * 255 ) / 60;
-			switch ( sector ) {
-			case 0: r = 255; g = frac;       b = 0;           break; /* red->yellow */
-			case 1: r = 255 - frac; g = 255; b = 0;           break; /* yellow->green */
-			case 2: r = 0;   g = 255;        b = frac;        break; /* green->cyan */
-			case 3: r = 0;   g = 255 - frac; b = 255;         break; /* cyan->blue */
-			case 4: r = frac; g = 0;          b = 255;         break; /* blue->magenta */
-			default: r = 255; g = 0;          b = 255;         break;
+			for ( i = 0; i < 60; i++ ) {
+				int r, g, b;
+				int hue = ( i * 300 ) / 59;
+				int sector = hue / 60;
+				int frac = ( ( hue % 60 ) * 255 ) / 60;
+				switch ( sector ) {
+				case 0: r = 255; g = frac;       b = 0;   break;
+				case 1: r = 255 - frac; g = 255; b = 0;   break;
+				case 2: r = 0;   g = 255;        b = frac; break;
+				case 3: r = 0;   g = 255 - frac; b = 255; break;
+				case 4: r = frac; g = 0;          b = 255; break;
+				default: r = 255; g = 0;          b = 255; break;
+				}
+				if ( tier == 0 )
+					snprintf( buf, sizeof( buf ), "%s|#n", rgb_to_ansi16( r, g, b ) );
+				else if ( tier == 1 )
+					snprintf( buf, sizeof( buf ), "\033[38;5;%dm|\033[0m", rgb_to_xterm256( r, g, b ) );
+				else
+					snprintf( buf, sizeof( buf ), "#t%02X%02X%02X|#n", r, g, b );
+				send_to_char( buf, ch );
 			}
-			snprintf( buf, sizeof( buf ), "#t%02X%02X%02X|#n", r, g, b );
-			send_to_char( buf, ch );
+			send_to_char( "\n\r", ch );
 		}
-	}
-	send_to_char( "\n\r\n\r", ch );
+		send_to_char( "\n\r", ch );
 
-	/* Health bar comparison */
-	send_to_char( "  #7Health bar (256):#n ", ch );
-	{
-		int i;
-		for ( i = 0; i < 50; i++ ) {
-			int pct = ( i * 100 ) / 49;
-			int idx;
-			if ( pct < 25 )      idx = 196; /* red */
-			else if ( pct < 50 ) idx = 208; /* orange */
-			else if ( pct < 75 ) idx = 226; /* yellow */
-			else                 idx = 46;  /* green */
-			snprintf( buf, sizeof( buf ), "#x%03d=#n", idx );
+		send_to_char( "#7Health bar (16 vs 256 vs true color):#n\n\r", ch );
+
+		for ( tier = 0; tier < 3; tier++ ) {
+			int i;
+			snprintf( buf, sizeof( buf ), "  #7%s:#n ", tier_labels[tier] );
 			send_to_char( buf, ch );
-		}
-	}
-	send_to_char( "\n\r", ch );
-	send_to_char( "  #7Health bar (TC): #n ", ch );
-	{
-		int i;
-		for ( i = 0; i < 50; i++ ) {
-			int r, g;
-			int pct = ( i * 100 ) / 49;
-			if ( pct < 50 ) {
-				r = 255;
-				g = ( 255 * pct ) / 50;
-			} else {
-				r = ( 255 * ( 100 - pct ) ) / 50;
-				g = 255;
+
+			for ( i = 0; i < 50; i++ ) {
+				int r, g;
+				int pct = ( i * 100 ) / 49;
+				if ( pct < 50 ) {
+					r = 255;
+					g = ( 255 * pct ) / 50;
+				} else {
+					r = ( 255 * ( 100 - pct ) ) / 50;
+					g = 255;
+				}
+				if ( tier == 0 )
+					snprintf( buf, sizeof( buf ), "%s=#n", rgb_to_ansi16( r, g, 0 ) );
+				else if ( tier == 1 )
+					snprintf( buf, sizeof( buf ), "\033[38;5;%dm=\033[0m", rgb_to_xterm256( r, g, 0 ) );
+				else
+					snprintf( buf, sizeof( buf ), "#t%02X%02X00=#n", r, g );
+				send_to_char( buf, ch );
 			}
-			snprintf( buf, sizeof( buf ), "#t%02X%02X00=#n", r, g );
-			send_to_char( buf, ch );
+			send_to_char( "\n\r", ch );
 		}
+		send_to_char( "\n\r", ch );
 	}
-	send_to_char( "\n\r\n\r", ch );
 
 	snprintf( buf, sizeof( buf ),
 		"#7Your mode:#n ANSI=%s, Xterm=%s, TrueColor=%s, ScreenReader=%s\n\r",
