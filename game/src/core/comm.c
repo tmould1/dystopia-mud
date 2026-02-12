@@ -176,8 +176,9 @@ bool merc_down;					  /* Shutdown			*/
 bool wizlock;					  /* Game is wizlocked		*/
 char str_boot_time[MAX_INPUT_LENGTH];
 char crypt_pwd[MAX_INPUT_LENGTH];
-time_t current_time; /* Time of this pulse		*/
-time_t boot_time;	 /* Time of server boot		*/
+time_t current_time;		/* Time of this pulse		*/
+time_t boot_time;			/* Time of first server boot	*/
+time_t last_copyover_time;	/* Time of last copyover		*/
 int arena;
 
 /* Colour scale - returns # color code based on current/max ratio */
@@ -348,6 +349,7 @@ int main( int argc, char **argv ) {
 	gettimeofday( &now_time, NULL );
 	current_time = (time_t) now_time.tv_sec;
 	boot_time = current_time;
+	last_copyover_time = current_time;
 	strcpy( str_boot_time, ctime( &current_time ) );
 	sprintf( crypt_pwd, "Don't bother." );
 
@@ -431,6 +433,28 @@ int main( int argc, char **argv ) {
 
 	else
 		fCopyOver = FALSE;
+
+	/*
+	 * Persist boot_time across copyovers so MSSP UPTIME and player-visible
+	 * uptime reflect the original server start, not the last copyover.
+	 */
+	if ( fCopyOver ) {
+		FILE *fp_uptime = fopen( UPTIME_FILE, "r" );
+		if ( fp_uptime ) {
+			long saved_time;
+			if ( fscanf( fp_uptime, "%ld", &saved_time ) == 1 )
+				boot_time = (time_t) saved_time;
+			fclose( fp_uptime );
+			strcpy( str_boot_time, ctime( &boot_time ) );
+		}
+	} else {
+		FILE *fp_uptime = fopen( UPTIME_FILE, "w" );
+		if ( fp_uptime ) {
+			fprintf( fp_uptime, "%ld\n", (long) boot_time );
+			fclose( fp_uptime );
+		}
+	}
+
 	/*
 	 * Run the game.
 	 */
@@ -1571,6 +1595,15 @@ void crashrecov( int iSignal ) {
 
 	fprintf( fp, "-1\n" );
 	fclose( fp );
+
+	/* Persist original boot_time so it survives the crash recovery */
+	{
+		FILE *fp_uptime = fopen( UPTIME_FILE, "w" );
+		if ( fp_uptime ) {
+			fprintf( fp_uptime, "%ld\n", (long) boot_time );
+			fclose( fp_uptime );
+		}
+	}
 
 	/* Close reserve and other always-open files and release other resources */
 	fclose( fpReserve );

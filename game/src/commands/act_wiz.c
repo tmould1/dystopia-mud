@@ -4269,6 +4269,15 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 	fprintf( fp, "-1\n" );
 	fclose( fp );
 
+	/* Persist original boot_time so it survives the copyover */
+	{
+		FILE *fp_uptime = fopen( UPTIME_FILE, "w" );
+		if ( fp_uptime ) {
+			fprintf( fp_uptime, "%ld\n", (long) boot_time );
+			fclose( fp_uptime );
+		}
+	}
+
 	/* Close reserve and other always-open files and release other resources */
 
 	fclose( fpReserve );

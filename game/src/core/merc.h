@@ -3091,6 +3091,7 @@ extern BAN_DATA *ban_free;
 extern char bug_buf[];
 extern time_t current_time;
 extern time_t boot_time;
+extern time_t last_copyover_time;
 extern bool fLogAll;
 extern FILE *fpReserve;
 extern KILL_DATA kill_table[];
@@ -4180,6 +4181,7 @@ void mud_init_paths( const char *exe_path );
 #define SHUTDOWN_FILE	mud_path( mud_run_dir, "shutdown.txt" )
 #define CRASH_TEMP_FILE mud_path( mud_run_dir, "crashtmp.txt" )
 #define COPYOVER_FILE	mud_path( mud_run_dir, "copyover.data" )
+#define UPTIME_FILE		mud_path( mud_run_dir, "uptime.dat" )
 
 /* Windows socket info file for copyover (WSADuplicateSocket data) */
 #if defined( WIN32 )
