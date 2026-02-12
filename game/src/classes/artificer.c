@@ -37,45 +37,45 @@ void do_power( CHAR_DATA *ch, char *argument ) {
 	if ( IS_CLASS( ch, CLASS_ARTIFICER ) && ch->pcdata->powers[ART_OVERCHARGE] > 0 )
 		power_cap = ART_POWER_CAP_OVERCHARGE;
 
-	sprintf( buf, "%s[%s=#n Power Cell Status %s=%s]#n\n\r", ac, pc, pc, ac );
+	snprintf( buf, sizeof( buf ),"%s[%s=#n Power Cell Status %s=%s]#n\n\r", ac, pc, pc, ac );
 	send_to_char( buf, ch );
-	sprintf( buf, "Current Power: %s%d#n / %d\n\r", pc, ch->rage, power_cap );
+	snprintf( buf, sizeof( buf ),"Current Power: %s%d#n / %d\n\r", pc, ch->rage, power_cap );
 	send_to_char( buf, ch );
 
 	if ( IS_CLASS( ch, CLASS_ARTIFICER ) ) {
 		if ( ch->pcdata->powers[ART_OVERCHARGE] > 0 ) {
-			sprintf( buf, "#x208[#nOVERCHARGE: #C%d#n ticks remaining#x208]#n\n\r",
+			snprintf( buf, sizeof( buf ),"#x208[#nOVERCHARGE: #C%d#n ticks remaining#x208]#n\n\r",
 				ch->pcdata->powers[ART_OVERCHARGE] );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[ART_TURRET_COUNT] > 0 ) {
-			sprintf( buf, "%s[#nTurrets active: #C%d#n%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nTurrets active: #C%d#n%s]#n\n\r",
 				pc, ch->pcdata->powers[ART_TURRET_COUNT], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[ART_FORCEFIELD] > 0 ) {
-			sprintf( buf, "%s[#nForce field: #C%d#n HP, #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nForce field: #C%d#n HP, #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->stats[ART_STAT_FORCEFIELD_HP],
 				ch->pcdata->powers[ART_FORCEFIELD], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[ART_ENERGYBLADE] > 0 ) {
-			sprintf( buf, "%s[#nEnergy blade: #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nEnergy blade: #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->powers[ART_ENERGYBLADE], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[ART_REPAIRBOT] > 0 ) {
-			sprintf( buf, "%s[#nRepair bot: #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nRepair bot: #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->powers[ART_REPAIRBOT], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[ART_CLOAK] > 0 ) {
-			sprintf( buf, "%s[#nCloak: #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nCloak: #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->powers[ART_CLOAK], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[ART_DECOY] > 0 ) {
-			sprintf( buf, "%s[#nDecoy: #C%d#n HP, #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nDecoy: #C%d#n HP, #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->stats[ART_STAT_DECOY_HP],
 				ch->pcdata->powers[ART_DECOY], pc );
 			send_to_char( buf, ch );
@@ -84,41 +84,41 @@ void do_power( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_CLASS( ch, CLASS_MECHANIST ) ) {
 		if ( ch->pcdata->powers[MECH_NEURAL_JACK] > 0 ) {
-			sprintf( buf, "%s[#nNeural Jack: #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nNeural Jack: #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->powers[MECH_NEURAL_JACK], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[MECH_SERVO_ARMS] > 0 ) {
-			sprintf( buf, "%s[#nServo Arms: #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nServo Arms: #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->powers[MECH_SERVO_ARMS], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[MECH_REACTIVE_PLATING] > 0 ) {
-			sprintf( buf, "%s[#nReactive Plating: #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nReactive Plating: #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->powers[MECH_REACTIVE_PLATING], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[MECH_DRONE_COUNT] > 0 ) {
-			sprintf( buf, "%s[#nCombat Drones: #C%d#n / %d%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nCombat Drones: #C%d#n / %d%s]#n\n\r",
 				pc, ch->pcdata->powers[MECH_DRONE_COUNT], MECH_MAX_DRONES, pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[MECH_BOMBER_ACTIVE] ) {
-			sprintf( buf, "%s[#nBomber drone deployed%s]#n\n\r", ac, ac );
+			snprintf( buf, sizeof( buf ),"%s[#nBomber drone deployed%s]#n\n\r", ac, ac );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[MECH_REPAIR_SWARM] > 0 ) {
-			sprintf( buf, "%s[#nRepair Swarm: #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nRepair Swarm: #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->powers[MECH_REPAIR_SWARM], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[MECH_DRONE_ARMY] > 0 ) {
-			sprintf( buf, "%s[#nDrone Army: #C%d#n ticks%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nDrone Army: #C%d#n ticks%s]#n\n\r",
 				pc, ch->pcdata->powers[MECH_DRONE_ARMY], pc );
 			send_to_char( buf, ch );
 		}
 		if ( ch->pcdata->powers[MECH_ORBITAL_CHARGE] > 0 ) {
-			sprintf( buf, "%s[#nORBITAL STRIKE CHARGING: round %d/3%s]#n\n\r",
+			snprintf( buf, sizeof( buf ),"%s[#nORBITAL STRIKE CHARGING: round %d/3%s]#n\n\r",
 				ac, ch->pcdata->powers[MECH_ORBITAL_CHARGE], ac );
 			send_to_char( buf, ch );
 		}
@@ -126,7 +126,7 @@ void do_power( CHAR_DATA *ch, char *argument ) {
 		if ( ch->pcdata->powers[MECH_NEURAL_IMPLANT] != IMPLANT_NEURAL_NONE ||
 			ch->pcdata->powers[MECH_SERVO_IMPLANT] != IMPLANT_SERVO_NONE ||
 			ch->pcdata->powers[MECH_CORE_IMPLANT] != IMPLANT_CORE_NONE ) {
-			sprintf( buf, "%sImplants:#n", pc );
+			snprintf( buf, sizeof( buf ),"%sImplants:#n", pc );
 			send_to_char( buf, ch );
 			if ( ch->pcdata->powers[MECH_NEURAL_IMPLANT] == IMPLANT_NEURAL_COMBAT_PROC )
 				send_to_char( " Neural:Combat", ch );
@@ -190,7 +190,7 @@ void do_powercharge( CHAR_DATA *ch, char *argument ) {
 	{
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *pc = br ? br->primary_color : "";
-		sprintf( buf, "You channel mana into your power cells, gaining %s%d#n power. [%d/%d]\n\r",
+		snprintf( buf, sizeof( buf ),"You channel mana into your power cells, gaining %s%d#n power. [%d/%d]\n\r",
 			pc, gain, ch->rage, power_cap );
 	}
 	send_to_char( buf, ch );
@@ -217,7 +217,7 @@ void do_overcharge( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->rage < cfg( CFG_ABILITY_ARTIFICER_OVERCHARGE_POWER_COST ) ) {
-		sprintf( buf, "You need at least %d power cells to overcharge.\n\r",
+		snprintf( buf, sizeof( buf ),"You need at least %d power cells to overcharge.\n\r",
 			cfg( CFG_ABILITY_ARTIFICER_OVERCHARGE_POWER_COST ) );
 		send_to_char( buf, ch );
 		return;
@@ -325,7 +325,7 @@ void do_turret( CHAR_DATA *ch, char *argument ) {
 	{
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *pc = br ? br->primary_color : "";
-		sprintf( buf, "%sYou deploy an auto-turret, which unfolds with mechanical precision!#n\n\r", pc );
+		snprintf( buf, sizeof( buf ),"%sYou deploy an auto-turret, which unfolds with mechanical precision!#n\n\r", pc );
 		send_to_char( buf, ch );
 	}
 	act( "$n deploys an auto-turret, which unfolds with mechanical precision!", ch, NULL, NULL, TO_ROOM );
@@ -571,7 +571,7 @@ void do_energyblade( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->powers[ART_ENERGYBLADE] > 0 ) {
-		sprintf( buf, "Your energy blade is already active (%d ticks remaining).\n\r",
+		snprintf( buf, sizeof( buf ),"Your energy blade is already active (%d ticks remaining).\n\r",
 			ch->pcdata->powers[ART_ENERGYBLADE] );
 		send_to_char( buf, ch );
 		return;
@@ -811,7 +811,7 @@ void do_forcefield( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->powers[ART_FORCEFIELD] > 0 ) {
-		sprintf( buf, "Your force field is already active (%d HP, %d ticks remaining).\n\r",
+		snprintf( buf, sizeof( buf ),"Your force field is already active (%d HP, %d ticks remaining).\n\r",
 			ch->pcdata->stats[ART_STAT_FORCEFIELD_HP],
 			ch->pcdata->powers[ART_FORCEFIELD] );
 		send_to_char( buf, ch );
@@ -836,7 +836,7 @@ void do_forcefield( CHAR_DATA *ch, char *argument ) {
 	{
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *pc = br ? br->primary_color : "";
-		sprintf( buf, "A shimmering force field surrounds you! [%s%d#n HP absorption]\n\r", pc, absorb );
+		snprintf( buf, sizeof( buf ),"A shimmering force field surrounds you! [%s%d#n HP absorption]\n\r", pc, absorb );
 	}
 	send_to_char( buf, ch );
 	act( "A shimmering energy field materializes around $n!", ch, NULL, NULL, TO_ROOM );
@@ -858,7 +858,7 @@ void do_repairbot( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->powers[ART_REPAIRBOT] > 0 ) {
-		sprintf( buf, "Your repair bot is already active (%d ticks remaining).\n\r",
+		snprintf( buf, sizeof( buf ),"Your repair bot is already active (%d ticks remaining).\n\r",
 			ch->pcdata->powers[ART_REPAIRBOT] );
 		send_to_char( buf, ch );
 		return;
@@ -876,7 +876,7 @@ void do_repairbot( CHAR_DATA *ch, char *argument ) {
 	ch->rage -= cfg( CFG_ABILITY_ARTIFICER_REPAIRBOT_POWER_COST );
 	ch->pcdata->powers[ART_REPAIRBOT] = cfg( CFG_ABILITY_ARTIFICER_REPAIRBOT_DURATION );
 
-	sprintf( buf, "A small repair bot deploys and begins scanning for damage. [%d HP/tick, %d ticks]\n\r",
+	snprintf( buf, sizeof( buf ),"A small repair bot deploys and begins scanning for damage. [%d HP/tick, %d ticks]\n\r",
 		cfg( CFG_ABILITY_ARTIFICER_REPAIRBOT_HEAL_PER_TICK ),
 		ch->pcdata->powers[ART_REPAIRBOT] );
 	send_to_char( buf, ch );
@@ -931,7 +931,7 @@ void do_artcloak( CHAR_DATA *ch, char *argument ) {
 		char buf[MAX_STRING_LENGTH];
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *pc = br ? br->primary_color : "";
-		sprintf( buf, "%sWarning:#n Drains power cells each tick. Deactivated by combat.\n\r", pc );
+		snprintf( buf, sizeof( buf ),"%sWarning:#n Drains power cells each tick. Deactivated by combat.\n\r", pc );
 		send_to_char( buf, ch );
 	}
 	act( "$n shimmers and vanishes from sight.", ch, NULL, NULL, TO_ROOM );
@@ -960,15 +960,15 @@ void do_techtrain( CHAR_DATA *ch, char *argument ) {
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *ac = br ? br->accent_color : "";
 		const char *pc = br ? br->primary_color : "";
-		sprintf( buf, "%s[%s=#n Artificer Training %s=%s]#n\n\r", ac, pc, pc, ac );
+		snprintf( buf, sizeof( buf ),"%s[%s=#n Artificer Training %s=%s]#n\n\r", ac, pc, pc, ac );
 		send_to_char( buf, ch );
-		sprintf( buf, "Gadgetry:      Level %d/3 (turret, decoy, grapple)\n\r",
+		snprintf( buf, sizeof( buf ),"Gadgetry:      Level %d/3 (turret, decoy, grapple)\n\r",
 			ch->pcdata->powers[ART_TRAIN_GADGET] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Weaponsmithing: Level %d/3 (energyblade, blaster, grenade)\n\r",
+		snprintf( buf, sizeof( buf ),"Weaponsmithing: Level %d/3 (energyblade, blaster, grenade)\n\r",
 			ch->pcdata->powers[ART_TRAIN_WEAPON] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Defensive Tech: Level %d/3 (forcefield, repairbot, techcloak)\n\r",
+		snprintf( buf, sizeof( buf ),"Defensive Tech: Level %d/3 (forcefield, repairbot, techcloak)\n\r",
 			ch->pcdata->powers[ART_TRAIN_DEFENSE] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rSyntax: techtrain <gadgetry|weaponsmithing|defensive>\n\r", ch );
@@ -993,7 +993,7 @@ void do_techtrain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( *path >= max_level ) {
-		sprintf( buf, "Your %s training is already at maximum (%d).\n\r", path_name, max_level );
+		snprintf( buf, sizeof( buf ),"Your %s training is already at maximum (%d).\n\r", path_name, max_level );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -1001,7 +1001,7 @@ void do_techtrain( CHAR_DATA *ch, char *argument ) {
 	cost = ( *path + 1 ) * 40;  /* 40 primal per level for Artificer */
 
 	if ( ch->practice < cost ) {
-		sprintf( buf, "You need %d primal to advance %s to level %d.\n\r",
+		snprintf( buf, sizeof( buf ),"You need %d primal to advance %s to level %d.\n\r",
 			cost, path_name, *path + 1 );
 		send_to_char( buf, ch );
 		return;
@@ -1010,7 +1010,7 @@ void do_techtrain( CHAR_DATA *ch, char *argument ) {
 	ch->practice -= cost;
 	(*path)++;
 
-	sprintf( buf, "You advance your %s training to level %d!\n\r", path_name, *path );
+	snprintf( buf, sizeof( buf ),"You advance your %s training to level %d!\n\r", path_name, *path );
 	send_to_char( buf, ch );
 
 	/* Notify which abilities unlock */
@@ -1033,7 +1033,7 @@ void do_techtrain( CHAR_DATA *ch, char *argument ) {
 			else if ( *path == 3 ) ability = "techcloak";
 		}
 		if ( ability ) {
-			sprintf( buf, "You have learned %s%s#n!\n\r", pc, ability );
+			snprintf( buf, sizeof( buf ),"You have learned %s%s#n!\n\r", pc, ability );
 			send_to_char( buf, ch );
 		}
 	}

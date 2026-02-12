@@ -352,62 +352,72 @@ const char *get_room_tint_color( ROOM_INDEX_DATA *room ) {
  */
 static char *format_obj_prefixes( OBJ_DATA *obj, CHAR_DATA *ch ) {
 	static char prefix_buf[MAX_STRING_LENGTH];
+	char *ptr = prefix_buf;
 	prefix_buf[0] = '\0';
+
+#define OBJ_PREFIX_APPEND( text ) \
+	do { \
+		ptr = buf_append_safe( ptr, (text), prefix_buf, sizeof( prefix_buf ), 10 ); \
+		if ( ptr == NULL ) { ptr = prefix_buf + sizeof( prefix_buf ) - 10; goto done; } \
+	} while( 0 )
 
 	/* === Item rarity/quest prefixes === */
 	if ( IS_SET( obj->quest, QUEST_ARTIFACT ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#y(Artifact)#n ", "Artifact - unique powerful item", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#y(Artifact)#n ", "Artifact - unique powerful item", -1 ) );
 	else if ( IS_SET( obj->quest, QUEST_PRIZE ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#3(#CPrize#3)#n ", "Prize - quest reward", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#3(#CPrize#3)#n ", "Prize - quest reward", -1 ) );
 	else if ( IS_SET( obj->quest, QUEST_RELIC ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#3(#7Relic#3)#n ", "Relic - ancient powerful item", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#3(#7Relic#3)#n ", "Relic - ancient powerful item", -1 ) );
 	else if ( obj->points < 750 && obj->points != 0 )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#3(Legendary)#n ", "Legendary item", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#3(Legendary)#n ", "Legendary item", -1 ) );
 	else if ( obj->points < 1250 && obj->points != 0 )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#7(#2Mythical#7)#n ", "Mythical item", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#7(#2Mythical#7)#n ", "Mythical item", -1 ) );
 	else if ( obj->points != 0 )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#6(#3Priceless#6)#n ", "Priceless item", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#6(#3Priceless#6)#n ", "Priceless item", -1 ) );
 
 	/* === Magical property prefixes === */
 	if ( IS_OBJ_STAT( obj, ITEM_GLOW ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#y(#rGlow#y)#n ", "Glowing - continual light", skill_lookup( "continual light" ) ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#y(#rGlow#y)#n ", "Glowing - continual light", skill_lookup( "continual light" ) ) );
 	if ( IS_OBJ_STAT( obj, ITEM_HUM ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#y(#rHum#y)#n ", "Humming - magical resonance", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#y(#rHum#y)#n ", "Humming - magical resonance", -1 ) );
 	if ( IS_OBJ_STAT( obj, ITEM_INVIS ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#6(Invis)#n ", "Invisible item", skill_lookup( "invis" ) ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#6(Invis)#n ", "Invisible item", skill_lookup( "invis" ) ) );
 
 	/* === Alignment auras (requires detect evil) === */
 	if ( IS_AFFECTED( ch, AFF_DETECT_EVIL ) && !IS_OBJ_STAT( obj, ITEM_ANTI_GOOD ) && IS_OBJ_STAT( obj, ITEM_ANTI_EVIL ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#4(Blue Aura)#n ", "Good-aligned item", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#4(Blue Aura)#n ", "Good-aligned item", -1 ) );
 	else if ( IS_AFFECTED( ch, AFF_DETECT_EVIL ) && IS_OBJ_STAT( obj, ITEM_ANTI_GOOD ) && !IS_OBJ_STAT( obj, ITEM_ANTI_EVIL ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#1(Red Aura)#n ", "Evil-aligned item", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#1(Red Aura)#n ", "Evil-aligned item", -1 ) );
 	else if ( IS_AFFECTED( ch, AFF_DETECT_EVIL ) && IS_OBJ_STAT( obj, ITEM_ANTI_GOOD ) && !IS_OBJ_STAT( obj, ITEM_ANTI_NEUTRAL ) && IS_OBJ_STAT( obj, ITEM_ANTI_EVIL ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#3(Yellow Aura)#n ", "Neutral-aligned item", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#3(Yellow Aura)#n ", "Neutral-aligned item", -1 ) );
 
 	/* === Magical detection (requires detect magic) === */
 	if ( IS_AFFECTED( ch, AFF_DETECT_MAGIC ) && IS_OBJ_STAT( obj, ITEM_MAGIC ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#4(Magical)#n ", "Magical enchantment", skill_lookup( "detect magic" ) ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#4(Magical)#n ", "Magical enchantment", skill_lookup( "detect magic" ) ) );
 
 	/* === Material prefixes === */
 	if ( IS_SET( obj->spectype, SITEM_COPPER ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#r(Copper)#n ", "Copper material", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#r(Copper)#n ", "Copper material", -1 ) );
 	if ( IS_SET( obj->spectype, SITEM_IRON ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#c(Iron)#n ", "Iron material", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#c(Iron)#n ", "Iron material", -1 ) );
 	if ( IS_SET( obj->spectype, SITEM_STEEL ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#C(Steel)#n ", "Steel material", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#C(Steel)#n ", "Steel material", -1 ) );
 	if ( IS_SET( obj->spectype, SITEM_ADAMANTITE ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#0(#CAdamantite#0)#n ", "Adamantite material", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#0(#CAdamantite#0)#n ", "Adamantite material", -1 ) );
 	if ( IS_SET( obj->spectype, SITEM_HILT ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#P(Hilted)#n ", "Custom hilt", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#P(Hilted)#n ", "Custom hilt", -1 ) );
 	if ( IS_SET( obj->spectype, SITEM_GEMSTONE ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#C(#yGemstoned#C)#n ", "Gemstone embedded", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#C(#yGemstoned#C)#n ", "Gemstone embedded", -1 ) );
 
 	/* === Plane indicators === */
 	if ( IS_OBJ_STAT( obj, ITEM_SHADOWPLANE ) && obj->in_room != NULL && !IS_AFFECTED( ch, AFF_SHADOWPLANE ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#0(Shadowplane)#n ", "On shadow plane", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#0(Shadowplane)#n ", "On shadow plane", -1 ) );
 	if ( !IS_OBJ_STAT( obj, ITEM_SHADOWPLANE ) && obj->in_room != NULL && IS_AFFECTED( ch, AFF_SHADOWPLANE ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#7(Normal plane)#n ", "On normal plane", -1 ) );
+		OBJ_PREFIX_APPEND( mxp_aura_tag( ch, "#7(Normal plane)#n ", "On normal plane", -1 ) );
 
+done:
+	*ptr = '\0';
+#undef OBJ_PREFIX_APPEND
 	return prefix_buf;
 }
 
@@ -783,6 +793,7 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 	char desc_buf[MAX_STRING_LENGTH];	/* Character name/description */
 	char suffix_buf[MAX_STRING_LENGTH]; /* Position, condition, effects */
 	char mount_buf[MAX_STRING_LENGTH];
+	char *pptr; /* tracked pointer for prefix_buf */
 	CHAR_DATA *mount;
 
 	/* Cache spell lookups for MXP tooltips */
@@ -794,6 +805,7 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 	prefix_buf[0] = '\0';
 	desc_buf[0] = '\0';
 	suffix_buf[0] = '\0';
+	pptr = prefix_buf;
 
 	/* Early exits for special cases */
 	if ( !IS_NPC( victim ) && victim->pcdata->chobj != NULL )
@@ -804,41 +816,48 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 
 	if ( !IS_NPC( victim ) && IS_SET( victim->flag2, VAMP_OBJMASK ) ) {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "     %s\n\r", victim->objdesc );
+		snprintf( buf, sizeof( buf ), "     %s\n\r", victim->objdesc );
 		stc( buf, ch );
 		return;
 	}
 
+/* Safe append to prefix_buf via tracked pointer */
+#define PFX_APPEND( text ) \
+	do { \
+		pptr = buf_append_safe( pptr, (text), prefix_buf, sizeof( prefix_buf ), 10 ); \
+		if ( pptr == NULL ) { pptr = prefix_buf + sizeof( prefix_buf ) - 10; goto pfx_done; } \
+	} while( 0 )
+
 	/* ========== PHASE 1: Build status prefixes with MXP tooltips ========== */
 
 	if ( IS_HEAD( victim, LOST_HEAD ) && IS_AFFECTED( victim, AFF_POLYMORPH ) ) {
-		strcat( prefix_buf, "     " );
+		PFX_APPEND( "     " );
 	} else {
 		if ( !IS_NPC( victim ) && victim->desc == NULL )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#y(Link-Dead)#n ", "Player disconnected", -1 ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#y(Link-Dead)#n ", "Player disconnected", -1 ) );
 		if ( IS_AFFECTED( victim, AFF_INVISIBLE ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#L(Invis)#n ", "Invisibility", sn_invis ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#L(Invis)#n ", "Invisibility", sn_invis ) );
 		if ( IS_AFFECTED( victim, AFF_HIDE ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#0(Hide)#n ", "Hiding", -1 ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#0(Hide)#n ", "Hiding", -1 ) );
 		if ( IS_AFFECTED( victim, AFF_CHARM ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#R(Charmed)#n ", "Charm person", sn_charm ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#R(Charmed)#n ", "Charm person", sn_charm ) );
 		if ( IS_AFFECTED( victim, AFF_PASS_DOOR ) || IS_AFFECTED( victim, AFF_ETHEREAL ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#l(Translucent)#n ", "Pass door / Ethereal", -1 ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#l(Translucent)#n ", "Pass door / Ethereal", -1 ) );
 		if ( IS_AFFECTED( victim, AFF_FAERIE_FIRE ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#P(Pink Aura)#n ", "Faerie fire", sn_faerie ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#P(Pink Aura)#n ", "Faerie fire", sn_faerie ) );
 		if ( IS_EVIL( victim ) && IS_AFFECTED( ch, AFF_DETECT_EVIL ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#R(Red Aura)#n ", "Evil alignment", -1 ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#R(Red Aura)#n ", "Evil alignment", -1 ) );
 		if ( IS_GOOD( victim ) && IS_AFFECTED( ch, AFF_DETECT_EVIL ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#x220(Golden Aura)#n ", "Good alignment", -1 ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#x220(Golden Aura)#n ", "Good alignment", -1 ) );
 		if ( IS_AFFECTED( victim, AFF_SANCTUARY ) )
-			strcat( prefix_buf, mxp_aura_tag( ch, "#C(White Aura)#n ", "Sanctuary", sn_sanctuary ) );
+			PFX_APPEND( mxp_aura_tag( ch, "#C(White Aura)#n ", "Sanctuary", sn_sanctuary ) );
 	}
 
 	/* Plane indicators */
 	if ( IS_AFFECTED( ch, AFF_SHADOWPLANE ) && !IS_AFFECTED( victim, AFF_SHADOWPLANE ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#0(#CNormal plane#0)#n ", "On normal plane", -1 ) );
+		PFX_APPEND( mxp_aura_tag( ch, "#0(#CNormal plane#0)#n ", "On normal plane", -1 ) );
 	else if ( !IS_AFFECTED( ch, AFF_SHADOWPLANE ) && IS_AFFECTED( victim, AFF_SHADOWPLANE ) )
-		strcat( prefix_buf, mxp_aura_tag( ch, "#C(#0Shadowplane#C)#n ", "On shadow plane", -1 ) );
+		PFX_APPEND( mxp_aura_tag( ch, "#C(#0Shadowplane#C)#n ", "On shadow plane", -1 ) );
 
 	/* Class titles - database-driven */
 	if ( !IS_NPC( victim ) && !IS_NPC( ch ) && IS_HERO( victim ) ) {
@@ -855,47 +874,57 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 				continue;
 
 			if ( IS_CLASS( victim, aura->class_id ) )
-				strcat( prefix_buf, mxp_aura_tag( ch, aura->aura_text, aura->mxp_tooltip, -1 ) );
+				PFX_APPEND( mxp_aura_tag( ch, aura->aura_text, aura->mxp_tooltip, -1 ) );
 		}
 	}
+
+pfx_done:
+	*pptr = '\0';
+#undef PFX_APPEND
 
 	/* ========== PHASE 2: Build suffix (condition effects) ========== */
 
 	/* Embrace */
 	if ( victim->embracing != NULL ) {
-		sprintf( suffix_buf + strlen( suffix_buf ), "\n\r...%s is holding %s in a stern embrace!",
+		size_t slen = strlen( suffix_buf );
+		snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "\n\r...%s is holding %s in a stern embrace!",
 			victim->name, victim->embracing->name );
 	} else if ( victim->embraced != NULL ) {
-		sprintf( suffix_buf + strlen( suffix_buf ), "\n\r...%s is being embraced by %s!",
+		size_t slen = strlen( suffix_buf );
+		snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "\n\r...%s is being embraced by %s!",
 			victim->name, victim->embraced->name );
 	}
 
 	/* Rot */
 	if ( IS_EXTRA( victim, EXTRA_ROT ) ) {
 		const char *vname = IS_NPC( victim ) ? victim->short_descr : ( IS_AFFECTED( victim, AFF_POLYMORPH ) ? victim->morph : victim->name );
-		sprintf( suffix_buf + strlen( suffix_buf ), "\n\r...%s is coated with a layer of rotten skin!", vname );
+		size_t slen = strlen( suffix_buf );
+		snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "\n\r...%s is coated with a layer of rotten skin!", vname );
 	}
 
 	/* Flaming */
 	if ( IS_AFFECTED( victim, AFF_FLAMING ) ) {
 		const char *vname = IS_NPC( victim ) ? victim->short_descr : ( IS_AFFECTED( victim, AFF_POLYMORPH ) ? victim->morph : victim->name );
-		sprintf( suffix_buf + strlen( suffix_buf ), "\n\r...%s is engulfed in blazing flames!", vname );
+		size_t slen = strlen( suffix_buf );
+		snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "\n\r...%s is engulfed in blazing flames!", vname );
 	}
 
 	/* Restrained (LOST_HEAD case) */
 	if ( !IS_NPC( victim ) && IS_HEAD( victim, LOST_HEAD ) && IS_AFFECTED( victim, AFF_POLYMORPH ) ) {
+		size_t slen = strlen( suffix_buf );
 		if ( IS_EXTRA( victim, GAGGED ) && IS_EXTRA( victim, BLINDFOLDED ) )
-			sprintf( suffix_buf + strlen( suffix_buf ), "...%s is gagged and blindfolded!", victim->morph );
+			snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "...%s is gagged and blindfolded!", victim->morph );
 		else if ( IS_EXTRA( victim, GAGGED ) )
-			sprintf( suffix_buf + strlen( suffix_buf ), "...%s is gagged!", victim->morph );
+			snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "...%s is gagged!", victim->morph );
 		else if ( IS_EXTRA( victim, BLINDFOLDED ) )
-			sprintf( suffix_buf + strlen( suffix_buf ), "...%s is blindfolded!", victim->morph );
+			snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "...%s is blindfolded!", victim->morph );
 	}
 
 	/* Tied up */
 	if ( IS_EXTRA( victim, TIED_UP ) ) {
 		const char *vname = IS_NPC( victim ) ? victim->short_descr : ( IS_AFFECTED( victim, AFF_POLYMORPH ) ? victim->morph : victim->name );
-		sprintf( suffix_buf + strlen( suffix_buf ), "\n\r...%s is tied up", vname );
+		size_t slen = strlen( suffix_buf );
+		snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "\n\r...%s is tied up", vname );
 		if ( IS_EXTRA( victim, GAGGED ) && IS_EXTRA( victim, BLINDFOLDED ) )
 			strcat( suffix_buf, ", gagged and blindfolded!" );
 		else if ( IS_EXTRA( victim, GAGGED ) )
@@ -909,7 +938,8 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 	/* Webbed */
 	if ( IS_AFFECTED( victim, AFF_WEBBED ) ) {
 		const char *vname = IS_NPC( victim ) ? victim->short_descr : ( IS_AFFECTED( victim, AFF_POLYMORPH ) ? victim->morph : victim->name );
-		sprintf( suffix_buf + strlen( suffix_buf ), "\n\r...%s is coated in a sticky web.", vname );
+		size_t slen = strlen( suffix_buf );
+		snprintf( suffix_buf + slen, sizeof( suffix_buf ) - slen, "\n\r...%s is coated in a sticky web.", vname );
 	}
 
 	/* ========== PHASE 3: Build character description ========== */
@@ -925,7 +955,7 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 	} else if ( !IS_NPC( victim ) && IS_AFFECTED( victim, AFF_POLYMORPH ) ) {
 		/* Polymorphed player */
 		if ( IS_IMMORTAL( ch ) ) {
-			sprintf( mount_buf, "%s #0[#n%s#0]#n", victim->morph, victim->name );
+			snprintf( mount_buf, sizeof( mount_buf ), "%s #0[#n%s#0]#n", victim->morph, victim->name );
 			strcat( desc_buf, mount_buf );
 		} else {
 			strcat( desc_buf, victim->morph );
@@ -950,9 +980,9 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 
 	if ( ( mount = victim->mount ) != NULL && victim->mounted == IS_RIDING ) {
 		if ( IS_NPC( mount ) )
-			sprintf( mount_buf, " is here riding %s", mount->short_descr );
+			snprintf( mount_buf, sizeof( mount_buf ), " is here riding %s", mount->short_descr );
 		else
-			sprintf( mount_buf, " is here riding %s", mount->name );
+			snprintf( mount_buf, sizeof( mount_buf ), " is here riding %s", mount->name );
 		strcat( desc_buf, mount_buf );
 		if ( victim->position == POS_FIGHTING ) {
 			strcat( desc_buf, ", fighting " );

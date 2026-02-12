@@ -25,28 +25,28 @@ void do_resonance( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "#x136~#x178[#n Resonance Status #x178]#x136~#n\n\r" );
+	snprintf( buf, sizeof( buf ),"#x136~#x178[#n Resonance Status #x178]#x136~#n\n\r" );
 	send_to_char( buf, ch );
-	sprintf( buf, "Current Resonance: #x178%d#n / %d\n\r", ch->rage,
+	snprintf( buf, sizeof( buf ),"Current Resonance: #x178%d#n / %d\n\r", ch->rage,
 		IS_CLASS( ch, CLASS_SIREN ) ? 150 : 100 );
 	send_to_char( buf, ch );
 
 	if ( ch->pcdata->powers[DIRGE_WARSONG_ACTIVE] )
 		send_to_char( "#x178[#nWarsong active#x178]#n\n\r", ch );
 	if ( ch->pcdata->powers[DIRGE_BATTLEHYMN_ACTIVE] > 0 ) {
-		sprintf( buf, "#x178[#nBattlehymn: #C%d#n ticks remaining#x178]#n\n\r", ch->pcdata->powers[DIRGE_BATTLEHYMN_ACTIVE] );
+		snprintf( buf, sizeof( buf ),"#x178[#nBattlehymn: #C%d#n ticks remaining#x178]#n\n\r", ch->pcdata->powers[DIRGE_BATTLEHYMN_ACTIVE] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[DIRGE_IRONSONG_ACTIVE] > 0 ) {
-		sprintf( buf, "#x178[#nIronsong barrier: #C%d#n HP remaining#x178]#n\n\r", ch->pcdata->stats[DIRGE_ARMOR_BONUS] );
+		snprintf( buf, sizeof( buf ),"#x178[#nIronsong barrier: #C%d#n HP remaining#x178]#n\n\r", ch->pcdata->stats[DIRGE_ARMOR_BONUS] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] > 0 ) {
-		sprintf( buf, "#x178[#nCadence: #C%d#n ticks remaining#x178]#n\n\r", ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] );
+		snprintf( buf, sizeof( buf ),"#x178[#nCadence: #C%d#n ticks remaining#x178]#n\n\r", ch->pcdata->powers[DIRGE_CADENCE_ACTIVE] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[DIRGE_DIRGE_TICKS] > 0 ) {
-		sprintf( buf, "#x178[#nDirge DOT: #C%d#n stacks, #C%d#n ticks remaining#x178]#n\n\r",
+		snprintf( buf, sizeof( buf ),"#x178[#nDirge DOT: #C%d#n stacks, #C%d#n ticks remaining#x178]#n\n\r",
 			ch->pcdata->powers[DIRGE_DIRGE_STACKS], ch->pcdata->powers[DIRGE_DIRGE_TICKS] );
 		send_to_char( buf, ch );
 	}
@@ -122,7 +122,7 @@ void do_shatter( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( ch->rage < cfg( CFG_ABILITY_DIRGESINGER_SHATTER_RESONANCE_REQ ) ) {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You need at least %d resonance to use shatter.\n\r", cfg( CFG_ABILITY_DIRGESINGER_SHATTER_RESONANCE_REQ ) );
+		snprintf( buf, sizeof( buf ),"You need at least %d resonance to use shatter.\n\r", cfg( CFG_ABILITY_DIRGESINGER_SHATTER_RESONANCE_REQ ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -219,7 +219,7 @@ void do_dirge( CHAR_DATA *ch, char *argument ) {
 		act( "$n begins a mournful dirge, and you feel your strength waning!", ch, NULL, victim, TO_VICT );
 	} else {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "Your dirge intensifies to %d stacks!\n\r", ch->pcdata->powers[DIRGE_DIRGE_STACKS] );
+		snprintf( buf, sizeof( buf ),"Your dirge intensifies to %d stacks!\n\r", ch->pcdata->powers[DIRGE_DIRGE_STACKS] );
 		send_to_char( buf, ch );
 	}
 	return;
@@ -251,7 +251,7 @@ void do_thunderclap( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( ch->rage < cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_RESONANCE_REQ ) ) {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You need at least %d resonance to use thunderclap.\n\r", cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_RESONANCE_REQ ) );
+		snprintf( buf, sizeof( buf ),"You need at least %d resonance to use thunderclap.\n\r", cfg( CFG_ABILITY_DIRGESINGER_THUNDERCLAP_RESONANCE_REQ ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -386,7 +386,7 @@ void do_rally( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->rage < cfg( CFG_ABILITY_DIRGESINGER_RALLY_RESONANCE_REQ ) ) {
-		sprintf( buf, "You need at least %d resonance to rally your allies.\n\r", cfg( CFG_ABILITY_DIRGESINGER_RALLY_RESONANCE_REQ ) );
+		snprintf( buf, sizeof( buf ),"You need at least %d resonance to rally your allies.\n\r", cfg( CFG_ABILITY_DIRGESINGER_RALLY_RESONANCE_REQ ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -456,13 +456,13 @@ void do_songtrain( CHAR_DATA *ch, char *argument ) {
 
 	if ( arg[0] == '\0' ) {
 		send_to_char( "#x136~#x178[#n Song Training #x178]#x136~#n\n\r", ch );
-		sprintf( buf, "  #x178War Chants#n    [%d/3]  Offensive sonic attacks\n\r", ch->pcdata->powers[DIRGE_TRAIN_WARCHANTS] );
+		snprintf( buf, sizeof( buf ),"  #x178War Chants#n    [%d/3]  Offensive sonic attacks\n\r", ch->pcdata->powers[DIRGE_TRAIN_WARCHANTS] );
 		send_to_char( buf, ch );
-		sprintf( buf, "  #x178Battle Songs#n  [%d/3]  Combat buffs\n\r", ch->pcdata->powers[DIRGE_TRAIN_BATTLESONGS] );
+		snprintf( buf, sizeof( buf ),"  #x178Battle Songs#n  [%d/3]  Combat buffs\n\r", ch->pcdata->powers[DIRGE_TRAIN_BATTLESONGS] );
 		send_to_char( buf, ch );
-		sprintf( buf, "  #x178Dirges#n        [%d/2]  Debuffs and DOTs\n\r", ch->pcdata->powers[DIRGE_TRAIN_DIRGES] );
+		snprintf( buf, sizeof( buf ),"  #x178Dirges#n        [%d/2]  Debuffs and DOTs\n\r", ch->pcdata->powers[DIRGE_TRAIN_DIRGES] );
 		send_to_char( buf, ch );
-		sprintf( buf, "  #x178Iron Voice#n    [%d/2]  Defense and support\n\r", ch->pcdata->powers[DIRGE_TRAIN_IRONVOICE] );
+		snprintf( buf, sizeof( buf ),"  #x178Iron Voice#n    [%d/2]  Defense and support\n\r", ch->pcdata->powers[DIRGE_TRAIN_IRONVOICE] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rSyntax: songtrain <warchants|battlesongs|dirges|ironvoice>\n\r", ch );
 
@@ -495,7 +495,7 @@ void do_songtrain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( *path >= max_level ) {
-		sprintf( buf, "Your %s training is already at maximum (%d).\n\r", path_name, max_level );
+		snprintf( buf, sizeof( buf ),"Your %s training is already at maximum (%d).\n\r", path_name, max_level );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -503,7 +503,7 @@ void do_songtrain( CHAR_DATA *ch, char *argument ) {
 	cost = ( *path + 1 ) * 40;
 
 	if ( ch->practice < cost ) {
-		sprintf( buf, "You need %d primal to advance %s to level %d.\n\r", cost, path_name, *path + 1 );
+		snprintf( buf, sizeof( buf ),"You need %d primal to advance %s to level %d.\n\r", cost, path_name, *path + 1 );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -511,7 +511,7 @@ void do_songtrain( CHAR_DATA *ch, char *argument ) {
 	ch->practice -= cost;
 	(*path)++;
 
-	sprintf( buf, "You advance your #x178%s#n training to level %d!\n\r", path_name, *path );
+	snprintf( buf, sizeof( buf ),"You advance your #x178%s#n training to level %d!\n\r", path_name, *path );
 	send_to_char( buf, ch );
 
 	if ( !str_cmp( arg, "warchants" ) ) {

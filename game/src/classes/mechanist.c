@@ -823,12 +823,12 @@ void do_mechimplant( CHAR_DATA *ch, char *argument ) {
 	pc = br ? br->primary_color : "";
 
 	if ( arg1[0] == '\0' || !str_cmp( arg1, "list" ) ) {
-		sprintf( buf, "%s>%s/#n Implant Status %s\\%s<#n\n\r", ac, pc, pc, ac );
+		snprintf( buf, sizeof( buf ),"%s>%s/#n Implant Status %s\\%s<#n\n\r", ac, pc, pc, ac );
 		send_to_char( buf, ch );
 
 		/* Neural slot */
 		if ( ch->pcdata->powers[MECH_TRAIN_CYBER] >= 1 ) {
-			sprintf( buf, "Neural: %s\n\r",
+			snprintf( buf, sizeof( buf ),"Neural: %s\n\r",
 				ch->pcdata->powers[MECH_NEURAL_IMPLANT] == IMPLANT_NEURAL_COMBAT_PROC ? "Combat Processor" :
 				ch->pcdata->powers[MECH_NEURAL_IMPLANT] == IMPLANT_NEURAL_TARGETING ? "Targeting Suite" :
 				ch->pcdata->powers[MECH_NEURAL_IMPLANT] == IMPLANT_NEURAL_THREAT ? "Threat Analyzer" : "None" );
@@ -837,7 +837,7 @@ void do_mechimplant( CHAR_DATA *ch, char *argument ) {
 
 		/* Servo slot */
 		if ( ch->pcdata->powers[MECH_TRAIN_CYBER] >= 2 ) {
-			sprintf( buf, "Servo:  %s\n\r",
+			snprintf( buf, sizeof( buf ),"Servo:  %s\n\r",
 				ch->pcdata->powers[MECH_SERVO_IMPLANT] == IMPLANT_SERVO_POWER_ARMS ? "Power Arms" :
 				ch->pcdata->powers[MECH_SERVO_IMPLANT] == IMPLANT_SERVO_MULTI_TOOL ? "Multi-Tool" :
 				ch->pcdata->powers[MECH_SERVO_IMPLANT] == IMPLANT_SERVO_SHIELD_GEN ? "Shield Generator" : "None" );
@@ -846,7 +846,7 @@ void do_mechimplant( CHAR_DATA *ch, char *argument ) {
 
 		/* Core slot */
 		if ( ch->pcdata->powers[MECH_TRAIN_CYBER] >= 3 ) {
-			sprintf( buf, "Core:   %s\n\r",
+			snprintf( buf, sizeof( buf ),"Core:   %s\n\r",
 				ch->pcdata->powers[MECH_CORE_IMPLANT] == IMPLANT_CORE_ARMORED ? "Armored Chassis" :
 				ch->pcdata->powers[MECH_CORE_IMPLANT] == IMPLANT_CORE_REGENERATOR ? "Regenerator" :
 				ch->pcdata->powers[MECH_CORE_IMPLANT] == IMPLANT_CORE_POWER ? "Power Core" : "None" );
@@ -875,21 +875,21 @@ void do_mechimplant( CHAR_DATA *ch, char *argument ) {
 		}
 		if ( arg2[0] == '\0' ) {
 			send_to_char( "Available neural implants:\n\r", ch );
-			sprintf( buf, "  %scombat#n    - Combat Processor: +15%% dodge, -1 pulse cooldowns\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %stargeting#n  - Targeting Suite: +20 hitroll, +20%% railgun damage\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %sthreat#n     - Threat Analyzer: see enemy HP/buffs\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %snone#n       - Remove implant\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %scombat#n    - Combat Processor: +15%% dodge, -1 pulse cooldowns\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %stargeting#n  - Targeting Suite: +20 hitroll, +20%% railgun damage\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %sthreat#n     - Threat Analyzer: see enemy HP/buffs\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %snone#n       - Remove implant\n\r", pc ); send_to_char( buf, ch );
 			return;
 		}
 		if ( !str_prefix( arg2, "combat" ) ) {
 			ch->pcdata->powers[MECH_NEURAL_IMPLANT] = IMPLANT_NEURAL_COMBAT_PROC;
-			sprintf( buf, "%sCombat Processor neural implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sCombat Processor neural implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "targeting" ) ) {
 			ch->pcdata->powers[MECH_NEURAL_IMPLANT] = IMPLANT_NEURAL_TARGETING;
-			sprintf( buf, "%sTargeting Suite neural implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sTargeting Suite neural implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "threat" ) ) {
 			ch->pcdata->powers[MECH_NEURAL_IMPLANT] = IMPLANT_NEURAL_THREAT;
-			sprintf( buf, "%sThreat Analyzer neural implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sThreat Analyzer neural implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "none" ) ) {
 			ch->pcdata->powers[MECH_NEURAL_IMPLANT] = IMPLANT_NEURAL_NONE;
 			send_to_char( "Neural implant removed.\n\r", ch );
@@ -906,21 +906,21 @@ void do_mechimplant( CHAR_DATA *ch, char *argument ) {
 		}
 		if ( arg2[0] == '\0' ) {
 			send_to_char( "Available servo implants:\n\r", ch );
-			sprintf( buf, "  %spower#n     - Power Arms: +30 damroll, +50 melee damage\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %smulti#n     - Multi-Tool: +1 extra attack\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %sshield#n    - Shield Generator: +200 damcap\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %snone#n      - Remove implant\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %spower#n     - Power Arms: +30 damroll, +50 melee damage\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %smulti#n     - Multi-Tool: +1 extra attack\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %sshield#n    - Shield Generator: +200 damcap\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %snone#n      - Remove implant\n\r", pc ); send_to_char( buf, ch );
 			return;
 		}
 		if ( !str_prefix( arg2, "power" ) ) {
 			ch->pcdata->powers[MECH_SERVO_IMPLANT] = IMPLANT_SERVO_POWER_ARMS;
-			sprintf( buf, "%sPower Arms servo implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sPower Arms servo implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "multi" ) ) {
 			ch->pcdata->powers[MECH_SERVO_IMPLANT] = IMPLANT_SERVO_MULTI_TOOL;
-			sprintf( buf, "%sMulti-Tool servo implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sMulti-Tool servo implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "shield" ) ) {
 			ch->pcdata->powers[MECH_SERVO_IMPLANT] = IMPLANT_SERVO_SHIELD_GEN;
-			sprintf( buf, "%sShield Generator servo implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sShield Generator servo implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "none" ) ) {
 			ch->pcdata->powers[MECH_SERVO_IMPLANT] = IMPLANT_SERVO_NONE;
 			send_to_char( "Servo implant removed.\n\r", ch );
@@ -937,21 +937,21 @@ void do_mechimplant( CHAR_DATA *ch, char *argument ) {
 		}
 		if ( arg2[0] == '\0' ) {
 			send_to_char( "Available core implants:\n\r", ch );
-			sprintf( buf, "  %sarmored#n   - Armored Chassis: -50 AC, 10%% damage resistance\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %sregen#n     - Regenerator: +100 HP/tick regen\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %spower#n     - Power Core: +25 max power, +1 power/tick\n\r", pc ); send_to_char( buf, ch );
-			sprintf( buf, "  %snone#n      - Remove implant\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %sarmored#n   - Armored Chassis: -50 AC, 10%% damage resistance\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %sregen#n     - Regenerator: +100 HP/tick regen\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %spower#n     - Power Core: +25 max power, +1 power/tick\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"  %snone#n      - Remove implant\n\r", pc ); send_to_char( buf, ch );
 			return;
 		}
 		if ( !str_prefix( arg2, "armored" ) ) {
 			ch->pcdata->powers[MECH_CORE_IMPLANT] = IMPLANT_CORE_ARMORED;
-			sprintf( buf, "%sArmored Chassis core implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sArmored Chassis core implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "regen" ) ) {
 			ch->pcdata->powers[MECH_CORE_IMPLANT] = IMPLANT_CORE_REGENERATOR;
-			sprintf( buf, "%sRegenerator core implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sRegenerator core implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "power" ) ) {
 			ch->pcdata->powers[MECH_CORE_IMPLANT] = IMPLANT_CORE_POWER;
-			sprintf( buf, "%sPower Core implant installed.#n\n\r", pc ); send_to_char( buf, ch );
+			snprintf( buf, sizeof( buf ),"%sPower Core implant installed.#n\n\r", pc ); send_to_char( buf, ch );
 		} else if ( !str_prefix( arg2, "none" ) ) {
 			ch->pcdata->powers[MECH_CORE_IMPLANT] = IMPLANT_CORE_NONE;
 			send_to_char( "Core implant removed.\n\r", ch );
@@ -992,16 +992,16 @@ void do_cybtrain( CHAR_DATA *ch, char *argument ) {
 			const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 			const char *ac = br ? br->accent_color : "";
 			const char *pc = br ? br->primary_color : "";
-			sprintf( buf, "%s>%s/#n Mechanist Training %s\\%s<#n\n\r", ac, pc, pc, ac );
+			snprintf( buf, sizeof( buf ),"%s>%s/#n Mechanist Training %s\\%s<#n\n\r", ac, pc, pc, ac );
 			send_to_char( buf, ch );
 		}
-		sprintf( buf, "Cybernetics:   Level %d/3 (neuraljack, servoarms, reactiveplating)\n\r",
+		snprintf( buf, sizeof( buf ),"Cybernetics:   Level %d/3 (neuraljack, servoarms, reactiveplating)\n\r",
 			ch->pcdata->powers[MECH_TRAIN_CYBER] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Drone Swarm:   Level %d/4 (combatdrone, repairswarm, bomberdrone, dronearmy)\n\r",
+		snprintf( buf, sizeof( buf ),"Drone Swarm:   Level %d/4 (combatdrone, repairswarm, bomberdrone, dronearmy)\n\r",
 			ch->pcdata->powers[MECH_TRAIN_DRONE] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Heavy Ordnance: Level %d/3 (railgun, empburst, orbitalstrike)\n\r",
+		snprintf( buf, sizeof( buf ),"Heavy Ordnance: Level %d/3 (railgun, empburst, orbitalstrike)\n\r",
 			ch->pcdata->powers[MECH_TRAIN_ORDNANCE] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rSyntax: cybtrain <cybernetics|drones|ordnance>\n\r", ch );
@@ -1026,7 +1026,7 @@ void do_cybtrain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( *path >= max_level ) {
-		sprintf( buf, "Your %s training is already at maximum (%d).\n\r", path_name, max_level );
+		snprintf( buf, sizeof( buf ),"Your %s training is already at maximum (%d).\n\r", path_name, max_level );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -1034,7 +1034,7 @@ void do_cybtrain( CHAR_DATA *ch, char *argument ) {
 	cost = ( *path + 1 ) * 50;  /* 50 primal per level for Mechanist */
 
 	if ( ch->practice < cost ) {
-		sprintf( buf, "You need %d primal to advance %s to level %d.\n\r",
+		snprintf( buf, sizeof( buf ),"You need %d primal to advance %s to level %d.\n\r",
 			cost, path_name, *path + 1 );
 		send_to_char( buf, ch );
 		return;
@@ -1043,7 +1043,7 @@ void do_cybtrain( CHAR_DATA *ch, char *argument ) {
 	ch->practice -= cost;
 	(*path)++;
 
-	sprintf( buf, "You advance your %s training to level %d!\n\r", path_name, *path );
+	snprintf( buf, sizeof( buf ),"You advance your %s training to level %d!\n\r", path_name, *path );
 	send_to_char( buf, ch );
 
 	/* Notify which abilities unlock */
@@ -1068,7 +1068,7 @@ void do_cybtrain( CHAR_DATA *ch, char *argument ) {
 			else if ( *path == 3 ) ability = "orbitalstrike";
 		}
 		if ( ability ) {
-			sprintf( buf, "You have learned %s%s#n!%s\n\r", pc, ability, extra ? extra : "" );
+			snprintf( buf, sizeof( buf ),"You have learned %s%s#n!%s\n\r", pc, ability, extra ? extra : "" );
 			send_to_char( buf, ch );
 		}
 	}
@@ -1101,7 +1101,7 @@ void do_dronestatus( CHAR_DATA *ch, char *argument ) {
 	ac = br ? br->accent_color : "";
 	pc = br ? br->primary_color : "";
 
-	sprintf( buf, "%s>%s/#n Drone Status %s\\%s<#n\n\r", ac, pc, pc, ac );
+	snprintf( buf, sizeof( buf ),"%s>%s/#n Drone Status %s\\%s<#n\n\r", ac, pc, pc, ac );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof(buf), "Combat Drones: %d / %d\n\r",
 		ch->pcdata->powers[MECH_DRONE_COUNT], MECH_MAX_DRONES );
@@ -1192,7 +1192,7 @@ void do_dronerecall( CHAR_DATA *ch, char *argument ) {
 		char buf[MAX_STRING_LENGTH];
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *pc = br ? br->primary_color : "";
-		sprintf( buf, "%sYou recall all your drones to storage compartments.#n\n\r", pc );
+		snprintf( buf, sizeof( buf ),"%sYou recall all your drones to storage compartments.#n\n\r", pc );
 		send_to_char( buf, ch );
 	}
 	act( "$n's drones fly back and fold into storage compartments.", ch, NULL, NULL, TO_ROOM );

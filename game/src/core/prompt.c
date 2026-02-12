@@ -46,6 +46,8 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 	else
 		str = d->original ? d->original->prompt : d->character->prompt;
 	while ( *str != '\0' ) {
+		if ( point >= buf + sizeof( buf ) - 10 )
+			break;
 		if ( *str != '%' ) {
 			*point++ = *str++;
 			continue;
@@ -314,9 +316,13 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 			break;
 		}
 		++str;
-		while ( ( *point = *i ) != '\0' )
-			++point, ++i;
+		point = buf_append_safe( point, i, buf, sizeof( buf ), 10 );
+		if ( point == NULL ) {
+			point = buf + sizeof( buf ) - 10;
+			break;
+		}
 	}
+	*point = '\0';
 	write_to_buffer( d, buf, (int) ( point - buf ) );
 	return;
 }
