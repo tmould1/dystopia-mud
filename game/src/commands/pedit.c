@@ -319,7 +319,8 @@ void pedit_show( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
              victim->sex == SEX_MALE ? "Male" : victim->sex == SEX_FEMALE ? "Female" : "Neutral",
              victim->class, victim->level, victim->trust );
     send_to_char( buf, ch );
-    sprintf( buf, "  Clan: %s\n\r", victim->clan ? victim->clan : "(none)" );
+    sprintf( buf, "  Clan: %s  Generation: %d\n\r",
+             victim->clan ? victim->clan : "(none)", victim->generation );
     send_to_char( buf, ch );
 
     /* Vitals */
@@ -389,7 +390,7 @@ void pedit_identity( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
 
     if ( arg1[0] == '\0' ) {
         send_to_char( "Syntax: pedit <player> identity <field> <value>\n\r", ch );
-        send_to_char( "Fields: name, title, sex, class, level, clan\n\r", ch );
+        send_to_char( "Fields: name, title, sex, class, level, clan, generation\n\r", ch );
         return;
     }
 
@@ -463,7 +464,17 @@ void pedit_identity( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
         return;
     }
 
-    send_to_char( "Unknown identity field. Use: name, title, sex, class, level, clan\n\r", ch );
+    if ( !str_cmp( arg1, "generation" ) || !str_cmp( arg1, "gen" ) ) {
+        if ( !is_number( arg2 ) ) {
+            send_to_char( "Generation must be a number.\n\r", ch );
+            return;
+        }
+        victim->generation = atoi( arg2 );
+        send_to_char( "Generation set.\n\r", ch );
+        return;
+    }
+
+    send_to_char( "Unknown identity field. Use: name, title, sex, class, level, clan, generation\n\r", ch );
 }
 
 /*
