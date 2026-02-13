@@ -502,6 +502,9 @@ void boot_db( bool fCopyOver ) {
 		save_notes();
 		load_disabled();
 		load_gameconfig();
+		db_game_load_forbidden_names();
+		db_game_load_profanity_filters();
+		db_game_load_confusables();
 		load_cfg();  /* Unified config system */
 		db_class_load_registry();  /* Must load first - other class tables reference it */
 		db_class_load_display();

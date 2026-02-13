@@ -35,6 +35,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "utf8.h"
 
 /*****************************************************************************
  Name:		string_append
@@ -304,14 +305,36 @@ char *format_string( char *oldstring /*, bool fSpace */ ) {
 	xbuf[0] = 0;
 
 	for ( ;; ) {
-		for ( i = 0; i < 77; i++ ) {
-			if ( !*( rdesc + i ) ) break;
+		/* Walk forward counting display columns, not bytes */
+		{
+			const char *p = rdesc;
+			int col = 0;
+			while ( *p && col < 77 ) {
+				if ( (unsigned char) *p >= 0x80 ) {
+					int w;
+					const char *prev = p;
+					unsigned int cp = utf8_decode( &p );
+					w = utf8_wcwidth( cp );
+					if ( w > 0 ) col += w;
+					(void) prev;
+				} else {
+					col++;
+					p++;
+				}
+			}
+			i = (int) ( p - rdesc );
+			if ( col < 77 ) break; /* remaining text fits on one line */
 		}
-		if ( i < 77 ) {
-			break;
-		}
-		for ( i = ( xbuf[0] ? 76 : 73 ); i; i-- ) {
-			if ( *( rdesc + i ) == ' ' ) break;
+		/* Search backward for a space to break at.
+		 * Space (0x20) is ASCII and cannot appear inside a UTF-8 multi-byte
+		 * sequence, so byte-level backward scan is safe. */
+		{
+			int limit = ( xbuf[0] ? i : ( i > 3 ? i - 3 : i ) );
+			int j;
+			for ( j = limit; j > 0; j-- ) {
+				if ( *( rdesc + j ) == ' ' ) break;
+			}
+			i = j;
 		}
 		if ( i ) {
 			*( rdesc + i ) = 0;
@@ -320,11 +343,14 @@ char *format_string( char *oldstring /*, bool fSpace */ ) {
 			rdesc += i + 1;
 			while ( *rdesc == ' ' ) rdesc++;
 		} else {
-			bug( "No spaces", 0 );
-			*( rdesc + 75 ) = 0;
+			/* No spaces found - force break (avoid splitting UTF-8) */
+			int brk = utf8_truncate( rdesc, 75 );
+			char saved = *( rdesc + brk );
+			*( rdesc + brk ) = 0;
 			strcat( xbuf, rdesc );
 			strcat( xbuf, "-\n\r" );
-			rdesc += 76;
+			*( rdesc + brk ) = saved;
+			rdesc += brk;
 		}
 	}
 	while ( *( rdesc + i ) && ( *( rdesc + i ) == ' ' || *( rdesc + i ) == '\n' || *( rdesc + i ) == '\r' ) )
@@ -487,38 +513,10 @@ void add_commas_to_number( int number, char *out_str, size_t buf_size ) {
  * Calculate visible string length, excluding color codes.
  * Handles standard (#X), extended (#xNNN/#XNNN), and true color
  * (#tRRGGBB/#TRRGGBB) color codes.
+ * UTF-8 aware: CJK wide characters count as 2 columns.
  */
 int visible_strlen( const char *str ) {
-	int len = 0;
-	const char *p = str;
-
-	if ( !str )
-		return 0;
-
-	while ( *p ) {
-		if ( *p == '#' && *( p + 1 ) != '\0' ) {
-			/* Check for extended color code #xNNN or #XNNN */
-			if ( ( *( p + 1 ) == 'x' || *( p + 1 ) == 'X' ) &&
-				*( p + 2 ) >= '0' && *( p + 2 ) <= '9' &&
-				*( p + 3 ) >= '0' && *( p + 3 ) <= '9' &&
-				*( p + 4 ) >= '0' && *( p + 4 ) <= '9' ) {
-				p += 5; /* Skip #xNNN or #XNNN */
-			}
-			/* Check for true color #tRRGGBB or #TRRGGBB */
-			else if ( ( *( p + 1 ) == 't' || *( p + 1 ) == 'T' ) &&
-				isxdigit( *( p + 2 ) ) && isxdigit( *( p + 3 ) ) &&
-				isxdigit( *( p + 4 ) ) && isxdigit( *( p + 5 ) ) &&
-				isxdigit( *( p + 6 ) ) && isxdigit( *( p + 7 ) ) ) {
-				p += 8; /* Skip #tRRGGBB or #TRRGGBB */
-			} else {
-				p += 2; /* Skip #X (standard 2-char code) */
-			}
-		} else {
-			len++;
-			p++;
-		}
-	}
-	return len;
+	return utf8_visible_width( str );
 }
 
 /*

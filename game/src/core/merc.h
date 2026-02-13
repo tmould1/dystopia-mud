@@ -591,6 +591,9 @@ struct descriptor_data {
 	int  mtts_flags;    /* MTTS capability bitfield */
 	char client_name[64];    /* Terminal/client name from round 1 */
 	char terminal_type[64];  /* Standard terminal name from round 2 */
+	/* charset: client encoding support (RFC 2066) */
+	int  client_charset;     /* CHARSET_UNKNOWN=0, CHARSET_ASCII=1, CHARSET_UTF8=2 */
+	bool charset_negotiated; /* TRUE once charset is determined */
 };
 
 /*
@@ -3581,6 +3584,8 @@ DECLARE_DO_FUN( do_forceauto );
 DECLARE_DO_FUN( do_freeze );
 DECLARE_DO_FUN( do_earthshatter );
 DECLARE_DO_FUN( do_confuse );
+DECLARE_DO_FUN( do_confusable );
+DECLARE_DO_FUN( do_nameban );
 DECLARE_DO_FUN( do_gag );
 DECLARE_DO_FUN( do_garotte );
 DECLARE_DO_FUN( do_dark_garotte );

@@ -21,7 +21,10 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "utf8.h"
+#include "../db/db_game.h"
 #include "../systems/ttype.h"
+#include "../systems/charset.h"
 #include "../db/db_game.h"
 #include "../db/db_player.h"
 #if !defined( WIN32 )
@@ -4161,7 +4164,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	sprintf( buf, "\n\r <*>         It is a time of changes         <*>\n\r" );
+	sprintf( buf, "\n\r (╯°□°)╯︵ ┻━┻ \n\r" );
 
 #if defined( WIN32 )
 	/*
@@ -4224,7 +4227,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 				fwrite( &proto_info, sizeof( proto_info ), 1, socket_fp );
 
 				/* Write index (not raw descriptor) to text file */
-				fprintf( fp, "%d %s %s\n", socket_index, och->name, d->host );
+				fprintf( fp, "%d %s %s %d\n", socket_index, och->name, d->host, d->client_charset );
 				socket_index++;
 
 				if ( och->level == 1 ) {
@@ -4253,7 +4256,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 			write_to_descriptor_2( d->descriptor, "\n\rSorry, we are rebooting. Come back in 30 seconds.\n\r", 0 );
 			close_socket( d ); /* throw'em out */
 		} else {
-			fprintf( fp, "%d %s %s\n", d->descriptor, och->name, d->host );
+			fprintf( fp, "%d %s %s %d\n", d->descriptor, och->name, d->host, d->client_charset );
 			if ( och->level == 1 ) {
 				write_to_descriptor( d, "Since you are level one, and level one characters do not save, you gain a free level!\n\r", 0 );
 				och->level++; /* Advance_level doesn't do that */
@@ -4402,8 +4405,9 @@ void copyover_recover() {
 	unlink( COPYOVER_FILE ); /* In case something crashes - doesn't prevent reading	*/
 
 	for ( ;; ) {
-		int items_read = fscanf( fp, "%d %s %s\n", &desc, name, host );
-		if ( items_read != 3 || desc == -1 ) {
+		int charset = CHARSET_UNKNOWN;
+		int items_read = fscanf( fp, "%d %s %s %d\n", &desc, name, host, &charset );
+		if ( items_read < 3 || desc == -1 ) {
 			/* Only warn if it's not EOF and not the -1 terminator line */
 			if ( items_read != EOF && !( items_read >= 1 && desc == -1 ) )
 				merc_logf( "copyover_recover: malformed line in copyover file, stopping" );
@@ -4450,8 +4454,14 @@ void copyover_recover() {
 		/* MUSHclient and some clients only accept WILL offers at connection start */
 		retell_protocols( d );
 
+		/* Restore charset from before copyover as fallback until re-negotiation completes */
+		if ( charset != CHARSET_UNKNOWN ) {
+			d->client_charset = charset;
+			d->charset_negotiated = TRUE;
+		}
+
 		/* Write something, and check if it goes error-free */
-		if ( !write_to_descriptor_2( desc, "\n\r <*>             The world spins             <*>\n\r", 0 ) ) {
+		if ( !write_to_descriptor_2( desc, "\n\r ┻━┻ ︵╰(°□°╰)\n\r", 0 ) ) {
 #if defined( WIN32 )
 			closesocket( desc );
 #else
@@ -4475,11 +4485,11 @@ void copyover_recover() {
 
 		if ( !fOld ) /* Player file not found?! */
 		{
-			write_to_descriptor_2( desc, "\n\rSomehow, your character was lost in the copyover. Sorry.\n\r", 0 );
+			write_to_descriptor_2( desc, "\n\r(┛◉Д◉)┛彡┻━┻\n\rSomehow, your character was lost in the copyover. Sorry.\n\r", 0 );
 			close_socket( d );
 		} else /* ok! */
 		{
-			write_to_descriptor_2( desc, "\n\r <*> And nothing will ever be the same again <*>\n\r", 0 );
+			write_to_descriptor_2( desc, "\n\r ┬─┬ノ( º _ ºノ)\n\r", 0 );
 
 			/* Just In Case */
 			if ( !d->character->in_room )
@@ -4772,4 +4782,302 @@ void do_dwho( CHAR_DATA *ch, char *argument ) {
 	snprintf( buf, sizeof( buf ), "#w%d#n player%s shown\n\r",
 		count, count == 1 ? "" : "s" );
 	send_to_char( buf, ch );
+}
+
+
+/*
+ * Nameban - manage forbidden names and profanity filters.
+ *
+ * Syntax:
+ *   nameban list                         - show all rules
+ *   nameban add <word> reserved          - add reserved word (exact block)
+ *   nameban add <word> protected         - add protected prefix
+ *   nameban add <word> blocked           - add exact name block
+ *   nameban add <word> profanity         - add profanity filter pattern
+ *   nameban remove <word> reserved       - remove from forbidden_names
+ *   nameban remove <word> profanity      - remove from profanity_filters
+ *   nameban test <name>                  - test a name against current rules
+ */
+void do_nameban( CHAR_DATA *ch, char *argument ) {
+	char arg1[MAX_INPUT_LENGTH];
+	char arg2[MAX_INPUT_LENGTH];
+	char arg3[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+
+	if ( IS_NPC( ch ) )
+		return;
+
+	argument = one_argument( argument, arg1 );
+	argument = one_argument( argument, arg2 );
+	argument = one_argument( argument, arg3 );
+
+	if ( arg1[0] == '\0' || !str_cmp( arg1, "list" ) ) {
+		FORBIDDEN_NAME *fn;
+		PROFANITY_FILTER *pf;
+		int count = 0;
+
+		send_to_char( "#GForbidden Names:#n\n\r", ch );
+
+		for ( fn = forbidden_name_list; fn; fn = fn->next ) {
+			const char *type_str;
+
+			switch ( fn->type ) {
+			case NAMETYPE_RESERVED:  type_str = "reserved";  break;
+			case NAMETYPE_PROTECTED: type_str = "protected"; break;
+			case NAMETYPE_BLOCKED:   type_str = "blocked";   break;
+			default:                 type_str = "unknown";    break;
+			}
+
+			snprintf( buf, sizeof( buf ), "  %-15s  %-10s  (by %s)\n\r",
+				fn->name, type_str, fn->added_by );
+			send_to_char( buf, ch );
+			count++;
+		}
+
+		if ( count == 0 )
+			send_to_char( "  (none)\n\r", ch );
+
+		send_to_char( "\n\r#GProfanity Filters:#n\n\r", ch );
+		count = 0;
+
+		for ( pf = profanity_filter_list; pf; pf = pf->next ) {
+			snprintf( buf, sizeof( buf ), "  %-15s  (by %s)\n\r",
+				pf->pattern, pf->added_by );
+			send_to_char( buf, ch );
+			count++;
+		}
+
+		if ( count == 0 )
+			send_to_char( "  (none)\n\r", ch );
+
+		send_to_char( "\n\r#wSyntax:#n nameban <add|remove|test> <word> <reserved|protected|blocked|profanity>\n\r", ch );
+		return;
+	}
+
+	if ( !str_cmp( arg1, "test" ) ) {
+		char skeleton[256];
+
+		if ( arg2[0] == '\0' ) {
+			send_to_char( "Test which name?\n\r", ch );
+			return;
+		}
+
+		utf8_skeletonize( arg2, skeleton, sizeof( skeleton ) );
+
+		snprintf( buf, sizeof( buf ),
+			"Name:      %s\n\r"
+			"Skeleton:  %s\n\r"
+			"Result:    %s\n\r",
+			arg2, skeleton,
+			check_parse_name( arg2 ) ? "#GACCEPTED#n" : "#RREJECTED#n" );
+		send_to_char( buf, ch );
+		return;
+	}
+
+	if ( !str_cmp( arg1, "add" ) ) {
+		if ( arg2[0] == '\0' || arg3[0] == '\0' ) {
+			send_to_char( "Syntax: nameban add <word> <reserved|protected|blocked|profanity>\n\r", ch );
+			return;
+		}
+
+		if ( !str_cmp( arg3, "profanity" ) ) {
+			PROFANITY_FILTER *pf;
+
+			/* Check for duplicate */
+			for ( pf = profanity_filter_list; pf; pf = pf->next ) {
+				if ( !str_cmp( arg2, pf->pattern ) ) {
+					send_to_char( "That profanity pattern already exists.\n\r", ch );
+					return;
+				}
+			}
+
+			pf = alloc_mem( sizeof( PROFANITY_FILTER ) );
+			pf->pattern  = str_dup( arg2 );
+			pf->added_by = str_dup( ch->name );
+			pf->next     = profanity_filter_list;
+			profanity_filter_list = pf;
+
+			db_game_save_profanity_filters();
+
+			snprintf( buf, sizeof( buf ),
+				"Profanity filter '%s' added.\n\r", arg2 );
+			send_to_char( buf, ch );
+		}
+		else {
+			FORBIDDEN_NAME *fn;
+			int type;
+
+			if ( !str_cmp( arg3, "reserved" ) )
+				type = NAMETYPE_RESERVED;
+			else if ( !str_cmp( arg3, "protected" ) )
+				type = NAMETYPE_PROTECTED;
+			else if ( !str_cmp( arg3, "blocked" ) )
+				type = NAMETYPE_BLOCKED;
+			else {
+				send_to_char( "Type must be: reserved, protected, blocked, or profanity.\n\r", ch );
+				return;
+			}
+
+			/* Check for duplicate */
+			for ( fn = forbidden_name_list; fn; fn = fn->next ) {
+				if ( !str_cmp( arg2, fn->name ) && fn->type == type ) {
+					send_to_char( "That forbidden name entry already exists.\n\r", ch );
+					return;
+				}
+			}
+
+			fn = alloc_mem( sizeof( FORBIDDEN_NAME ) );
+			fn->name     = str_dup( arg2 );
+			fn->type     = type;
+			fn->added_by = str_dup( ch->name );
+			fn->next     = forbidden_name_list;
+			forbidden_name_list = fn;
+
+			db_game_save_forbidden_names();
+
+			snprintf( buf, sizeof( buf ),
+				"Forbidden name '%s' (type: %s) added.\n\r", arg2, arg3 );
+			send_to_char( buf, ch );
+		}
+		return;
+	}
+
+	if ( !str_cmp( arg1, "remove" ) ) {
+		if ( arg2[0] == '\0' || arg3[0] == '\0' ) {
+			send_to_char( "Syntax: nameban remove <word> <reserved|protected|blocked|profanity>\n\r", ch );
+			return;
+		}
+
+		if ( !str_cmp( arg3, "profanity" ) ) {
+			PROFANITY_FILTER *pf, *prev = NULL;
+
+			for ( pf = profanity_filter_list; pf; prev = pf, pf = pf->next ) {
+				if ( !str_cmp( arg2, pf->pattern ) ) {
+					if ( prev == NULL )
+						profanity_filter_list = pf->next;
+					else
+						prev->next = pf->next;
+
+					free_string( pf->pattern );
+					free_string( pf->added_by );
+					free_mem( pf, sizeof( PROFANITY_FILTER ) );
+
+					db_game_save_profanity_filters();
+
+					snprintf( buf, sizeof( buf ),
+						"Profanity filter '%s' removed.\n\r", arg2 );
+					send_to_char( buf, ch );
+					return;
+				}
+			}
+
+			send_to_char( "That profanity pattern was not found.\n\r", ch );
+		}
+		else {
+			FORBIDDEN_NAME *fn, *prev = NULL;
+			int type;
+
+			if ( !str_cmp( arg3, "reserved" ) )
+				type = NAMETYPE_RESERVED;
+			else if ( !str_cmp( arg3, "protected" ) )
+				type = NAMETYPE_PROTECTED;
+			else if ( !str_cmp( arg3, "blocked" ) )
+				type = NAMETYPE_BLOCKED;
+			else {
+				send_to_char( "Type must be: reserved, protected, blocked, or profanity.\n\r", ch );
+				return;
+			}
+
+			for ( fn = forbidden_name_list; fn; prev = fn, fn = fn->next ) {
+				if ( !str_cmp( arg2, fn->name ) && fn->type == type ) {
+					if ( prev == NULL )
+						forbidden_name_list = fn->next;
+					else
+						prev->next = fn->next;
+
+					free_string( fn->name );
+					free_string( fn->added_by );
+					free_mem( fn, sizeof( FORBIDDEN_NAME ) );
+
+					db_game_save_forbidden_names();
+
+					snprintf( buf, sizeof( buf ),
+						"Forbidden name '%s' (type: %s) removed.\n\r", arg2, arg3 );
+					send_to_char( buf, ch );
+					return;
+				}
+			}
+
+			send_to_char( "That forbidden name entry was not found.\n\r", ch );
+		}
+		return;
+	}
+
+	send_to_char( "Syntax: nameban <list|add|remove|test> [word] [type]\n\r", ch );
+}
+
+
+/*
+ * Confusable - view confusable character mappings.
+ *
+ * Syntax:
+ *   confusable list           - show all mappings
+ *   confusable test <string>  - show skeleton of a string
+ */
+void do_confusable( CHAR_DATA *ch, char *argument ) {
+	char arg1[MAX_INPUT_LENGTH];
+	char arg2[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+
+	if ( IS_NPC( ch ) )
+		return;
+
+	argument = one_argument( argument, arg1 );
+	argument = one_argument( argument, arg2 );
+
+	if ( arg1[0] == '\0' || !str_cmp( arg1, "list" ) ) {
+		int i;
+		int count = confusable_count;
+
+		snprintf( buf, sizeof( buf ),
+			"#GConfusable Character Mappings:#n  (%d entries)\n\r\n\r", count );
+		send_to_char( buf, ch );
+
+		for ( i = 0; i < count; i++ ) {
+			char cp_buf[8];
+			int len = utf8_encode( confusable_table[i].codepoint, cp_buf );
+			cp_buf[len] = '\0';
+
+			snprintf( buf, sizeof( buf ), "  U+%04X  %s  ->  %s\n\r",
+				confusable_table[i].codepoint,
+				cp_buf,
+				confusable_table[i].canonical );
+			send_to_char( buf, ch );
+		}
+
+		send_to_char( "\n\r#wSyntax:#n confusable <list|test> [string]\n\r", ch );
+		return;
+	}
+
+	if ( !str_cmp( arg1, "test" ) ) {
+		char skeleton[256];
+		char *test_str = arg2;
+
+		/* Use remainder of original argument for testing */
+		if ( test_str[0] == '\0' ) {
+			send_to_char( "Test which string?\n\r", ch );
+			return;
+		}
+
+		utf8_skeletonize( test_str, skeleton, sizeof( skeleton ) );
+
+		snprintf( buf, sizeof( buf ),
+			"Input:    %s\n\r"
+			"Skeleton: %s\n\r",
+			test_str, skeleton );
+		send_to_char( buf, ch );
+		return;
+	}
+
+	send_to_char( "Syntax: confusable <list|test> [string]\n\r", ch );
 }

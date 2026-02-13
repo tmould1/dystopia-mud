@@ -75,6 +75,33 @@ void db_game_set_pretitle( const char *name, const char *pretitle, const char *s
 void db_game_delete_pretitle( const char *name );
 void db_game_list_pretitles( CHAR_DATA *ch );
 
+/* Name validation tables (game.db) */
+#define NAMETYPE_RESERVED   0  /* Reserved word (exact match block) */
+#define NAMETYPE_PROTECTED  1  /* Protected prefix (contains-block, exact allowed) */
+#define NAMETYPE_BLOCKED    2  /* Exact name block */
+
+typedef struct forbidden_name {
+	struct forbidden_name *next;
+	char *name;
+	int   type;      /* NAMETYPE_RESERVED, NAMETYPE_PROTECTED, NAMETYPE_BLOCKED */
+	char *added_by;
+} FORBIDDEN_NAME;
+
+typedef struct profanity_filter {
+	struct profanity_filter *next;
+	char *pattern;
+	char *added_by;
+} PROFANITY_FILTER;
+
+extern FORBIDDEN_NAME  *forbidden_name_list;
+extern PROFANITY_FILTER *profanity_filter_list;
+
+void db_game_load_forbidden_names( void );
+void db_game_save_forbidden_names( void );
+void db_game_load_profanity_filters( void );
+void db_game_save_profanity_filters( void );
+void db_game_load_confusables( void );
+
 /* Audio config (game.db) - MCMP audio file mappings */
 typedef struct audio_entry {
 	char   *category;      /* "ambient", "footstep", "combat", etc. */

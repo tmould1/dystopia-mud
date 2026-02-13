@@ -896,6 +896,8 @@ const struct cmd_type cmd_table[] =
 		{ "daemonseed", do_seed, POS_STANDING, 3, LOG_NORMAL, CLASS_DEMON, DISC_DAEM_HELL, 7 },
 		{ "hellfire", do_hellfire, POS_STANDING, 3, LOG_NORMAL, CLASS_DEMON, DISC_DAEM_HELL, 8 },
 		{ "ban", do_ban, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
+		{ "nameban", do_nameban, POS_DEAD, 11, LOG_ALWAYS, 0, 0, 0 },
+		{ "confusable", do_confusable, POS_DEAD, 11, LOG_NORMAL, 0, 0, 0 },
 		{ "transfer", do_transfer, POS_DEAD, 7, LOG_NORMAL, 0, 0, 0 },
 		{ "runeeq", do_runeeq, POS_STANDING, 2, LOG_NORMAL, 0, 0, 0 },
 		{ "afk", do_afk, POS_STANDING, 3, LOG_NORMAL, 0, 0, 0 },

@@ -52,6 +52,8 @@
 #endif
 
 #include "merc.h"
+#include "utf8.h"
+#include "../systems/charset.h"
 #include "../db/db_game.h"
 #include "../systems/profile.h"
 
@@ -115,6 +117,11 @@ extern const char ttype_do[];
 extern const char ttype_dont[];
 extern const char ttype_will[];
 extern const char ttype_wont[];
+/* CHARSET */
+extern const char charset_will[];
+extern const char charset_wont[];
+extern const char charset_do[];
+extern const char charset_dont[];
 
 void show_string args( ( DESCRIPTOR_DATA * d, char *input ) );
 
@@ -160,6 +167,11 @@ extern const char ttype_do[];
 extern const char ttype_dont[];
 extern const char ttype_will[];
 extern const char ttype_wont[];
+/* CHARSET */
+extern const char charset_will[];
+extern const char charset_wont[];
+extern const char charset_do[];
+extern const char charset_dont[];
 
 void show_string args( ( DESCRIPTOR_DATA * d, char *input ) );
 #endif
@@ -832,6 +844,9 @@ void init_descriptor( DESCRIPTOR_DATA *dnew, int desc ) {
 	dnew->mtts_flags        = 0;
 	dnew->client_name[0]    = '\0';
 	dnew->terminal_type[0]  = '\0';
+	/* CHARSET defaults */
+	dnew->client_charset    = CHARSET_UNKNOWN;
+	dnew->charset_negotiated = FALSE;
 }
 
 void new_descriptor( int control ) {
@@ -964,6 +979,7 @@ void new_descriptor( int control ) {
 	write_to_descriptor( dnew, (char *) mxp_will, (int) strlen( mxp_will ) );
 	write_to_descriptor( dnew, (char *) naws_do, (int) strlen( naws_do ) );
 	write_to_descriptor( dnew, (char *) ttype_do, (int) strlen( ttype_do ) );
+	write_to_descriptor( dnew, (char *) charset_will, (int) strlen( charset_will ) );
 
 	/* send greeting */
 	{
@@ -1305,6 +1321,32 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					}
 					i += 3 + sb_len + 1; /* Skip IAC SB TTYPE ... IAC SE */
 				}
+				/* CHARSET - client agrees to negotiate */
+				else if ( !memcmp( &d->inbuf[i], charset_do, strlen( charset_do ) ) ) {
+					i += (int) strlen( charset_do ) - 1;
+					charset_send_request( d );
+				} else if ( !memcmp( &d->inbuf[i], charset_dont, strlen( charset_dont ) ) ) {
+					i += (int) strlen( charset_dont ) - 1;
+					d->client_charset = CHARSET_ASCII;
+					d->charset_negotiated = TRUE;
+				}
+				/* CHARSET subnegotiation: IAC SB CHARSET <opcode> ... IAC SE */
+				else if ( d->inbuf[i + 1] == (signed char) SB &&
+					d->inbuf[i + 2] == (signed char) TELOPT_CHARSET ) {
+					int sb_start = i + 3;
+					int sb_len = 0;
+					while ( d->inbuf[sb_start + sb_len] != '\0' ) {
+						if ( d->inbuf[sb_start + sb_len] == (signed char) IAC &&
+							d->inbuf[sb_start + sb_len + 1] == (signed char) SE ) {
+							break;
+						}
+						sb_len++;
+					}
+					if ( sb_len > 0 ) {
+						charset_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
+					}
+					i += 3 + sb_len + 1; /* Skip IAC SB CHARSET ... IAC SE */
+				}
 			}
 		}
 		/* Clear buffer after processing telnet-only data */
@@ -1329,8 +1371,35 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 			break;
 		}
 
-		if ( d->inbuf[i] == '\b' && k > 0 )
+		if ( d->inbuf[i] == '\b' && k > 0 ) {
 			--k;
+			/* UTF-8: backspace should erase the whole multi-byte character */
+			while ( k > 0 && utf8_is_cont( (unsigned char) d->incomm[k] ) )
+				--k;
+		}
+		else if ( (unsigned char) d->inbuf[i] >= 0xC2
+			&& (unsigned char) d->inbuf[i] <= 0xF4 ) {
+			/* UTF-8 lead byte - validate and copy the full sequence */
+			int seq = utf8_seq_len( (unsigned char) d->inbuf[i] );
+			if ( seq >= 2 ) {
+				int j;
+				bool valid = TRUE;
+				for ( j = 1; j < seq; j++ ) {
+					if ( d->inbuf[i + j] == '\n' || d->inbuf[i + j] == '\r'
+						|| d->inbuf[i + j] == '\0'
+						|| !utf8_is_cont( (unsigned char) d->inbuf[i + j] ) ) {
+						valid = FALSE;
+						break;
+					}
+				}
+				if ( valid && k + seq < MAX_INPUT_LENGTH - 2 ) {
+					for ( j = 0; j < seq; j++ )
+						d->incomm[k++] = d->inbuf[i + j];
+					i += seq - 1; /* -1 because the for loop increments */
+				}
+				/* else: invalid/incomplete sequence or buffer full, silently dropped */
+			}
+		}
 		else if ( isascii( d->inbuf[i] ) && isprint( d->inbuf[i] ) )
 			d->incomm[k++] = d->inbuf[i];
 		else if ( d->inbuf[i] == (signed char) IAC ) {
@@ -1448,6 +1517,32 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					ttype_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
 				}
 				i += 3 + sb_len + 1; /* Skip IAC SB TTYPE ... IAC SE */
+			}
+			/* CHARSET - client agrees to negotiate */
+			else if ( !memcmp( &d->inbuf[i], charset_do, strlen( charset_do ) ) ) {
+				i += (int) strlen( charset_do ) - 1;
+				charset_send_request( d );
+			} else if ( !memcmp( &d->inbuf[i], charset_dont, strlen( charset_dont ) ) ) {
+				i += (int) strlen( charset_dont ) - 1;
+				d->client_charset = CHARSET_ASCII;
+				d->charset_negotiated = TRUE;
+			}
+			/* CHARSET subnegotiation: IAC SB CHARSET <opcode> ... IAC SE */
+			else if ( d->inbuf[i + 1] == (signed char) SB &&
+				d->inbuf[i + 2] == (signed char) TELOPT_CHARSET ) {
+				int sb_start = i + 3;
+				int sb_len = 0;
+				while ( d->inbuf[sb_start + sb_len] != '\0' ) {
+					if ( d->inbuf[sb_start + sb_len] == (signed char) IAC &&
+						d->inbuf[sb_start + sb_len + 1] == (signed char) SE ) {
+						break;
+					}
+					sb_len++;
+				}
+				if ( sb_len > 0 ) {
+					charset_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
+				}
+				i += 3 + sb_len + 1; /* Skip IAC SB CHARSET ... IAC SE */
 			}
 		}
 	}
@@ -1645,12 +1740,17 @@ void retell_protocols( DESCRIPTOR_DATA *d ) {
 	write_to_descriptor( d, (char *) mxp_wont, (int) strlen( mxp_wont ) );
 	write_to_descriptor( d, (char *) naws_dont, (int) strlen( naws_dont ) ); /* NAWS uses DO/DONT */
 	write_to_descriptor( d, (char *) ttype_dont, (int) strlen( ttype_dont ) ); /* TTYPE uses DO/DONT */
+	write_to_descriptor( d, (char *) charset_wont, (int) strlen( charset_wont ) ); /* CHARSET */
 
 	/* Reset TTYPE state for re-negotiation */
 	d->ttype_enabled     = FALSE;
 	d->ttype_round       = 0;
 	d->mtts_flags        = 0;
 	d->terminal_type[0]  = '\0';
+
+	/* Reset CHARSET state for re-negotiation */
+	d->client_charset    = CHARSET_UNKNOWN;
+	d->charset_negotiated = FALSE;
 
 	/* Now send WILL/DO to offer protocols fresh */
 	/* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
@@ -1661,6 +1761,7 @@ void retell_protocols( DESCRIPTOR_DATA *d ) {
 	write_to_descriptor( d, (char *) mxp_will, (int) strlen( mxp_will ) );			   /* MXP */
 	write_to_descriptor( d, (char *) naws_do, (int) strlen( naws_do ) );			   /* NAWS */
 	write_to_descriptor( d, (char *) ttype_do, (int) strlen( ttype_do ) );			   /* TTYPE */
+	write_to_descriptor( d, (char *) charset_will, (int) strlen( charset_will ) );	   /* CHARSET */
 	return;
 }
 
@@ -2265,6 +2366,10 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		length = (int) ( dst - output );
 	}
 
+	/* Transliterate UTF-8 to ASCII for clients that don't support it */
+	if ( d->charset_negotiated && d->client_charset != CHARSET_UTF8 )
+		length = charset_transliterate( output, length );
+
 	/* Expand the buffer as needed */
 	while ( d->outtop + length >= d->outsize ) {
 		char *obuf;
@@ -2303,6 +2408,9 @@ bool write_to_descriptor_2( int desc, char *txt, int length ) {
 
 	for ( iStart = 0; iStart < length; iStart += nWrite ) {
 		nBlock = UMIN( length - iStart, 4096 );
+		/* Avoid splitting a UTF-8 multi-byte sequence at the chunk boundary */
+		if ( iStart + nBlock < length )
+			nBlock = utf8_truncate( txt + iStart, nBlock );
 #if !defined( WIN32 )
 		if ( ( nWrite = write( desc, txt + iStart, nBlock ) ) < 0 )
 #else

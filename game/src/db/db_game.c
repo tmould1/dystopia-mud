@@ -8,6 +8,7 @@
 #include "db_util.h"
 #include "db_game.h"
 #include "../core/cfg.h"
+#include "../core/utf8.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,6 +51,11 @@ static int pretitle_count = 0;
 
 /* Forward declarations */
 static void db_game_migrate_schema( void );
+static void db_game_seed_name_rules( void );
+
+/* In-memory name validation lists */
+FORBIDDEN_NAME  *forbidden_name_list  = NULL;
+PROFANITY_FILTER *profanity_filter_list = NULL;
 
 /* Schema for help.db */
 static const char *HELP_SCHEMA_SQL =
@@ -167,6 +173,25 @@ static const char *GAME_SCHEMA_SQL =
 	"  pretitle      TEXT NOT NULL,"
 	"  set_by        TEXT NOT NULL,"
 	"  set_date      INTEGER NOT NULL"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS forbidden_names ("
+	"  id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  name     TEXT NOT NULL COLLATE NOCASE,"
+	"  type     INTEGER NOT NULL DEFAULT 0,"
+	"  added_by TEXT NOT NULL DEFAULT 'system'"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS profanity_filters ("
+	"  id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  pattern  TEXT NOT NULL COLLATE NOCASE,"
+	"  added_by TEXT NOT NULL DEFAULT 'system'"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS confusable_chars ("
+	"  id        INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  codepoint INTEGER NOT NULL UNIQUE,"
+	"  canonical TEXT NOT NULL"
 	");";
 
 
@@ -229,6 +254,9 @@ void db_game_init( void ) {
 		}
 		/* Run schema migrations for existing databases */
 		db_game_migrate_schema();
+
+		/* Seed name validation tables if empty (first boot) */
+		db_game_seed_name_rules();
 
 		/* WAL mode: eliminates journal file create/delete per transaction.
 		 * synchronous=NORMAL: fsync only at WAL checkpoints, not every commit.
@@ -1854,4 +1882,386 @@ void db_game_list_pretitles( CHAR_DATA *ch ) {
 
 	snprintf( buf, sizeof( buf ), "#wTotal: %d#n\n\r", pretitle_count );
 	send_to_char( buf, ch );
+}
+
+
+/*
+ * =======================================================================
+ * Name validation tables (game.db)
+ *
+ * Three tables provide database-driven name validation:
+ *   forbidden_names  - reserved words, protected prefixes, exact blocks
+ *   profanity_filters - substring patterns checked against skeletonized names
+ *   confusable_chars  - Unicode -> ASCII mappings for skeleton normalization
+ *
+ * These replace the hardcoded checks in check_parse_name() and prevent
+ * UTF-8 confusable-character bypass of profanity filters.
+ * =======================================================================
+ */
+
+/* Seed data for confusable characters (sorted by codepoint for binary search).
+ * Covers: accented Latin, Greek lookalikes, Cyrillic lookalikes. */
+static const struct {
+	unsigned int codepoint;
+	const char  *canonical;
+} confusable_seed[] = {
+	/* Accented Latin uppercase */
+	{ 0x00C0, "a" }, { 0x00C1, "a" }, { 0x00C2, "a" }, { 0x00C3, "a" },
+	{ 0x00C4, "a" }, { 0x00C5, "a" }, { 0x00C8, "e" }, { 0x00C9, "e" },
+	{ 0x00CA, "e" }, { 0x00CB, "e" }, { 0x00CC, "i" }, { 0x00CD, "i" },
+	{ 0x00CE, "i" }, { 0x00CF, "i" }, { 0x00D2, "o" }, { 0x00D3, "o" },
+	{ 0x00D4, "o" }, { 0x00D5, "o" }, { 0x00D6, "o" }, { 0x00D9, "u" },
+	{ 0x00DA, "u" }, { 0x00DB, "u" }, { 0x00DC, "u" },
+	/* Accented Latin lowercase */
+	{ 0x00E0, "a" }, { 0x00E1, "a" }, { 0x00E2, "a" }, { 0x00E3, "a" },
+	{ 0x00E4, "a" }, { 0x00E5, "a" }, { 0x00E8, "e" }, { 0x00E9, "e" },
+	{ 0x00EA, "e" }, { 0x00EB, "e" }, { 0x00EC, "i" }, { 0x00ED, "i" },
+	{ 0x00EE, "i" }, { 0x00EF, "i" }, { 0x00F2, "o" }, { 0x00F3, "o" },
+	{ 0x00F4, "o" }, { 0x00F5, "o" }, { 0x00F6, "o" }, { 0x00F9, "u" },
+	{ 0x00FA, "u" }, { 0x00FB, "u" }, { 0x00FC, "u" },
+	/* Greek uppercase lookalikes */
+	{ 0x0391, "a" }, { 0x0392, "b" }, { 0x0395, "e" }, { 0x0396, "z" },
+	{ 0x0397, "h" }, { 0x0399, "i" }, { 0x039A, "k" }, { 0x039C, "m" },
+	{ 0x039D, "n" }, { 0x039F, "o" }, { 0x03A1, "p" }, { 0x03A4, "t" },
+	{ 0x03A5, "y" },
+	/* Greek lowercase lookalikes */
+	{ 0x03B1, "a" }, { 0x03B5, "e" }, { 0x03B9, "i" }, { 0x03BA, "k" },
+	{ 0x03BD, "v" }, { 0x03BF, "o" }, { 0x03C4, "t" },
+	/* Cyrillic uppercase lookalikes */
+	{ 0x0410, "a" }, { 0x0412, "b" }, { 0x0415, "e" }, { 0x041A, "k" },
+	{ 0x041C, "m" }, { 0x041D, "h" }, { 0x041E, "o" }, { 0x0420, "p" },
+	{ 0x0421, "c" }, { 0x0422, "t" }, { 0x0423, "y" }, { 0x0425, "x" },
+	/* Cyrillic lowercase lookalikes */
+	{ 0x0430, "a" }, { 0x0435, "e" }, { 0x043E, "o" }, { 0x0440, "p" },
+	{ 0x0441, "c" }, { 0x0443, "y" }, { 0x0445, "x" },
+	/* Cyrillic extended lookalikes */
+	{ 0x0455, "s" }, { 0x0456, "i" }, { 0x0458, "j" },
+	{ 0x0501, "d" }, { 0x051B, "q" }, { 0x051D, "w" },
+};
+#define CONFUSABLE_SEED_COUNT \
+	( (int)( sizeof( confusable_seed ) / sizeof( confusable_seed[0] ) ) )
+
+/*
+ * Seed name validation tables if they are empty (first boot).
+ * Called during db_game_init() after schema creation.
+ */
+static void db_game_seed_name_rules( void ) {
+	sqlite3_stmt *stmt;
+	int count;
+
+	if ( !game_db )
+		return;
+
+	/* Check if forbidden_names is empty */
+	count = 0;
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT COUNT(*) FROM forbidden_names", -1, &stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( stmt, 0 );
+		sqlite3_finalize( stmt );
+	}
+
+	if ( count == 0 ) {
+		static const struct { const char *name; int type; } forbidden_seed[] = {
+			/* Reserved words (type 0) */
+			{ "all",       0 }, { "wtf",       0 }, { "auto",      0 },
+			{ "immortal",  0 }, { "self",      0 }, { "someone",   0 },
+			{ "gaia",      0 }, { "none",      0 }, { "save",      0 },
+			{ "quit",      0 }, { "why",       0 }, { "who",       0 },
+			{ "noone",     0 },
+			/* Protected prefixes (type 1) */
+			{ "jobo",      1 }, { "dracknuur", 1 }, { "vladd",     1 },
+			{ "tarasque",  1 },
+		};
+		int i, seed_count = (int)( sizeof( forbidden_seed ) / sizeof( forbidden_seed[0] ) );
+
+		if ( sqlite3_prepare_v2( game_db,
+				"INSERT INTO forbidden_names (name, type, added_by) VALUES (?,?,'system')",
+				-1, &stmt, NULL ) == SQLITE_OK ) {
+			for ( i = 0; i < seed_count; i++ ) {
+				sqlite3_reset( stmt );
+				sqlite3_bind_text( stmt, 1, forbidden_seed[i].name, -1, SQLITE_STATIC );
+				sqlite3_bind_int( stmt, 2, forbidden_seed[i].type );
+				sqlite3_step( stmt );
+			}
+			sqlite3_finalize( stmt );
+		}
+	}
+
+	/* Check if profanity_filters is empty */
+	count = 0;
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT COUNT(*) FROM profanity_filters", -1, &stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( stmt, 0 );
+		sqlite3_finalize( stmt );
+	}
+
+	if ( count == 0 ) {
+		static const char *profanity_seed[] = { "fuck", "bitch", "whore" };
+		int i, seed_count = (int)( sizeof( profanity_seed ) / sizeof( profanity_seed[0] ) );
+
+		if ( sqlite3_prepare_v2( game_db,
+				"INSERT INTO profanity_filters (pattern, added_by) VALUES (?,'system')",
+				-1, &stmt, NULL ) == SQLITE_OK ) {
+			for ( i = 0; i < seed_count; i++ ) {
+				sqlite3_reset( stmt );
+				sqlite3_bind_text( stmt, 1, profanity_seed[i], -1, SQLITE_STATIC );
+				sqlite3_step( stmt );
+			}
+			sqlite3_finalize( stmt );
+		}
+	}
+
+	/* Check if confusable_chars is empty */
+	count = 0;
+	if ( sqlite3_prepare_v2( game_db,
+			"SELECT COUNT(*) FROM confusable_chars", -1, &stmt, NULL ) == SQLITE_OK ) {
+		if ( sqlite3_step( stmt ) == SQLITE_ROW )
+			count = sqlite3_column_int( stmt, 0 );
+		sqlite3_finalize( stmt );
+	}
+
+	if ( count == 0 ) {
+		int i;
+
+		if ( sqlite3_prepare_v2( game_db,
+				"INSERT INTO confusable_chars (codepoint, canonical) VALUES (?,?)",
+				-1, &stmt, NULL ) == SQLITE_OK ) {
+			for ( i = 0; i < CONFUSABLE_SEED_COUNT; i++ ) {
+				sqlite3_reset( stmt );
+				sqlite3_bind_int( stmt, 1, (int) confusable_seed[i].codepoint );
+				sqlite3_bind_text( stmt, 2, confusable_seed[i].canonical, -1, SQLITE_STATIC );
+				sqlite3_step( stmt );
+			}
+			sqlite3_finalize( stmt );
+		}
+	}
+}
+
+
+/*
+ * Load forbidden names from game.db into a linked list.
+ */
+void db_game_load_forbidden_names( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT name, type, added_by FROM forbidden_names ORDER BY id";
+	FORBIDDEN_NAME *tail = NULL;
+	char buf[256];
+	int count = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Free existing list */
+	while ( forbidden_name_list ) {
+		FORBIDDEN_NAME *next = forbidden_name_list->next;
+		free_string( forbidden_name_list->name );
+		free_string( forbidden_name_list->added_by );
+		free_mem( forbidden_name_list, sizeof( FORBIDDEN_NAME ) );
+		forbidden_name_list = next;
+	}
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		FORBIDDEN_NAME *p = alloc_mem( sizeof( FORBIDDEN_NAME ) );
+		p->name     = str_dup( col_text( stmt, 0 ) );
+		p->type     = sqlite3_column_int( stmt, 1 );
+		p->added_by = str_dup( col_text( stmt, 2 ) );
+		p->next     = NULL;
+
+		if ( !forbidden_name_list )
+			forbidden_name_list = p;
+		else
+			tail->next = p;
+		tail = p;
+		count++;
+	}
+
+	sqlite3_finalize( stmt );
+
+	snprintf( buf, sizeof( buf ), "  Loaded %d forbidden name rules.", count );
+	log_string( buf );
+}
+
+/*
+ * Save forbidden names from memory to game.db.
+ */
+void db_game_save_forbidden_names( void ) {
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
+	FORBIDDEN_NAME *p;
+
+	db = db_game_open_for_write();
+	if ( !db )
+		return;
+
+	db_begin( db );
+	sqlite3_exec( db, "DELETE FROM forbidden_names", NULL, NULL, NULL );
+
+	if ( sqlite3_prepare_v2( db,
+			"INSERT INTO forbidden_names (name, type, added_by) VALUES (?,?,?)",
+			-1, &stmt, NULL ) != SQLITE_OK ) {
+		db_rollback( db );
+		sqlite3_close( db );
+		return;
+	}
+
+	for ( p = forbidden_name_list; p; p = p->next ) {
+		sqlite3_reset( stmt );
+		sqlite3_bind_text( stmt, 1, p->name, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_int( stmt, 2, p->type );
+		sqlite3_bind_text( stmt, 3, p->added_by, -1, SQLITE_TRANSIENT );
+		sqlite3_step( stmt );
+	}
+
+	sqlite3_finalize( stmt );
+	db_commit( db );
+	sqlite3_close( db );
+}
+
+
+/*
+ * Load profanity filters from game.db into a linked list.
+ */
+void db_game_load_profanity_filters( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT pattern, added_by FROM profanity_filters ORDER BY id";
+	PROFANITY_FILTER *tail = NULL;
+	char buf[256];
+	int count = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Free existing list */
+	while ( profanity_filter_list ) {
+		PROFANITY_FILTER *next = profanity_filter_list->next;
+		free_string( profanity_filter_list->pattern );
+		free_string( profanity_filter_list->added_by );
+		free_mem( profanity_filter_list, sizeof( PROFANITY_FILTER ) );
+		profanity_filter_list = next;
+	}
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		PROFANITY_FILTER *p = alloc_mem( sizeof( PROFANITY_FILTER ) );
+		p->pattern  = str_dup( col_text( stmt, 0 ) );
+		p->added_by = str_dup( col_text( stmt, 1 ) );
+		p->next     = NULL;
+
+		if ( !profanity_filter_list )
+			profanity_filter_list = p;
+		else
+			tail->next = p;
+		tail = p;
+		count++;
+	}
+
+	sqlite3_finalize( stmt );
+
+	snprintf( buf, sizeof( buf ), "  Loaded %d profanity filter patterns.", count );
+	log_string( buf );
+}
+
+/*
+ * Save profanity filters from memory to game.db.
+ */
+void db_game_save_profanity_filters( void ) {
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
+	PROFANITY_FILTER *p;
+
+	db = db_game_open_for_write();
+	if ( !db )
+		return;
+
+	db_begin( db );
+	sqlite3_exec( db, "DELETE FROM profanity_filters", NULL, NULL, NULL );
+
+	if ( sqlite3_prepare_v2( db,
+			"INSERT INTO profanity_filters (pattern, added_by) VALUES (?,?)",
+			-1, &stmt, NULL ) != SQLITE_OK ) {
+		db_rollback( db );
+		sqlite3_close( db );
+		return;
+	}
+
+	for ( p = profanity_filter_list; p; p = p->next ) {
+		sqlite3_reset( stmt );
+		sqlite3_bind_text( stmt, 1, p->pattern, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, 2, p->added_by, -1, SQLITE_TRANSIENT );
+		sqlite3_step( stmt );
+	}
+
+	sqlite3_finalize( stmt );
+	db_commit( db );
+	sqlite3_close( db );
+}
+
+
+/*
+ * Load confusable character mappings from game.db into a sorted array.
+ * The array is stored in confusable_table/confusable_count (declared in utf8.h,
+ * defined in utf8.c) and used by utf8_skeletonize() for binary search lookups.
+ */
+void db_game_load_confusables( void ) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT codepoint, canonical FROM confusable_chars "
+		"ORDER BY codepoint ASC";
+	char buf[256];
+	int count = 0, alloc = 0;
+
+	if ( !game_db )
+		return;
+
+	/* Free existing table */
+	if ( confusable_table != NULL ) {
+		free_mem( confusable_table, confusable_count * sizeof( CONFUSABLE_ENTRY ) );
+		confusable_table = NULL;
+		confusable_count = 0;
+	}
+
+	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	/* Count rows first */
+	while ( sqlite3_step( stmt ) == SQLITE_ROW )
+		alloc++;
+	sqlite3_reset( stmt );
+
+	if ( alloc == 0 ) {
+		sqlite3_finalize( stmt );
+		return;
+	}
+
+	/* Allocate sorted array */
+	confusable_table = alloc_mem( alloc * sizeof( CONFUSABLE_ENTRY ) );
+
+	/* Load entries (already sorted by ORDER BY codepoint ASC) */
+	while ( sqlite3_step( stmt ) == SQLITE_ROW && count < alloc ) {
+		CONFUSABLE_ENTRY *ce = &confusable_table[count];
+		const char *can;
+		int len;
+
+		ce->codepoint = (unsigned int) sqlite3_column_int( stmt, 0 );
+		can = col_text( stmt, 1 );
+		len = (int) strlen( can );
+		if ( len >= (int) sizeof( ce->canonical ) )
+			len = (int) sizeof( ce->canonical ) - 1;
+		memcpy( ce->canonical, can, len );
+		ce->canonical[len] = '\0';
+
+		count++;
+	}
+
+	confusable_count = count;
+	sqlite3_finalize( stmt );
+
+	snprintf( buf, sizeof( buf ), "  Loaded %d confusable character mappings.", count );
+	log_string( buf );
 }

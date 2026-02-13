@@ -22,6 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "utf8.h"
 #include "../db/db_player.h"
 #include "../db/db_game.h"
 #include "../systems/mxp.h"
@@ -2911,11 +2912,12 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 		if ( fMxp ) {
 			/* Wrap just the name with MXP, then add padding after */
 			char *wrapped = mxp_player_link( gch, ch, gch->pcdata->switchname );
-			int namelen = (int) strlen( gch->pcdata->switchname );
-			int padding = ( namelen < 12 ) ? 12 - namelen : 0;
+			int namew = utf8_display_width( gch->pcdata->switchname );
+			int padding = ( namew < 12 ) ? 12 - namew : 0;
 			snprintf( playername, sizeof( playername ), "%s%*s", wrapped, padding, "" );
 		} else {
-			snprintf( playername, sizeof( playername ), "%-12s", gch->pcdata->switchname );
+			utf8_pad_right( playername, sizeof( playername ),
+				gch->pcdata->switchname, 12 );
 		}
 
 		/*

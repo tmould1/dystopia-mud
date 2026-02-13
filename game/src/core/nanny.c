@@ -5,10 +5,13 @@
  ***************************************************************************/
 
 #include "merc.h"
+#include "utf8.h"
 #include "../db/db_player.h"
+#include "../db/db_game.h"
 #include "../systems/gmcp.h"
 #include "../systems/mcmp.h"
 #include "../systems/ttype.h"
+#include "../systems/charset.h"
 
 /* External variables from comm.c */
 extern char echo_off_str[];
@@ -140,6 +143,9 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 	case CON_NOT_PLAYING:
 		break;
 	case CON_GET_NAME:
+		/* Finalize charset as ASCII if negotiation got no response */
+		charset_finalize( d );
+
 		if ( argument[0] == '\0' ) {
 			close_socket( d );
 			return;
@@ -857,46 +863,125 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 
 /*
  * Parse a name for acceptability.
+ *
+ * Validation flow (database-driven with UTF-8 confusable detection):
+ *   1. UTF-8 validity
+ *   2. Length: 3-12 codepoints, max 48 bytes
+ *   3. Character validation: each codepoint must pass utf8_is_name_char()
+ *   4. Mixed-script rejection: all chars must be from the same script group
+ *   5. Forbidden names: reserved words, protected prefixes, exact blocks
+ *   6. Profanity: skeletonize name, check against profanity_filters
+ *   7. I/L twit check: only when all characters are ASCII
+ *   8. Mob name collision: unchanged
  */
 bool check_parse_name( char *name ) {
+	int byte_len, cp_len;
+	int primary_script = 0;
+	bool all_ascii = TRUE;
+
+	if ( name == NULL || name[0] == '\0' )
+		return FALSE;
+
+	byte_len = (int) strlen( name );
+
 	/*
-	 * Reserved words.
+	 * 1. UTF-8 validity.
 	 */
-	if ( is_name( name, "all wtf auto immortal self someone gaia none save quit why who noone" ) )
-		return FALSE;
-
-	if ( is_contained( "jobo", name ) && str_cmp( name, "jobo" ) )
-		return FALSE;
-	else if ( is_contained( "dracknuur", name ) && str_cmp( name, "dracknuur" ) )
-		return FALSE;
-	else if ( is_contained( "vladd", name ) && str_cmp( name, "vladd" ) )
-		return FALSE;
-	else if ( is_contained( "tarasque", name ) && str_cmp( name, "tarasque" ) )
-		return FALSE;
-	else if ( is_contained( "fuck", name ) || is_contained( "bitch", name ) || is_contained( "whore", name ) )
+	if ( !utf8_is_valid( name, byte_len ) )
 		return FALSE;
 
 	/*
-	 * Length restrictions.
+	 * 2. Length restrictions: 3-12 codepoints, max 48 bytes.
 	 */
-	if ( strlen( name ) < 3 )
+	if ( byte_len > 48 )
 		return FALSE;
 
-	if ( strlen( name ) > 12 )
+	cp_len = utf8_strlen( name );
+	if ( cp_len < 3 || cp_len > 12 )
 		return FALSE;
 
 	/*
-	 * Alphanumerics only.
-	 * Lock out IllIll twits.
+	 * 3. Character validation + 4. Mixed-script detection.
+	 * Walk every codepoint: must be a valid name character.
+	 * Determine primary script from first non-ASCII character.
+	 * Reject if a different script appears later.
 	 */
 	{
-		char *pc;
-		bool fIll;
+		const char *p = name;
 
-		fIll = TRUE;
-		for ( pc = name; *pc != '\0'; pc++ ) {
-			if ( !isalpha( *pc ) )
+		while ( *p != '\0' ) {
+			unsigned int cp = utf8_decode( &p );
+			int script;
+
+			if ( !utf8_is_name_char( cp ) )
 				return FALSE;
+
+			if ( cp > 0x7F )
+				all_ascii = FALSE;
+
+			script = utf8_char_script( cp );
+
+			/* Only check mixing for non-Latin scripts vs Latin, or between
+			 * non-Latin scripts. Latin (script 1) is always allowed as it
+			 * serves as the base script. */
+			if ( script > 1 ) {
+				if ( primary_script == 0 )
+					primary_script = script;
+				else if ( script != primary_script )
+					return FALSE;
+			}
+		}
+	}
+
+	/*
+	 * 5. Forbidden names (database-driven).
+	 */
+	{
+		FORBIDDEN_NAME *fn;
+
+		for ( fn = forbidden_name_list; fn; fn = fn->next ) {
+			switch ( fn->type ) {
+			case NAMETYPE_RESERVED:
+			case NAMETYPE_BLOCKED:
+				/* Exact match (case-insensitive) */
+				if ( !str_cmp( name, fn->name ) )
+					return FALSE;
+				break;
+			case NAMETYPE_PROTECTED:
+				/* Contains but not exact match */
+				if ( is_contained( fn->name, name )
+					&& str_cmp( name, fn->name ) )
+					return FALSE;
+				break;
+			}
+		}
+	}
+
+	/*
+	 * 6. Profanity check with confusable-character detection.
+	 * Skeletonize the name (Unicode lookalikes -> ASCII canonical)
+	 * then check against profanity filter patterns.
+	 */
+	{
+		char skeleton[256];
+		PROFANITY_FILTER *pf;
+
+		utf8_skeletonize( name, skeleton, sizeof( skeleton ) );
+
+		for ( pf = profanity_filter_list; pf; pf = pf->next ) {
+			if ( is_contained( pf->pattern, skeleton ) )
+				return FALSE;
+		}
+	}
+
+	/*
+	 * 7. Lock out IllIll twits (ASCII names only).
+	 */
+	if ( all_ascii ) {
+		char *pc;
+		bool fIll = TRUE;
+
+		for ( pc = name; *pc != '\0'; pc++ ) {
 			if ( LOWER( *pc ) != 'i' && LOWER( *pc ) != 'l' )
 				fIll = FALSE;
 		}
@@ -904,10 +989,12 @@ bool check_parse_name( char *name ) {
 		if ( fIll )
 			return FALSE;
 	}
+
+	/* Special override */
 	if ( !str_cmp( name, "kip" ) ) return TRUE;
 
 	/*
-	 * Prevent players from naming themselves after mobs.
+	 * 8. Prevent players from naming themselves after mobs.
 	 */
 	{
 		extern MOB_INDEX_DATA *mob_index_hash[MAX_KEY_HASH];

@@ -4,6 +4,7 @@
  ***************************************************************************/
 
 #include "merc.h"
+#include "utf8.h"
 
 /*
  * Send to character - short form
@@ -15,28 +16,14 @@ void stc( const char *txt, CHAR_DATA *ch ) {
 }
 
 int col_str_len( char *txt ) {
-	int pos, len;
-
-	len = 0;
-	for ( pos = 0; txt[pos] != '\0'; pos++ ) {
-		if ( txt[pos] != '#' ) {
-			len++;
-			continue;
-		}
-
-		pos++;
-		if ( txt[pos] == '\0' ) return len;
-		if ( txt[pos] == '#' || txt[pos] == '-' ) len++;
-	}
-
-	return len;
+	return utf8_visible_width( txt );
 }
 
 void cent_to_char( char *txt, CHAR_DATA *ch ) {
 	int len, pos;
 	char buf[MAX_STRING_LENGTH];
 
-	len = ( 80 - col_str_len( txt ) ) / 2;
+	len = ( naws_get_width( ch ) - col_str_len( txt ) ) / 2;
 	for ( pos = 0; pos < len; pos++ ) {
 		buf[pos] = ' ';
 	}
@@ -74,8 +61,9 @@ void divide6_to_char( CHAR_DATA *ch ) {
 
 void banner_to_char( char *txt, CHAR_DATA *ch ) {
 	char buf[MAX_STRING_LENGTH];
-	int loop, wdth, ln;
-	ln = (int) strlen( txt );
+	int wdth, ln, txt_bytes;
+	ln = utf8_display_width( txt );
+	txt_bytes = (int) strlen( txt );
 	if ( ln > 16 ) {
 		sprintf( buf, "#4-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[                   ]#4=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-#n" );
 		wdth = ( 17 - ln ) / 2 + 20;
@@ -84,15 +72,15 @@ void banner_to_char( char *txt, CHAR_DATA *ch ) {
 			"#4-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[              ] #L=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-#n" );
 		wdth = ( 11 - ln ) / 2 + 32;
 	}
-	for ( loop = 0; loop < ln; loop++ )
-		buf[loop + wdth + 22] = txt[loop];
+	memcpy( buf + wdth + 22, txt, txt_bytes );
 	cent_to_char( buf, ch );
 }
 
 void banner2_to_char( char *txt, CHAR_DATA *ch ) {
 	char buf[MAX_STRING_LENGTH];
-	int loop, wdth, ln;
-	ln = (int) strlen( txt );
+	int wdth, ln, txt_bytes;
+	ln = utf8_display_width( txt );
+	txt_bytes = (int) strlen( txt );
 	if ( ln > 16 ) {
 		sprintf( buf, "#4    -   -  - - -#6- ---===#7                               #6===--- -#4- - -  -   -\r\n" );
 		wdth = ( 31 - ln ) / 2 + 24;
@@ -100,8 +88,7 @@ void banner2_to_char( char *txt, CHAR_DATA *ch ) {
 		sprintf( buf, "#4     -    -   -  - - -#6- ---====#7                #6====--- -#4- - -  -   -    -\r\n" );
 		wdth = ( 16 - ln ) / 2 + 32;
 	}
-	for ( loop = 0; loop < ln; loop++ )
-		buf[loop + wdth + 6] = txt[loop];
+	memcpy( buf + wdth + 6, txt, txt_bytes );
 	send_to_char( buf, ch );
 }
 
