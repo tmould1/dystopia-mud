@@ -827,10 +827,11 @@ void init_descriptor( DESCRIPTOR_DATA *dnew, int desc ) {
 	dnew->client_width = NAWS_DEFAULT_WIDTH;
 	dnew->client_height = NAWS_DEFAULT_HEIGHT;
 	/* TTYPE/MTTS defaults */
-	dnew->ttype_enabled = FALSE;
-	dnew->ttype_round   = 0;
-	dnew->mtts_flags    = 0;
-	dnew->client_name[0] = '\0';
+	dnew->ttype_enabled     = FALSE;
+	dnew->ttype_round       = 0;
+	dnew->mtts_flags        = 0;
+	dnew->client_name[0]    = '\0';
+	dnew->terminal_type[0]  = '\0';
 }
 
 void new_descriptor( int control ) {
@@ -951,15 +952,18 @@ void new_descriptor( int control ) {
 		return;
 	}
 
-	/* Offer protocol support to client */
-	/* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
-	write_to_buffer( dnew, compress2_will, 0 ); /* MCCP v2 preferred */
-	write_to_buffer( dnew, compress_will, 0 );	/* MCCP v1 fallback */
-	write_to_buffer( dnew, mssp_will, 0 );		/* MSSP server status */
-	write_to_buffer( dnew, gmcp_will, 0 );		/* GMCP protocol */
-	write_to_buffer( dnew, mxp_will, 0 );		/* MXP rich text */
-	write_to_buffer( dnew, naws_do, 0 );		/* NAWS window size (request) */
-	write_to_buffer( dnew, ttype_do, 0 );		/* TTYPE terminal type (request) */
+	/* Offer protocol support to client via raw socket write.
+	 * Must use write_to_descriptor (not write_to_buffer) because
+	 * write_to_buffer appends ESC[0m ANSI reset after each call,
+	 * corrupting the 3-byte telnet sequences.
+	 * Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
+	write_to_descriptor( dnew, (char *) compress2_will, (int) strlen( compress2_will ) );
+	write_to_descriptor( dnew, (char *) compress_will, (int) strlen( compress_will ) );
+	write_to_descriptor( dnew, (char *) mssp_will, (int) strlen( mssp_will ) );
+	write_to_descriptor( dnew, (char *) gmcp_will, (int) strlen( gmcp_will ) );
+	write_to_descriptor( dnew, (char *) mxp_will, (int) strlen( mxp_will ) );
+	write_to_descriptor( dnew, (char *) naws_do, (int) strlen( naws_do ) );
+	write_to_descriptor( dnew, (char *) ttype_do, (int) strlen( ttype_do ) );
 
 	/* send greeting */
 	{
@@ -1277,12 +1281,16 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 				/* TTYPE - client agrees to send terminal type */
 				else if ( !memcmp( &d->inbuf[i], ttype_will, strlen( ttype_will ) ) ) {
 					i += (int) strlen( ttype_will ) - 1;
+					merc_logf( "TTYPE_DEBUG: [pre-NL] WILL TTYPE, cur_round=%d, sending TTYPE SEND", d->ttype_round );
 					ttype_request( d ); /* Send first TTYPE SEND */
 				} else if ( !memcmp( &d->inbuf[i], ttype_wont, strlen( ttype_wont ) ) ) {
 					i += (int) strlen( ttype_wont ) - 1;
+					merc_logf( "TTYPE_DEBUG: [pre-NL] WONT TTYPE, cur_round=%d", d->ttype_round );
 					d->ttype_enabled = FALSE;
 				}
-				/* TTYPE subnegotiation: IAC SB TTYPE IS <string> IAC SE */
+				/* TTYPE subnegotiation: IAC SB TTYPE IS <string> IAC SE
+				 * Note: TTYPE data starts with TELQUAL_IS (0x00), a NUL byte,
+				 * so we cannot use '\0' as terminator. Use bounded scan like NAWS. */
 				else if ( d->inbuf[i + 1] == (signed char) SB &&
 					d->inbuf[i + 2] == (signed char) TELOPT_TTYPE ) {
 					int sb_start = i + 3;
@@ -1292,10 +1300,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 							(unsigned char) d->inbuf[sb_start + sb_len + 1] == SE ) {
 							break;
 						}
-						if ( d->inbuf[sb_start + sb_len] == '\0' )
-							break;
 						sb_len++;
 					}
+					merc_logf( "TTYPE_DEBUG: [pre-NL] SB TTYPE subneg, sb_len=%d", sb_len );
 					if ( sb_len > 0 ) {
 						ttype_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
 					}
@@ -1421,12 +1428,16 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 			/* TTYPE - client agrees to send terminal type */
 			else if ( !memcmp( &d->inbuf[i], ttype_will, strlen( ttype_will ) ) ) {
 				i += (int) strlen( ttype_will ) - 1;
+				merc_logf( "TTYPE_DEBUG: [post-NL] WILL TTYPE, cur_round=%d, sending TTYPE SEND", d->ttype_round );
 				ttype_request( d ); /* Send first TTYPE SEND */
 			} else if ( !memcmp( &d->inbuf[i], ttype_wont, strlen( ttype_wont ) ) ) {
 				i += (int) strlen( ttype_wont ) - 1;
+				merc_logf( "TTYPE_DEBUG: [post-NL] WONT TTYPE, cur_round=%d", d->ttype_round );
 				d->ttype_enabled = FALSE;
 			}
-			/* TTYPE subnegotiation: IAC SB TTYPE IS <string> IAC SE */
+			/* TTYPE subnegotiation: IAC SB TTYPE IS <string> IAC SE
+			 * Note: TTYPE data starts with TELQUAL_IS (0x00), a NUL byte,
+			 * so we cannot use '\0' as terminator. Use bounded scan like NAWS. */
 			else if ( d->inbuf[i + 1] == (signed char) SB &&
 				d->inbuf[i + 2] == (signed char) TELOPT_TTYPE ) {
 				int sb_start = i + 3;
@@ -1436,10 +1447,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 						(unsigned char) d->inbuf[sb_start + sb_len + 1] == SE ) {
 						break;
 					}
-					if ( d->inbuf[sb_start + sb_len] == '\0' )
-						break;
 					sb_len++;
 				}
+				merc_logf( "TTYPE_DEBUG: [post-NL] SB TTYPE subneg, sb_len=%d", sb_len );
 				if ( sb_len > 0 ) {
 					ttype_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
 				}
@@ -1643,9 +1653,12 @@ void retell_protocols( DESCRIPTOR_DATA *d ) {
 	write_to_descriptor( d, (char *) ttype_dont, (int) strlen( ttype_dont ) ); /* TTYPE uses DO/DONT */
 
 	/* Reset TTYPE state for re-negotiation */
-	d->ttype_enabled = FALSE;
-	d->ttype_round   = 0;
-	d->mtts_flags    = 0;
+	merc_logf( "TTYPE_DEBUG: retell_protocols resetting ttype state (was round=%d mtts=%d)",
+		d->ttype_round, d->mtts_flags );
+	d->ttype_enabled     = FALSE;
+	d->ttype_round       = 0;
+	d->mtts_flags        = 0;
+	d->terminal_type[0]  = '\0';
 
 	/* Now send WILL/DO to offer protocols fresh */
 	/* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */

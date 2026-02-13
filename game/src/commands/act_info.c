@@ -39,31 +39,6 @@ extern int can_interpret args( ( CHAR_DATA * ch, int cmd ) );
  *   #xNNN - 5-char extended 256-color code (e.g., #x237)
  */
 /*
- * Pad a string (which may contain color codes) to a target visible width.
- * Appends spaces to reach target_width visible characters.
- */
-static void pad_to_visible_width( char *dest, size_t destsize, const char *src, int target_width ) {
-	int visible_len = visible_strlen( src );
-	int padding = target_width - visible_len;
-	size_t src_len = strlen( src );
-	size_t i;
-
-	if ( padding < 0 )
-		padding = 0;
-
-	/* Copy the source string */
-	if ( src_len >= destsize )
-		src_len = destsize - 1;
-	memcpy( dest, src, src_len );
-
-	/* Add padding spaces */
-	for ( i = 0; i < (size_t)padding && ( src_len + i ) < ( destsize - 1 ); i++ )
-		dest[src_len + i] = ' ';
-
-	dest[src_len + i] = '\0';
-}
-
-/*
  * Add a player line to a who list buffer.
  * Centralized formatting ensures consistent column alignment.
  */
@@ -4442,14 +4417,35 @@ void do_colortest( CHAR_DATA *ch, char *argument ) {
 
 	if ( ch->desc && ch->desc->ttype_enabled ) {
 		snprintf( buf, sizeof( buf ),
-			"#7TTYPE:#n Client: %s, MTTS: %d%s%s%s%s\n\r",
-			ch->desc->client_name,
-			ch->desc->mtts_flags,
-			( ch->desc->mtts_flags & MTTS_TRUECOLOR ) ? " [TRUECOLOR]" : "",
-			( ch->desc->mtts_flags & MTTS_256_COLORS ) ? " [256COLOR]" : "",
-			( ch->desc->mtts_flags & MTTS_ANSI ) ? " [ANSI]" : "",
-			( ch->desc->mtts_flags & MTTS_SCREEN_READER ) ? " [SCREENRD]" : "" );
+			"#7TTYPE:#n Client: #C%s#n",
+			ch->desc->client_name[0] ? ch->desc->client_name : "unknown" );
 		send_to_char( buf, ch );
+
+		if ( ch->desc->terminal_type[0] ) {
+			snprintf( buf, sizeof( buf ), ", Terminal: #C%s#n", ch->desc->terminal_type );
+			send_to_char( buf, ch );
+		}
+
+		snprintf( buf, sizeof( buf ), ", MTTS: %d\n\r", ch->desc->mtts_flags );
+		send_to_char( buf, ch );
+
+		if ( ch->desc->mtts_flags > 0 ) {
+			snprintf( buf, sizeof( buf ),
+				"#7  Flags:#n%s%s%s%s%s%s%s%s%s%s%s%s\n\r",
+				( ch->desc->mtts_flags & MTTS_ANSI )           ? " [ANSI]" : "",
+				( ch->desc->mtts_flags & MTTS_VT100 )          ? " [VT100]" : "",
+				( ch->desc->mtts_flags & MTTS_UTF8 )           ? " [UTF-8]" : "",
+				( ch->desc->mtts_flags & MTTS_256_COLORS )     ? " [256COLOR]" : "",
+				( ch->desc->mtts_flags & MTTS_MOUSE_TRACKING ) ? " [MOUSE]" : "",
+				( ch->desc->mtts_flags & MTTS_OSC_COLOR )      ? " [OSC]" : "",
+				( ch->desc->mtts_flags & MTTS_SCREEN_READER )  ? " [SCREENRD]" : "",
+				( ch->desc->mtts_flags & MTTS_PROXY )          ? " [PROXY]" : "",
+				( ch->desc->mtts_flags & MTTS_TRUECOLOR )      ? " [TRUECOLOR]" : "",
+				( ch->desc->mtts_flags & MTTS_MNES )           ? " [MNES]" : "",
+				( ch->desc->mtts_flags & MTTS_MSLP )           ? " [MSLP]" : "",
+				( ch->desc->mtts_flags & MTTS_SSL )            ? " [SSL]" : "" );
+			send_to_char( buf, ch );
+		}
 	} else {
 		send_to_char( "#7TTYPE:#n Not detected (client may not support MTTS)\n\r", ch );
 	}

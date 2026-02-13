@@ -520,3 +520,28 @@ int visible_strlen( const char *str ) {
 	}
 	return len;
 }
+
+/*
+ * Pad a string (which may contain color codes) to a target visible width.
+ * Appends spaces to reach target_width visible characters.
+ */
+void pad_to_visible_width( char *dest, size_t destsize, const char *src, int target_width ) {
+	int visible_len = visible_strlen( src );
+	int padding = target_width - visible_len;
+	size_t src_len = strlen( src );
+	size_t i;
+
+	if ( padding < 0 )
+		padding = 0;
+
+	/* Copy the source string */
+	if ( src_len >= destsize )
+		src_len = destsize - 1;
+	memcpy( dest, src, src_len );
+
+	/* Add padding spaces */
+	for ( i = 0; i < (size_t)padding && ( src_len + i ) < ( destsize - 1 ); i++ )
+		dest[src_len + i] = ' ';
+
+	dest[src_len + i] = '\0';
+}

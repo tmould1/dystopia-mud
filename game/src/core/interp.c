@@ -1242,6 +1242,8 @@ const struct cmd_type cmd_table[] =
 		{ "shutdow", do_shutdow, POS_DEAD, 10, LOG_NORMAL, 0, 0, 0 },
 		{ "shutdown", do_shutdown, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "users", do_users, POS_DEAD, 8, LOG_NORMAL, 0, 0, 0 },
+		{ "mudclients", do_mudclients, POS_DEAD, 8, LOG_NORMAL, 0, 0, 0 },
+		{ "dwho", do_dwho, POS_DEAD, 8, LOG_NORMAL, 0, 0, 0 },
 		{ "omni", do_omni, POS_DEAD, 10, LOG_NORMAL, 0, 0, 0 },
 		{ "hreload", do_hreload, POS_DEAD, 10, LOG_NORMAL, 0, 0, 0 },
 		{ "wizlock", do_wizlock, POS_DEAD, 11, LOG_ALWAYS, 0, 0, 0 },

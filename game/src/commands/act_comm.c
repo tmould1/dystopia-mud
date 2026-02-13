@@ -1937,61 +1937,157 @@ void do_communicate( CHAR_DATA *ch, char *argument ) {
 void do_protocols( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	char naws_status[64];
-	const char *mccp_status;
-	const char *gmcp_status;
-	const char *mxp_status;
+	char ttype_status[64];
+	char padded_name[128];
+	char padded_desc[128];
+	char padded_status[128];
+	char margin[64];
+	char border[128];
+	const char *title = "#CMUD Protocol Status#n";
+	int term_width, inner_width, outer_width, left_pad;
+	int max_name, max_desc, max_status;
+	int title_visible, title_left, title_right;
+	int i, num_rows;
+
+	struct {
+		const char *name;
+		const char *desc;
+		const char *status;
+	} rows[7];
 
 	if ( ch->desc == NULL ) {
 		send_to_char( "No descriptor.\n\r", ch );
 		return;
 	}
 
-	/* Determine MCCP status */
+	/* Populate protocol rows */
+	rows[0].name = "#yMCCP#n";
+	rows[0].desc = "Compression";
 	if ( ch->desc->out_compress != NULL ) {
 		if ( ch->desc->mccp_version == 2 )
-			mccp_status = "#GOn (v2)#n";
+			rows[0].status = "#GOn (v2)#n";
 		else if ( ch->desc->mccp_version == 1 )
-			mccp_status = "#GOn (v1)#n";
+			rows[0].status = "#GOn (v1)#n";
 		else
-			mccp_status = "#GOn#n     ";
+			rows[0].status = "#GOn#n";
 	} else
-		mccp_status = "#rOff#n    ";
+		rows[0].status = "#rOff#n";
 
-	/* Determine GMCP status */
-	gmcp_status = ch->desc->gmcp_enabled ? "#GOn#n " : "#rOff#n";
+	rows[1].name = "#yGMCP#n";
+	rows[1].desc = "Data Channel";
+	rows[1].status = ch->desc->gmcp_enabled ? "#GOn#n" : "#rOff#n";
 
-	/* Determine MXP status */
-	mxp_status = ch->desc->mxp_enabled ? "#GOn#n " : "#rOff#n";
+	rows[2].name = "#yMCMP#n";
+	rows[2].desc = "Client.Media";
+	rows[2].status = mcmp_enabled( ch->desc ) ? "#GOn#n" : "#rOff#n";
 
-	/* Determine NAWS status */
+	rows[3].name = "#yMXP#n";
+	rows[3].desc = "Extensions";
+	rows[3].status = ch->desc->mxp_enabled ? "#GOn#n" : "#rOff#n";
+
+	rows[4].name = "#yMSSP#n";
+	rows[4].desc = "Server Status";
+	rows[4].status = "#yAvail#n";
+
+	rows[5].name = "#yNAWS#n";
+	rows[5].desc = "Window Size";
 	if ( ch->desc->naws_enabled )
 		snprintf( naws_status, sizeof( naws_status ), "#GOn#n (%dx%d)",
 			ch->desc->client_width, ch->desc->client_height );
 	else
 		snprintf( naws_status, sizeof( naws_status ), "#rOff#n" );
+	rows[5].status = naws_status;
 
-	/* Box width = 34 chars inside the + markers */
-	send_to_char( "#w+----------------------------------+#n\n\r", ch );
-	send_to_char( "#w|#n      #CMUD Protocol Status#n       #w|#n\n\r", ch );
-	send_to_char( "#w+----------------------------------+#n\n\r", ch );
-	snprintf( buf, sizeof( buf ), "#w|#n  #yMCCP#n  Compression      %s #w|#n\n\r", mccp_status );
+	rows[6].name = "#yTTYPE#n";
+	rows[6].desc = "Terminal Type";
+	if ( ch->desc->ttype_enabled )
+		snprintf( ttype_status, sizeof( ttype_status ), "#GOn#n (%s)",
+			ch->desc->client_name[0] ? ch->desc->client_name : "?" );
+	else
+		snprintf( ttype_status, sizeof( ttype_status ), "#rOff#n" );
+	rows[6].status = ttype_status;
+
+	num_rows = 7;
+
+	/* Calculate column widths from content */
+	max_name = max_desc = max_status = 0;
+	for ( i = 0; i < num_rows; i++ ) {
+		int vn = visible_strlen( rows[i].name );
+		int vd = visible_strlen( rows[i].desc );
+		int vs = visible_strlen( rows[i].status );
+		if ( vn > max_name ) max_name = vn;
+		if ( vd > max_desc ) max_desc = vd;
+		if ( vs > max_status ) max_status = vs;
+	}
+
+	/* inner_width: 2 + name + 2 + desc + 3 + status + 2 */
+	inner_width = 2 + max_name + 2 + max_desc + 3 + max_status + 2;
+	outer_width = inner_width + 2; /* for | borders */
+
+	/* Ensure title fits */
+	title_visible = visible_strlen( title );
+	if ( inner_width < title_visible + 4 )
+		inner_width = title_visible + 4;
+	outer_width = inner_width + 2;
+
+	/* Center table in terminal */
+	term_width = naws_get_width( ch );
+	left_pad = ( term_width - outer_width ) / 2;
+	if ( left_pad < 0 )
+		left_pad = 0;
+	if ( left_pad > (int)sizeof( margin ) - 1 )
+		left_pad = (int)sizeof( margin ) - 1;
+	for ( i = 0; i < left_pad; i++ )
+		margin[i] = ' ';
+	margin[left_pad] = '\0';
+
+	/* Build border: +---...---+ */
+	border[0] = '+';
+	for ( i = 1; i <= inner_width; i++ )
+		border[i] = '-';
+	border[inner_width + 1] = '+';
+	border[inner_width + 2] = '\0';
+
+	/* Title centering within inner width */
+	title_left = ( inner_width - title_visible ) / 2;
+	title_right = inner_width - title_visible - title_left;
+
+	/* Top border */
+	snprintf( buf, sizeof( buf ), "%s#w%s#n\n\r", margin, border );
 	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "#w|#n  #yGMCP#n  Data Channel     %s    #w|#n\n\r", gmcp_status );
+
+	/* Title row */
+	snprintf( buf, sizeof( buf ), "%s#w|#n%*s%s%*s#w|#n\n\r",
+		margin, title_left, "", title, title_right, "" );
 	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "#w|#n  #yMCMP#n  Client.Media     %s    #w|#n\n\r",
-		mcmp_enabled( ch->desc ) ? "#GOn#n " : "#rOff#n" );
+
+	/* Middle border */
+	snprintf( buf, sizeof( buf ), "%s#w%s#n\n\r", margin, border );
 	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "#w|#n  #yMXP#n   Extensions       %s    #w|#n\n\r", mxp_status );
+
+	/* Data rows */
+	for ( i = 0; i < num_rows; i++ ) {
+		pad_to_visible_width( padded_name, sizeof( padded_name ),
+			rows[i].name, max_name );
+		pad_to_visible_width( padded_desc, sizeof( padded_desc ),
+			rows[i].desc, max_desc );
+		pad_to_visible_width( padded_status, sizeof( padded_status ),
+			rows[i].status, max_status );
+
+		snprintf( buf, sizeof( buf ), "%s#w|#n  %s  %s   %s  #w|#n\n\r",
+			margin, padded_name, padded_desc, padded_status );
+		send_to_char( buf, ch );
+	}
+
+	/* Bottom border */
+	snprintf( buf, sizeof( buf ), "%s#w%s#n\n\r", margin, border );
 	send_to_char( buf, ch );
-	send_to_char( "#w|#n  #yMSSP#n  Server Status    #yAvail#n  #w|#n\n\r", ch );
-	snprintf( buf, sizeof( buf ), "#w|#n  #yNAWS#n  Window Size      %-10s#w|#n\n\r", naws_status );
-	send_to_char( buf, ch );
-	send_to_char( "#w+----------------------------------+#n\n\r", ch );
 
 	/* Show additional GMCP details if enabled */
 	if ( ch->desc->gmcp_enabled && ch->desc->gmcp_packages > 0 ) {
 		snprintf( buf, sizeof( buf ),
-			"\n\r#yGMCP Packages:#n %s%s%s%s%s%s\n\r",
+			"\n\r%s#yGMCP Packages:#n %s%s%s%s%s%s\n\r",
+			margin,
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CORE ) ? "Core " : "",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR ) ? "Char " : "",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_VITALS ) ? "Char.Vitals " : "",

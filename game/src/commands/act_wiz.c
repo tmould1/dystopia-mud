@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../systems/ttype.h"
 #include "../db/db_game.h"
 #include "../db/db_player.h"
 #if !defined( WIN32 )
@@ -4582,4 +4583,193 @@ void do_doublexp( CHAR_DATA *ch, char *argument ) {
 	} else
 		do_doublexp( ch, "" );
 	return;
+}
+
+/*
+ * do_mudclients - List connected MUD clients by frequency
+ */
+void do_mudclients( CHAR_DATA *ch, char *argument ) {
+	char buf[MAX_STRING_LENGTH];
+	DESCRIPTOR_DATA *d;
+	struct {
+		char name[64];
+		int  count;
+	} clients[128];
+	int num_clients = 0;
+	int total = 0;
+	int i, j;
+
+	for ( d = descriptor_list; d != NULL; d = d->next ) {
+		const char *cname;
+
+		if ( d->connected != CON_PLAYING )
+			continue;
+		if ( d->character == NULL )
+			continue;
+
+		total++;
+		cname = ( d->client_name[0] != '\0' ) ? d->client_name : "(unknown)";
+
+		/* Search existing entries (case-insensitive) */
+		for ( i = 0; i < num_clients; i++ ) {
+			if ( !str_cmp( clients[i].name, cname ) ) {
+				clients[i].count++;
+				break;
+			}
+		}
+		if ( i == num_clients && num_clients < 128 ) {
+			strncpy( clients[num_clients].name, cname, 63 );
+			clients[num_clients].name[63] = '\0';
+			clients[num_clients].count = 1;
+			num_clients++;
+		}
+	}
+
+	if ( total == 0 ) {
+		send_to_char( "No players connected.\n\r", ch );
+		return;
+	}
+
+	/* Insertion sort descending by count */
+	for ( i = 1; i < num_clients; i++ ) {
+		char tmp_name[64];
+		int tmp_count = clients[i].count;
+		strncpy( tmp_name, clients[i].name, 63 );
+		tmp_name[63] = '\0';
+		j = i - 1;
+		while ( j >= 0 && clients[j].count < tmp_count ) {
+			strncpy( clients[j + 1].name, clients[j].name, 63 );
+			clients[j + 1].name[63] = '\0';
+			clients[j + 1].count = clients[j].count;
+			j--;
+		}
+		strncpy( clients[j + 1].name, tmp_name, 63 );
+		clients[j + 1].name[63] = '\0';
+		clients[j + 1].count = tmp_count;
+	}
+
+	send_to_char( "#C--- MUD Clients Connected ---#n\n\r", ch );
+	for ( i = 0; i < num_clients; i++ ) {
+		char bar[32];
+		int blen = clients[i].count > 30 ? 30 : clients[i].count;
+		memset( bar, '|', blen );
+		bar[blen] = '\0';
+
+		snprintf( buf, sizeof( buf ), "  #G%-20s#n  #w%d#n  #y%s#n\n\r",
+			clients[i].name, clients[i].count, bar );
+		send_to_char( buf, ch );
+	}
+	send_to_char( "#C---#n\n\r", ch );
+	snprintf( buf, sizeof( buf ), "  #w%d#n connection%s, #w%d#n unique client%s\n\r",
+		total, total == 1 ? "" : "s",
+		num_clients, num_clients == 1 ? "" : "s" );
+	send_to_char( buf, ch );
+}
+
+/*
+ * do_dwho - Debug who: show protocol/client details for each connected player
+ */
+void do_dwho( CHAR_DATA *ch, char *argument ) {
+	char buf[MAX_STRING_LENGTH];
+	DESCRIPTOR_DATA *d;
+	int count = 0;
+
+	send_to_char( "#C--- Debug Who ---#n\n\r", ch );
+
+	for ( d = descriptor_list; d != NULL; d = d->next ) {
+		CHAR_DATA *wch;
+		const char *client;
+		const char *term;
+		const char *color_mode;
+		char mtts[256];
+		char proto[256];
+
+		if ( d->connected != CON_PLAYING )
+			continue;
+		wch = ( d->original != NULL ) ? d->original : d->character;
+		if ( wch == NULL || !can_see( ch, wch ) )
+			continue;
+
+		count++;
+		client = ( d->client_name[0] != '\0' ) ? d->client_name : "(none)";
+		term   = ( d->terminal_type[0] != '\0' ) ? d->terminal_type : "(none)";
+
+		/* Build MTTS flags string */
+		mtts[0] = '\0';
+		if ( d->mtts_flags & MTTS_ANSI )           strcat( mtts, "ANSI " );
+		if ( d->mtts_flags & MTTS_VT100 )          strcat( mtts, "VT100 " );
+		if ( d->mtts_flags & MTTS_UTF8 )            strcat( mtts, "UTF8 " );
+		if ( d->mtts_flags & MTTS_256_COLORS )     strcat( mtts, "256COLOR " );
+		if ( d->mtts_flags & MTTS_MOUSE_TRACKING ) strcat( mtts, "MOUSE " );
+		if ( d->mtts_flags & MTTS_OSC_COLOR )      strcat( mtts, "OSC " );
+		if ( d->mtts_flags & MTTS_SCREEN_READER )  strcat( mtts, "READER " );
+		if ( d->mtts_flags & MTTS_PROXY )          strcat( mtts, "PROXY " );
+		if ( d->mtts_flags & MTTS_TRUECOLOR )      strcat( mtts, "TRUECOLOR " );
+		if ( d->mtts_flags & MTTS_MNES )           strcat( mtts, "MNES " );
+		if ( d->mtts_flags & MTTS_MSLP )           strcat( mtts, "MSLP " );
+		if ( d->mtts_flags & MTTS_SSL )            strcat( mtts, "SSL " );
+		if ( mtts[0] == '\0' ) strcpy( mtts, "(none)" );
+
+		/* Build protocol string */
+		proto[0] = '\0';
+		if ( d->out_compress != NULL ) {
+			if ( d->mccp_version == 2 )      strcat( proto, "MCCP2 " );
+			else if ( d->mccp_version == 1 ) strcat( proto, "MCCP1 " );
+			else                             strcat( proto, "MCCP " );
+		}
+		if ( d->gmcp_enabled )  strcat( proto, "GMCP " );
+		if ( d->mxp_enabled )   strcat( proto, "MXP " );
+		if ( d->naws_enabled ) {
+			char naws_buf[32];
+			snprintf( naws_buf, sizeof( naws_buf ), "NAWS(%dx%d) ",
+				d->client_width, d->client_height );
+			strcat( proto, naws_buf );
+		}
+		if ( d->ttype_enabled ) strcat( proto, "TTYPE " );
+		if ( proto[0] == '\0' ) strcpy( proto, "(none)" );
+
+		/* Determine color mode from character flags */
+		if ( IS_EXTRA( wch, EXTRA_TRUECOLOR ) )
+			color_mode = "#GTruecolor#n";
+		else if ( IS_SET( wch->act, PLR_XTERM ) )
+			color_mode = "#G256-Color#n";
+		else if ( IS_SET( wch->act, PLR_ANSI ) )
+			color_mode = "#GANSI#n";
+		else
+			color_mode = "#rNone#n";
+
+		/* Player name */
+		snprintf( buf, sizeof( buf ), "#G%s#n\n\r", wch->pcdata->switchname );
+		send_to_char( buf, ch );
+
+		/* Client + Terminal type */
+		snprintf( buf, sizeof( buf ),
+			"  #yClient:#n %-16s #yTerm:#n %s\n\r", client, term );
+		send_to_char( buf, ch );
+
+		/* MTTS flags */
+		if ( d->mtts_flags > 0 )
+			snprintf( buf, sizeof( buf ),
+				"  #yMTTS:#n   %s(%d)\n\r", mtts, d->mtts_flags );
+		else
+			snprintf( buf, sizeof( buf ), "  #yMTTS:#n   %s\n\r", mtts );
+		send_to_char( buf, ch );
+
+		/* Protocols */
+		snprintf( buf, sizeof( buf ), "  #yProto:#n  %s\n\r", proto );
+		send_to_char( buf, ch );
+
+		/* Color mode */
+		snprintf( buf, sizeof( buf ), "  #yColor:#n  %s\n\r", color_mode );
+		send_to_char( buf, ch );
+	}
+
+	if ( count == 0 ) {
+		send_to_char( "  No visible players connected.\n\r", ch );
+	}
+
+	send_to_char( "#C---#n\n\r", ch );
+	snprintf( buf, sizeof( buf ), "#w%d#n player%s shown\n\r",
+		count, count == 1 ? "" : "s" );
+	send_to_char( buf, ch );
 }

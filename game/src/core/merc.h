@@ -589,7 +589,8 @@ struct descriptor_data {
 	bool ttype_enabled; /* TTYPE negotiation successful */
 	int  ttype_round;   /* Current TTYPE round (1-3) */
 	int  mtts_flags;    /* MTTS capability bitfield */
-	char client_name[64]; /* Terminal/client name from round 1 */
+	char client_name[64];    /* Terminal/client name from round 1 */
+	char terminal_type[64];  /* Standard terminal name from round 2 */
 };
 
 /*
@@ -3927,6 +3928,8 @@ DECLARE_DO_FUN( do_unwerewolf );
 DECLARE_DO_FUN( do_up );
 DECLARE_DO_FUN( do_upkeep );
 DECLARE_DO_FUN( do_users );
+DECLARE_DO_FUN( do_mudclients );
+DECLARE_DO_FUN( do_dwho );
 DECLARE_DO_FUN( do_vampire );
 DECLARE_DO_FUN( do_vamptalk );
 DECLARE_DO_FUN( do_tail );
@@ -4378,6 +4381,7 @@ bool str_infix args( ( const char *astr, const char *bstr ) );
 bool str_suffix args( ( const char *astr, const char *bstr ) );
 char *capitalize args( ( const char *str ) );
 int visible_strlen args( ( const char *str ) );
+void pad_to_visible_width args( ( char *dest, size_t destsize, const char *src, int target_width ) );
 const char *mask_ip args( ( const char *ip ) );
 void append_file args( ( CHAR_DATA * ch, char *file, char *str ) );
 void bug args( ( const char *str, int param ) );

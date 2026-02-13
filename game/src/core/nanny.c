@@ -314,6 +314,9 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 		char_list = ch;
 		d->connected = CON_PLAYING;
 
+		/* MTTS auto-upgrade: apply detected terminal capabilities */
+		ttype_apply_mtts( d, ch );
+
 		if ( IS_HERO( ch ) ) do_help( ch, "motd" );
 
 		if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
@@ -556,25 +559,8 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 			SET_BIT( ch->act, PLR_PREFER_MXP );
 		if ( d->gmcp_enabled && ( d->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) )
 			SET_BIT( ch->act, PLR_PREFER_MCMP );
-		/* MTTS auto-upgrade: if TTYPE detected higher capabilities, upgrade */
-		if ( d->ttype_enabled && d->mtts_flags > 0 ) {
-			if ( ( d->mtts_flags & MTTS_TRUECOLOR ) && !IS_EXTRA( ch, EXTRA_TRUECOLOR ) ) {
-				SET_BIT( ch->act, PLR_ANSI );
-				SET_BIT( ch->act, PLR_XTERM );
-				SET_BIT( ch->extra, EXTRA_TRUECOLOR );
-			} else if ( ( d->mtts_flags & MTTS_256_COLORS ) && !IS_SET( ch->act, PLR_XTERM ) ) {
-				SET_BIT( ch->act, PLR_ANSI );
-				SET_BIT( ch->act, PLR_XTERM );
-			} else if ( ( d->mtts_flags & MTTS_ANSI ) && !IS_SET( ch->act, PLR_ANSI ) ) {
-				SET_BIT( ch->act, PLR_ANSI );
-			}
-			if ( d->mtts_flags & MTTS_SCREEN_READER ) {
-				SET_BIT( ch->act, PLR_SCREENREADER );
-				SET_BIT( ch->act, PLR_BLANK );
-				SET_BIT( ch->act, PLR_AUTOEXIT );
-				d->mxp_enabled = FALSE;
-			}
-		}
+		/* MTTS auto-upgrade: apply detected terminal capabilities */
+		ttype_apply_mtts( d, ch );
 		/* Character creation finalization */
 		ch->pcdata->perm_str = number_range( 10, 16 );
 		ch->pcdata->perm_int = number_range( 10, 16 );
@@ -609,6 +595,9 @@ void nanny( DESCRIPTOR_DATA *d, char *argument ) {
 			else if ( !IS_SET( ch->act, PLR_PREFER_MXP ) && d->mxp_enabled )
 				d->mxp_enabled = FALSE;
 		}
+
+		/* MTTS auto-upgrade: apply detected terminal capabilities */
+		ttype_apply_mtts( d, ch );
 
 		if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 			ch->gnosis[GCURRENT] = ch->gnosis[GMAXIMUM] - 5;
@@ -963,6 +952,8 @@ bool check_reconnect( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 				/* Send GMCP data on reconnect */
 				if ( d->gmcp_enabled )
 					gmcp_send_char_data( ch );
+				/* MTTS auto-upgrade on reconnect */
+				ttype_apply_mtts( d, ch );
 				/* Inform the character of a note in progress and the possbility of continuation! */
 				if ( ch->pcdata->in_progress )
 					send_to_char( "You have a note in progress. Type NWRITE to continue it.\n\r", ch );
@@ -995,6 +986,8 @@ bool check_kickoff( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 				sprintf( log_buf, "%s@%s kicking off old link.", ch->name, ch->lasthost );
 				log_string( log_buf );
 				d->connected = CON_PLAYING;
+				/* MTTS auto-upgrade on kickoff */
+				ttype_apply_mtts( d, ch );
 			}
 			return TRUE;
 		}

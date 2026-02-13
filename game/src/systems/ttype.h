@@ -25,6 +25,9 @@
 #define MTTS_SCREEN_READER   (1 << 6)  /*  64 - Screen reader active */
 #define MTTS_PROXY           (1 << 7)  /* 128 - Proxy/relay connection */
 #define MTTS_TRUECOLOR       (1 << 8)  /* 256 - True color (24-bit RGB) */
+#define MTTS_MNES            (1 << 9)  /* 512 - MUD New-Environ Standard */
+#define MTTS_MSLP            (1 << 10) /* 1024 - MUD Server Link Protocol */
+#define MTTS_SSL             (1 << 11) /* 2048 - SSL/TLS secured connection */
 
 /*
  * Telnet negotiation strings (defined in ttype.c)
@@ -53,5 +56,8 @@ void ttype_request( DESCRIPTOR_DATA *d );
 
 /* Handle incoming TTYPE subnegotiation response from client */
 void ttype_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int len );
+
+/* Apply MTTS-detected capabilities to a player (upgrade-only, never downgrades) */
+void ttype_apply_mtts( DESCRIPTOR_DATA *d, CHAR_DATA *ch );
 
 #endif /* TTYPE_H */

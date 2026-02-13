@@ -61,10 +61,11 @@ void ttype_init( DESCRIPTOR_DATA *d ) {
 	if ( d == NULL )
 		return;
 
-	d->ttype_enabled = FALSE;
-	d->ttype_round   = 0;
-	d->mtts_flags    = 0;
-	d->client_name[0] = '\0';
+	d->ttype_enabled     = FALSE;
+	d->ttype_round       = 0;
+	d->mtts_flags        = 0;
+	d->client_name[0]    = '\0';
+	d->terminal_type[0]  = '\0';
 }
 
 /*
@@ -106,21 +107,99 @@ void ttype_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int l
 	d->ttype_round++;
 	d->ttype_enabled = TRUE;
 
+	merc_logf( "TTYPE_DEBUG: round=%d term='%s' len=%d cur_terminal='%s' cur_mtts=%d",
+		d->ttype_round, term_type, len, d->terminal_type, d->mtts_flags );
+
 	if ( d->ttype_round == 1 ) {
-		/* Round 1: Store client/terminal name */
-		strncpy( d->client_name, term_type, sizeof( d->client_name ) - 1 );
-		d->client_name[sizeof( d->client_name ) - 1] = '\0';
+		/* Round 1: Store as terminal type (Mudlet sends terminal type here) */
+		strncpy( d->terminal_type, term_type, sizeof( d->terminal_type ) - 1 );
+		d->terminal_type[sizeof( d->terminal_type ) - 1] = '\0';
+
+		/* Only use as client name if GMCP Core.Hello hasn't already set it */
+		if ( d->client_name[0] == '\0' ) {
+			strncpy( d->client_name, term_type, sizeof( d->client_name ) - 1 );
+			d->client_name[sizeof( d->client_name ) - 1] = '\0';
+		}
 
 		/* Request round 2 */
 		ttype_request( d );
 	} else if ( d->ttype_round == 2 ) {
-		/* Round 2: Extended terminal name - request round 3 for MTTS */
+		/* Round 2: May be a terminal name or MTTS flags string.
+		 * Only overwrite terminal_type if not an MTTS flags string. */
+		if ( strncmp( term_type, "MTTS ", 5 ) != 0 ) {
+			merc_logf( "TTYPE_DEBUG: round2 storing terminal_type='%s'", term_type );
+			strncpy( d->terminal_type, term_type, sizeof( d->terminal_type ) - 1 );
+			d->terminal_type[sizeof( d->terminal_type ) - 1] = '\0';
+		} else {
+			merc_logf( "TTYPE_DEBUG: round2 SKIPPING MTTS string" );
+		}
+
+		/* Request round 3 for MTTS */
 		ttype_request( d );
 	} else if ( d->ttype_round == 3 ) {
 		/* Round 3: MTTS capability bitfield */
 		if ( !strncmp( term_type, "MTTS ", 5 ) ) {
 			d->mtts_flags = atoi( term_type + 5 );
+			merc_logf( "TTYPE_DEBUG: round3 parsed mtts_flags=%d", d->mtts_flags );
+		} else {
+			merc_logf( "TTYPE_DEBUG: round3 NO MTTS prefix, term='%s'", term_type );
 		}
 		/* Do not request further rounds */
+	} else {
+		merc_logf( "TTYPE_DEBUG: UNEXPECTED round=%d term='%s'", d->ttype_round, term_type );
+	}
+}
+
+/*
+ * Apply MTTS-detected capabilities to a player character.
+ *
+ * Upgrade-only: sets capability flags when MTTS reports higher capabilities
+ * than the player currently has enabled. Never removes flags, so manual
+ * player settings are preserved.
+ *
+ * Called on new character creation, returning player login, reconnect,
+ * and kickoff to ensure all login paths benefit from MTTS detection.
+ */
+void ttype_apply_mtts( DESCRIPTOR_DATA *d, CHAR_DATA *ch ) {
+	if ( d == NULL || ch == NULL || IS_NPC( ch ) )
+		return;
+	if ( !d->ttype_enabled )
+		return;
+
+	/* MTTS round 3 bitfield-based upgrades */
+	if ( d->mtts_flags > 0 ) {
+		/* Color capability upgrades (highest first) */
+		if ( ( d->mtts_flags & MTTS_TRUECOLOR ) && !IS_EXTRA( ch, EXTRA_TRUECOLOR ) ) {
+			SET_BIT( ch->act, PLR_ANSI );
+			SET_BIT( ch->act, PLR_XTERM );
+			SET_BIT( ch->extra, EXTRA_TRUECOLOR );
+		} else if ( ( d->mtts_flags & MTTS_256_COLORS ) && !IS_SET( ch->act, PLR_XTERM ) ) {
+			SET_BIT( ch->act, PLR_ANSI );
+			SET_BIT( ch->act, PLR_XTERM );
+		} else if ( ( d->mtts_flags & MTTS_ANSI ) && !IS_SET( ch->act, PLR_ANSI ) ) {
+			SET_BIT( ch->act, PLR_ANSI );
+		}
+
+		/* Screen reader mode */
+		if ( ( d->mtts_flags & MTTS_SCREEN_READER ) && !IS_SET( ch->act, PLR_SCREENREADER ) ) {
+			SET_BIT( ch->act, PLR_SCREENREADER );
+			SET_BIT( ch->act, PLR_BLANK );
+			SET_BIT( ch->act, PLR_AUTOEXIT );
+			d->mxp_enabled = FALSE;
+		}
+		return;
+	}
+
+	/*
+	 * Round 2 fallback: for non-MTTS clients (mtts_flags == 0) that still
+	 * provided a terminal type string in round 2 (e.g., raw telnet sends
+	 * "VT100"), infer basic ANSI capability from the terminal type name.
+	 */
+	if ( d->terminal_type[0] != '\0' && !IS_SET( ch->act, PLR_ANSI ) ) {
+		if ( !str_prefix( "XTERM", d->terminal_type )
+		||   !str_prefix( "VT100", d->terminal_type )
+		||   !str_prefix( "ANSI", d->terminal_type ) ) {
+			SET_BIT( ch->act, PLR_ANSI );
+		}
 	}
 }

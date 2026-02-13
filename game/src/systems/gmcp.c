@@ -508,9 +508,20 @@ void gmcp_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int le
 	else if ( !strcmp( package, "Core.Supports.Remove" ) ) {
 		d->gmcp_packages &= ~parse_package_support( json_data );
 	}
-	/* Core.Hello - client identification (we just log/ignore) */
+	/* Core.Hello - client identification, e.g. {"client":"Mudlet","version":"4.19.1"} */
 	else if ( !strcmp( package, "Core.Hello" ) ) {
-		/* Could parse client name/version from json_data if needed */
+		char *ptr = strstr( json_data, "\"client\"" );
+		if ( ptr != NULL ) {
+			ptr += 8; /* skip past "client" */
+			while ( *ptr && *ptr != '"' ) ptr++;
+			if ( *ptr == '"' ) {
+				int ci = 0;
+				ptr++;
+				while ( *ptr && *ptr != '"' && ci < (int) sizeof( d->client_name ) - 1 )
+					d->client_name[ci++] = *ptr++;
+				d->client_name[ci] = '\0';
+			}
+		}
 	}
 }
 
