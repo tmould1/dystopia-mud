@@ -2086,8 +2086,7 @@ void do_protocols( CHAR_DATA *ch, char *argument ) {
 	/* Show additional GMCP details if enabled */
 	if ( ch->desc->gmcp_enabled && ch->desc->gmcp_packages > 0 ) {
 		snprintf( buf, sizeof( buf ),
-			"\n\r%s#yGMCP Packages:#n %s%s%s%s%s%s\n\r",
-			margin,
+			"\n\r#yGMCP Packages:#n %s%s%s%s%s%s\n\r",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CORE ) ? "Core " : "",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR ) ? "Char " : "",
 			( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_VITALS ) ? "Char.Vitals " : "",
