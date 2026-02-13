@@ -1281,11 +1281,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 				/* TTYPE - client agrees to send terminal type */
 				else if ( !memcmp( &d->inbuf[i], ttype_will, strlen( ttype_will ) ) ) {
 					i += (int) strlen( ttype_will ) - 1;
-					merc_logf( "TTYPE_DEBUG: [pre-NL] WILL TTYPE, cur_round=%d, sending TTYPE SEND", d->ttype_round );
 					ttype_request( d ); /* Send first TTYPE SEND */
 				} else if ( !memcmp( &d->inbuf[i], ttype_wont, strlen( ttype_wont ) ) ) {
 					i += (int) strlen( ttype_wont ) - 1;
-					merc_logf( "TTYPE_DEBUG: [pre-NL] WONT TTYPE, cur_round=%d", d->ttype_round );
 					d->ttype_enabled = FALSE;
 				}
 				/* TTYPE subnegotiation: IAC SB TTYPE IS <string> IAC SE
@@ -1302,7 +1300,6 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 						}
 						sb_len++;
 					}
-					merc_logf( "TTYPE_DEBUG: [pre-NL] SB TTYPE subneg, sb_len=%d", sb_len );
 					if ( sb_len > 0 ) {
 						ttype_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
 					}
@@ -1428,11 +1425,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 			/* TTYPE - client agrees to send terminal type */
 			else if ( !memcmp( &d->inbuf[i], ttype_will, strlen( ttype_will ) ) ) {
 				i += (int) strlen( ttype_will ) - 1;
-				merc_logf( "TTYPE_DEBUG: [post-NL] WILL TTYPE, cur_round=%d, sending TTYPE SEND", d->ttype_round );
 				ttype_request( d ); /* Send first TTYPE SEND */
 			} else if ( !memcmp( &d->inbuf[i], ttype_wont, strlen( ttype_wont ) ) ) {
 				i += (int) strlen( ttype_wont ) - 1;
-				merc_logf( "TTYPE_DEBUG: [post-NL] WONT TTYPE, cur_round=%d", d->ttype_round );
 				d->ttype_enabled = FALSE;
 			}
 			/* TTYPE subnegotiation: IAC SB TTYPE IS <string> IAC SE
@@ -1449,7 +1444,6 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					}
 					sb_len++;
 				}
-				merc_logf( "TTYPE_DEBUG: [post-NL] SB TTYPE subneg, sb_len=%d", sb_len );
 				if ( sb_len > 0 ) {
 					ttype_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
 				}
@@ -1653,8 +1647,6 @@ void retell_protocols( DESCRIPTOR_DATA *d ) {
 	write_to_descriptor( d, (char *) ttype_dont, (int) strlen( ttype_dont ) ); /* TTYPE uses DO/DONT */
 
 	/* Reset TTYPE state for re-negotiation */
-	merc_logf( "TTYPE_DEBUG: retell_protocols resetting ttype state (was round=%d mtts=%d)",
-		d->ttype_round, d->mtts_flags );
 	d->ttype_enabled     = FALSE;
 	d->ttype_round       = 0;
 	d->mtts_flags        = 0;

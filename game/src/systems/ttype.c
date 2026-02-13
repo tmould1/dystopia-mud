@@ -107,9 +107,6 @@ void ttype_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int l
 	d->ttype_round++;
 	d->ttype_enabled = TRUE;
 
-	merc_logf( "TTYPE_DEBUG: round=%d term='%s' len=%d cur_terminal='%s' cur_mtts=%d",
-		d->ttype_round, term_type, len, d->terminal_type, d->mtts_flags );
-
 	if ( d->ttype_round == 1 ) {
 		/* Round 1: Store as terminal type (Mudlet sends terminal type here) */
 		strncpy( d->terminal_type, term_type, sizeof( d->terminal_type ) - 1 );
@@ -127,11 +124,8 @@ void ttype_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int l
 		/* Round 2: May be a terminal name or MTTS flags string.
 		 * Only overwrite terminal_type if not an MTTS flags string. */
 		if ( strncmp( term_type, "MTTS ", 5 ) != 0 ) {
-			merc_logf( "TTYPE_DEBUG: round2 storing terminal_type='%s'", term_type );
 			strncpy( d->terminal_type, term_type, sizeof( d->terminal_type ) - 1 );
 			d->terminal_type[sizeof( d->terminal_type ) - 1] = '\0';
-		} else {
-			merc_logf( "TTYPE_DEBUG: round2 SKIPPING MTTS string" );
 		}
 
 		/* Request round 3 for MTTS */
@@ -140,13 +134,8 @@ void ttype_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int l
 		/* Round 3: MTTS capability bitfield */
 		if ( !strncmp( term_type, "MTTS ", 5 ) ) {
 			d->mtts_flags = atoi( term_type + 5 );
-			merc_logf( "TTYPE_DEBUG: round3 parsed mtts_flags=%d", d->mtts_flags );
-		} else {
-			merc_logf( "TTYPE_DEBUG: round3 NO MTTS prefix, term='%s'", term_type );
 		}
 		/* Do not request further rounds */
-	} else {
-		merc_logf( "TTYPE_DEBUG: UNEXPECTED round=%d term='%s'", d->ttype_round, term_type );
 	}
 }
 
