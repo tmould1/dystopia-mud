@@ -4454,11 +4454,11 @@ void copyover_recover() {
 		/* MUSHclient and some clients only accept WILL offers at connection start */
 		retell_protocols( d );
 
-		/* Restore charset from before copyover as fallback until re-negotiation completes */
-		if ( charset != CHARSET_UNKNOWN ) {
-			d->client_charset = charset;
-			d->charset_negotiated = TRUE;
-		}
+		/* Don't restore saved charset - it may be stale CHARSET_ASCII from before
+		 * the DONT CHARSET fix. Let charset_finalize() apply current logic
+		 * (MTTS flags or default to UTF-8). charset_finalize() is normally only
+		 * called at CON_GET_NAME, but after copyover we're already CON_PLAYING. */
+		charset_finalize( d );
 
 		/* Write something, and check if it goes error-free */
 		if ( !write_to_descriptor_2( desc, "\n\r ┻━┻ ︵╰(°□°╰)\n\r", 0 ) ) {
@@ -4628,8 +4628,7 @@ void do_mudclients( CHAR_DATA *ch, char *argument ) {
 			}
 		}
 		if ( i == num_clients && num_clients < 128 ) {
-			strncpy( clients[num_clients].name, cname, 63 );
-			clients[num_clients].name[63] = '\0';
+			snprintf( clients[num_clients].name, sizeof( clients[num_clients].name ), "%s", cname );
 			clients[num_clients].count = 1;
 			num_clients++;
 		}
@@ -4644,30 +4643,28 @@ void do_mudclients( CHAR_DATA *ch, char *argument ) {
 	for ( i = 1; i < num_clients; i++ ) {
 		char tmp_name[64];
 		int tmp_count = clients[i].count;
-		strncpy( tmp_name, clients[i].name, 63 );
-		tmp_name[63] = '\0';
+		snprintf( tmp_name, sizeof( tmp_name ), "%s", clients[i].name );
 		j = i - 1;
 		while ( j >= 0 && clients[j].count < tmp_count ) {
-			strncpy( clients[j + 1].name, clients[j].name, 63 );
-			clients[j + 1].name[63] = '\0';
+			snprintf( clients[j + 1].name, sizeof( clients[j + 1].name ), "%s", clients[j].name );
 			clients[j + 1].count = clients[j].count;
 			j--;
 		}
-		strncpy( clients[j + 1].name, tmp_name, 63 );
-		clients[j + 1].name[63] = '\0';
+		snprintf( clients[j + 1].name, sizeof( clients[j + 1].name ), "%s", tmp_name );
 		clients[j + 1].count = tmp_count;
 	}
 
 	send_to_char( "#C--- MUD Clients Connected ---#n\n\r", ch );
 	for ( i = 0; i < num_clients; i++ ) {
 		char bar[32];
+		char line[256];
 		int blen = clients[i].count > 30 ? 30 : clients[i].count;
 		memset( bar, '|', blen );
 		bar[blen] = '\0';
 
-		snprintf( buf, sizeof( buf ), "  #G%-20s#n  #w%d#n  #y%s#n\n\r",
+		snprintf( line, sizeof( line ), "  #G%-20s#n  #w%d#n  #y%s#n\n\r",
 			clients[i].name, clients[i].count, bar );
-		send_to_char( buf, ch );
+		send_to_char( line, ch );
 	}
 	send_to_char( "#C---#n\n\r", ch );
 	snprintf( buf, sizeof( buf ), "  #w%d#n connection%s, #w%d#n unique client%s\n\r",

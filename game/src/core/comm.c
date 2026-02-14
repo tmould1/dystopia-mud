@@ -1327,8 +1327,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					charset_send_request( d );
 				} else if ( !memcmp( &d->inbuf[i], charset_dont, strlen( charset_dont ) ) ) {
 					i += (int) strlen( charset_dont ) - 1;
-					d->client_charset = CHARSET_ASCII;
-					d->charset_negotiated = TRUE;
+					/* DONT just means client won't negotiate CHARSET option.
+					 * It does NOT mean client is ASCII-only. Leave as unknown
+					 * so charset_finalize() can use MTTS or default to UTF-8. */
 				}
 				/* CHARSET subnegotiation: IAC SB CHARSET <opcode> ... IAC SE */
 				else if ( d->inbuf[i + 1] == (signed char) SB &&
@@ -1524,8 +1525,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 				charset_send_request( d );
 			} else if ( !memcmp( &d->inbuf[i], charset_dont, strlen( charset_dont ) ) ) {
 				i += (int) strlen( charset_dont ) - 1;
-				d->client_charset = CHARSET_ASCII;
-				d->charset_negotiated = TRUE;
+				/* DONT just means client won't negotiate CHARSET option.
+				 * It does NOT mean client is ASCII-only. Leave as unknown
+				 * so charset_finalize() can use MTTS or default to UTF-8. */
 			}
 			/* CHARSET subnegotiation: IAC SB CHARSET <opcode> ... IAC SE */
 			else if ( d->inbuf[i + 1] == (signed char) SB &&

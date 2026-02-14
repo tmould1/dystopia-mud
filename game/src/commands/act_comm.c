@@ -1937,7 +1937,7 @@ void do_communicate( CHAR_DATA *ch, char *argument ) {
 void do_protocols( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	char naws_status[64];
-	char ttype_status[64];
+	char ttype_status[128];
 	char padded_name[128];
 	char padded_desc[128];
 	char padded_status[128];
