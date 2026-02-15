@@ -287,6 +287,19 @@ void promote_new_executable( const char *argv0 ) {
 int proc_pid;
 int port, control;
 
+#if defined( WIN32 )
+/*
+ * Pre-created socket handles for copyover recovery.
+ * All sockets (control + clients) must be recreated via WSASocketW in main()
+ * while the parent process is still alive, because WSADuplicateSocket protocol
+ * infos become stale after the source process exits.
+ * Index 0 = control socket (stored in 'control' global).
+ * Indices 1+ = client sockets (stored here, consumed by copyover_recover).
+ */
+SOCKET copyover_client_sockets[256];
+int    copyover_client_count = 0;
+#endif
+
 int main( int argc, char **argv ) {
 	struct timeval now_time;
 	bool fCopyOver = FALSE;
@@ -407,33 +420,44 @@ int main( int argc, char **argv ) {
 				exit( 1 );
 			}
 
-			/* Read the protocol info from file */
+			/* Read ALL socket protocol infos from file and recreate handles NOW,
+			 * while the parent process is still alive. WSADuplicateSocket protocol
+			 * infos become stale after the source process exits, so we must call
+			 * WSASocketW for every socket before the parent's ExitProcess(). */
 			socket_fp = fopen( COPYOVER_SOCKET_FILE, "rb" );
 			if ( !socket_fp ) {
 				perror( "Copyover recovery: fopen socket file" );
 				exit( 1 );
 			}
+
+			/* Entry 0: control (listening) socket */
 			if ( fread( &proto_info, sizeof( proto_info ), 1, socket_fp ) != 1 ) {
-				perror( "Copyover recovery: fread socket file" );
+				perror( "Copyover recovery: fread control socket" );
 				fclose( socket_fp );
 				exit( 1 );
 			}
-			fclose( socket_fp );
-
-			/* NOTE: Don't delete the socket file here!
-			 * copyover_recover() in boot_db() still needs to read
-			 * the client socket entries. It will delete the file
-			 * after reading all entries.
-			 */
-
-			/* Recreate the socket using the duplicated info */
 			control = (int) WSASocketW( AF_INET, SOCK_STREAM, IPPROTO_TCP,
 				&proto_info, 0, 0 );
 			if ( control == INVALID_SOCKET ) {
-				fprintf( stderr, "Copyover recovery: WSASocket failed: %d\n",
+				fprintf( stderr, "Copyover recovery: WSASocket failed for control: %d\n",
 					WSAGetLastError() );
 				exit( 1 );
 			}
+
+			/* Entries 1+: client sockets - recreate all while parent is alive */
+			copyover_client_count = 0;
+			while ( fread( &proto_info, sizeof( proto_info ), 1, socket_fp ) == 1 ) {
+				SOCKET s = WSASocketW( AF_INET, SOCK_STREAM, IPPROTO_TCP,
+					&proto_info, 0, 0 );
+				if ( copyover_client_count < 256 ) {
+					copyover_client_sockets[copyover_client_count++] = s;
+				} else if ( s != INVALID_SOCKET ) {
+					closesocket( s );
+				}
+			}
+
+			fclose( socket_fp );
+			unlink( COPYOVER_SOCKET_FILE );
 		} else {
 			/* Fallback for old-style copyover (shouldn't happen on Windows) */
 			control = atoi( argv[3] );

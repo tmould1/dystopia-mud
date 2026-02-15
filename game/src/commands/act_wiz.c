@@ -4115,11 +4115,10 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 	char buf[100];
 #if !defined( WIN32 )
 	char buf2[100];
+#else
+	PROCESS_INFORMATION pi;
+	BOOL child_created = FALSE;
 #endif
-
-	/* Debug: immediate log to stderr with flush */
-	fprintf( stderr, "do_copyover: ENTERED function\n" );
-	fflush( stderr );
 
 	fp = fopen( COPYOVER_FILE, "w" );
 
@@ -4168,19 +4167,60 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 #if defined( WIN32 )
 	/*
-	 * Windows: Need to duplicate each client socket and save to binary file.
-	 * The text file will contain socket indices instead of raw descriptors.
-	 * Entry 0 in the socket file is the control (listening) socket.
-	 * Entries 1+ are the client sockets.
+	 * Windows copyover using CreateProcess + CREATE_SUSPENDED:
+	 * 1. Resolve exe path and create child process (suspended) to get its PID
+	 * 2. Duplicate sockets targeting the child's PID so WSASocketW works in child
+	 * 3. Write socket file and copyover data file
+	 * 4. After shared cleanup code, resume child and exit parent
+	 *
+	 * Using CreateProcess instead of _spawnl(_P_OVERLAY) because:
+	 * - _exec/_spawn with _P_OVERLAY is documented as unsafe with threads (MSVC)
+	 * - CreateProcess provides detailed GetLastError() diagnostics
+	 * - CREATE_SUSPENDED lets us get the child PID for WSADuplicateSocket
 	 */
 	{
 		FILE *socket_fp;
 		int socket_index = 1; /* Start at 1; index 0 is reserved for control socket */
-		DWORD target_pid = GetCurrentProcessId();
 		WSAPROTOCOL_INFOW proto_info;
 		char socket_path[MUD_PATH_MAX];
+		char exe_path[MUD_PATH_MAX];
+		char cmdline[MUD_PATH_MAX + 128];
+		STARTUPINFOA si;
+		DWORD child_pid;
 
-		/* Copy path to local buffer to avoid mud_path() rotating buffer issues */
+		/* Resolve executable path (prefer dystopia_new.exe for hot-reload) */
+		strncpy( exe_path, EXE_FILE_NEW, sizeof( exe_path ) - 1 );
+		exe_path[sizeof( exe_path ) - 1] = '\0';
+		if ( _access( exe_path, 0 ) != 0 ) {
+			strncpy( exe_path, EXE_FILE, sizeof( exe_path ) - 1 );
+			exe_path[sizeof( exe_path ) - 1] = '\0';
+			log_string( "do_copyover: using dystopia.exe" );
+		} else {
+			log_string( "do_copyover: found dystopia_new.exe, using it for hot-reload" );
+		}
+		log_string( exe_path );
+
+		/* Create child process SUSPENDED so we can get its PID */
+		ZeroMemory( &si, sizeof( si ) );
+		si.cb = sizeof( si );
+		ZeroMemory( &pi, sizeof( pi ) );
+
+		snprintf( cmdline, sizeof( cmdline ), "\"%s\" %d copyover wsasocket", exe_path, port );
+
+		if ( !CreateProcessA( exe_path, cmdline, NULL, NULL, FALSE,
+				CREATE_SUSPENDED, NULL, NULL, &si, &pi ) ) {
+			DWORD err = GetLastError();
+			merc_logf( "do_copyover: CreateProcess FAILED! error=%lu exe=%s", err, exe_path );
+			send_to_char( "Copyover FAILED - could not start new process!\n\r", ch );
+			fclose( fp );
+			return;
+		}
+
+		child_pid = pi.dwProcessId;
+		child_created = TRUE;
+		merc_logf( "do_copyover: child process created SUSPENDED, PID=%lu", child_pid );
+
+		/* Copy socket path to local buffer to avoid mud_path() rotating buffer issues */
 		strncpy( socket_path, COPYOVER_SOCKET_FILE, sizeof( socket_path ) - 1 );
 		socket_path[sizeof( socket_path ) - 1] = '\0';
 		merc_logf( "do_copyover: opening socket file for write: %s", socket_path );
@@ -4189,22 +4229,30 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 		if ( !socket_fp ) {
 			merc_logf( "do_copyover: fopen failed for socket file: %s", socket_path );
 			send_to_char( "Copyover FAILED - could not write socket file!\n\r", ch );
+			TerminateProcess( pi.hProcess, 1 );
+			CloseHandle( pi.hThread );
+			CloseHandle( pi.hProcess );
+			child_created = FALSE;
 			fclose( fp );
 			return;
 		}
 
-		/* First, write the control (listening) socket as entry 0 */
-		if ( WSADuplicateSocketW( (SOCKET) control, target_pid, &proto_info ) == SOCKET_ERROR ) {
+		/* Duplicate the control (listening) socket for the CHILD process */
+		if ( WSADuplicateSocketW( (SOCKET) control, child_pid, &proto_info ) == SOCKET_ERROR ) {
 			merc_logf( "do_copyover: WSADuplicateSocket failed for control socket: %d", WSAGetLastError() );
 			send_to_char( "Copyover FAILED - could not duplicate control socket!\n\r", ch );
+			TerminateProcess( pi.hProcess, 1 );
+			CloseHandle( pi.hThread );
+			CloseHandle( pi.hProcess );
+			child_created = FALSE;
 			fclose( socket_fp );
 			fclose( fp );
 			return;
 		}
 		fwrite( &proto_info, sizeof( proto_info ), 1, socket_fp );
-		merc_logf( "do_copyover: wrote control socket to %s", socket_path );
+		merc_logf( "do_copyover: wrote control socket (target child PID=%lu)", child_pid );
 
-		/* For each playing descriptor, save its state */
+		/* For each playing descriptor, duplicate socket for child PID and save state */
 		for ( d = descriptor_list; d; d = d_next ) {
 			CHAR_DATA *och = CH( d );
 
@@ -4214,8 +4262,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 				write_to_descriptor_2( d->descriptor, "\n\rSorry, we are rebooting. Come back in 30 seconds.\n\r", 0 );
 				close_socket( d );
 			} else {
-				/* Duplicate this client socket */
-				if ( WSADuplicateSocketW( (SOCKET) d->descriptor, target_pid, &proto_info ) == SOCKET_ERROR ) {
+				if ( WSADuplicateSocketW( (SOCKET) d->descriptor, child_pid, &proto_info ) == SOCKET_ERROR ) {
 					merc_logf( "do_copyover: WSADuplicateSocket failed for client %s: %d",
 						och->name, WSAGetLastError() );
 					write_to_descriptor_2( d->descriptor, "\n\rCould not preserve your connection. Please reconnect.\n\r", 0 );
@@ -4295,37 +4342,44 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 #if defined( WIN32 )
 	/*
-	 * Windows: Socket file was already written above with control socket at
-	 * index 0 and client sockets at indices 1+. Just exec the new process.
+	 * Windows: Child process was created suspended earlier.
+	 * All data files are now written and flushed. Resume the child and exit.
 	 */
-	{
-		char exe_path[MUD_PATH_MAX];
+	if ( child_created ) {
 		FILE *test_fp;
 
-		/* Verify socket file exists before exec */
+		/* Verify socket file exists before resuming child */
 		test_fp = fopen( COPYOVER_SOCKET_FILE, "rb" );
 		if ( test_fp ) {
 			fseek( test_fp, 0, SEEK_END );
 			merc_logf( "do_copyover: verified socket file exists, size=%ld", ftell( test_fp ) );
 			fclose( test_fp );
 		} else {
-			merc_logf( "do_copyover: ERROR - socket file not found before exec!" );
+			merc_logf( "do_copyover: WARNING - socket file not found before resume!" );
 		}
 
-		/* Prefer dystopia_new.exe if it exists (fresh build for hot-reload) */
-		strncpy( exe_path, EXE_FILE_NEW, sizeof( exe_path ) - 1 );
-		exe_path[sizeof( exe_path ) - 1] = '\0';
-		if ( _access( exe_path, 0 ) != 0 ) {
-			/* No new exe, fall back to standard exe */
-			strncpy( exe_path, EXE_FILE, sizeof( exe_path ) - 1 );
-			exe_path[sizeof( exe_path ) - 1] = '\0';
-			log_string( "do_copyover: using dystopia.exe" );
-		} else {
-			log_string( "do_copyover: found dystopia_new.exe, using it for hot-reload" );
+		merc_logf( "do_copyover: resuming child process PID=%lu", pi.dwProcessId );
+		fflush( NULL );
+
+		if ( ResumeThread( pi.hThread ) == (DWORD) -1 ) {
+			DWORD err = GetLastError();
+			merc_logf( "do_copyover: ResumeThread FAILED! error=%lu", err );
+			TerminateProcess( pi.hProcess, 1 );
+			CloseHandle( pi.hThread );
+			CloseHandle( pi.hProcess );
+			exit( 1 );
 		}
-		log_string( exe_path );
-		/* Pass exe_path as argv[0] so mud_init_paths gets the full path */
-		execl( exe_path, exe_path, buf, "copyover", "wsasocket", (char *) NULL );
+
+		CloseHandle( pi.hThread );
+		CloseHandle( pi.hProcess );
+
+		merc_logf( "do_copyover: child resumed, parent exiting with code 99" );
+		fflush( NULL );
+
+		/* Don't call closesocket/WSACleanup here - ExitProcess handles cleanup.
+		 * Explicitly closing sockets before the child has fully initialized
+		 * could invalidate shared socket state. */
+		ExitProcess( 99 );
 	}
 #else
 	sprintf( buf2, "%d", control );
@@ -4341,12 +4395,14 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 	}
 #endif
 
-	/* Failed - sucessful exec will not return */
+#if !defined( WIN32 )
+	/* Failed - successful exec will not return (Windows uses ExitProcess above) */
 
 	perror( "do_copyover: execl" );
 	send_to_char( "Copyover FAILED!\n\r", ch );
 
 	/* Here you might want to reopen fpReserve */
+#endif
 }
 
 /* Recover from a copyover - load players */
@@ -4359,33 +4415,12 @@ void copyover_recover() {
 	bool fOld;
 
 #if defined( WIN32 )
-	/* Windows: Load all socket protocol infos from binary file first */
-	WSAPROTOCOL_INFOW *socket_infos = NULL;
-	int socket_count = 0;
-	long file_size;
-	FILE *socket_fp;
-
-	socket_fp = fopen( COPYOVER_SOCKET_FILE, "rb" );
-	if ( socket_fp ) {
-		/* Get file size to determine number of entries */
-		fseek( socket_fp, 0, SEEK_END );
-		file_size = ftell( socket_fp );
-		fseek( socket_fp, 0, SEEK_SET );
-
-		socket_count = (int) ( file_size / sizeof( WSAPROTOCOL_INFOW ) );
-		merc_logf( "copyover_recover: socket file size=%ld, sizeof(WSAPROTOCOL_INFOW)=%d, socket_count=%d",
-			file_size, (int) sizeof( WSAPROTOCOL_INFOW ), socket_count );
-		if ( socket_count > 0 ) {
-			socket_infos = (WSAPROTOCOL_INFOW *) malloc( file_size );
-			if ( socket_infos ) {
-				fread( socket_infos, sizeof( WSAPROTOCOL_INFOW ), socket_count, socket_fp );
-			}
-		}
-		fclose( socket_fp );
-		unlink( COPYOVER_SOCKET_FILE );
-	} else {
-		merc_logf( "copyover_recover: could not open socket file: %s", COPYOVER_SOCKET_FILE );
-	}
+	/* Socket handles were already recreated in main() and stored in
+	 * copyover_client_sockets[]. We use those pre-created handles here
+	 * because WSADuplicateSocket protocol infos become stale after the
+	 * parent process exits. */
+	extern SOCKET copyover_client_sockets[];
+	extern int    copyover_client_count;
 #endif
 
 	merc_logf( "Copyover recovery initiated" );
@@ -4396,9 +4431,6 @@ void copyover_recover() {
 	{
 		perror( "copyover_recover:fopen" );
 		merc_logf( "Copyover file not found. Exitting.\n\r" );
-#if defined( WIN32 )
-		if ( socket_infos ) free( socket_infos );
-#endif
 		exit( 1 );
 	}
 
@@ -4416,15 +4448,14 @@ void copyover_recover() {
 
 #if defined( WIN32 )
 		/*
-		 * On Windows, 'desc' is actually an index into our socket_infos array.
-		 * We need to recreate the socket using WSASocket.
+		 * On Windows, 'desc' is a 1-based index into the client socket array.
+		 * Socket handles were already recreated in main() via WSASocketW while
+		 * the parent process was still alive (required by WSADuplicateSocket).
 		 */
-		if ( socket_infos && desc >= 0 && desc < socket_count ) {
-			int new_desc = (int) WSASocketW( AF_INET, SOCK_STREAM, IPPROTO_TCP,
-				&socket_infos[desc], 0, 0 );
-			if ( new_desc == INVALID_SOCKET ) {
-				merc_logf( "copyover_recover: WSASocket failed for %s: %d",
-					name, WSAGetLastError() );
+		if ( desc >= 1 && ( desc - 1 ) < copyover_client_count ) {
+			int new_desc = (int) copyover_client_sockets[desc - 1];
+			if ( new_desc == (int) INVALID_SOCKET ) {
+				merc_logf( "copyover_recover: pre-created socket invalid for %s", name );
 				continue;
 			}
 			desc = new_desc;
@@ -4435,7 +4466,8 @@ void copyover_recover() {
 				ioctlsocket( desc, FIONBIO, &nonblocking );
 			}
 		} else {
-			merc_logf( "copyover_recover: Invalid socket index %d for %s", desc, name );
+			merc_logf( "copyover_recover: Invalid socket index %d for %s (have %d clients)",
+				desc, name, copyover_client_count );
 			continue;
 		}
 #else
@@ -4508,10 +4540,6 @@ void copyover_recover() {
 	}
 
 	fclose( fp );
-
-#if defined( WIN32 )
-	if ( socket_infos ) free( socket_infos );
-#endif
 }
 
 void do_implag( CHAR_DATA *ch, char *argument ) {

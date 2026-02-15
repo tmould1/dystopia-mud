@@ -31,6 +31,12 @@ if exist "%GAMEDATA_DIR%\area\shutdown.txt" (
     echo Starting Dystopia MUD on port %port%...
     "%GAMEDATA_DIR%\dystopia.exe" %port%
 
+    REM Exit code 99 = copyover (parent exits after spawning child process)
+    if %ERRORLEVEL% == 99 (
+        echo Copyover completed, new server process is running.
+        goto :end
+    )
+
     REM Check for shutdown file
     if exist "%GAMEDATA_DIR%\area\shutdown.txt" (
         del /q "%GAMEDATA_DIR%\area\shutdown.txt"
