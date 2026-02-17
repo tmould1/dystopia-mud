@@ -26,6 +26,7 @@ Available via `selfclass` command at level 3 (Avatar):
 - Psion
 - Dragonkin
 - Artificer
+- Cultist
 
 ### Upgrade Classes
 Achieved by upgrading from a maxed base class:
@@ -43,6 +44,8 @@ Achieved by upgrading from a maxed base class:
 | Psion | Mindflayer |
 | Dragonkin | Wyrm |
 | Artificer | Mechanist |
+| Cultist | Voidborn |
+| Chronomancer | Paradox |
 
 **Source**: `src/systems/upgrade.c`, `gamedata/db/game/base_help.db` (UPGRADE help entry)
 
@@ -92,21 +95,13 @@ Additional requirements:
 ### Checking Upgrade Status
 
 ```c
-// From upgrade.c:38-51
+// From upgrade.c - now DB-driven via class_registry table
 bool is_upgrade(CHAR_DATA *ch) {
+    const CLASS_REGISTRY_ENTRY *reg;
     if (IS_NPC(ch)) return FALSE;
-    if (IS_CLASS(ch, CLASS_DROID))         return TRUE;
-    if (IS_CLASS(ch, CLASS_SAMURAI))       return TRUE;
-    if (IS_CLASS(ch, CLASS_TANARRI))       return TRUE;
-    if (IS_CLASS(ch, CLASS_UNDEAD_KNIGHT)) return TRUE;
-    if (IS_CLASS(ch, CLASS_ANGEL))         return TRUE;
-    if (IS_CLASS(ch, CLASS_LICH))          return TRUE;
-    if (IS_CLASS(ch, CLASS_SHAPESHIFTER))  return TRUE;
-    if (IS_CLASS(ch, CLASS_SIREN))         return TRUE;
-    if (IS_CLASS(ch, CLASS_MINDFLAYER))    return TRUE;
-    if (IS_CLASS(ch, CLASS_WYRM))          return TRUE;
-    if (IS_CLASS(ch, CLASS_MECHANIST))     return TRUE;
-    return FALSE;
+    reg = db_class_get_registry_by_id(ch->class);
+    if (reg == NULL) return FALSE;
+    return !IS_BASE_CLASS(reg);
 }
 ```
 
@@ -198,6 +193,18 @@ struct pc_data {
 #define CLASS_MINDFLAYER 131072
 #define CLASS_WYRM       524288
 #define CLASS_MECHANIST 2097152
+
+// Base Classes (continued)
+#define CLASS_CULTIST   4194304
+
+// Upgrade Classes (continued)
+#define CLASS_VOIDBORN  8388608
+
+// Base Classes (continued)
+#define CLASS_CHRONOMANCER 16777216
+
+// Upgrade Classes (continued)
+#define CLASS_PARADOX   33554432
 ```
 
 ### Checking Class Membership
@@ -246,6 +253,10 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 | Wyrm | Ancient powers, breath mastery, training levels (10-12) | dragonkin.h |
 | Artificer | Turret count, buff durations, cooldowns, training levels (10-12) | artificer.h |
 | Mechanist | Drone count, implant types, cooldowns, training levels (10-12) | artificer.h |
+| Cultist | Grasp/constrict/gibbering ticks, training levels (10-12) | cultist.h |
+| Voidborn | Phase shift, void shape, final form, rift, training levels (10-12) | cultist.h |
+| Chronomancer | Quicken, blur, foresight, hindsight, echo, slow ticks, training (10-12) | chronomancer.h |
+| Paradox | Past self, time loop, split, age, eternity, echo count, training (10-12) | chronomancer.h |
 
 ## File Organization
 
@@ -273,6 +284,7 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 - `src/classes/psion.c`, `src/classes/psion.h` - Psion powers
 - `src/classes/dragonkin.c`, `src/classes/dragonkin.h` - Dragonkin powers
 - `src/classes/artificer.c`, `src/classes/artificer.h` - Artificer powers
+- `src/classes/cultist.c`, `src/classes/cultist.h` - Cultist powers
 
 **Upgrade Classes:**
 - `src/tanarri.c`, `src/tanarri.h` - Tanar'ri powers
@@ -286,6 +298,9 @@ Different classes use `ch->pcdata->powers[]` for different purposes:
 - `src/classes/mindflayer.c` - Mindflayer powers
 - `src/classes/wyrm.c` - Wyrm powers
 - `src/classes/mechanist.c` - Mechanist powers
+- `src/classes/voidborn.c` - Voidborn powers
+- `src/classes/chronomancer.c` - Chronomancer powers
+- `src/classes/paradox.c` - Paradox powers
 
 ## Design Considerations
 

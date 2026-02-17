@@ -1213,6 +1213,67 @@ const struct cmd_type cmd_table[] =
 		{ "drones",          do_dronestatus,     POS_SITTING,   3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
 		{ "dronerecall",     do_dronerecall,     POS_STANDING,  3, LOG_NORMAL, CLASS_MECHANIST, 0, 0 },
 
+		/* Cultist */
+		{ "corruption",      do_corruption,      POS_SITTING,   3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "purge",           do_cultpurge,       POS_STANDING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "eldritchsight",   do_eldritchsight,   POS_STANDING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "whispers",        do_whispers,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "unravel",         do_unravel,         POS_FIGHTING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "voidtendril",     do_voidtendril,     POS_FIGHTING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "grasp",           do_grasp,           POS_FIGHTING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "constrict",       do_constrict,       POS_FIGHTING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "maddeninggaze",   do_maddeninggaze,   POS_FIGHTING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "gibbering",       do_gibbering,       POS_FIGHTING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "insanity",        do_insanity,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "voidtrain",       do_voidtrain,       POS_SITTING,   3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+		{ "cultistarmor",    do_cultistarmor,    POS_SITTING,   3, LOG_NORMAL, CLASS_CULTIST, 0, 0 },
+
+		/* Voidborn */
+		{ "corruption",      do_corruption,      POS_SITTING,   3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "purge",           do_cultpurge,       POS_STANDING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "voidtrain",       do_voidtrain,       POS_SITTING,   3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "phaseshift",      do_phaseshift,      POS_STANDING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "dimensionalrend", do_dimensionalrend, POS_FIGHTING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "unmake",          do_unmake,           POS_FIGHTING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "voidshape",       do_voidshape,       POS_STANDING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "aberrantgrowth",  do_aberrantgrowth,  POS_STANDING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "finalform",       do_finalform,       POS_STANDING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "summonthing",     do_summonthing,     POS_STANDING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "starspawn",       do_starspawn,       POS_FIGHTING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "entropy",         do_entropy,         POS_FIGHTING,  3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+		{ "voidbornarmor",   do_voidbornarmor,   POS_SITTING,   3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+
+		/* Chronomancer */
+		{ "flux",            do_flux,            POS_SITTING,   3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "quicken",         do_quicken,         POS_STANDING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "timeslip",        do_timeslip,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "blur",            do_blur,            POS_STANDING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "slow",            do_slow,            POS_FIGHTING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "timetrap",        do_timetrap,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "stasis",          do_stasis,          POS_FIGHTING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "foresight",       do_foresight,       POS_STANDING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "hindsight",       do_hindsight,       POS_STANDING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "temporalecho",    do_temporalecho,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "timetrain",       do_timetrain,       POS_SITTING,   3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+		{ "chronoarmor",     do_chronoarmor,     POS_SITTING,   3, LOG_NORMAL, CLASS_CHRONOMANCER, 0, 0 },
+
+		/* Paradox */
+		{ "flux",            do_flux,            POS_SITTING,   3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "destabilize",     do_destabilize,     POS_STANDING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "rewind",          do_rewind,          POS_STANDING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "splittimeline",   do_splittimeline,   POS_STANDING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "convergence",     do_convergence,     POS_FIGHTING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "futurestrike",    do_futurestrike,    POS_FIGHTING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "pastself",        do_pastself,        POS_STANDING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "timeloop",        do_timeloop,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "paradoxstrike",   do_paradoxstrike,   POS_FIGHTING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "age",             do_age,             POS_FIGHTING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "temporalcollapse", do_temporalcollapse, POS_FIGHTING, 3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "eternity",        do_eternity,        POS_STANDING,  3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "paratrain",       do_paratrain,       POS_SITTING,   3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "timetrain",       do_timetrain,       POS_SITTING,   3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+		{ "paradoxarmor",    do_paradoxarmor,    POS_SITTING,   3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
+
 		/*
 		 * Immortal commands.
 		 */

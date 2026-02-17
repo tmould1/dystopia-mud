@@ -26,6 +26,8 @@
 #include "psion.h"
 #include "dragonkin.h"
 #include "artificer.h"
+#include "cultist.h"
+#include "chronomancer.h"
 #include "../systems/mcmp.h"
 #include "../systems/profile.h"
 
@@ -1056,6 +1058,44 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MECHANIST ) &&
 			ch->pcdata->powers[MECH_SERVO_IMPLANT] == IMPLANT_SERVO_MULTI_TOOL )
 			count += 1;
+		/* Voidborn Void Shape: +2 extra attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VOIDBORN ) &&
+			ch->pcdata->powers[VOID_VOID_SHAPE] > 0 )
+			count += cfg( CFG_VOIDBORN_VOIDSHAPE_EXTRA_ATTACKS );
+		/* Voidborn Final Form: +4 extra attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VOIDBORN ) &&
+			ch->pcdata->powers[VOID_FINAL_FORM] > 0 )
+			count += 4;
+		/* Chronomancer Quicken: +2 extra attacks (+3 at low flux) */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_CHRONOMANCER ) &&
+			ch->pcdata->powers[CHRONO_QUICKEN_TICKS] > 0 ) {
+			if ( ch->rage <= CHRONO_SLOW_MAX )
+				count += cfg( CFG_CHRONO_QUICKEN_EXTRA_ATTACKS_BONUS );
+			else
+				count += cfg( CFG_CHRONO_QUICKEN_EXTRA_ATTACKS );
+		}
+		/* Chronomancer Blur: +4 extra attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_CHRONOMANCER ) &&
+			ch->pcdata->powers[CHRONO_BLUR_TICKS] > 0 )
+			count += cfg( CFG_CHRONO_BLUR_EXTRA_ATTACKS );
+		/* Chronomancer Slow: enemy loses attacks */
+		if ( !IS_NPC( ch ) && ch->fighting != NULL && !IS_NPC( ch->fighting ) &&
+			IS_CLASS( ch->fighting, CLASS_CHRONOMANCER ) &&
+			ch->fighting->pcdata->powers[CHRONO_SLOW_TICKS] > 0 )
+			count -= cfg( CFG_CHRONO_SLOW_ATTACKS_LOST );
+		/* Paradox Past Self: +2 extra attacks from echo */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_PARADOX ) &&
+			ch->pcdata->powers[PARA_PAST_SELF_TICKS] > 0 )
+			count += cfg( CFG_PARA_PASTSELF_EXTRA_ATTACKS );
+		/* Paradox Age: enemy loses attacks */
+		if ( !IS_NPC( ch ) && ch->fighting != NULL && !IS_NPC( ch->fighting ) &&
+			IS_CLASS( ch->fighting, CLASS_PARADOX ) &&
+			ch->fighting->pcdata->powers[PARA_AGE_TICKS] > 0 )
+			count -= 2;
+		/* Paradox Eternity Aftermath: stunned, no extra attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_PARADOX ) &&
+			ch->pcdata->powers[PARA_ETERNITY_AFTERMATH] > 0 )
+			count = UMAX( count - 4, 0 );
 		if ( IS_ITEMAFF( ch, ITEMA_SPEED ) ) count += 2;
 	} else {
 		if ( !IS_NPC( ch ) )
@@ -1834,6 +1874,43 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( ch->pcdata->powers[MECH_SERVO_IMPLANT] == IMPLANT_SERVO_SHIELD_GEN )
 				max_dam += cfg( CFG_ABILITY_MECHANIST_IMPLANT_SERVO_SHIELD_DAMCAP );
 		}
+		/* Cultist: corruption-based damcap */
+		if ( IS_CLASS( ch, CLASS_CULTIST ) ) {
+			max_dam += cfg( CFG_COMBAT_DAMCAP_CULTIST_BASE );
+			max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_CULTIST_CORRUPT_MULT );
+			if ( ch->rage >= 75 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_CULTIST_HIGH_CORRUPT );
+		}
+		/* Voidborn: enhanced corruption scaling + form bonuses */
+		if ( IS_CLASS( ch, CLASS_VOIDBORN ) ) {
+			max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_VOIDBORN_CORRUPT_MULT );
+			if ( ch->pcdata->powers[VOID_FINAL_FORM] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_VOIDBORN_FINALFORM );
+			if ( ch->pcdata->powers[VOID_ABERRANT_GROWTH] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_VOIDBORN_ABERRANT );
+		}
+		/* Chronomancer: flux-based damcap + ability bonuses */
+		if ( IS_CLASS( ch, CLASS_CHRONOMANCER ) ) {
+			int flux_extreme = abs( ch->rage - CHRONO_FLUX_CENTER );
+			max_dam += cfg( CFG_COMBAT_DAMCAP_CHRONO_BASE );
+			max_dam += flux_extreme * cfg( CFG_COMBAT_DAMCAP_CHRONO_EXTREME_MULT );
+			if ( ch->pcdata->powers[CHRONO_QUICKEN_TICKS] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_CHRONO_QUICKEN );
+			if ( ch->pcdata->powers[CHRONO_BLUR_TICKS] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_CHRONO_BLUR );
+		}
+		/* Paradox: flux-based damcap + ability bonuses */
+		if ( IS_CLASS( ch, CLASS_PARADOX ) ) {
+			int flux_extreme = abs( ch->rage - PARA_FLUX_CENTER );
+			max_dam += cfg( CFG_COMBAT_DAMCAP_PARA_BASE );
+			max_dam += flux_extreme * cfg( CFG_COMBAT_DAMCAP_PARA_EXTREME_MULT );
+			if ( ch->pcdata->powers[PARA_PAST_SELF_TICKS] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_PARA_PASTSELF );
+			if ( ch->pcdata->powers[PARA_TIME_LOOP_TICKS] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_PARA_TIMELOOP );
+			if ( ch->pcdata->powers[PARA_ETERNITY_TICKS] > 0 )
+				max_dam = max_dam * ( 100 - cfg( CFG_COMBAT_DAMCAP_PARA_ETERNITY_REDUCTION ) ) / 100;
+		}
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_ARTIFACT );
 
@@ -1959,6 +2036,24 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 				disarm( ch, victim );
 			if ( IS_NPC( ch ) && number_percent() < ch->level * 0.5 )
 				trip( ch, victim );
+			/* Chronomancer Time Slip: auto-dodge + counter-attack */
+			if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_CHRONOMANCER ) &&
+				victim->pcdata->powers[CHRONO_TIMESLIP_READY] > 0 ) {
+				int counter_dam;
+				victim->pcdata->powers[CHRONO_TIMESLIP_READY] = 0;
+				act( "#x215You slip through time - the attack passes through your afterimage!#n",
+					ch, NULL, victim, TO_VICT );
+				act( "#x215$N vanishes in a temporal shimmer and $n's attack hits nothing but air!#n",
+					ch, NULL, victim, TO_NOTVICT );
+				act( "#x215Your attack passes through $N's afterimage!#n",
+					ch, NULL, victim, TO_CHAR );
+				/* Counter-attack: base 100-200 + (50 - flux) * 2 */
+				counter_dam = number_range( 100, 200 ) + ( CHRONO_FLUX_CENTER - victim->rage ) * 2;
+				counter_dam = counter_dam * get_chrono_power_mod( victim, TRUE ) / 100;
+				if ( counter_dam > 0 )
+					damage( victim, ch, counter_dam, TYPE_UNDEFINED );
+				return;
+			}
 			if ( check_dodge( ch, victim, dt ) )
 				return;
 			if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_MONGOOSE ) &&
@@ -2117,6 +2212,67 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			send_to_char( "Your kinetic barrier shatters!\n\r", victim );
 		}
 	}
+	/* Chronomancer Stasis: store damage instead of applying it */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_CHRONOMANCER ) &&
+		ch->pcdata->powers[CHRONO_STASIS_TICKS] > 0 && dam > 0 ) {
+		int max_stored = cfg( CFG_CHRONO_STASIS_MAX_STORED );
+		int to_store = UMIN( dam, max_stored - ch->pcdata->stats[CHRONO_STAT_STASIS_DMG] );
+		if ( to_store > 0 ) {
+			ch->pcdata->stats[CHRONO_STAT_STASIS_DMG] += to_store;
+			send_to_char( "#x215The damage is absorbed into the stasis field.#n\n\r", ch );
+		}
+		dam = 0;
+	}
+	/* Chronomancer Hindsight: gain a stack when hit */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_CHRONOMANCER ) &&
+		victim->pcdata->powers[CHRONO_HINDSIGHT_TICKS] > 0 && dam > 0 ) {
+		int max_stacks = cfg( CFG_CHRONO_HINDSIGHT_MAX_STACKS );
+		if ( victim->pcdata->powers[CHRONO_HINDSIGHT_STACKS] < max_stacks ) {
+			victim->pcdata->powers[CHRONO_HINDSIGHT_STACKS]++;
+			send_to_char( "#x215You learn from the blow - hindsight deepens.#n\n\r", victim );
+		}
+	}
+	/* Chronomancer Hindsight: bonus damage when attacking */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_CHRONOMANCER ) &&
+		ch->pcdata->powers[CHRONO_HINDSIGHT_TICKS] > 0 &&
+		ch->pcdata->powers[CHRONO_HINDSIGHT_STACKS] > 0 && dam > 0 ) {
+		int bonus_pct = ch->pcdata->powers[CHRONO_HINDSIGHT_STACKS] * cfg( CFG_CHRONO_HINDSIGHT_STACK_BONUS );
+		dam = dam * ( 100 + bonus_pct ) / 100;
+	}
+	/* Chronomancer Blur: chance for attacks to miss entirely */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_CHRONOMANCER ) &&
+		victim->pcdata->powers[CHRONO_BLUR_TICKS] > 0 && dam > 0 &&
+		number_percent() <= cfg( CFG_CHRONO_BLUR_MISS_CHANCE ) ) {
+		act( "#x215$N is moving too fast - your attack misses entirely!#n", ch, NULL, victim, TO_CHAR );
+		act( "#x215You blur past the attack effortlessly.#n", ch, NULL, victim, TO_VICT );
+		dam = 0;
+	}
+	/* Paradox Eternity: immune to all damage */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_PARADOX ) &&
+		victim->pcdata->powers[PARA_ETERNITY_TICKS] > 0 && dam > 0 ) {
+		act( "#x210Time shields $N — your attack passes through $M harmlessly!#n", ch, NULL, victim, TO_CHAR );
+		act( "#x210The attack passes through you — you exist outside time.#n", ch, NULL, victim, TO_VICT );
+		dam = 0;
+	}
+	/* Paradox Age: target deals reduced damage */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_PARADOX ) &&
+		ch->pcdata->powers[PARA_AGE_TICKS] > 0 &&
+		ch->fighting != NULL && dam > 0 ) {
+		/* The check: if victim (attacker) is fighting the Paradox and the Paradox has Age active */
+	}
+	if ( !IS_NPC( victim ) && victim->fighting != NULL && !IS_NPC( victim->fighting ) &&
+		IS_CLASS( victim->fighting, CLASS_PARADOX ) &&
+		victim->fighting->pcdata->powers[PARA_AGE_TICKS] > 0 && dam > 0 ) {
+		dam = dam * ( 100 - cfg( CFG_PARA_AGE_DAMAGE_REDUCTION ) ) / 100;
+	}
+	/* Paradox Time Loop: bonus damage when Paradox attacks */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_PARADOX ) &&
+		ch->pcdata->powers[PARA_TIME_LOOP_TICKS] > 0 && dam > 0 ) {
+		dam = dam * ( 100 + cfg( CFG_PARA_TIMELOOP_DAMAGE_BONUS ) ) / 100;
+	}
+	/* Paradox Rewind: track damage taken for heal calculation */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_PARADOX ) && dam > 0 )
+		victim->pcdata->stats[PARA_STAT_DAMAGE_HIST_0] += dam;
 	hurt_person( ch, victim, dam );
 	dropinvis( ch );
 	dropinvis( victim );
@@ -2859,6 +3015,34 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		if ( IS_CLASS( victim, CLASS_MECHANIST ) &&
 			victim->pcdata->powers[MECH_NEURAL_IMPLANT] == IMPLANT_NEURAL_COMBAT_PROC )
 			chance += cfg( CFG_ABILITY_MECHANIST_IMPLANT_NEURAL_COMBAT_DODGE );
+		/* Voidborn Phase Shift: dodge bonus */
+		if ( IS_CLASS( victim, CLASS_VOIDBORN ) &&
+			victim->pcdata->powers[VOID_PHASE_SHIFT] > 0 )
+			chance += cfg( CFG_VOIDBORN_PHASESHIFT_DODGE_BONUS );
+		/* Chronomancer Foresight: dodge bonus */
+		if ( IS_CLASS( victim, CLASS_CHRONOMANCER ) &&
+			victim->pcdata->powers[CHRONO_FORESIGHT_TICKS] > 0 )
+			chance += cfg( CFG_CHRONO_FORESIGHT_DODGE_BONUS );
+		/* Chronomancer Blur: dodge bonus */
+		if ( IS_CLASS( victim, CLASS_CHRONOMANCER ) &&
+			victim->pcdata->powers[CHRONO_BLUR_TICKS] > 0 )
+			chance += cfg( CFG_CHRONO_BLUR_DODGE_BONUS );
+		/* Chronomancer Slow: enemy dodge reduced */
+		if ( IS_CLASS( victim, CLASS_CHRONOMANCER ) == 0 &&
+			victim->fighting != NULL && !IS_NPC( victim->fighting ) &&
+			IS_CLASS( victim->fighting, CLASS_CHRONOMANCER ) &&
+			victim->fighting->pcdata->powers[CHRONO_SLOW_TICKS] > 0 )
+			chance -= cfg( CFG_CHRONO_SLOW_DODGE_REDUCTION );
+		/* Paradox Time Loop: dodge bonus */
+		if ( IS_CLASS( victim, CLASS_PARADOX ) &&
+			victim->pcdata->powers[PARA_TIME_LOOP_TICKS] > 0 )
+			chance += cfg( CFG_PARA_TIMELOOP_DODGE );
+		/* Paradox Age: enemy dodge reduced */
+		if ( IS_CLASS( victim, CLASS_PARADOX ) == 0 &&
+			victim->fighting != NULL && !IS_NPC( victim->fighting ) &&
+			IS_CLASS( victim->fighting, CLASS_PARADOX ) &&
+			victim->fighting->pcdata->powers[PARA_AGE_TICKS] > 0 )
+			chance -= cfg( CFG_PARA_AGE_DODGE_REDUCTION );
 	}
 	if ( chance > 80 )
 		chance = 80;

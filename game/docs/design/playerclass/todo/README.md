@@ -1,13 +1,13 @@
 # Proposed Player Classes
 
-This folder contains design documents for **2 new class pairs** (4 classes total) that fill remaining fantasy gaps in the Dystopia class roster. These are proposals awaiting implementation - when ready, documents should be moved to the main `classes/` folder.
+This folder contains design documents for proposed class pairs. When a class is implemented, its design doc is copied to the main `classes/` folder.
 
 ## Overview
 
 | Base Class | Upgrade Class | Fantasy Niche | Status |
 |------------|---------------|---------------|--------|
-| [Cultist](cultist.md) | [Voidborn](voidborn.md) | Eldritch horror | Proposed |
-| [Chronomancer](chronomancer.md) | [Paradox](paradox.md) | Time manipulation | Proposed |
+| [Cultist](../classes/cultist.md) | [Voidborn](../classes/voidborn.md) | Eldritch horror | **Implemented** |
+| [Chronomancer](../classes/chronomancer.md) | [Paradox](../classes/paradox.md) | Time manipulation | **Implemented** |
 
 ## Gaps Being Filled
 
@@ -76,12 +76,12 @@ Several proposed classes feature minion mechanics:
 
 Each class has a distinct two-color palette for visual identity:
 
-| Class | Accent | Primary | Theme |
-|-------|--------|---------|-------|
-| Cultist | Dark teal | Sickly green | Cosmic horror |
-| Voidborn | Void black | Eldritch purple | Space between stars |
-| Chronomancer | Deep blue | Bright silver | Flow of time |
-| Paradox | Shifting violet | Iridescent white | Broken time |
+| Class | Brackets | Accent | Primary | Theme |
+|-------|----------|--------|---------|-------|
+| Cultist | `{~ ~}` | `#x064` Dark olive | `#x120` Sickly lime | Corruption and decay |
+| Voidborn | `*( )*` | `#x055` Dark violet | `#x097` Eldritch purple | Void between stars |
+| Chronomancer | `[> <]` | `#x130` Deep copper | `#x215` Warm amber | Clockwork brass |
+| Paradox | `>( )<` | `#x160` Deep crimson | `#x210` Warm rose | Temporal danger |
 
 ## Implementation Priority
 
@@ -108,8 +108,8 @@ Each class document follows the established format:
 To implement a class from this folder:
 
 1. Read the [Implementing a New Class](../implementing-a-new-class.md) guide
-2. Assign class constant (next power-of-2 after 2097152, which is CLASS_MECHANIST)
-3. Assign equipment vnum range (next available: 33500+)
+2. Assign class constant (next power-of-2 after 33554432, which is CLASS_PARADOX)
+3. Assign equipment vnum range (next available: 33580+)
 4. Create source files following the documented structure
 5. Move the design doc from `todo/` to `classes/` when complete
 6. Update `README.md` and `overview.md` in the parent folder

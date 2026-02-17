@@ -463,6 +463,12 @@ int char_damroll( CHAR_DATA *ch ) {
 	/* Psion/Mindflayer Focus */
 	if ( ( IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) ) && ch->rage > 0 )
 		value += ch->rage;
+	/* Cultist/Voidborn Corruption */
+	if ( ( IS_CLASS( ch, CLASS_CULTIST ) || IS_CLASS( ch, CLASS_VOIDBORN ) ) && ch->rage > 0 )
+		value += ch->rage;
+	/* Chronomancer/Paradox Flux */
+	if ( ( IS_CLASS( ch, CLASS_CHRONOMANCER ) || IS_CLASS( ch, CLASS_PARADOX ) ) && ch->rage > 0 )
+		value += ch->rage;
 
 	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->pcdata->stats[DEMON_POWER] > 0 )
 		value += ( ( ch->pcdata->stats[DEMON_POWER] ) * ch->pcdata->stats[DEMON_POWER] );
@@ -527,6 +533,12 @@ int char_hitroll( CHAR_DATA *ch ) {
 		value += ch->rage;
 	/* Psion/Mindflayer Focus */
 	if ( ( IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) ) && ch->rage > 0 )
+		value += ch->rage;
+	/* Cultist/Voidborn Corruption */
+	if ( ( IS_CLASS( ch, CLASS_CULTIST ) || IS_CLASS( ch, CLASS_VOIDBORN ) ) && ch->rage > 0 )
+		value += ch->rage;
+	/* Chronomancer/Paradox Flux */
+	if ( ( IS_CLASS( ch, CLASS_CHRONOMANCER ) || IS_CLASS( ch, CLASS_PARADOX ) ) && ch->rage > 0 )
 		value += ch->rage;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->pcdata->stats[DEMON_POWER] > 0 )
 		value += ( ( ch->pcdata->stats[DEMON_POWER] ) * ch->pcdata->stats[DEMON_POWER] );
@@ -2531,7 +2543,7 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 			send_to_char( buf, ch );
 		}
 
-		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 && !IS_CLASS( ch, CLASS_NINJA ) && !IS_CLASS( ch, CLASS_DIRGESINGER ) && !IS_CLASS( ch, CLASS_SIREN ) && !IS_CLASS( ch, CLASS_PSION ) && !IS_CLASS( ch, CLASS_MINDFLAYER ) && !IS_CLASS( ch, CLASS_ARTIFICER ) && !IS_CLASS( ch, CLASS_MECHANIST ) ) {
+		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->rage > 0 && !IS_CLASS( ch, CLASS_NINJA ) && !IS_CLASS( ch, CLASS_DIRGESINGER ) && !IS_CLASS( ch, CLASS_SIREN ) && !IS_CLASS( ch, CLASS_PSION ) && !IS_CLASS( ch, CLASS_MINDFLAYER ) && !IS_CLASS( ch, CLASS_ARTIFICER ) && !IS_CLASS( ch, CLASS_MECHANIST ) && !IS_CLASS( ch, CLASS_CULTIST ) && !IS_CLASS( ch, CLASS_VOIDBORN ) && !IS_CLASS( ch, CLASS_CHRONOMANCER ) && !IS_CLASS( ch, CLASS_PARADOX ) ) {
 			sprintf( buf, "#R[#nYou are in a mad frenzy, adding #C%d#n Hitroll and Damroll#R]\n\r", ch->rage );
 			stc( buf, ch );
 		}

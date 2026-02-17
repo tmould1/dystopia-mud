@@ -341,7 +341,8 @@ void db_class_load_starting( void ) {
 	starting_count = 0;
 
 	if ( sqlite3_prepare_v2( class_db,
-			"SELECT class_id, starting_beast, starting_level, has_disciplines "
+			"SELECT class_id, starting_beast, starting_level, has_disciplines, "
+			"COALESCE(starting_rage, 0) "
 			"FROM class_starting ORDER BY class_id",
 			-1, &stmt, NULL ) == SQLITE_OK ) {
 		while ( sqlite3_step( stmt ) == SQLITE_ROW && starting_count < MAX_CACHED_STARTING ) {
@@ -349,6 +350,7 @@ void db_class_load_starting( void ) {
 			starting_cache[starting_count].starting_beast  = sqlite3_column_int( stmt, 1 );
 			starting_cache[starting_count].starting_level  = sqlite3_column_int( stmt, 2 );
 			starting_cache[starting_count].has_disciplines = sqlite3_column_int( stmt, 3 ) != 0;
+			starting_cache[starting_count].starting_rage   = sqlite3_column_int( stmt, 4 );
 			starting_count++;
 		}
 		sqlite3_finalize( stmt );

@@ -64,6 +64,7 @@ typedef struct class_starting {
 	int    starting_beast;   /* Beast value on class selection (default 15, vampire 30) */
 	int    starting_level;   /* Level set on class selection (default 1, monk/mage 3) */
 	bool   has_disciplines;  /* Whether to call set_learnable_disciplines() */
+	int    starting_rage;    /* Rage value on class selection (default 0, chronomancer 50) */
 } CLASS_STARTING;
 
 /* Class registry - centralized class metadata for mudstat/selfclass */

@@ -4,32 +4,32 @@
 
 Cultists are devotees of the void who channel eldritch energies from beyond reality. They wield forbidden knowledge, summon tentacles of void-stuff, and drive their enemies mad with whispers from the outer dark. Their power comes with a price: Corruption builds as they use void abilities, granting increased power but causing periodic self-damage. This is a **base class** that upgrades to Voidborn.
 
-**Source Files**: `src/classes/cultist.c`, `src/classes/cultist.h` (TBD)
-**Class Constant**: `CLASS_CULTIST` (TBD - next available power-of-2)
+**Source Files**: `src/classes/cultist.c`, `src/classes/cultist.h`
+**Class Constant**: `CLASS_CULTIST` (4194304)
 **Upgrades To**: Voidborn
 
 ## Color Scheme
 
-Cultist uses a sickly teal-green palette evoking cosmic horror and unnatural energies:
+Cultist uses a sickly olive-green palette evoking corruption, decay, and unnatural energies:
 
 | Element | Code | Color | Usage |
 |---------|------|-------|-------|
-| Accent | `#x023` | Dark teal | Bracket tildes, decorative accents |
-| Primary | `#x120` | Sickly green | Class name, titles, ability highlights |
-| Bracket open | `#x023~#x120[` | Teal~Green[ | Who list open bracket |
-| Bracket close | `#x120]#x023~` | Green]Teal~ | Who list close bracket |
+| Accent | `#x064` | Dark olive | Bracket decorations, ritual accents |
+| Primary | `#x120` | Sickly lime green | Class name, titles, ability highlights |
+| Bracket open | `#x064{~#x120[` | Olive{~Green[ | Who list open bracket |
+| Bracket close | `#x120]#x064~}` | Green]Olive~} | Who list close bracket |
 | Room tag | `#x120(#nCultist#x120)` | Green parens | Room display prefix |
 
 **Who List Titles**:
 
 | Generation | Title | Display |
 |------------|-------|---------|
-| 1 | High Priest | `#x023~#x120[#x120High Priest#n#x120]#x023~` |
-| 2 | Void Touched | `#x023~#x120[#x120Void Touched#n#x120]#x023~` |
-| 3 | Cultist | `#x023~#x120[#x120Cultist#n#x120]#x023~` |
-| 4 | Initiate | `#x023~#x120[#x120Initiate#n#x120]#x023~` |
-| 5 | Seeker | `#x023~#x120[#x120Seeker#n#x120]#x023~` |
-| default | Acolyte | `#x023~#x120[#x120Acolyte#n#x120]#x023~` |
+| 1 | High Priest | `#x064{~#x120[#x120High Priest#n#x120]#x064~}` |
+| 2 | Void Touched | `#x064{~#x120[#x120Void Touched#n#x120]#x064~}` |
+| 3 | Cultist | `#x064{~#x120[#x120Cultist#n#x120]#x064~}` |
+| 4 | Initiate | `#x064{~#x120[#x120Initiate#n#x120]#x064~}` |
+| 5 | Seeker | `#x064{~#x120[#x120Seeker#n#x120]#x064~}` |
+| default | Acolyte | `#x064{~#x120[#x120Acolyte#n#x120]#x064~}` |
 
 ## Core Mechanics
 
@@ -276,19 +276,20 @@ Create equipment via `cultistarmor <piece>`:
 
 | Piece | Vnum | Wear Slot |
 |-------|------|-----------|
-| void staff | TBD | Wield |
-| sigil ring | TBD | Finger |
-| eldritch amulet | TBD | Neck |
-| cultist robes | TBD | Torso |
-| hood of whispers | TBD | Head |
-| ritual leggings | TBD | Legs |
-| void-touched boots | TBD | Feet |
-| sacrificial gloves | TBD | Hands |
-| bracers of binding | TBD | Arms |
-| shroud of madness | TBD | About Body |
-| ritual sash | TBD | Waist |
-| tentacle bangle | TBD | Wrist |
-| mask of the deep | TBD | Face |
+| void staff | 33500 | Wield |
+| sigil ring | 33501 | Finger |
+| eldritch amulet | 33502 | Neck |
+| cultist robes | 33503 | Torso |
+| hood of whispers | 33504 | Head |
+| ritual leggings | 33505 | Legs |
+| void-touched boots | 33506 | Feet |
+| sacrificial gloves | 33507 | Hands |
+| bracers of binding | 33508 | Arms |
+| shroud of madness | 33509 | About Body |
+| ritual sash | 33510 | Waist |
+| tentacle bangle | 33511 | Wrist |
+| mask of the deep | 33512 | Face |
+| mastery item | 33515 | Hold |
 
 **Equipment Stats** (proposed):
 - Weapons: +35 hitroll, +35 damroll
@@ -350,7 +351,7 @@ Per-tick processing:
 
 | Field | Location | Purpose |
 |-------|----------|---------|
-| class | ch->class | CLASS_CULTIST bit (TBD) |
+| class | ch->class | CLASS_CULTIST bit (4194304) |
 | corruption | ch->rage | Current corruption (0-100) |
 | eldritch_sight | ch->pcdata->powers[0] | Eldritch Sight ticks remaining |
 | grasp_target | ch->pcdata->powers[1] | Grasp target (char ID) |

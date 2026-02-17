@@ -4,31 +4,31 @@
 
 Voidborn are beings who have surrendered their humanity to the void, becoming vessels for eldritch power. They can phase through reality, tear dimensional rents, transform into aberrant forms, and summon entities from beyond. Their corruption tolerance is higher, but so are the stakes - they walk the razor's edge between ultimate power and self-annihilation. This is an **upgrade class** obtained by upgrading from Cultist.
 
-**Source Files**: `src/classes/voidborn.c`, `src/classes/cultist.h` (TBD)
-**Class Constant**: `CLASS_VOIDBORN` (TBD - next available power-of-2)
+**Source Files**: `src/classes/voidborn.c`, `src/classes/cultist.h`
+**Class Constant**: `CLASS_VOIDBORN` (8388608)
 **Upgrades From**: Cultist
 
 ## Color Scheme
 
-Voidborn uses an otherworldly black-purple palette evoking the space between stars:
+Voidborn uses an otherworldly violet-purple palette evoking the void between stars:
 
 | Element | Code | Color | Usage |
 |---------|------|-------|-------|
-| Accent | `#x016` | Void black | Bracket tildes, decorative accents |
+| Accent | `#x055` | Dark violet | Bracket asterisks, decorative accents |
 | Primary | `#x097` | Eldritch purple | Class name, titles, ability highlights |
-| Bracket open | `#x016~#x097(` | Black~Purple( | Who list open bracket |
-| Bracket close | `#x097)#x016~` | Purple)Black~ | Who list close bracket |
+| Bracket open | `#x055*(#x097(` | Violet*(Purple( | Who list open bracket |
+| Bracket close | `#x097)#x055)*` | Purple)Violet)* | Who list close bracket |
 | Room tag | `#x097(#nVoidborn#x097)` | Purple parens | Room display prefix |
 
 **Who List Titles**:
 
 | Generation | Title | Display |
 |------------|-------|---------|
-| 1 | Void Incarnate | `#x016~#x097(#x097Void Incarnate#n#x097)#x016~` |
-| 2 | Aberration | `#x016~#x097(#x097Aberration#n#x097)#x016~` |
-| 3 | Voidspawn | `#x016~#x097(#x097Voidspawn#n#x097)#x016~` |
-| 4 | Void Touched | `#x016~#x097(#x097Void Touched#n#x097)#x016~` |
-| default | Voidborn | `#x016~#x097(#x097Voidborn#n#x097)#x016~` |
+| 1 | Void Incarnate | `#x055*(#x097(#x097Void Incarnate#n#x097)#x055)*` |
+| 2 | Aberration | `#x055*(#x097(#x097Aberration#n#x097)#x055)*` |
+| 3 | Voidspawn | `#x055*(#x097(#x097Voidspawn#n#x097)#x055)*` |
+| 4 | Void Touched | `#x055*(#x097(#x097Void Touched#n#x097)#x055)*` |
+| default | Voidborn | `#x055*(#x097(#x097Voidborn#n#x097)#x055)*` |
 
 ## Core Mechanics
 
@@ -276,19 +276,20 @@ Create equipment via `voidbornarmor <piece>`:
 
 | Piece | Vnum | Wear Slot |
 |-------|------|-----------|
-| void scepter | TBD | Wield |
-| ring of unmaking | TBD | Finger |
-| collar of stars | TBD | Neck |
-| aberrant robes | TBD | Torso |
-| crown of madness | TBD | Head |
-| void-woven leggings | TBD | Legs |
-| phasing boots | TBD | Feet |
-| tentacle gauntlets | TBD | Hands |
-| dimensional bracers | TBD | Arms |
-| shroud of entropy | TBD | About Body |
-| sash of binding | TBD | Waist |
-| rift bangle | TBD | Wrist |
-| mask of the void | TBD | Face |
+| void scepter | 33520 | Wield |
+| ring of unmaking | 33521 | Finger |
+| collar of stars | 33522 | Neck |
+| aberrant robes | 33523 | Torso |
+| crown of madness | 33524 | Head |
+| void-woven leggings | 33525 | Legs |
+| phasing boots | 33526 | Feet |
+| tentacle gauntlets | 33527 | Hands |
+| dimensional bracers | 33528 | Arms |
+| shroud of entropy | 33529 | About Body |
+| sash of binding | 33530 | Waist |
+| rift bangle | 33531 | Wrist |
+| mask of the void | 33532 | Face |
+| mastery item | 33535 | Hold |
 
 **Equipment Stats** (proposed):
 - Weapons: +35 hitroll, +35 damroll
@@ -337,7 +338,7 @@ Per-tick processing:
 
 | Field | Location | Purpose |
 |-------|----------|---------|
-| class | ch->class | CLASS_VOIDBORN bit (TBD) |
+| class | ch->class | CLASS_VOIDBORN bit (8388608) |
 | corruption | ch->rage | Current corruption (0-150) |
 | phase_shift | ch->pcdata->powers[0] | Phase Shift ticks remaining |
 | void_shape | ch->pcdata->powers[1] | Void Shape ticks remaining |

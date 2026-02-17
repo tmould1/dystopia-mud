@@ -185,6 +185,9 @@ static void apply_class_starting( CHAR_DATA *ch, int class_id ) {
 
 	ch->beast = start->starting_beast;
 
+	if ( start->starting_rage > 0 )
+		ch->rage = start->starting_rage;
+
 	if ( start->starting_level > 1 )
 		ch->level = start->starting_level;
 

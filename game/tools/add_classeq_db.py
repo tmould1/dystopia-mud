@@ -420,11 +420,172 @@ MECHANIST_EQUIPMENT = {
                              "#x127>/#x177a thrumming mechanist core#x127\\<#n", 75, 75),
 }
 
+# Cultist Equipment (vnums 33500-33512, mastery at 33515)
+# Stats: Weapon +35/+35, Armor +30/+30/-35 AC, Mastery +50/+50 (base class = Dragonkin tier)
+# Colors: accent #x064 (dark olive), primary #x120 (lime green)
+CULTIST_EQUIPMENT = {
+    "class_name": "Cultist",
+    "vnum_start": 33500,
+    "mastery_vnum": 33515,
+    "pieces": [
+        weapon_piece("cultist void staff", "cultist void staff eldritch",
+                    "#x064{~#x120a crackling void staff#x064~}#n", 35, 35),
+        armor_piece("cultist sigil ring", "cultist sigil ring",
+                   "#x064{~#x120a void sigil ring#x064~}#n", WEAR_TAKE | WEAR_FINGER, 30, 30, -35),
+        armor_piece("cultist eldritch amulet", "cultist eldritch amulet",
+                   "#x064{~#x120an eldritch amulet#x064~}#n", WEAR_TAKE | WEAR_NECK, 30, 30, -35),
+        armor_piece("cultist robes void", "cultist robes void",
+                   "#x064{~#x120void-touched cultist robes#x064~}#n", WEAR_TAKE | WEAR_BODY, 30, 30, -35),
+        armor_piece("cultist hood whispers", "cultist hood whispers",
+                   "#x064{~#x120a hood of whispers#x064~}#n", WEAR_TAKE | WEAR_HEAD, 30, 30, -35),
+        armor_piece("cultist ritual leggings", "cultist ritual leggings",
+                   "#x064{~#x120ritual leggings#x064~}#n", WEAR_TAKE | WEAR_LEGS, 30, 30, -35),
+        armor_piece("cultist boots void-touched", "cultist boots void-touched",
+                   "#x064{~#x120void-touched boots#x064~}#n", WEAR_TAKE | WEAR_FEET, 30, 30, -35),
+        armor_piece("cultist sacrificial gloves", "cultist sacrificial gloves",
+                   "#x064{~#x120sacrificial gloves#x064~}#n", WEAR_TAKE | WEAR_HANDS, 30, 30, -35),
+        armor_piece("cultist bracers binding", "cultist bracers binding",
+                   "#x064{~#x120bracers of binding#x064~}#n", WEAR_TAKE | WEAR_ARMS, 30, 30, -35),
+        armor_piece("cultist shroud madness", "cultist shroud madness",
+                   "#x064{~#x120a shroud of madness#x064~}#n", WEAR_TAKE | WEAR_ABOUT, 30, 30, -35),
+        armor_piece("cultist ritual sash", "cultist ritual sash",
+                   "#x064{~#x120a ritual sash#x064~}#n", WEAR_TAKE | WEAR_WAIST, 30, 30, -35),
+        armor_piece("cultist tentacle bangle", "cultist tentacle bangle",
+                   "#x064{~#x120a tentacle bangle#x064~}#n", WEAR_TAKE | WEAR_WRIST, 30, 30, -35),
+        armor_piece("cultist mask deep", "cultist mask deep",
+                   "#x064{~#x120a mask of the deep#x064~}#n", WEAR_TAKE | WEAR_FACE, 30, 30, -35),
+    ],
+    "mastery": mastery_piece("cultist void heart", "cultist void heart eldritch",
+                             "#x064{~#x120a pulsing void heart#x064~}#n", 50, 50),
+}
+
+# Voidborn Equipment (vnums 33520-33532, mastery at 33535)
+# Stats: Weapon +45/+45, Armor +40/+40/-45 AC, Mastery +75/+75 (upgrade class = Wyrm tier)
+# Colors: accent #x055 (dark violet), primary #x097 (eldritch purple)
+VOIDBORN_EQUIPMENT = {
+    "class_name": "Voidborn",
+    "vnum_start": 33520,
+    "mastery_vnum": 33535,
+    "pieces": [
+        weapon_piece("voidborn scepter void", "voidborn scepter void",
+                    "#x055*(#x097a void scepter of unmaking#x055)*#n", 45, 45),
+        armor_piece("voidborn ring unmaking", "voidborn ring unmaking",
+                   "#x055*(#x097a ring of unmaking#x055)*#n", WEAR_TAKE | WEAR_FINGER, 40, 40, -45),
+        armor_piece("voidborn collar stars", "voidborn collar stars",
+                   "#x055*(#x097a collar of distant stars#x055)*#n", WEAR_TAKE | WEAR_NECK, 40, 40, -45),
+        armor_piece("voidborn aberrant robes", "voidborn aberrant robes",
+                   "#x055*(#x097aberrant void robes#x055)*#n", WEAR_TAKE | WEAR_BODY, 40, 40, -45),
+        armor_piece("voidborn crown madness", "voidborn crown madness",
+                   "#x055*(#x097a crown of madness#x055)*#n", WEAR_TAKE | WEAR_HEAD, 40, 40, -45),
+        armor_piece("voidborn leggings void-woven", "voidborn leggings void-woven",
+                   "#x055*(#x097void-woven leggings#x055)*#n", WEAR_TAKE | WEAR_LEGS, 40, 40, -45),
+        armor_piece("voidborn phasing boots", "voidborn phasing boots",
+                   "#x055*(#x097phasing boots#x055)*#n", WEAR_TAKE | WEAR_FEET, 40, 40, -45),
+        armor_piece("voidborn tentacle gauntlets", "voidborn tentacle gauntlets",
+                   "#x055*(#x097tentacle gauntlets#x055)*#n", WEAR_TAKE | WEAR_HANDS, 40, 40, -45),
+        armor_piece("voidborn dimensional bracers", "voidborn dimensional bracers",
+                   "#x055*(#x097dimensional bracers#x055)*#n", WEAR_TAKE | WEAR_ARMS, 40, 40, -45),
+        armor_piece("voidborn shroud entropy", "voidborn shroud entropy",
+                   "#x055*(#x097a shroud of entropy#x055)*#n", WEAR_TAKE | WEAR_ABOUT, 40, 40, -45),
+        armor_piece("voidborn sash binding", "voidborn sash binding",
+                   "#x055*(#x097a sash of binding#x055)*#n", WEAR_TAKE | WEAR_WAIST, 40, 40, -45),
+        armor_piece("voidborn rift bangle", "voidborn rift bangle",
+                   "#x055*(#x097a rift bangle#x055)*#n", WEAR_TAKE | WEAR_WRIST, 40, 40, -45),
+        armor_piece("voidborn mask void", "voidborn mask void",
+                   "#x055*(#x097a mask of the void#x055)*#n", WEAR_TAKE | WEAR_FACE, 40, 40, -45),
+    ],
+    "mastery": mastery_piece("voidborn heart void", "voidborn heart void eldritch",
+                             "#x055*(#x097a pulsing heart of the void#x055)*#n", 75, 75),
+}
+
+# Chronomancer Equipment (vnums 33540-33552, mastery at 33555)
+# Stats: Weapon +35/+35, Armor +30/+30/-35 AC, Mastery +50/+50 (base class = Dragonkin tier)
+# Colors: accent #x130 (deep copper), primary #x215 (warm amber)
+CHRONOMANCER_EQUIPMENT = {
+    "class_name": "Chronomancer",
+    "vnum_start": 33540,
+    "mastery_vnum": 33555,
+    "pieces": [
+        weapon_piece("chronomancer staff temporal", "chronomancer staff temporal",
+                    "#x130[>#x215a temporal staff#x130<]#n", 35, 35),
+        armor_piece("chronomancer ring hourglass", "chronomancer ring hourglass",
+                   "#x130[>#x215an hourglass ring#x130<]#n", WEAR_TAKE | WEAR_FINGER, 30, 30, -35),
+        armor_piece("chronomancer amulet timepiece", "chronomancer amulet timepiece",
+                   "#x130[>#x215a timepiece amulet#x130<]#n", WEAR_TAKE | WEAR_NECK, 30, 30, -35),
+        armor_piece("chronomancer robes flux", "chronomancer robes flux",
+                   "#x130[>#x215flux robes#x130<]#n", WEAR_TAKE | WEAR_BODY, 30, 30, -35),
+        armor_piece("chronomancer circlet chrono", "chronomancer circlet chrono",
+                   "#x130[>#x215a chrono circlet#x130<]#n", WEAR_TAKE | WEAR_HEAD, 30, 30, -35),
+        armor_piece("chronomancer pants time-touched", "chronomancer pants time-touched",
+                   "#x130[>#x215time-touched pants#x130<]#n", WEAR_TAKE | WEAR_LEGS, 30, 30, -35),
+        armor_piece("chronomancer boots phasing", "chronomancer boots phasing",
+                   "#x130[>#x215phasing boots#x130<]#n", WEAR_TAKE | WEAR_FEET, 30, 30, -35),
+        armor_piece("chronomancer gloves temporal", "chronomancer gloves temporal",
+                   "#x130[>#x215temporal gloves#x130<]#n", WEAR_TAKE | WEAR_HANDS, 30, 30, -35),
+        armor_piece("chronomancer bracers clockwork", "chronomancer bracers clockwork",
+                   "#x130[>#x215clockwork bracers#x130<]#n", WEAR_TAKE | WEAR_ARMS, 30, 30, -35),
+        armor_piece("chronomancer cloak moments", "chronomancer cloak moments",
+                   "#x130[>#x215a cloak of moments#x130<]#n", WEAR_TAKE | WEAR_ABOUT, 30, 30, -35),
+        armor_piece("chronomancer sash temporal", "chronomancer sash temporal",
+                   "#x130[>#x215a temporal sash#x130<]#n", WEAR_TAKE | WEAR_WAIST, 30, 30, -35),
+        armor_piece("chronomancer sundial wrist", "chronomancer sundial wrist",
+                   "#x130[>#x215a wrist sundial#x130<]#n", WEAR_TAKE | WEAR_WRIST, 30, 30, -35),
+        armor_piece("chronomancer mask ages", "chronomancer mask ages",
+                   "#x130[>#x215a mask of ages#x130<]#n", WEAR_TAKE | WEAR_FACE, 30, 30, -35),
+    ],
+    "mastery": mastery_piece("chronomancer core temporal shard", "chronomancer core temporal shard",
+                             "#x130[>#x215a pulsing temporal core shard#x130<]#n", 50, 50),
+}
+
+# =========================================================================
+# PARADOX (Upgrade Class) - Vnums 33560-33572, mastery 33575
+# Stats: Weapon +45/+45, Armor +40/+40/-45 AC, Mastery +75/+75 (upgrade class = Wyrm tier)
+# Colors: accent #x160 (deep crimson), primary #x210 (warm rose)
+PARADOX_EQUIPMENT = {
+    "class_name": "Paradox",
+    "vnum_start": 33560,
+    "mastery_vnum": 33575,
+    "pieces": [
+        weapon_piece("paradox staff infinity", "paradox staff infinity",
+                    "#x160>(#x210an infinity staff#x160)<#n", 45, 45),
+        armor_piece("paradox ring mobius", "paradox ring mobius",
+                   "#x160>(#x210a mobius ring#x160)<#n", WEAR_TAKE | WEAR_FINGER, 40, 40, -45),
+        armor_piece("paradox amulet hourglass", "paradox amulet hourglass",
+                   "#x160>(#x210an hourglass pendant#x160)<#n", WEAR_TAKE | WEAR_NECK, 40, 40, -45),
+        armor_piece("paradox robes timeweave", "paradox robes timeweave",
+                   "#x160>(#x210timeweave robes#x160)<#n", WEAR_TAKE | WEAR_BODY, 40, 40, -45),
+        armor_piece("paradox crown moments", "paradox crown moments",
+                   "#x160>(#x210a crown of moments#x160)<#n", WEAR_TAKE | WEAR_HEAD, 40, 40, -45),
+        armor_piece("paradox leggings paradox", "paradox leggings paradox",
+                   "#x160>(#x210paradox leggings#x160)<#n", WEAR_TAKE | WEAR_LEGS, 40, 40, -45),
+        armor_piece("paradox boots ages", "paradox boots ages",
+                   "#x160>(#x210boots of ages#x160)<#n", WEAR_TAKE | WEAR_FEET, 40, 40, -45),
+        armor_piece("paradox gauntlets temporal", "paradox gauntlets temporal",
+                   "#x160>(#x210temporal gauntlets#x160)<#n", WEAR_TAKE | WEAR_HANDS, 40, 40, -45),
+        armor_piece("paradox bracers chrono", "paradox bracers chrono",
+                   "#x160>(#x210chrono-bracers#x160)<#n", WEAR_TAKE | WEAR_ARMS, 40, 40, -45),
+        armor_piece("paradox cloak eternities", "paradox cloak eternities",
+                   "#x160>(#x210a cloak of eternities#x160)<#n", WEAR_TAKE | WEAR_ABOUT, 40, 40, -45),
+        armor_piece("paradox belt loop", "paradox belt loop",
+                   "#x160>(#x210a loop belt#x160)<#n", WEAR_TAKE | WEAR_WAIST, 40, 40, -45),
+        armor_piece("paradox bracer timeline", "paradox bracer timeline",
+                   "#x160>(#x210a timeline bracer#x160)<#n", WEAR_TAKE | WEAR_WRIST, 40, 40, -45),
+        armor_piece("paradox mask void", "paradox mask void",
+                   "#x160>(#x210a mask of the void#x160)<#n", WEAR_TAKE | WEAR_FACE, 40, 40, -45),
+    ],
+    "mastery": mastery_piece("paradox core temporal shard", "paradox core temporal shard",
+                             "#x160>(#x210a pulsing paradox core shard#x160)<#n", 75, 75),
+}
+
 EQUIPMENT_TO_ADD = [
     DRAGONKIN_EQUIPMENT,
     WYRM_EQUIPMENT,
     ARTIFICER_EQUIPMENT,
     MECHANIST_EQUIPMENT,
+    CULTIST_EQUIPMENT,
+    VOIDBORN_EQUIPMENT,
+    CHRONOMANCER_EQUIPMENT,
+    PARADOX_EQUIPMENT,
 ]
 
 

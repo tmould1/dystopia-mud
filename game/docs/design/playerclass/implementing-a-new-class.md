@@ -34,13 +34,13 @@ If the new class is an upgrade that shares a header with its base class (like Si
 | `src/core/interp.c` | Entry in `cmd_table[]` for every player command | Set `race` field to `CLASS_<NAME>` for class-restricted commands |
 | `src/commands/act_info.c` | Value calc (if using ch->rage), "mad frenzy" exclusion (if using ch->rage) | Only 1-2 locations now - `class_name()` is DB-driven via `db_class_get_name()` |
 | `src/classes/clan.c` | `do_class` immortal class-setting command | Add to help text and class-setting switch |
-| `src/systems/upgrade.c` | `is_upgrade()` check (upgrade classes only), upgrade path mapping | Two locations |
+| `src/systems/upgrade.c` | Upgrade path mapping in `clearshit()` switch (upgrade classes only) | `is_upgrade()` is now database-driven — only the path mapping needs a code change |
 | `src/combat/fight.c` | Damcap bonuses, extra attack hooks, defensive mechanics (barrier, reflect) | Multiple locations, add `#include "<class>.h"` for constants |
 | `src/systems/update.c` | Call to `<class>_update(ch)` in the tick loop | One line in the character update section |
-| `src/core/handler.c` | Equipment vnum restrictions (if class armor exists) | Prevents other classes from using your gear |
+| ~~`src/core/handler.c`~~ | ~~Equipment vnum restrictions~~ | **Now database-driven** via `db_class_is_equipment_restricted()` — no code changes needed |
 | `src/core/cfg_keys.h` | Default `cfg()` values for all balance-tunable parameters | Add `CFG_X()` entries using the X-macro system |
 | `src/core/prompt.c` | `%R` prompt variable (if class uses `ch->rage` for resource) | Add class to the `case 'R':` check |
-| `src/systems/save.c` | Verify `pcdata->powers[]` and `pcdata->stats[]` are saved/loaded | Usually already handled generically, but verify |
+| ~~`src/systems/save.c`~~ | ~~Verify pcdata->powers[] and pcdata->stats[] are saved/loaded~~ | **Handled generically** — the save system saves all powers[]/stats[] indices for all classes. No code changes needed. |
 | `game/build/Makefile` | Add new `.c` file to the build | Run `GenerateProjectFiles.bat` (Windows) or `.sh` (Linux) instead of editing manually |
 
 **Note:** Many items that previously required code changes are now database-driven. See "Database Tables" section below.
@@ -301,10 +301,20 @@ Class equipment provides progression and identity. The vnum range you choose is 
      - `usage_message`: Text showing available pieces
      - `act_to_char` / `act_to_room`: Messages when creating armor
    - Add `class_armor_pieces` entries mapping keywords to vnums (e.g., "ring" → 12345)
-5. **Add equipment restrictions to `handler.c`** - Prevent other classes from equipping your class gear by checking vnum ranges.
-6. **Add `cfg()` default in `cfg_keys.h`** - Add a `CFG_X()` entry for the primal cost for armor creation.
+5. **Add `cfg()` default in `cfg_keys.h`** - Add a `CFG_X()` entry for the primal cost for armor creation.
 
-**Note:** The armor command itself (`do_classarmor_generic` in `class_armor.c`) is shared by all classes. You do NOT need to write a custom armor command - just configure the database entries.
+**Note:** Equipment restrictions are now **database-driven** via `db_class_is_equipment_restricted()`. The `class_armor_pieces` entries automatically enforce class-only equipping. No `handler.c` code changes are needed.
+
+**Note:** The armor logic (`do_classarmor_generic` in `class_armor.c`) is shared by all classes. You still need a thin **wrapper function** that calls the generic handler, plus the corresponding `DECLARE_DO_FUN` and `cmd_table` entry:
+
+```c
+// In <class>.c:
+void do_classarmor( CHAR_DATA *ch, char *argument ) {
+    do_classarmor_generic( ch, argument, CLASS_YOURCLASS );
+}
+```
+
+The wrapper is needed because `cmd_table` entries reference specific `do_` functions. The database entries configure what the generic handler actually does (piece names, costs, messages).
 
 **Mastery Item Requirements:**
 - Wear location: HOLD (not armor slot)
@@ -480,9 +490,11 @@ Before starting this phase, verify:
 Every base class has a corresponding upgrade class. This is a required part of class design. The upgrade class shares some infrastructure (header indices, upgrade.c mapping) but needs its own abilities, display entries, help, and mastery item.
 
 **Implementation Steps:**
-1. **Add upgrade path in `upgrade.c`** - Map base class to upgrade class in the upgrade switch, and add to `is_upgrade()`.
+1. **Add upgrade path in `upgrade.c`** - Map base class to upgrade class in the `clearshit()` switch. Note: `is_upgrade()` is now database-driven via `class_registry.upgrade_class` — no code change needed for that.
 2. **Add to immortal `do_class`** - Upgrade classes need entries in `clan.c` for immortals to assign them, but NOT in `do_classself` (players can only select base classes).
 3. **Repeat Phases 1-11 for the upgrade class** - The upgrade class needs its own abilities, act_info.c display entries, help entries, and equipment (including mastery item).
+
+**Tip:** When the base and upgrade classes share significant infrastructure (header file, shared commands like resource display), it can be more efficient to implement both classes in parallel through each phase rather than completing the base class entirely before starting the upgrade. The Cultist/Voidborn implementation used this approach successfully.
 
 **Verification:**
 - [ ] `upgrade` command transitions base class to upgrade class correctly
@@ -510,11 +522,11 @@ Complex implementations spanning many files and databases are easy to leave inco
 - [ ] `update.c` — Tick update call for resource management
 - [ ] `act_info.c` — `ch->rage` value calculation (if using rage) and mad frenzy exclusion
 - [ ] `clan.c` — `do_class` help text and class-setting cases for BOTH classes
-- [ ] `handler.c` — Equipment restrictions for class-specific armor
-- [ ] `jobo_act.c` — `do_mastery` vnum mapping
+- [ ] Equipment restrictions working (database-driven via `class_armor_pieces`)
+- [ ] Mastery item working (database-driven via `class_armor_config.mastery_vnum`)
 - [ ] `prompt.c` — `%R` prompt variable (if using `ch->rage`)
 - [ ] `cfg_keys.h` — All `CFG_X()` entries for tunable values
-- [ ] `upgrade.c` — Upgrade path mapping and `is_upgrade()` check
+- [ ] `upgrade.c` — Upgrade path mapping in `clearshit()` switch (`is_upgrade()` is now DB-driven)
 - [ ] Build files regenerated (`GenerateProjectFiles.bat`/`.sh`)
 
 *Database Integration:*
@@ -555,6 +567,17 @@ Example from Dirgesinger/Siren:
 
 The `race` field in `cmd_table[]` entries is a class restriction bitmask, not a "race." If set to `CLASS_DIRGESINGER`, only Dirgesingers can use the command. If set to 0, anyone can use it. A common mistake is forgetting to set this, which makes class abilities available to everyone.
 
+### Shared Commands Between Base and Upgrade Classes
+
+When a base class and its upgrade share a command (e.g., Cultist and Voidborn both use `corruption`, `purge`, and `voidtrain`), you need **duplicate `cmd_table` entries** — one with `race = CLASS_BASE` and one with `race = CLASS_UPGRADE`. Both entries point to the same `do_` function:
+
+```c
+{ "corruption",     do_corruption,     POS_SITTING,   3, LOG_NORMAL, CLASS_CULTIST,  0, 0 },
+{ "corruption",     do_corruption,     POS_SITTING,   3, LOG_NORMAL, CLASS_VOIDBORN, 0, 0 },
+```
+
+The `race` field is a single class constant, not a bitmask, so you cannot OR them together. If you forget the upgrade class entry, the command silently won't work for upgraded characters.
+
 ### Function Name Conflicts
 
 Before naming abilities, search the codebase for existing `do_<name>` functions to avoid linker errors (LNK2005 multiply defined symbol). Common conflicts encountered:
@@ -564,6 +587,8 @@ Before naming abilities, search the codebase for existing `do_<name>` functions 
 | `do_focus` | `samurai.c` | Use `do_psifocus` |
 | `do_meditate` | `act_move.c` | Use `do_psimeditate` |
 | `do_mindblast` | `vamp.c` | Use `do_psiblast` |
+| `do_purge` | `wizutil.c` (immortal command) | Use `do_cultpurge` |
+| `do_grasp` | (check first — may conflict) | Use `do_voidgrasp` if needed |
 
 **Best practice**: Prefix class-specific commands with a short class identifier (e.g., `psi`, `dirge`, `siren`) to avoid conflicts and make grep searches easier.
 
@@ -681,19 +706,33 @@ This script checks:
 | Siren | `~( )~` | `#x039` | `#x147` |
 | Psion | `<\| \|>` | `#x033` | `#x039` |
 | Mindflayer | `~{ }~` | `#x029` | `#x035` |
+| Dragonkin | `<* *>` | `#x202` | `#x220` |
+| Wyrm | `<* *>` | `#x058` | `#x064` |
+| Artificer | `[= =]` | `#x037` | `#x073` |
+| Mechanist | `[= =]` | `#x031` | `#x067` |
+| Cultist | `{~ ~}` | `#x064` | `#x120` |
+| Voidborn | `*( )*` | `#x055` | `#x097` |
+| Chronomancer | `[> <]` | `#x130` | `#x215` |
+| Paradox | `>( )<` | `#x160` | `#x210` |
 
 **3. Avoid these combinations:**
 - Gold/bronze tones (`#x178`, `#x220`) with `[ ]` brackets - too similar to Dirgesinger
 - Lavender/teal (`#x147`, `#x039`) with `( )` brackets - too similar to Siren
 - Blue/cyan (`#x033`, `#x039`) with `<| |>` brackets - too similar to Psion
 - Green/teal (`#x029`, `#x035`) with `{ }` brackets - too similar to Mindflayer
+- Red-gold/gold (`#x202`, `#x220`) with `<* *>` brackets - too similar to Dragonkin
+- Teal/cyan (`#x037`, `#x073`) with `[= =]` brackets - too similar to Artificer
+- Olive/lime (`#x064`, `#x120`) with `{~ ~}` brackets - too similar to Cultist
+- Violet/purple (`#x055`, `#x097`) with `*( )*` brackets - too similar to Voidborn
+- Copper/amber (`#x130`, `#x215`) with `[> <]` brackets - too similar to Chronomancer
+- Crimson/rose (`#x160`, `#x210`) with `>( )<` brackets - too similar to Paradox
 
 **4. Use unique bracket styles:**
-Consider using a unique bracket character combination rather than reusing common brackets if your color scheme might be confused with existing classes. Examples:
-- `<* *>` - dragon fang style
+Consider using a unique bracket character combination rather than reusing common brackets if your color scheme might be confused with existing classes. Examples of unused styles:
 - `~~ ~~` - wave style
 - `{{ }}` - curly braces
 - `<> <>` - chevron style
+- `|= =|` - pillar style
 
 **5. Update MudEdit after choosing colors:**
 The `class_brackets` table stores both brackets AND the accent/primary color summary. When adding your class via MudEdit's Class Display panel, fill in the accent_color and primary_color fields for documentation and validation purposes.
@@ -730,8 +769,12 @@ Each class with armor equipment needs a contiguous vnum range in `classeq.db`. *
 | Wyrm | 33420-33432 | 33435 | Upgrade |
 | Artificer | 33440-33452 | 33455 | Base class |
 | Mechanist | 33460-33472 | 33475 | Upgrade |
+| Cultist | 33500-33512 | 33515 | Base class |
+| Voidborn | 33520-33532 | 33535 | Upgrade |
+| Chronomancer | 33540-33552 | 33555 | Base class |
+| Paradox | 33560-33572 | 33575 | Upgrade |
 
-**Next available starting vnum:** 33500+
+**Next available starting vnum:** 33580+
 
 ### Build File Regeneration
 
@@ -840,8 +883,8 @@ clan.c           +2 blocks (do_class help text + class-setting case)
 update.c         +1 line   (tick update call)
 fight.c          +1-3 blocks (damcap, defense, extra attacks) + #include
 cfg_keys.h       +N lines  (CFG_X() entries for tunable values)
-handler.c        +1 block  (equipment restrictions)
-jobo_act.c       +1 block  (do_mastery vnum mapping - uses mastery_vnum from class_armor_config)
+                            (handler.c - NO changes needed, equipment restrictions are DB-driven)
+                            (jobo_act.c - NO changes needed, mastery vnum is DB-driven)
 ```
 
 ### Database Entries (via MudEdit)
@@ -876,7 +919,7 @@ The corresponding upgrade class (required for every base class) additionally nee
 
 **Code:**
 ```
-upgrade.c        +2 blocks (is_upgrade check, upgrade path mapping)
+upgrade.c        +1 block  (upgrade path mapping in clearshit() — is_upgrade() is DB-driven)
 clan.c           +1 block  (do_class class-setting case for immortals)
 act_info.c       +1 block  (mad frenzy exclusion if using ch->rage - class_name is now DB-driven)
 + Standard code changes (merc.h, interp.c, fight.c, etc.) for upgrade abilities

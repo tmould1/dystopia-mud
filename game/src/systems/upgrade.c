@@ -26,6 +26,7 @@
 #include <time.h>
 #include "merc.h"
 #include "../db/db_class.h"
+#include "chronomancer.h"
 
 /* local functions */
 
@@ -215,6 +216,13 @@ void do_upgrade( CHAR_DATA *ch, char *argument ) {
 	} else if ( ch->class == CLASS_ARTIFICER ) {
 		ch->class = CLASS_MECHANIST;
 		sprintf( buf, "%s melds with machine, reborn as a Mechanist", ch->name );
+	} else if ( ch->class == CLASS_CULTIST ) {
+		ch->class = CLASS_VOIDBORN;
+		sprintf( buf, "%s surrenders to the void, becoming a Voidborn", ch->name );
+	} else if ( ch->class == CLASS_CHRONOMANCER ) {
+		ch->class = CLASS_PARADOX;
+		ch->rage = PARA_FLUX_CENTER;
+		sprintf( buf, "%s shatters the timeline, becoming a Paradox", ch->name );
 	} else
 		return;
 	clearshit( ch );

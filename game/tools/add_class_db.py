@@ -125,16 +125,23 @@ def insert_class_data(conn, class_data, dry_run=False):
     # 5. class_starting
     if "starting" in class_data:
         start = class_data["starting"]
+        # Ensure starting_rage column exists (migration for older databases)
+        if not dry_run:
+            try:
+                cursor.execute("ALTER TABLE class_starting ADD COLUMN starting_rage INTEGER DEFAULT 0")
+            except sqlite3.OperationalError:
+                pass  # Column already exists
         sql = """INSERT OR REPLACE INTO class_starting
-                 (class_id, starting_beast, starting_level, has_disciplines)
-                 VALUES (?, ?, ?, ?)"""
+                 (class_id, starting_beast, starting_level, has_disciplines, starting_rage)
+                 VALUES (?, ?, ?, ?, ?)"""
         params = (
             class_id,
             start.get("beast", 15),
             start.get("level", 1),
-            1 if start.get("has_disciplines", False) else 0
+            1 if start.get("has_disciplines", False) else 0,
+            start.get("rage", 0)
         )
-        print(f"  - class_starting: beast={params[1]}, level={params[2]}")
+        print(f"  - class_starting: beast={params[1]}, level={params[2]}, rage={params[4]}")
         if not dry_run:
             cursor.execute(sql, params)
 
@@ -277,6 +284,9 @@ STAT_DRAGON_ESSENCE_PEAK = 24
 # Class IDs (must match class.h defines)
 CLASS_ARTIFICER = 1048576
 CLASS_MECHANIST = 2097152
+CLASS_CULTIST = 4194304
+CLASS_VOIDBORN = 8388608
+CLASS_CHRONOMANCER = 16777216
 
 CLASSES_TO_ADD = [
     # -------------------------------------------------------------------------
@@ -424,6 +434,302 @@ CLASSES_TO_ADD = [
             {"keyword": "belt",      "vnum": 33470},
             {"keyword": "holo",      "vnum": 33471},
             {"keyword": "visor",     "vnum": 33472},
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # CULTIST (Base Class)
+    # -------------------------------------------------------------------------
+    {
+        "class_id": CLASS_CULTIST,
+        "class_name": "Cultist",
+
+        "registry": {
+            "keyword": "cultist",
+            "keyword_alt": None,
+            "mudstat_label": "Cultists",
+            "selfclass_message": "The void whispers your name. You are now a #x120Cultist#n.",
+            "display_order": 9,
+            "upgrade_class": None,  # Base class
+            "requirements": None
+        },
+
+        "brackets": {
+            "open": "#x064{~#n",
+            "close": "#x064~}#n",
+            "accent": "#x064",
+            "primary": "#x120"
+        },
+
+        # Generation 0 = default (lowest), then 1 = highest gen, counting up
+        "generations": [
+            "Acolyte",         # 0 - default
+            "High Priest",     # 1 - highest
+            "Void Touched",    # 2
+            "Cultist",         # 3
+            "Initiate",        # 4
+            "Seeker",          # 5
+        ],
+
+        "aura": {
+            "text": "#x120(#nCultist#x120)#n ",
+            "display_order": 24
+        },
+
+        "starting": {
+            "beast": 15,
+            "level": 1,
+            "has_disciplines": False
+        },
+
+        "score_stats": [
+            {"source": STAT_RAGE, "label": "Corruption", "order": 1,
+             "format": "#x064{#n%s: #x120%d#x064}#n\\n\\r"},
+        ],
+
+        "armor_config": {
+            "acfg_cost_key": "cultist.cultistarmor.practice_cost",
+            "command_name": "cultistarmor",
+            "act_to_char": "Void energy coalesces into $p in your hands.",
+            "act_to_room": "Void energy coalesces into $p in $n's hands.",
+            "mastery_vnum": 33515
+        },
+
+        "armor_pieces": [
+            {"keyword": "staff",     "vnum": 33500},
+            {"keyword": "ring",      "vnum": 33501},
+            {"keyword": "amulet",    "vnum": 33502},
+            {"keyword": "robes",     "vnum": 33503},
+            {"keyword": "hood",      "vnum": 33504},
+            {"keyword": "leggings",  "vnum": 33505},
+            {"keyword": "boots",     "vnum": 33506},
+            {"keyword": "gloves",    "vnum": 33507},
+            {"keyword": "bracers",   "vnum": 33508},
+            {"keyword": "shroud",    "vnum": 33509},
+            {"keyword": "sash",      "vnum": 33510},
+            {"keyword": "bangle",    "vnum": 33511},
+            {"keyword": "mask",      "vnum": 33512},
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # VOIDBORN (Upgrade Class from Cultist)
+    # -------------------------------------------------------------------------
+    {
+        "class_id": CLASS_VOIDBORN,
+        "class_name": "Voidborn",
+
+        "registry": {
+            "keyword": "voidborn",
+            "keyword_alt": None,
+            "mudstat_label": "Voidborn",
+            "selfclass_message": "Reality unravels around you. You are now #x097Voidborn#n.",
+            "display_order": 9,
+            "upgrade_class": CLASS_CULTIST,  # Upgrades from Cultist
+            "requirements": None
+        },
+
+        "brackets": {
+            "open": "#x055*(#n",
+            "close": "#x055)*#n",
+            "accent": "#x055",
+            "primary": "#x097"
+        },
+
+        "generations": [
+            "Voidborn",        # 0 - default
+            "Void Incarnate",  # 1 - highest
+            "Aberration",      # 2
+            "Voidspawn",       # 3
+            "Void Touched",    # 4
+        ],
+
+        "aura": {
+            "text": "#x097(#nVoidborn#x097)#n ",
+            "display_order": 25
+        },
+
+        # Voidborn doesn't need starting - inherits from upgrade
+
+        "score_stats": [
+            {"source": STAT_RAGE, "label": "Corruption", "order": 1,
+             "format": "#x055{#n%s: #x097%d#x055}#n\\n\\r"},
+        ],
+
+        "armor_config": {
+            "acfg_cost_key": "voidborn.voidbornarmor.practice_cost",
+            "command_name": "voidbornarmor",
+            "act_to_char": "Reality tears open and $p materializes in your grasp.",
+            "act_to_room": "Reality tears open and $p materializes in $n's grasp.",
+            "mastery_vnum": 33535
+        },
+
+        "armor_pieces": [
+            {"keyword": "scepter",    "vnum": 33520},
+            {"keyword": "ring",       "vnum": 33521},
+            {"keyword": "collar",     "vnum": 33522},
+            {"keyword": "robes",      "vnum": 33523},
+            {"keyword": "crown",      "vnum": 33524},
+            {"keyword": "leggings",   "vnum": 33525},
+            {"keyword": "boots",      "vnum": 33526},
+            {"keyword": "gauntlets",  "vnum": 33527},
+            {"keyword": "bracers",    "vnum": 33528},
+            {"keyword": "shroud",     "vnum": 33529},
+            {"keyword": "sash",       "vnum": 33530},
+            {"keyword": "bangle",     "vnum": 33531},
+            {"keyword": "mask",       "vnum": 33532},
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # CHRONOMANCER (Base Class)
+    # -------------------------------------------------------------------------
+    {
+        "class_id": CLASS_CHRONOMANCER,
+        "class_name": "Chronomancer",
+
+        "registry": {
+            "keyword": "chronomancer",
+            "keyword_alt": "chrono",
+            "mudstat_label": "Chronomancers",
+            "selfclass_message": "Time bends to your will. You are now a #x215Chronomancer#n.",
+            "display_order": 10,
+            "upgrade_class": None,  # Base class
+            "requirements": None
+        },
+
+        "brackets": {
+            "open": "#x130[>#n",
+            "close": "#x130<]#n",
+            "accent": "#x130",
+            "primary": "#x215"
+        },
+
+        # Generation 0 = default (lowest), then 1 = highest gen, counting up
+        "generations": [
+            "Novice",            # 0 - default
+            "Time Lord",         # 1 - highest
+            "Temporal Master",   # 2
+            "Chronomancer",      # 3
+            "Time Weaver",       # 4
+            "Initiate",          # 5
+        ],
+
+        "aura": {
+            "text": "#x215(#nChronomancer#x215)#n ",
+            "display_order": 26
+        },
+
+        "starting": {
+            "beast": 15,
+            "level": 1,
+            "has_disciplines": False,
+            "rage": 50  # Flux starts at 50 (center)
+
+        },
+
+        "score_stats": [
+            {"source": STAT_RAGE, "label": "Flux", "order": 1,
+             "format": "#x130[#n%s: #x215%d#x130]#n\\n\\r"},
+        ],
+
+        "armor_config": {
+            "acfg_cost_key": "chrono.chronoarmor.practice_cost",
+            "command_name": "chronoarmor",
+            "act_to_char": "Temporal energy coalesces into $p in your hands.",
+            "act_to_room": "Temporal energy coalesces into $p in $n's hands.",
+            "mastery_vnum": 33555
+        },
+
+        "armor_pieces": [
+            {"keyword": "staff",    "vnum": 33540},
+            {"keyword": "ring",     "vnum": 33541},
+            {"keyword": "amulet",   "vnum": 33542},
+            {"keyword": "robes",    "vnum": 33543},
+            {"keyword": "circlet",  "vnum": 33544},
+            {"keyword": "pants",    "vnum": 33545},
+            {"keyword": "boots",    "vnum": 33546},
+            {"keyword": "gloves",   "vnum": 33547},
+            {"keyword": "bracers",  "vnum": 33548},
+            {"keyword": "cloak",    "vnum": 33549},
+            {"keyword": "sash",     "vnum": 33550},
+            {"keyword": "sundial",  "vnum": 33551},
+            {"keyword": "mask",     "vnum": 33552},
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # PARADOX (Upgrade Class - upgrades from Chronomancer)
+    # -------------------------------------------------------------------------
+    {
+        "class_id": 33554432,  # CLASS_PARADOX
+        "class_name": "Paradox",
+
+        "registry": {
+            "keyword": "paradox",
+            "keyword_alt": "para",
+            "mudstat_label": "Paradoxes",
+            "selfclass_message": "#x160>(#x210You shatter the timeline, becoming a Paradox!#x160)<#n",
+            "display_order": 11,
+            "upgrade_class": CLASS_CHRONOMANCER,
+            "requirements": "Chronomancer upgrade"
+        },
+
+        "brackets": {
+            "open":    "#x160>(#n",
+            "close":   "#x160)<#n",
+            "accent":  "#x160",
+            "primary": "#x210"
+        },
+
+        "generations": [
+            "Glitch",            # 0 - default
+            "Temporal God",      # 1 - highest
+            "Timeline Breaker",  # 2
+            "Paradox",           # 3
+            "Anomaly",           # 4
+            "Distortion",        # 5
+        ],
+
+        "aura": {
+            "text": "#x210(#nParadox#x210)#n ",
+            "display_order": 27
+        },
+
+        "starting": {
+            "beast": 15,
+            "level": 1,
+            "has_disciplines": False,
+            "rage": 75  # Flux starts at 75 (Paradox center)
+        },
+
+        "score_stats": [
+            {"source": STAT_RAGE, "label": "Flux", "order": 1,
+             "format": "#x160[#n%s: #x210%d#x160]#n\\n\\r"},
+        ],
+
+        "armor_config": {
+            "acfg_cost_key": "para.paradoxarmor.practice_cost",
+            "command_name": "paradoxarmor",
+            "act_to_char": "Timeline fragments coalesce into $p in your hands.",
+            "act_to_room": "Timeline fragments coalesce into $p in $n's hands.",
+            "mastery_vnum": 33575
+        },
+
+        "armor_pieces": [
+            {"keyword": "staff",    "vnum": 33560},
+            {"keyword": "ring",     "vnum": 33561},
+            {"keyword": "amulet",   "vnum": 33562},
+            {"keyword": "robe",     "vnum": 33563},
+            {"keyword": "crown",    "vnum": 33564},
+            {"keyword": "pants",    "vnum": 33565},
+            {"keyword": "boots",    "vnum": 33566},
+            {"keyword": "gloves",   "vnum": 33567},
+            {"keyword": "bracers",  "vnum": 33568},
+            {"keyword": "cloak",    "vnum": 33569},
+            {"keyword": "belt",     "vnum": 33570},
+            {"keyword": "bracer",   "vnum": 33571},
+            {"keyword": "mask",     "vnum": 33572},
         ],
     },
 ]

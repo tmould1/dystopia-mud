@@ -34,6 +34,10 @@ CLASS_NAMES = {
     524288: 'Wyrm',
     1048576: 'Artificer',
     2097152: 'Mechanist',
+    4194304: 'Cultist',
+    8388608: 'Voidborn',
+    16777216: 'Chronomancer',
+    33554432: 'Paradox',
 }
 
 # Cache for class names loaded from database

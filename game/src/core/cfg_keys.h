@@ -1489,7 +1489,225 @@
     /* ABILITY - ARTIFICER - ARMOR */ \
     CFG_X(ABILITY_ARTIFICER_ARTIFICERARMOR_PRACTICE_COST      , "ability.artificer.artificerarmor.practice_cost",        60) \
     /* ABILITY - MECHANIST - ARMOR */ \
-    CFG_X(ABILITY_MECHANIST_MECHANISTARMOR_PRACTICE_COST      , "ability.mechanist.mechanistarmor.practice_cost",        60)
+    CFG_X(ABILITY_MECHANIST_MECHANISTARMOR_PRACTICE_COST      , "ability.mechanist.mechanistarmor.practice_cost",        60) \
+    /* COMBAT - CULTIST - DAMCAP */ \
+    CFG_X(COMBAT_DAMCAP_CULTIST_BASE                           , "combat.damcap.cultist.base",                         150) \
+    CFG_X(COMBAT_DAMCAP_CULTIST_CORRUPT_MULT                   , "combat.damcap.cultist.corrupt_mult",                   5) \
+    CFG_X(COMBAT_DAMCAP_CULTIST_HIGH_CORRUPT                   , "combat.damcap.cultist.high_corrupt",                 150) \
+    /* COMBAT - VOIDBORN - DAMCAP */ \
+    CFG_X(COMBAT_DAMCAP_VOIDBORN_CORRUPT_MULT                  , "combat.damcap.voidborn.corrupt_mult",                  7) \
+    CFG_X(COMBAT_DAMCAP_VOIDBORN_FINALFORM                     , "combat.damcap.voidborn.finalform",                   300) \
+    CFG_X(COMBAT_DAMCAP_VOIDBORN_ABERRANT                      , "combat.damcap.voidborn.aberrant",                    150) \
+    /* ABILITY - CULTIST - GENERAL */ \
+    CFG_X(CULTIST_TRAIN_COST_MULT                              , "ability.cultist.train.cost_mult",                     40) \
+    CFG_X(CULTIST_PURGE_HP_COST                                , "ability.cultist.purge.hp_cost",                        5) \
+    CFG_X(CULTIST_PURGE_CORRUPTION_REMOVED                     , "ability.cultist.purge.corruption_removed",            25) \
+    /* ABILITY - CULTIST - FORBIDDEN LORE */ \
+    CFG_X(CULTIST_ELDRITCHSIGHT_MANA_COST                      , "ability.cultist.eldritchsight.mana_cost",             30) \
+    CFG_X(CULTIST_ELDRITCHSIGHT_CORRUPT_GAIN                   , "ability.cultist.eldritchsight.corrupt_gain",           3) \
+    CFG_X(CULTIST_ELDRITCHSIGHT_DURATION                       , "ability.cultist.eldritchsight.duration",              10) \
+    CFG_X(CULTIST_WHISPERS_MANA_COST                           , "ability.cultist.whispers.mana_cost",                  50) \
+    CFG_X(CULTIST_WHISPERS_CORRUPT_GAIN                        , "ability.cultist.whispers.corrupt_gain",                5) \
+    CFG_X(CULTIST_WHISPERS_DEBUFF_DURATION                     , "ability.cultist.whispers.debuff_duration",             8) \
+    CFG_X(CULTIST_UNRAVEL_MANA_COST                            , "ability.cultist.unravel.mana_cost",                   80) \
+    CFG_X(CULTIST_UNRAVEL_CORRUPT_GAIN                         , "ability.cultist.unravel.corrupt_gain",                10) \
+    CFG_X(CULTIST_UNRAVEL_MAX_REMOVES                          , "ability.cultist.unravel.max_removes",                  3) \
+    CFG_X(CULTIST_UNRAVEL_MAX_REMOVES_HIGH                     , "ability.cultist.unravel.max_removes_high",             5) \
+    /* ABILITY - CULTIST - TENTACLE ARTS */ \
+    CFG_X(CULTIST_VOIDTENDRIL_MANA_COST                        , "ability.cultist.voidtendril.mana_cost",               40) \
+    CFG_X(CULTIST_VOIDTENDRIL_CORRUPT_GAIN                     , "ability.cultist.voidtendril.corrupt_gain",             5) \
+    CFG_X(CULTIST_GRASP_MANA_COST                              , "ability.cultist.grasp.mana_cost",                     60) \
+    CFG_X(CULTIST_GRASP_CORRUPT_GAIN                           , "ability.cultist.grasp.corrupt_gain",                   8) \
+    CFG_X(CULTIST_GRASP_DURATION                               , "ability.cultist.grasp.duration",                       4) \
+    CFG_X(CULTIST_GRASP_DURATION_HIGH                          , "ability.cultist.grasp.duration_high",                  6) \
+    CFG_X(CULTIST_GRASP_TICK_DAMAGE                            , "ability.cultist.grasp.tick_damage",                   30) \
+    CFG_X(CULTIST_CONSTRICT_MANA_COST                          , "ability.cultist.constrict.mana_cost",                 80) \
+    CFG_X(CULTIST_CONSTRICT_CORRUPT_GAIN                       , "ability.cultist.constrict.corrupt_gain",              12) \
+    CFG_X(CULTIST_CONSTRICT_DURATION                           , "ability.cultist.constrict.duration",                   5) \
+    /* ABILITY - CULTIST - MADNESS */ \
+    CFG_X(CULTIST_MADDENINGGAZE_MANA_COST                      , "ability.cultist.maddeninggaze.mana_cost",             50) \
+    CFG_X(CULTIST_MADDENINGGAZE_CORRUPT_GAIN                   , "ability.cultist.maddeninggaze.corrupt_gain",           7) \
+    CFG_X(CULTIST_GIBBERING_MANA_COST                          , "ability.cultist.gibbering.mana_cost",                 90) \
+    CFG_X(CULTIST_GIBBERING_CORRUPT_GAIN                       , "ability.cultist.gibbering.corrupt_gain",              15) \
+    CFG_X(CULTIST_GIBBERING_CONFUSION_DURATION                 , "ability.cultist.gibbering.confusion_duration",         3) \
+    CFG_X(CULTIST_GIBBERING_FLEE_CHANCE                        , "ability.cultist.gibbering.flee_chance",               30) \
+    CFG_X(CULTIST_INSANITY_MANA_COST                           , "ability.cultist.insanity.mana_cost",                 120) \
+    CFG_X(CULTIST_INSANITY_CORRUPT_GAIN                        , "ability.cultist.insanity.corrupt_gain",               20) \
+    CFG_X(CULTIST_INSANITY_SELFATTACK_CHANCE                   , "ability.cultist.insanity.selfattack_chance",           20) \
+    /* ABILITY - CULTIST - ARMOR */ \
+    CFG_X(CULTIST_CULTISTARMOR_PRACTICE_COST                   , "ability.cultist.cultistarmor.practice_cost",           60) \
+    /* ABILITY - VOIDBORN - GENERAL */ \
+    CFG_X(VOIDBORN_TRAIN_COST_MULT                             , "ability.voidborn.train.cost_mult",                    50) \
+    /* ABILITY - VOIDBORN - REALITY WARP */ \
+    CFG_X(VOIDBORN_PHASESHIFT_MANA_COST                        , "ability.voidborn.phaseshift.mana_cost",               70) \
+    CFG_X(VOIDBORN_PHASESHIFT_CORRUPT_GAIN                     , "ability.voidborn.phaseshift.corrupt_gain",            10) \
+    CFG_X(VOIDBORN_PHASESHIFT_DURATION                         , "ability.voidborn.phaseshift.duration",                 8) \
+    CFG_X(VOIDBORN_PHASESHIFT_DODGE_BONUS                      , "ability.voidborn.phaseshift.dodge_bonus",             25) \
+    CFG_X(VOIDBORN_DIMREND_MANA_COST                           , "ability.voidborn.dimrend.mana_cost",                 100) \
+    CFG_X(VOIDBORN_DIMREND_CORRUPT_GAIN                        , "ability.voidborn.dimrend.corrupt_gain",               15) \
+    CFG_X(VOIDBORN_DIMREND_COOLDOWN                            , "ability.voidborn.dimrend.cooldown",                   10) \
+    CFG_X(VOIDBORN_DIMREND_HAZARD_DURATION                     , "ability.voidborn.dimrend.hazard_duration",             5) \
+    CFG_X(VOIDBORN_DIMREND_HAZARD_DAMAGE                       , "ability.voidborn.dimrend.hazard_damage",              50) \
+    CFG_X(VOIDBORN_UNMAKE_MANA_COST                            , "ability.voidborn.unmake.mana_cost",                  180) \
+    CFG_X(VOIDBORN_UNMAKE_CORRUPT_REQ                          , "ability.voidborn.unmake.corrupt_req",                100) \
+    CFG_X(VOIDBORN_UNMAKE_CORRUPT_COST                         , "ability.voidborn.unmake.corrupt_cost",                50) \
+    CFG_X(VOIDBORN_UNMAKE_COOLDOWN                             , "ability.voidborn.unmake.cooldown",                    25) \
+    CFG_X(VOIDBORN_UNMAKE_INSTAKILL_THRESHOLD                  , "ability.voidborn.unmake.instakill_threshold",       1000) \
+    /* ABILITY - VOIDBORN - ELDER FORM */ \
+    CFG_X(VOIDBORN_VOIDSHAPE_MANA_COST                         , "ability.voidborn.voidshape.mana_cost",                80) \
+    CFG_X(VOIDBORN_VOIDSHAPE_CORRUPT_GAIN                      , "ability.voidborn.voidshape.corrupt_gain",             12) \
+    CFG_X(VOIDBORN_VOIDSHAPE_DURATION                          , "ability.voidborn.voidshape.duration",                 10) \
+    CFG_X(VOIDBORN_VOIDSHAPE_EXTRA_ATTACKS                     , "ability.voidborn.voidshape.extra_attacks",             2) \
+    CFG_X(VOIDBORN_ABERRANT_MANA_COST                          , "ability.voidborn.aberrant.mana_cost",                100) \
+    CFG_X(VOIDBORN_ABERRANT_CORRUPT_GAIN                       , "ability.voidborn.aberrant.corrupt_gain",              18) \
+    CFG_X(VOIDBORN_ABERRANT_DURATION                           , "ability.voidborn.aberrant.duration",                   8) \
+    CFG_X(VOIDBORN_ABERRANT_DAMAGE_BONUS                       , "ability.voidborn.aberrant.damage_bonus",              25) \
+    CFG_X(VOIDBORN_ABERRANT_RESISTANCE                         , "ability.voidborn.aberrant.resistance",                15) \
+    CFG_X(VOIDBORN_FINALFORM_MANA_COST                         , "ability.voidborn.finalform.mana_cost",               150) \
+    CFG_X(VOIDBORN_FINALFORM_CORRUPT_REQ                       , "ability.voidborn.finalform.corrupt_req",              75) \
+    CFG_X(VOIDBORN_FINALFORM_CORRUPT_GAIN                      , "ability.voidborn.finalform.corrupt_gain",             30) \
+    CFG_X(VOIDBORN_FINALFORM_DURATION                          , "ability.voidborn.finalform.duration",                  6) \
+    CFG_X(VOIDBORN_FINALFORM_COOLDOWN                          , "ability.voidborn.finalform.cooldown",                 30) \
+    /* ABILITY - VOIDBORN - COSMIC HORROR */ \
+    CFG_X(VOIDBORN_SUMMONTHING_MANA_COST                       , "ability.voidborn.summonthing.mana_cost",             120) \
+    CFG_X(VOIDBORN_SUMMONTHING_CORRUPT_GAIN                    , "ability.voidborn.summonthing.corrupt_gain",           20) \
+    CFG_X(VOIDBORN_SUMMONTHING_DURATION                        , "ability.voidborn.summonthing.duration",               15) \
+    CFG_X(VOIDBORN_STARSPAWN_MANA_COST                         , "ability.voidborn.starspawn.mana_cost",               140) \
+    CFG_X(VOIDBORN_STARSPAWN_CORRUPT_GAIN                      , "ability.voidborn.starspawn.corrupt_gain",             25) \
+    CFG_X(VOIDBORN_STARSPAWN_COOLDOWN                          , "ability.voidborn.starspawn.cooldown",                 12) \
+    CFG_X(VOIDBORN_STARSPAWN_AOE_PCT                           , "ability.voidborn.starspawn.aoe_pct",                  50) \
+    CFG_X(VOIDBORN_ENTROPY_MANA_COST                           , "ability.voidborn.entropy.mana_cost",                 200) \
+    CFG_X(VOIDBORN_ENTROPY_CORRUPT_REQ                         , "ability.voidborn.entropy.corrupt_req",               125) \
+    CFG_X(VOIDBORN_ENTROPY_CORRUPT_COST                        , "ability.voidborn.entropy.corrupt_cost",               75) \
+    CFG_X(VOIDBORN_ENTROPY_COOLDOWN                            , "ability.voidborn.entropy.cooldown",                   30) \
+    CFG_X(VOIDBORN_ENTROPY_DURATION                            , "ability.voidborn.entropy.duration",                    5) \
+    /* ABILITY - VOIDBORN - ARMOR */ \
+    CFG_X(VOIDBORN_VOIDBORNARMOR_PRACTICE_COST                 , "ability.voidborn.voidbornarmor.practice_cost",         60) \
+    /* COMBAT - CHRONOMANCER - DAMCAP */ \
+    CFG_X(COMBAT_DAMCAP_CHRONO_BASE                            , "combat.damcap.chrono.base",                          150) \
+    CFG_X(COMBAT_DAMCAP_CHRONO_EXTREME_MULT                    , "combat.damcap.chrono.extreme_mult",                    4) \
+    CFG_X(COMBAT_DAMCAP_CHRONO_QUICKEN                         , "combat.damcap.chrono.quicken",                       100) \
+    CFG_X(COMBAT_DAMCAP_CHRONO_BLUR                            , "combat.damcap.chrono.blur",                          150) \
+    /* ABILITY - CHRONOMANCER - GENERAL */ \
+    CFG_X(CHRONO_TRAIN_COST_MULT                               , "ability.chrono.train.cost_mult",                      40) \
+    /* ABILITY - CHRONOMANCER - ACCELERATION */ \
+    CFG_X(CHRONO_QUICKEN_MANA_COST                             , "ability.chrono.quicken.mana_cost",                    60) \
+    CFG_X(CHRONO_QUICKEN_FLUX_CHANGE                           , "ability.chrono.quicken.flux_change",                  15) \
+    CFG_X(CHRONO_QUICKEN_DURATION                              , "ability.chrono.quicken.duration",                      8) \
+    CFG_X(CHRONO_QUICKEN_EXTRA_ATTACKS                         , "ability.chrono.quicken.extra_attacks",                 2) \
+    CFG_X(CHRONO_QUICKEN_EXTRA_ATTACKS_BONUS                   , "ability.chrono.quicken.extra_attacks_bonus",           3) \
+    CFG_X(CHRONO_TIMESLIP_MANA_COST                            , "ability.chrono.timeslip.mana_cost",                   50) \
+    CFG_X(CHRONO_TIMESLIP_FLUX_CHANGE                          , "ability.chrono.timeslip.flux_change",                 10) \
+    CFG_X(CHRONO_TIMESLIP_COOLDOWN                             , "ability.chrono.timeslip.cooldown",                     6) \
+    CFG_X(CHRONO_BLUR_MANA_COST                                , "ability.chrono.blur.mana_cost",                      100) \
+    CFG_X(CHRONO_BLUR_FLUX_CHANGE                              , "ability.chrono.blur.flux_change",                     25) \
+    CFG_X(CHRONO_BLUR_DURATION                                 , "ability.chrono.blur.duration",                         5) \
+    CFG_X(CHRONO_BLUR_COOLDOWN                                 , "ability.chrono.blur.cooldown",                        15) \
+    CFG_X(CHRONO_BLUR_EXTRA_ATTACKS                            , "ability.chrono.blur.extra_attacks",                    4) \
+    CFG_X(CHRONO_BLUR_DODGE_BONUS                              , "ability.chrono.blur.dodge_bonus",                     40) \
+    CFG_X(CHRONO_BLUR_MISS_CHANCE                              , "ability.chrono.blur.miss_chance",                     25) \
+    /* ABILITY - CHRONOMANCER - DECELERATION */ \
+    CFG_X(CHRONO_SLOW_MANA_COST                                , "ability.chrono.slow.mana_cost",                       50) \
+    CFG_X(CHRONO_SLOW_FLUX_CHANGE                              , "ability.chrono.slow.flux_change",                     12) \
+    CFG_X(CHRONO_SLOW_DURATION                                 , "ability.chrono.slow.duration",                         8) \
+    CFG_X(CHRONO_SLOW_DURATION_BONUS                           , "ability.chrono.slow.duration_bonus",                  12) \
+    CFG_X(CHRONO_SLOW_ATTACKS_LOST                             , "ability.chrono.slow.attacks_lost",                     2) \
+    CFG_X(CHRONO_SLOW_DODGE_REDUCTION                          , "ability.chrono.slow.dodge_reduction",                 20) \
+    CFG_X(CHRONO_TIMETRAP_MANA_COST                            , "ability.chrono.timetrap.mana_cost",                   80) \
+    CFG_X(CHRONO_TIMETRAP_FLUX_CHANGE                          , "ability.chrono.timetrap.flux_change",                 18) \
+    CFG_X(CHRONO_TIMETRAP_DURATION                             , "ability.chrono.timetrap.duration",                     6) \
+    CFG_X(CHRONO_TIMETRAP_COOLDOWN                             , "ability.chrono.timetrap.cooldown",                    12) \
+    CFG_X(CHRONO_STASIS_MANA_COST                              , "ability.chrono.stasis.mana_cost",                    120) \
+    CFG_X(CHRONO_STASIS_FLUX_CHANGE                            , "ability.chrono.stasis.flux_change",                   25) \
+    CFG_X(CHRONO_STASIS_DURATION                               , "ability.chrono.stasis.duration",                       3) \
+    CFG_X(CHRONO_STASIS_COOLDOWN                               , "ability.chrono.stasis.cooldown",                      20) \
+    CFG_X(CHRONO_STASIS_MAX_STORED                             , "ability.chrono.stasis.max_stored",                  2000) \
+    /* ABILITY - CHRONOMANCER - TEMPORAL SIGHT */ \
+    CFG_X(CHRONO_FORESIGHT_MANA_COST                           , "ability.chrono.foresight.mana_cost",                  40) \
+    CFG_X(CHRONO_FORESIGHT_DURATION                            , "ability.chrono.foresight.duration",                   10) \
+    CFG_X(CHRONO_FORESIGHT_DODGE_BONUS                         , "ability.chrono.foresight.dodge_bonus",                20) \
+    CFG_X(CHRONO_HINDSIGHT_MANA_COST                           , "ability.chrono.hindsight.mana_cost",                  50) \
+    CFG_X(CHRONO_HINDSIGHT_DURATION                            , "ability.chrono.hindsight.duration",                    8) \
+    CFG_X(CHRONO_HINDSIGHT_STACK_BONUS                         , "ability.chrono.hindsight.stack_bonus",                 5) \
+    CFG_X(CHRONO_HINDSIGHT_MAX_STACKS                          , "ability.chrono.hindsight.max_stacks",                  5) \
+    CFG_X(CHRONO_ECHO_MANA_COST                                , "ability.chrono.temporalecho.mana_cost",               70) \
+    CFG_X(CHRONO_ECHO_COOLDOWN                                 , "ability.chrono.temporalecho.cooldown",                 8) \
+    CFG_X(CHRONO_ECHO_DELAY                                    , "ability.chrono.temporalecho.delay",                    2) \
+    CFG_X(CHRONO_ECHO_DAMAGE_PCT                               , "ability.chrono.temporalecho.damage_pct",             75) \
+    /* ABILITY - CHRONOMANCER - ARMOR */ \
+    CFG_X(CHRONO_CHRONOARMOR_PRACTICE_COST                     , "ability.chrono.chronoarmor.practice_cost",            60) \
+    /* ======================================================================= */ \
+    /* COMBAT - PARADOX - DAMCAP */ \
+    CFG_X(COMBAT_DAMCAP_PARA_BASE                              , "combat.damcap.para.base",                           200) \
+    CFG_X(COMBAT_DAMCAP_PARA_EXTREME_MULT                      , "combat.damcap.para.extreme_mult",                     5) \
+    CFG_X(COMBAT_DAMCAP_PARA_PASTSELF                           , "combat.damcap.para.pastself",                       100) \
+    CFG_X(COMBAT_DAMCAP_PARA_TIMELOOP                           , "combat.damcap.para.timeloop",                       150) \
+    CFG_X(COMBAT_DAMCAP_PARA_ETERNITY_REDUCTION                 , "combat.damcap.para.eternity_reduction",              50) \
+    /* GENERAL - PARADOX - TRAINING */ \
+    CFG_X(PARA_TRAIN_COST_MULT                                 , "ability.para.train.cost_mult",                       45) \
+    /* ABILITY - PARADOX - DESTABILIZE */ \
+    CFG_X(PARA_DESTABILIZE_MANA                                , "ability.para.destabilize.mana",                      60) \
+    CFG_X(PARA_DESTABILIZE_FLUX                                , "ability.para.destabilize.flux",                      20) \
+    CFG_X(PARA_DESTABILIZE_CD                                  , "ability.para.destabilize.cd",                        10) \
+    /* ABILITY - PARADOX - TIMELINE: REWIND */ \
+    CFG_X(PARA_REWIND_MANA                                     , "ability.para.rewind.mana",                          100) \
+    CFG_X(PARA_REWIND_CD                                       , "ability.para.rewind.cd",                             20) \
+    CFG_X(PARA_REWIND_MAX_HEAL                                 , "ability.para.rewind.max_heal",                     1500) \
+    /* ABILITY - PARADOX - TIMELINE: SPLIT TIMELINE */ \
+    CFG_X(PARA_SPLIT_MANA                                      , "ability.para.split.mana",                           120) \
+    CFG_X(PARA_SPLIT_CD                                        , "ability.para.split.cd",                              30) \
+    CFG_X(PARA_SPLIT_ROUNDS                                    , "ability.para.split.rounds",                           3) \
+    /* ABILITY - PARADOX - TIMELINE: CONVERGENCE */ \
+    CFG_X(PARA_CONVERGENCE_MANA                                , "ability.para.convergence.mana",                     180) \
+    CFG_X(PARA_CONVERGENCE_FLUX                                , "ability.para.convergence.flux",                      50) \
+    CFG_X(PARA_CONVERGENCE_CD                                  , "ability.para.convergence.cd",                        35) \
+    CFG_X(PARA_CONVERGENCE_BASE_MIN                            , "ability.para.convergence.base_min",                 500) \
+    CFG_X(PARA_CONVERGENCE_BASE_MAX                            , "ability.para.convergence.base_max",                 800) \
+    /* ABILITY - PARADOX - TEMPORAL COMBAT: FUTURE STRIKE */ \
+    CFG_X(PARA_FUTURESTRIKE_MANA                               , "ability.para.futurestrike.mana",                     60) \
+    CFG_X(PARA_FUTURESTRIKE_FLUX                               , "ability.para.futurestrike.flux",                     15) \
+    CFG_X(PARA_FUTURESTRIKE_CD                                 , "ability.para.futurestrike.cd",                        6) \
+    CFG_X(PARA_FUTURESTRIKE_BASE_MIN                           , "ability.para.futurestrike.base_min",                200) \
+    CFG_X(PARA_FUTURESTRIKE_BASE_MAX                           , "ability.para.futurestrike.base_max",                350) \
+    CFG_X(PARA_FUTURESTRIKE_DELAY                              , "ability.para.futurestrike.delay",                     2) \
+    /* ABILITY - PARADOX - TEMPORAL COMBAT: PAST SELF */ \
+    CFG_X(PARA_PASTSELF_MANA                                   , "ability.para.pastself.mana",                        100) \
+    CFG_X(PARA_PASTSELF_FLUX                                   , "ability.para.pastself.flux",                         20) \
+    CFG_X(PARA_PASTSELF_CD                                     , "ability.para.pastself.cd",                           25) \
+    CFG_X(PARA_PASTSELF_DURATION                               , "ability.para.pastself.duration",                      8) \
+    CFG_X(PARA_PASTSELF_EXTRA_ATTACKS                          , "ability.para.pastself.extra_attacks",                  2) \
+    /* ABILITY - PARADOX - TEMPORAL COMBAT: TIME LOOP */ \
+    CFG_X(PARA_TIMELOOP_MANA                                   , "ability.para.timeloop.mana",                         90) \
+    CFG_X(PARA_TIMELOOP_CD                                     , "ability.para.timeloop.cd",                           20) \
+    CFG_X(PARA_TIMELOOP_ROUNDS                                 , "ability.para.timeloop.rounds",                        3) \
+    CFG_X(PARA_TIMELOOP_DODGE                                  , "ability.para.timeloop.dodge",                        30) \
+    CFG_X(PARA_TIMELOOP_DAMAGE_BONUS                           , "ability.para.timeloop.damage_bonus",                 20) \
+    /* ABILITY - PARADOX - TEMPORAL COMBAT: PARADOX STRIKE */ \
+    CFG_X(PARA_PARADOXSTRIKE_MANA                              , "ability.para.paradoxstrike.mana",                   120) \
+    CFG_X(PARA_PARADOXSTRIKE_FLUX                              , "ability.para.paradoxstrike.flux",                    30) \
+    CFG_X(PARA_PARADOXSTRIKE_CD                                , "ability.para.paradoxstrike.cd",                      12) \
+    CFG_X(PARA_PARADOXSTRIKE_BASE_MIN                          , "ability.para.paradoxstrike.base_min",               350) \
+    CFG_X(PARA_PARADOXSTRIKE_BASE_MAX                          , "ability.para.paradoxstrike.base_max",               550) \
+    /* ABILITY - PARADOX - ENTROPY: AGE */ \
+    CFG_X(PARA_AGE_MANA                                        , "ability.para.age.mana",                              80) \
+    CFG_X(PARA_AGE_FLUX                                        , "ability.para.age.flux",                              25) \
+    CFG_X(PARA_AGE_CD                                          , "ability.para.age.cd",                                15) \
+    CFG_X(PARA_AGE_DURATION                                    , "ability.para.age.duration",                          10) \
+    CFG_X(PARA_AGE_DAMAGE_REDUCTION                            , "ability.para.age.damage_reduction",                  20) \
+    CFG_X(PARA_AGE_DODGE_REDUCTION                             , "ability.para.age.dodge_reduction",                   15) \
+    /* ABILITY - PARADOX - ENTROPY: TEMPORAL COLLAPSE */ \
+    CFG_X(PARA_COLLAPSE_MANA                                   , "ability.para.collapse.mana",                        160) \
+    CFG_X(PARA_COLLAPSE_CD                                     , "ability.para.collapse.cd",                           30) \
+    CFG_X(PARA_COLLAPSE_BASE_MIN                               , "ability.para.collapse.base_min",                    400) \
+    CFG_X(PARA_COLLAPSE_BASE_MAX                               , "ability.para.collapse.base_max",                    700) \
+    CFG_X(PARA_COLLAPSE_FLUX_RESTORE                           , "ability.para.collapse.flux_restore",                 40) \
+    /* ABILITY - PARADOX - ENTROPY: ETERNITY */ \
+    CFG_X(PARA_ETERNITY_MANA                                   , "ability.para.eternity.mana",                        250) \
+    CFG_X(PARA_ETERNITY_CD                                     , "ability.para.eternity.cd",                           60) \
+    CFG_X(PARA_ETERNITY_DURATION                               , "ability.para.eternity.duration",                      6) \
+    CFG_X(PARA_ETERNITY_AFTERMATH                              , "ability.para.eternity.aftermath",                     2) \
+    /* ABILITY - PARADOX - ARMOR */ \
+    CFG_X(PARA_PARADOXARMOR_PRACTICE_COST                      , "ability.para.paradoxarmor.practice_cost",            60)
 
 
 /* Generate enum from X-macro */

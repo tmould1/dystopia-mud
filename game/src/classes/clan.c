@@ -1564,6 +1564,8 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Tanarri, Shapeshifter, Spiderdroid, Samurai, Undeadknight, Angel, Lich, Fae, Drone.\n\r", ch );
 		send_to_char( "Dirgesinger, Siren, Psion, Mindflayer, Dragonkin, Wyrm.\n\r", ch );
 		send_to_char( "Artificer, Mechanist.\n\r", ch );
+		send_to_char( "Cultist, Voidborn.\n\r", ch );
+		send_to_char( "Chronomancer, Paradox.\n\r", ch );
 		return;
 	}
 	if ( ( victim = get_char_world( ch, arg1 ) ) == NULL ) {
@@ -1644,6 +1646,20 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 	} else if ( !str_cmp( arg2, "mechanist" ) ) {
 		victim->class = CLASS_MECHANIST;
 		send_to_char( "You are now a Mechanist!\n\r", victim );
+	} else if ( !str_cmp( arg2, "cultist" ) ) {
+		victim->class = CLASS_CULTIST;
+		send_to_char( "You are now a Cultist!\n\r", victim );
+	} else if ( !str_cmp( arg2, "voidborn" ) ) {
+		victim->class = CLASS_VOIDBORN;
+		send_to_char( "You are now a Voidborn!\n\r", victim );
+	} else if ( !str_cmp( arg2, "chronomancer" ) ) {
+		victim->class = CLASS_CHRONOMANCER;
+		victim->rage = 50;
+		send_to_char( "You are now a Chronomancer!\n\r", victim );
+	} else if ( !str_cmp( arg2, "paradox" ) ) {
+		victim->class = CLASS_PARADOX;
+		victim->rage = 75;
+		send_to_char( "You are now a Paradox!\n\r", victim );
 	} else if ( !str_cmp( arg2, "none" ) ) {
 		victim->class = 0;
 		save_char_obj( victim );

@@ -4831,6 +4831,62 @@ DECLARE_DO_FUN( do_mechanistarmor );
 DECLARE_DO_FUN( do_dronestatus );
 DECLARE_DO_FUN( do_dronerecall );
 
+/* Cultist */
+DECLARE_DO_FUN( do_corruption );
+DECLARE_DO_FUN( do_cultpurge );
+DECLARE_DO_FUN( do_eldritchsight );
+DECLARE_DO_FUN( do_whispers );
+DECLARE_DO_FUN( do_unravel );
+DECLARE_DO_FUN( do_voidtendril );
+DECLARE_DO_FUN( do_grasp );
+DECLARE_DO_FUN( do_constrict );
+DECLARE_DO_FUN( do_maddeninggaze );
+DECLARE_DO_FUN( do_gibbering );
+DECLARE_DO_FUN( do_insanity );
+DECLARE_DO_FUN( do_voidtrain );
+DECLARE_DO_FUN( do_cultistarmor );
+
+/* Voidborn */
+DECLARE_DO_FUN( do_phaseshift );
+DECLARE_DO_FUN( do_dimensionalrend );
+DECLARE_DO_FUN( do_unmake );
+DECLARE_DO_FUN( do_voidshape );
+DECLARE_DO_FUN( do_aberrantgrowth );
+DECLARE_DO_FUN( do_finalform );
+DECLARE_DO_FUN( do_summonthing );
+DECLARE_DO_FUN( do_starspawn );
+DECLARE_DO_FUN( do_entropy );
+DECLARE_DO_FUN( do_voidbornarmor );
+
+/* Chronomancer */
+DECLARE_DO_FUN( do_flux );
+DECLARE_DO_FUN( do_quicken );
+DECLARE_DO_FUN( do_timeslip );
+DECLARE_DO_FUN( do_blur );
+DECLARE_DO_FUN( do_slow );
+DECLARE_DO_FUN( do_timetrap );
+DECLARE_DO_FUN( do_stasis );
+DECLARE_DO_FUN( do_foresight );
+DECLARE_DO_FUN( do_hindsight );
+DECLARE_DO_FUN( do_temporalecho );
+DECLARE_DO_FUN( do_timetrain );
+DECLARE_DO_FUN( do_chronoarmor );
+
+/* Paradox */
+DECLARE_DO_FUN( do_destabilize );
+DECLARE_DO_FUN( do_rewind );
+DECLARE_DO_FUN( do_splittimeline );
+DECLARE_DO_FUN( do_convergence );
+DECLARE_DO_FUN( do_futurestrike );
+DECLARE_DO_FUN( do_pastself );
+DECLARE_DO_FUN( do_timeloop );
+DECLARE_DO_FUN( do_paradoxstrike );
+DECLARE_DO_FUN( do_age );
+DECLARE_DO_FUN( do_temporalcollapse );
+DECLARE_DO_FUN( do_eternity );
+DECLARE_DO_FUN( do_paratrain );
+DECLARE_DO_FUN( do_paradoxarmor );
+
 /*
  * Global Constants
  */

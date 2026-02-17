@@ -6,9 +6,6 @@
 
 [INFLIGHT]
 
-20) UTF-8
-
-21) XTERM TRUE COLORS
 
 [SOON]
 
@@ -24,3 +21,6 @@
 
 23) class-data global structs to avoid common function allocations
 
+24) MudEditor Design and QoL Pass
+
+25) Redesign the intro screen experience. determine client capabilities; then pick stylized versions, send.
