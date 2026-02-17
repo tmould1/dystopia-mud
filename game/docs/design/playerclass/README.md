@@ -29,6 +29,8 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [Psion](classes/psion.md) - Mental powers, Focus resource
 - [Dragonkin](classes/dragonkin.md) - Draconic essence, breath weapons
 - [Artificer](classes/artificer.md) - Power cells, turrets, tech gadgets
+- [Cultist](classes/cultist.md) - Eldritch pacts, tentacles, madness
+- [Chronomancer](classes/chronomancer.md) - Temporal Flux, time manipulation
 
 ### Upgrade Class Documentation
 - [Tanar'ri](classes/tanarri.md) - Upgraded from Demon, Blood Wars powers
@@ -42,9 +44,11 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 - [Mindflayer](classes/mindflayer.md) - Upgraded from Psion, mental domination
 - [Wyrm](classes/wyrm.md) - Upgraded from Dragonkin, ancient dragon
 - [Mechanist](classes/mechanist.md) - Upgraded from Artificer, cybernetic war machine
+- [Voidborn](classes/voidborn.md) - Upgraded from Cultist, eldritch horror
+- [Paradox](classes/paradox.md) - Upgraded from Chronomancer, temporal anomaly
 
-### Proposed Classes (Not Yet Implemented)
-- [Todo Folder](todo/) - 2 remaining class pairs: Cultist/Voidborn, Chronomancer/Paradox
+### Design Documents
+- [Todo Folder](todo/) - Original design documents and implementation notes
 
 ## Upgrade Paths
 
@@ -61,6 +65,8 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Psion | Mindflayer | 50K hp, 35K mana/move, 40K qp, gen 1 |
 | Dragonkin | Wyrm | 50K hp, 35K mana/move, 40K qp, gen 1 |
 | Artificer | Mechanist | 50K hp, 35K mana/move, 40K qp, gen 1 |
+| Cultist | Voidborn | 50K hp, 35K mana/move, 40K qp, gen 1 |
+| Chronomancer | Paradox | 50K hp, 35K mana/move, 40K qp, gen 1 |
 
 ## Quick Reference
 
@@ -80,6 +86,8 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Psion | CLASS_PSION | 65536 |
 | Dragonkin | CLASS_DRAGONKIN | 262144 |
 | Artificer | CLASS_ARTIFICER | 1048576 |
+| Cultist | CLASS_CULTIST | 4194304 |
+| Chronomancer | CLASS_CHRONOMANCER | 16777216 |
 
 **Upgrade Classes:**
 | Class | Constant | Bit Value |
@@ -95,6 +103,8 @@ Classes are divided into **base classes** (player-selectable at Avatar) and **up
 | Mindflayer | CLASS_MINDFLAYER | 131072 |
 | Wyrm | CLASS_WYRM | 524288 |
 | Mechanist | CLASS_MECHANIST | 2097152 |
+| Voidborn | CLASS_VOIDBORN | 8388608 |
+| Paradox | CLASS_PARADOX | 33554432 |
 
 ### Key Source Files
 - `src/core/class.h` - Class constants and definitions

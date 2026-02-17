@@ -27,6 +27,7 @@ Available via `selfclass` command at level 3 (Avatar):
 - Dragonkin
 - Artificer
 - Cultist
+- Chronomancer
 
 ### Upgrade Classes
 Achieved by upgrading from a maxed base class:
