@@ -1525,7 +1525,7 @@ static void clear_class_state( CHAR_DATA *victim ) {
 	victim->beast = 15;
 	victim->warp = 0;
 	victim->rage = 0;
-	victim->generation = 0;
+	victim->generation = 6;
 	victim->cclan = 0;
 
 	/* Clear PC-specific class data */
