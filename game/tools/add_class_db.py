@@ -287,6 +287,9 @@ CLASS_MECHANIST = 2097152
 CLASS_CULTIST = 4194304
 CLASS_VOIDBORN = 8388608
 CLASS_CHRONOMANCER = 16777216
+CLASS_PARADOX = 33554432
+CLASS_SHAMAN = 67108864
+CLASS_SPIRITLORD = 134217728
 
 CLASSES_TO_ADD = [
     # -------------------------------------------------------------------------
@@ -730,6 +733,156 @@ CLASSES_TO_ADD = [
             {"keyword": "belt",     "vnum": 33570},
             {"keyword": "bracer",   "vnum": 33571},
             {"keyword": "mask",     "vnum": 33572},
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # SHAMAN (Base Class)
+    # -------------------------------------------------------------------------
+    {
+        "class_id": CLASS_SHAMAN,
+        "class_name": "Shaman",
+
+        "registry": {
+            "keyword": "shaman",
+            "keyword_alt": None,
+            "mudstat_label": "Shamans",
+            "selfclass_message": "The spirit world opens its veil. You are now a #x116Shaman#n.",
+            "display_order": 11,
+            "upgrade_class": None,
+            "requirements": None
+        },
+
+        "brackets": {
+            "open": "#x026~(#n",
+            "close": "#x026)~#n",
+            "accent": "#x026",
+            "primary": "#x116"
+        },
+
+        "generations": [
+            "Initiate",          # 0 - default
+            "Spirit Walker",     # 1 - highest
+            "Elder Shaman",      # 2
+            "Shaman",            # 3
+            "Seer",              # 4
+            "Apprentice",        # 5
+        ],
+
+        "aura": {
+            "text": "#x116(#nShaman#x116)#n ",
+            "display_order": 28
+        },
+
+        "starting": {
+            "beast": 15,
+            "level": 1,
+            "has_disciplines": False,
+            "rage": 50  # Tether starts at 50 (center)
+        },
+
+        "score_stats": [
+            {"source": STAT_RAGE, "label": "Spirit Tether", "order": 1,
+             "format": "#x026~(#n%s: #x116%d#x026)~#n\\n\\r"},
+        ],
+
+        "armor_config": {
+            "acfg_cost_key": "ability.shaman.shamanarmor.practice_cost",
+            "command_name": "shamanarmor",
+            "act_to_char": "Spirits weave $p into existence in your hands.",
+            "act_to_room": "Spirits weave $p into existence in $n's hands.",
+            "mastery_vnum": 33595
+        },
+
+        "armor_pieces": [
+            {"keyword": "staff",      "vnum": 33580},
+            {"keyword": "ring",       "vnum": 33581},
+            {"keyword": "talisman",   "vnum": 33582},
+            {"keyword": "vestments",  "vnum": 33583},
+            {"keyword": "headdress",  "vnum": 33584},
+            {"keyword": "leggings",   "vnum": 33585},
+            {"keyword": "moccasins",  "vnum": 33586},
+            {"keyword": "gloves",     "vnum": 33587},
+            {"keyword": "bracers",    "vnum": 33588},
+            {"keyword": "cloak",      "vnum": 33589},
+            {"keyword": "sash",       "vnum": 33590},
+            {"keyword": "bangle",     "vnum": 33591},
+            {"keyword": "mask",       "vnum": 33592},
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # SPIRIT LORD (Upgrade Class from Shaman)
+    # -------------------------------------------------------------------------
+    {
+        "class_id": CLASS_SPIRITLORD,
+        "class_name": "Spirit Lord",
+
+        "registry": {
+            "keyword": "spiritlord",
+            "keyword_alt": "spirit",
+            "mudstat_label": "Spirit Lords",
+            "selfclass_message": "#x135+(#WYou transcend the veil, becoming a Spirit Lord!#x135)+#n",
+            "display_order": 11,
+            "upgrade_class": CLASS_SHAMAN,
+            "requirements": "Shaman upgrade"
+        },
+
+        "brackets": {
+            "open": "#x135+(#n",
+            "close": "#x135)+#n",
+            "accent": "#x135",
+            "primary": "#W"
+        },
+
+        "generations": [
+            "Spirit Touched",    # 0 - default
+            "Spirit God",        # 1 - highest
+            "Ascended One",      # 2
+            "Spirit Lord",       # 3
+            "Soul Binder",       # 4
+            "Medium",            # 5
+        ],
+
+        "aura": {
+            "text": "#W(#nSpirit Lord#W)#n ",
+            "display_order": 29
+        },
+
+        "starting": {
+            "beast": 15,
+            "level": 1,
+            "has_disciplines": False,
+            "rage": 75  # Tether starts at 75 (Spirit Lord center)
+        },
+
+        "score_stats": [
+            {"source": STAT_RAGE, "label": "Spirit Tether", "order": 1,
+             "format": "#x135+(#n%s: #W%d#x135)+#n\\n\\r"},
+        ],
+
+        "armor_config": {
+            "acfg_cost_key": "ability.sl.lordarmor.practice_cost",
+            "command_name": "lordarmor",
+            "act_to_char": "Ancestral spirits forge $p from pure ether.",
+            "act_to_room": "Ancestral spirits forge $p from pure ether before $n.",
+            "mastery_vnum": 33615
+        },
+
+        "armor_pieces": [
+            {"keyword": "scepter",    "vnum": 33600},
+            {"keyword": "ring",       "vnum": 33601},
+            {"keyword": "pendant",    "vnum": 33602},
+            {"keyword": "robes",      "vnum": 33603},
+            {"keyword": "crown",      "vnum": 33604},
+            {"keyword": "leggings",   "vnum": 33605},
+            {"keyword": "boots",      "vnum": 33606},
+            {"keyword": "gauntlets",  "vnum": 33607},
+            {"keyword": "bracers",    "vnum": 33608},
+            {"keyword": "mantle",     "vnum": 33609},
+            {"keyword": "belt",       "vnum": 33610},
+            {"keyword": "bangle",     "vnum": 33611},
+            {"keyword": "mask",       "vnum": 33612},
         ],
     },
 ]

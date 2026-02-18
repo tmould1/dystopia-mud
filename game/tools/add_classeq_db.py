@@ -577,6 +577,84 @@ PARADOX_EQUIPMENT = {
                              "#x160>(#x210a pulsing paradox core shard#x160)<#n", 75, 75),
 }
 
+# Shaman Equipment (vnums 33580-33592, mastery at 33595)
+# Stats: Weapon +35/+35, Armor +30/+30/-35 AC, Mastery +50/+50 (base class = Dragonkin tier)
+# Colors: accent #x026 (dark teal), primary #x116 (bright cyan)
+SHAMAN_EQUIPMENT = {
+    "class_name": "Shaman",
+    "vnum_start": 33580,
+    "mastery_vnum": 33595,
+    "pieces": [
+        weapon_piece("shaman staff spirit", "shaman staff spirit",
+                    "#x026~(#x116a spirit-bound staff#x026)~#n", 35, 35),
+        armor_piece("shaman ring bone", "shaman ring bone",
+                   "#x026~(#x116a spirit bone ring#x026)~#n", WEAR_TAKE | WEAR_FINGER, 30, 30, -35),
+        armor_piece("shaman talisman ancestor", "shaman talisman ancestor",
+                   "#x026~(#x116an ancestor talisman#x026)~#n", WEAR_TAKE | WEAR_NECK, 30, 30, -35),
+        armor_piece("shaman vestments spirit", "shaman vestments spirit",
+                   "#x026~(#x116spirit-touched vestments#x026)~#n", WEAR_TAKE | WEAR_BODY, 30, 30, -35),
+        armor_piece("shaman headdress feathered", "shaman headdress feathered",
+                   "#x026~(#x116a feathered headdress#x026)~#n", WEAR_TAKE | WEAR_HEAD, 30, 30, -35),
+        armor_piece("shaman leggings hide", "shaman leggings hide",
+                   "#x026~(#x116spirit-hide leggings#x026)~#n", WEAR_TAKE | WEAR_LEGS, 30, 30, -35),
+        armor_piece("shaman moccasins spirit", "shaman moccasins spirit",
+                   "#x026~(#x116spirit-walk moccasins#x026)~#n", WEAR_TAKE | WEAR_FEET, 30, 30, -35),
+        armor_piece("shaman gloves ritualist", "shaman gloves ritualist",
+                   "#x026~(#x116ritualist gloves#x026)~#n", WEAR_TAKE | WEAR_HANDS, 30, 30, -35),
+        armor_piece("shaman bracers totem", "shaman bracers totem",
+                   "#x026~(#x116totem bracers#x026)~#n", WEAR_TAKE | WEAR_ARMS, 30, 30, -35),
+        armor_piece("shaman cloak spirit", "shaman cloak spirit",
+                   "#x026~(#x116a spirit-woven cloak#x026)~#n", WEAR_TAKE | WEAR_ABOUT, 30, 30, -35),
+        armor_piece("shaman sash ritual", "shaman sash ritual",
+                   "#x026~(#x116a ritual sash#x026)~#n", WEAR_TAKE | WEAR_WAIST, 30, 30, -35),
+        armor_piece("shaman bangle ancestor", "shaman bangle ancestor",
+                   "#x026~(#x116an ancestor bangle#x026)~#n", WEAR_TAKE | WEAR_WRIST, 30, 30, -35),
+        armor_piece("shaman mask spirit", "shaman mask spirit",
+                   "#x026~(#x116a spirit mask#x026)~#n", WEAR_TAKE | WEAR_FACE, 30, 30, -35),
+    ],
+    "mastery": mastery_piece("shaman totem heart", "shaman totem heart spirit",
+                             "#x026~(#x116a pulsing totem heart#x026)~#n", 50, 50),
+}
+
+# Spirit Lord Equipment (vnums 33600-33612, mastery at 33615)
+# Stats: Weapon +45/+45, Armor +40/+40/-45 AC, Mastery +75/+75 (upgrade class = Wyrm tier)
+# Colors: accent #x135 (warm gold), primary #W (bright white)
+SPIRITLORD_EQUIPMENT = {
+    "class_name": "Spirit Lord",
+    "vnum_start": 33600,
+    "mastery_vnum": 33615,
+    "pieces": [
+        weapon_piece("spiritlord scepter ancestral", "spiritlord scepter ancestral",
+                    "#x135+(#Wan ancestral scepter#x135)+#n", 45, 45),
+        armor_piece("spiritlord ring ethereal", "spiritlord ring ethereal",
+                   "#x135+(#Wan ethereal ring#x135)+#n", WEAR_TAKE | WEAR_FINGER, 40, 40, -45),
+        armor_piece("spiritlord pendant ascended", "spiritlord pendant ascended",
+                   "#x135+(#Wan ascended pendant#x135)+#n", WEAR_TAKE | WEAR_NECK, 40, 40, -45),
+        armor_piece("spiritlord robes transcendent", "spiritlord robes transcendent",
+                   "#x135+(#Wtranscendent spirit robes#x135)+#n", WEAR_TAKE | WEAR_BODY, 40, 40, -45),
+        armor_piece("spiritlord crown ancestors", "spiritlord crown ancestors",
+                   "#x135+(#Wa crown of ancestors#x135)+#n", WEAR_TAKE | WEAR_HEAD, 40, 40, -45),
+        armor_piece("spiritlord leggings ethereal", "spiritlord leggings ethereal",
+                   "#x135+(#Wethereal leggings#x135)+#n", WEAR_TAKE | WEAR_LEGS, 40, 40, -45),
+        armor_piece("spiritlord boots phasing", "spiritlord boots phasing",
+                   "#x135+(#Wphasing spirit boots#x135)+#n", WEAR_TAKE | WEAR_FEET, 40, 40, -45),
+        armor_piece("spiritlord gauntlets spirit", "spiritlord gauntlets spirit",
+                   "#x135+(#Wspirit gauntlets#x135)+#n", WEAR_TAKE | WEAR_HANDS, 40, 40, -45),
+        armor_piece("spiritlord bracers ancestral", "spiritlord bracers ancestral",
+                   "#x135+(#Wancestral bracers#x135)+#n", WEAR_TAKE | WEAR_ARMS, 40, 40, -45),
+        armor_piece("spiritlord mantle spirit", "spiritlord mantle spirit",
+                   "#x135+(#Wa mantle of spirits#x135)+#n", WEAR_TAKE | WEAR_ABOUT, 40, 40, -45),
+        armor_piece("spiritlord belt ethereal", "spiritlord belt ethereal",
+                   "#x135+(#Wan ethereal belt#x135)+#n", WEAR_TAKE | WEAR_WAIST, 40, 40, -45),
+        armor_piece("spiritlord bangle transcend", "spiritlord bangle transcend",
+                   "#x135+(#Wa transcendent bangle#x135)+#n", WEAR_TAKE | WEAR_WRIST, 40, 40, -45),
+        armor_piece("spiritlord mask ascended", "spiritlord mask ascended",
+                   "#x135+(#Wa mask of ascension#x135)+#n", WEAR_TAKE | WEAR_FACE, 40, 40, -45),
+    ],
+    "mastery": mastery_piece("spiritlord core ancestral", "spiritlord core ancestral spirit",
+                             "#x135+(#Wa pulsing ancestral core#x135)+#n", 75, 75),
+}
+
 EQUIPMENT_TO_ADD = [
     DRAGONKIN_EQUIPMENT,
     WYRM_EQUIPMENT,
@@ -586,6 +664,8 @@ EQUIPMENT_TO_ADD = [
     VOIDBORN_EQUIPMENT,
     CHRONOMANCER_EQUIPMENT,
     PARADOX_EQUIPMENT,
+    SHAMAN_EQUIPMENT,
+    SPIRITLORD_EQUIPMENT,
 ]
 
 

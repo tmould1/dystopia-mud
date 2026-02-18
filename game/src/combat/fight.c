@@ -28,6 +28,7 @@
 #include "artificer.h"
 #include "cultist.h"
 #include "chronomancer.h"
+#include "shaman.h"
 #include "../systems/mcmp.h"
 #include "../systems/profile.h"
 
@@ -1096,6 +1097,14 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_PARADOX ) &&
 			ch->pcdata->powers[PARA_ETERNITY_AFTERMATH] > 0 )
 			count = UMAX( count - 4, 0 );
+		/* Spirit Lord Ancestral Form: extra attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_SPIRITLORD ) &&
+			ch->pcdata->powers[SL_ANCESTRAL_FORM_TICKS] > 0 )
+			count += cfg( CFG_SL_ANCESTRALFORM_EXTRA_ATTACKS );
+		/* Spirit Lord Ascension Aftermath: stunned, fewer attacks */
+		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_SPIRITLORD ) &&
+			ch->pcdata->powers[SL_ASCENSION_AFTERMATH] > 0 )
+			count = UMAX( count - 4, 0 );
 		if ( IS_ITEMAFF( ch, ITEMA_SPEED ) ) count += 2;
 	} else {
 		if ( !IS_NPC( ch ) )
@@ -1911,6 +1920,25 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( ch->pcdata->powers[PARA_ETERNITY_TICKS] > 0 )
 				max_dam = max_dam * ( 100 - cfg( CFG_COMBAT_DAMCAP_PARA_ETERNITY_REDUCTION ) ) / 100;
 		}
+		/* Shaman: tether-based damcap + ability bonuses */
+		if ( IS_CLASS( ch, CLASS_SHAMAN ) ) {
+			int tether_extreme = abs( ch->rage - SHAMAN_TETHER_CENTER );
+			max_dam += cfg( CFG_COMBAT_DAMCAP_SHAMAN_BASE );
+			max_dam += tether_extreme * cfg( CFG_COMBAT_DAMCAP_SHAMAN_EXTREME_MULT );
+			if ( ch->pcdata->powers[SHAMAN_ACTIVE_TOTEM] == TOTEM_WRATH )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_SHAMAN_WRATH );
+			if ( ch->pcdata->powers[SHAMAN_SPIRIT_WALK_TICKS] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_SHAMAN_SPIRITW );
+		}
+		/* Spirit Lord: tether-based damcap + ability bonuses */
+		if ( IS_CLASS( ch, CLASS_SPIRITLORD ) ) {
+			int tether_extreme = abs( ch->rage - SL_TETHER_CENTER );
+			max_dam += cfg( CFG_COMBAT_DAMCAP_SL_EXTREME_MULT ) * tether_extreme;
+			if ( ch->pcdata->powers[SL_ANCESTRAL_FORM_TICKS] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_SL_ANCESTRAL );
+			if ( ch->pcdata->powers[SL_SPIRIT_ARMY_TICKS] > 0 )
+				max_dam += cfg( CFG_COMBAT_DAMCAP_SL_ARMY );
+		}
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_ARTIFACT );
 
@@ -2184,6 +2212,40 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			act( "Your echoshield reverberates, reflecting sonic energy back at $N!", victim, NULL, ch, TO_CHAR );
 		}
 	}
+	/* Shaman Spirit Ward: absorb hit + reflect damage back to attacker */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SHAMAN ) &&
+		victim->pcdata->powers[SHAMAN_SPIRIT_WARD_CHARGES] > 0 && dam > 0 ) {
+		int reflect = dam * cfg( CFG_SHAMAN_SPIRITWARD_REFLECT_PCT ) / 100;
+		victim->pcdata->powers[SHAMAN_SPIRIT_WARD_CHARGES]--;
+		if ( reflect > 0 )
+			hurt_person( victim, ch, reflect );
+		act( "Protective spirits intercept the blow, reflecting energy back at $N!",
+			victim, NULL, ch, TO_CHAR );
+		act( "$n's spirit ward flares, reflecting energy back at you!",
+			victim, NULL, ch, TO_VICT );
+		dam = 0;
+		if ( victim->pcdata->powers[SHAMAN_SPIRIT_WARD_CHARGES] == 0 )
+			send_to_char( "Your spirit ward's last charge is spent.\n\r", victim );
+	}
+	/* Shaman Soul Link: share damage with fighting target */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SHAMAN ) &&
+		victim->pcdata->powers[SHAMAN_SOUL_LINK_TICKS] > 0 && dam > 0 &&
+		victim->fighting != NULL && victim->fighting != ch ) {
+		int share = dam * cfg( CFG_SHAMAN_SOULLINK_DAMAGE_SHARE ) / 100;
+		if ( share > 0 ) {
+			dam -= share;
+			hurt_person( victim, victim->fighting, share );
+			act( "Your soul link channels some of the pain to $N!",
+				victim, NULL, victim->fighting, TO_CHAR );
+		}
+	}
+	/* Spirit Lord Ascension: immune to physical damage */
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SPIRITLORD ) &&
+		victim->pcdata->powers[SL_ASCENSION_TICKS] > 0 && dam > 0 &&
+		dt >= TYPE_HIT && dt <= TYPE_HIT + 12 ) {
+		send_to_char( "The attack passes harmlessly through your ascended form!\n\r", victim );
+		dam = 0;
+	}
 	/* Psion Thought Shield: mental barrier absorbs damage */
 	if ( !IS_NPC( victim ) && ( IS_CLASS( victim, CLASS_PSION ) || IS_CLASS( victim, CLASS_MINDFLAYER ) ) &&
 		victim->pcdata->powers[PSION_THOUGHT_SHIELD] > 0 && victim->pcdata->stats[PSION_THOUGHT_SHIELD_HP] > 0 ) {
@@ -2273,6 +2335,16 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 	/* Paradox Rewind: track damage taken for heal calculation */
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_PARADOX ) && dam > 0 )
 		victim->pcdata->stats[PARA_STAT_DAMAGE_HIST_0] += dam;
+	/* Spirit Lord Ancestral Wisdom: bonus damage when attacking */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_SPIRITLORD ) &&
+		ch->pcdata->powers[SL_WISDOM_TICKS] > 0 && dam > 0 ) {
+		dam = dam * ( 100 + cfg( CFG_SL_ANCESTRALWISDOM_DAMAGE_BONUS ) ) / 100;
+	}
+	/* Spirit Lord Ancestral Form: bonus damage when attacking */
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_SPIRITLORD ) &&
+		ch->pcdata->powers[SL_ANCESTRAL_FORM_TICKS] > 0 && dam > 0 ) {
+		dam = dam * ( 100 + cfg( CFG_SL_ANCESTRALFORM_DAMAGE_BONUS ) ) / 100;
+	}
 	hurt_person( ch, victim, dam );
 	dropinvis( ch );
 	dropinvis( victim );
@@ -3043,6 +3115,18 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 			IS_CLASS( victim->fighting, CLASS_PARADOX ) &&
 			victim->fighting->pcdata->powers[PARA_AGE_TICKS] > 0 )
 			chance -= cfg( CFG_PARA_AGE_DODGE_REDUCTION );
+		/* Shaman Spirit Walk: dodge bonus (partially in spirit plane) */
+		if ( IS_CLASS( victim, CLASS_SHAMAN ) &&
+			victim->pcdata->powers[SHAMAN_SPIRIT_WALK_TICKS] > 0 )
+			chance += cfg( CFG_SHAMAN_SPIRITWALK_DODGE_CHANCE );
+		/* Spirit Lord Ancestral Form: dodge bonus */
+		if ( IS_CLASS( victim, CLASS_SPIRITLORD ) &&
+			victim->pcdata->powers[SL_ANCESTRAL_FORM_TICKS] > 0 )
+			chance += cfg( CFG_SL_ANCESTRALFORM_DODGE_BONUS );
+		/* Spirit Lord Ancestral Wisdom: dodge bonus */
+		if ( IS_CLASS( victim, CLASS_SPIRITLORD ) &&
+			victim->pcdata->powers[SL_WISDOM_TICKS] > 0 )
+			chance += cfg( CFG_SL_ANCESTRALWISDOM_DODGE_BONUS );
 	}
 	if ( chance > 80 )
 		chance = 80;
@@ -3473,6 +3557,26 @@ void raw_kill( CHAR_DATA *victim ) {
 				victim->wizard->pcdata->powers[MECH_BOMBER_ACTIVE] = 0;
 				send_to_char( "Your bomber drone has been destroyed!\n\r", victim->wizard );
 			}
+		}
+
+		/* Shaman totem killed: clear totem state */
+		if ( victim->pIndexData != NULL && victim->wizard != NULL &&
+			!IS_NPC( victim->wizard ) && victim->pIndexData->vnum == VNUM_SHAMAN_TOTEM &&
+			IS_CLASS( victim->wizard, CLASS_SHAMAN ) ) {
+			victim->wizard->pcdata->powers[SHAMAN_ACTIVE_TOTEM] = TOTEM_NONE;
+			victim->wizard->pcdata->powers[SHAMAN_WARD_TICKS] = 0;
+			victim->wizard->pcdata->powers[SHAMAN_WRATH_TICKS] = 0;
+			victim->wizard->pcdata->powers[SHAMAN_SPIRIT_TOTEM_TICKS] = 0;
+			send_to_char( "Your totem has been destroyed!\n\r", victim->wizard );
+		}
+
+		/* Spirit Lord spirit warrior killed: decrement army count */
+		if ( victim->pIndexData != NULL && victim->wizard != NULL &&
+			!IS_NPC( victim->wizard ) && victim->pIndexData->vnum == VNUM_SL_SPIRIT_WARRIOR &&
+			IS_CLASS( victim->wizard, CLASS_SPIRITLORD ) &&
+			victim->wizard->pcdata->stats[SL_STAT_ARMY_COUNT] > 0 ) {
+			victim->wizard->pcdata->stats[SL_STAT_ARMY_COUNT]--;
+			send_to_char( "One of your spirit warriors has been destroyed!\n\r", victim->wizard );
 		}
 
 		victim->pIndexData->killed++;

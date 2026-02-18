@@ -201,7 +201,7 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 			i = buf2;
 			break;
 		case 'R':
-			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) || IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) || IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) || IS_CLASS( ch, CLASS_DRAGONKIN ) || IS_CLASS( ch, CLASS_WYRM ) || IS_CLASS( ch, CLASS_ARTIFICER ) || IS_CLASS( ch, CLASS_MECHANIST ) || IS_CLASS( ch, CLASS_CULTIST ) || IS_CLASS( ch, CLASS_VOIDBORN ) || IS_CLASS( ch, CLASS_CHRONOMANCER ) || IS_CLASS( ch, CLASS_PARADOX ) ) ) {
+			if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) || IS_CLASS( ch, CLASS_VAMPIRE ) || IS_CLASS( ch, CLASS_NINJA ) || IS_CLASS( ch, CLASS_DIRGESINGER ) || IS_CLASS( ch, CLASS_SIREN ) || IS_CLASS( ch, CLASS_PSION ) || IS_CLASS( ch, CLASS_MINDFLAYER ) || IS_CLASS( ch, CLASS_DRAGONKIN ) || IS_CLASS( ch, CLASS_WYRM ) || IS_CLASS( ch, CLASS_ARTIFICER ) || IS_CLASS( ch, CLASS_MECHANIST ) || IS_CLASS( ch, CLASS_CULTIST ) || IS_CLASS( ch, CLASS_VOIDBORN ) || IS_CLASS( ch, CLASS_CHRONOMANCER ) || IS_CLASS( ch, CLASS_PARADOX ) || IS_CLASS( ch, CLASS_SHAMAN ) || IS_CLASS( ch, CLASS_SPIRITLORD ) ) ) {
 				snprintf( buf2, sizeof( buf2 ), "#r%d#n", ch->rage );
 			} else
 				snprintf( buf2, sizeof( buf2 ), "0" );

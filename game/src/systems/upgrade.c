@@ -27,6 +27,7 @@
 #include "merc.h"
 #include "../db/db_class.h"
 #include "chronomancer.h"
+#include "shaman.h"
 
 /* local functions */
 
@@ -223,6 +224,10 @@ void do_upgrade( CHAR_DATA *ch, char *argument ) {
 		ch->class = CLASS_PARADOX;
 		ch->rage = PARA_FLUX_CENTER;
 		sprintf( buf, "%s shatters the timeline, becoming a Paradox", ch->name );
+	} else if ( ch->class == CLASS_SHAMAN ) {
+		ch->class = CLASS_SPIRITLORD;
+		ch->rage = SL_TETHER_CENTER;
+		sprintf( buf, "%s transcends the veil, ascending as a Spirit Lord", ch->name );
 	} else
 		return;
 	clearshit( ch );

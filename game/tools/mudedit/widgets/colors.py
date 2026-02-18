@@ -2,11 +2,14 @@
 Color code utilities for MUD text rendering.
 
 Provides parsing and rendering of MUD color codes for Tkinter Text widgets.
-Supports standard #X codes and xterm 256-color #xNNN codes.
+Supports standard #X codes, xterm 256-color #xNNN codes, and true color
+#tRRGGBB (foreground) / #TRRGGBB (background) codes.
 """
 
 import re
 from typing import List, Tuple
+
+_HEX_CHARS = set('0123456789abcdefABCDEF')
 
 # MUD color code -> hex color mapping for tkinter
 TK_COLORS = {
@@ -103,6 +106,11 @@ def parse_colored_segments(text: str) -> List[Tuple[str, str]]:
                 code = int(text[i+2:i+5])
                 current_tag = f'color_x{code}'
                 i += 5
+            elif nxt in ('t', 'T') and i + 7 < len(text) and \
+                    all(c in _HEX_CHARS for c in text[i+2:i+8]):
+                hex_rgb = text[i+2:i+8]
+                current_tag = f'color_{nxt}{hex_rgb}'
+                i += 8
             elif nxt in TK_COLORS:
                 current_tag = f'color_{nxt}'
                 i += 2
@@ -125,6 +133,9 @@ def strip_colors(text: str) -> str:
     result = text.replace('##', '\x00HASH\x00')
     result = result.replace('#-', '~')
     result = result.replace('#+', '%')
+
+    # Remove true color #tRRGGBB / #TRRGGBB codes
+    result = re.sub(r'#[tT][0-9a-fA-F]{6}', '', result)
 
     # Remove #xNNN codes
     result = re.sub(r'#x\d{3}', '', result)

@@ -6,9 +6,7 @@ This folder contains design documents for proposed class pairs. When a class is 
 
 | Base Class | Upgrade Class | Fantasy Niche | Status |
 |------------|---------------|---------------|--------|
-| [Cultist](../classes/cultist.md) | [Voidborn](../classes/voidborn.md) | Eldritch horror | **Implemented** |
-| [Chronomancer](../classes/chronomancer.md) | [Paradox](../classes/paradox.md) | Time manipulation | **Implemented** |
-| [Shaman](shaman.md) | [Spirit Lord](spiritlord.md) | Spirit world / totems | **Design** |
+| ~~Shaman~~ | ~~Spirit Lord~~ | Spirit world / totems | **Implemented** (moved to classes/) |
 
 ## Gaps Being Filled
 
@@ -26,20 +24,6 @@ These new classes address remaining missing archetypes:
 
 Each class pair has a unique resource that defines its playstyle:
 
-### Corruption (Cultist/Voidborn)
-- **Risk/Reward**: High corruption boosts damage but causes self-damage
-- 0-49: Safe zone
-- 50-74: 1% max HP/tick self-damage
-- 75-99: 2% max HP/tick self-damage
-- 100+: 3% max HP/tick self-damage (Voidborn only)
-- Forces active resource management unlike any other class
-
-### Temporal Flux (Chronomancer/Paradox)
-- **Balance Mechanic**: Starts at center (50/75), drifts back toward center
-- Acceleration abilities push flux UP, Deceleration abilities push flux DOWN
-- At extremes: One type becomes stronger, the other weaker
-- Forces tactical decisions about which abilities to use when
-
 ### Spirit Tether (Shaman/Spirit Lord)
 - **Dual-World Balance**: Position between material and spirit worlds (0-100/0-150)
 - Material abilities (totems) push tether DOWN, Spirit abilities push tether UP
@@ -48,29 +32,6 @@ Each class pair has a unique resource that defines its playstyle:
 - Shaman places external totems; Spirit Lord internalizes them as personal auras
 
 ## Unique Mechanics
-
-### Corruption Risk/Reward (Cultist/Voidborn)
-
-Unlike standard resources, Corruption actively punishes high values:
-- Damage scales with corruption level (+corruption/10% damage)
-- But above 50, you take periodic self-damage
-- Creates tension: Push for power and risk death, or stay safe and deal less damage
-- `purge` command lets you dump corruption at an HP cost
-
-### Temporal Flux Balance (Chronomancer/Paradox)
-
-```
-0----25----50----75----100
-     SLOW  |BAL|  FAST
-```
-
-- **Deep Slow (0-19)**: Acceleration +30%, Deceleration -50%
-- **Slow (20-39)**: Acceleration +15%, Deceleration -25%
-- **Balanced (40-60)**: All abilities normal
-- **Fast (61-80)**: Deceleration +15%, Acceleration -25%
-- **Deep Fast (81-100)**: Deceleration +30%, Acceleration -50%
-
-Using Quicken (acceleration) pushes you toward Fast, making your next Slow ability weaker. Strategic play involves riding the edges or staying balanced for versatility.
 
 ### Spirit Tether Balance (Shaman/Spirit Lord)
 
@@ -93,8 +54,6 @@ Several proposed classes feature minion mechanics:
 
 | Class | Minion Type | Max Count | Notable Feature |
 |-------|-------------|-----------|-----------------|
-| Voidborn | Void Creatures | 2 | Summoned from beyond |
-| Paradox | Past Self | 1 | Echo of yourself from another timeline |
 | Spirit Lord | Spirit Warriors | 3 | Ancestral warriors summoned via Spirit Army |
 
 ## Color Schemes
@@ -103,10 +62,7 @@ Each class has a distinct two-color palette for visual identity:
 
 | Class | Brackets | Accent | Primary | Theme |
 |-------|----------|--------|---------|-------|
-| Cultist | `{~ ~}` | `#x064` Dark olive | `#x120` Sickly lime | Corruption and decay |
-| Voidborn | `*( )*` | `#x055` Dark violet | `#x097` Eldritch purple | Void between stars |
-| Chronomancer | `[> <]` | `#x130` Deep copper | `#x215` Warm amber | Clockwork brass |
-| Paradox | `>( )<` | `#x160` Deep crimson | `#x210` Warm rose | Temporal danger |
+
 | Shaman | `\|~ ~\|` | `#t1A7A6A` Deep teal | `#t5EC4B0` Jade green | Sacred waters, healing stones |
 | Spirit Lord | `{{ }}` | `#t4060A0` Spectral indigo | `#t90B8E0` Luminous sky | Ethereal spirit world |
 
@@ -114,9 +70,7 @@ Each class has a distinct two-color palette for visual identity:
 
 Suggested order based on uniqueness and complexity:
 
-1. **Cultist/Voidborn** - Corruption risk/reward is novel but self-contained
-2. **Chronomancer/Paradox** - Flux balance and timeline abilities are most complex
-3. **Shaman/Spirit Lord** - Tether balance with totem-to-aura upgrade progression
+1. **Shaman/Spirit Lord** - Tether balance with totem-to-aura upgrade progression
 
 ## Document Structure
 

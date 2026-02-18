@@ -4887,6 +4887,34 @@ DECLARE_DO_FUN( do_eternity );
 DECLARE_DO_FUN( do_paratrain );
 DECLARE_DO_FUN( do_paradoxarmor );
 
+/* Shaman abilities */
+DECLARE_DO_FUN( do_tether );
+DECLARE_DO_FUN( do_wardtotem );
+DECLARE_DO_FUN( do_wrathtotem );
+DECLARE_DO_FUN( do_spirittotem );
+DECLARE_DO_FUN( do_spiritbolt );
+DECLARE_DO_FUN( do_spiritward );
+DECLARE_DO_FUN( do_spiritwalk );
+DECLARE_DO_FUN( do_ancestorcall );
+DECLARE_DO_FUN( do_spiritsight );
+DECLARE_DO_FUN( do_soullink );
+DECLARE_DO_FUN( do_spirittrain );
+DECLARE_DO_FUN( do_shamanarmor );
+
+/* Spirit Lord abilities */
+DECLARE_DO_FUN( do_embody );
+DECLARE_DO_FUN( do_ancestralform );
+DECLARE_DO_FUN( do_spiritfusion );
+DECLARE_DO_FUN( do_compel );
+DECLARE_DO_FUN( do_possess );
+DECLARE_DO_FUN( do_spiritarmy );
+DECLARE_DO_FUN( do_soulstorm );
+DECLARE_DO_FUN( do_ancestralwisdom );
+DECLARE_DO_FUN( do_spiritcleanse );
+DECLARE_DO_FUN( do_ascension );
+DECLARE_DO_FUN( do_lordtrain );
+DECLARE_DO_FUN( do_lordarmor );
+
 /*
  * Global Constants
  */

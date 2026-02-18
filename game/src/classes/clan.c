@@ -1566,6 +1566,7 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Artificer, Mechanist.\n\r", ch );
 		send_to_char( "Cultist, Voidborn.\n\r", ch );
 		send_to_char( "Chronomancer, Paradox.\n\r", ch );
+		send_to_char( "Shaman, Spiritlord.\n\r", ch );
 		return;
 	}
 	if ( ( victim = get_char_world( ch, arg1 ) ) == NULL ) {
@@ -1660,6 +1661,14 @@ void do_class( CHAR_DATA *ch, char *argument ) {
 		victim->class = CLASS_PARADOX;
 		victim->rage = 75;
 		send_to_char( "You are now a Paradox!\n\r", victim );
+	} else if ( !str_cmp( arg2, "shaman" ) ) {
+		victim->class = CLASS_SHAMAN;
+		victim->rage = 50;
+		send_to_char( "You are now a Shaman!\n\r", victim );
+	} else if ( !str_cmp( arg2, "spiritlord" ) ) {
+		victim->class = CLASS_SPIRITLORD;
+		victim->rage = 75;
+		send_to_char( "You are now a Spirit Lord!\n\r", victim );
 	} else if ( !str_cmp( arg2, "none" ) ) {
 		victim->class = 0;
 		save_char_obj( victim );

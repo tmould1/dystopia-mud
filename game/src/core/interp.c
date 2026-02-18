@@ -1274,6 +1274,35 @@ const struct cmd_type cmd_table[] =
 		{ "timetrain",       do_timetrain,       POS_SITTING,   3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
 		{ "paradoxarmor",    do_paradoxarmor,    POS_SITTING,   3, LOG_NORMAL, CLASS_PARADOX, 0, 0 },
 
+		/* Shaman */
+		{ "tether",          do_tether,          POS_SITTING,   3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "wardtotem",       do_wardtotem,       POS_STANDING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "wrathtotem",      do_wrathtotem,      POS_STANDING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "spirittotem",     do_spirittotem,     POS_STANDING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "spiritbolt",      do_spiritbolt,      POS_FIGHTING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "spiritward",      do_spiritward,      POS_STANDING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "spiritwalk",      do_spiritwalk,      POS_STANDING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "ancestorcall",    do_ancestorcall,    POS_STANDING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "spiritsight",     do_spiritsight,     POS_STANDING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "soullink",        do_soullink,        POS_FIGHTING,  3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "spirittrain",     do_spirittrain,     POS_SITTING,   3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+		{ "shamanarmor",     do_shamanarmor,     POS_SITTING,   3, LOG_NORMAL, CLASS_SHAMAN, 0, 0 },
+
+		/* Spirit Lord */
+		{ "tether",          do_tether,          POS_SITTING,   3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "embody",          do_embody,          POS_STANDING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "ancestralform",   do_ancestralform,   POS_STANDING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "spiritfusion",    do_spiritfusion,    POS_STANDING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "compel",          do_compel,          POS_FIGHTING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "possess",         do_possess,         POS_STANDING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "spiritarmy",      do_spiritarmy,      POS_STANDING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "soulstorm",       do_soulstorm,       POS_FIGHTING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "ancestralwisdom", do_ancestralwisdom, POS_STANDING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "spiritcleanse",   do_spiritcleanse,   POS_STANDING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "ascension",       do_ascension,       POS_STANDING,  3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "lordtrain",       do_lordtrain,       POS_SITTING,   3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+		{ "lordarmor",       do_lordarmor,       POS_SITTING,   3, LOG_NORMAL, CLASS_SPIRITLORD, 0, 0 },
+
 		/*
 		 * Immortal commands.
 		 */

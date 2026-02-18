@@ -69,6 +69,8 @@ void update_cultist args( ( CHAR_DATA * ch ) );
 void update_voidborn args( ( CHAR_DATA * ch ) );
 void update_chronomancer args( ( CHAR_DATA * ch ) );
 void update_paradox args( ( CHAR_DATA * ch ) );
+void update_shaman args( ( CHAR_DATA * ch ) );
+void update_spiritlord args( ( CHAR_DATA * ch ) );
 void update_knight args( ( CHAR_DATA * ch ) );
 void update_shapeshifter args( ( CHAR_DATA * ch ) );
 void update_arti_regen args( ( CHAR_DATA * ch ) );
@@ -533,6 +535,8 @@ void mobile_update( void ) {
 				if ( IS_CLASS( ch, CLASS_VOIDBORN ) ) update_voidborn( ch );
 				if ( IS_CLASS( ch, CLASS_CHRONOMANCER ) ) update_chronomancer( ch );
 				if ( IS_CLASS( ch, CLASS_PARADOX ) ) update_paradox( ch );
+				if ( IS_CLASS( ch, CLASS_SHAMAN ) ) update_shaman( ch );
+				if ( IS_CLASS( ch, CLASS_SPIRITLORD ) ) update_spiritlord( ch );
 				if ( ch->class == 0 && IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
 			} else {
 				heal_char( ch, number_range( 1, 5 ) );

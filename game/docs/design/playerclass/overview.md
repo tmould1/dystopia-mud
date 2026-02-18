@@ -28,6 +28,7 @@ Available via `selfclass` command at level 3 (Avatar):
 - Artificer
 - Cultist
 - Chronomancer
+- Shaman
 
 ### Upgrade Classes
 Achieved by upgrading from a maxed base class:
@@ -47,6 +48,7 @@ Achieved by upgrading from a maxed base class:
 | Artificer | Mechanist |
 | Cultist | Voidborn |
 | Chronomancer | Paradox |
+| Shaman | Spirit Lord |
 
 **Source**: `src/systems/upgrade.c`, `gamedata/db/game/base_help.db` (UPGRADE help entry)
 

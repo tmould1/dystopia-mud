@@ -1707,7 +1707,129 @@
     CFG_X(PARA_ETERNITY_DURATION                               , "ability.para.eternity.duration",                      6) \
     CFG_X(PARA_ETERNITY_AFTERMATH                              , "ability.para.eternity.aftermath",                     2) \
     /* ABILITY - PARADOX - ARMOR */ \
-    CFG_X(PARA_PARADOXARMOR_PRACTICE_COST                      , "ability.para.paradoxarmor.practice_cost",            60)
+    CFG_X(PARA_PARADOXARMOR_PRACTICE_COST                      , "ability.para.paradoxarmor.practice_cost",            60) \
+    /* ======================================================================= */ \
+    /* COMBAT - SHAMAN - DAMCAP */ \
+    CFG_X(COMBAT_DAMCAP_SHAMAN_BASE                            , "combat.damcap.shaman.base",                         150) \
+    CFG_X(COMBAT_DAMCAP_SHAMAN_EXTREME_MULT                    , "combat.damcap.shaman.extreme_mult",                   4) \
+    CFG_X(COMBAT_DAMCAP_SHAMAN_WRATH                           , "combat.damcap.shaman.wrath",                        100) \
+    CFG_X(COMBAT_DAMCAP_SHAMAN_SPIRITW                         , "combat.damcap.shaman.spiritw",                      100) \
+    /* ABILITY - SHAMAN - GENERAL */ \
+    CFG_X(SHAMAN_TRAIN_COST_MULT                               , "ability.shaman.train.cost_mult",                     40) \
+    /* ABILITY - SHAMAN - TOTEMS */ \
+    CFG_X(SHAMAN_WARDTOTEM_MANA_COST                           , "ability.shaman.wardtotem.mana_cost",                 60) \
+    CFG_X(SHAMAN_WARDTOTEM_TETHER_CHANGE                       , "ability.shaman.wardtotem.tether_change",             12) \
+    CFG_X(SHAMAN_WARDTOTEM_DURATION                            , "ability.shaman.wardtotem.duration",                   8) \
+    CFG_X(SHAMAN_WARDTOTEM_DODGE_BONUS                         , "ability.shaman.wardtotem.dodge_bonus",               15) \
+    CFG_X(SHAMAN_WARDTOTEM_PARRY_BONUS                         , "ability.shaman.wardtotem.parry_bonus",               10) \
+    CFG_X(SHAMAN_WRATHTOTEM_MANA_COST                          , "ability.shaman.wrathtotem.mana_cost",               80) \
+    CFG_X(SHAMAN_WRATHTOTEM_TETHER_CHANGE                      , "ability.shaman.wrathtotem.tether_change",            15) \
+    CFG_X(SHAMAN_WRATHTOTEM_DURATION                           , "ability.shaman.wrathtotem.duration",                  6) \
+    CFG_X(SHAMAN_WRATHTOTEM_COOLDOWN                           , "ability.shaman.wrathtotem.cooldown",                 10) \
+    CFG_X(SHAMAN_WRATHTOTEM_TICK_MIN                           , "ability.shaman.wrathtotem.tick_min",                100) \
+    CFG_X(SHAMAN_WRATHTOTEM_TICK_MAX                           , "ability.shaman.wrathtotem.tick_max",                200) \
+    CFG_X(SHAMAN_SPIRITTOTEM_MANA_COST                         , "ability.shaman.spirittotem.mana_cost",             100) \
+    CFG_X(SHAMAN_SPIRITTOTEM_TETHER_CHANGE                     , "ability.shaman.spirittotem.tether_change",           20) \
+    CFG_X(SHAMAN_SPIRITTOTEM_DURATION                          , "ability.shaman.spirittotem.duration",                 6) \
+    CFG_X(SHAMAN_SPIRITTOTEM_COOLDOWN                          , "ability.shaman.spirittotem.cooldown",                15) \
+    CFG_X(SHAMAN_SPIRITTOTEM_MANA_DRAIN                        , "ability.shaman.spirittotem.mana_drain",              30) \
+    CFG_X(SHAMAN_SPIRITTOTEM_MANA_RESTORE                      , "ability.shaman.spirittotem.mana_restore",            15) \
+    /* ABILITY - SHAMAN - SPIRITS */ \
+    CFG_X(SHAMAN_SPIRITBOLT_MANA_COST                          , "ability.shaman.spiritbolt.mana_cost",               50) \
+    CFG_X(SHAMAN_SPIRITBOLT_TETHER_CHANGE                      , "ability.shaman.spiritbolt.tether_change",            10) \
+    CFG_X(SHAMAN_SPIRITBOLT_COOLDOWN                           , "ability.shaman.spiritbolt.cooldown",                  4) \
+    CFG_X(SHAMAN_SPIRITBOLT_BASE_MIN                           , "ability.shaman.spiritbolt.base_min",               150) \
+    CFG_X(SHAMAN_SPIRITBOLT_BASE_MAX                           , "ability.shaman.spiritbolt.base_max",               300) \
+    CFG_X(SHAMAN_SPIRITWARD_MANA_COST                          , "ability.shaman.spiritward.mana_cost",               70) \
+    CFG_X(SHAMAN_SPIRITWARD_TETHER_CHANGE                      , "ability.shaman.spiritward.tether_change",            15) \
+    CFG_X(SHAMAN_SPIRITWARD_DURATION                           , "ability.shaman.spiritward.duration",                  8) \
+    CFG_X(SHAMAN_SPIRITWARD_CHARGES                            , "ability.shaman.spiritward.charges",                   3) \
+    CFG_X(SHAMAN_SPIRITWARD_REFLECT_PCT                        , "ability.shaman.spiritward.reflect_pct",              50) \
+    CFG_X(SHAMAN_SPIRITWALK_MANA_COST                          , "ability.shaman.spiritwalk.mana_cost",              100) \
+    CFG_X(SHAMAN_SPIRITWALK_TETHER_CHANGE                      , "ability.shaman.spiritwalk.tether_change",            20) \
+    CFG_X(SHAMAN_SPIRITWALK_DURATION                           , "ability.shaman.spiritwalk.duration",                  4) \
+    CFG_X(SHAMAN_SPIRITWALK_COOLDOWN                           , "ability.shaman.spiritwalk.cooldown",                 20) \
+    CFG_X(SHAMAN_SPIRITWALK_DODGE_CHANCE                       , "ability.shaman.spiritwalk.dodge_chance",             50) \
+    /* ABILITY - SHAMAN - COMMUNION */ \
+    CFG_X(SHAMAN_ANCESTORCALL_MANA_COST                        , "ability.shaman.ancestorcall.mana_cost",              40) \
+    CFG_X(SHAMAN_ANCESTORCALL_HEAL_MIN                         , "ability.shaman.ancestorcall.heal_min",             300) \
+    CFG_X(SHAMAN_ANCESTORCALL_HEAL_MAX                         , "ability.shaman.ancestorcall.heal_max",             500) \
+    CFG_X(SHAMAN_ANCESTORCALL_BALANCE_BONUS                    , "ability.shaman.ancestorcall.balance_bonus",        150) \
+    CFG_X(SHAMAN_SPIRITSIGHT_MANA_COST                         , "ability.shaman.spiritsight.mana_cost",              50) \
+    CFG_X(SHAMAN_SPIRITSIGHT_DURATION                          , "ability.shaman.spiritsight.duration",                10) \
+    CFG_X(SHAMAN_SOULLINK_MANA_COST                            , "ability.shaman.soullink.mana_cost",                 80) \
+    CFG_X(SHAMAN_SOULLINK_DURATION                             , "ability.shaman.soullink.duration",                    6) \
+    CFG_X(SHAMAN_SOULLINK_COOLDOWN                             , "ability.shaman.soullink.cooldown",                   15) \
+    CFG_X(SHAMAN_SOULLINK_DAMAGE_SHARE                         , "ability.shaman.soullink.damage_share",               60) \
+    CFG_X(SHAMAN_SOULLINK_DEATH_DAMAGE                         , "ability.shaman.soullink.death_damage",             500) \
+    /* ABILITY - SHAMAN - ARMOR */ \
+    CFG_X(SHAMAN_SHAMANARMOR_PRACTICE_COST                     , "ability.shaman.shamanarmor.practice_cost",           60) \
+    /* ABILITY - SHAMAN - TOTEM MOB */ \
+    CFG_X(SHAMAN_TOTEM_HP                                      , "ability.shaman.totem.hp",                          500) \
+    /* ======================================================================= */ \
+    /* COMBAT - SPIRITLORD - DAMCAP */ \
+    CFG_X(COMBAT_DAMCAP_SL_EXTREME_MULT                        , "combat.damcap.sl.extreme_mult",                      5) \
+    CFG_X(COMBAT_DAMCAP_SL_ANCESTRAL                           , "combat.damcap.sl.ancestral",                       150) \
+    CFG_X(COMBAT_DAMCAP_SL_ARMY                                , "combat.damcap.sl.army",                            100) \
+    /* ABILITY - SPIRITLORD - GENERAL */ \
+    CFG_X(SL_TRAIN_COST_MULT                                   , "ability.sl.train.cost_mult",                        45) \
+    /* ABILITY - SPIRITLORD - EMBODIMENT */ \
+    CFG_X(SL_EMBODY_MANA_COST                                  , "ability.sl.embody.mana_cost",                       40) \
+    CFG_X(SL_EMBODY_TETHER_CHANGE                              , "ability.sl.embody.tether_change",                    8) \
+    CFG_X(SL_EMBODY_WRATH_TICK_MIN                             , "ability.sl.embody.wrath_tick_min",                 120) \
+    CFG_X(SL_EMBODY_WRATH_TICK_MAX                             , "ability.sl.embody.wrath_tick_max",                 250) \
+    CFG_X(SL_EMBODY_SPIRIT_MANA_DRAIN                          , "ability.sl.embody.spirit_mana_drain",               40) \
+    CFG_X(SL_EMBODY_SPIRIT_MANA_RESTORE                        , "ability.sl.embody.spirit_mana_restore",             20) \
+    CFG_X(SL_ANCESTRALFORM_MANA_COST                           , "ability.sl.ancestralform.mana_cost",               100) \
+    CFG_X(SL_ANCESTRALFORM_TETHER_CHANGE                       , "ability.sl.ancestralform.tether_change",             20) \
+    CFG_X(SL_ANCESTRALFORM_DURATION                            , "ability.sl.ancestralform.duration",                   8) \
+    CFG_X(SL_ANCESTRALFORM_COOLDOWN                            , "ability.sl.ancestralform.cooldown",                  20) \
+    CFG_X(SL_ANCESTRALFORM_EXTRA_ATTACKS                       , "ability.sl.ancestralform.extra_attacks",              3) \
+    CFG_X(SL_ANCESTRALFORM_DODGE_BONUS                         , "ability.sl.ancestralform.dodge_bonus",               20) \
+    CFG_X(SL_ANCESTRALFORM_DAMAGE_BONUS                        , "ability.sl.ancestralform.damage_bonus",              20) \
+    CFG_X(SL_SPIRITFUSION_MANA_COST                            , "ability.sl.spiritfusion.mana_cost",                150) \
+    CFG_X(SL_SPIRITFUSION_TETHER_CHANGE                        , "ability.sl.spiritfusion.tether_change",              30) \
+    CFG_X(SL_SPIRITFUSION_DURATION                             , "ability.sl.spiritfusion.duration",                    6) \
+    CFG_X(SL_SPIRITFUSION_COOLDOWN                             , "ability.sl.spiritfusion.cooldown",                   25) \
+    CFG_X(SL_SPIRITFUSION_MANA_TICK                            , "ability.sl.spiritfusion.mana_tick",                  10) \
+    /* ABILITY - SPIRITLORD - DOMINION */ \
+    CFG_X(SL_COMPEL_MANA_COST                                  , "ability.sl.compel.mana_cost",                       60) \
+    CFG_X(SL_COMPEL_TETHER_CHANGE                              , "ability.sl.compel.tether_change",                    12) \
+    CFG_X(SL_COMPEL_COOLDOWN                                   , "ability.sl.compel.cooldown",                          6) \
+    CFG_X(SL_COMPEL_BASE_MIN                                   , "ability.sl.compel.base_min",                       200) \
+    CFG_X(SL_COMPEL_BASE_MAX                                   , "ability.sl.compel.base_max",                       400) \
+    CFG_X(SL_POSSESS_MANA_COST                                 , "ability.sl.possess.mana_cost",                     100) \
+    CFG_X(SL_POSSESS_TETHER_CHANGE                             , "ability.sl.possess.tether_change",                   18) \
+    CFG_X(SL_POSSESS_DURATION                                  , "ability.sl.possess.duration",                         4) \
+    CFG_X(SL_POSSESS_COOLDOWN                                  , "ability.sl.possess.cooldown",                        20) \
+    CFG_X(SL_SPIRITARMY_MANA_COST                              , "ability.sl.spiritarmy.mana_cost",                  130) \
+    CFG_X(SL_SPIRITARMY_TETHER_CHANGE                          , "ability.sl.spiritarmy.tether_change",                25) \
+    CFG_X(SL_SPIRITARMY_DURATION                               , "ability.sl.spiritarmy.duration",                      6) \
+    CFG_X(SL_SPIRITARMY_COOLDOWN                               , "ability.sl.spiritarmy.cooldown",                     25) \
+    CFG_X(SL_SPIRITARMY_COUNT                                  , "ability.sl.spiritarmy.count",                         3) \
+    CFG_X(SL_SOULSTORM_MANA_COST                               , "ability.sl.soulstorm.mana_cost",                   160) \
+    CFG_X(SL_SOULSTORM_COOLDOWN                                , "ability.sl.soulstorm.cooldown",                      30) \
+    CFG_X(SL_SOULSTORM_BASE_MIN                                , "ability.sl.soulstorm.base_min",                    400) \
+    CFG_X(SL_SOULSTORM_BASE_MAX                                , "ability.sl.soulstorm.base_max",                    700) \
+    /* ABILITY - SPIRITLORD - TRANSCENDENCE */ \
+    CFG_X(SL_ANCESTRALWISDOM_MANA_COST                         , "ability.sl.ancestralwisdom.mana_cost",              80) \
+    CFG_X(SL_ANCESTRALWISDOM_DURATION                          , "ability.sl.ancestralwisdom.duration",                10) \
+    CFG_X(SL_ANCESTRALWISDOM_COOLDOWN                          , "ability.sl.ancestralwisdom.cooldown",                15) \
+    CFG_X(SL_ANCESTRALWISDOM_DAMAGE_BONUS                      , "ability.sl.ancestralwisdom.damage_bonus",            15) \
+    CFG_X(SL_ANCESTRALWISDOM_DODGE_BONUS                       , "ability.sl.ancestralwisdom.dodge_bonus",             10) \
+    CFG_X(SL_ANCESTRALWISDOM_PARRY_BONUS                       , "ability.sl.ancestralwisdom.parry_bonus",             10) \
+    CFG_X(SL_ANCESTRALWISDOM_REGEN_PCT                         , "ability.sl.ancestralwisdom.regen_pct",                2) \
+    CFG_X(SL_SPIRITCLEANSE_MANA_COST                           , "ability.sl.spiritcleanse.mana_cost",               120) \
+    CFG_X(SL_SPIRITCLEANSE_COOLDOWN                            , "ability.sl.spiritcleanse.cooldown",                  20) \
+    CFG_X(SL_SPIRITCLEANSE_HEAL_PCT                            , "ability.sl.spiritcleanse.heal_pct",                  20) \
+    CFG_X(SL_ASCENSION_MANA_COST                               , "ability.sl.ascension.mana_cost",                   250) \
+    CFG_X(SL_ASCENSION_DURATION                                , "ability.sl.ascension.duration",                       6) \
+    CFG_X(SL_ASCENSION_COOLDOWN                                , "ability.sl.ascension.cooldown",                      60) \
+    CFG_X(SL_ASCENSION_AFTERMATH                               , "ability.sl.ascension.aftermath",                      2) \
+    CFG_X(SL_ASCENSION_BOLT_MIN                                , "ability.sl.ascension.bolt_min",                    300) \
+    CFG_X(SL_ASCENSION_BOLT_MAX                                , "ability.sl.ascension.bolt_max",                    600) \
+    /* ABILITY - SPIRITLORD - ARMOR */ \
+    CFG_X(SL_LORDARMOR_PRACTICE_COST                           , "ability.sl.lordarmor.practice_cost",                 60)
 
 
 /* Generate enum from X-macro */

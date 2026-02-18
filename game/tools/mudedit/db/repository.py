@@ -38,6 +38,8 @@ CLASS_NAMES = {
     8388608: 'Voidborn',
     16777216: 'Chronomancer',
     33554432: 'Paradox',
+    67108864: 'Shaman',
+    134217728: 'Spirit Lord',
 }
 
 # Cache for class names loaded from database

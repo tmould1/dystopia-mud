@@ -179,15 +179,24 @@ class ColorTextEditor(ttk.Frame):
 
         segments = parse_colored_segments(text)
         for plain, tag in segments:
-            # Ensure tag exists for dynamic #xNNN colors
-            if tag.startswith('color_x') and tag not in self._existing_tags:
-                try:
-                    code = int(tag[7:])
-                    hex_color = xterm256_to_hex(code)
+            # Ensure tag exists for dynamic colors
+            if tag not in self._existing_tags:
+                if tag.startswith('color_x'):
+                    try:
+                        code = int(tag[7:])
+                        hex_color = xterm256_to_hex(code)
+                        self.preview.tag_configure(tag, foreground=hex_color)
+                        self._existing_tags.add(tag)
+                    except (ValueError, IndexError):
+                        pass
+                elif tag.startswith('color_t'):
+                    hex_color = f'#{tag[7:]}'
                     self.preview.tag_configure(tag, foreground=hex_color)
                     self._existing_tags.add(tag)
-                except (ValueError, IndexError):
-                    pass
+                elif tag.startswith('color_T'):
+                    hex_color = f'#{tag[7:]}'
+                    self.preview.tag_configure(tag, background=hex_color)
+                    self._existing_tags.add(tag)
 
             self.preview.insert(tk.END, plain, tag)
 
