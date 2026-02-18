@@ -18,18 +18,6 @@ extern int get_chrono_power_mod args( ( CHAR_DATA *ch, bool is_accel ) );
 
 
 /*
- * get_para_flux_zone_name - Return colored zone name for Paradox flux zones
- */
-static const char *get_para_flux_zone_name( int flux ) {
-	if ( flux <= PARA_ANCHOR_MAX )   return "#x196Temporal Anchor#n";
-	if ( flux <= PARA_SLOW_MAX )     return "#x039Slow#n";
-	if ( flux <= PARA_BALANCED_MAX ) return "#x153Balanced#n";
-	if ( flux <= PARA_FAST_MAX )     return "#x208Fast#n";
-	return "#x196Temporal Storm#n";
-}
-
-
-/*
  * do_destabilize - Voluntary instability trigger (Paradox only)
  *
  * Triggers a random temporal effect. Costs mana and has a cooldown.

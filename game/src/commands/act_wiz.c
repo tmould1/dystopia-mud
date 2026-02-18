@@ -4690,7 +4690,7 @@ void do_mudclients( CHAR_DATA *ch, char *argument ) {
 		memset( bar, '|', blen );
 		bar[blen] = '\0';
 
-		snprintf( line, sizeof( line ), "  #G%-20s#n  #w%d#n  #y%s#n\n\r",
+		snprintf( line, sizeof( line ), "  #G%-20.20s#n  #w%d#n  #y%s#n\n\r",
 			clients[i].name, clients[i].count, bar );
 		send_to_char( line, ch );
 	}
