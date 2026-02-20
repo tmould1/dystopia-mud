@@ -22,6 +22,7 @@ from .class_equipment import ClassEquipmentPanel
 from .class_starting import ClassStartingPanel
 from .class_score import ClassScorePanel
 from .class_registry import ClassRegistryPanel
+from .area_map import AreaMapPanel
 
 __all__ = [
     'HelpEditorPanel',
@@ -50,4 +51,5 @@ __all__ = [
     'ClassStartingPanel',
     'ClassScorePanel',
     'ClassRegistryPanel',
+    'AreaMapPanel',
 ]

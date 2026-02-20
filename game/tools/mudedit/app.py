@@ -13,7 +13,7 @@ import sys
 
 from .db.manager import DatabaseManager
 from .db.repository import (
-    HelpRepository, MobileRepository, ObjectRepository, RoomRepository,
+    HelpRepository, MobileRepository, ObjectRepository, RoomRepository, ExitRepository,
     ResetRepository, ShopRepository, AreaRepository,
     GameConfigRepository, BalanceConfigRepository, AbilityConfigRepository,
     AudioConfigRepository,
@@ -28,7 +28,7 @@ from .db.repository import (
 from .nav.tree import NavigationTree
 from .panels import (
     HelpEditorPanel, MobileEditorPanel, ObjectEditorPanel, RoomEditorPanel,
-    ResetEditorPanel, AreaInfoPanel, ShopEditorPanel,
+    ResetEditorPanel, AreaInfoPanel, ShopEditorPanel, AreaMapPanel,
     GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel, AudioConfigPanel,
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
@@ -234,7 +234,18 @@ class MudEditorApp:
         elif category == 'area':
             conn = self.db_manager.get_connection(db_path)
 
-            if entity_type == 'area':
+            if entity_type == 'map_3d':
+                room_repo = RoomRepository(conn)
+                exit_repo = ExitRepository(conn)
+                return AreaMapPanel(
+                    self.notebook,
+                    room_repo,
+                    exit_repo,
+                    on_open_room=lambda v, dp=db_path: self._on_nav_select('area', dp, 'rooms'),
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'area':
                 repository = AreaRepository(conn)
                 return AreaInfoPanel(
                     self.notebook,
@@ -513,6 +524,8 @@ class MudEditorApp:
         if category == 'help':
             return f"Help: {db_path.stem}"
         elif category == 'area':
+            if entity_type == 'map_3d':
+                return f"{db_path.stem}: 3D Map"
             return f"{db_path.stem}: {entity_type.title()}"
         elif category == 'game':
             # Friendly names for game config tables

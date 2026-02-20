@@ -99,6 +99,7 @@ class NavigationTree(ttk.Frame):
             # Add entity type sub-items
             for entity_type, label in [
                 ('area', 'Area Info'),
+                ('map_3d', '3D Map'),
                 ('mobiles', 'Mobiles'),
                 ('objects', 'Objects'),
                 ('rooms', 'Rooms'),
