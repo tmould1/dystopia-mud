@@ -2348,13 +2348,22 @@ void log_string( const char *str ) {
 
 		if ( log_fp != NULL ) {
 			fprintf( log_fp, "%s :: %s\n", strtime, str );
-			fflush( log_fp );
 		}
 	}
 
 	strcpy( logout, str );
 	logchan( logout );
 	return;
+}
+
+/*
+ * Flush the log file buffer to disk. Called periodically from the
+ * game loop rather than on every log_string() call, to avoid
+ * blocking the game thread with synchronous I/O.
+ */
+void log_flush( void ) {
+	if ( log_fp != NULL )
+		fflush( log_fp );
 }
 
 /*

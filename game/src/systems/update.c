@@ -922,16 +922,20 @@ void room_update( void ) {
  */
 void obj_update( void ) {
 	OBJ_DATA *obj;
-	OBJ_DATA *obj_next;
+	OBJ_DATA *obj_prev = NULL;
 
 	PROFILE_START( "obj_update" );
 
-	for ( obj = object_list; obj != NULL; obj = obj_next ) {
+	obj = object_list;
+	while ( obj != NULL ) {
 		CHAR_DATA *rch;
 		char *message;
 
-		obj_next = obj->next;
-		if ( obj->timer <= 0 || --obj->timer > 0 ) continue;
+		if ( obj->timer <= 0 || --obj->timer > 0 ) {
+			obj_prev = obj;
+			obj = obj->next;
+			continue;
+		}
 
 		switch ( obj->item_type ) {
 		default:
@@ -993,32 +997,13 @@ void obj_update( void ) {
 		}
 
 		/*
-		 * BUGFIX : The famous extract_obj bug....
-		 *          basicly we just make sure that we don't skip into the obj_free list
-		 *          by accident. (That's what caused it).
+		 * Extract the object safely. Use tracked obj_prev to resume
+		 * iteration from the correct point, avoiding the obj_free list
+		 * corruption bug (previously required an O(n) predecessor scan).
 		 */
-
-		if ( obj == object_list ) {
-			extract_obj( obj );
-			obj_next = object_list;
-		} else {
-			OBJ_DATA *bugObj;
-
-			for ( bugObj = object_list; bugObj; bugObj = bugObj->next ) {
-				if ( bugObj->next == obj ) break;
-			}
-			/*
-			 * This shouldn't happen, but if it does, I want to make sure we never see that object again,
-			 * so we let extract_obj() try and handle it, terminating to avoid further corruption.
-			 */
-			if ( !bugObj ) {
-				bug( "obj_update: obj %d not in object_list. Terminating obj_update.", obj->pIndexData->vnum );
-				PROFILE_END( "obj_update" );
-				return;
-			}
-			extract_obj( obj );
-			obj_next = bugObj->next;
-		}
+		extract_obj( obj );
+		obj = obj_prev ? obj_prev->next : object_list;
+		/* obj_prev stays the same — it didn't move. */
 	}
 
 	PROFILE_END( "obj_update" );

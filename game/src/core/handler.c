@@ -1788,24 +1788,45 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 	if ( ch->desc != NULL && ch->desc->original != NULL )
 		do_return( ch, "" );
 
-	for ( wch = char_list; wch != NULL; wch = wch->next ) {
-		if ( wch->reply == ch )
-			wch->reply = NULL;
-	}
+	/*
+	 * Single consolidated pass: clear reply/propose/partner pointers,
+	 * remove ch from char_list, and decrement follower counts.
+	 * (Previously 3-4 separate full list scans.)
+	 */
+	{
+		bool is_npc_ch       = IS_NPC( ch );
+		bool check_propose   = !is_npc_ch;
+		bool check_followers = is_npc_ch && strlen( ch->lord ) > 1;
+		bool removed         = FALSE;
 
-	if ( ch == char_list ) {
-		char_list = ch->next;
-	} else {
-		CHAR_DATA *prev;
+		if ( ch == char_list ) {
+			char_list = ch->next;
+			removed = TRUE;
+		}
 
-		for ( prev = char_list; prev != NULL; prev = prev->next ) {
-			if ( prev->next == ch ) {
-				prev->next = ch->next;
-				break;
+		for ( wch = char_list; wch != NULL; wch = wch->next ) {
+			if ( wch->reply == ch )
+				wch->reply = NULL;
+
+			if ( !removed && wch->next == ch ) {
+				wch->next = ch->next;
+				removed = TRUE;
+			}
+
+			if ( check_propose && !IS_NPC( wch ) ) {
+				if ( wch->pcdata->propose != NULL && wch->pcdata->propose == ch )
+					wch->pcdata->propose = NULL;
+				if ( wch->pcdata->partner != NULL && wch->pcdata->partner == ch )
+					wch->pcdata->partner = NULL;
+			}
+
+			if ( check_followers && !IS_NPC( wch ) ) {
+				if ( !str_cmp( wch->name, ch->lord ) && wch->pcdata->followers > 0 )
+					wch->pcdata->followers--;
 			}
 		}
 
-		if ( prev == NULL ) {
+		if ( !removed ) {
 			bug( "Extract_char: char not found.", 0 );
 			return;
 		}
@@ -1831,20 +1852,6 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 			ch->pcdata->partner = NULL;
 		if ( ( familiar = ch->pcdata->propose ) != NULL )
 			ch->pcdata->propose = NULL;
-		for ( familiar = char_list; familiar != NULL; familiar = familiar->next ) {
-			if ( !IS_NPC( familiar ) && familiar->pcdata->propose != NULL &&
-				familiar->pcdata->propose == ch )
-				familiar->pcdata->propose = NULL;
-			if ( !IS_NPC( familiar ) && familiar->pcdata->partner != NULL &&
-				familiar->pcdata->partner == ch )
-				familiar->pcdata->partner = NULL;
-		}
-	} else if ( IS_NPC( ch ) && strlen( ch->lord ) > 1 ) {
-		for ( wch = char_list; wch != NULL; wch = wch->next ) {
-			if ( IS_NPC( wch ) ) continue;
-			if ( str_cmp( wch->name, ch->lord ) ) continue;
-			if ( wch->pcdata->followers > 0 ) wch->pcdata->followers--;
-		}
 	}
 
 	free_char( ch );

@@ -3349,8 +3349,16 @@ void stop_embrace( CHAR_DATA *ch, CHAR_DATA *victim ) {
 
 void stop_fighting( CHAR_DATA *ch, bool fBoth ) {
 	CHAR_DATA *fch;
+
+	if ( !fBoth ) {
+		ch->fighting = NULL;
+		ch->position = POS_STANDING;
+		update_pos( ch );
+		return;
+	}
+
 	for ( fch = char_list; fch != NULL; fch = fch->next ) {
-		if ( fch == ch || ( fBoth && fch->fighting == ch ) ) {
+		if ( fch == ch || fch->fighting == ch ) {
 			fch->fighting = NULL;
 			fch->position = POS_STANDING;
 			update_pos( fch );

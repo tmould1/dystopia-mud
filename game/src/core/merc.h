@@ -4391,6 +4391,7 @@ const char *mask_ip args( ( const char *ip ) );
 void append_file args( ( CHAR_DATA * ch, char *file, char *str ) );
 void bug args( ( const char *str, int param ) );
 void log_string args( ( const char *str ) );
+void log_flush  args( ( void ) );
 void tail_chain args( (void) );
 
 void add_help args( ( HELP_DATA * pHelp ) );

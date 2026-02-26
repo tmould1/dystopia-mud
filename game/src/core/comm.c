@@ -757,6 +757,11 @@ void game_loop( int control ) {
 		update_handler();
 
 		/*
+		 * Flush log buffer once per pulse instead of on every log_string() call.
+		 */
+		log_flush();
+
+		/*
 		 * Output.
 		 */
 		for ( d = descriptor_list; d != NULL; d = d_next ) {
@@ -1969,13 +1974,26 @@ static const char *random_colors[] = {
 };
 #define NUM_RANDOM_COLORS 15
 
+/* Direct lookup table for color codes - O(1) instead of linear search.
+ * Indexed by character value, initialized from color_codes[] at startup. */
+static const char *color_lookup[128];
+static bool color_lookup_init = FALSE;
+
+static void init_color_lookup( void ) {
+	int i;
+	for ( i = 0; i < 128; i++ )
+		color_lookup[i] = NULL;
+	for ( i = 0; color_codes[i].code != 0; i++ )
+		color_lookup[(unsigned char) color_codes[i].code] = color_codes[i].ansi;
+	color_lookup_init = TRUE;
+}
+
 /* Look up a color code character, return ANSI sequence or NULL */
 static const char *lookup_color( char code ) {
-	int i;
-	for ( i = 0; color_codes[i].code != 0; i++ ) {
-		if ( color_codes[i].code == code )
-			return color_codes[i].ansi;
-	}
+	if ( !color_lookup_init )
+		init_color_lookup();
+	if ( (unsigned char) code < 128 )
+		return color_lookup[(unsigned char) code];
 	return NULL;
 }
 
@@ -2069,6 +2087,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 	const char *ansi;
 	CHAR_DATA *wch = d->character ? ( d->original ? d->original : d->character ) : NULL;
 	bool use_ansi = ( !wch || IS_NPC( wch ) || IS_SET( wch->act, PLR_ANSI ) );
+	bool had_color = FALSE;
 
 	/* clear the output buffer, and set the pointer */
 	output[0] = '\0';
@@ -2123,6 +2142,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 
 		/* Check color lookup table */
 		if ( ( ansi = lookup_color( *txt ) ) != NULL ) {
+			had_color = TRUE;
 			if ( use_ansi ) {
 				char *new_ptr = buf_append_safe( ptr, ansi, output, sizeof(output), 20 );
 				if ( new_ptr == NULL ) {
@@ -2138,6 +2158,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		/* Handle special codes not in the table */
 		switch ( *txt ) {
 		case 's': /* Random color */
+			had_color = TRUE;
 			if ( use_ansi ) {
 				ansi = random_colors[number_range( 0, NUM_RANDOM_COLORS - 1 )];
 				{
@@ -2154,6 +2175,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 			break;
 		case 'x': /* 256-color: #x### */
 			if ( isdigit( txt[1] ) && isdigit( txt[2] ) && isdigit( txt[3] ) ) {
+				had_color = TRUE;
 				if ( use_ansi ) {
 					/* Need 14 bytes for ANSI sequence */
 					if ( ptr + 14 < output_end ) {
@@ -2183,6 +2205,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 				int r = ( hex_digit( txt[1] ) << 4 ) | hex_digit( txt[2] );
 				int g = ( hex_digit( txt[3] ) << 4 ) | hex_digit( txt[4] );
 				int b = ( hex_digit( txt[5] ) << 4 ) | hex_digit( txt[6] );
+				had_color = TRUE;
 				if ( use_ansi && wch && IS_TRUECOLOR( wch ) ) {
 					char tc_buf[24];
 					snprintf( tc_buf, sizeof( tc_buf ), "\033[38;2;%d;%d;%dm", r, g, b );
@@ -2225,6 +2248,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 				int r = ( hex_digit( txt[1] ) << 4 ) | hex_digit( txt[2] );
 				int g = ( hex_digit( txt[3] ) << 4 ) | hex_digit( txt[4] );
 				int b = ( hex_digit( txt[5] ) << 4 ) | hex_digit( txt[6] );
+				had_color = TRUE;
 				if ( use_ansi && wch && IS_TRUECOLOR( wch ) ) {
 					char tc_buf[24];
 					snprintf( tc_buf, sizeof( tc_buf ), "\033[48;2;%d;%d;%dm", r, g, b );
@@ -2256,6 +2280,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 			break;
 		case 'X': /* 256-color background: #XNNN */
 			if ( isdigit( txt[1] ) && isdigit( txt[2] ) && isdigit( txt[3] ) ) {
+				had_color = TRUE;
 				if ( use_ansi ) {
 					if ( ptr + 14 < output_end ) {
 						*ptr++ = '\033';
@@ -2278,6 +2303,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 			}
 			break;
 		case 'b': /* Reset background only */
+			had_color = TRUE;
 			if ( use_ansi ) {
 				char *new_ptr = buf_append_safe( ptr, "\033[49m", output, sizeof(output), 20 );
 				if ( new_ptr == NULL )
@@ -2349,23 +2375,22 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 		}
 	}
 
-	/* Add ANSI reset sequence only if ANSI enabled and there's room */
-	if ( use_ansi && ptr >= output && ptr + 5 <= output + sizeof(output) ) {
+	/* Add ANSI reset sequence only if colors were used and ANSI enabled */
+	if ( had_color && use_ansi && ptr >= output && ptr + 5 <= output + sizeof(output) ) {
 		*ptr++ = '\033';
 		*ptr++ = '[';
 		*ptr++ = '0';
 		*ptr++ = 'm';
+	}
+	/* Null terminate */
+	if ( ptr >= output && ptr < output + sizeof(output) ) {
 		*ptr = '\0';
 	} else {
-		/* No room for reset, just null terminate */
-		if ( ptr >= output && ptr < output + sizeof(output) ) {
-			*ptr = '\0';
-		} else {
-			output[sizeof(output) - 1] = '\0';
-		}
+		output[sizeof(output) - 1] = '\0';
+		ptr = output + sizeof(output) - 1;
 	}
 
-	length = (int) strlen( output ); /* Use strlen for safety */
+	length = (int) ( ptr - output );
 
 	/*
 	 * Screen reader post-processing: collapse multiple spaces to one.
