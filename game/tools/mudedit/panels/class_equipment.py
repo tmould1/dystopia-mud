@@ -9,7 +9,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from typing import Callable, Optional
 
-from ..db.repository import get_class_name, CLASS_NAMES
+from ..db.repository import load_class_names
 
 
 class ClassEquipmentPanel(ttk.Frame):
@@ -38,6 +38,7 @@ class ClassEquipmentPanel(ttk.Frame):
         self.db_manager = db_manager
         self.on_status = on_status or (lambda msg: None)
 
+        self.class_names = load_class_names(self.config_repo.conn)
         self.current_class_id: Optional[int] = None
         self.current_piece_id: Optional[int] = None
         self.unsaved_config = False
@@ -329,7 +330,7 @@ class ClassEquipmentPanel(ttk.Frame):
 
         entries = self.config_repo.list_all()
         for entry in entries:
-            class_name = get_class_name(entry['class_id'])
+            class_name = self.class_names.get(entry['class_id'], f"Unknown ({entry['class_id']})")
             self.config_tree.insert(
                 '', tk.END, iid=str(entry['class_id']),
                 values=(entry['class_id'], class_name)
@@ -378,7 +379,7 @@ class ClassEquipmentPanel(ttk.Frame):
 
         entry = self.config_repo.get_by_id(class_id)
         if entry:
-            class_name = get_class_name(class_id)
+            class_name = self.class_names.get(class_id, f'Unknown ({class_id})')
             self.class_label.config(text=class_name)
             self.cost_key_var.set(entry['acfg_cost_key'])
             self.usage_var.set(entry['usage_message'])
@@ -622,7 +623,7 @@ class ClassEquipmentPanel(ttk.Frame):
             for conflict in conflicts:
                 overlaps.append(
                     f"  VNUM {piece['vnum']} ({piece['keyword']}) conflicts with "
-                    f"{get_class_name(conflict['class_id'])} ({conflict['keyword']})"
+                    f"{self.class_names.get(conflict['class_id'], f"Unknown ({conflict['class_id']})")} ({conflict['keyword']})"
                 )
 
         # Check mastery VNUM
@@ -635,7 +636,7 @@ class ClassEquipmentPanel(ttk.Frame):
                 for conflict in mastery_conflicts:
                     overlaps.append(
                         f"  Mastery VNUM {mastery} conflicts with "
-                        f"{get_class_name(conflict['class_id'])} ({conflict['keyword']})"
+                        f"{self.class_names.get(conflict['class_id'], f"Unknown ({conflict['class_id']})")} ({conflict['keyword']})"
                     )
         except ValueError:
             pass

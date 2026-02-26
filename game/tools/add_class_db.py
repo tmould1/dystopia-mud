@@ -27,6 +27,10 @@ import os
 import sys
 from pathlib import Path
 
+# Add mudlib to path for shared constants
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from mudlib.merc_constants import STAT_SOURCE_ENUM
+
 
 def find_class_db():
     """Find the class.db file relative to script location."""
@@ -247,34 +251,10 @@ def delete_class(conn, class_id, dry_run=False):
     print(f"{'[DRY RUN] ' if dry_run else ''}Done: {class_name} deleted")
 
 
-# ============================================================================
-# STAT_SOURCE enum values (must match db_class.h)
-# ============================================================================
-STAT_NONE = 0
-STAT_BEAST = 1
-STAT_RAGE = 2
-STAT_CHI_CURRENT = 3
-STAT_CHI_MAXIMUM = 4
-STAT_GNOSIS_CURRENT = 5
-STAT_GNOSIS_MAXIMUM = 6
-STAT_MONKBLOCK = 7
-STAT_SILTOL = 8
-STAT_SOULS = 9
-STAT_DEMON_POWER = 10
-STAT_DEMON_TOTAL = 11
-STAT_DROID_POWER = 12
-STAT_DROW_POWER = 13
-STAT_DROW_MAGIC = 14
-STAT_TPOINTS = 15
-STAT_ANGEL_JUSTICE = 16
-STAT_ANGEL_LOVE = 17
-STAT_ANGEL_HARMONY = 18
-STAT_ANGEL_PEACE = 19
-STAT_SHAPE_COUNTER = 20
-STAT_PHASE_COUNTER = 21
-STAT_HARA_KIRI = 22
-STAT_DRAGON_ATTUNEMENT = 23
-STAT_DRAGON_ESSENCE_PEAK = 24
+# STAT_SOURCE enum values — parsed from db_class.h via merc_constants.py
+# Generate local STAT_* variables from the parsed enum for use in class data below
+for _val, _name in STAT_SOURCE_ENUM.items():
+    globals()[_name.upper()] = _val
 
 
 # ============================================================================

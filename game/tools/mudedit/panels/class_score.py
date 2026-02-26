@@ -9,7 +9,12 @@ import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from typing import Callable, Optional
 
-from ..db.repository import CLASS_NAMES, STAT_SOURCES, get_class_name, get_stat_source_name
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from mudlib.models import STAT_SOURCES, get_stat_source_name
+
+from ..db.repository import load_class_names
 
 
 class ClassScorePanel(ttk.Frame):
@@ -30,6 +35,7 @@ class ClassScorePanel(ttk.Frame):
 
         self.score_repo = score_repo
         self.on_status = on_status or (lambda msg: None)
+        self.class_names = load_class_names(self.score_repo.conn)
 
         self.current_stat_id: Optional[int] = None
         self.unsaved = False
@@ -163,7 +169,7 @@ class ClassScorePanel(ttk.Frame):
 
         entries = self.score_repo.list_all()
         for entry in entries:
-            class_name = get_class_name(entry['class_id'])
+            class_name = self.class_names.get(entry['class_id'], f"Unknown ({entry['class_id']})")
             source_name = get_stat_source_name(entry['stat_source'])
             self.stats_tree.insert('', tk.END, iid=str(entry['id']),
                                    values=(class_name, entry['stat_label'], source_name))
@@ -185,7 +191,7 @@ class ClassScorePanel(ttk.Frame):
 
         entry = self.score_repo.get_by_id(stat_id)
         if entry:
-            class_name = get_class_name(entry['class_id'])
+            class_name = self.class_names.get(entry['class_id'], f"Unknown ({entry['class_id']})")
             self.class_label.config(text=class_name)
             self.order_var.set(str(entry['display_order']))
             self.label_var.set(entry['stat_label'])
@@ -254,7 +260,7 @@ class ClassScorePanel(ttk.Frame):
     def _new_stat(self):
         """Create a new score stat."""
         # Ask for class
-        class_options = list(CLASS_NAMES.items())
+        class_options = list(self.class_names.items())
         class_str = simpledialog.askstring(
             "New Score Stat",
             "Enter class ID (e.g., 8 for Vampire):"
@@ -268,7 +274,7 @@ class ClassScorePanel(ttk.Frame):
             messagebox.showwarning("Invalid", "Class ID must be a number.")
             return
 
-        if class_id not in CLASS_NAMES:
+        if class_id not in self.class_names:
             messagebox.showwarning("Invalid", f"Unknown class ID: {class_id}")
             return
 
@@ -286,7 +292,7 @@ class ClassScorePanel(ttk.Frame):
         self.stats_tree.selection_set(str(new_id))
         self._on_stat_select(None)
 
-        self.on_status(f"Created new stat for {get_class_name(class_id)}")
+        self.on_status(f"Created new stat for {self.class_names.get(class_id, f'Unknown ({class_id})')}")
 
     def _delete_stat(self):
         """Delete current stat."""

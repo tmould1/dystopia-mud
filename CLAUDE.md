@@ -158,3 +158,30 @@ Each class has its own source file with powers and abilities:
 - `DESCRIPTOR_DATA` - Network connections
 - `AREA_DATA` - Areas/zones
 - `AFFECT_DATA` - Spell/status effects
+
+## Python Tools (game/tools/)
+
+### Constant Sourcing Architecture
+
+Game constants flow from C headers to Python at import time — no manual synchronization:
+
+```
+C headers (merc.h, class.h, db_class.h)
+    │
+    ├── merc_constants.py (parses #define and enum at import time)
+    │       │
+    │       └── models.py (single import point for all consumers)
+    │               │
+    │               ├── mudedit/panels/*.py
+    │               ├── mudedit/viz/layout.py
+    │               └── mudlib/area_*.py
+    │
+    └── class.db (SQLite) ──► repository.py:load_class_names()
+                                    └── mudedit/panels/class_*.py
+```
+
+- **`mudlib/merc_constants.py`** — Parses `merc.h`, `class.h`, and `db_class.h` at import time. Exports raw `{value: 'name'}` dicts for flags, types, enums. Handles letter-macro expansion (`#define ACT_IS_NPC (A)`), overlapping `ITEM_` prefix disambiguation, and stray define filtering.
+- **`mudlib/models.py`** — The **single import point** for all game constants. Re-exports simple dicts from `merc_constants.py` and builds enriched `{value: ('ENUM_NAME', 'Display Name')}` tuple formats for editor UI. Also contains area data classes (`Room`, `Mobile`, `Object`, etc.).
+- **`mudedit/db/repository.py`** — DB-backed data access. `load_class_names()` queries `class_registry` table. All other game constants come from `models.py`, not from repository.
+
+When adding new `#define` constants to C headers, they automatically appear in the Python tools on next editor launch. Display name overrides can be added to `models.py` for human-friendly labels.

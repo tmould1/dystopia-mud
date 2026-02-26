@@ -4,34 +4,16 @@ BFS-based coordinate assignment for room layout.
 Ports the algorithm from map_generator.py to work with SQLite room/exit data.
 """
 
+import sys
 from collections import deque
+from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-# Direction constants matching merc.h
-DIR_NORTH = 0
-DIR_EAST = 1
-DIR_SOUTH = 2
-DIR_WEST = 3
-DIR_UP = 4
-DIR_DOWN = 5
-
-DIR_NAMES = ['north', 'east', 'south', 'west', 'up', 'down']
-REVERSE_DIR = [2, 3, 0, 1, 5, 4]  # N<->S, E<->W, U<->D
-
-DIR_OFFSETS = {
-    DIR_NORTH: (0, 1, 0),
-    DIR_EAST:  (1, 0, 0),
-    DIR_SOUTH: (0, -1, 0),
-    DIR_WEST:  (-1, 0, 0),
-    DIR_UP:    (0, 0, 1),
-    DIR_DOWN:  (0, 0, -1),
-}
-
-SECTOR_NAMES = {
-    0: 'inside', 1: 'city', 2: 'field', 3: 'forest',
-    4: 'hills', 5: 'mountain', 6: 'water_swim', 7: 'water_noswim',
-    9: 'air', 10: 'desert',
-}
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from mudlib.models import (
+    DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN,
+    DIR_NAMES, REVERSE_DIR, DIR_OFFSETS, SECTOR_NAMES, ROOM_FLAGS
+)
 
 SECTOR_COLORS = {
     0: '#808080',   # inside - gray
@@ -44,14 +26,6 @@ SECTOR_COLORS = {
     7: '#00008B',   # water_noswim - dark blue
     9: '#87CEEB',   # air - sky blue
     10: '#F4A460',  # desert - sandy brown
-}
-
-# Room flag constants matching merc.h
-ROOM_FLAGS = {
-    1: 'dark', 2: 'no_otrans', 4: 'no_mob', 8: 'indoors',
-    512: 'private', 1024: 'safe', 2048: 'solitary',
-    4096: 'pet_shop', 8192: 'no_recall', 16384: 'no_teleport',
-    32768: 'total_darkness', 131072: 'arena', 1048576: 'astral',
 }
 
 

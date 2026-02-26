@@ -9,7 +9,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from typing import Callable, Optional
 
-from ..db.repository import get_class_name
+from ..db.repository import load_class_names
 
 
 class ClassStartingPanel(ttk.Frame):
@@ -31,6 +31,7 @@ class ClassStartingPanel(ttk.Frame):
 
         self.starting_repo = starting_repo
         self.on_status = on_status or (lambda msg: None)
+        self.class_names = load_class_names(self.starting_repo.conn)
 
         self.current_class_id: Optional[int] = None
         self.unsaved = False
@@ -153,7 +154,7 @@ class ClassStartingPanel(ttk.Frame):
 
         entries = self.starting_repo.list_all()
         for entry in entries:
-            class_name = get_class_name(entry['class_id'])
+            class_name = self.class_names.get(entry['class_id'], f"Unknown ({entry['class_id']})")
             disciplines = "Yes" if entry['has_disciplines'] else "No"
             self.class_tree.insert('', tk.END, iid=str(entry['class_id']),
                                    values=(entry['class_id'], class_name,
@@ -177,7 +178,7 @@ class ClassStartingPanel(ttk.Frame):
 
         entry = self.starting_repo.get_by_id(class_id)
         if entry:
-            class_name = get_class_name(class_id)
+            class_name = self.class_names.get(class_id, f'Unknown ({class_id})')
             self.class_label.config(text=class_name)
             self.beast_var.set(str(entry['starting_beast']))
             self.level_var.set(str(entry['starting_level']))

@@ -23,34 +23,10 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from mudlib.models import (
     CLASS_TABLE, DISCIPLINE_NAMES, PLR_FLAGS, EXTRA_FLAGS_PLAYER,
-    NEWBITS_FLAGS, IMM_FLAGS, AFF_FLAGS, GIFT_NAMES
+    NEWBITS_FLAGS, IMM_FLAGS, AFF_FLAGS, GIFT_NAMES, SEX_TYPES,
+    WEAPON_NAMES, SPELL_NAMES, STANCE_NAMES, SUPER_STANCE_NAMES,
+    MASTERY_THRESHOLD
 )
-
-
-# Weapon proficiency names (index -> name)
-WEAPON_NAMES = {
-    0: 'Unarmed', 1: 'Slice', 2: 'Stab', 3: 'Slash', 4: 'Whip',
-    5: 'Claw', 6: 'Blast', 7: 'Pound', 8: 'Crush', 9: 'Grep',
-    10: 'Bite', 11: 'Pierce', 12: 'Suck',
-}
-
-# Spell proficiency names (index -> name)
-SPELL_NAMES = {
-    0: 'Purple (General)', 1: 'Red', 2: 'Blue', 3: 'Green', 4: 'Yellow',
-}
-
-# Stance proficiency names (index -> name) - required for mastery
-STANCE_NAMES = {
-    1: 'Viper', 2: 'Crane', 3: 'Crab', 4: 'Mongoose', 5: 'Bull',
-    6: 'Mantis', 7: 'Dragon', 8: 'Tiger', 9: 'Monkey', 10: 'Swallow',
-}
-
-# Super stance names (optional display)
-SUPER_STANCE_NAMES = {
-    13: 'SS1', 14: 'SS2', 15: 'SS3', 16: 'SS4', 17: 'SS5',
-}
-
-MASTERY_THRESHOLD = 200
 
 
 class PlayerEditorPanel(ttk.Frame):
@@ -60,9 +36,6 @@ class PlayerEditorPanel(ttk.Frame):
     Features multiple tabs for different aspects of player data.
     Password field is write-only - can set but not read.
     """
-
-    # Sex options
-    SEXES = {0: 'Neutral', 1: 'Male', 2: 'Female'}
 
     def __init__(
         self,
@@ -157,7 +130,7 @@ class PlayerEditorPanel(ttk.Frame):
         row.pack(fill=tk.X, padx=4, pady=2)
         ttk.Label(row, text="Sex:", width=15).pack(side=tk.LEFT)
         self.sex_var = tk.StringVar()
-        sex_combo = ttk.Combobox(row, textvariable=self.sex_var, values=list(self.SEXES.values()), state='readonly', width=10)
+        sex_combo = ttk.Combobox(row, textvariable=self.sex_var, values=list(SEX_TYPES.values()), state='readonly', width=10)
         sex_combo.pack(side=tk.LEFT)
 
         row = ttk.Frame(identity)
@@ -1128,7 +1101,7 @@ class PlayerEditorPanel(ttk.Frame):
         # Load identity
         self.name_var.set(player.get('name', ''))
         self.title_var.set(player.get('title', ''))
-        self.sex_var.set(self.SEXES.get(player.get('sex', 0), 'Neutral'))
+        self.sex_var.set(SEX_TYPES.get(player.get('sex', 0), 'Neutral'))
         self.level_var.set(player.get('level', 1))
         self.trust_var.set(player.get('trust', 0))
 
@@ -1486,7 +1459,7 @@ class PlayerEditorPanel(ttk.Frame):
         """Save player changes."""
         # Get sex value
         sex_val = 0
-        for k, v in self.SEXES.items():
+        for k, v in SEX_TYPES.items():
             if v == self.sex_var.get():
                 sex_val = k
                 break

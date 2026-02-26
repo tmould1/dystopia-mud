@@ -9,80 +9,13 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 # =============================================================================
-# Shared Constants - Class ID to name mapping (fallback, prefer DB lookup)
+# Shared Helpers
 # =============================================================================
-CLASS_NAMES = {
-    1: 'Demon',
-    2: 'Mage',
-    4: 'Werewolf',
-    8: 'Vampire',
-    16: 'Samurai',
-    32: 'Drow',
-    64: 'Monk',
-    128: 'Ninja',
-    256: 'Lich',
-    512: 'Shapeshifter',
-    1024: 'Tanarri',
-    2048: 'Angel',
-    4096: 'Undead Knight',
-    8192: 'Spider Droid',
-    16384: 'Dirgesinger',
-    32768: 'Siren',
-    65536: 'Psion',
-    131072: 'Mindflayer',
-    262144: 'Dragonkin',
-    524288: 'Wyrm',
-    1048576: 'Artificer',
-    2097152: 'Mechanist',
-    4194304: 'Cultist',
-    8388608: 'Voidborn',
-    16777216: 'Chronomancer',
-    33554432: 'Paradox',
-    67108864: 'Shaman',
-    134217728: 'Spirit Lord',
-}
 
-# Cache for class names loaded from database
-_class_name_cache: Dict[int, str] = {}
-
-# Stat source enum mapping (matches C STAT_SOURCE enum in db_game.h)
-STAT_SOURCES = {
-    0: ('STAT_NONE', 'None'),
-    1: ('STAT_BEAST', 'Beast (ch->beast)'),
-    2: ('STAT_RAGE', 'Rage (ch->rage)'),
-    3: ('STAT_CHI_CURRENT', 'Chi Current'),
-    4: ('STAT_CHI_MAXIMUM', 'Chi Maximum'),
-    5: ('STAT_GNOSIS_CURRENT', 'Gnosis Current'),
-    6: ('STAT_GNOSIS_MAXIMUM', 'Gnosis Maximum'),
-    7: ('STAT_MONKBLOCK', 'Monk Block'),
-    8: ('STAT_SILTOL', 'Silver Tolerance'),
-    9: ('STAT_SOULS', 'Souls'),
-    10: ('STAT_DEMON_POWER', 'Demon Power (Current)'),
-    11: ('STAT_DEMON_TOTAL', 'Demon Power (Total)'),
-    12: ('STAT_DROID_POWER', 'Droid Power'),
-    13: ('STAT_DROW_POWER', 'Drow Power'),
-    14: ('STAT_DROW_MAGIC', 'Drow Magic'),
-    15: ('STAT_TPOINTS', 'Tanarri Points'),
-    16: ('STAT_ANGEL_JUSTICE', 'Angel Justice'),
-    17: ('STAT_ANGEL_LOVE', 'Angel Love'),
-    18: ('STAT_ANGEL_HARMONY', 'Angel Harmony'),
-    19: ('STAT_ANGEL_PEACE', 'Angel Peace'),
-    20: ('STAT_SHAPE_COUNTER', 'Shape Counter'),
-    21: ('STAT_PHASE_COUNTER', 'Phase Counter'),
-    22: ('STAT_HARA_KIRI', 'Hara Kiri'),
-}
-
-
-def get_class_name(class_id: int) -> str:
-    """Get human-readable class name from class_id."""
-    return CLASS_NAMES.get(class_id, f'Unknown ({class_id})')
-
-
-def get_stat_source_name(stat_source: int) -> str:
-    """Get human-readable stat source name."""
-    if stat_source in STAT_SOURCES:
-        return STAT_SOURCES[stat_source][1]
-    return f'Unknown ({stat_source})'
+def load_class_names(conn: sqlite3.Connection) -> Dict[int, str]:
+    """Load {class_id: class_name} mapping from class_registry table."""
+    rows = conn.execute("SELECT class_id, class_name FROM class_registry").fetchall()
+    return {row['class_id']: row['class_name'] for row in rows}
 
 
 # =============================================================================

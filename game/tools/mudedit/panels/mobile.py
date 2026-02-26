@@ -12,7 +12,7 @@ from pathlib import Path
 
 # Add mudlib to path for model imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-from mudlib.models import ACT_FLAGS, AFF_FLAGS
+from mudlib.models import ACT_FLAGS, AFF_FLAGS, SEX_TYPES
 
 from ..db.repository import MobileRepository
 from ..widgets import ColorTextEditor, EntityListPanel, FlagEditor, DiceEditor, strip_colors
@@ -328,8 +328,7 @@ class MobileEditorPanel(ttk.Frame):
         self.long_var.set(mobile.get('long_descr', ''))
 
         # Sex
-        sex_map = {0: "Neutral", 1: "Male", 2: "Female"}
-        self.sex_var.set(sex_map.get(mobile.get('sex', 0), "Neutral"))
+        self.sex_var.set(SEX_TYPES.get(mobile.get('sex', 0), "Neutral"))
 
         self.align_var.set(mobile.get('alignment', 0))
         self.gold_var.set(mobile.get('gold', 0))

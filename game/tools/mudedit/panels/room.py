@@ -12,44 +12,10 @@ from pathlib import Path
 
 # Add mudlib to path for model imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-from mudlib.models import SECTOR_NAMES, DIR_NAMES
+from mudlib.models import SECTOR_NAMES, DIR_NAMES, ROOM_FLAGS, EXIT_FLAGS
 
 from ..db.repository import RoomRepository, ExitRepository
 from ..widgets import ColorTextEditor, EntityListPanel, strip_colors
-
-
-# Room flags (from merc.h)
-ROOM_FLAGS = {
-    1: 'dark',
-    2: 'no_mob',
-    4: 'indoors',
-    8: 'private',
-    16: 'safe',
-    32: 'solitary',
-    64: 'pet_shop',
-    128: 'no_recall',
-    256: 'no_teleport',
-    512: 'total_darkness',
-    1024: 'blade_barrier',
-    2048: 'arena',
-    4096: 'flaming',
-    8192: 'silence',
-    16384: 'no_gate',
-    32768: 'prototype',
-}
-
-# Exit flags
-EXIT_FLAGS = {
-    1: 'door',
-    2: 'closed',
-    4: 'locked',
-    8: 'pickproof',
-    16: 'bashproof',
-    32: 'passproof',
-    64: 'easy',
-    128: 'hard',
-    256: 'infuriating',
-}
 
 
 class RoomEditorPanel(ttk.Frame):
