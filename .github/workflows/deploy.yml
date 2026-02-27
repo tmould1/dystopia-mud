@@ -37,6 +37,12 @@ jobs:
           cd build
           make -j$(nproc) -f Makefile
 
+      - name: Run tests
+        run: |
+          cd game/tests
+          make clean && make
+          ./run_tests
+
       - name: Package gamedata
         run: tar -czvf dystopia-linux.tar.gz gamedata/
 
@@ -62,6 +68,10 @@ jobs:
       - name: Build
         shell: cmd
         run: msbuild game\build\dystopia.vcxproj /p:Configuration=Release /p:Platform=x64
+
+      - name: Run tests
+        shell: cmd
+        run: game\tests\build_tests.bat
 
       - name: Package gamedata
         shell: pwsh

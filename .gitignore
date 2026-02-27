@@ -47,6 +47,14 @@ gamedata/db/players/
 # Runtime data files
 gamedata/run/
 
+# Test build artifacts
+game/tests/obj/
+game/tests/run_tests
+game/tests/run_tests.exe
+game/tests/run_tests.pdb
+game/tests/vc140.pdb
+game/tests/*.ilk
+
 # Python cache
 __pycache__/
 *.pyc

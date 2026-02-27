@@ -7,9 +7,63 @@
 #include "utf8.h"
 
 /*
+ * Test output capture: intercepts raw output for a specific character
+ * before color processing. Used by the test harness for Tier 2+ tests.
+ */
+static CHAR_DATA *capture_ch   = NULL;
+static char      *capture_buf  = NULL;
+static int        capture_len  = 0;
+static int        capture_size = 0;
+
+static void capture_append( const char *txt ) {
+	int len = (int) strlen( txt );
+	while ( capture_len + len + 1 > capture_size ) {
+		capture_size = capture_size ? capture_size * 2 : 4096;
+		capture_buf = realloc( capture_buf, capture_size );
+	}
+	memcpy( capture_buf + capture_len, txt, len );
+	capture_len += len;
+	capture_buf[capture_len] = '\0';
+}
+
+void test_output_start( CHAR_DATA *ch ) {
+	capture_ch = ch;
+	capture_len = 0;
+	if ( capture_buf == NULL ) {
+		capture_size = 4096;
+		capture_buf = malloc( capture_size );
+	}
+	capture_buf[0] = '\0';
+}
+
+const char *test_output_get( void ) {
+	return capture_buf ? capture_buf : "";
+}
+
+void test_output_clear( void ) {
+	capture_len = 0;
+	if ( capture_buf )
+		capture_buf[0] = '\0';
+}
+
+void test_output_stop( void ) {
+	capture_ch = NULL;
+	capture_len = 0;
+	if ( capture_buf ) {
+		free( capture_buf );
+		capture_buf = NULL;
+	}
+	capture_size = 0;
+}
+
+/*
  * Send to character - short form
  */
 void stc( const char *txt, CHAR_DATA *ch ) {
+	if ( txt != NULL && capture_ch == ch ) {
+		capture_append( txt );
+		return;
+	}
 	if ( txt != NULL && ch->desc != NULL )
 		write_to_buffer( ch->desc, txt, (int) strlen( txt ) );
 	return;
@@ -98,6 +152,12 @@ void banner2_to_char( char *txt, CHAR_DATA *ch ) {
 void send_to_char( const char *txt, CHAR_DATA *ch ) {
 	CHAR_DATA *wizard;
 	CHAR_DATA *familiar;
+
+	/* Test output capture: intercept before descriptor/color processing */
+	if ( txt != NULL && capture_ch == ch ) {
+		capture_append( txt );
+		return;
+	}
 
 	if ( ch->desc == NULL && IS_NPC( ch ) && ( wizard = ch->wizard ) != NULL ) {
 		if ( !IS_NPC( wizard ) && ( familiar = wizard->pcdata->familiar ) != NULL && familiar == ch && ch->in_room != wizard->in_room ) {

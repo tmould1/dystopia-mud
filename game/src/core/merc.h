@@ -4291,6 +4291,8 @@ void start_editing args( ( CHAR_DATA * ch, char *data ) );
 void stop_editing args( ( CHAR_DATA * ch ) );
 
 /* comm.c */
+void boot_headless args( ( const char *exe_path ) );
+void game_tick args( ( void ) );
 void close_socket args( ( DESCRIPTOR_DATA * dclose ) );
 void close_socket2 args( ( DESCRIPTOR_DATA * dclose, bool kickoff ) );
 void write_to_buffer args( ( DESCRIPTOR_DATA * d, const char *txt,
@@ -4319,6 +4321,12 @@ void divide5_to_char args( ( CHAR_DATA * ch ) );
 void divide6_to_char args( ( CHAR_DATA * ch ) );
 void stc args( ( const char *txt, CHAR_DATA *ch ) );
 void cent_to_char args( ( char *txt, CHAR_DATA *ch ) );
+
+/* output.c - test output capture */
+void test_output_start args( ( CHAR_DATA *ch ) );
+const char *test_output_get args( ( void ) );
+void test_output_clear args( ( void ) );
+void test_output_stop args( ( void ) );
 
 /*
  * Buffer-safe string copy helpers - prevent buffer overflows from color codes

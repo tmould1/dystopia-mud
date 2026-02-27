@@ -244,7 +244,9 @@ bool write_to_descriptor_2 args( ( int desc, char *txt, int length ) );
 bool check_reconnect args( ( DESCRIPTOR_DATA * d, char *name, bool fConn ) );
 bool check_kickoff args( ( DESCRIPTOR_DATA * d, char *name, bool fConn ) );
 bool check_playing args( ( DESCRIPTOR_DATA * d, char *name ) );
+#ifndef TEST_BUILD
 int main args( ( int argc, char **argv ) );
+#endif
 void nanny args( ( DESCRIPTOR_DATA * d, char *argument ) );
 bool process_output args( ( DESCRIPTOR_DATA * d, bool fPrompt ) );
 void read_from_buffer args( ( DESCRIPTOR_DATA * d ) );
@@ -302,6 +304,50 @@ SOCKET copyover_client_sockets[256];
 int    copyover_client_count = 0;
 #endif
 
+/*
+ * Initialize the game engine without opening network sockets.
+ * Suitable for test harnesses and offline tools.
+ * Sets up paths, time, memory, RNG, and loads the game database.
+ */
+void boot_headless( const char *exe_path ) {
+	struct timeval now_time;
+
+#if defined( WIN32 )
+	setvbuf( stderr, NULL, _IONBF, 0 );
+	setvbuf( stdout, NULL, _IONBF, 0 );
+	{
+		extern pthread_mutex_t memory_mutex;
+		InitializeCriticalSection( &memory_mutex );
+	}
+#else
+	{
+		extern pthread_mutex_t memory_mutex;
+		pthread_mutexattr_t attr;
+		pthread_mutexattr_init( &attr );
+		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE );
+		pthread_mutex_init( &memory_mutex, &attr );
+		pthread_mutexattr_destroy( &attr );
+	}
+#endif
+
+	mud_init_paths( exe_path );
+
+	gettimeofday( &now_time, NULL );
+	current_time = (time_t) now_time.tv_sec;
+	boot_time = current_time;
+	strcpy( str_boot_time, ctime( &current_time ) );
+	sprintf( crypt_pwd, "Don't bother." );
+
+	if ( ( fpReserve = fopen( NULL_FILE, "r" ) ) == NULL ) {
+		perror( NULL_FILE );
+		exit( 1 );
+	}
+
+	boot_db( FALSE );
+	arena = FIGHT_OPEN;
+}
+
+#ifndef TEST_BUILD
 int main( int argc, char **argv ) {
 	struct timeval now_time;
 	bool fCopyOver = FALSE;
@@ -515,6 +561,7 @@ int main( int argc, char **argv ) {
 	exit( 0 );
 	return 0;
 }
+#endif /* TEST_BUILD */
 
 int init_socket( int port ) {
 	static struct sockaddr_in sa_zero;
@@ -616,6 +663,15 @@ void excessive_cpu( int blx ) {
 		}
 	}
 	exit( 1 );
+}
+
+/*
+ * One pulse of autonomous game updates, decoupled from I/O.
+ * Called by game_loop() each pulse, and directly by test harnesses.
+ */
+void game_tick( void ) {
+	update_handler();
+	log_flush();
 }
 
 void game_loop( int control ) {
@@ -765,12 +821,7 @@ void game_loop( int control ) {
 		/*
 		 * Autonomous game motion.
 		 */
-		update_handler();
-
-		/*
-		 * Flush log buffer once per pulse instead of on every log_string() call.
-		 */
-		log_flush();
+		game_tick();
 
 		/*
 		 * Output.

@@ -6,16 +6,17 @@
 
 [INFLIGHT]
 
-25) Redesign the initial connection experience to match modern game bootup feel. determine client capabilities behind the scenes; then pick stylized versions of the messages sent based on those capabilities, then send an intro flow to the player that brings them from the world of just having opened a mudclient into the world of dystopia.
+27) what other structural improvements.  How much is original diku/smaug/godwars/dystopia code vs dystopia+.  at what point has the code been ship of theseus'd into something new?  What more should change to support more modern approaches? How could we support a testing harness?
+
+24) MudEditor Design and QoL Pass
 
 [SOON]
 
 
 [NMI]
 
-24) MudEditor Design and QoL Pass
 
-27) what other structural improvements.  How much is original diku/smaug/godwars/dystopia code vs dystopia+.  at what point has the code been ship of theseus'd into something new?  How could we support a testing harness?
+
 
 [POSTPONED]
 

@@ -1,0 +1,40 @@
+#!/bin/bash
+# Pre-push hook: builds and runs unit tests before pushing.
+#
+# Install with:
+#   git config core.hooksPath .githooks
+#
+# Skip with:
+#   git push --no-verify
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+echo ""
+echo "=== Pre-push: Building and running unit tests ==="
+echo ""
+
+# Check if game has been built (object files exist)
+if [ ! -d "$REPO_ROOT/game/build/linux/obj" ]; then
+    echo "Game object files not found. Building game first..."
+    cd "$REPO_ROOT/game/build"
+    make -j$(nproc) -f Makefile
+fi
+
+cd "$REPO_ROOT/game/tests"
+make clean && make
+./run_tests
+
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+    echo ""
+    echo "=== TESTS FAILED - push aborted ==="
+    echo "Fix failing tests before pushing, or use: git push --no-verify"
+    echo ""
+    exit 1
+fi
+
+echo ""
+echo "=== All tests passed ==="
+echo ""
