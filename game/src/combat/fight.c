@@ -32,7 +32,6 @@
 #include "../systems/mcmp.h"
 #include "../systems/profile.h"
 
-#define MAX_SLAY_TYPES 3
 #define MONK_AUTODROP  12
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];

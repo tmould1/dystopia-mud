@@ -120,67 +120,13 @@ static void make_who_banner( CHAR_DATA *ch, char *buf, size_t bufsize, const cha
 	strncat( buf, "#n\n\r", bufsize - strlen( buf ) - 1 );
 }
 
-char *const where_name[] =
-	{
-		"#R[#CLight#R         ]#n ",
-		"#R[#COn Finger     #R]#n ",
-		"#R[#COn Finger     #R]#n ",
-		"#R[#CAround Neck   #R]#n ",
-		"#R[#CAround Neck   #R]#n ",
-		"#R[#COn Body       #R]#n ",
-		"#R[#COn Head       #R]#n ",
-		"#R[#COn Legs       #R]#n ",
-		"#R[#COn Feet       #R]#n ",
-		"#R[#COn Hands      #R]#n ",
-		"#R[#COn Arms       #R]#n ",
-		"#R[#COff Hand      #R]#n ",
-		"#R[#CAround Body   #R]#n ",
-		"#R[#CAround Waist  #R]#n ",
-		"#R[#CAround Wrist  #R]#n ",
-		"#R[#CAround Wrist  #R]#n ",
-		"#R[#CRight Hand    #R]#n ",
-		"#R[#CLeft Hand     #R]#n ",
-		"#R[#CThird Hand    #R]#n ",
-		"#R[#CFourth Hand   #R]#n ",
-		"#R[#COn Face       #R]#n ",
-		"#R[#CLeft Scabbard #R]#n ",
-		"#R[#CRight Scabbard#R]#n ",
-		"#R[#CSpecial       #R]#n ",
-		"#R[#CFloating      #R]#n ",
-		"#R[#CMedal         #R]#n ",
-		"#R[#CBodyart       #R]#n ",
-};
-
-char *const where_name_sr[] =
-	{
-		"Light: ",
-		"On Finger: ",
-		"On Finger: ",
-		"Around Neck: ",
-		"Around Neck: ",
-		"On Body: ",
-		"On Head: ",
-		"On Legs: ",
-		"On Feet: ",
-		"On Hands: ",
-		"On Arms: ",
-		"Off Hand: ",
-		"Around Body: ",
-		"Around Waist: ",
-		"Around Wrist: ",
-		"Around Wrist: ",
-		"Right Hand: ",
-		"Left Hand: ",
-		"Third Hand: ",
-		"Fourth Hand: ",
-		"On Face: ",
-		"Left Scabbard: ",
-		"Right Scabbard: ",
-		"Special: ",
-		"Floating: ",
-		"Medal: ",
-		"Bodyart: ",
-};
+/*
+ * Equipment wear location display strings.
+ * Populated from tables.db at boot time by db_tables_load_wear_locations().
+ * To modify, edit gamedata/db/game/tables.db.
+ */
+char *where_name[MAX_WEAR] = { NULL };
+char *where_name_sr[MAX_WEAR] = { NULL };
 
 const char *exitname[6] =
 	{
@@ -2575,17 +2521,13 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 	return;
 }
 
-char *const day_name[] =
-	{
-		"the Moon", "the Bull", "Deception", "Thunder", "Freedom",
-		"the Great Gods", "the Sun" };
-
-char *const month_name[] =
-	{
-		"Winter", "the Winter Wolf", "the Frost Giant", "the Old Forces",
-		"the Grand Struggle", "the Spring", "Nature", "Futility", "the Dragon",
-		"the Sun", "the Heat", "the Battle", "the Dark Shades", "the Shadows",
-		"the Long Shadows", "the Ancient Darkness", "the Great Evil" };
+/*
+ * Calendar names.
+ * Populated from tables.db at boot time by db_tables_load_calendar().
+ * To modify, edit gamedata/db/game/tables.db.
+ */
+char *day_name[35] = { NULL };
+char *month_name[35] = { NULL };
 
 void do_time( CHAR_DATA *ch, char *argument ) {
 	extern char str_boot_time[];

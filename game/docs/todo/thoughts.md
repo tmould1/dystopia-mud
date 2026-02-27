@@ -6,6 +6,9 @@
 
 [INFLIGHT]
 
+27) is merc.h a datatable or set of data tables?  What could we convert to using an extension of the sql db system?
+
+25) Redesign the initial connection experience to match modern game bootup feel. determine client capabilities behind the scenes; then pick stylized versions of the messages sent based on those capabilities, then send an intro flow to the player that brings them from the world of just having opened a mudclient into the world of dystopia.
 
 [SOON]
 
@@ -17,10 +20,9 @@
 
 14) Active audio display to detect when sounds are being erroneously triggered.
 
-22) MudEdit: remove fallback dictionary in repository.py ~line 34
-
-23) class-data global structs to avoid common function allocations
-
 24) MudEditor Design and QoL Pass
 
-25) Redesign the intro screen experience. determine client capabilities; then pick stylized versions, send.
+
+
+26) a testing harness
+

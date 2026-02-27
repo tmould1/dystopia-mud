@@ -1153,3 +1153,65 @@ class ClassRegistryRepository(BaseRepository):
         return [dict(row) for row in rows]
 
 
+# =============================================================================
+# tables.db Repositories (game reference data)
+# =============================================================================
+
+class SocialsRepository(BaseRepository):
+    """Repository for socials table - social command messages."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'socials', 'name')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        return super().list_all(order_by or 'name')
+
+
+class SlaysRepository(BaseRepository):
+    """Repository for slays table - immortal slay messages."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'slays', 'id')
+
+
+class LiquidsRepository(BaseRepository):
+    """Repository for liquids table - liquid properties."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'liquids', 'id')
+
+
+class WearLocationsRepository(BaseRepository):
+    """Repository for wear_locations table - equipment slot display strings."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'wear_locations', 'slot_id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        return super().list_all(order_by or 'slot_id')
+
+
+class CalendarRepository(BaseRepository):
+    """Repository for calendar table - in-game day and month names."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'calendar', 'idx')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        return super().list_all(order_by or 'type, idx')
+
+    def get_days(self) -> List[Dict]:
+        """Get all day names in order."""
+        rows = self.conn.execute(
+            "SELECT * FROM calendar WHERE type = 'day' ORDER BY idx"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_months(self) -> List[Dict]:
+        """Get all month names in order."""
+        rows = self.conn.execute(
+            "SELECT * FROM calendar WHERE type = 'month' ORDER BY idx"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+

@@ -29,6 +29,7 @@
 #include "../db/db_sql.h"
 #include "../db/db_game.h"
 #include "../db/db_player.h"
+#include "../db/db_tables.h"
 
 /*
  * Path management - allows executable to run from any directory
@@ -444,6 +445,7 @@ void boot_db( bool fCopyOver ) {
 	 */
 	db_game_init();
 	db_class_init();
+	db_tables_init();
 	db_game_load_helps();
 
 	/*
@@ -513,6 +515,12 @@ void boot_db( bool fCopyOver ) {
 		db_class_build_vnum_ranges();  /* Build vnum ranges for equipment restrictions */
 		db_class_load_starting();
 		db_class_load_score();
+		db_tables_load_socials();
+		db_tables_load_slays();
+		db_tables_load_liquids();
+		db_tables_load_wear_locations();
+		db_tables_load_calendar();
+		db_tables_close();
 		db_game_close_boot_connections();
 	}
 

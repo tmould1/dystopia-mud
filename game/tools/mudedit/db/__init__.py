@@ -7,7 +7,9 @@ from .repository import (
     KeyValueRepository, GameConfigRepository, BalanceConfigRepository,
     AbilityConfigRepository, KingdomsRepository, BansRepository,
     DisabledCommandsRepository, TopBoardRepository, LeaderboardRepository,
-    NotesRepository, BugsRepository, PlayerRepository
+    NotesRepository, BugsRepository, PlayerRepository,
+    SocialsRepository, SlaysRepository, LiquidsRepository,
+    WearLocationsRepository, CalendarRepository,
 )
 
 __all__ = [
@@ -33,4 +35,9 @@ __all__ = [
     'NotesRepository',
     'BugsRepository',
     'PlayerRepository',
+    'SocialsRepository',
+    'SlaysRepository',
+    'LiquidsRepository',
+    'WearLocationsRepository',
+    'CalendarRepository',
 ]

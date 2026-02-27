@@ -23,7 +23,9 @@ from .db.repository import (
     PlayerRepository,
     ClassBracketsRepository, ClassGenerationsRepository, ClassAurasRepository,
     ClassArmorConfigRepository, ClassArmorPiecesRepository, ClassStartingRepository,
-    ClassScoreStatsRepository, ClassRegistryRepository
+    ClassScoreStatsRepository, ClassRegistryRepository,
+    SocialsRepository, SlaysRepository, LiquidsRepository,
+    WearLocationsRepository, CalendarRepository,
 )
 from .nav.tree import NavigationTree
 from .panels import (
@@ -33,7 +35,8 @@ from .panels import (
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
     PlayerEditorPanel, ClassDisplayPanel, ClassAuraPanel, ClassEquipmentPanel,
-    ClassStartingPanel, ClassScorePanel, ClassRegistryPanel
+    ClassStartingPanel, ClassScorePanel, ClassRegistryPanel,
+    SocialsPanel, SlaysPanel, LiquidsPanel, WearLocationsPanel, CalendarPanel,
 )
 
 
@@ -125,6 +128,7 @@ class MudEditorApp:
                  "  - Areas: Edit rooms, mobiles, objects, and resets\n"
                  "  - Game Config: Edit server configuration (game.db)\n"
                  "  - Class Config: Edit class configuration (class.db)\n"
+                 "  - Reference Tables: Socials, slays, liquids, wear slots, calendar (tables.db)\n"
                  "  - Players: View player data (read-only recommended)",
             justify=tk.LEFT,
             font=('Consolas', 11)
@@ -485,6 +489,41 @@ class MudEditorApp:
                     "This editor is not yet implemented."
                 )
 
+        elif category == 'tables':
+            conn = self.db_manager.get_connection(db_path)
+
+            if entity_type == 'socials':
+                repository = SocialsRepository(conn)
+                return SocialsPanel(
+                    self.notebook, repository, on_status=self._set_status)
+
+            elif entity_type == 'slays':
+                repository = SlaysRepository(conn)
+                return SlaysPanel(
+                    self.notebook, repository, on_status=self._set_status)
+
+            elif entity_type == 'liquids':
+                repository = LiquidsRepository(conn)
+                return LiquidsPanel(
+                    self.notebook, repository, on_status=self._set_status)
+
+            elif entity_type == 'wear_locations':
+                repository = WearLocationsRepository(conn)
+                return WearLocationsPanel(
+                    self.notebook, repository, on_status=self._set_status)
+
+            elif entity_type == 'calendar':
+                repository = CalendarRepository(conn)
+                return CalendarPanel(
+                    self.notebook, repository, on_status=self._set_status)
+
+            else:
+                return self._create_placeholder_panel(
+                    f"Reference Table: {entity_type}",
+                    f"Table: {entity_type}\n\n"
+                    "This editor is not yet implemented."
+                )
+
         elif category == 'player':
             conn = self.db_manager.get_connection(db_path)
             repository = PlayerRepository(conn)
@@ -543,6 +582,15 @@ class MudEditorApp:
                 'disabled_commands': 'Disabled Cmds',
                 'super_admins': 'Super Admins',
                 'immortal_pretitles': 'Imm Pretitles',
+            }
+            return names.get(entity_type, entity_type.title())
+        elif category == 'tables':
+            names = {
+                'socials': 'Socials',
+                'slays': 'Slays',
+                'liquids': 'Liquids',
+                'wear_locations': 'Wear Locations',
+                'calendar': 'Calendar',
             }
             return names.get(entity_type, entity_type.title())
         elif category == 'player':

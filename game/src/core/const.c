@@ -21,8 +21,6 @@
 #include <time.h>
 #include "merc.h"
 
-#define MAX_SLAY_TYPES 6
-
 /*
  * Attribute bonus tables.
  */
@@ -228,29 +226,12 @@ const struct con_app_type con_app[36] =
 
 /*
  * Liquid properties.
- * Used in world.obj.
+ * Populated from tables.db at boot time by db_tables_load_liquids().
+ * To modify, edit gamedata/db/game/tables.db.
  */
-const struct liq_type liq_table[LIQ_MAX] =
+struct liq_type liq_table[LIQ_MAX] =
 	{
-		{ "water", "clear", { 0, 1, 10 } }, /*  0 */
-		{ "beer", "amber", { 3, 2, 5 } },
-		{ "wine", "rose", { 5, 2, 5 } },
-		{ "ale", "brown", { 2, 2, 5 } },
-		{ "dark ale", "dark", { 1, 2, 5 } },
-
-		{ "whisky", "golden", { 6, 1, 4 } }, /*  5 */
-		{ "lemonade", "pink", { 0, 1, 8 } },
-		{ "firebreather", "boiling", { 10, 0, 0 } },
-		{ "local specialty", "everclear", { 3, 3, 3 } },
-		{ "slime mold juice", "green", { 0, 4, -8 } },
-
-		{ "milk", "white", { 0, 3, 6 } }, /* 10 */
-		{ "tea", "tan", { 0, 1, 6 } },
-		{ "coffee", "black", { 0, 1, 6 } },
-		{ "blood", "red", { 0, 0, 5 } },
-		{ "salt water", "clear", { 0, 1, -2 } },
-
-		{ "cola", "cherry", { 0, 1, 5 } } /* 15 */
+		{ "", "", { 0, 0, 0 } }
 };
 
 /*
@@ -1272,88 +1253,17 @@ const struct skill_type skill_table[MAX_SKILL] =
 			NULL, "Your paradox fades." },
 };
 
-/* "slay_type" for use with new slay command. [lvl58+]
-	The _msg strings are parsed through the "act" function,
-	instead of "send_to_char", so the following macros may be used:
-
-	$t  Result is the 'arg1' argument interpreted as a string.
-
-	$T  Result is the 'arg2' argument interpreted as a string.
-
-	$n  Result is the name of 'ch'.  If 'ch' is not visible to the target
-		character, result is the string 'someone'.
-
-	$N  Result is the name of 'arg2' (considered as a victim).  If 'arg2'
-	is not visible to the target character, result is the string
-		'someone'.
-
-	$e  Result is 'he', 'she', or 'it', depending on the sex of 'ch'.
-
-	$E  Result is 'he', 'she', or 'it', depending on the sex of 'arg2'
-		(considered as a victim).
-
-	$m  Result is 'him', 'her', or 'it', depending on the sex of 'ch'.
-	$M  Result is 'him', 'her', or 'it', depending on the sex of 'arg2'
-		(considered as a victim).
-
-	$s  Result is 'his', 'her', or 'its', depending on the sex of 'ch'.
-
-	$S  Result is 'his', 'her', or 'its', depending on the sex of 'arg2'
-		(considered as a victim).
-
-	$p  Result is the short description of 'arg1' (considered as an
-	object).
-		If 'arg1' is invisible to the target character, result is the
-	string 'something'.
-
-	$P  Result is the short description of 'arg2' (considered as an
-	object). If 'arg2' is invisible to the target character, result is the
-	string 'something'.
-
-	$d  Result is the first word in 'arg2', considered as a string.  If
-	'arg2' is NULL, result is the string 'door'.  This is meant for
-	extracting the name from a door's keyword list, but may be used in
-	general for other keyword lists.
-
-*/
-
+/*
+ * Slay table.
+ * Populated from tables.db at boot time by db_tables_load_slays().
+ * To modify, edit gamedata/db/game/tables.db.
+ */
 struct slay_type slay_table[MAX_SLAY_TYPES] =
 	{
-		/* owner        title           char_msg        vict_msg        room_msg */
-		{
-			"",
-			"Straight Jacket"
-			"Placing $N in a straight jacket and send them to the insane asylum",
-			"$n places you in a straight jacket, and places you in an insane asylum!"
-			"$n dresses $N in a straight jacket and takes them to an insane asylum!",
-		},
-		{ "",
-			"Kip's balefire",
-			"Siezing Saidin, you blast $N with a bolt of blazing balefire!",
-			"Your vision goes negative as $n's searing bolt of balefire anhilates you!",
-			"$n's blast of balefire rips $N from the pattern!" },
-		{
-			"",
-			"Peanuts",
-			"Chanting in the mystics tongue you conjure a horde up from the peanut gallery to kill $N!",
-			"You hear $n chant in a strange tongue and all of a sudden a huge horde of peanuts rise up to kill you!",
-			"$n chants in a strange tongue and all of a sudden you see a huge horde of peanuts rise up to kill $N!",
-		},
-		{ "",
-			"demon attack",
-			"You gesture, and a slavering demon appears.  With a horrible grin, the foul creature turns on $N, who screams in panic before being eaten alive.",
-			"$n gestures, and a slavering demon appears.  The foul creature turns on you\n\r with a horrible grin.   You scream in panic before being eaten alive.",
-			"$n gestures, and a slavering demon appears.  With a horrible grin, the foul creature turns on $N, who screams in panic before being eaten alive." },
-		{ "",
-			"Elmo",
-			"You start the elmo giggling and give it to $N causing $M to shudder and convulse saying \"kill it, please make it stop!\" and slumps to the ground dead from the giggling.",
-			"$n starts the elmo giggling and gives it to you causing you to shudder and convulse saying \"kill it, please make it stop!\" and slumps to the ground dead from the giggling.",
-			"$n starts the elmo giggling and gives it to $N causing $M to shudder and convulse saying \"kill it, please make it stop!\" and slumps to the ground dead from the giggling." },
-		{ "",
-			"CD",
-			"You fling a razor sharp CD at $N slicing their head clean off.",
-			"$n flings a razor sharp CD at you slicing your head clean off.",
-			"$n flings a razor sharp CD at $N slicing their head clean off." } };
+		{ "", "", "", "", "" }
+};
+
+int slay_count = 0;
 
 /* -----------------------------------------------------------------------
 The following snippet was written by Gary McNickle (dharvest) for
@@ -1394,7 +1304,7 @@ void do_slay( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "\n\rSyntax: slay [who] <type>\n\r", ch );
 		send_to_char( "where type is one of the following...\n\r\n\r", ch );
 
-		for ( i = 0; i < MAX_SLAY_TYPES - 1; i++ )
+		for ( i = 0; i < slay_count; i++ )
 
 			if ( ( slay_table[i].owner == NULL ) ||
 				( !str_prefix( slay_table[i].owner, ch->name ) &&
@@ -1432,7 +1342,7 @@ void do_slay( CHAR_DATA *ch, char *argument ) {
 		return;
 	} else
 
-		for ( i = 0; i < MAX_SLAY_TYPES; i++ ) {
+		for ( i = 0; i < slay_count; i++ ) {
 			if (
 				!str_prefix( type, slay_table[i].title ) &&
 				( slay_table[i].owner == NULL ||

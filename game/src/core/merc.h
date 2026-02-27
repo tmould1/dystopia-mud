@@ -3035,14 +3035,14 @@ struct cmd_type {
  * Structure for a social in the socials table.
  */
 struct social_type {
-	char *const name;
-	char *const char_no_arg;
-	char *const others_no_arg;
-	char *const char_found;
-	char *const others_found;
-	char *const vict_found;
-	char *const char_auto;
-	char *const others_auto;
+	char *name;
+	char *char_no_arg;
+	char *others_no_arg;
+	char *char_found;
+	char *others_found;
+	char *vict_found;
+	char *char_auto;
+	char *others_auto;
 };
 
 /* Removed: xsocial_type structure - xsocial system removed */
@@ -3060,11 +3060,12 @@ extern const struct con_app_type con_app[36];
 extern const struct jope_type jope_table[];
 
 extern const struct cmd_type cmd_table[];
-extern const struct liq_type liq_table[LIQ_MAX];
+extern struct liq_type liq_table[LIQ_MAX];
 extern const struct skill_type skill_table[MAX_SKILL];
 extern const char *discipline[MAX_DISCIPLINES];
 extern const char *wwgift[MAX_GIFTS];
-extern const struct social_type social_table[];
+extern struct social_type social_table[];
+extern int social_count;
 /* Removed: xsocial_table extern - xsocial system removed */
 
 /*
@@ -5011,6 +5012,11 @@ struct slay_type {
 	char *vict_msg; /* is sent to the "slayee" (poor sucker)*/
 	char *room_msg; /* is sent to everyone else in the room */
 };
+
+#define MAX_SLAY_TYPES 16
+
+extern struct slay_type slay_table[];
+extern int slay_count;
 
 /* I am lazy :) */
 #define MSL MAX_STRING_LENGTH

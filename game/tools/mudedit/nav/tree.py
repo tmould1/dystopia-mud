@@ -146,6 +146,20 @@ class NavigationTree(ttk.Frame):
                 node_id = self.tree.insert(class_node, tk.END, text=label)
                 self._node_data[node_id] = ('class', class_db, table_name)
 
+        # Reference Tables (tables.db)
+        tables_node = self.tree.insert('', tk.END, text='Reference Tables', open=False)
+        tables_db = self.db_manager.get_tables_db_path()
+        if tables_db.exists():
+            for table_name, label in [
+                ('socials', 'Socials'),
+                ('slays', 'Slays'),
+                ('liquids', 'Liquids'),
+                ('wear_locations', 'Wear Locations'),
+                ('calendar', 'Calendar'),
+            ]:
+                node_id = self.tree.insert(tables_node, tk.END, text=label)
+                self._node_data[node_id] = ('tables', tables_db, table_name)
+
         # Players
         players_node = self.tree.insert('', tk.END, text='Players', open=False)
         for db_path in self.db_manager.list_player_dbs():
