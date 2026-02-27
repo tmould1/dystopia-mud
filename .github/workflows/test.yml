@@ -1,0 +1,58 @@
+name: Run Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to test on'
+        type: choice
+        options:
+          - both
+          - linux
+          - windows
+        default: both
+
+jobs:
+  test-linux:
+    name: Test (Linux)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.platform == 'both' || github.event.inputs.platform == 'linux' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential zlib1g-dev libcrypt-dev
+
+      - name: Generate Makefile and build game
+        run: |
+          cd game
+          chmod +x build/GenerateProjectFiles.sh
+          bash build/GenerateProjectFiles.sh
+          cd build
+          make -j$(nproc) -f Makefile
+
+      - name: Build and run tests
+        run: |
+          cd game/tests
+          make clean && make
+          ./run_tests
+
+  test-windows:
+    name: Test (Windows)
+    runs-on: windows-latest
+    if: ${{ github.event.inputs.platform == 'both' || github.event.inputs.platform == 'windows' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Generate project files and build game
+        shell: cmd
+        run: |
+          game\build\GenerateProjectFiles.bat
+          msbuild game\build\dystopia.vcxproj /p:Configuration=Release /p:Platform=x64
+
+      - name: Build and run tests
+        shell: cmd
+        run: game\tests\build_tests.bat
