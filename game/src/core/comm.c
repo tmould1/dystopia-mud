@@ -53,6 +53,8 @@
 
 #include "merc.h"
 #include "utf8.h"
+#include "intro.h"
+#include "../systems/ttype.h"
 #include "../systems/charset.h"
 #include "../db/db_game.h"
 #include "../systems/profile.h"
@@ -711,6 +713,15 @@ void game_loop( int control ) {
 			}
 
 			read_from_buffer( d );
+
+			/* Capability detection: tick the intro timer each pulse.
+			 * Telnet responses are parsed by read_from_buffer() above.
+			 * Don't process player input during detection — it stays buffered. */
+			if ( d->connected == CON_DETECT_CAPS ) {
+				intro_check_ready( d );
+				continue;
+			}
+
 			if ( d->incomm[0] != '\0' ) {
 				d->fcommand = TRUE;
 				stop_idling( d->character );
@@ -1010,14 +1021,11 @@ void new_descriptor( int control ) {
 	write_to_descriptor( dnew, (char *) ttype_do, (int) strlen( ttype_do ) );
 	write_to_descriptor( dnew, (char *) charset_will, (int) strlen( charset_will ) );
 
-	/* send greeting */
-	{
-		extern char *help_greeting;
-		if ( help_greeting[0] == '.' )
-			write_to_buffer( dnew, help_greeting + 1, 0 );
-		else
-			write_to_buffer( dnew, help_greeting, 0 );
-	}
+	/* Enter capability detection state.
+	 * Intro will be sent after telnet negotiation completes (or times out).
+	 * See intro_check_ready() called from game_loop(). */
+	dnew->connected = CON_DETECT_CAPS;
+	dnew->intro_pulse = 0;
 
 	return;
 }
@@ -1199,7 +1207,11 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
 			break;
 #endif
 		else {
+#if !defined( WIN32 )
 			perror( "Read_from_descriptor" );
+#else
+			log_string( "Read_from_descriptor: recv error." );
+#endif
 			return FALSE;
 		}
 	}
@@ -1326,6 +1338,7 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 				/* TTYPE - client agrees to send terminal type */
 				else if ( !memcmp( &d->inbuf[i], ttype_will, strlen( ttype_will ) ) ) {
 					i += (int) strlen( ttype_will ) - 1;
+					d->ttype_enabled = TRUE;
 					ttype_request( d ); /* Send first TTYPE SEND */
 				} else if ( !memcmp( &d->inbuf[i], ttype_wont, strlen( ttype_wont ) ) ) {
 					i += (int) strlen( ttype_wont ) - 1;
@@ -1524,7 +1537,8 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 			/* TTYPE - client agrees to send terminal type */
 			else if ( !memcmp( &d->inbuf[i], ttype_will, strlen( ttype_will ) ) ) {
 				i += (int) strlen( ttype_will ) - 1;
-				ttype_request( d ); /* Send first TTYPE SEND */
+				d->ttype_enabled = TRUE;
+					ttype_request( d ); /* Send first TTYPE SEND */
 			} else if ( !memcmp( &d->inbuf[i], ttype_wont, strlen( ttype_wont ) ) ) {
 				i += (int) strlen( ttype_wont ) - 1;
 				d->ttype_enabled = FALSE;
@@ -2087,6 +2101,8 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 	const char *ansi;
 	CHAR_DATA *wch = d->character ? ( d->original ? d->original : d->character ) : NULL;
 	bool use_ansi = ( !wch || IS_NPC( wch ) || IS_SET( wch->act, PLR_ANSI ) );
+	bool can_truecolor = wch ? IS_TRUECOLOR( wch ) : ( ( d->mtts_flags & MTTS_TRUECOLOR ) != 0 );
+	bool can_256color  = wch ? IS_SET( wch->act, PLR_XTERM ) : ( ( d->mtts_flags & MTTS_256_COLORS ) != 0 );
 	bool had_color = FALSE;
 
 	/* clear the output buffer, and set the pointer */
@@ -2206,7 +2222,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 				int g = ( hex_digit( txt[3] ) << 4 ) | hex_digit( txt[4] );
 				int b = ( hex_digit( txt[5] ) << 4 ) | hex_digit( txt[6] );
 				had_color = TRUE;
-				if ( use_ansi && wch && IS_TRUECOLOR( wch ) ) {
+				if ( use_ansi && can_truecolor ) {
 					char tc_buf[24];
 					snprintf( tc_buf, sizeof( tc_buf ), "\033[38;2;%d;%d;%dm", r, g, b );
 					{
@@ -2218,7 +2234,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 							ptr = new_ptr;
 						}
 					}
-				} else if ( use_ansi && wch && IS_SET( wch->act, PLR_XTERM ) ) {
+				} else if ( use_ansi && can_256color ) {
 					int idx = rgb_to_xterm256( r, g, b );
 					char xc_buf[16];
 					snprintf( xc_buf, sizeof( xc_buf ), "\033[38;5;%dm", idx );
@@ -2249,7 +2265,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 				int g = ( hex_digit( txt[3] ) << 4 ) | hex_digit( txt[4] );
 				int b = ( hex_digit( txt[5] ) << 4 ) | hex_digit( txt[6] );
 				had_color = TRUE;
-				if ( use_ansi && wch && IS_TRUECOLOR( wch ) ) {
+				if ( use_ansi && can_truecolor ) {
 					char tc_buf[24];
 					snprintf( tc_buf, sizeof( tc_buf ), "\033[48;2;%d;%d;%dm", r, g, b );
 					{
@@ -2259,7 +2275,7 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 						else
 							ptr = new_ptr;
 					}
-				} else if ( use_ansi && wch && IS_SET( wch->act, PLR_XTERM ) ) {
+				} else if ( use_ansi && can_256color ) {
 					int idx = rgb_to_xterm256( r, g, b );
 					char xc_buf[16];
 					snprintf( xc_buf, sizeof( xc_buf ), "\033[48;5;%dm", idx );
@@ -2463,14 +2479,24 @@ bool write_to_descriptor_2( int desc, char *txt, int length ) {
 		if ( iStart + nBlock < length )
 			nBlock = utf8_truncate( txt + iStart, nBlock );
 #if !defined( WIN32 )
-		if ( ( nWrite = write( desc, txt + iStart, nBlock ) ) < 0 )
-#else
-		if ( ( nWrite = send( desc, txt + iStart, nBlock, 0 ) ) < 0 )
-#endif
-		{
+		if ( ( nWrite = write( desc, txt + iStart, nBlock ) ) < 0 ) {
+			if ( errno == EWOULDBLOCK || errno == EAGAIN ) {
+				nWrite = 0;
+				continue;
+			}
 			perror( "Write_to_descriptor" );
 			return FALSE;
 		}
+#else
+		if ( ( nWrite = send( desc, txt + iStart, nBlock, 0 ) ) < 0 ) {
+			if ( WSAGetLastError() == WSAEWOULDBLOCK ) {
+				nWrite = 0;
+				continue;
+			}
+			log_string( "Write_to_descriptor: send error." );
+			return FALSE;
+		}
+#endif
 	}
 
 	return TRUE;

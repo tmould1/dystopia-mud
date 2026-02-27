@@ -447,6 +447,7 @@ void boot_db( bool fCopyOver ) {
 	db_class_init();
 	db_tables_init();
 	db_game_load_helps();
+	intro_load();
 
 	/*
 	 * Load all areas from SQLite .db files in gamedata/db/areas/.

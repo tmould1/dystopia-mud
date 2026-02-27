@@ -403,6 +403,7 @@ typedef enum {
 #define CON_GET_NEW_GMCP	 21
 #define CON_GET_NEW_MXP		 22
 #define CON_GET_NEW_EXPLEVEL 23
+#define CON_DETECT_CAPS		 24
 
 /*
  * Character substates
@@ -594,6 +595,8 @@ struct descriptor_data {
 	/* charset: client encoding support (RFC 2066) */
 	int  client_charset;     /* CHARSET_UNKNOWN=0, CHARSET_ASCII=1, CHARSET_UTF8=2 */
 	bool charset_negotiated; /* TRUE once charset is determined */
+	/* intro: capability detection timing */
+	int  intro_pulse;        /* Pulses elapsed since connection (for CON_DETECT_CAPS) */
 };
 
 /*
@@ -4614,6 +4617,10 @@ int naws_get_width( CHAR_DATA *ch );
 void ttype_init( DESCRIPTOR_DATA *d );
 void ttype_request( DESCRIPTOR_DATA *d );
 void ttype_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int len );
+
+/* intro.c */
+void intro_load( void );
+void intro_check_ready( DESCRIPTOR_DATA *d );
 
 /* update.c */
 void gain_exp args( ( CHAR_DATA * ch, int gain ) );
