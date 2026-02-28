@@ -33,7 +33,7 @@ void do_destabilize( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( ch->pcdata->stats[PARA_DESTABILIZE_CD] > 0 ) {
-		char buf[MSL];
+		char buf[MAX_STRING_LENGTH];
 		snprintf( buf, sizeof( buf ), "You must wait %d more pulses to destabilize again.\n\r",
 			ch->pcdata->stats[PARA_DESTABILIZE_CD] );
 		send_to_char( buf, ch );
@@ -104,7 +104,7 @@ void do_destabilize( CHAR_DATA *ch, char *argument ) {
  */
 void do_rewind( CHAR_DATA *ch, char *argument ) {
 	int total_heal, i;
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -205,7 +205,7 @@ void do_splittimeline( CHAR_DATA *ch, char *argument ) {
 
 	/* Activate new split */
 	if ( ch->pcdata->powers[PARA_SPLIT_CD] > 0 ) {
-		char buf[MSL];
+		char buf[MAX_STRING_LENGTH];
 		snprintf( buf, sizeof( buf ), "You must wait %d more pulses to split the timeline again.\n\r",
 			ch->pcdata->powers[PARA_SPLIT_CD] );
 		send_to_char( buf, ch );
@@ -237,7 +237,7 @@ void do_splittimeline( CHAR_DATA *ch, char *argument ) {
 void do_convergence( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	int dam, echoes, power_mod;
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -301,7 +301,7 @@ void do_convergence( CHAR_DATA *ch, char *argument ) {
 void do_futurestrike( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	int dam, power_mod;
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -357,7 +357,7 @@ void do_futurestrike( CHAR_DATA *ch, char *argument ) {
  * Implemented as a buff granting extra attacks rather than an actual mob.
  */
 void do_pastself( CHAR_DATA *ch, char *argument ) {
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -403,7 +403,7 @@ void do_pastself( CHAR_DATA *ch, char *argument ) {
  */
 void do_timeloop( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -455,7 +455,7 @@ void do_timeloop( CHAR_DATA *ch, char *argument ) {
 void do_paradoxstrike( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	int dam, power_mod, flux_dev;
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -514,7 +514,7 @@ void do_paradoxstrike( CHAR_DATA *ch, char *argument ) {
 void do_age( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	int power_mod, duration;
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -572,7 +572,7 @@ void do_temporalcollapse( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	CHAR_DATA *vch_next;
 	int dam, power_mod, targets;
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 
 	if ( IS_NPC( ch ) ) return;
 
@@ -665,7 +665,7 @@ void do_eternity( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( ch->pcdata->stats[PARA_ETERNITY_CD] > 0 ) {
-		char buf[MSL];
+		char buf[MAX_STRING_LENGTH];
 		snprintf( buf, sizeof( buf ), "You must wait %d more pulses.\n\r",
 			ch->pcdata->stats[PARA_ETERNITY_CD] );
 		send_to_char( buf, ch );
@@ -694,7 +694,7 @@ void do_eternity( CHAR_DATA *ch, char *argument ) {
  */
 void do_paratrain( CHAR_DATA *ch, char *argument ) {
 	char arg[MAX_INPUT_LENGTH];
-	char buf[MSL];
+	char buf[MAX_STRING_LENGTH];
 	int cost, *train_ptr, max_level;
 	const char *train_name;
 

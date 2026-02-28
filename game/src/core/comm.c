@@ -2565,7 +2565,7 @@ bool write_to_descriptor( DESCRIPTOR_DATA *d, char *txt, int length ) {
 /* gettimeofday for WIN32 is now in compat.c */
 
 void merc_logf( char *fmt, ... ) {
-	char buf[2 * MSL];
+	char buf[2 * MAX_STRING_LENGTH];
 	va_list args;
 	va_start( args, fmt );
 	vsnprintf( buf, sizeof( buf ), fmt, args );

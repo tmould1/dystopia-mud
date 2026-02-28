@@ -477,7 +477,7 @@ char *all_capitalize( const char *str ) {
 }
 
 void add_commas_to_number( int number, char *out_str, size_t buf_size ) {
-	char non_formatted_string[MSL];
+	char non_formatted_string[MAX_STRING_LENGTH];
 
 	if ( buf_size == 0 ) return;
 	out_str[0] = '\0';

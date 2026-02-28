@@ -403,7 +403,7 @@ static int load_helps_from_db( sqlite3 *db ) {
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 		HELP_DATA *pHelp;
 
-		CREATE( pHelp, HELP_DATA, 1 );
+		pHelp = calloc( 1, sizeof( HELP_DATA ) );
 		pHelp->level   = (int)sqlite3_column_int( stmt, 0 );
 		pHelp->keyword = str_dup( col_text( stmt, 1 ) );
 		pHelp->text    = str_dup( col_text( stmt, 2 ) );
@@ -513,7 +513,7 @@ bool db_game_reload_help( const char *keyword ) {
 		if ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 			HELP_DATA *pHelp;
 
-			CREATE( pHelp, HELP_DATA, 1 );
+			pHelp = calloc( 1, sizeof( HELP_DATA ) );
 			pHelp->level   = (int)sqlite3_column_int( stmt, 0 );
 			pHelp->keyword = str_dup( col_text( stmt, 1 ) );
 			pHelp->text    = str_dup( col_text( stmt, 2 ) );

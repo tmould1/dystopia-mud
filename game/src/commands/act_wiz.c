@@ -4391,7 +4391,7 @@ void copyover_recover() {
 	DESCRIPTOR_DATA *d;
 	FILE *fp;
 	char name[100];
-	char host[MSL];
+	char host[MAX_STRING_LENGTH];
 	int desc;
 	bool fOld;
 
@@ -4561,9 +4561,9 @@ void do_implag( CHAR_DATA *ch, char *argument ) {
 }
 
 void do_doublexp( CHAR_DATA *ch, char *argument ) {
-	char arg[MIL];
-	char buf[MSL];
-	char arg2[MIL];
+	char arg[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	char arg2[MAX_INPUT_LENGTH];
 	int time_on = 0;
 
 	argument = one_argument( argument, arg );

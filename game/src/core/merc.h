@@ -2719,26 +2719,6 @@ extern int gsn_multiplearms;
 #define REMOVE_BIT( var, bit ) ( ( var ) &= ~( bit ) )
 #define TOGGLE_BIT( var, bit ) ( ( var ) ^= ( bit ) )
 
-/*
- * Memory allocation macros.
- */
-
-#define CREATE( result, type, number )                                           \
-	do {                                                                         \
-		if ( !( ( result ) = (type *) calloc( ( number ), sizeof( type ) ) ) ) { \
-			perror( "malloc failure" );                                          \
-			abort();                                                             \
-		}                                                                        \
-	} while ( 0 )
-
-#define RECREATE( result, type, number )                                                       \
-	do {                                                                                       \
-		if ( !( ( result ) = (type *) realloc( ( result ), sizeof( type ) * ( number ) ) ) ) { \
-			perror( "realloc failure" );                                                       \
-			abort();                                                                           \
-		}                                                                                      \
-	} while ( 0 )
-
 /* double-linked list handling macros -Thoric */
 
 #define ASSIGN_GSN( gsn, skill )                                  \
@@ -4816,10 +4796,6 @@ struct slay_type {
 
 extern struct slay_type slay_table[];
 extern int slay_count;
-
-/* I am lazy :) */
-#define MSL MAX_STRING_LENGTH
-#define MIL MAX_INPUT_LENGTH
 
 void merc_logf ( char *fmt, ... );
 

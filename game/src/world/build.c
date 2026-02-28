@@ -615,7 +615,7 @@ void start_editing( CHAR_DATA *ch, char *data ) {
 	if ( ch->editor )
 		stop_editing( ch );
 
-	CREATE( edit, EDITOR_DATA, 1 );
+	edit = calloc( 1, sizeof( EDITOR_DATA ) );
 	edit->numlines = 0;
 	edit->on_line = 0;
 	edit->size = 0;
