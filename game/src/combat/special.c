@@ -25,42 +25,42 @@
 /*
  * The following special functions are available for mobiles.
  */
-DECLARE_SPEC_FUN( spec_executioner );
-DECLARE_SPEC_FUN( spec_breath_any );
-DECLARE_SPEC_FUN( spec_breath_acid );
-DECLARE_SPEC_FUN( spec_breath_fire );
-DECLARE_SPEC_FUN( spec_breath_frost );
-DECLARE_SPEC_FUN( spec_breath_gas );
-DECLARE_SPEC_FUN( spec_breath_lightning );
-DECLARE_SPEC_FUN( spec_cast_adept );
-DECLARE_SPEC_FUN( spec_cast_cleric );
-DECLARE_SPEC_FUN( spec_cast_judge );
-DECLARE_SPEC_FUN( spec_cast_mage );
-DECLARE_SPEC_FUN( spec_cast_undead );
-DECLARE_SPEC_FUN( spec_fido );
-DECLARE_SPEC_FUN( spec_guard );
-DECLARE_SPEC_FUN( spec_janitor );
-DECLARE_SPEC_FUN( spec_mayor );
-DECLARE_SPEC_FUN( spec_poison );
-DECLARE_SPEC_FUN( spec_thief );
-DECLARE_SPEC_FUN( spec_eater );
-DECLARE_SPEC_FUN( spec_gremlin_original );
-DECLARE_SPEC_FUN( spec_gremlin_born );
-DECLARE_SPEC_FUN( spec_rogue );
-DECLARE_SPEC_FUN( spec_zombie_lord );
-DECLARE_SPEC_FUN( spec_dog );
-DECLARE_SPEC_FUN( spec_guard_demon );
-DECLARE_SPEC_FUN( spec_guard_vampire );
-DECLARE_SPEC_FUN( spec_guard_werewolf );
-DECLARE_SPEC_FUN( spec_guard_dragon );
-DECLARE_SPEC_FUN( spec_guard_mage );
-DECLARE_SPEC_FUN( spec_guard_drow );
-DECLARE_SPEC_FUN( spec_guard_ninja );
-DECLARE_SPEC_FUN( spec_guard_monk );
-DECLARE_SPEC_FUN( spec_guard_highlander );
-DECLARE_SPEC_FUN( spec_assassin );
-DECLARE_SPEC_FUN( spec_guard_cyborg );
-DECLARE_SPEC_FUN( spec_vladd_decap );
+SPEC_FUN spec_executioner;
+SPEC_FUN spec_breath_any;
+SPEC_FUN spec_breath_acid;
+SPEC_FUN spec_breath_fire;
+SPEC_FUN spec_breath_frost;
+SPEC_FUN spec_breath_gas;
+SPEC_FUN spec_breath_lightning;
+SPEC_FUN spec_cast_adept;
+SPEC_FUN spec_cast_cleric;
+SPEC_FUN spec_cast_judge;
+SPEC_FUN spec_cast_mage;
+SPEC_FUN spec_cast_undead;
+SPEC_FUN spec_fido;
+SPEC_FUN spec_guard;
+SPEC_FUN spec_janitor;
+SPEC_FUN spec_mayor;
+SPEC_FUN spec_poison;
+SPEC_FUN spec_thief;
+SPEC_FUN spec_eater;
+SPEC_FUN spec_gremlin_original;
+SPEC_FUN spec_gremlin_born;
+SPEC_FUN spec_rogue;
+SPEC_FUN spec_zombie_lord;
+SPEC_FUN spec_dog;
+SPEC_FUN spec_guard_demon;
+SPEC_FUN spec_guard_vampire;
+SPEC_FUN spec_guard_werewolf;
+SPEC_FUN spec_guard_dragon;
+SPEC_FUN spec_guard_mage;
+SPEC_FUN spec_guard_drow;
+SPEC_FUN spec_guard_ninja;
+SPEC_FUN spec_guard_monk;
+SPEC_FUN spec_guard_highlander;
+SPEC_FUN spec_assassin;
+SPEC_FUN spec_guard_cyborg;
+SPEC_FUN spec_vladd_decap;
 
 bool spec_vladd_decap( CHAR_DATA *ch ) {
 	char buf[MAX_STRING_LENGTH];
@@ -1696,7 +1696,6 @@ bool spec_clan_guardian(CHAR_DATA *ch)
    CHAR_DATA             *victim;
    char                  buf[MAX_STRING_LENGTH];
    OBJ_DATA              *obj;
-
 
    if (ch->fighting) return FALSE;
 

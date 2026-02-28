@@ -26,7 +26,7 @@
 
 void frost_breath ( CHAR_DATA * ch, CHAR_DATA *victim, bool all );
 void fire_effect ( void *vo, int level, int dam, int target );
-DECLARE_DO_FUN( do_stance );
+DO_FUN do_stance;
 
 void do_deathsense( CHAR_DATA *ch, char *argument ) {
 

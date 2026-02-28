@@ -30,7 +30,6 @@
  * New typedefs.
  */
 typedef bool OLC_FUN ( CHAR_DATA * ch, char *argument );
-#define DECLARE_OLC_FUN( fun ) OLC_FUN fun
 
 /*
  * Connected states for editor.
@@ -102,14 +101,14 @@ bool show_version ( CHAR_DATA * ch, char *argument );
 #define ED_HELP 6
 void hedit ( CHAR_DATA * ch, char *argument );
 extern const struct olc_cmd_type hedit_table[];
-DECLARE_DO_FUN( do_hedit );
-DECLARE_OLC_FUN( hedit_create );
-DECLARE_OLC_FUN( hedit_level );
-DECLARE_OLC_FUN( hedit_keyword );
-DECLARE_OLC_FUN( hedit_text );
-DECLARE_OLC_FUN( hedit_index );
-DECLARE_OLC_FUN( hedit_change );
-DECLARE_OLC_FUN( hedit_delete );
+DO_FUN do_hedit;
+OLC_FUN hedit_create;
+OLC_FUN hedit_level;
+OLC_FUN hedit_keyword;
+OLC_FUN hedit_text;
+OLC_FUN hedit_index;
+OLC_FUN hedit_change;
+OLC_FUN hedit_delete;
 #define EDIT_HELP( Ch, Help ) ( Help = (HELP_DATA *) Ch->desc->pEdit )
 HELP_DATA *new_help_data (void);
 
@@ -121,77 +120,77 @@ void save_area ( AREA_DATA *pArea );
 /*
  * Area Editor Prototypes
  */
-DECLARE_OLC_FUN( aedit_show );
-DECLARE_OLC_FUN( aedit_create );
-DECLARE_OLC_FUN( aedit_name );
-DECLARE_OLC_FUN( aedit_file );
-DECLARE_OLC_FUN( aedit_hidden );
-DECLARE_OLC_FUN( aedit_age );
-DECLARE_OLC_FUN( aedit_recall );
-DECLARE_OLC_FUN( aedit_reset );
-DECLARE_OLC_FUN( aedit_security );
-DECLARE_OLC_FUN( aedit_builder );
-DECLARE_OLC_FUN( aedit_vnum );
-DECLARE_OLC_FUN( aedit_lvnum );
-DECLARE_OLC_FUN( aedit_uvnum );
+OLC_FUN aedit_show;
+OLC_FUN aedit_create;
+OLC_FUN aedit_name;
+OLC_FUN aedit_file;
+OLC_FUN aedit_hidden;
+OLC_FUN aedit_age;
+OLC_FUN aedit_recall;
+OLC_FUN aedit_reset;
+OLC_FUN aedit_security;
+OLC_FUN aedit_builder;
+OLC_FUN aedit_vnum;
+OLC_FUN aedit_lvnum;
+OLC_FUN aedit_uvnum;
 
 /*
  * Room Editor Prototypes
  */
-DECLARE_OLC_FUN( redit_show );
-DECLARE_OLC_FUN( redit_create );
-DECLARE_OLC_FUN( redit_name );
-DECLARE_OLC_FUN( redit_desc );
-DECLARE_OLC_FUN( redit_ed );
-DECLARE_OLC_FUN( redit_format );
-DECLARE_OLC_FUN( redit_north );
-DECLARE_OLC_FUN( redit_south );
-DECLARE_OLC_FUN( redit_east );
-DECLARE_OLC_FUN( redit_west );
-DECLARE_OLC_FUN( redit_up );
-DECLARE_OLC_FUN( redit_down );
-DECLARE_OLC_FUN( redit_move );
-DECLARE_OLC_FUN( redit_mreset );
-DECLARE_OLC_FUN( redit_oreset );
-DECLARE_OLC_FUN( redit_mlist );
-DECLARE_OLC_FUN( redit_olist );
-DECLARE_OLC_FUN( redit_mshow );
-DECLARE_OLC_FUN( redit_oshow );
+OLC_FUN redit_show;
+OLC_FUN redit_create;
+OLC_FUN redit_name;
+OLC_FUN redit_desc;
+OLC_FUN redit_ed;
+OLC_FUN redit_format;
+OLC_FUN redit_north;
+OLC_FUN redit_south;
+OLC_FUN redit_east;
+OLC_FUN redit_west;
+OLC_FUN redit_up;
+OLC_FUN redit_down;
+OLC_FUN redit_move;
+OLC_FUN redit_mreset;
+OLC_FUN redit_oreset;
+OLC_FUN redit_mlist;
+OLC_FUN redit_olist;
+OLC_FUN redit_mshow;
+OLC_FUN redit_oshow;
 
 /*
  * Object Editor Prototypes
  */
-DECLARE_OLC_FUN( oedit_show );
-DECLARE_OLC_FUN( oedit_create );
-DECLARE_OLC_FUN( oedit_name );
-DECLARE_OLC_FUN( oedit_short );
-DECLARE_OLC_FUN( oedit_long );
-DECLARE_OLC_FUN( oedit_addaffect );
-DECLARE_OLC_FUN( oedit_delaffect );
-DECLARE_OLC_FUN( oedit_value0 );
-DECLARE_OLC_FUN( oedit_value1 );
-DECLARE_OLC_FUN( oedit_value2 );
-DECLARE_OLC_FUN( oedit_value3 );
-DECLARE_OLC_FUN( oedit_weight );
-DECLARE_OLC_FUN( oedit_cost );
-DECLARE_OLC_FUN( oedit_ed );
+OLC_FUN oedit_show;
+OLC_FUN oedit_create;
+OLC_FUN oedit_name;
+OLC_FUN oedit_short;
+OLC_FUN oedit_long;
+OLC_FUN oedit_addaffect;
+OLC_FUN oedit_delaffect;
+OLC_FUN oedit_value0;
+OLC_FUN oedit_value1;
+OLC_FUN oedit_value2;
+OLC_FUN oedit_value3;
+OLC_FUN oedit_weight;
+OLC_FUN oedit_cost;
+OLC_FUN oedit_ed;
 
 /*
  * Mobile Editor Prototypes
  */
-DECLARE_OLC_FUN( medit_show );
-DECLARE_OLC_FUN( medit_create );
-DECLARE_OLC_FUN( medit_name );
-DECLARE_OLC_FUN( medit_short );
-DECLARE_OLC_FUN( medit_long );
-DECLARE_OLC_FUN( medit_shop );
-DECLARE_OLC_FUN( medit_desc );
-DECLARE_OLC_FUN( medit_level );
-DECLARE_OLC_FUN( medit_align );
-DECLARE_OLC_FUN( medit_spec );
-DECLARE_OLC_FUN( medit_value0 );
-DECLARE_OLC_FUN( medit_value1 );
-DECLARE_OLC_FUN( medit_value2 );
+OLC_FUN medit_show;
+OLC_FUN medit_create;
+OLC_FUN medit_name;
+OLC_FUN medit_short;
+OLC_FUN medit_long;
+OLC_FUN medit_shop;
+OLC_FUN medit_desc;
+OLC_FUN medit_level;
+OLC_FUN medit_align;
+OLC_FUN medit_spec;
+OLC_FUN medit_value0;
+OLC_FUN medit_value1;
+OLC_FUN medit_value2;
 
 /*
  * Macros

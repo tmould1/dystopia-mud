@@ -68,8 +68,8 @@ void handle_con_note_finish( DESCRIPTOR_DATA *d, char *argument );
 
 /* Commands */
 
-DECLARE_DO_FUN( do_note );
-DECLARE_DO_FUN( do_board );
+DO_FUN do_note;
+DO_FUN do_board;
 
 #define BOLD	 "#7"
 #define NO_COLOR "#n"
