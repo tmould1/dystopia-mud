@@ -408,7 +408,7 @@ void pedit_identity( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
             return;
         }
         if ( victim->pcdata->title )
-            free_string( victim->pcdata->title );
+            free(victim->pcdata->title);
         victim->pcdata->title = str_dup( arg2 );
         send_to_char( "Title set.\n\r", ch );
         return;
@@ -456,7 +456,7 @@ void pedit_identity( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
 
     if ( !str_cmp( arg1, "clan" ) ) {
         if ( victim->clan )
-            free_string( victim->clan );
+            free(victim->clan);
         victim->clan = str_dup( arg2 );
         send_to_char( "Clan set.\n\r", ch );
         return;
@@ -966,17 +966,17 @@ void pedit_strings( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
 
     if ( !str_cmp( arg1, "bamfin" ) ) {
         if ( victim->pcdata->bamfin )
-            free_string( victim->pcdata->bamfin );
+            free(victim->pcdata->bamfin);
         victim->pcdata->bamfin = str_dup( arg2 );
         send_to_char( "Bamfin set.\n\r", ch );
     } else if ( !str_cmp( arg1, "bamfout" ) ) {
         if ( victim->pcdata->bamfout )
-            free_string( victim->pcdata->bamfout );
+            free(victim->pcdata->bamfout);
         victim->pcdata->bamfout = str_dup( arg2 );
         send_to_char( "Bamfout set.\n\r", ch );
     } else if ( !str_cmp( arg1, "title" ) ) {
         if ( victim->pcdata->title )
-            free_string( victim->pcdata->title );
+            free(victim->pcdata->title);
         victim->pcdata->title = str_dup( arg2 );
         send_to_char( "Title set.\n\r", ch );
     } else {

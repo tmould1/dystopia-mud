@@ -153,41 +153,41 @@
  * ========================================================================= */
 
 /* Shared command */
-void do_tether          args( ( CHAR_DATA *ch, char *argument ) );
+void do_tether          ( CHAR_DATA *ch, char *argument );
 
 /* Shaman abilities */
-void do_wardtotem       args( ( CHAR_DATA *ch, char *argument ) );
-void do_wrathtotem      args( ( CHAR_DATA *ch, char *argument ) );
-void do_spirittotem     args( ( CHAR_DATA *ch, char *argument ) );
-void do_spiritbolt      args( ( CHAR_DATA *ch, char *argument ) );
-void do_spiritward      args( ( CHAR_DATA *ch, char *argument ) );
-void do_spiritwalk      args( ( CHAR_DATA *ch, char *argument ) );
-void do_ancestorcall    args( ( CHAR_DATA *ch, char *argument ) );
-void do_spiritsight     args( ( CHAR_DATA *ch, char *argument ) );
-void do_soullink        args( ( CHAR_DATA *ch, char *argument ) );
-void do_spirittrain     args( ( CHAR_DATA *ch, char *argument ) );
-void do_shamanarmor     args( ( CHAR_DATA *ch, char *argument ) );
+void do_wardtotem       ( CHAR_DATA *ch, char *argument );
+void do_wrathtotem      ( CHAR_DATA *ch, char *argument );
+void do_spirittotem     ( CHAR_DATA *ch, char *argument );
+void do_spiritbolt      ( CHAR_DATA *ch, char *argument );
+void do_spiritward      ( CHAR_DATA *ch, char *argument );
+void do_spiritwalk      ( CHAR_DATA *ch, char *argument );
+void do_ancestorcall    ( CHAR_DATA *ch, char *argument );
+void do_spiritsight     ( CHAR_DATA *ch, char *argument );
+void do_soullink        ( CHAR_DATA *ch, char *argument );
+void do_spirittrain     ( CHAR_DATA *ch, char *argument );
+void do_shamanarmor     ( CHAR_DATA *ch, char *argument );
 
 /* Spirit Lord abilities */
-void do_embody          args( ( CHAR_DATA *ch, char *argument ) );
-void do_ancestralform   args( ( CHAR_DATA *ch, char *argument ) );
-void do_spiritfusion    args( ( CHAR_DATA *ch, char *argument ) );
-void do_compel          args( ( CHAR_DATA *ch, char *argument ) );
-void do_possess         args( ( CHAR_DATA *ch, char *argument ) );
-void do_spiritarmy      args( ( CHAR_DATA *ch, char *argument ) );
-void do_soulstorm       args( ( CHAR_DATA *ch, char *argument ) );
-void do_ancestralwisdom args( ( CHAR_DATA *ch, char *argument ) );
-void do_spiritcleanse   args( ( CHAR_DATA *ch, char *argument ) );
-void do_ascension       args( ( CHAR_DATA *ch, char *argument ) );
-void do_lordtrain       args( ( CHAR_DATA *ch, char *argument ) );
-void do_lordarmor       args( ( CHAR_DATA *ch, char *argument ) );
+void do_embody          ( CHAR_DATA *ch, char *argument );
+void do_ancestralform   ( CHAR_DATA *ch, char *argument );
+void do_spiritfusion    ( CHAR_DATA *ch, char *argument );
+void do_compel          ( CHAR_DATA *ch, char *argument );
+void do_possess         ( CHAR_DATA *ch, char *argument );
+void do_spiritarmy      ( CHAR_DATA *ch, char *argument );
+void do_soulstorm       ( CHAR_DATA *ch, char *argument );
+void do_ancestralwisdom ( CHAR_DATA *ch, char *argument );
+void do_spiritcleanse   ( CHAR_DATA *ch, char *argument );
+void do_ascension       ( CHAR_DATA *ch, char *argument );
+void do_lordtrain       ( CHAR_DATA *ch, char *argument );
+void do_lordarmor       ( CHAR_DATA *ch, char *argument );
 
 /* Tether scaling helpers */
-int get_shaman_power_mod args( ( CHAR_DATA *ch, bool is_material ) );
-int get_sl_power_mod     args( ( CHAR_DATA *ch, bool is_material ) );
+int get_shaman_power_mod ( CHAR_DATA *ch, bool is_material );
+int get_sl_power_mod     ( CHAR_DATA *ch, bool is_material );
 
 /* Update functions (called from update.c) */
-void update_shaman      args( ( CHAR_DATA *ch ) );
-void update_spiritlord  args( ( CHAR_DATA *ch ) );
+void update_shaman      ( CHAR_DATA *ch );
+void update_spiritlord  ( CHAR_DATA *ch );
 
 #endif /* SHAMAN_H */

@@ -137,41 +137,41 @@
  * ========================================================================= */
 
 /* Chronomancer abilities */
-void do_flux            args( ( CHAR_DATA *ch, char *argument ) );
-void do_quicken         args( ( CHAR_DATA *ch, char *argument ) );
-void do_timeslip        args( ( CHAR_DATA *ch, char *argument ) );
-void do_blur            args( ( CHAR_DATA *ch, char *argument ) );
-void do_slow            args( ( CHAR_DATA *ch, char *argument ) );
-void do_timetrap        args( ( CHAR_DATA *ch, char *argument ) );
-void do_stasis          args( ( CHAR_DATA *ch, char *argument ) );
-void do_foresight       args( ( CHAR_DATA *ch, char *argument ) );
-void do_hindsight       args( ( CHAR_DATA *ch, char *argument ) );
-void do_temporalecho    args( ( CHAR_DATA *ch, char *argument ) );
-void do_timetrain       args( ( CHAR_DATA *ch, char *argument ) );
+void do_flux            ( CHAR_DATA *ch, char *argument );
+void do_quicken         ( CHAR_DATA *ch, char *argument );
+void do_timeslip        ( CHAR_DATA *ch, char *argument );
+void do_blur            ( CHAR_DATA *ch, char *argument );
+void do_slow            ( CHAR_DATA *ch, char *argument );
+void do_timetrap        ( CHAR_DATA *ch, char *argument );
+void do_stasis          ( CHAR_DATA *ch, char *argument );
+void do_foresight       ( CHAR_DATA *ch, char *argument );
+void do_hindsight       ( CHAR_DATA *ch, char *argument );
+void do_temporalecho    ( CHAR_DATA *ch, char *argument );
+void do_timetrain       ( CHAR_DATA *ch, char *argument );
 
 /* Paradox abilities */
-void do_destabilize     args( ( CHAR_DATA *ch, char *argument ) );
-void do_rewind          args( ( CHAR_DATA *ch, char *argument ) );
-void do_splittimeline   args( ( CHAR_DATA *ch, char *argument ) );
-void do_convergence     args( ( CHAR_DATA *ch, char *argument ) );
-void do_futurestrike    args( ( CHAR_DATA *ch, char *argument ) );
-void do_pastself        args( ( CHAR_DATA *ch, char *argument ) );
-void do_timeloop        args( ( CHAR_DATA *ch, char *argument ) );
-void do_paradoxstrike   args( ( CHAR_DATA *ch, char *argument ) );
-void do_age             args( ( CHAR_DATA *ch, char *argument ) );
-void do_temporalcollapse args( ( CHAR_DATA *ch, char *argument ) );
-void do_eternity        args( ( CHAR_DATA *ch, char *argument ) );
-void do_paratrain       args( ( CHAR_DATA *ch, char *argument ) );
+void do_destabilize     ( CHAR_DATA *ch, char *argument );
+void do_rewind          ( CHAR_DATA *ch, char *argument );
+void do_splittimeline   ( CHAR_DATA *ch, char *argument );
+void do_convergence     ( CHAR_DATA *ch, char *argument );
+void do_futurestrike    ( CHAR_DATA *ch, char *argument );
+void do_pastself        ( CHAR_DATA *ch, char *argument );
+void do_timeloop        ( CHAR_DATA *ch, char *argument );
+void do_paradoxstrike   ( CHAR_DATA *ch, char *argument );
+void do_age             ( CHAR_DATA *ch, char *argument );
+void do_temporalcollapse ( CHAR_DATA *ch, char *argument );
+void do_eternity        ( CHAR_DATA *ch, char *argument );
+void do_paratrain       ( CHAR_DATA *ch, char *argument );
 
 /* Armor wrappers */
-void do_chronoarmor     args( ( CHAR_DATA *ch, char *argument ) );
-void do_paradoxarmor    args( ( CHAR_DATA *ch, char *argument ) );
+void do_chronoarmor     ( CHAR_DATA *ch, char *argument );
+void do_paradoxarmor    ( CHAR_DATA *ch, char *argument );
 
 /* Flux scaling helper */
-int get_chrono_power_mod args( ( CHAR_DATA *ch, bool is_accel ) );
+int get_chrono_power_mod ( CHAR_DATA *ch, bool is_accel );
 
 /* Update functions (called from update.c) */
-void update_chronomancer args( ( CHAR_DATA *ch ) );
-void update_paradox      args( ( CHAR_DATA *ch ) );
+void update_chronomancer ( CHAR_DATA *ch );
+void update_paradox      ( CHAR_DATA *ch );
 
 #endif /* CHRONOMANCER_H */

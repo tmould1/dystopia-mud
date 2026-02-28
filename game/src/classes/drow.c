@@ -533,7 +533,7 @@ void do_spiderform( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "$n morphs back into %s.", GET_PROPER_NAME( ch ) );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		stc( "You return to your normal form.\n\r", ch );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		ch->hitroll -= cfg( CFG_ABILITY_DROW_SPIDERFORM_HITROLL_BONUS );
 		ch->damroll -= cfg( CFG_ABILITY_DROW_SPIDERFORM_DAMROLL_BONUS );
@@ -550,7 +550,7 @@ void do_spiderform( CHAR_DATA *ch, char *argument ) {
 		act( "You mutate into a giant spider.", ch, NULL, NULL, TO_CHAR );
 		act( "$n mutates into a giant spider.", ch, NULL, NULL, TO_ROOM );
 		sprintf( buf, "%s the giant mylochar", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		ch->hitroll += cfg( CFG_ABILITY_DROW_SPIDERFORM_HITROLL_BONUS );
 		ch->damroll += cfg( CFG_ABILITY_DROW_SPIDERFORM_DAMROLL_BONUS );
@@ -801,12 +801,12 @@ void do_glamour( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( arg2, "name" ) ) {
-		free_string( obj->name );
+		free(obj->name);
 		obj->name = str_dup( arg3 );
 		obj->questmaker = str_dup( ch->name );
 	}
 	if ( !str_cmp( arg2, "short" ) ) {
-		free_string( obj->short_descr );
+		free(obj->short_descr);
 		obj->short_descr = str_dup( arg3 );
 		obj->questmaker = str_dup( ch->name );
 	}

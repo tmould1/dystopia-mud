@@ -29,7 +29,7 @@
 
 KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 
-void imm_kset args( ( CHAR_DATA * ch, char *argument ) );
+void imm_kset ( CHAR_DATA * ch, char *argument );
 
 void save_kingdoms() {
 	db_game_save_kingdoms();
@@ -193,7 +193,7 @@ void do_kset( CHAR_DATA *ch, char *argument ) {
 	} else if ( !str_cmp( keyword, "req_move" ) ) {
 		kingdom_table[ch->pcdata->kingdom].req_move = atoi( value );
 	} else if ( !str_cmp( keyword, "general" ) ) {
-		free_string( kingdom_table[ch->pcdata->kingdom].general );
+		free(kingdom_table[ch->pcdata->kingdom].general);
 		kingdom_table[ch->pcdata->kingdom].general = str_dup( value );
 	} else {
 		do_kset( ch, "" );
@@ -229,18 +229,18 @@ void imm_kset( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg2, "leader" ) ) {
-		free_string( kingdom_table[i].leader );
+		free(kingdom_table[i].leader);
 		arg3[0] = UPPER( arg3[0] );
 		kingdom_table[i].leader = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "name" ) ) {
-		free_string( kingdom_table[i].name );
+		free(kingdom_table[i].name);
 		arg3[0] = UPPER( arg3[0] );
 		kingdom_table[i].name = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "whoname" ) ) {
-		free_string( kingdom_table[i].whoname );
+		free(kingdom_table[i].whoname);
 		kingdom_table[i].whoname = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "general" ) ) {
-		free_string( kingdom_table[i].general );
+		free(kingdom_table[i].general);
 		arg3[0] = UPPER( arg3[0] );
 		kingdom_table[i].general = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "kills" ) ) {

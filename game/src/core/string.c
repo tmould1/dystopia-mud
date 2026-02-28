@@ -101,7 +101,7 @@ char *string_replace( char *orig, char *old, char *new ) {
 		xbuf[i] = '\0';
 		strcat( xbuf, new );
 		strcat( xbuf, &orig[i + strlen( old )] );
-		free_string( orig );
+		free(orig);
 	}
 
 	return str_dup( xbuf );
@@ -203,7 +203,7 @@ void string_add( CHAR_DATA *ch, char *argument ) {
 	strcpy( buf, *ch->desc->pString );
 	strcat( buf, argument );
 	strcat( buf, "\n\r" );
-	free_string( *ch->desc->pString );
+	free(*ch->desc->pString);
 	*ch->desc->pString = str_dup( buf );
 	return;
 }
@@ -360,7 +360,7 @@ char *format_string( char *oldstring /*, bool fSpace */ ) {
 	if ( xbuf[strlen( xbuf ) - 2] != '\n' )
 		strcat( xbuf, "\n\r" );
 
-	free_string( oldstring );
+	free(oldstring);
 	return ( str_dup( xbuf ) );
 }
 
@@ -438,7 +438,7 @@ char *string_unpad( char *argument ) {
 		*s = '\0';
 	}
 
-	free_string( argument );
+	free(argument);
 	return str_dup( buf );
 }
 

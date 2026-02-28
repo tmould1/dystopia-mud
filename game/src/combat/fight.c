@@ -42,23 +42,23 @@ void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx );
 /*
  * Local functions.
  */
-void autodrop args( ( CHAR_DATA * ch ) );
-void dropinvis args( ( CHAR_DATA * ch ) );
-bool check_dodge args( ( CHAR_DATA * ch, CHAR_DATA *victim, int dt ) );
-bool check_parry args( ( CHAR_DATA * ch, CHAR_DATA *victim, int dt ) );
-void dam_message args( ( CHAR_DATA * ch, CHAR_DATA *victim, int dam, int dt ) );
-void death_cry args( ( CHAR_DATA * ch ) );
-void group_gain args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-int xp_compute args( ( CHAR_DATA * gch, CHAR_DATA *victim ) );
-void set_fighting args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-bool can_counter args( ( CHAR_DATA * ch ) );
-bool can_bypass args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-int number_attacks args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-int dambonus args( ( CHAR_DATA * ch, CHAR_DATA *victim, int dam, int stance ) );
-void update_damcap args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-void decap_message args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-void angel_eye args( ( CHAR_DATA * ch, CHAR_DATA *victim, int dam ) );
-void ragnarokdecap args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
+void autodrop ( CHAR_DATA * ch );
+void dropinvis ( CHAR_DATA * ch );
+bool check_dodge ( CHAR_DATA * ch, CHAR_DATA *victim, int dt );
+bool check_parry ( CHAR_DATA * ch, CHAR_DATA *victim, int dt );
+void dam_message ( CHAR_DATA * ch, CHAR_DATA *victim, int dam, int dt );
+void death_cry ( CHAR_DATA * ch );
+void group_gain ( CHAR_DATA * ch, CHAR_DATA *victim );
+int xp_compute ( CHAR_DATA * gch, CHAR_DATA *victim );
+void set_fighting ( CHAR_DATA * ch, CHAR_DATA *victim );
+bool can_counter ( CHAR_DATA * ch );
+bool can_bypass ( CHAR_DATA * ch, CHAR_DATA *victim );
+int number_attacks ( CHAR_DATA * ch, CHAR_DATA *victim );
+int dambonus ( CHAR_DATA * ch, CHAR_DATA *victim, int dam, int stance );
+void update_damcap ( CHAR_DATA * ch, CHAR_DATA *victim );
+void decap_message ( CHAR_DATA * ch, CHAR_DATA *victim );
+void angel_eye ( CHAR_DATA * ch, CHAR_DATA *victim, int dam );
+void ragnarokdecap ( CHAR_DATA * ch, CHAR_DATA *victim );
 
 /*
  * Control the fights going on.
@@ -550,8 +550,8 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		act( "You return to your normal form.", ch, NULL, NULL, TO_CHAR );
 		snprintf( buf, sizeof( buf ), "%s reforms as %s.\n\r", ch->morph, ch->name );
 		act( buf, ch, NULL, NULL, TO_ROOM );
-		free_string( ch->morph );
-		free_string( ch->objdesc );
+		free(ch->morph);
+		free(ch->objdesc);
 		ch->long_descr = str_dup( "" );
 		REMOVE_BIT( ch->flag2, VAMP_OBJMASK );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
@@ -3392,10 +3392,10 @@ void make_corpse( CHAR_DATA *ch ) {
 	if ( IS_SET( ch->extra, EXTRA_ZOMBIE ) )
 		SET_BIT( corpse->quest, QUEST_ZOMBIE );
 	snprintf( buf, sizeof(buf), corpse->short_descr, name );
-	free_string( corpse->short_descr );
+	free(corpse->short_descr);
 	corpse->short_descr = str_dup( buf );
 	snprintf( buf, sizeof(buf), corpse->description, name );
-	free_string( corpse->description );
+	free(corpse->description);
 	corpse->description = str_dup( buf );
 	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		obj_from_char( obj );
@@ -3504,18 +3504,18 @@ void make_part( CHAR_DATA *ch, char *argument ) {
 		if ( vnum == OBJ_VNUM_SPILT_BLOOD ) obj->timer = 2;
 		if ( !IS_NPC( ch ) ) {
 			snprintf( buf, sizeof( buf ), obj->name, name );
-			free_string( obj->name );
+			free(obj->name);
 			obj->name = str_dup( buf );
 		} else {
 			snprintf( buf, sizeof( buf ), obj->name, "mob" );
-			free_string( obj->name );
+			free(obj->name);
 			obj->name = str_dup( buf );
 		}
 		snprintf( buf, sizeof( buf ), obj->short_descr, name );
-		free_string( obj->short_descr );
+		free(obj->short_descr);
 		obj->short_descr = str_dup( buf );
 		snprintf( buf, sizeof( buf ), obj->description, name );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 		if ( IS_AFFECTED( ch, AFF_SHADOWPLANE ) )
 			SET_BIT( obj->extra_flags, ITEM_SHADOWPLANE );
@@ -3679,7 +3679,7 @@ void behead( CHAR_DATA *victim ) {
 	SET_BIT( victim->loc_hp[0], LOST_HEAD );
 	SET_BIT( victim->affected_by, AFF_POLYMORPH );
 	snprintf( buf, sizeof( buf ), "the severed head of %s", victim->name );
-	free_string( victim->morph );
+	free(victim->morph);
 	victim->morph = str_dup( buf );
 	do_call( victim, "all" );
 	save_char_obj( victim );
@@ -5279,9 +5279,9 @@ void do_decapitate( CHAR_DATA *ch, char *argument ) {
 	/*
 	 * Update the last decaps to prevent spamcapping.
 	 */
-	free_string( ch->pcdata->last_decap[1] );
+	free(ch->pcdata->last_decap[1]);
 	ch->pcdata->last_decap[1] = str_dup( ch->pcdata->last_decap[0] );
-	free_string( ch->pcdata->last_decap[0] );
+	free(ch->pcdata->last_decap[0]);
 	ch->pcdata->last_decap[0] = str_dup( victim->name );
 
 	act( "A misty white vapour pours from $N's corpse into your body.", ch, NULL, victim, TO_CHAR );
@@ -5453,7 +5453,7 @@ void crack_head( CHAR_DATA *ch, OBJ_DATA *obj, char *argument ) {
 		make_part( victim, "cracked_head" );
 		make_part( victim, "brain" );
 		snprintf( buf, sizeof( buf ), "the quivering brain of %s", victim->name );
-		free_string( victim->morph );
+		free(victim->morph);
 		victim->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( arg2, "mob" ) ) {
@@ -5468,7 +5468,7 @@ void crack_head( CHAR_DATA *ch, OBJ_DATA *obj, char *argument ) {
 		if ( ( pMobIndex = get_mob_index( 30002 ) ) == NULL ) return;
 		victim = create_mobile( pMobIndex );
 		snprintf( buf, sizeof( buf ), "%s", capitalize( arg2 ) );
-		free_string( victim->short_descr );
+		free(victim->short_descr);
 		victim->short_descr = str_dup( buf );
 		char_to_room( victim, ch->in_room );
 		make_part( victim, "cracked_head" );

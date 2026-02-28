@@ -101,16 +101,16 @@ void db_class_load_display( void ) {
 
 	/* Clear existing caches */
 	for ( i = 0; i < bracket_count; i++ ) {
-		if ( bracket_cache[i].open_bracket ) free_string( bracket_cache[i].open_bracket );
-		if ( bracket_cache[i].close_bracket ) free_string( bracket_cache[i].close_bracket );
-		if ( bracket_cache[i].accent_color ) free_string( bracket_cache[i].accent_color );
-		if ( bracket_cache[i].primary_color ) free_string( bracket_cache[i].primary_color );
+		if ( bracket_cache[i].open_bracket ) free(bracket_cache[i].open_bracket);
+		if ( bracket_cache[i].close_bracket ) free(bracket_cache[i].close_bracket);
+		if ( bracket_cache[i].accent_color ) free(bracket_cache[i].accent_color);
+		if ( bracket_cache[i].primary_color ) free(bracket_cache[i].primary_color);
 	}
 	bracket_count = 0;
 
 	for ( i = 0; i < gen_count; i++ ) {
-		if ( gen_cache[i].title ) free_string( gen_cache[i].title );
-		if ( gen_cache[i].title_color ) free_string( gen_cache[i].title_color );
+		if ( gen_cache[i].title ) free(gen_cache[i].title);
+		if ( gen_cache[i].title_color ) free(gen_cache[i].title_color);
 	}
 	gen_count = 0;
 
@@ -200,8 +200,8 @@ void db_class_load_aura( void ) {
 		return;
 
 	for ( i = 0; i < aura_count; i++ ) {
-		if ( aura_cache[i].aura_text )   free_string( aura_cache[i].aura_text );
-		if ( aura_cache[i].mxp_tooltip ) free_string( aura_cache[i].mxp_tooltip );
+		if ( aura_cache[i].aura_text )   free(aura_cache[i].aura_text);
+		if ( aura_cache[i].mxp_tooltip ) free(aura_cache[i].mxp_tooltip);
 	}
 	aura_count = 0;
 
@@ -259,15 +259,15 @@ void db_class_load_armor( void ) {
 		return;
 
 	for ( i = 0; i < armor_config_count; i++ ) {
-		if ( armor_config_cache[i].acfg_cost_key ) free_string( armor_config_cache[i].acfg_cost_key );
-		if ( armor_config_cache[i].usage_message ) free_string( armor_config_cache[i].usage_message );
-		if ( armor_config_cache[i].act_to_char )   free_string( armor_config_cache[i].act_to_char );
-		if ( armor_config_cache[i].act_to_room )   free_string( armor_config_cache[i].act_to_room );
+		if ( armor_config_cache[i].acfg_cost_key ) free(armor_config_cache[i].acfg_cost_key);
+		if ( armor_config_cache[i].usage_message ) free(armor_config_cache[i].usage_message);
+		if ( armor_config_cache[i].act_to_char )   free(armor_config_cache[i].act_to_char);
+		if ( armor_config_cache[i].act_to_room )   free(armor_config_cache[i].act_to_room);
 	}
 	armor_config_count = 0;
 
 	for ( i = 0; i < armor_piece_count; i++ ) {
-		if ( armor_piece_cache[i].keyword ) free_string( armor_piece_cache[i].keyword );
+		if ( armor_piece_cache[i].keyword ) free(armor_piece_cache[i].keyword);
 	}
 	armor_piece_count = 0;
 

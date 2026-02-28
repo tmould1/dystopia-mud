@@ -23,7 +23,7 @@
 #include "merc.h"
 #include "cfg.h"
 
-void check_samuraiattack args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
+void check_samuraiattack ( CHAR_DATA * ch, CHAR_DATA *victim );
 
 void do_katana( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;

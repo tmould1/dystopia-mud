@@ -26,8 +26,8 @@
 /*
  * Local functions.
  */
-void say_spell args( ( CHAR_DATA * ch, int sn ) );
-void improve_spl args( ( CHAR_DATA * ch, int dtype, int sn ) );
+void say_spell ( CHAR_DATA * ch, int sn );
+void improve_spl ( CHAR_DATA * ch, int dtype, int sn );
 
 /*
  * Improve ability at a certain spell type.  KaVir.
@@ -1010,7 +1010,7 @@ void spell_create_water( int sn, int level, CHAR_DATA *ch, void *vo ) {
 			char buf[MAX_STRING_LENGTH];
 
 			snprintf( buf, sizeof( buf ), "%s water", obj->name );
-			free_string( obj->name );
+			free(obj->name);
 			obj->name = str_dup( buf );
 		}
 		act( "$p is filled.", ch, obj, NULL, TO_CHAR );
@@ -2975,17 +2975,17 @@ void spell_soulblade( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	}
 	if ( weapontype == 3 ) snprintf( wpnname, sizeof( wpnname ), "blade" );
 	/* First we name the weapon */
-	free_string( obj->name );
+	free(obj->name);
 	snprintf( buf, sizeof( buf ), "%s soul %s", ch->name, wpnname );
 	obj->name = str_dup( buf );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	if ( IS_NPC( ch ) )
 		snprintf( buf, sizeof( buf ), "%s's soul %s", ch->short_descr, wpnname );
 	else
 		snprintf( buf, sizeof( buf ), "%s's soul %s", ch->pcdata->switchname, wpnname );
 	buf[0] = UPPER( buf[0] );
 	obj->short_descr = str_dup( buf );
-	free_string( obj->description );
+	free(obj->description);
 	if ( IS_NPC( ch ) )
 		snprintf( buf, sizeof( buf ), "%s's soul %s is lying here.", ch->short_descr, wpnname );
 	else
@@ -3004,10 +3004,10 @@ void spell_soulblade( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	obj->value[1] = 10;
 	obj->value[2] = 20;
 	obj->value[3] = weapontype;
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 	obj->questmaker = str_dup( ch->name );
 	if ( !IS_NPC( ch ) ) {
-		if ( obj->questowner != NULL ) free_string( obj->questowner );
+		if ( obj->questowner != NULL ) free(obj->questowner);
 		obj->questowner = str_dup( ch->pcdata->switchname );
 	}
 	obj_to_char( obj, ch );
@@ -3300,15 +3300,15 @@ void spell_voodoo( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	obj = create_object( get_obj_index( OBJ_VNUM_VOODOO_DOLL ), 0 );
 
 	snprintf( buf, sizeof( buf ), "%s voodoo doll", victim->name );
-	free_string( obj->name );
+	free(obj->name);
 	obj->name = str_dup( buf );
 
 	snprintf( buf, sizeof( buf ), "a voodoo doll of %s", victim->name );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	obj->short_descr = str_dup( buf );
 
 	snprintf( buf, sizeof( buf ), "A voodoo doll of %s lies here.", victim->name );
-	free_string( obj->description );
+	free(obj->description);
 	obj->description = str_dup( buf );
 
 	obj_to_char( obj, ch );
@@ -3836,9 +3836,9 @@ void spell_quest( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	}
 	act( "$p fades into existance in your hands.", ch, obj, NULL, TO_CHAR );
 	act( "$p fades into existance in $n's hands.", ch, obj, NULL, TO_ROOM );
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 	obj->questmaker = str_dup( ch->name );
-	if ( obj->questowner != NULL ) free_string( obj->questowner );
+	if ( obj->questowner != NULL ) free(obj->questowner);
 	obj->questowner = str_dup( ch->name );
 	return;
 }
@@ -3875,18 +3875,18 @@ void spell_minor_creation( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	obj->item_type = itemtype;
 
 	snprintf( buf, sizeof( buf ), "%s %s", ch->name, itemkind );
-	free_string( obj->name );
+	free(obj->name);
 	obj->name = str_dup( buf );
 	snprintf( buf, sizeof( buf ), "%s's %s", ch->name, itemkind );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	obj->short_descr = str_dup( buf );
 	snprintf( buf, sizeof( buf ), "%s's %s lies here.", ch->name, itemkind );
-	free_string( obj->description );
+	free(obj->description);
 	obj->description = str_dup( buf );
 
 	obj->weight = 10;
 
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 	obj->questmaker = str_dup( ch->name );
 
 	obj_to_char( obj, ch );
@@ -3964,13 +3964,13 @@ void spell_brew( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		obj->value[3] = sn;
 	else
 		obj->value[3] = -1;
-	free_string( obj->name );
+	free(obj->name);
 	snprintf( buf, sizeof( buf ), "%s potion %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	snprintf( buf, sizeof( buf ), "%s's %s potion of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
-	free_string( obj->description );
+	free(obj->description);
 	snprintf( buf, sizeof( buf ), "A %s potion is lying here.", col );
 	obj->description = str_dup( buf );
 	act( "You brew $p.", ch, obj, NULL, TO_CHAR );
@@ -4049,13 +4049,13 @@ void spell_scribe( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		obj->value[3] = sn;
 	else
 		obj->value[3] = -1;
-	free_string( obj->name );
+	free(obj->name);
 	snprintf( buf, sizeof( buf ), "%s scroll %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	snprintf( buf, sizeof( buf ), "%s's %s scroll of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
-	free_string( obj->description );
+	free(obj->description);
 	snprintf( buf, sizeof( buf ), "A %s scroll is lying here.", col );
 	obj->description = str_dup( buf );
 	act( "You scribe $p.", ch, obj, NULL, TO_CHAR );
@@ -4126,13 +4126,13 @@ void spell_carve( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	obj->value[1] = ( obj->value[0] / 5 ) + 1;
 	obj->value[2] = ( obj->value[0] / 5 ) + 1;
 	obj->value[3] = sn;
-	free_string( obj->name );
+	free(obj->name);
 	snprintf( buf, sizeof( buf ), "%s wand %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	snprintf( buf, sizeof( buf ), "%s's %s wand of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
-	free_string( obj->description );
+	free(obj->description);
 	snprintf( buf, sizeof( buf ), "A %s wand is lying here.", col );
 	obj->description = str_dup( buf );
 	obj->wear_flags = ITEM_TAKE + ITEM_HOLD;
@@ -4204,13 +4204,13 @@ void spell_engrave( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	obj->value[1] = ( obj->value[0] / 10 ) + 1;
 	obj->value[2] = ( obj->value[0] / 10 ) + 1;
 	obj->value[3] = sn;
-	free_string( obj->name );
+	free(obj->name);
 	snprintf( buf, sizeof( buf ), "%s staff %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	snprintf( buf, sizeof( buf ), "%s's %s staff of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
-	free_string( obj->description );
+	free(obj->description);
 	snprintf( buf, sizeof( buf ), "A %s staff is lying here.", col );
 	obj->description = str_dup( buf );
 	obj->wear_flags = ITEM_TAKE + ITEM_HOLD;
@@ -4288,13 +4288,13 @@ void spell_bake( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		obj->value[3] = sn;
 	else
 		obj->value[3] = -1;
-	free_string( obj->name );
+	free(obj->name);
 	snprintf( buf, sizeof( buf ), "%s pill %s %s", ch->name, col, skill_table[sn].name );
 	obj->name = str_dup( buf );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	snprintf( buf, sizeof( buf ), "%s's %s pill of %s", ch->name, col, skill_table[sn].name );
 	obj->short_descr = str_dup( buf );
-	free_string( obj->description );
+	free(obj->description);
 	snprintf( buf, sizeof( buf ), "A %s pill is lying here.", col );
 	obj->description = str_dup( buf );
 	act( "You bake $p.", ch, obj, NULL, TO_CHAR );
@@ -4322,7 +4322,7 @@ void spell_mount( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		victim->damroll = level * 2;
 		victim->hit = 250 * level;
 		victim->max_hit = 250 * level;
-		free_string( victim->lord );
+		free(victim->lord);
 		victim->lord = str_dup( ch->name );
 		SET_BIT( victim->act, ACT_NOEXP );
 		SET_BIT( victim->act, ACT_MOUNT );
@@ -4338,7 +4338,7 @@ void spell_mount( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		victim->damroll = level * 2;
 		victim->hit = 250 * level;
 		victim->max_hit = 250 * level;
-		free_string( victim->lord );
+		free(victim->lord);
 		victim->lord = str_dup( ch->name );
 		SET_BIT( victim->act, ACT_NOEXP );
 		SET_BIT( victim->act, ACT_MOUNT );
@@ -4354,33 +4354,33 @@ void spell_mount( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	victim->damroll = level;
 	victim->hit = 100 * level;
 	victim->max_hit = 100 * level;
-	free_string( victim->lord );
+	free(victim->lord);
 	victim->lord = str_dup( ch->name );
 	SET_BIT( victim->affected_by, AFF_FLYING );
 	SET_BIT( victim->act, ACT_NOEXP );
 	if ( IS_GOOD( ch ) ) {
-		free_string( victim->name );
+		free(victim->name);
 		victim->name = str_dup( "mount white horse pegasus" );
 		snprintf( buf, sizeof( buf ), "%s's white pegasus", ch->name );
-		free_string( victim->short_descr );
+		free(victim->short_descr);
 		victim->short_descr = str_dup( buf );
-		free_string( victim->long_descr );
+		free(victim->long_descr);
 		victim->long_descr = str_dup( "A beautiful white pegasus stands here.\n\r" );
 	} else if ( IS_NEUTRAL( ch ) ) {
-		free_string( victim->name );
+		free(victim->name);
 		victim->name = str_dup( "mount griffin" );
 		snprintf( buf, sizeof( buf ), "%s's griffin", ch->name );
-		free_string( victim->short_descr );
+		free(victim->short_descr);
 		victim->short_descr = str_dup( buf );
-		free_string( victim->long_descr );
+		free(victim->long_descr);
 		victim->long_descr = str_dup( "A vicious looking griffin stands here.\n\r" );
 	} else {
-		free_string( victim->name );
+		free(victim->name);
 		victim->name = str_dup( "mount black horse nightmare" );
 		snprintf( buf, sizeof( buf ), "%s's black nightmare", ch->name );
-		free_string( victim->short_descr );
+		free(victim->short_descr);
 		victim->short_descr = str_dup( buf );
-		free_string( victim->long_descr );
+		free(victim->long_descr);
 		victim->long_descr = str_dup( "A large black demonic horse stands here.\n\r" );
 	}
 	char_to_room( victim, ch->in_room );
@@ -4538,14 +4538,14 @@ void spell_make_bag( int sn, int level, CHAR_DATA *ch,void *vo)
 	if ( memcmp(obj->short_descr, headers[i], len) == 0)
 		{
 		 snprintf( buf, sizeof( buf ), "bag %s", obj->short_descr+len );
-		 free_string( obj->name );
+		 free(obj->name);
 		 obj->name = str_dup(buf);
 		 snprintf( buf, sizeof( buf ), "A bag of fine %s hide catches your eye. ",
 				 obj->short_descr+len );
-		 free_string( obj->description );
+		 free(obj->description);
 		 obj->description = str_dup( buf );
 		 snprintf( buf, sizeof( buf ), "bag made from %s hide", obj->short_descr+len);
-		 free_string( obj->short_descr );
+		 free(obj->short_descr);
 		 obj->short_descr = str_dup( buf );
 
 		 break;
@@ -4712,7 +4712,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		af.bitvector = AFF_POLYMORPH;
 		affect_to_char( ch, &af );
 		snprintf( buf, sizeof( buf ), "%s the frog", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( target_name, "fish" ) ) {
@@ -4727,7 +4727,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		af.bitvector = AFF_POLYMORPH;
 		affect_to_char( ch, &af );
 		snprintf( buf, sizeof( buf ), "%s the fish", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( target_name, "raven" ) ) {
@@ -4748,7 +4748,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		af.modifier = POLY_RAVEN;
 		affect_to_char( ch, &af );
 		snprintf( buf, sizeof( buf ), "%s the raven", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	}

@@ -16,7 +16,7 @@
 #include "mxp.h"
 
 /* External function from comm.c */
-bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
+bool write_to_descriptor ( DESCRIPTOR_DATA * d, char *txt, int length );
 
 /*
  * Telnet negotiation sequences for MXP

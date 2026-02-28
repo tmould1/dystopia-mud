@@ -122,47 +122,47 @@
  * ========================================================================= */
 
 /* Artificer abilities */
-void do_power           args( ( CHAR_DATA *ch, char *argument ) );
-void do_powercharge     args( ( CHAR_DATA *ch, char *argument ) );
-void do_overcharge      args( ( CHAR_DATA *ch, char *argument ) );
-void do_turret          args( ( CHAR_DATA *ch, char *argument ) );
-void do_decoy           args( ( CHAR_DATA *ch, char *argument ) );
-void do_grapple         args( ( CHAR_DATA *ch, char *argument ) );
-void do_energyblade     args( ( CHAR_DATA *ch, char *argument ) );
-void do_blaster         args( ( CHAR_DATA *ch, char *argument ) );
-void do_grenade         args( ( CHAR_DATA *ch, char *argument ) );
-void do_forcefield      args( ( CHAR_DATA *ch, char *argument ) );
-void do_repairbot       args( ( CHAR_DATA *ch, char *argument ) );
-void do_artcloak        args( ( CHAR_DATA *ch, char *argument ) );
-void do_techtrain       args( ( CHAR_DATA *ch, char *argument ) );
-void do_artificerarmor  args( ( CHAR_DATA *ch, char *argument ) );
+void do_power           ( CHAR_DATA *ch, char *argument );
+void do_powercharge     ( CHAR_DATA *ch, char *argument );
+void do_overcharge      ( CHAR_DATA *ch, char *argument );
+void do_turret          ( CHAR_DATA *ch, char *argument );
+void do_decoy           ( CHAR_DATA *ch, char *argument );
+void do_grapple         ( CHAR_DATA *ch, char *argument );
+void do_energyblade     ( CHAR_DATA *ch, char *argument );
+void do_blaster         ( CHAR_DATA *ch, char *argument );
+void do_grenade         ( CHAR_DATA *ch, char *argument );
+void do_forcefield      ( CHAR_DATA *ch, char *argument );
+void do_repairbot       ( CHAR_DATA *ch, char *argument );
+void do_artcloak        ( CHAR_DATA *ch, char *argument );
+void do_techtrain       ( CHAR_DATA *ch, char *argument );
+void do_artificerarmor  ( CHAR_DATA *ch, char *argument );
 
 /* Mechanist abilities */
-void do_neuraljack      args( ( CHAR_DATA *ch, char *argument ) );
-void do_servoarms       args( ( CHAR_DATA *ch, char *argument ) );
-void do_reactiveplating args( ( CHAR_DATA *ch, char *argument ) );
-void do_combatdrone     args( ( CHAR_DATA *ch, char *argument ) );
-void do_repairswarm     args( ( CHAR_DATA *ch, char *argument ) );
-void do_bomberdrone     args( ( CHAR_DATA *ch, char *argument ) );
-void do_artdetonate     args( ( CHAR_DATA *ch, char *argument ) );
-void do_dronearmy       args( ( CHAR_DATA *ch, char *argument ) );
-void do_railgun         args( ( CHAR_DATA *ch, char *argument ) );
-void do_empburst        args( ( CHAR_DATA *ch, char *argument ) );
-void do_orbitalstrike   args( ( CHAR_DATA *ch, char *argument ) );
-void do_mechimplant     args( ( CHAR_DATA *ch, char *argument ) );
-void do_cybtrain        args( ( CHAR_DATA *ch, char *argument ) );
-void do_mechanistarmor  args( ( CHAR_DATA *ch, char *argument ) );
-void do_dronestatus     args( ( CHAR_DATA *ch, char *argument ) );
-void do_dronerecall     args( ( CHAR_DATA *ch, char *argument ) );
+void do_neuraljack      ( CHAR_DATA *ch, char *argument );
+void do_servoarms       ( CHAR_DATA *ch, char *argument );
+void do_reactiveplating ( CHAR_DATA *ch, char *argument );
+void do_combatdrone     ( CHAR_DATA *ch, char *argument );
+void do_repairswarm     ( CHAR_DATA *ch, char *argument );
+void do_bomberdrone     ( CHAR_DATA *ch, char *argument );
+void do_artdetonate     ( CHAR_DATA *ch, char *argument );
+void do_dronearmy       ( CHAR_DATA *ch, char *argument );
+void do_railgun         ( CHAR_DATA *ch, char *argument );
+void do_empburst        ( CHAR_DATA *ch, char *argument );
+void do_orbitalstrike   ( CHAR_DATA *ch, char *argument );
+void do_mechimplant     ( CHAR_DATA *ch, char *argument );
+void do_cybtrain        ( CHAR_DATA *ch, char *argument );
+void do_mechanistarmor  ( CHAR_DATA *ch, char *argument );
+void do_dronestatus     ( CHAR_DATA *ch, char *argument );
+void do_dronerecall     ( CHAR_DATA *ch, char *argument );
 
 /* Update functions (called from update.c) */
-void update_artificer   args( ( CHAR_DATA *ch ) );
-void update_mechanist   args( ( CHAR_DATA *ch ) );
+void update_artificer   ( CHAR_DATA *ch );
+void update_mechanist   ( CHAR_DATA *ch );
 
 /* Helper functions */
-void artificer_despawn_turrets  args( ( CHAR_DATA *ch ) );
-void mechanist_move_drones      args( ( CHAR_DATA *ch, ROOM_INDEX_DATA *to_room ) );
-void artificer_turret_attacks   args( ( CHAR_DATA *ch ) );
-void mechanist_drone_attacks    args( ( CHAR_DATA *ch ) );
+void artificer_despawn_turrets  ( CHAR_DATA *ch );
+void mechanist_move_drones      ( CHAR_DATA *ch, ROOM_INDEX_DATA *to_room );
+void artificer_turret_attacks   ( CHAR_DATA *ch );
+void mechanist_drone_attacks    ( CHAR_DATA *ch );
 
 #endif /* ARTIFICER_H */

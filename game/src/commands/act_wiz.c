@@ -35,14 +35,14 @@
 /*
  * Local functions.
  */
-ROOM_INDEX_DATA *find_location args( ( CHAR_DATA * ch, char *arg ) );
-void call_all args( ( CHAR_DATA * ch ) );
+ROOM_INDEX_DATA *find_location ( CHAR_DATA * ch, char *arg );
+void call_all ( CHAR_DATA * ch );
 char buf[MAX_STRING_LENGTH];
 char arg[MAX_INPUT_LENGTH];
-bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
-bool write_to_descriptor_2 args( ( int desc, char *txt, int length ) );
+bool write_to_descriptor ( DESCRIPTOR_DATA * d, char *txt, int length );
+bool write_to_descriptor_2 ( int desc, char *txt, int length );
 
-void init_descriptor args( ( DESCRIPTOR_DATA * dnew, int desc ) );
+void init_descriptor ( DESCRIPTOR_DATA * dnew, int desc );
 
 void do_resetarea( CHAR_DATA *ch, char *argument ) {
 	send_to_char( "You patiently twiddle your thumbs, waiting for the reset.\n\r", ch );
@@ -143,7 +143,7 @@ void do_wizhelp( CHAR_DATA *ch, char *argument ) {
 void do_bamfin( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_NPC( ch ) ) {
 		smash_tilde( argument );
-		free_string( ch->pcdata->bamfin );
+		free(ch->pcdata->bamfin);
 		ch->pcdata->bamfin = str_dup( argument );
 		send_to_char( "Ok.\n\r", ch );
 	}
@@ -153,7 +153,7 @@ void do_bamfin( CHAR_DATA *ch, char *argument ) {
 void do_bamfout( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_NPC( ch ) ) {
 		smash_tilde( argument );
-		free_string( ch->pcdata->bamfout );
+		free(ch->pcdata->bamfout);
 		ch->pcdata->bamfout = str_dup( argument );
 		send_to_char( "Ok.\n\r", ch );
 	}
@@ -1230,7 +1230,7 @@ void do_oswitch( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->chobj = obj;
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->extra, EXTRA_OSWITCH );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( obj->short_descr );
 	send_to_char( "Ok.\n\r", ch );
 	return;
@@ -1258,7 +1258,7 @@ void do_oreturn( CHAR_DATA *ch, char *argument ) {
 	REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 	REMOVE_BIT( ch->extra, EXTRA_OSWITCH );
 	if ( IS_HEAD( ch, LOST_HEAD ) ) REMOVE_BIT( ch->loc_hp[0], LOST_HEAD );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( "" );
 	char_from_room( ch );
 	char_to_room( ch, get_room_index( ROOM_VNUM_ALTAR ) );
@@ -1459,7 +1459,7 @@ void do_preturn( CHAR_DATA *ch, char *argument ) {
 		char_to_room( ch, ch->in_room );
 	else
 		char_to_room( ch, get_room_index( 3001 ) );
-	free_string( ch->pload );
+	free(ch->pload);
 	ch->pload = str_dup( "" );
 	return;
 }
@@ -1519,7 +1519,7 @@ void do_oload( CHAR_DATA *ch, char *argument ) {
 		act( "$n has created $p!", ch, obj, NULL, TO_ROOM );
 	}
 	act( "You create $p.", ch, obj, NULL, TO_CHAR );
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 	obj->questmaker = str_dup( ch->name );
 	return;
 }
@@ -1969,8 +1969,8 @@ void do_allow( CHAR_DATA *ch, char *argument ) {
 			else
 				prev->next = curr->next;
 
-			free_string( curr->name );
-			free_string( curr->reason );
+			free(curr->name);
+			free(curr->reason);
 			free( curr );
 			send_to_char( "Ok.\n\r", ch );
 			save_bans();
@@ -2122,7 +2122,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		else
 			obj->value[0] = value;
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2133,7 +2133,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 			else*/
 		obj->value[1] = value;
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2144,7 +2144,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 			else*/
 		obj->value[2] = value;
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2156,7 +2156,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 			obj->value[3] = value;
 			send_to_char( "Ok.\n\r", ch );
 		}
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2186,7 +2186,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		obj_to_obj( obj, morph );
 		if ( morph->wear_flags == obj->wear_flags && mnum != WEAR_NONE )
 			equip_char( ch, morph, mnum );
-		if ( morph->questmaker != NULL ) free_string( morph->questmaker );
+		if ( morph->questmaker != NULL ) free(morph->questmaker);
 		morph->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2236,7 +2236,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		else
 			SET_BIT( obj->extra_flags, value );
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2245,7 +2245,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		if ( !str_cmp( arg3, "none" ) || !str_cmp( arg3, "clear" ) ) {
 			obj->wear_flags = 0;
 			send_to_char( "Ok.\n\r", ch );
-			if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+			if ( obj->questmaker != NULL ) free(obj->questmaker);
 			obj->questmaker = str_dup( ch->name );
 			return;
 		} else if ( !str_cmp( arg3, "take" ) ) {
@@ -2254,7 +2254,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 			else
 				SET_BIT( obj->wear_flags, ITEM_TAKE );
 			send_to_char( "Ok.\n\r", ch );
-			if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+			if ( obj->questmaker != NULL ) free(obj->questmaker);
 			obj->questmaker = str_dup( ch->name );
 			return;
 		} else if ( !str_cmp( arg3, "finger" ) )
@@ -2298,7 +2298,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		if ( IS_SET( obj->wear_flags, ITEM_TAKE ) ) value += 1;
 		obj->wear_flags = value;
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2313,7 +2313,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		else {
 			obj->level = value;
 			send_to_char( "Ok.\n\r", ch );
-			if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+			if ( obj->questmaker != NULL ) free(obj->questmaker);
 			obj->questmaker = str_dup( ch->name );
 		}
 		return;
@@ -2322,7 +2322,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg2, "weight" ) ) {
 		obj->weight = value;
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2333,7 +2333,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		else {
 			obj->cost = value;
 			send_to_char( "Ok.\n\r", ch );
-			if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+			if ( obj->questmaker != NULL ) free(obj->questmaker);
 			obj->questmaker = str_dup( ch->name );
 		}
 		return;
@@ -2342,7 +2342,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg2, "timer" ) ) {
 		obj->timer = value;
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2462,7 +2462,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2484,37 +2484,37 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "Not on NPC's.\n\r", ch );
 			return;
 		}
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
-		if ( obj->questowner != NULL ) free_string( obj->questowner );
+		if ( obj->questowner != NULL ) free(obj->questowner);
 		obj->questowner = str_dup( victim->name );
 		send_to_char( "Ok.\n\r", ch );
 		return;
 	}
 
 	if ( !str_cmp( arg2, "name" ) ) {
-		free_string( obj->name );
+		free(obj->name);
 		obj->name = str_dup( arg3 );
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
 
 	if ( !str_cmp( arg2, "short" ) ) {
-		free_string( obj->short_descr );
+		free(obj->short_descr);
 		obj->short_descr = str_dup( arg3 );
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
 
 	if ( !str_cmp( arg2, "long" ) ) {
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( arg3 );
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2540,7 +2540,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		ed->next = obj->extra_descr;
 		obj->extra_descr = ed;
 		send_to_char( "Ok.\n\r", ch );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );
 		return;
 	}
@@ -2983,115 +2983,115 @@ void do_qset( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg2, "chwear" ) ) {
 		if ( obj->chpoweron != NULL ) strcpy( buf, obj->chpoweron );
 		if ( !str_cmp( arg3, "clear" ) ) {
-			free_string( obj->chpoweron );
+			free(obj->chpoweron);
 			obj->chpoweron = str_dup( "(null)" );
 		} else if ( obj->chpoweron != NULL && buf[0] != '\0' && str_cmp( buf, "(null)" ) ) {
 			if ( strlen( buf ) + strlen( arg3 ) >= MAX_STRING_LENGTH - 4 ) {
 				send_to_char( "Line too long.\n\r", ch );
 				return;
 			} else {
-				free_string( obj->chpoweron );
+				free(obj->chpoweron);
 				strcat( buf, "\n\r" );
 				strcat( buf, arg3 );
 				obj->chpoweron = str_dup( buf );
 			}
 		} else {
-			free_string( obj->chpoweron );
+			free(obj->chpoweron);
 			obj->chpoweron = str_dup( arg3 );
 		}
 	} else if ( !str_cmp( arg2, "chrem" ) ) {
 		if ( obj->chpoweroff != NULL ) strcpy( buf, obj->chpoweroff );
 		if ( !str_cmp( arg3, "clear" ) ) {
-			free_string( obj->chpoweroff );
+			free(obj->chpoweroff);
 			obj->chpoweroff = str_dup( "(null)" );
 		} else if ( obj->chpoweroff != NULL && buf[0] != '\0' && str_cmp( buf, "(null)" ) ) {
 			if ( strlen( buf ) + strlen( arg3 ) >= MAX_STRING_LENGTH - 4 ) {
 				send_to_char( "Line too long.\n\r", ch );
 				return;
 			} else {
-				free_string( obj->chpoweroff );
+				free(obj->chpoweroff);
 				strcat( buf, "\n\r" );
 				strcat( buf, arg3 );
 				obj->chpoweroff = str_dup( buf );
 			}
 		} else {
-			free_string( obj->chpoweroff );
+			free(obj->chpoweroff);
 			obj->chpoweroff = str_dup( arg3 );
 		}
 	} else if ( !str_cmp( arg2, "chuse" ) ) {
 		if ( obj->chpoweruse != NULL ) strcpy( buf, obj->chpoweruse );
 		if ( !str_cmp( arg3, "clear" ) ) {
-			free_string( obj->chpoweruse );
+			free(obj->chpoweruse);
 			obj->chpoweruse = str_dup( "(null)" );
 		} else if ( obj->chpoweruse != NULL && buf[0] != '\0' && str_cmp( buf, "(null)" ) ) {
 			if ( strlen( buf ) + strlen( arg3 ) >= MAX_STRING_LENGTH - 4 ) {
 				send_to_char( "Line too long.\n\r", ch );
 				return;
 			} else {
-				free_string( obj->chpoweruse );
+				free(obj->chpoweruse);
 				strcat( buf, "\n\r" );
 				strcat( buf, arg3 );
 				obj->chpoweruse = str_dup( buf );
 			}
 		} else {
-			free_string( obj->chpoweruse );
+			free(obj->chpoweruse);
 			obj->chpoweruse = str_dup( arg3 );
 		}
 	} else if ( !str_cmp( arg2, "victwear" ) ) {
 		if ( obj->victpoweron != NULL ) strcpy( buf, obj->victpoweron );
 		if ( !str_cmp( arg3, "clear" ) ) {
-			free_string( obj->victpoweron );
+			free(obj->victpoweron);
 			obj->victpoweron = str_dup( "(null)" );
 		} else if ( obj->victpoweron != NULL && buf[0] != '\0' && str_cmp( buf, "(null)" ) ) {
 			if ( strlen( buf ) + strlen( arg3 ) >= MAX_STRING_LENGTH - 4 ) {
 				send_to_char( "Line too long.\n\r", ch );
 				return;
 			} else {
-				free_string( obj->victpoweron );
+				free(obj->victpoweron);
 				strcat( buf, "\n\r" );
 				strcat( buf, arg3 );
 				obj->victpoweron = str_dup( buf );
 			}
 		} else {
-			free_string( obj->victpoweron );
+			free(obj->victpoweron);
 			obj->victpoweron = str_dup( arg3 );
 		}
 	} else if ( !str_cmp( arg2, "victrem" ) ) {
 		if ( obj->victpoweroff != NULL ) strcpy( buf, obj->victpoweroff );
 		if ( !str_cmp( arg3, "clear" ) ) {
-			free_string( obj->victpoweroff );
+			free(obj->victpoweroff);
 			obj->victpoweroff = str_dup( "(null)" );
 		} else if ( obj->victpoweroff != NULL && buf[0] != '\0' && str_cmp( buf, "(null)" ) ) {
 			if ( strlen( buf ) + strlen( arg3 ) >= MAX_STRING_LENGTH - 4 ) {
 				send_to_char( "Line too long.\n\r", ch );
 				return;
 			} else {
-				free_string( obj->victpoweroff );
+				free(obj->victpoweroff);
 				strcat( buf, "\n\r" );
 				strcat( buf, arg3 );
 				obj->victpoweroff = str_dup( buf );
 			}
 		} else {
-			free_string( obj->victpoweroff );
+			free(obj->victpoweroff);
 			obj->victpoweroff = str_dup( arg3 );
 		}
 	} else if ( !str_cmp( arg2, "victuse" ) ) {
 		if ( obj->victpoweruse != NULL ) strcpy( buf, obj->victpoweruse );
 		if ( !str_cmp( arg3, "clear" ) ) {
-			free_string( obj->victpoweruse );
+			free(obj->victpoweruse);
 			obj->victpoweruse = str_dup( "(null)" );
 		} else if ( obj->victpoweruse != NULL && buf[0] != '\0' && str_cmp( buf, "(null)" ) ) {
 			if ( strlen( buf ) + strlen( arg3 ) >= MAX_STRING_LENGTH - 4 ) {
 				send_to_char( "Line too long.\n\r", ch );
 				return;
 			} else {
-				free_string( obj->victpoweruse );
+				free(obj->victpoweruse);
 				strcat( buf, "\n\r" );
 				strcat( buf, arg3 );
 				obj->victpoweruse = str_dup( buf );
 			}
 		} else {
-			free_string( obj->victpoweruse );
+			free(obj->victpoweruse);
 			obj->victpoweruse = str_dup( arg3 );
 		}
 	} else if ( !str_cmp( arg2, "type" ) ) {
@@ -3192,40 +3192,40 @@ void do_oclone( CHAR_DATA *ch, char *argument ) {
 	pObjIndex = get_obj_index( obj->pIndexData->vnum );
 	obj2 = create_object( pObjIndex, obj->level );
 	/* Copy any changed parts of the object. */
-	free_string( obj2->name );
+	free(obj2->name);
 	obj2->name = str_dup( obj->name );
-	free_string( obj2->short_descr );
+	free(obj2->short_descr);
 	obj2->short_descr = str_dup( obj->short_descr );
-	free_string( obj2->description );
+	free(obj2->description);
 	obj2->description = str_dup( obj->description );
 
 	if ( obj->questmaker != NULL && strlen( obj->questmaker ) > 1 ) {
-		free_string( obj2->questmaker );
+		free(obj2->questmaker);
 		obj2->questmaker = str_dup( obj->questmaker );
 	}
 
 	if ( obj->chpoweron != NULL ) {
-		free_string( obj2->chpoweron );
+		free(obj2->chpoweron);
 		obj2->chpoweron = str_dup( obj->chpoweron );
 	}
 	if ( obj->chpoweroff != NULL ) {
-		free_string( obj2->chpoweroff );
+		free(obj2->chpoweroff);
 		obj2->chpoweroff = str_dup( obj->chpoweroff );
 	}
 	if ( obj->chpoweruse != NULL ) {
-		free_string( obj2->chpoweruse );
+		free(obj2->chpoweruse);
 		obj2->chpoweruse = str_dup( obj->chpoweruse );
 	}
 	if ( obj->victpoweron != NULL ) {
-		free_string( obj2->victpoweron );
+		free(obj2->victpoweron);
 		obj2->victpoweron = str_dup( obj->victpoweron );
 	}
 	if ( obj->victpoweroff != NULL ) {
-		free_string( obj2->victpoweroff );
+		free(obj2->victpoweroff);
 		obj2->victpoweroff = str_dup( obj->victpoweroff );
 	}
 	if ( obj->victpoweruse != NULL ) {
-		free_string( obj2->victpoweruse );
+		free(obj2->victpoweruse);
 		obj2->victpoweruse = str_dup( obj->victpoweruse );
 	}
 	obj2->item_type = obj->item_type;
@@ -3308,11 +3308,11 @@ void do_evileye( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg1, "action" ) ) {
-		free_string( ch->poweraction );
+		free(ch->poweraction);
 		ch->poweraction = str_dup( arg2 );
 		return;
 	} else if ( !str_cmp( arg1, "message" ) ) {
-		free_string( ch->powertype );
+		free(ch->powertype);
 		ch->powertype = str_dup( arg2 );
 		return;
 	} else if ( !str_cmp( arg1, "toggle" ) ) {
@@ -3494,7 +3494,7 @@ void do_claim( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->exp -= 500;
-	if ( obj->questowner != NULL ) free_string( obj->questowner );
+	if ( obj->questowner != NULL ) free(obj->questowner);
 	obj->questowner = str_dup( ch->pcdata->switchname );
 	act( "You are now the owner of $p.", ch, obj, NULL, TO_CHAR );
 	act( "$n is now the owner of $p.", ch, obj, NULL, TO_ROOM );
@@ -3551,7 +3551,7 @@ void do_gift( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	ch->exp -= 500;
-	if ( obj->questowner != NULL ) free_string( obj->questowner );
+	if ( obj->questowner != NULL ) free(obj->questowner);
 	obj->questowner = str_dup( victim->pcdata->switchname );
 	act( "You grant ownership of $p to $N.", ch, obj, victim, TO_CHAR );
 	act( "$n grants ownership of $p to $N.", ch, obj, victim, TO_NOTVICT );
@@ -3642,7 +3642,7 @@ void do_create( CHAR_DATA *ch, char *argument ) {
 	obj->level = level;
 	obj->item_type = itemtype;
 	obj_to_char( obj, ch );
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 	obj->questmaker = str_dup( ch->name );
 
 	act( "You reach up into the air and draw out a ball of protoplasm.", ch, obj, NULL, TO_CHAR );
@@ -3696,15 +3696,15 @@ void do_token( CHAR_DATA *ch, char *argument ) {
 	obj->cost = value * 1000;
 	obj->item_type = ITEM_QUEST;
 	obj_to_char( obj, ch );
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 	obj->questmaker = str_dup( ch->name );
-	free_string( obj->name );
+	free(obj->name);
 	obj->name = str_dup( "quest token" );
 	sprintf( buf, "a %d point quest token", value );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	obj->short_descr = str_dup( buf );
 	sprintf( buf, "A %d point quest token lies on the floor.", value );
-	free_string( obj->description );
+	free(obj->description);
 	obj->description = str_dup( buf );
 	if ( victim != NULL && victim != ch ) {
 		act( "You reach behind $N's ear and produce $p.", ch, obj, victim, TO_CHAR );
@@ -3896,7 +3896,7 @@ void bind_char( CHAR_DATA *ch ) {
 	ch->pcdata->chobj = obj;
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->extra, EXTRA_OSWITCH );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( obj->short_descr );
 	send_to_char( "You reform yourself.\n\r", ch );
 	act( "$p fades into existance on the floor.", ch, obj, NULL, TO_ROOM );
@@ -3952,7 +3952,7 @@ void do_bind( CHAR_DATA *ch, char *argument ) {
 	victim->pcdata->chobj = obj;
 	SET_BIT( victim->affected_by, AFF_POLYMORPH );
 	SET_BIT( victim->extra, EXTRA_OSWITCH );
-	free_string( victim->morph );
+	free(victim->morph);
 	victim->morph = str_dup( obj->short_descr );
 	return;
 }
@@ -3983,7 +3983,7 @@ void do_release( CHAR_DATA *ch, char *argument ) {
 	victim->pcdata->chobj = NULL;
 	REMOVE_BIT( victim->affected_by, AFF_POLYMORPH );
 	REMOVE_BIT( victim->extra, EXTRA_OSWITCH );
-	free_string( victim->morph );
+	free(victim->morph);
 	victim->morph = str_dup( "" );
 	act( "A white vapour pours out of $p and forms into $n.", victim, obj, NULL, TO_ROOM );
 	act( "Your spirit floats out of $p and reforms its body.", victim, obj, NULL, TO_CHAR );
@@ -4012,8 +4012,8 @@ void do_hreload( CHAR_DATA *ch, char *argument ) {
 		if ( is_name( arg, h->keyword ) ) {
 			snprintf( keyword_saved, sizeof( keyword_saved ), "%s", h->keyword );
 			list_remove( &g_helps, &h->node );
-			free_string( h->keyword );
-			free_string( h->text );
+			free(h->keyword);
+			free(h->text);
 			free( h );
 			found = TRUE;
 		}
@@ -4076,7 +4076,7 @@ void do_resetpassword( CHAR_DATA *ch, char *argument ) {
 	}
 
 	pwdnew = crypt( arg2, victim->name );
-	free_string( victim->pcdata->pwd );
+	free(victim->pcdata->pwd);
 	victim->pcdata->pwd = str_dup( pwdnew );
 	save_char_obj( victim );
 	send_to_char( "Ok.\n\r", ch );
@@ -4125,7 +4125,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 			if ( IS_HEAD( gch, LOST_HEAD ) ) REMOVE_BIT( gch->loc_hp[0], LOST_HEAD );
 			REMOVE_BIT( gch->affected_by, AFF_POLYMORPH );
 			if ( IS_SET( gch->extra, EXTRA_OSWITCH ) ) REMOVE_BIT( gch->extra, EXTRA_OSWITCH );
-			//      free_string(gch->morph); // not threadsafe.
+			//      free(gch->morph); // not threadsafe.
 			gch->morph = str_dup( "" );
 			if ( gch->pcdata->chobj != NULL ) gch->pcdata->chobj = NULL;
 			if ( gch->pcdata->obj_vnum != 0 ) gch->pcdata->obj_vnum = 0;
@@ -4968,8 +4968,8 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 					else
 						prev->next = pf->next;
 
-					free_string( pf->pattern );
-					free_string( pf->added_by );
+					free(pf->pattern);
+					free(pf->added_by);
 					free( pf );
 
 					db_game_save_profanity_filters();
@@ -5005,8 +5005,8 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 					else
 						prev->next = fn->next;
 
-					free_string( fn->name );
-					free_string( fn->added_by );
+					free(fn->name);
+					free(fn->added_by);
 					free( fn );
 
 					db_game_save_forbidden_names();

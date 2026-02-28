@@ -32,10 +32,10 @@ extern GAMECONFIG_DATA game_config;
 /*
  * Local functions.
  */
-void talk_channel args( ( CHAR_DATA * ch, char *argument,
-	int channel, const char *verb ) );
-bool is_in args( (char *, char *) );
-bool all_in args( (char *, char *) );
+void talk_channel ( CHAR_DATA * ch, char *argument,
+	int channel, const char *verb );
+bool is_in (char *, char *);
+bool all_in (char *, char *);
 
 /* Trace's Bounty code */
 void do_bounty( CHAR_DATA *ch, char *argument ) {

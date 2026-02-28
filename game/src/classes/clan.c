@@ -752,7 +752,7 @@ void do_plasma( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->obj_vnum = 30007;
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->extra, EXTRA_OSWITCH );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( "a pool of blood" );
 	obj_to_room( obj, ch->in_room );
 	return;
@@ -976,7 +976,7 @@ void do_earthmeld( CHAR_DATA *ch, char *argument ) {
 		REMOVE_BIT( ch->extra, EXTRA_EARTHMELD );
 		REMOVE_BIT( ch->act, PLR_WIZINVIS );
 		if ( IS_HEAD( ch, LOST_HEAD ) ) REMOVE_BIT( ch->loc_hp[0], LOST_HEAD );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		send_to_char( "You rise up from the ground.\n\r", ch );
 		sprintf( buf, "%s rises up from the ground", ch->name );
@@ -989,7 +989,7 @@ void do_earthmeld( CHAR_DATA *ch, char *argument ) {
 	SET_BIT( ch->affected_by, AFF_SHIFT );
 	SET_BIT( ch->extra, EXTRA_EARTHMELD );
 	SET_BIT( ch->act, PLR_WIZINVIS );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( "Someone" );
 	send_to_char( "You sink into the ground.\n\r", ch );
 	sprintf( buf, "%s sinks into the ground.", ch->name );
@@ -1174,7 +1174,7 @@ void do_demonform( CHAR_DATA *ch, char *argument ) {
 		ch->damroll -= 200;
 		ch->hitroll -= 200;
 		ch->armor += 300;
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	} else if ( IS_AFFECTED( ch, AFF_POLYMORPH ) ) {
@@ -1191,7 +1191,7 @@ void do_demonform( CHAR_DATA *ch, char *argument ) {
 	SET_BIT( ch->polyaff, POLY_ZULOFORM );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	sprintf( buf, "%s the huge hulking demon", ch->name );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( buf );
 	ch->damroll += 200;
 	ch->hitroll += 200;
@@ -1228,7 +1228,7 @@ void do_zuloform( CHAR_DATA *ch, char *argument ) {
 		if ( ch->hit < 1 ) ch->hit = 1;
 		ch->damroll = ch->damroll - 150;
 		ch->hitroll = ch->hitroll - 150;
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	} else if ( IS_AFFECTED( ch, AFF_POLYMORPH ) ) {
@@ -1251,14 +1251,14 @@ void do_zuloform( CHAR_DATA *ch, char *argument ) {
 	SET_BIT( ch->polyaff, POLY_ZULOFORM );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	sprintf( buf, "A big black monster" );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( buf );
 	ch->damroll = ch->damroll + 150;
 	ch->hitroll = ch->hitroll + 150;
 	return;
 }
 
-void horn args( ( CHAR_DATA * ch ) );
+void horn ( CHAR_DATA * ch );
 
 /* claw and fang commands */
 
@@ -1865,7 +1865,7 @@ void do_mask( CHAR_DATA *ch, char *argument ) {
 		act( buf, ch, NULL, victim, TO_ROOM );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		REMOVE_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	}
@@ -1876,7 +1876,7 @@ void do_mask( CHAR_DATA *ch, char *argument ) {
 		act( buf, ch, NULL, victim, TO_NOTVICT );
 		sprintf( buf, "%s's form shimmers and transforms into a clone of you!", ch->morph );
 		act( buf, ch, NULL, victim, TO_VICT );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( victim->name );
 		return;
 	}
@@ -1888,7 +1888,7 @@ void do_mask( CHAR_DATA *ch, char *argument ) {
 	act( buf, ch, NULL, victim, TO_VICT );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( victim->name );
 	return;
 }
@@ -1937,7 +1937,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_CHANGED );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
 		sprintf( buf, "%s the vampire bat", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( arg, "wolf" ) ) {
@@ -1966,7 +1966,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
 		SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_CHANGED );
 		sprintf( buf, "%s the dire wolf", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( arg, "mist" ) ) {
@@ -2007,7 +2007,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
 		SET_BIT( ch->affected_by, AFF_ETHEREAL );
 		sprintf( buf, "%s the white mist", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( arg, "human" ) ) {
@@ -2038,7 +2038,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		REMOVE_BIT( ch->pcdata->stats[UNI_AFF], VAM_CHANGED );
 		clear_stats( ch );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	} else
@@ -2870,7 +2870,7 @@ void do_serpent( CHAR_DATA *ch, char *argument ) {
 		clear_stats( ch );
 		REMOVE_BIT( ch->polyaff, POLY_SERPENT );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	}
@@ -2893,7 +2893,7 @@ void do_serpent( CHAR_DATA *ch, char *argument ) {
 	SET_BIT( ch->polyaff, POLY_SERPENT );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	sprintf( buf, "%s the huge serpent", ch->name );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( buf );
 	return;
 }
@@ -3381,7 +3381,7 @@ void do_werewolf( CHAR_DATA *ch, char *argument ) {
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
 	sprintf( buf, "%s the werewolf", ch->name );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( buf );
 	ch->rage += 25;
 	ch->hitroll += 50;
@@ -3427,7 +3427,7 @@ void do_unwerewolf( CHAR_DATA *ch, char *argument ) {
 	REMOVE_BIT( ch->special, SPC_WOLFMAN );
 	REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 	REMOVE_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( "" );
 	if ( IS_VAMPAFF( ch, VAM_CLAWS ) ) {
 		send_to_char( "Your talons slide back into your fingers.\n\r", ch );

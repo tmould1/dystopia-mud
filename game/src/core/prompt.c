@@ -387,7 +387,7 @@ void show_string( DESCRIPTOR_DATA *d, char *input ) {
 		/* stop viewing */
 
 	default:
-		free_string( d->showstr_head );
+		free(d->showstr_head);
 		d->showstr_head = NULL;
 		d->showstr_point = NULL;
 		return;
@@ -424,7 +424,7 @@ void show_string( DESCRIPTOR_DATA *d, char *input ) {
 	for ( ; isspace( *end ); end++ );
 
 	if ( !*end ) {
-		free_string( d->showstr_head );
+		free(d->showstr_head);
 		d->showstr_head = NULL;
 		d->showstr_point = NULL;
 	}

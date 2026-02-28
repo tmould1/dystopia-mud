@@ -483,12 +483,12 @@ void do_vtwist( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( arg2, "name" ) ) {
-		free_string( obj->name );
+		free(obj->name);
 		obj->name = str_dup( arg3 );
 		obj->questmaker = str_dup( ch->name );
 	}
 	if ( !str_cmp( arg2, "short" ) ) {
-		free_string( obj->short_descr );
+		free(obj->short_descr);
 		obj->short_descr = str_dup( arg3 );
 		obj->questmaker = str_dup( ch->name );
 	}
@@ -525,9 +525,9 @@ void do_dub( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "From 3 to 40 characters please.\n\r", ch );
 		return;
 	}
-	free_string( obj->name );
+	free(obj->name);
 	obj->name = str_dup( arg2 );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	obj->short_descr = str_dup( arg2 );
 	obj->questmaker = str_dup( ch->name );
 	send_to_char( "Ok.\n\r", ch );
@@ -812,7 +812,7 @@ void do_dragonform( CHAR_DATA *ch, char *argument ) {
 		if ( ch->hit < 1 ) ch->hit = 1;
 		ch->damroll = ch->damroll - 100;
 		ch->hitroll = ch->hitroll - 100;
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "A big black monster" );
 		return;
 	}
@@ -829,7 +829,7 @@ void do_dragonform( CHAR_DATA *ch, char *argument ) {
 		NULL, TO_ROOM );
 	SET_BIT( ch->extra, EXTRA_DRAGON );
 	sprintf( buf, "%s, the huge rabid dragon", ch->name );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( buf );
 	ch->damroll = ch->damroll + 100;
 	ch->hitroll = ch->hitroll + 100;
@@ -900,7 +900,7 @@ void do_obj( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->chobj = obj;
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->extra, EXTRA_OSWITCH );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( obj->short_descr );
 	return;
 }
@@ -1206,12 +1206,12 @@ void do_zombie( CHAR_DATA *ch, char *argument ) {
 	victim = create_mobile( get_mob_index( obj->value[2] ) );
 	sprintf( buf, "the zombie of %s", victim->short_descr );
 	sprintf( buf2, "the zombie of %s is here.\n\r", victim->short_descr );
-	free_string( victim->short_descr );
+	free(victim->short_descr);
 	victim->short_descr = str_dup( buf );
-	free_string( victim->name );
+	free(victim->name);
 	SET_BIT( victim->act, ACT_NOEXP );
 	victim->name = str_dup( buf );
-	free_string( victim->long_descr );
+	free(victim->long_descr);
 	victim->long_descr = str_dup( buf2 );
 	SET_BIT( victim->extra, EXTRA_ZOMBIE );
 	victim->spec_fun = NULL;
@@ -1295,7 +1295,7 @@ void do_fleshcraft( CHAR_DATA *ch, char *argument ) {
 		act( buf, ch, NULL, victim, TO_ROOM );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		REMOVE_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	}
@@ -1306,7 +1306,7 @@ void do_fleshcraft( CHAR_DATA *ch, char *argument ) {
 		act( buf, ch, NULL, victim, TO_NOTVICT );
 		sprintf( buf, "%s's flesh mols and transforms into a clone of you!", ch->morph );
 		act( buf, ch, NULL, victim, TO_VICT );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( victim->short_descr );
 		return;
 	}
@@ -1318,7 +1318,7 @@ void do_fleshcraft( CHAR_DATA *ch, char *argument ) {
 	act( buf, ch, NULL, victim, TO_VICT );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( victim->short_descr );
 	return;
 }
@@ -1759,9 +1759,9 @@ void do_objmask( CHAR_DATA *ch, char *argument ) {
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	act( "You mask yourself as $p.", ch, obj, NULL, TO_CHAR );
 	act( "$n masks $mself as $p.", ch, obj, NULL, TO_ROOM );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( obj->short_descr );
-	free_string( ch->objdesc );
+	free(ch->objdesc);
 	ch->objdesc = str_dup( obj->description );
 	ch->long_descr = str_dup( "" );
 	return;
@@ -1955,7 +1955,7 @@ void do_ashes( CHAR_DATA *ch, char *argument )
 	  REMOVE_BIT(ch->flag2, VAMP_ASHES);
 	  ch->pcdata->chobj = NULL;
 	  obj->chobj = NULL;
-	  free_string(ch->morph);
+	  free(ch->morph);
 	  ch->morph = str_dup("");
 	  act("$p transforms into $n.",ch,obj,NULL,TO_ROOM);
 	  act("Your reform your human body.",ch,obj,NULL,TO_CHAR);
@@ -1978,7 +1978,7 @@ void do_ashes( CHAR_DATA *ch, char *argument )
 	SET_BIT(ch->affected_by, AFF_POLYMORPH);
 	SET_BIT(ch->extra, EXTRA_OSWITCH);
 	SET_BIT(ch->flag2, VAMP_ASHES);
-	free_string(ch->morph);
+	free(ch->morph);
 	ch->morph = str_dup("a pile of ashes");
 	obj_to_room(obj,ch->in_room);
 	return;
@@ -2153,7 +2153,7 @@ void do_hagswrinkles( CHAR_DATA *ch, char *argument ) {
 		act( buf, ch, NULL, victim, TO_ROOM );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		REMOVE_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	}
@@ -2164,7 +2164,7 @@ void do_hagswrinkles( CHAR_DATA *ch, char *argument ) {
 		act( buf, ch, NULL, victim, TO_NOTVICT );
 		sprintf( buf, "%s's body wrinkles and reshapes as you!", ch->morph );
 		act( buf, ch, NULL, victim, TO_VICT );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( victim->name );
 		return;
 	}
@@ -2176,7 +2176,7 @@ void do_hagswrinkles( CHAR_DATA *ch, char *argument ) {
 	act( buf, ch, NULL, victim, TO_VICT );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( victim->name );
 	return;
 }
@@ -3022,37 +3022,37 @@ void do_bloodwall( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg, "n" ) ) {
 		obj = create_object( get_obj_index( 30043 ), 0 );
 		sprintf( buf, "A wall of blood is here, blocking your exit north." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "s" ) ) {
 		obj = create_object( get_obj_index( 30044 ), 0 );
 		sprintf( buf, "A wall of blood is here, blocking your exit south." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "e" ) ) {
 		obj = create_object( get_obj_index( 30045 ), 0 );
 		sprintf( buf, "A wall of blood is here, blocking your exit east." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "w" ) ) {
 		obj = create_object( get_obj_index( 30046 ), 0 );
 		sprintf( buf, "A wall of blood is here, blocking your exit west." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "d" ) ) {
 		obj = create_object( get_obj_index( 30047 ), 0 );
 		sprintf( buf, "A wall of blood is here, blocking your exit down." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "u" ) ) {
 		obj = create_object( get_obj_index( 30048 ), 0 );
 		sprintf( buf, "A wall of blood is here, blocking your exit up." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	obj_to_room( obj, ch->in_room );

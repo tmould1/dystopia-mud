@@ -318,7 +318,7 @@ void do_guide( CHAR_DATA *ch, char *argument ) {
 	else
 		victim->trust = LEVEL_AVATAR;
 	send_to_char( "You are now a monk.\n\r", victim );
-	free_string( victim->lord );
+	free(victim->lord);
 	victim->lord = str_dup( ch->name );
 	victim->class = CLASS_MONK;
 	save_char_obj( ch );

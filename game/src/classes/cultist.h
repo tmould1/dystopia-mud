@@ -95,32 +95,32 @@
  * ========================================================================= */
 
 /* Cultist abilities */
-void do_corruption      args( ( CHAR_DATA *ch, char *argument ) );
-void do_cultpurge       args( ( CHAR_DATA *ch, char *argument ) );
-void do_eldritchsight   args( ( CHAR_DATA *ch, char *argument ) );
-void do_whispers        args( ( CHAR_DATA *ch, char *argument ) );
-void do_unravel         args( ( CHAR_DATA *ch, char *argument ) );
-void do_voidtendril     args( ( CHAR_DATA *ch, char *argument ) );
-void do_grasp           args( ( CHAR_DATA *ch, char *argument ) );
-void do_constrict       args( ( CHAR_DATA *ch, char *argument ) );
-void do_maddeninggaze   args( ( CHAR_DATA *ch, char *argument ) );
-void do_gibbering       args( ( CHAR_DATA *ch, char *argument ) );
-void do_insanity        args( ( CHAR_DATA *ch, char *argument ) );
-void do_voidtrain       args( ( CHAR_DATA *ch, char *argument ) );
+void do_corruption      ( CHAR_DATA *ch, char *argument );
+void do_cultpurge       ( CHAR_DATA *ch, char *argument );
+void do_eldritchsight   ( CHAR_DATA *ch, char *argument );
+void do_whispers        ( CHAR_DATA *ch, char *argument );
+void do_unravel         ( CHAR_DATA *ch, char *argument );
+void do_voidtendril     ( CHAR_DATA *ch, char *argument );
+void do_grasp           ( CHAR_DATA *ch, char *argument );
+void do_constrict       ( CHAR_DATA *ch, char *argument );
+void do_maddeninggaze   ( CHAR_DATA *ch, char *argument );
+void do_gibbering       ( CHAR_DATA *ch, char *argument );
+void do_insanity        ( CHAR_DATA *ch, char *argument );
+void do_voidtrain       ( CHAR_DATA *ch, char *argument );
 
 /* Voidborn abilities */
-void do_phaseshift      args( ( CHAR_DATA *ch, char *argument ) );
-void do_dimensionalrend args( ( CHAR_DATA *ch, char *argument ) );
-void do_unmake          args( ( CHAR_DATA *ch, char *argument ) );
-void do_voidshape       args( ( CHAR_DATA *ch, char *argument ) );
-void do_aberrantgrowth  args( ( CHAR_DATA *ch, char *argument ) );
-void do_finalform       args( ( CHAR_DATA *ch, char *argument ) );
-void do_summonthing     args( ( CHAR_DATA *ch, char *argument ) );
-void do_starspawn       args( ( CHAR_DATA *ch, char *argument ) );
-void do_entropy         args( ( CHAR_DATA *ch, char *argument ) );
+void do_phaseshift      ( CHAR_DATA *ch, char *argument );
+void do_dimensionalrend ( CHAR_DATA *ch, char *argument );
+void do_unmake          ( CHAR_DATA *ch, char *argument );
+void do_voidshape       ( CHAR_DATA *ch, char *argument );
+void do_aberrantgrowth  ( CHAR_DATA *ch, char *argument );
+void do_finalform       ( CHAR_DATA *ch, char *argument );
+void do_summonthing     ( CHAR_DATA *ch, char *argument );
+void do_starspawn       ( CHAR_DATA *ch, char *argument );
+void do_entropy         ( CHAR_DATA *ch, char *argument );
 
 /* Update functions (called from update.c) */
-void update_cultist     args( ( CHAR_DATA *ch ) );
-void update_voidborn    args( ( CHAR_DATA *ch ) );
+void update_cultist     ( CHAR_DATA *ch );
+void update_voidborn    ( CHAR_DATA *ch );
 
 #endif /* CULTIST_H */

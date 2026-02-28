@@ -559,25 +559,25 @@ void db_game_load_gameconfig( void ) {
 		} else if ( !str_cmp( key, "max_xp_per_kill" ) ) {
 			game_config.max_xp_per_kill = atoi( val );
 		} else if ( !str_cmp( key, "game_name" ) ) {
-			free_string( game_config.game_name );
+			free(game_config.game_name);
 			game_config.game_name = str_dup( val );
 		} else if ( !str_cmp( key, "gui_url" ) ) {
-			free_string( game_config.gui_url );
+			free(game_config.gui_url);
 			game_config.gui_url = str_dup( val );
 		} else if ( !str_cmp( key, "gui_version" ) ) {
-			free_string( game_config.gui_version );
+			free(game_config.gui_version);
 			game_config.gui_version = str_dup( val );
 		} else if ( !str_cmp( key, "banner_left" ) ) {
-			free_string( game_config.banner_left );
+			free(game_config.banner_left);
 			game_config.banner_left = str_dup( val );
 		} else if ( !str_cmp( key, "banner_right" ) ) {
-			free_string( game_config.banner_right );
+			free(game_config.banner_right);
 			game_config.banner_right = str_dup( val );
 		} else if ( !str_cmp( key, "banner_fill" ) ) {
-			free_string( game_config.banner_fill );
+			free(game_config.banner_fill);
 			game_config.banner_fill = str_dup( val );
 		} else if ( !str_cmp( key, "audio_url" ) ) {
-			free_string( game_config.audio_url );
+			free(game_config.audio_url);
 			game_config.audio_url = str_dup( val );
 		}
 	}
@@ -652,7 +652,7 @@ void db_game_load_topboard( void ) {
 		int rank = sqlite3_column_int( stmt, 0 );
 		if ( rank < 1 || rank > MAX_TOP_PLAYERS )
 			continue;
-		free_string( top_board[rank].name );
+		free(top_board[rank].name);
 		top_board[rank].name    = str_dup( col_text( stmt, 1 ) );
 		top_board[rank].pkscore = sqlite3_column_int( stmt, 2 );
 	}
@@ -711,31 +711,31 @@ void db_game_load_leaderboard( void ) {
 		int value        = sqlite3_column_int( stmt, 2 );
 
 		if ( !str_cmp( cat, "bestpk" ) ) {
-			free_string( leader_board.bestpk_name );
+			free(leader_board.bestpk_name);
 			leader_board.bestpk_name   = str_dup( name );
 			leader_board.bestpk_number = value;
 		} else if ( !str_cmp( cat, "pk" ) ) {
-			free_string( leader_board.pk_name );
+			free(leader_board.pk_name);
 			leader_board.pk_name   = str_dup( name );
 			leader_board.pk_number = value;
 		} else if ( !str_cmp( cat, "pd" ) ) {
-			free_string( leader_board.pd_name );
+			free(leader_board.pd_name);
 			leader_board.pd_name   = str_dup( name );
 			leader_board.pd_number = value;
 		} else if ( !str_cmp( cat, "mk" ) ) {
-			free_string( leader_board.mk_name );
+			free(leader_board.mk_name);
 			leader_board.mk_name   = str_dup( name );
 			leader_board.mk_number = value;
 		} else if ( !str_cmp( cat, "md" ) ) {
-			free_string( leader_board.md_name );
+			free(leader_board.md_name);
 			leader_board.md_name   = str_dup( name );
 			leader_board.md_number = value;
 		} else if ( !str_cmp( cat, "tt" ) ) {
-			free_string( leader_board.tt_name );
+			free(leader_board.tt_name);
 			leader_board.tt_name   = str_dup( name );
 			leader_board.tt_number = value;
 		} else if ( !str_cmp( cat, "qc" ) ) {
-			free_string( leader_board.qc_name );
+			free(leader_board.qc_name);
 			leader_board.qc_name   = str_dup( name );
 			leader_board.qc_number = value;
 		}
@@ -803,10 +803,10 @@ void db_game_load_kingdoms( void ) {
 		int id = sqlite3_column_int( stmt, 0 );
 		if ( id < 1 || id > MAX_KINGDOM )
 			continue;
-		free_string( kingdom_table[id].name );
-		free_string( kingdom_table[id].whoname );
-		free_string( kingdom_table[id].leader );
-		free_string( kingdom_table[id].general );
+		free(kingdom_table[id].name);
+		free(kingdom_table[id].whoname);
+		free(kingdom_table[id].leader);
+		free(kingdom_table[id].general);
 		kingdom_table[id].name     = str_dup( col_text( stmt, 1 ) );
 		kingdom_table[id].whoname  = str_dup( col_text( stmt, 2 ) );
 		kingdom_table[id].leader   = str_dup( col_text( stmt, 3 ) );
@@ -1403,13 +1403,13 @@ void db_game_load_audio_config( void ) {
 	/* Free existing entries */
 	if ( audio_entries != NULL ) {
 		for ( i = 0; i < audio_entry_count; i++ ) {
-			if ( audio_entries[i].category )   free_string( audio_entries[i].category );
-			if ( audio_entries[i].trigger_key ) free_string( audio_entries[i].trigger_key );
-			if ( audio_entries[i].filename )   free_string( audio_entries[i].filename );
-			if ( audio_entries[i].media_type ) free_string( audio_entries[i].media_type );
-			if ( audio_entries[i].tag )        free_string( audio_entries[i].tag );
-			if ( audio_entries[i].caption )    free_string( audio_entries[i].caption );
-			if ( audio_entries[i].use_key )    free_string( audio_entries[i].use_key );
+			if ( audio_entries[i].category )   free(audio_entries[i].category);
+			if ( audio_entries[i].trigger_key ) free(audio_entries[i].trigger_key);
+			if ( audio_entries[i].filename )   free(audio_entries[i].filename);
+			if ( audio_entries[i].media_type ) free(audio_entries[i].media_type);
+			if ( audio_entries[i].tag )        free(audio_entries[i].tag);
+			if ( audio_entries[i].caption )    free(audio_entries[i].caption);
+			if ( audio_entries[i].use_key )    free(audio_entries[i].use_key);
 		}
 		free( audio_entries );
 		audio_entries = NULL;
@@ -1663,7 +1663,7 @@ void do_audioconfig( CHAR_DATA *ch, char *argument ) {
 
 	/* Edit the field */
 	if ( !str_cmp( arg3, "filename" ) ) {
-		free_string( ae->filename );
+		free(ae->filename);
 		ae->filename = str_dup( arg4 );
 	}
 	else if ( !str_cmp( arg3, "volume" ) ) {
@@ -1690,20 +1690,20 @@ void do_audioconfig( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "Media type must be 'sound' or 'music'.\n\r", ch );
 			return;
 		}
-		free_string( ae->media_type );
+		free(ae->media_type);
 		ae->media_type = str_dup( arg4 );
 	}
 	else if ( !str_cmp( arg3, "tag" ) ) {
-		free_string( ae->tag );
+		free(ae->tag);
 		ae->tag = str_dup( arg4 );
 	}
 	else if ( !str_cmp( arg3, "caption" ) ) {
-		free_string( ae->caption );
+		free(ae->caption);
 		ae->caption = str_dup( arg4 );
 	}
 	else if ( !str_cmp( arg3, "use_key" ) ) {
 		if ( ae->use_key )
-			free_string( ae->use_key );
+			free(ae->use_key);
 		if ( !str_cmp( arg4, "none" ) || !str_cmp( arg4, "null" ) )
 			ae->use_key = NULL;
 		else
@@ -1746,11 +1746,11 @@ void db_game_load_pretitles( void ) {
 	if ( pretitle_entries != NULL ) {
 		for ( i = 0; i < pretitle_count; i++ ) {
 			if ( pretitle_entries[i].immortal_name )
-				free_string( pretitle_entries[i].immortal_name );
+				free(pretitle_entries[i].immortal_name);
 			if ( pretitle_entries[i].pretitle )
-				free_string( pretitle_entries[i].pretitle );
+				free(pretitle_entries[i].pretitle);
 			if ( pretitle_entries[i].set_by )
-				free_string( pretitle_entries[i].set_by );
+				free(pretitle_entries[i].set_by);
 		}
 		free( pretitle_entries );
 		pretitle_entries = NULL;
@@ -2063,8 +2063,8 @@ void db_game_load_forbidden_names( void ) {
 	/* Free existing list */
 	while ( forbidden_name_list ) {
 		FORBIDDEN_NAME *next = forbidden_name_list->next;
-		free_string( forbidden_name_list->name );
-		free_string( forbidden_name_list->added_by );
+		free(forbidden_name_list->name);
+		free(forbidden_name_list->added_by);
 		free( forbidden_name_list );
 		forbidden_name_list = next;
 	}
@@ -2147,8 +2147,8 @@ void db_game_load_profanity_filters( void ) {
 	/* Free existing list */
 	while ( profanity_filter_list ) {
 		PROFANITY_FILTER *next = profanity_filter_list->next;
-		free_string( profanity_filter_list->pattern );
-		free_string( profanity_filter_list->added_by );
+		free(profanity_filter_list->pattern);
+		free(profanity_filter_list->added_by);
 		free( profanity_filter_list );
 		profanity_filter_list = next;
 	}

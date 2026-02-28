@@ -539,7 +539,7 @@ bool aedit_name( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	free_string( pArea->name );
+	free(pArea->name);
 	pArea->name = str_dup( argument );
 
 	send_to_char( "Name set.\n\r", ch );
@@ -579,7 +579,7 @@ bool aedit_file( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	free_string( pArea->filename );
+	free(pArea->filename);
 	strcat( file, ".are" );
 	pArea->filename = str_dup( file );
 
@@ -687,7 +687,7 @@ bool aedit_builder( CHAR_DATA *ch, char *argument ) {
 		pArea->builders = string_unpad( pArea->builders );
 
 		if ( pArea->builders[0] == '\0' ) {
-			free_string( pArea->builders );
+			free(pArea->builders);
 			pArea->builders = str_dup( "None" );
 		}
 		send_to_char( "Builder removed.\n\r", ch );
@@ -704,7 +704,7 @@ bool aedit_builder( CHAR_DATA *ch, char *argument ) {
 			strcat( buf, " " );
 		}
 		strcat( buf, name );
-		free_string( pArea->builders );
+		free(pArea->builders);
 		pArea->builders = string_proper( str_dup( buf ) );
 
 		send_to_char( "Builder added.\n\r", ch );
@@ -1161,15 +1161,15 @@ bool change_exit( CHAR_DATA *ch, char *argument, int door ) {
 		}
 
 		if ( !str_cmp( argument, "name" ) ) {
-			free_string( pRoom->exit[door]->keyword );
-			pRoom->exit[door]->keyword = &str_empty[0];
+			free(pRoom->exit[door]->keyword);
+			pRoom->exit[door]->keyword = str_dup( "" );
 			send_to_char( "Exit name removed.\n\r", ch );
 			return TRUE;
 		}
 
 		if ( argument[0] == 'd' && !str_prefix( argument, "description" ) ) {
-			free_string( pRoom->exit[door]->description );
-			pRoom->exit[door]->description = &str_empty[0];
+			free(pRoom->exit[door]->description);
+			pRoom->exit[door]->description = str_dup( "" );
 			send_to_char( "Exit description removed.\n\r", ch );
 			return TRUE;
 		}
@@ -1214,7 +1214,7 @@ bool change_exit( CHAR_DATA *ch, char *argument, int door ) {
 		if ( !pRoom->exit[door] )
 			pRoom->exit[door] = new_exit();
 
-		free_string( pRoom->exit[door]->keyword );
+		free(pRoom->exit[door]->keyword);
 		pRoom->exit[door]->keyword = str_dup( argument );
 
 		send_to_char( "Exit name set.\n\r", ch );
@@ -1509,7 +1509,7 @@ bool redit_name( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	free_string( pRoom->name );
+	free(pRoom->name);
 	pRoom->name = str_dup( argument );
 
 	send_to_char( "Name set.\n\r", ch );
@@ -2332,7 +2332,7 @@ bool oedit_name( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	free_string( pObj->name );
+	free(pObj->name);
 	pObj->name = str_dup( argument );
 
 	send_to_char( "Name set.\n\r", ch );
@@ -2349,7 +2349,7 @@ bool oedit_short( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	free_string( pObj->short_descr );
+	free(pObj->short_descr);
 	pObj->short_descr = str_dup( argument );
 	pObj->short_descr[0] = LOWER( pObj->short_descr[0] );
 
@@ -2367,7 +2367,7 @@ bool oedit_long( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	free_string( pObj->description );
+	free(pObj->description);
 	pObj->description = str_dup( argument );
 	pObj->description[0] = UPPER( pObj->description[0] );
 
@@ -2915,7 +2915,7 @@ bool medit_long( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	free_string( pMob->long_descr );
+	free(pMob->long_descr);
 	strcat( argument, "\n\r" );
 	pMob->long_descr = str_dup( argument );
 	pMob->long_descr[0] = UPPER( pMob->long_descr[0] );
@@ -2934,7 +2934,7 @@ bool medit_short( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	free_string( pMob->short_descr );
+	free(pMob->short_descr);
 	pMob->short_descr = str_dup( argument );
 
 	send_to_char( "Short description set.\n\r", ch );
@@ -2951,7 +2951,7 @@ bool medit_name( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	free_string( pMob->player_name );
+	free(pMob->player_name);
 	pMob->player_name = str_dup( argument );
 
 	send_to_char( "Name set.\n\r", ch );

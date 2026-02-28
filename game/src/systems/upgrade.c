@@ -31,8 +31,8 @@
 
 /* local functions */
 
-void clearshit args( ( CHAR_DATA * ch ) );
-void upgrade2 args( ( CHAR_DATA * ch ) );
+void clearshit ( CHAR_DATA * ch );
+void upgrade2 ( CHAR_DATA * ch );
 
 /*
  * Check if character's class is an upgrade class.

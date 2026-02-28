@@ -713,7 +713,7 @@ void do_weaponform( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->chobj = obj;
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->extra, EXTRA_OSWITCH );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( obj->short_descr );
 	return;
 }
@@ -732,7 +732,7 @@ void do_humanform( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->chobj = NULL;
 	REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 	REMOVE_BIT( ch->extra, EXTRA_OSWITCH );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( "" );
 	act( "$p transforms into $n.", ch, obj, NULL, TO_ROOM );
 	act( "Your reform your human body.", ch, obj, NULL, TO_CHAR );

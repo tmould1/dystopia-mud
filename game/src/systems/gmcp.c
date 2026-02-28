@@ -40,7 +40,7 @@ const char gmcp_dont[] = { IAC, DONT, TELOPT_GMCP, '\0' };
 #endif
 
 /* External functions */
-bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
+bool write_to_descriptor ( DESCRIPTOR_DATA * d, char *txt, int length );
 
 /* External data */
 extern GAMECONFIG_DATA game_config;

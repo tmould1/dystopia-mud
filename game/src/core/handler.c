@@ -647,8 +647,8 @@ void alias_remove( CHAR_DATA *ch, ALIAS_DATA *ali ) {
 			return;
 		}
 	}
-	free_string( ali->short_n );
-	free_string( ali->long_n );
+	free(ali->short_n);
+	free(ali->long_n);
 	free( ali );
 	return;
 }
@@ -1586,7 +1586,7 @@ void extract_obj( OBJ_DATA *obj ) {
 	if ( ( ch = obj->chobj ) != NULL && !IS_NPC( ch ) && ch->pcdata->chobj == obj && IS_HEAD( ch, LOST_HEAD ) ) {
 		REMOVE_BIT( ch->loc_hp[0], LOST_HEAD );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		ch->hit = 1;
 		char_from_room( ch );
@@ -1604,7 +1604,7 @@ void extract_obj( OBJ_DATA *obj ) {
 		} else {
 			REMOVE_BIT( ch->extra, EXTRA_OSWITCH );
 			REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
-			free_string( ch->morph );
+			free(ch->morph);
 			ch->morph = str_dup( "" );
 			char_from_room( ch );
 			char_to_room( ch, get_room_index( ROOM_VNUM_ALTAR ) );
@@ -1646,24 +1646,24 @@ void extract_obj( OBJ_DATA *obj ) {
 		for ( ed = obj->extra_descr; ed != NULL; ed = ed_next ) {
 			ed_next = ed->next;
 
-			free_string( ed->description );
-			free_string( ed->keyword );
+			free(ed->description);
+			free(ed->keyword);
 
 			free( ed );
 		}
 	}
 
-	free_string( obj->name );
-	free_string( obj->description );
-	free_string( obj->short_descr );
-	if ( obj->chpoweron != NULL ) free_string( obj->chpoweron );
-	if ( obj->chpoweroff != NULL ) free_string( obj->chpoweroff );
-	if ( obj->chpoweruse != NULL ) free_string( obj->chpoweruse );
-	if ( obj->victpoweron != NULL ) free_string( obj->victpoweron );
-	if ( obj->victpoweroff != NULL ) free_string( obj->victpoweroff );
-	if ( obj->victpoweruse != NULL ) free_string( obj->victpoweruse );
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
-	if ( obj->questowner != NULL ) free_string( obj->questowner );
+	free(obj->name);
+	free(obj->description);
+	free(obj->short_descr);
+	if ( obj->chpoweron != NULL ) free(obj->chpoweron);
+	if ( obj->chpoweroff != NULL ) free(obj->chpoweroff);
+	if ( obj->chpoweruse != NULL ) free(obj->chpoweruse);
+	if ( obj->victpoweron != NULL ) free(obj->victpoweron);
+	if ( obj->victpoweroff != NULL ) free(obj->victpoweroff);
+	if ( obj->victpoweruse != NULL ) free(obj->victpoweruse);
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
+	if ( obj->questowner != NULL ) free(obj->questowner);
 	--obj->pIndexData->count;
 	free( obj );
 	return;
@@ -2030,7 +2030,7 @@ OBJ_DATA *create_money( int amount ) {
 	} else {
 		obj = create_object( get_obj_index( OBJ_VNUM_MONEY_SOME ), 0 );
 		sprintf( buf, obj->short_descr, amount );
-		free_string( obj->short_descr );
+		free(obj->short_descr);
 		obj->short_descr = str_dup( buf );
 		obj->value[0] = amount;
 	}

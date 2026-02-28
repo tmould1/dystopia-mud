@@ -40,7 +40,7 @@
 /*
  * Local functions.
  */
-AREA_DATA *get_area_data args( ( int vnum ) );
+AREA_DATA *get_area_data ( int vnum );
 
 /* Executed from comm.c.  Minimizes compiling when changes are made. */
 bool run_olc_editor( DESCRIPTOR_DATA *d ) {

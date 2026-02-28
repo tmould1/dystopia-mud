@@ -127,15 +127,15 @@ static char *mxp_note_link( CHAR_DATA *ch, int note_num, char *display_text, con
 /* recycle a note */
 void free_note( NOTE_DATA *note ) {
 	if ( note->sender )
-		free_string( note->sender );
+		free(note->sender);
 	if ( note->to_list )
-		free_string( note->to_list );
+		free(note->to_list);
 	if ( note->subject )
-		free_string( note->subject );
+		free(note->subject);
 	if ( note->date ) /* was note->datestamp for some reason */
-		free_string( note->date );
+		free(note->date);
 	if ( note->text )
-		free_string( note->text );
+		free(note->text);
 
 	free( note );
 }
@@ -922,7 +922,7 @@ void handle_con_note_text( DESCRIPTOR_DATA *d, char *argument ) {
 	/* How would the system react to strcpy( , NULL) ? */
 	if ( ch->pcdata->in_progress->text != NULL ) {
 		strcpy( letter, ch->pcdata->in_progress->text );
-		free_string( ch->pcdata->in_progress->text );
+		free(ch->pcdata->in_progress->text);
 		ch->pcdata->in_progress->text = NULL; /* be sure we don't free it twice */
 	} else
 		strcpy( letter, "" );

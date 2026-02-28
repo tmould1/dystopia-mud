@@ -913,12 +913,12 @@ void do_reshape( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( arg2, "name" ) ) {
-		free_string( obj->name );
+		free(obj->name);
 		obj->name = str_dup( arg3 );
 		obj->questmaker = str_dup( ch->name );
 	}
 	if ( !str_cmp( arg2, "short" ) ) {
-		free_string( obj->short_descr );
+		free(obj->short_descr);
 		obj->short_descr = str_dup( arg3 );
 		obj->questmaker = str_dup( ch->name );
 	}

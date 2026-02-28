@@ -125,7 +125,7 @@ extern const char charset_wont[];
 extern const char charset_do[];
 extern const char charset_dont[];
 
-void show_string args( ( DESCRIPTOR_DATA * d, char *input ) );
+void show_string ( DESCRIPTOR_DATA * d, char *input );
 
 #endif
 
@@ -175,7 +175,7 @@ extern const char charset_wont[];
 extern const char charset_do[];
 extern const char charset_dont[];
 
-void show_string args( ( DESCRIPTOR_DATA * d, char *input ) );
+void show_string ( DESCRIPTOR_DATA * d, char *input );
 #endif
 
 /*
@@ -229,31 +229,31 @@ const char *col_scale_code_tc( int current, int max, CHAR_DATA *ch ) {
 	return tc_buf;
 }
 
-void game_loop args( ( int control ) );
-int init_socket args( ( int port ) );
-void new_descriptor args( ( int control ) );
-bool read_from_descriptor args( ( DESCRIPTOR_DATA * d ) );
-bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
-bool write_to_descriptor_2 args( ( int desc, char *txt, int length ) );
+void game_loop ( int control );
+int init_socket ( int port );
+void new_descriptor ( int control );
+bool read_from_descriptor ( DESCRIPTOR_DATA * d );
+bool write_to_descriptor ( DESCRIPTOR_DATA * d, char *txt, int length );
+bool write_to_descriptor_2 ( int desc, char *txt, int length );
 
 /*
  * Other local functions.
  */
-bool check_reconnect args( ( DESCRIPTOR_DATA * d, char *name, bool fConn ) );
-bool check_kickoff args( ( DESCRIPTOR_DATA * d, char *name, bool fConn ) );
-bool check_playing args( ( DESCRIPTOR_DATA * d, char *name ) );
+bool check_reconnect ( DESCRIPTOR_DATA * d, char *name, bool fConn );
+bool check_kickoff ( DESCRIPTOR_DATA * d, char *name, bool fConn );
+bool check_playing ( DESCRIPTOR_DATA * d, char *name );
 #ifndef TEST_BUILD
-int main args( ( int argc, char **argv ) );
+int main ( int argc, char **argv );
 #endif
-void nanny args( ( DESCRIPTOR_DATA * d, char *argument ) );
-bool process_output args( ( DESCRIPTOR_DATA * d, bool fPrompt ) );
-void read_from_buffer args( ( DESCRIPTOR_DATA * d ) );
-void stop_idling args( ( CHAR_DATA * ch ) );
-void bust_a_prompt args( ( DESCRIPTOR_DATA * d ) );
-void bust_a_header args( ( DESCRIPTOR_DATA * d ) );
+void nanny ( DESCRIPTOR_DATA * d, char *argument );
+bool process_output ( DESCRIPTOR_DATA * d, bool fPrompt );
+void read_from_buffer ( DESCRIPTOR_DATA * d );
+void stop_idling ( CHAR_DATA * ch );
+void bust_a_prompt ( DESCRIPTOR_DATA * d );
+void bust_a_header ( DESCRIPTOR_DATA * d );
 
-void lookup_address args( ( DUMMY_ARG * dummyarg ) ); // Only threaded calls, please.
-bool check_banned args( ( DESCRIPTOR_DATA * dnew ) ); // Ban check
+void lookup_address ( DUMMY_ARG * dummyarg ); // Only threaded calls, please.
+bool check_banned ( DESCRIPTOR_DATA * dnew ); // Ban check
 
 #if defined( WIN32 )
 /*
@@ -1068,7 +1068,7 @@ void lookup_address( DUMMY_ARG *darg ) {
 	gethostbyaddr_r( darg->buf, sizeof( darg->buf ), AF_INET, &ent, buf, 16384, &from, &err );
 
 	if ( from && from->h_name ) {
-		free_string( darg->d->host );
+		free(darg->d->host);
 		darg->d->host = str_dup( from->h_name );
 	}
 
@@ -1077,7 +1077,7 @@ void lookup_address( DUMMY_ARG *darg ) {
 	 */
 	darg->d->lookup_status++;
 
-	free_string( darg->buf );
+	free(darg->buf);
 	darg->status = 0;
 
 	thread_count--;

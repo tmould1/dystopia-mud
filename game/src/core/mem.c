@@ -93,9 +93,9 @@ AREA_DATA *new_area( void ) {
 
 void free_area( AREA_DATA *pArea ) {
 	if ( !pArea ) return;
-	free_string( pArea->name );
-	free_string( pArea->filename );
-	free_string( pArea->builders );
+	free(pArea->name);
+	free(pArea->filename);
+	free(pArea->builders);
 	free( pArea );
 }
 
@@ -109,16 +109,16 @@ EXIT_DATA *new_exit( void ) {
 	}
 	top_exit++;
 
-	pExit->keyword = &str_empty[0];
-	pExit->description = &str_empty[0];
+	pExit->keyword = str_dup( "" );
+	pExit->description = str_dup( "" );
 
 	return pExit;
 }
 
 void free_exit( EXIT_DATA *pExit ) {
 	if ( !pExit ) return;
-	free_string( pExit->keyword );
-	free_string( pExit->description );
+	free(pExit->keyword);
+	free(pExit->description);
 	free( pExit );
 }
 
@@ -137,8 +137,8 @@ EXTRA_DESCR_DATA *new_extra_descr( void ) {
 
 void free_extra_descr( EXTRA_DESCR_DATA *pExtra ) {
 	if ( !pExtra ) return;
-	free_string( pExtra->keyword );
-	free_string( pExtra->description );
+	free(pExtra->keyword);
+	free(pExtra->description);
 	free( pExtra );
 }
 
@@ -154,8 +154,8 @@ ROOM_INDEX_DATA *new_room_index( void ) {
 
 	list_init( &pRoom->characters );
 	list_init( &pRoom->objects );
-	pRoom->name = &str_empty[0];
-	pRoom->description = &str_empty[0];
+	pRoom->name = str_dup( "" );
+	pRoom->description = str_dup( "" );
 
 	return pRoom;
 }
@@ -169,8 +169,8 @@ void free_room_index( ROOM_INDEX_DATA *pRoom ) {
 
 	if ( !pRoom ) return;
 
-	free_string( pRoom->name );
-	free_string( pRoom->description );
+	free(pRoom->name);
+	free(pRoom->description);
 
 	for ( door = 0; door < MAX_DIR; door++ ) {
 		if ( pRoom->exit[door] )
@@ -257,9 +257,9 @@ void free_obj_index( OBJ_INDEX_DATA *pObj ) {
 
 	if ( !pObj ) return;
 
-	free_string( pObj->name );
-	free_string( pObj->short_descr );
-	free_string( pObj->description );
+	free(pObj->name);
+	free(pObj->short_descr);
+	free(pObj->description);
 
 	LIST_FOR_EACH_SAFE( pAf, pAf_next, &pObj->affects, AFFECT_DATA, node ) {
 		list_remove( &pObj->affects, &pAf->node );
@@ -287,7 +287,7 @@ MOB_INDEX_DATA *new_mob_index( void ) {
 	pMob->player_name = str_dup( "no name" );
 	pMob->short_descr = str_dup( "(no short description)" );
 	pMob->long_descr = str_dup( "(no long description)\n\r" );
-	pMob->description = &str_empty[0];
+	pMob->description = str_dup( "" );
 	pMob->act = ACT_IS_NPC;
 
 	return pMob;
@@ -296,10 +296,10 @@ MOB_INDEX_DATA *new_mob_index( void ) {
 void free_mob_index( MOB_INDEX_DATA *pMob ) {
 	if ( !pMob ) return;
 
-	free_string( pMob->player_name );
-	free_string( pMob->short_descr );
-	free_string( pMob->long_descr );
-	free_string( pMob->description );
+	free(pMob->player_name);
+	free(pMob->short_descr);
+	free(pMob->long_descr);
+	free(pMob->description);
 
 	if ( pMob->pShop )
 		free_shop( pMob->pShop );

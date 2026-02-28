@@ -31,7 +31,7 @@
 
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
-extern int can_interpret args( ( CHAR_DATA * ch, int cmd ) );
+extern int can_interpret ( CHAR_DATA * ch, int cmd );
 
 /*
  * Calculate visible length of a string (excluding color codes).
@@ -149,20 +149,20 @@ const char *exitname2[6] =
 /*
  * Local functions.
  */
-char *format_obj_to_char args( ( OBJ_DATA * obj, CHAR_DATA *ch,
-	bool fShort ) );
-void show_char_to_char_0 args( ( CHAR_DATA * victim, CHAR_DATA *ch ) );
-void show_char_to_char_1 args( ( CHAR_DATA * victim, CHAR_DATA *ch ) );
-void show_char_to_char args( ( list_head_t * list, CHAR_DATA *ch ) );
-bool check_blind args( ( CHAR_DATA * ch ) );
+char *format_obj_to_char ( OBJ_DATA * obj, CHAR_DATA *ch,
+	bool fShort );
+void show_char_to_char_0 ( CHAR_DATA * victim, CHAR_DATA *ch );
+void show_char_to_char_1 ( CHAR_DATA * victim, CHAR_DATA *ch );
+void show_char_to_char ( list_head_t * list, CHAR_DATA *ch );
+bool check_blind ( CHAR_DATA * ch );
 
-void evil_eye args( ( CHAR_DATA * victim, CHAR_DATA *ch ) );
-void check_left_arm args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-void check_right_arm args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-void check_left_leg args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
-void check_right_leg args( ( CHAR_DATA * ch, CHAR_DATA *victim ) );
+void evil_eye ( CHAR_DATA * victim, CHAR_DATA *ch );
+void check_left_arm ( CHAR_DATA * ch, CHAR_DATA *victim );
+void check_right_arm ( CHAR_DATA * ch, CHAR_DATA *victim );
+void check_left_leg ( CHAR_DATA * ch, CHAR_DATA *victim );
+void check_right_leg ( CHAR_DATA * ch, CHAR_DATA *victim );
 
-void obj_score args( ( CHAR_DATA * ch, OBJ_DATA *obj ) );
+void obj_score ( CHAR_DATA * ch, OBJ_DATA *obj );
 
 /*
  * Get xterm-256 color code for room description tinting.
@@ -704,9 +704,9 @@ void show_list_to_char( void *list, CHAR_DATA *ch, bool fShort, bool fShowNothin
 		}
 
 		send_to_char( "\n\r", ch );
-		free_string( prgpstrShow[iShow] );
-		free_string( prgpstrPrefix[iShow] );
-		free_string( prgpstrDesc[iShow] );
+		free(prgpstrShow[iShow]);
+		free(prgpstrPrefix[iShow]);
+		free(prgpstrDesc[iShow]);
 	}
 
 	if ( fShowNothing && nShow == 0 ) {
@@ -3385,7 +3385,7 @@ void set_prefix( CHAR_DATA *ch, char *title ) {
 		strcpy( buf, title );
 	}
 
-	free_string( ch->prefix );
+	free(ch->prefix);
 	ch->prefix = str_dup( buf );
 	return;
 }
@@ -3427,7 +3427,7 @@ void set_title( CHAR_DATA *ch, char *title ) {
 		strcpy( buf, title );
 	}
 
-	free_string( ch->pcdata->title );
+	free(ch->pcdata->title);
 	ch->pcdata->title = str_dup( buf );
 	return;
 }
@@ -3446,7 +3446,7 @@ void set_kingtitle( CHAR_DATA *ch, char *title ) {
 		strcpy( buf, title );
 	}
 
-	free_string( ch->pcdata->title );
+	free(ch->pcdata->title);
 	ch->pcdata->title = str_dup( buf );
 	return;
 }
@@ -3548,7 +3548,7 @@ void do_description( CHAR_DATA *ch, char *argument ) {
 
 		strcat( buf, argument );
 		strcat( buf, "\n\r" );
-		free_string( ch->description );
+		free(ch->description);
 		ch->description = str_dup( buf );
 	}
 
@@ -3785,7 +3785,7 @@ void do_password( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	free_string( ch->pcdata->pwd );
+	free(ch->pcdata->pwd);
 	ch->pcdata->pwd = str_dup( pwdnew );
 	if ( !IS_EXTRA( ch, EXTRA_NEWPASS ) ) SET_BIT( ch->extra, EXTRA_NEWPASS );
 	save_char_obj( ch );
@@ -5240,7 +5240,7 @@ void do_prompt( CHAR_DATA *ch, char *argument ) {
 		}
 		return;
 	} else if ( !strcmp( argument, "clear" ) ) {
-		free_string( ch->prompt );
+		free(ch->prompt);
 		ch->prompt = str_dup( "" );
 		return;
 	} else {
@@ -5250,7 +5250,7 @@ void do_prompt( CHAR_DATA *ch, char *argument ) {
 		strcat( buf, argument );
 	}
 
-	free_string( ch->prompt );
+	free(ch->prompt);
 	ch->prompt = str_dup( buf );
 	send_to_char( "Ok.\n\r", ch );
 	return;
@@ -5269,7 +5269,7 @@ void do_cprompt( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !strcmp( argument, "clear" ) ) {
-		free_string( ch->cprompt );
+		free(ch->cprompt);
 		ch->cprompt = str_dup( "" );
 		return;
 	} else {
@@ -5279,7 +5279,7 @@ void do_cprompt( CHAR_DATA *ch, char *argument ) {
 		strcat( buf, argument );
 	}
 
-	free_string( ch->cprompt );
+	free(ch->cprompt);
 	ch->cprompt = str_dup( buf );
 	send_to_char( "Ok.\n\r", ch );
 	return;

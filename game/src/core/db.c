@@ -267,8 +267,6 @@ ROOM_INDEX_DATA *room_list;
 
 list_head_t g_helps;
 
-char str_empty[1];
-
 int top_affect;
 int top_area;
 int top_rt;
@@ -302,9 +300,9 @@ bool fBootDb;
 /*
  * Local booting procedures.
  */
-void fix_exits args( (void) );
+void fix_exits (void);
 
-void reset_area args( ( AREA_DATA * pArea ) );
+void reset_area ( AREA_DATA * pArea );
 
 /*
  * Big mama top level function.
@@ -1255,21 +1253,21 @@ void clear_char( CHAR_DATA *ch ) {
 	static CHAR_DATA ch_zero;
 
 	*ch = ch_zero;
-	ch->name = &str_empty[0];
-	ch->short_descr = &str_empty[0];
-	ch->long_descr = &str_empty[0];
-	ch->description = &str_empty[0];
-	ch->lord = &str_empty[0];
-	ch->morph = &str_empty[0];
-	ch->createtime = &str_empty[0];
-	ch->lasthost = &str_empty[0];
-	ch->lasttime = &str_empty[0];
-	ch->powertype = &str_empty[0];
-	ch->poweraction = &str_empty[0];
-	ch->pload = &str_empty[0];
-	ch->prompt = &str_empty[0];
-	ch->cprompt = &str_empty[0];
-	ch->hunting = &str_empty[0];
+	ch->name = str_dup( "" );
+	ch->short_descr = str_dup( "" );
+	ch->long_descr = str_dup( "" );
+	ch->description = str_dup( "" );
+	ch->lord = str_dup( "" );
+	ch->morph = str_dup( "" );
+	ch->createtime = str_dup( "" );
+	ch->lasthost = str_dup( "" );
+	ch->lasttime = str_dup( "" );
+	ch->powertype = str_dup( "" );
+	ch->poweraction = str_dup( "" );
+	ch->pload = str_dup( "" );
+	ch->prompt = str_dup( "" );
+	ch->cprompt = str_dup( "" );
+	ch->hunting = str_dup( "" );
 
 	list_node_init( &ch->char_node );
 	list_node_init( &ch->room_node );
@@ -1317,21 +1315,21 @@ void free_char( CHAR_DATA *ch ) {
 		affect_remove( ch, paf );
 	}
 
-	free_string( ch->name );
-	free_string( ch->short_descr );
-	free_string( ch->long_descr );
-	free_string( ch->description );
-	free_string( ch->lord );
-	free_string( ch->morph );
-	free_string( ch->createtime );
-	free_string( ch->lasttime );
-	free_string( ch->lasthost );
-	free_string( ch->powertype );
-	free_string( ch->poweraction );
-	free_string( ch->pload );
-	free_string( ch->prompt );
-	free_string( ch->cprompt );
-	free_string( ch->hunting );
+	free(ch->name);
+	free(ch->short_descr);
+	free(ch->long_descr);
+	free(ch->description);
+	free(ch->lord);
+	free(ch->morph);
+	free(ch->createtime);
+	free(ch->lasttime);
+	free(ch->lasthost);
+	free(ch->powertype);
+	free(ch->poweraction);
+	free(ch->pload);
+	free(ch->prompt);
+	free(ch->cprompt);
+	free(ch->hunting);
 
 	if ( ch->pcdata != NULL ) {
 		for ( ali = ch->pcdata->alias; ali; ali = ali_next ) {
@@ -1339,20 +1337,20 @@ void free_char( CHAR_DATA *ch ) {
 			alias_remove( ch, ali );
 		}
 
-		free_string( ch->pcdata->switchname );
-		free_string( ch->pcdata->logoutmessage );
-		free_string( ch->pcdata->avatarmessage );
-		free_string( ch->pcdata->loginmessage );
-		free_string( ch->pcdata->decapmessage );
-		free_string( ch->pcdata->tiemessage );
-		free_string( ch->pcdata->pwd );
-		free_string( ch->pcdata->bamfin );
-		free_string( ch->pcdata->bamfout );
-		free_string( ch->pcdata->title );
-		free_string( ch->pcdata->conception );
-		free_string( ch->pcdata->parents );
-		free_string( ch->pcdata->cparents );
-		free_string( ch->pcdata->marriage );
+		free(ch->pcdata->switchname);
+		free(ch->pcdata->logoutmessage);
+		free(ch->pcdata->avatarmessage);
+		free(ch->pcdata->loginmessage);
+		free(ch->pcdata->decapmessage);
+		free(ch->pcdata->tiemessage);
+		free(ch->pcdata->pwd);
+		free(ch->pcdata->bamfin);
+		free(ch->pcdata->bamfout);
+		free(ch->pcdata->title);
+		free(ch->pcdata->conception);
+		free(ch->pcdata->parents);
+		free(ch->pcdata->cparents);
+		free(ch->pcdata->marriage);
 		free( ch->pcdata );
 	}
 
@@ -1446,13 +1444,13 @@ void mem_debug_check_freelists( void ) {
 
 /*
  * Duplicate a string into dynamic memory.
- * Returns &str_empty[0] for empty strings so callers can compare against it.
+ * NULL and empty strings are normalized to a heap-allocated "".
  */
 char *str_dup( const char *str ) {
 	char *str_new;
 
-	if ( str[0] == '\0' ) {
-		return &str_empty[0];
+	if ( str == NULL || str[0] == '\0' ) {
+		str = "";
 	}
 
 #if defined( WIN32 )
@@ -1465,17 +1463,6 @@ char *str_dup( const char *str ) {
 		exit( 1 );
 	}
 	return str_new;
-}
-
-/*
- * Free a string.
- * Null and str_empty are legal here to simplify callers.
- */
-void free_string( char *pstr ) {
-	if ( pstr == NULL || pstr == &str_empty[0] ) {
-		return;
-	}
-	free( pstr );
 }
 
 /*

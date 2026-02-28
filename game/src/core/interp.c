@@ -29,10 +29,10 @@
 #include "../db/db_game.h"
 #include "../systems/profile.h"
 
-bool check_social args( ( CHAR_DATA * ch, char *command,
-	char *argument ) );
+bool check_social ( CHAR_DATA * ch, char *command,
+	char *argument );
 
-int can_interpret args( ( CHAR_DATA * ch, int cmd ) );
+int can_interpret ( CHAR_DATA * ch, int cmd );
 
 int can_interpret( CHAR_DATA *ch, int cmd ) {
 	bool cando = FALSE;
@@ -1717,7 +1717,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 	 * Dispatch the command.
 	 */
 
-	if ( last_command != NULL ) free_string( last_command );
+	if ( last_command != NULL ) free(last_command);
 	sprintf( log_buf, "%s %s BY %s", cmd_table[cmd].name, argument, ch->name );
 	last_command = str_dup( log_buf );
 
@@ -2054,7 +2054,7 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 			q->next = p->next;
 		}
 
-		free_string( p->disabled_by );			/* free name of disabler */
+		free(p->disabled_by);			/* free name of disabler */
 		free( p ); /* free node */
 
 		save_disabled(); /* save to disk */

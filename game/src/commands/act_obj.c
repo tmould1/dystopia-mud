@@ -26,13 +26,13 @@
  * Local functions.
  */
 #define CD CHAR_DATA
-void get_obj args( ( CHAR_DATA * ch, OBJ_DATA *obj,
-	OBJ_DATA *container ) );
-CD *find_keeper args( ( CHAR_DATA * ch ) );
-int get_cost args( ( CHAR_DATA * keeper, OBJ_DATA *obj, bool fBuy ) );
-void sheath args( ( CHAR_DATA * ch, bool right ) );
-void draw args( ( CHAR_DATA * ch, bool right ) );
-void call_all args( ( CHAR_DATA * ch ) );
+void get_obj ( CHAR_DATA * ch, OBJ_DATA *obj,
+	OBJ_DATA *container );
+CD *find_keeper ( CHAR_DATA * ch );
+int get_cost ( CHAR_DATA * keeper, OBJ_DATA *obj, bool fBuy );
+void sheath ( CHAR_DATA * ch, bool right );
+void draw ( CHAR_DATA * ch, bool right );
+void call_all ( CHAR_DATA * ch );
 #undef CD
 
 void do_call( CHAR_DATA *ch, char *argument ) {
@@ -295,7 +295,7 @@ static void silent_oload( CHAR_DATA *ch, int vnum ) {
 	else
 		obj_to_room( obj, ch->in_room );
 
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 	obj->questmaker = str_dup( ch->name );
 }
 
@@ -3298,14 +3298,14 @@ void do_recharge( CHAR_DATA *ch, char *argument ) {
 	obj->cost = value * 1000;
 	obj->item_type = ITEM_QUEST;
 	obj_to_char( obj, ch );
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 	obj->questmaker = str_dup( ch->name );
-	free_string( obj->name );
+	free(obj->name);
 	obj->name = str_dup( "quest token" );
-	free_string( obj->short_descr );
+	free(obj->short_descr);
 	sprintf( buf, "a %d point quest token", value );
 	obj->short_descr = str_dup( buf );
-	free_string( obj->description );
+	free(obj->description);
 	sprintf( buf, "A %d point quest token lies on the floor.", value );
 	obj->description = str_dup( buf );
 	act( "You take $p from $P.", ch, obj, qobj, TO_CHAR );

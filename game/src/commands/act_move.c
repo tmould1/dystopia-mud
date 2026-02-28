@@ -24,7 +24,7 @@
 #include "../systems/mcmp.h"
 #include "../classes/artificer.h"
 
-void horn args( ( CHAR_DATA * ch ) );
+void horn ( CHAR_DATA * ch );
 
 char *const dir_name[] =
 	{
@@ -41,12 +41,12 @@ const int movement_loss[SECT_MAX] =
 /*
  * Local functions.
  */
-int find_door args( ( CHAR_DATA * ch, char *arg ) );
-bool has_key args( ( CHAR_DATA * ch, int key ) );
-int count_imms args( ( CHAR_DATA * ch ) );
-bool check_track args( ( CHAR_DATA * ch, int direction ) );
-void add_tracks args( ( CHAR_DATA * ch, int direction ) );
-void drow_hate args( ( CHAR_DATA * ch ) );
+int find_door ( CHAR_DATA * ch, char *arg );
+bool has_key ( CHAR_DATA * ch, int key );
+int count_imms ( CHAR_DATA * ch );
+bool check_track ( CHAR_DATA * ch, int direction );
+void add_tracks ( CHAR_DATA * ch, int direction );
+void drow_hate ( CHAR_DATA * ch );
 
 void move_char( CHAR_DATA *ch, int door ) {
 	CHAR_DATA *fch;
@@ -494,7 +494,7 @@ void do_humanform( CHAR_DATA *ch, char *argument )
 	ch->pcdata->chobj = NULL;
 	REMOVE_BIT(ch->affected_by, AFF_POLYMORPH);
 	REMOVE_BIT(ch->extra, EXTRA_OSWITCH);
-	free_string(ch->morph);
+	free(ch->morph);
 	ch->morph = str_dup("");
 	act("$p transforms into $n.",ch,obj,NULL,TO_ROOM);
 	act("Your reform your human body.",ch,obj,NULL,TO_CHAR);
@@ -4013,7 +4013,7 @@ void do_hunt( CHAR_DATA *ch, char *argument ) {
 
 	if ( arg[0] == '\0' ) {
 		if ( strlen( ch->hunting ) > 1 ) {
-			free_string( ch->hunting );
+			free(ch->hunting);
 			ch->hunting = str_dup( "" );
 			send_to_char( "You stop hunting your prey.\n\r", ch );
 		} else
@@ -4024,7 +4024,7 @@ void do_hunt( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "How can you hunt yourself?\n\r", ch );
 		return;
 	}
-	free_string( ch->hunting );
+	free(ch->hunting);
 	ch->hunting = str_dup( arg );
 	send_to_char( "Ok.\n\r", ch );
 	return;
@@ -4039,7 +4039,7 @@ void check_hunt( CHAR_DATA *ch ) {
 	in_room = ch->in_room;
 	if ( !IS_NPC( ch ) && number_percent() > ch->pcdata->learned[gsn_track] ) {
 		send_to_char( "You cannot sense any trails from this room.\n\r", ch );
-		free_string( ch->hunting );
+		free(ch->hunting);
 		ch->hunting = str_dup( "" );
 		return;
 	}
@@ -4060,7 +4060,7 @@ void check_hunt( CHAR_DATA *ch ) {
 		direction = ch->in_room->track_dir[4];
 	} else if ( ( victim = get_char_room( ch, ch->hunting ) ) == NULL ) {
 		send_to_char( "You cannot sense any trails from this room.\n\r", ch );
-		free_string( ch->hunting );
+		free(ch->hunting);
 		ch->hunting = str_dup( "" );
 		return;
 	}
@@ -4069,7 +4069,7 @@ void check_hunt( CHAR_DATA *ch ) {
 	act( "$n carefully examines the ground for tracks.", ch, NULL, NULL, TO_ROOM );
 	move_char( ch, direction );
 	if ( in_room == ch->in_room || victim != NULL ) {
-		free_string( ch->hunting );
+		free(ch->hunting);
 		ch->hunting = str_dup( "" );
 	}
 	return;
@@ -4086,44 +4086,44 @@ void add_tracks( CHAR_DATA *ch, int direction ) {
 	if ( IS_ITEMAFF( ch, ITEMA_STALKER ) ) return;
 	for ( loop = 0; loop <= 4; loop++ ) {
 		if ( ch->in_room->track[loop] != NULL && !str_cmp( ch->in_room->track[loop], ch->name ) ) {
-			free_string( ch->in_room->track[loop] );
+			free(ch->in_room->track[loop]);
 			ch->in_room->track[loop] = str_dup( "" );
 		}
 	}
 	if ( ch->in_room->track[0] != NULL && strlen( ch->in_room->track[0] ) < 2 ) {
-		free_string( ch->in_room->track[0] );
+		free(ch->in_room->track[0]);
 		ch->in_room->track[0] = str_dup( ch->pcdata->switchname );
 		ch->in_room->track_dir[0] = direction;
 	} else if ( ch->in_room->track[1] != NULL && strlen( ch->in_room->track[1] ) < 2 ) {
-		free_string( ch->in_room->track[1] );
+		free(ch->in_room->track[1]);
 		ch->in_room->track[1] = str_dup( ch->pcdata->switchname );
 		ch->in_room->track_dir[1] = direction;
 	} else if ( ch->in_room->track[2] != NULL && strlen( ch->in_room->track[2] ) < 2 ) {
-		free_string( ch->in_room->track[2] );
+		free(ch->in_room->track[2]);
 		ch->in_room->track[2] = str_dup( ch->pcdata->switchname );
 		ch->in_room->track_dir[2] = direction;
 	} else if ( ch->in_room->track[3] != NULL && strlen( ch->in_room->track[3] ) < 2 ) {
-		free_string( ch->in_room->track[3] );
+		free(ch->in_room->track[3]);
 		ch->in_room->track[3] = str_dup( ch->pcdata->switchname );
 		ch->in_room->track_dir[3] = direction;
 	} else if ( ch->in_room->track[4] != NULL && strlen( ch->in_room->track[4] ) < 2 ) {
-		free_string( ch->in_room->track[4] );
+		free(ch->in_room->track[4]);
 		ch->in_room->track[4] = str_dup( ch->pcdata->switchname );
 		ch->in_room->track_dir[4] = direction;
 	} else {
-		free_string( ch->in_room->track[0] );
+		free(ch->in_room->track[0]);
 		ch->in_room->track[0] = str_dup( ch->in_room->track[1] );
 		ch->in_room->track_dir[0] = ch->in_room->track_dir[1];
-		free_string( ch->in_room->track[1] );
+		free(ch->in_room->track[1]);
 		ch->in_room->track[1] = str_dup( ch->in_room->track[2] );
 		ch->in_room->track_dir[1] = ch->in_room->track_dir[2];
-		free_string( ch->in_room->track[2] );
+		free(ch->in_room->track[2]);
 		ch->in_room->track[2] = str_dup( ch->in_room->track[3] );
 		ch->in_room->track_dir[2] = ch->in_room->track_dir[3];
-		free_string( ch->in_room->track[3] );
+		free(ch->in_room->track[3]);
 		ch->in_room->track[3] = str_dup( ch->in_room->track[4] );
 		ch->in_room->track_dir[3] = ch->in_room->track_dir[4];
-		free_string( ch->in_room->track[4] );
+		free(ch->in_room->track[4]);
 		ch->in_room->track[4] = str_dup( ch->name );
 		ch->in_room->track_dir[4] = direction;
 	}
@@ -4143,7 +4143,7 @@ bool check_track( CHAR_DATA *ch, int direction ) {
 	if ( !str_cmp( ch->hunting, vict ) ) {
 		if ( ( victim = get_char_room( ch, vict ) ) != NULL ) {
 			act( "You have found $N!", ch, NULL, victim, TO_CHAR );
-			free_string( ch->hunting );
+			free(ch->hunting);
 			ch->hunting = str_dup( "" );
 			return TRUE;
 		}

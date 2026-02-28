@@ -277,7 +277,7 @@ void do_gfavor( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You turn into your normal form.\n\r", ch );
 		ch->damroll -= cfg( CFG_ABILITY_ANGEL_GFAVOR_DAMROLL_BONUS );
 		ch->hitroll -= cfg( CFG_ABILITY_ANGEL_GFAVOR_HITROLL_BONUS );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	}
@@ -290,7 +290,7 @@ void do_gfavor( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->newbits, NEW_CUBEFORM );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
 		sprintf( buf, "%s the angel", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		use_move( ch, cfg( CFG_ABILITY_ANGEL_GFAVOR_MOVE_COST ) );
 		use_mana( ch, cfg( CFG_ABILITY_ANGEL_GFAVOR_MANA_COST ) );

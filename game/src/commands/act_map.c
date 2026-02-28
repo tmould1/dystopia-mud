@@ -42,10 +42,10 @@ typedef struct map_data {
 } MAP_DATA;
 
 /* Local function prototypes */
-static void fill_map_bfs args( ( ROOM_INDEX_DATA * start, MAP_DATA *map,
-	int cx, int cy, int radius ) );
-static bool is_exit_one_way args( ( ROOM_INDEX_DATA * from, int dir ) );
-static void render_map args( ( CHAR_DATA * ch, MAP_DATA *map, int radius ) );
+static void fill_map_bfs ( ROOM_INDEX_DATA * start, MAP_DATA *map,
+	int cx, int cy, int radius );
+static bool is_exit_one_way ( ROOM_INDEX_DATA * from, int dir );
+static void render_map ( CHAR_DATA * ch, MAP_DATA *map, int radius );
 
 /*
  * Fill the map using BFS from the starting room.

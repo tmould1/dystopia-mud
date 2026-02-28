@@ -85,9 +85,9 @@ void win_prize( CHAR_DATA *ch ) {
 	obj = create_object( pIndex, 50 );
 	if ( vnum == OBJ_VNUM_PROTOPLASM ) {
 		obj->level = 1;
-		free_string( obj->short_descr );
-		free_string( obj->name );
-		free_string( obj->description );
+		free(obj->short_descr);
+		free(obj->name);
+		free(obj->description);
 		obj->short_descr = str_dup( "A prize token" );
 		obj->description = str_dup( "A token lies on the floor" );
 		obj->name = str_dup( "prize token" );
@@ -202,13 +202,13 @@ void powerdown( CHAR_DATA *ch ) {
 		{
 			REMOVE_BIT( ch->polyaff, POLY_ZULOFORM );
 			REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
-			free_string( ch->morph );
+			free(ch->morph);
 			ch->morph = str_dup( "" );
 		}
 	} else if ( IS_CLASS( ch, CLASS_DROW ) ) {
 		if ( IS_SET( ch->newbits, NEW_DFORM ) ) /* spiderform */
 		{
-			free_string( ch->morph );
+			free(ch->morph);
 			ch->morph = str_dup( "" );
 			REMOVE_BIT( ch->newbits, NEW_DFORM );
 			REMOVE_BIT( ch->newbits, THIRD_HAND );
@@ -218,14 +218,14 @@ void powerdown( CHAR_DATA *ch ) {
 		if ( IS_EXTRA( ch, EXTRA_DRAGON ) ) /* dragonform */
 		{
 			REMOVE_BIT( ch->extra, EXTRA_DRAGON );
-			free_string( ch->morph );
+			free(ch->morph);
 			ch->morph = str_dup( "" );
 		}
 		if ( IS_POLYAFF( ch, POLY_ZULOFORM ) ) /* zuloform */
 		{
 			REMOVE_BIT( ch->polyaff, POLY_ZULOFORM );
 			REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
-			free_string( ch->morph );
+			free(ch->morph);
 			ch->morph = str_dup( "" );
 		}
 	} else if ( IS_CLASS( ch, CLASS_TANARRI ) ) {
@@ -236,7 +236,7 @@ void powerdown( CHAR_DATA *ch ) {
 		{
 			ch->pcdata->powers[SHAPE_FORM] = 0;
 			REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
-			free_string( ch->morph );
+			free(ch->morph);
 			ch->morph = str_dup( "" );
 		}
 	} else if ( IS_CLASS( ch, CLASS_DROID ) ) {
@@ -244,7 +244,7 @@ void powerdown( CHAR_DATA *ch ) {
 		{
 			REMOVE_BIT( ch->newbits, NEW_CUBEFORM );
 			REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
-			free_string( ch->morph );
+			free(ch->morph);
 			ch->morph = str_dup( "" );
 		}
 	} else if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) ) {
@@ -255,7 +255,7 @@ void powerdown( CHAR_DATA *ch ) {
 		{
 			REMOVE_BIT( ch->newbits, NEW_CUBEFORM );
 			REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
-			free_string( ch->morph );
+			free(ch->morph);
 			ch->morph = str_dup( "" );
 		}
 	}
@@ -904,7 +904,7 @@ void recycle_descriptors() {
 		/*
 		 * Clear out that memory
 		 */
-		free_string( dclose->host );
+		free(dclose->host);
 		free( dclose->outbuf );
 
 		/*

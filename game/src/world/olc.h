@@ -29,7 +29,7 @@
 /*
  * New typedefs.
  */
-typedef bool OLC_FUN args( ( CHAR_DATA * ch, char *argument ) );
+typedef bool OLC_FUN ( CHAR_DATA * ch, char *argument );
 #define DECLARE_OLC_FUN( fun ) OLC_FUN fun
 
 /*
@@ -43,10 +43,10 @@ typedef bool OLC_FUN args( ( CHAR_DATA * ch, char *argument ) );
 /*
  * Interpreter Prototypes
  */
-void aedit args( ( CHAR_DATA * ch, char *argument ) );
-void redit args( ( CHAR_DATA * ch, char *argument ) );
-void medit args( ( CHAR_DATA * ch, char *argument ) );
-void oedit args( ( CHAR_DATA * ch, char *argument ) );
+void aedit ( CHAR_DATA * ch, char *argument );
+void redit ( CHAR_DATA * ch, char *argument );
+void medit ( CHAR_DATA * ch, char *argument );
+void oedit ( CHAR_DATA * ch, char *argument );
 
 /*
  * OLC Constants
@@ -72,14 +72,14 @@ struct editor_cmd_type {
 /*
  * Utils.
  */
-AREA_DATA *get_vnum_area args( ( int vnum ) );
-AREA_DATA *get_area_data args( ( int vnum ) );
-int flag_value args( ( const struct flag_type *flag_table,
-	char *argument ) );
-char *flag_string args( ( const struct flag_type *flag_table,
-	int bits ) );
-void add_reset args( ( ROOM_INDEX_DATA * room,
-	RESET_DATA *pReset, int index ) );
+AREA_DATA *get_vnum_area ( int vnum );
+AREA_DATA *get_area_data ( int vnum );
+int flag_value ( const struct flag_type *flag_table,
+	char *argument );
+char *flag_string ( const struct flag_type *flag_table,
+	int bits );
+void add_reset ( ROOM_INDEX_DATA * room,
+	RESET_DATA *pReset, int index );
 
 /*
  * Interpreter Table Prototypes
@@ -93,14 +93,14 @@ extern const struct olc_cmd_type medit_table[];
 /*
  * General Functions
  */
-bool show_commands args( ( CHAR_DATA * ch, char *argument ) );
-bool show_help args( ( CHAR_DATA * ch, char *argument ) );
-bool edit_done args( ( CHAR_DATA * ch ) );
-bool show_version args( ( CHAR_DATA * ch, char *argument ) );
+bool show_commands ( CHAR_DATA * ch, char *argument );
+bool show_help ( CHAR_DATA * ch, char *argument );
+bool edit_done ( CHAR_DATA * ch );
+bool show_version ( CHAR_DATA * ch, char *argument );
 
 /* help editor */
 #define ED_HELP 6
-void hedit args( ( CHAR_DATA * ch, char *argument ) );
+void hedit ( CHAR_DATA * ch, char *argument );
 extern const struct olc_cmd_type hedit_table[];
 DECLARE_DO_FUN( do_hedit );
 DECLARE_OLC_FUN( hedit_create );
@@ -111,12 +111,12 @@ DECLARE_OLC_FUN( hedit_index );
 DECLARE_OLC_FUN( hedit_change );
 DECLARE_OLC_FUN( hedit_delete );
 #define EDIT_HELP( Ch, Help ) ( Help = (HELP_DATA *) Ch->desc->pEdit )
-HELP_DATA *new_help_data args( (void) );
+HELP_DATA *new_help_data (void);
 
 /*
  * Save Prototypes (olc_save.c)
  */
-void save_area args( ( AREA_DATA *pArea ) );
+void save_area ( AREA_DATA *pArea );
 
 /*
  * Area Editor Prototypes
@@ -211,22 +211,22 @@ DECLARE_OLC_FUN( medit_value2 );
  */
 /* mem.c - memory prototypes. */
 #define ED EXTRA_DESCR_DATA
-RESET_DATA *new_reset_data args( (void) );
-void free_reset_data args( ( RESET_DATA * pReset ) );
-AREA_DATA *new_area args( (void) );
-void free_area args( ( AREA_DATA * pArea ) );
-EXIT_DATA *new_exit args( (void) );
-void free_exit args( ( EXIT_DATA * pExit ) );
-ED *new_extra_descr args( (void) );
-void free_extra_descr args( ( ED * pExtra ) );
-ROOM_INDEX_DATA *new_room_index args( (void) );
-void free_room_index args( ( ROOM_INDEX_DATA * pRoom ) );
-AFFECT_DATA *new_affect args( (void) );
-void free_affect args( ( AFFECT_DATA * pAf ) );
-SHOP_DATA *new_shop args( (void) );
-void free_shop args( ( SHOP_DATA * pShop ) );
-OBJ_INDEX_DATA *new_obj_index args( (void) );
-void free_obj_index args( ( OBJ_INDEX_DATA * pObj ) );
-MOB_INDEX_DATA *new_mob_index args( (void) );
-void free_mob_index args( ( MOB_INDEX_DATA * pMob ) );
+RESET_DATA *new_reset_data (void);
+void free_reset_data ( RESET_DATA * pReset );
+AREA_DATA *new_area (void);
+void free_area ( AREA_DATA * pArea );
+EXIT_DATA *new_exit (void);
+void free_exit ( EXIT_DATA * pExit );
+ED *new_extra_descr (void);
+void free_extra_descr ( ED * pExtra );
+ROOM_INDEX_DATA *new_room_index (void);
+void free_room_index ( ROOM_INDEX_DATA * pRoom );
+AFFECT_DATA *new_affect (void);
+void free_affect ( AFFECT_DATA * pAf );
+SHOP_DATA *new_shop (void);
+void free_shop ( SHOP_DATA * pShop );
+OBJ_INDEX_DATA *new_obj_index (void);
+void free_obj_index ( OBJ_INDEX_DATA * pObj );
+MOB_INDEX_DATA *new_mob_index (void);
+void free_mob_index ( MOB_INDEX_DATA * pMob );
 #undef ED

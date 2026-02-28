@@ -24,8 +24,8 @@
 #include <time.h>
 #include "merc.h"
 
-void frost_breath args( ( CHAR_DATA * ch, CHAR_DATA *victim, bool all ) );
-void fire_effect args( ( void *vo, int level, int dam, int target ) );
+void frost_breath ( CHAR_DATA * ch, CHAR_DATA *victim, bool all );
+void fire_effect ( void *vo, int level, int dam, int target );
 DECLARE_DO_FUN( do_stance );
 
 void do_deathsense( CHAR_DATA *ch, char *argument ) {
@@ -120,7 +120,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 	else {
 		obj = create_object( get_obj_index( 30043 ), 0 );
 		sprintf( buf, "A wall of ice is here, blocking your exit north." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 		obj_to_room( obj, ch->in_room );
 		obj->timer = 5;
@@ -131,7 +131,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 	else {
 		obj = create_object( get_obj_index( 30044 ), 0 );
 		sprintf( buf, "A wall of ice is here, blocking your exit south." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 		obj_to_room( obj, ch->in_room );
 		obj->timer = 5;
@@ -142,7 +142,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 	else {
 		obj = create_object( get_obj_index( 30045 ), 0 );
 		sprintf( buf, "A wall of ice is here, blocking your exit east." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 		obj_to_room( obj, ch->in_room );
 		obj->timer = 5;
@@ -153,7 +153,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 	else {
 		obj = create_object( get_obj_index( 30046 ), 0 );
 		sprintf( buf, "A wall of ice is here, blocking your exit west." );
-		free_string( obj->description );
+		free(obj->description);
 		obj->description = str_dup( buf );
 		obj_to_room( obj, ch->in_room );
 		obj->timer = 5;

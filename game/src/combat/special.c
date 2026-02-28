@@ -1953,16 +1953,16 @@ bool spec_zombie_lord( CHAR_DATA *ch ) {
 			char_to_room( victim, ch->in_room );
 			snprintf( buf, sizeof( buf ), "zombie %s", victim->name );
 			snprintf( buf, sizeof( buf ), "The zombie of %s stands here.\n\r", victim->short_descr );
-			free_string( victim->long_descr );
+			free(victim->long_descr);
 			victim->long_descr = str_dup( buf );
-			free_string( victim->name );
+			free(victim->name);
 			victim->name = str_dup( buf );
 			snprintf( buf, sizeof( buf ), "the zombie of %s", victim->short_descr );
-			free_string( victim->short_descr );
+			free(victim->short_descr);
 			victim->short_descr = str_dup( buf );
 			act( "$n makes a few gestures over $p.", ch, obj, NULL, TO_ROOM );
 			act( "$n clambers to $s feet.", victim, NULL, NULL, TO_ROOM );
-			free_string( victim->powertype );
+			free(victim->powertype);
 			victim->powertype = str_dup( "zombie" );
 			LIST_FOR_EACH_SAFE( obj_content, obj_next, &obj->contents, OBJ_DATA, content_node ) {
 				obj_from_obj( obj_content );

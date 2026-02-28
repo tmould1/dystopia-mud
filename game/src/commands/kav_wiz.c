@@ -897,9 +897,9 @@ void do_accept( CHAR_DATA *ch, char *argument )
 	*/
 	victim->pcdata->propose = NULL;
 	ch->pcdata->propose = NULL;
-	free_string( victim->pcdata->marriage );
+	free(victim->pcdata->marriage);
 	victim->pcdata->marriage = str_dup( ch->name );
-	free_string( ch->pcdata->marriage );
+	free(ch->pcdata->marriage);
 	ch->pcdata->marriage = str_dup( victim->name );
 	act( "You accept $S offer of marriage.", ch, NULL, victim, TO_CHAR );
 	act( "$n accepts $N's offer of marriage.", ch, NULL, victim, TO_NOTVICT );
@@ -1006,11 +1006,11 @@ void do_breakup( CHAR_DATA *ch, char *argument )
 
 	{
 
-		free_string( victim->pcdata->marriage );
+		free(victim->pcdata->marriage);
 
 		victim->pcdata->marriage = str_dup( "" );
 
-		free_string( ch->pcdata->marriage );
+		free(ch->pcdata->marriage);
 
 		ch->pcdata->marriage = str_dup( "" );
 
@@ -1189,11 +1189,11 @@ void do_divorce( CHAR_DATA *ch, char *argument )
 
 		REMOVE_BIT( victim2->extra, EXTRA_MARRIED );
 
-		free_string( victim1->pcdata->marriage );
+		free(victim1->pcdata->marriage);
 
 		victim1->pcdata->marriage = str_dup( "" );
 
-		free_string( victim2->pcdata->marriage );
+		free(victim2->pcdata->marriage);
 
 		victim2->pcdata->marriage = str_dup( "" );
 
@@ -1366,9 +1366,9 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 		ch->pcdata->quest -= value;
 		obj_to_char( obj, ch );
 		SET_BIT( obj->quest, QUEST_FREENAME );
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->pcdata->switchname );
-		if ( obj->questowner != NULL ) free_string( obj->questowner );
+		if ( obj->questowner != NULL ) free(obj->questowner);
 		obj->questowner = str_dup( ch->pcdata->switchname );
 		act( "You reach up into the air and draw out a ball of protoplasm.", ch, obj, NULL, TO_CHAR );
 		act( "$n reaches up into the air and draws out a ball of protoplasm.", ch, obj, NULL, TO_ROOM );
@@ -1447,7 +1447,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Ok.\n\r", ch );
 		if ( value < 1 ) value = 1;
 		ch->pcdata->quest -= value;
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 		return;
 	}
@@ -1475,7 +1475,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Ok.\n\r", ch );
 		if ( value < 1 ) value = 1;
 		ch->pcdata->quest -= value;
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 		return;
 	}
@@ -1503,7 +1503,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Ok.\n\r", ch );
 		if ( value < 1 ) value = 1;
 		ch->pcdata->quest -= value;
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 		return;
 	}
@@ -1566,7 +1566,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 			else
 				ch->pcdata->quest -= 10;
 			send_to_char( "Ok.\n\r", ch );
-			if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+			if ( obj->questmaker != NULL ) free(obj->questmaker);
 			obj->questmaker = str_dup( ch->pcdata->switchname );
 		} else {
 			send_to_char( "That item is not a weapon.\n\r", ch );
@@ -1677,7 +1677,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 
@@ -1798,7 +1798,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 
@@ -1962,7 +1962,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 
@@ -2154,7 +2154,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 
@@ -2225,7 +2225,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 
@@ -2261,7 +2261,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 
@@ -2348,31 +2348,31 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 
-		if ( obj->chpoweron != NULL ) free_string( obj->chpoweron );
+		if ( obj->chpoweron != NULL ) free(obj->chpoweron);
 
 		obj->chpoweron = str_dup( "You transform into a fine mist and seep into the ground." );
 
-		if ( obj->victpoweron != NULL ) free_string( obj->victpoweron );
+		if ( obj->victpoweron != NULL ) free(obj->victpoweron);
 
 		obj->victpoweron = str_dup( "$n transforms into a fine mist and seeps into the ground." );
 
-		if ( obj->chpoweroff != NULL ) free_string( obj->chpoweroff );
+		if ( obj->chpoweroff != NULL ) free(obj->chpoweroff);
 
 		obj->chpoweroff = str_dup( "You seep up from the ground and reform your body." );
 
-		if ( obj->victpoweroff != NULL ) free_string( obj->victpoweroff );
+		if ( obj->victpoweroff != NULL ) free(obj->victpoweroff);
 
 		obj->victpoweroff = str_dup( "A fine mist seeps up from the ground and reforms into $n." );
 
-		if ( obj->chpoweruse != NULL ) free_string( obj->chpoweruse );
+		if ( obj->chpoweruse != NULL ) free(obj->chpoweruse);
 
 		obj->chpoweruse = str_dup( "You activate $p." );
 
-		if ( obj->victpoweruse != NULL ) free_string( obj->victpoweruse );
+		if ( obj->victpoweruse != NULL ) free(obj->victpoweruse);
 
 		obj->victpoweruse = str_dup( "$n activates $p." );
 
@@ -2449,7 +2449,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->pcdata->switchname );
 
@@ -2646,13 +2646,13 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		if ( !str_cmp( endchar, "." ) ) arg3[strlen( arg3 ) - 1] = '\0';
 
-		free_string( obj->name );
+		free(obj->name);
 
 		obj->name = str_dup( arg3 );
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->name );
 
@@ -2748,13 +2748,13 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		if ( !str_cmp( endchar, "." ) ) arg3[strlen( arg3 ) - 1] = '\0';
 
-		free_string( obj->short_descr );
+		free(obj->short_descr);
 
 		obj->short_descr = str_dup( arg3 );
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->name );
 
@@ -2852,13 +2852,13 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		if ( str_cmp( endchar, "." ) ) strcat( arg3, "." );
 
-		free_string( obj->description );
+		free(obj->description);
 
 		obj->description = str_dup( arg3 );
 
 		send_to_char( "Ok.\n\r", ch );
 
-		if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+		if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 		obj->questmaker = str_dup( ch->name );
 
@@ -3000,7 +3000,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->chpoweron );
+			free(obj->chpoweron);
 
 			obj->chpoweron = str_dup( "(null)" );
 
@@ -3024,7 +3024,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 			{
 
-				free_string( obj->chpoweron );
+				free(obj->chpoweron);
 
 				strcat( buf, "\n\r" );
 
@@ -3039,7 +3039,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->chpoweron );
+			free(obj->chpoweron);
 
 			obj->chpoweron = str_dup( arg3 );
 		}
@@ -3109,7 +3109,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->victpoweron );
+			free(obj->victpoweron);
 
 			obj->victpoweron = str_dup( "(null)" );
 
@@ -3133,7 +3133,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 			{
 
-				free_string( obj->victpoweron );
+				free(obj->victpoweron);
 
 				strcat( buf, "\n\r" );
 
@@ -3148,7 +3148,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->victpoweron );
+			free(obj->victpoweron);
 
 			obj->victpoweron = str_dup( arg3 );
 		}
@@ -3218,7 +3218,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->chpoweroff );
+			free(obj->chpoweroff);
 
 			obj->chpoweroff = str_dup( "(null)" );
 
@@ -3242,7 +3242,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 			{
 
-				free_string( obj->chpoweroff );
+				free(obj->chpoweroff);
 
 				strcat( buf, "\n\r" );
 
@@ -3257,7 +3257,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->chpoweroff );
+			free(obj->chpoweroff);
 
 			obj->chpoweroff = str_dup( arg3 );
 		}
@@ -3327,7 +3327,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->victpoweroff );
+			free(obj->victpoweroff);
 
 			obj->victpoweroff = str_dup( "(null)" );
 
@@ -3351,7 +3351,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 			{
 
-				free_string( obj->victpoweroff );
+				free(obj->victpoweroff);
 
 				strcat( buf, "\n\r" );
 
@@ -3366,7 +3366,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->victpoweroff );
+			free(obj->victpoweroff);
 
 			obj->victpoweroff = str_dup( arg3 );
 		}
@@ -3418,7 +3418,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->chpoweruse );
+			free(obj->chpoweruse);
 
 			obj->chpoweruse = str_dup( "(null)" );
 
@@ -3442,7 +3442,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 			{
 
-				free_string( obj->chpoweruse );
+				free(obj->chpoweruse);
 
 				strcat( buf, "\n\r" );
 
@@ -3457,7 +3457,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->chpoweruse );
+			free(obj->chpoweruse);
 
 			obj->chpoweruse = str_dup( arg3 );
 		}
@@ -3509,7 +3509,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->victpoweruse );
+			free(obj->victpoweruse);
 
 			obj->victpoweruse = str_dup( "(null)" );
 
@@ -3533,7 +3533,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 			{
 
-				free_string( obj->victpoweruse );
+				free(obj->victpoweruse);
 
 				strcat( buf, "\n\r" );
 
@@ -3548,7 +3548,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			free_string( obj->victpoweruse );
+			free(obj->victpoweruse);
 
 			obj->victpoweruse = str_dup( arg3 );
 		}
@@ -3717,7 +3717,7 @@ void oset_affect( CHAR_DATA *ch, OBJ_DATA *obj, int value, int affect, bool is_q
 
 	obj->points += cost;
 
-	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
+	if ( obj->questmaker != NULL ) free(obj->questmaker);
 
 	obj->questmaker = str_dup( ch->name );
 

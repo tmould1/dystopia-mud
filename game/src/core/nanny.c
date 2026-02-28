@@ -263,7 +263,7 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 		do_password( ch, kav );
 	}
 
-	if ( ch->lasthost != NULL ) free_string( ch->lasthost );
+	if ( ch->lasthost != NULL ) free(ch->lasthost);
 	if ( ch->desc != NULL && ch->desc->host != NULL ) {
 		ch->lasthost = str_dup( ch->desc->host );
 	} else {
@@ -271,7 +271,7 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 	}
 	strtime = ctime( &current_time );
 	strtime[strlen( strtime ) - 1] = '\0';
-	free_string( ch->lasttime );
+	free(ch->lasttime);
 	ch->lasttime = str_dup( strtime );
 	sprintf( log_buf, "%s@%s has connected.", ch->name, mask_ip( ch->lasthost ) );
 	log_string( log_buf );
@@ -443,7 +443,7 @@ static void nanny_get_new_password( DESCRIPTOR_DATA *d, char *argument ) {
 		}
 	}
 
-	free_string( ch->pcdata->pwd );
+	free(ch->pcdata->pwd);
 	ch->pcdata->pwd = str_dup( pwdnew );
 
 	write_to_buffer( d, " Please retype password: ", 0 );
@@ -1037,7 +1037,7 @@ bool check_reconnect( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 	LIST_FOR_EACH( ch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( ch ) && !IS_EXTRA( ch, EXTRA_SWITCH ) && ( !fConn || ch->desc == NULL ) && !str_cmp( GET_PC_NAME( d->character ), GET_PC_NAME( ch ) ) ) {
 			if ( fConn == FALSE ) {
-				free_string( d->character->pcdata->pwd );
+				free(d->character->pcdata->pwd);
 				d->character->pcdata->pwd = str_dup( ch->pcdata->pwd );
 			} else {
 				free_char( d->character );
@@ -1075,7 +1075,7 @@ bool check_kickoff( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 	LIST_FOR_EACH( ch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( ch ) && ( !fConn || ch->desc == NULL ) && !str_cmp( GET_PC_NAME( d->character ), GET_PC_NAME( ch ) ) ) {
 			if ( fConn == FALSE ) {
-				free_string( d->character->pcdata->pwd );
+				free(d->character->pcdata->pwd);
 				d->character->pcdata->pwd = str_dup( ch->pcdata->pwd );
 			} else {
 				free_char( d->character );

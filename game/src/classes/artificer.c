@@ -287,16 +287,16 @@ void do_turret( CHAR_DATA *ch, char *argument ) {
 
 	/* Customize appearance */
 	snprintf( buf, sizeof( buf ), "%s's auto-turret", ch->name );
-	free_string( turret->short_descr );
+	free(turret->short_descr);
 	turret->short_descr = str_dup( buf );
 	{
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *pc = br ? br->primary_color : "";
 		snprintf( buf, sizeof( buf ), "%sA mechanical auto-turret belonging to %s hums with energy here.#n\n\r", pc, ch->name );
 	}
-	free_string( turret->long_descr );
+	free(turret->long_descr);
 	turret->long_descr = str_dup( buf );
-	free_string( turret->name );
+	free(turret->name);
 	turret->name = str_dup( "turret auto-turret" );
 
 	/* Set turret flags */
@@ -305,7 +305,7 @@ void do_turret( CHAR_DATA *ch, char *argument ) {
 	turret->spec_fun = NULL;
 
 	/* Link to owner */
-	free_string( turret->lord );
+	free(turret->lord);
 	turret->lord = str_dup( ch->name );
 	turret->wizard = ch;
 

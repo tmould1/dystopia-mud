@@ -52,7 +52,7 @@ char compress2_start[] = { IAC, SB, TELOPT_COMPRESS2, IAC, SE, '\0' };
 #endif
 
 bool processCompressed( DESCRIPTOR_DATA *desc );
-bool write_to_descriptor args( ( DESCRIPTOR_DATA * d, char *txt, int length ) );
+bool write_to_descriptor ( DESCRIPTOR_DATA * d, char *txt, int length );
 
 /*
  * Memory management - zlib uses these hooks to allocate and free memory

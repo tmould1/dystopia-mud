@@ -34,7 +34,7 @@
 LEADER_BOARD leader_board;
 TOP_BOARD top_board[MAX_TOP_PLAYERS + 1];
 
-void sort_top_board args( (void) );
+void sort_top_board (void);
 
 void load_topboard() {
 	int i;
@@ -67,11 +67,11 @@ void update_top_board( CHAR_DATA *ch ) {
 		if ( get_ratio( ch ) > top_board[i].pkscore ) {
 			for ( j = MAX_TOP_PLAYERS; j > i; j-- ) {
 				top_board[j].pkscore = top_board[j - 1].pkscore;
-				free_string( top_board[j].name );
+				free(top_board[j].name);
 				top_board[j].name = str_dup( top_board[j - 1].name );
 			}
 			top_board[i].pkscore = get_ratio( ch );
-			free_string( top_board[i].name );
+			free(top_board[i].name);
 			top_board[i].name = str_dup( ch->name );
 			changed = TRUE;
 			i = MAX_TOP_PLAYERS + 1;
@@ -90,10 +90,10 @@ void sort_top_board() {
 		if ( top_board[i].pkscore < top_board[i + 1].pkscore ) {
 			tempscore = top_board[i].pkscore;
 			sprintf( buf, "%s", top_board[i].name );
-			free_string( top_board[i].name );
+			free(top_board[i].name);
 			top_board[i].name = str_dup( top_board[i + 1].name );
 			top_board[i].pkscore = top_board[i + 1].pkscore;
-			free_string( top_board[i + 1].name );
+			free(top_board[i + 1].name);
 			top_board[i + 1].name = str_dup( buf );
 			;
 			top_board[i + 1].pkscore = tempscore;
@@ -192,43 +192,43 @@ void check_leaderboard( CHAR_DATA *ch ) {
 	if ( ch->level > 6 ) return;
 	if ( get_ratio( ch ) > leader_board.bestpk_number || !str_cmp( leader_board.bestpk_name, ch->name ) ) {
 		leader_board.bestpk_number = get_ratio( ch );
-		free_string( leader_board.bestpk_name );
+		free(leader_board.bestpk_name);
 		leader_board.bestpk_name = str_dup( ch->name );
 		changed = TRUE;
 	}
 	if ( ch->mdeath > leader_board.md_number ) {
 		leader_board.md_number = ch->mdeath;
-		free_string( leader_board.md_name );
+		free(leader_board.md_name);
 		leader_board.md_name = str_dup( ch->name );
 		changed = TRUE;
 	}
 	if ( ch->mkill > leader_board.mk_number ) {
 		leader_board.mk_number = ch->mkill;
-		free_string( leader_board.mk_name );
+		free(leader_board.mk_name);
 		leader_board.mk_name = str_dup( ch->name );
 		changed = TRUE;
 	}
 	if ( ch->pkill > leader_board.pk_number ) {
 		leader_board.pk_number = ch->pkill;
-		free_string( leader_board.pk_name );
+		free(leader_board.pk_name);
 		leader_board.pk_name = str_dup( ch->name );
 		changed = TRUE;
 	}
 	if ( ch->pdeath > leader_board.pd_number ) {
 		leader_board.pd_number = ch->pdeath;
-		free_string( leader_board.pd_name );
+		free(leader_board.pd_name);
 		leader_board.pd_name = str_dup( ch->name );
 		changed = TRUE;
 	}
 	if ( ch->pcdata->questsrun > leader_board.qc_number ) {
 		leader_board.qc_number = ch->pcdata->questsrun;
-		free_string( leader_board.qc_name );
+		free(leader_board.qc_name);
 		leader_board.qc_name = str_dup( ch->name );
 		changed = TRUE;
 	}
 	if ( ( get_age( ch ) - 17 ) * 2 > leader_board.tt_number ) {
 		leader_board.tt_number = ( get_age( ch ) - 17 ) * 2;
-		free_string( leader_board.tt_name );
+		free(leader_board.tt_name);
 		leader_board.tt_name = str_dup( ch->name );
 		changed = TRUE;
 	}
@@ -239,25 +239,25 @@ void check_leaderboard( CHAR_DATA *ch ) {
 void do_leaderclear( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
 	if ( ch->level < 7 ) return;
-	free_string( leader_board.bestpk_name );
+	free(leader_board.bestpk_name);
 	leader_board.bestpk_name = str_dup( "Noone" );
 	leader_board.bestpk_number = 0;
-	free_string( leader_board.pk_name );
+	free(leader_board.pk_name);
 	leader_board.pk_name = str_dup( "Noone" );
 	leader_board.pk_number = 0;
-	free_string( leader_board.pd_name );
+	free(leader_board.pd_name);
 	leader_board.pd_name = str_dup( "Noone" );
 	leader_board.pd_number = 0;
-	free_string( leader_board.md_name );
+	free(leader_board.md_name);
 	leader_board.md_name = str_dup( "Noone" );
 	leader_board.md_number = 0;
-	free_string( leader_board.mk_name );
+	free(leader_board.mk_name);
 	leader_board.mk_name = str_dup( "Noone" );
 	leader_board.mk_number = 0;
-	free_string( leader_board.qc_name );
+	free(leader_board.qc_name);
 	leader_board.qc_name = str_dup( "Noone" );
 	leader_board.qc_number = 0;
-	free_string( leader_board.tt_name );
+	free(leader_board.tt_name);
 	leader_board.tt_name = str_dup( "Noone" );
 	leader_board.tt_number = 0;
 	save_leaderboard();
@@ -289,7 +289,7 @@ void do_topclear( CHAR_DATA *ch, char *argument ) {
 	if ( ch->level < MAX_LEVEL ) return;
 	for ( i = 1; i <= MAX_TOP_PLAYERS; i++ ) {
 		top_board[i].pkscore = 0;
-		free_string( top_board[i].name );
+		free(top_board[i].name);
 		top_board[i].name = str_dup( "Noone" );
 	}
 	save_topboard();

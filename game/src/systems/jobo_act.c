@@ -1478,7 +1478,7 @@ void do_setdecap( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !IS_SET( ch->pcdata->jflags, JFLAG_SETDECAP ) ) SET_BIT( ch->pcdata->jflags, JFLAG_SETDECAP );
-	free_string( ch->pcdata->decapmessage );
+	free(ch->pcdata->decapmessage);
 	ch->pcdata->decapmessage = str_dup( argument );
 	ch->pcdata->quest -= cost;
 	send_to_char( "done.\n\r", ch );
@@ -1509,7 +1509,7 @@ void do_settie( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !IS_SET( ch->pcdata->jflags, JFLAG_SETTIE ) ) SET_BIT( ch->pcdata->jflags, JFLAG_SETTIE );
-	free_string( ch->pcdata->tiemessage );
+	free(ch->pcdata->tiemessage);
 	ch->pcdata->tiemessage = str_dup( argument );
 	ch->pcdata->quest -= cost;
 	send_to_char( "done.\n\r", ch );
@@ -1540,7 +1540,7 @@ void do_setlogout( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !IS_SET( ch->pcdata->jflags, JFLAG_SETLOGOUT ) ) SET_BIT( ch->pcdata->jflags, JFLAG_SETLOGOUT );
-	free_string( ch->pcdata->logoutmessage );
+	free(ch->pcdata->logoutmessage);
 	ch->pcdata->logoutmessage = str_dup( argument );
 	ch->pcdata->quest -= cost;
 	send_to_char( "done.\n\r", ch );
@@ -1571,7 +1571,7 @@ void do_setlogin( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !IS_SET( ch->pcdata->jflags, JFLAG_SETLOGIN ) ) SET_BIT( ch->pcdata->jflags, JFLAG_SETLOGIN );
-	free_string( ch->pcdata->loginmessage );
+	free(ch->pcdata->loginmessage);
 	ch->pcdata->loginmessage = str_dup( argument );
 	ch->pcdata->quest -= cost;
 	send_to_char( "done.\n\r", ch );
@@ -1602,7 +1602,7 @@ void do_setavatar( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !IS_SET( ch->pcdata->jflags, JFLAG_SETAVATAR ) ) SET_BIT( ch->pcdata->jflags, JFLAG_SETAVATAR );
-	free_string( ch->pcdata->avatarmessage );
+	free(ch->pcdata->avatarmessage);
 	ch->pcdata->avatarmessage = str_dup( argument );
 	ch->pcdata->quest -= cost;
 	send_to_char( "done.\n\r", ch );

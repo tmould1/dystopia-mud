@@ -261,7 +261,7 @@ void do_hatform( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->chobj = obj;
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->extra, EXTRA_OSWITCH );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( obj->short_descr );
 	return;
 }
@@ -303,7 +303,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
 		sprintf( buf, "%s the huge phase tiger", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( arg, "hydra" ) ) {
@@ -325,7 +325,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
 		sprintf( buf, "%s the horrific hydra", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( arg, "bull" ) ) {
@@ -347,7 +347,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
 		sprintf( buf, "%s the black bull", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( arg, "faerie" ) ) {
@@ -369,7 +369,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
 		sprintf( buf, "%s the small pixie", ch->name );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( arg, "human" ) ) {
@@ -397,7 +397,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		ch->pcdata->powers[SHAPE_FORM] = 0;
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		send_to_char( "Your return to your human form.\n\r", ch );
-		free_string( ch->morph );
+		free(ch->morph);
 		ch->morph = str_dup( "" );
 		return;
 	} else {
@@ -613,12 +613,12 @@ void do_camouflage( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg2, "name" ) ) {
-		free_string( obj->name );
+		free(obj->name);
 		obj->name = str_dup( arg3 );
 		obj->questmaker = str_dup( ch->name );
 	}
 	if ( !str_cmp( arg2, "short" ) ) {
-		free_string( obj->short_descr );
+		free(obj->short_descr);
 		obj->short_descr = str_dup( arg3 );
 		obj->questmaker = str_dup( ch->name );
 	}
@@ -657,7 +657,7 @@ void do_shapeshift( CHAR_DATA *ch, char *argument ) {
 	send_to_char( argument, ch );
 	send_to_char( ".\n\r", ch );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
-	free_string( ch->morph );
+	free(ch->morph);
 	ch->morph = str_dup( argument );
 	return;
 }

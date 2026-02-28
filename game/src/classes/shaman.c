@@ -437,7 +437,7 @@ static CHAR_DATA *shaman_create_totem( CHAR_DATA *ch, int totem_type )
 	totem->armor  = 0;
 
 	snprintf( buf, sizeof(buf), "%s's %s Totem", ch->name, totem_name );
-	free_string( totem->short_descr );
+	free(totem->short_descr);
 	totem->short_descr = str_dup( buf );
 
 	{
@@ -447,18 +447,18 @@ static CHAR_DATA *shaman_create_totem( CHAR_DATA *ch, int totem_type )
 			"%sA glowing %s Totem belonging to %s pulses with spirit energy here.#n\n\r",
 			pc, totem_name, ch->name );
 	}
-	free_string( totem->long_descr );
+	free(totem->long_descr);
 	totem->long_descr = str_dup( buf );
 
 	snprintf( buf, sizeof(buf), "totem %s", totem_name );
-	free_string( totem->name );
+	free(totem->name);
 	totem->name = str_dup( buf );
 
 	SET_BIT( totem->act, ACT_SENTINEL );
 	SET_BIT( totem->act, ACT_NOEXP );
 	totem->spec_fun = NULL;
 
-	free_string( totem->lord );
+	free(totem->lord);
 	totem->lord = str_dup( ch->name );
 	totem->wizard = ch;
 

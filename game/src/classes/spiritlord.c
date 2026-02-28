@@ -642,7 +642,7 @@ void do_spiritarmy( CHAR_DATA *ch, char *argument )
 		warrior->armor   = -200;
 
 		snprintf( buf, sizeof(buf), "%s's spirit warrior", ch->name );
-		free_string( warrior->short_descr );
+		free(warrior->short_descr);
 		warrior->short_descr = str_dup( buf );
 
 		{
@@ -652,17 +652,17 @@ void do_spiritarmy( CHAR_DATA *ch, char *argument )
 				"%sA spectral warrior bound to %s hovers here, weapons ready.#n\n\r",
 				pc, ch->name );
 		}
-		free_string( warrior->long_descr );
+		free(warrior->long_descr);
 		warrior->long_descr = str_dup( buf );
 
-		free_string( warrior->name );
+		free(warrior->name);
 		warrior->name = str_dup( "spirit warrior spectral" );
 
 		SET_BIT( warrior->act, ACT_SENTINEL );
 		SET_BIT( warrior->act, ACT_NOEXP );
 		warrior->spec_fun = NULL;
 
-		free_string( warrior->lord );
+		free(warrior->lord);
 		warrior->lord = str_dup( ch->name );
 		warrior->wizard = ch;
 

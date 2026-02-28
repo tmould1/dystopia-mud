@@ -23,7 +23,7 @@
 #include "merc.h"
 #include "cfg.h"
 
-int dambonus args( ( CHAR_DATA * ch, CHAR_DATA *victim, int dam, int stance ) );
+int dambonus ( CHAR_DATA * ch, CHAR_DATA *victim, int dam, int stance );
 
 int find_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam, bool foot ) {
 	OBJ_DATA *boots;

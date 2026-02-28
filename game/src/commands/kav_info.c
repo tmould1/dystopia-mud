@@ -23,7 +23,7 @@
 #include "merc.h"
 
 #define SCREEN_WIDTH 79
-int col_str_len args( ( char *text ) );
+int col_str_len ( char *text );
 
 void centre_text( char *text, CHAR_DATA *ch ) {
 	int number;

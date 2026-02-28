@@ -214,16 +214,16 @@ void do_combatdrone( CHAR_DATA *ch, char *argument ) {
 
 	/* Customize appearance */
 	snprintf( buf, sizeof(buf), "%s's combat drone", ch->name );
-	free_string( drone->short_descr );
+	free(drone->short_descr);
 	drone->short_descr = str_dup( buf );
 	{
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *pc = br ? br->primary_color : "";
 		snprintf( buf, sizeof(buf), "%sA sleek combat drone belonging to %s hovers here, weapons ready.#n\n\r", pc, ch->name );
-		free_string( drone->long_descr );
+		free(drone->long_descr);
 		drone->long_descr = str_dup( buf );
 	}
-	free_string( drone->name );
+	free(drone->name);
 	drone->name = str_dup( "drone combat-drone" );
 
 	/* Set drone flags - NO ACT_SENTINEL so drones follow */
@@ -231,7 +231,7 @@ void do_combatdrone( CHAR_DATA *ch, char *argument ) {
 	drone->spec_fun = NULL;
 
 	/* Link to owner */
-	free_string( drone->lord );
+	free(drone->lord);
 	drone->lord = str_dup( ch->name );
 	drone->wizard = ch;
 
@@ -360,16 +360,16 @@ void do_bomberdrone( CHAR_DATA *ch, char *argument ) {
 
 	/* Customize appearance */
 	snprintf( buf, sizeof(buf), "%s's bomber drone", ch->name );
-	free_string( drone->short_descr );
+	free(drone->short_descr);
 	drone->short_descr = str_dup( buf );
 	{
 		const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 		const char *ac = br ? br->accent_color : "";
 		snprintf( buf, sizeof(buf), "%sA volatile bomber drone belonging to %s hovers here, blinking ominously.#n\n\r", ac, ch->name );
 	}
-	free_string( drone->long_descr );
+	free(drone->long_descr);
 	drone->long_descr = str_dup( buf );
-	free_string( drone->name );
+	free(drone->name);
 	drone->name = str_dup( "drone bomber-drone" );
 
 	/* Set drone flags - follows owner, no combat */
@@ -377,7 +377,7 @@ void do_bomberdrone( CHAR_DATA *ch, char *argument ) {
 	drone->spec_fun = NULL;
 
 	/* Link to owner */
-	free_string( drone->lord );
+	free(drone->lord);
 	drone->lord = str_dup( ch->name );
 	drone->wizard = ch;
 
@@ -540,22 +540,22 @@ void do_dronearmy( CHAR_DATA *ch, char *argument ) {
 		drone->armor = -200;
 
 		snprintf( buf, sizeof(buf), "%s's combat drone", ch->name );
-		free_string( drone->short_descr );
+		free(drone->short_descr);
 		drone->short_descr = str_dup( buf );
 		{
 			const CLASS_BRACKET *br = db_class_get_bracket( ch->class );
 			const char *pc = br ? br->primary_color : "";
 			snprintf( buf, sizeof(buf), "%sA sleek combat drone belonging to %s hovers here, weapons ready.#n\n\r", pc, ch->name );
 		}
-		free_string( drone->long_descr );
+		free(drone->long_descr);
 		drone->long_descr = str_dup( buf );
-		free_string( drone->name );
+		free(drone->name);
 		drone->name = str_dup( "drone combat-drone" );
 
 		SET_BIT( drone->act, ACT_NOEXP );
 		drone->spec_fun = NULL;
 
-		free_string( drone->lord );
+		free(drone->lord);
 		drone->lord = str_dup( ch->name );
 		drone->wizard = ch;
 

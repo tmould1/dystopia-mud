@@ -156,7 +156,7 @@ void set_switchname( CHAR_DATA *ch, char *title ) {
 		return;
 	}
 	strcpy( buf, title );
-	free_string( ch->pcdata->switchname );
+	free(ch->pcdata->switchname);
 	ch->pcdata->switchname = str_dup( buf );
 	return;
 }
@@ -169,7 +169,7 @@ void set_pc_name( CHAR_DATA *ch, char *title ) {
 		return;
 	}
 	strcpy( buf, title );
-	free_string( ch->name );
+	free(ch->name);
 	ch->name = str_dup( buf );
 	return;
 }

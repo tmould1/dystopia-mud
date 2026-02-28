@@ -319,7 +319,7 @@ void db_sql_free_scan( char **filenames, int count ) {
 	if ( !filenames )
 		return;
 	for ( i = 0; i < count; i++ )
-		free_string( filenames[i] );
+		free(filenames[i]);
 	free( filenames );
 }
 

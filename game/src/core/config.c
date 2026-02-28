@@ -110,7 +110,7 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( modified_field, "Game Name" );
 		sprintf( old_value, "%s", game_config.game_name );
 		sprintf( new_value, "%s", arg2 );
-		free_string( game_config.game_name );
+		free(game_config.game_name);
 		game_config.game_name = str_dup( new_value );
 	} else if ( !str_cmp( arg, "gui_url" ) ) {
 		// if arg2 is blank, report the value
@@ -124,7 +124,7 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( modified_field, "GUI URL" );
 		sprintf( old_value, "%s", game_config.gui_url );
 		sprintf( new_value, "%s", arg2 );
-		free_string( game_config.gui_url );
+		free(game_config.gui_url);
 		game_config.gui_url = str_dup( new_value );
 	} else if ( !str_cmp( arg, "gui_version" ) ) {
 		// if arg2 is blank, report the value
@@ -138,7 +138,7 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( modified_field, "GUI Version" );
 		sprintf( old_value, "%s", game_config.gui_version );
 		sprintf( new_value, "%s", arg2 );
-		free_string( game_config.gui_version );
+		free(game_config.gui_version);
 		game_config.gui_version = str_dup( new_value );
 	} else if ( !str_cmp( arg, "banner_left" ) ) {
 		// if arg2 is blank, report the value
@@ -152,7 +152,7 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( modified_field, "Banner Left Endcap" );
 		sprintf( old_value, "%s", game_config.banner_left );
 		sprintf( new_value, "%s", arg2 );
-		free_string( game_config.banner_left );
+		free(game_config.banner_left);
 		game_config.banner_left = str_dup( new_value );
 	} else if ( !str_cmp( arg, "banner_right" ) ) {
 		// if arg2 is blank, report the value
@@ -166,7 +166,7 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( modified_field, "Banner Right Endcap" );
 		sprintf( old_value, "%s", game_config.banner_right );
 		sprintf( new_value, "%s", arg2 );
-		free_string( game_config.banner_right );
+		free(game_config.banner_right);
 		game_config.banner_right = str_dup( new_value );
 	} else if ( !str_cmp( arg, "banner_fill" ) ) {
 		// if arg2 is blank, report the value
@@ -180,7 +180,7 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( modified_field, "Banner Fill" );
 		sprintf( old_value, "%s", game_config.banner_fill );
 		sprintf( new_value, "%s", arg2 );
-		free_string( game_config.banner_fill );
+		free(game_config.banner_fill);
 		game_config.banner_fill = str_dup( new_value );
 	} else if ( !str_cmp( arg, "audio_url" ) ) {
 		if ( arg2[0] == '\0' ) {
@@ -193,7 +193,7 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		sprintf( modified_field, "MCMP Audio Base URL" );
 		sprintf( old_value, "%s", game_config.audio_url );
 		sprintf( new_value, "%s", arg2 );
-		free_string( game_config.audio_url );
+		free(game_config.audio_url);
 		game_config.audio_url = str_dup( new_value );
 	}
 	// arg1 not recognized, show prompt

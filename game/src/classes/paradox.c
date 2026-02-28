@@ -14,7 +14,7 @@
 #include "../db/db_class.h"
 
 /* Forward declarations from chronomancer.c */
-extern int get_chrono_power_mod args( ( CHAR_DATA *ch, bool is_accel ) );
+extern int get_chrono_power_mod ( CHAR_DATA *ch, bool is_accel );
 
 
 /*
