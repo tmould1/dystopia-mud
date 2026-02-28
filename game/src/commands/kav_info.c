@@ -150,55 +150,55 @@ void skillstance( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	stance = victim->stance[0];
 	if ( stance < 1 || stance > 11 ) return;
 	if ( victim->stance[stance] <= 0 )
-		sprintf( bufskill, "completely unskilled in" );
+		snprintf( bufskill, sizeof( bufskill ), "completely unskilled in" );
 	else if ( victim->stance[stance] <= 25 )
-		sprintf( bufskill, "an apprentice of" );
+		snprintf( bufskill, sizeof( bufskill ), "an apprentice of" );
 	else if ( victim->stance[stance] <= 50 )
-		sprintf( bufskill, "a trainee of" );
+		snprintf( bufskill, sizeof( bufskill ), "a trainee of" );
 	else if ( victim->stance[stance] <= 75 )
-		sprintf( bufskill, "a student of" );
+		snprintf( bufskill, sizeof( bufskill ), "a student of" );
 	else if ( victim->stance[stance] <= 100 )
-		sprintf( bufskill, "fairly experienced in" );
+		snprintf( bufskill, sizeof( bufskill ), "fairly experienced in" );
 	else if ( victim->stance[stance] <= 125 )
-		sprintf( bufskill, "well trained in" );
+		snprintf( bufskill, sizeof( bufskill ), "well trained in" );
 	else if ( victim->stance[stance] <= 150 )
-		sprintf( bufskill, "highly skilled in" );
+		snprintf( bufskill, sizeof( bufskill ), "highly skilled in" );
 	else if ( victim->stance[stance] <= 175 )
-		sprintf( bufskill, "an expert of" );
+		snprintf( bufskill, sizeof( bufskill ), "an expert of" );
 	else if ( victim->stance[stance] <= 199 )
-		sprintf( bufskill, "a master of" );
+		snprintf( bufskill, sizeof( bufskill ), "a master of" );
 	else if ( victim->stance[stance] >= 200 )
-		sprintf( bufskill, "a grand master of" );
+		snprintf( bufskill, sizeof( bufskill ), "a grand master of" );
 	else
 		return;
 	if ( stance == STANCE_VIPER )
-		sprintf( stancename, "viper" );
+		snprintf( stancename, sizeof( stancename ), "viper" );
 	else if ( stance == STANCE_CRANE )
-		sprintf( stancename, "crane" );
+		snprintf( stancename, sizeof( stancename ), "crane" );
 	else if ( stance == STANCE_CRAB )
-		sprintf( stancename, "crab" );
+		snprintf( stancename, sizeof( stancename ), "crab" );
 	else if ( stance == STANCE_MONGOOSE )
-		sprintf( stancename, "mongoose" );
+		snprintf( stancename, sizeof( stancename ), "mongoose" );
 	else if ( stance == STANCE_BULL )
-		sprintf( stancename, "bull" );
+		snprintf( stancename, sizeof( stancename ), "bull" );
 	else if ( stance == STANCE_MANTIS )
-		sprintf( stancename, "mantis" );
+		snprintf( stancename, sizeof( stancename ), "mantis" );
 	else if ( stance == STANCE_DRAGON )
-		sprintf( stancename, "dragon" );
+		snprintf( stancename, sizeof( stancename ), "dragon" );
 	else if ( stance == STANCE_TIGER )
-		sprintf( stancename, "tiger" );
+		snprintf( stancename, sizeof( stancename ), "tiger" );
 	else if ( stance == STANCE_MONKEY )
-		sprintf( stancename, "monkey" );
+		snprintf( stancename, sizeof( stancename ), "monkey" );
 	else if ( stance == STANCE_SWALLOW )
-		sprintf( stancename, "swallow" );
+		snprintf( stancename, sizeof( stancename ), "swallow" );
 	else if ( stance == STANCE_WOLF )
-		sprintf( stancename, "wolf" );
+		snprintf( stancename, sizeof( stancename ), "wolf" );
 	else
 		return;
 	if ( ch == victim )
-		sprintf( buf, "You are %s the %s stance.", bufskill, stancename );
+		snprintf( buf, sizeof( buf ), "You are %s the %s stance.", bufskill, stancename );
 	else
-		sprintf( buf, "$N is %s the %s stance.", bufskill, stancename );
+		snprintf( buf, sizeof( buf ), "$N is %s the %s stance.", bufskill, stancename );
 	act( buf, ch, NULL, victim, TO_CHAR );
 	return;
 }
@@ -236,42 +236,42 @@ void show_spell( CHAR_DATA *ch, int dtype ) {
 	if ( IS_NPC( ch ) ) return;
 
 	if ( ch->spl[dtype] == 00 )
-		sprintf( bufskill, "untrained at" );
+		snprintf( bufskill, sizeof( bufskill ), "untrained at" );
 	else if ( ch->spl[dtype] <= 25 )
-		sprintf( bufskill, "an apprentice at" );
+		snprintf( bufskill, sizeof( bufskill ), "an apprentice at" );
 	else if ( ch->spl[dtype] <= 50 )
-		sprintf( bufskill, "a student at" );
+		snprintf( bufskill, sizeof( bufskill ), "a student at" );
 	else if ( ch->spl[dtype] <= 75 )
-		sprintf( bufskill, "a scholar at" );
+		snprintf( bufskill, sizeof( bufskill ), "a scholar at" );
 	else if ( ch->spl[dtype] <= 100 )
-		sprintf( bufskill, "a magus at" );
+		snprintf( bufskill, sizeof( bufskill ), "a magus at" );
 	else if ( ch->spl[dtype] <= 125 )
-		sprintf( bufskill, "an adept at" );
+		snprintf( bufskill, sizeof( bufskill ), "an adept at" );
 	else if ( ch->spl[dtype] <= 150 )
-		sprintf( bufskill, "a mage at" );
+		snprintf( bufskill, sizeof( bufskill ), "a mage at" );
 	else if ( ch->spl[dtype] <= 175 )
-		sprintf( bufskill, "a warlock at" );
+		snprintf( bufskill, sizeof( bufskill ), "a warlock at" );
 	else if ( ch->spl[dtype] <= 199 )
-		sprintf( bufskill, "a master wizard at" );
+		snprintf( bufskill, sizeof( bufskill ), "a master wizard at" );
 	else if ( ch->spl[dtype] >= 300 )
-		sprintf( bufskill, "a lich master of" );
+		snprintf( bufskill, sizeof( bufskill ), "a lich master of" );
 	else if ( ch->spl[dtype] >= 240 )
-		sprintf( bufskill, "the complete master of" );
+		snprintf( bufskill, sizeof( bufskill ), "the complete master of" );
 	else if ( ch->spl[dtype] >= 200 )
-		sprintf( bufskill, "a grand sorcerer at" );
+		snprintf( bufskill, sizeof( bufskill ), "a grand sorcerer at" );
 
 	else
 		return;
 	if ( dtype == 0 )
-		sprintf( buf, "You are %s purple magic.\n\r", bufskill );
+		snprintf( buf, sizeof( buf ), "You are %s purple magic.\n\r", bufskill );
 	else if ( dtype == 1 )
-		sprintf( buf, "You are %s red magic.\n\r", bufskill );
+		snprintf( buf, sizeof( buf ), "You are %s red magic.\n\r", bufskill );
 	else if ( dtype == 2 )
-		sprintf( buf, "You are %s blue magic.\n\r", bufskill );
+		snprintf( buf, sizeof( buf ), "You are %s blue magic.\n\r", bufskill );
 	else if ( dtype == 3 )
-		sprintf( buf, "You are %s green magic.\n\r", bufskill );
+		snprintf( buf, sizeof( buf ), "You are %s green magic.\n\r", bufskill );
 	else if ( dtype == 4 )
-		sprintf( buf, "You are %s yellow magic.\n\r", bufskill );
+		snprintf( buf, sizeof( buf ), "You are %s yellow magic.\n\r", bufskill );
 	else
 		return;
 	send_to_char( buf, ch );
@@ -413,14 +413,14 @@ void do_spydirection( CHAR_DATA *ch, char *argument ) {
 			continue;
 		if ( vch->in_room == ch->in_room ) {
 			if ( !IS_NPC( vch ) && !IS_AFFECTED( vch, AFF_POLYMORPH ) )
-				sprintf( buf, "   %s (Player)\n\r", vch->name );
+				snprintf( buf, sizeof( buf ), "   %s (Player)\n\r", vch->name );
 			else if ( !IS_NPC( vch ) && IS_AFFECTED( vch, AFF_POLYMORPH ) )
-				sprintf( buf, "   %s (Player)\n\r", vch->morph );
+				snprintf( buf, sizeof( buf ), "   %s (Player)\n\r", vch->morph );
 			else if ( !IS_NPC( vch ) && IS_AFFECTED( vch, AFF_SHIFT ) )
-				sprintf( buf, "   %s (Player)\n\r", vch->morph );
+				snprintf( buf, sizeof( buf ), "   %s (Player)\n\r", vch->morph );
 
 			else if ( IS_NPC( vch ) )
-				sprintf( buf, "   %s\n\r", capitalize( vch->short_descr ) );
+				snprintf( buf, sizeof( buf ), "   %s\n\r", capitalize( vch->short_descr ) );
 			send_to_char( buf, ch );
 			is_empty = FALSE;
 			continue;
@@ -657,25 +657,25 @@ void birth_date( CHAR_DATA *ch, bool is_self ) {
 		}
 	}
 	if ( mm == 1 )
-		sprintf( mstatus, "month" );
+		snprintf( mstatus, sizeof( mstatus ), "month" );
 	else
-		sprintf( mstatus, "months" );
+		snprintf( mstatus, sizeof( mstatus ), "months" );
 	if ( dd == 1 )
-		sprintf( dstatus, "day" );
+		snprintf( dstatus, sizeof( dstatus ), "day" );
 	else
-		sprintf( dstatus, "days" );
+		snprintf( dstatus, sizeof( dstatus ), "days" );
 	if ( is_self ) {
 		if ( !IS_EXTRA( ch, EXTRA_BORN ) ) yy += 17;
-		sprintf( buf, "#R[#nYou are #C%d #nyears#R][#C%d#n %s#R][#nand #C%d #n%s old#R]\n\r",
+		snprintf( buf, sizeof( buf ), "#R[#nYou are #C%d #nyears#R][#C%d#n %s#R][#nand #C%d #n%s old#R]\n\r",
 			yy, mm, mstatus, dd, dstatus );
 		send_to_char( buf, ch );
 	} else {
 		if ( yy > 0 || ( dd > 0 && mm >= 9 ) || IS_EXTRA( ch, EXTRA_LABOUR ) ) {
 			if ( !IS_EXTRA( ch, EXTRA_LABOUR ) ) SET_BIT( ch->extra, EXTRA_LABOUR );
-			sprintf( buf, "You are ready to give birth.\n\r" );
+			snprintf( buf, sizeof( buf ), "You are ready to give birth.\n\r" );
 			send_to_char( buf, ch );
 		} else if ( yy > 0 || mm > 0 ) {
-			sprintf( buf, "You are %d %s and %d %s pregnant.\n\r",
+			snprintf( buf, sizeof( buf ), "You are %d %s and %d %s pregnant.\n\r",
 				mm, mstatus, dd, dstatus );
 			send_to_char( buf, ch );
 		}
@@ -895,24 +895,24 @@ void other_age( CHAR_DATA *ch, int extra, bool is_preg, char *argument ) {
 		}
 	}
 	if ( mm == 1 )
-		sprintf( mstatus, "month" );
+		snprintf( mstatus, sizeof( mstatus ), "month" );
 	else
-		sprintf( mstatus, "months" );
+		snprintf( mstatus, sizeof( mstatus ), "months" );
 	if ( dd == 1 )
-		sprintf( dstatus, "day" );
+		snprintf( dstatus, sizeof( dstatus ), "day" );
 	else
-		sprintf( dstatus, "days" );
+		snprintf( dstatus, sizeof( dstatus ), "days" );
 	if ( !is_preg ) {
 		if ( !IS_EXTRA( ch, EXTRA_BORN ) ) yy += 17;
-		sprintf( buf, "Age: %d years, %d %s and %d %s old.\n\r",
+		snprintf( buf, sizeof( buf ), "Age: %d years, %d %s and %d %s old.\n\r",
 			yy, mm, mstatus, dd, dstatus );
 		send_to_char( buf, ch );
 	} else {
 		if ( yy > 0 || ( dd > 0 && mm >= 9 ) || IS_SET( extra, EXTRA_LABOUR ) ) {
-			sprintf( buf, "She is ready to give birth.\n\r" );
+			snprintf( buf, sizeof( buf ), "She is ready to give birth.\n\r" );
 			send_to_char( buf, ch );
 		} else if ( yy > 0 || mm > 0 ) {
-			sprintf( buf, "She is %d %s and %d %s pregnant.\n\r",
+			snprintf( buf, sizeof( buf ), "She is %d %s and %d %s pregnant.\n\r",
 				mm, mstatus, dd, dstatus );
 			send_to_char( buf, ch );
 		}

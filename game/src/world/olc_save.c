@@ -160,7 +160,7 @@ void do_asave( CHAR_DATA *ch, char *argument ) {
 
 
 		send_to_char( "Saved zones:\n\r", ch );
-		sprintf( buf, "None.\n\r" );
+		snprintf( buf, sizeof( buf ), "None.\n\r" );
 
 		LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 			/* Builder must be assigned this area. */
@@ -173,7 +173,7 @@ void do_asave( CHAR_DATA *ch, char *argument ) {
 					SET_BIT( pArea->area_flags, AREA_VERBOSE );
 				save_area( pArea );
 				REMOVE_BIT( pArea->area_flags, AREA_CHANGED | AREA_ADDED | AREA_VERBOSE );
-				sprintf( buf, "%24s - '%s'\n\r", pArea->name, pArea->filename );
+				snprintf( buf, sizeof( buf ), "%24s - '%s'\n\r", pArea->name, pArea->filename );
 				send_to_char( buf, ch );
 			}
 		}

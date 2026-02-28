@@ -89,7 +89,7 @@ void sort_top_board() {
 	for ( i = 1; i < MAX_TOP_PLAYERS; i++ ) {
 		if ( top_board[i].pkscore < top_board[i + 1].pkscore ) {
 			tempscore = top_board[i].pkscore;
-			sprintf( buf, "%s", top_board[i].name );
+			snprintf( buf, sizeof( buf ), "%s", top_board[i].name );
 			free(top_board[i].name);
 			top_board[i].name = str_dup( top_board[i + 1].name );
 			top_board[i].pkscore = top_board[i + 1].pkscore;
@@ -140,45 +140,45 @@ void do_leader( CHAR_DATA *ch, char *argument ) {
 	stc( "#r-==--==#L**#r==--==#L**#r==--==#L**#r== #GLEADER BOARD #r==#L**#r==--==#L**#r==--==#L**#r==--==#L**#r==#n\n\r\n\r", ch );
 
 	send_to_char( "   #oMr. Best PK'er   #C--->    ", ch );
-	sprintf( buf, "#G%-13s", leader_board.bestpk_name );
+	snprintf( buf, sizeof( buf ), "#G%-13s", leader_board.bestpk_name );
 	send_to_char( buf, ch );
-	sprintf( buf, " #owith a #G%d #oPK score#n\n\r", leader_board.bestpk_number );
+	snprintf( buf, sizeof( buf ), " #owith a #G%d #oPK score#n\n\r", leader_board.bestpk_number );
 	send_to_char( buf, ch );
 
 	send_to_char( "   #oMr. Deadly       #C--->    ", ch );
-	sprintf( buf, "#G%-13s", leader_board.pk_name );
+	snprintf( buf, sizeof( buf ), "#G%-13s", leader_board.pk_name );
 	send_to_char( buf, ch );
-	sprintf( buf, " #owith #G%d #opkills#n\n\r", leader_board.pk_number );
+	snprintf( buf, sizeof( buf ), " #owith #G%d #opkills#n\n\r", leader_board.pk_number );
 	send_to_char( buf, ch );
 
 	send_to_char( "   #oMr. Pathetic     #C--->    ", ch );
-	sprintf( buf, "#G%-13s", leader_board.pd_name );
+	snprintf( buf, sizeof( buf ), "#G%-13s", leader_board.pd_name );
 	send_to_char( buf, ch );
-	sprintf( buf, " #owith #G%d #opdeaths#n\n\r", leader_board.pd_number );
+	snprintf( buf, sizeof( buf ), " #owith #G%d #opdeaths#n\n\r", leader_board.pd_number );
 	send_to_char( buf, ch );
 
 	send_to_char( "   #oMr. Slayer       #C--->    ", ch );
-	sprintf( buf, "#G%-13s", leader_board.mk_name );
+	snprintf( buf, sizeof( buf ), "#G%-13s", leader_board.mk_name );
 	send_to_char( buf, ch );
-	sprintf( buf, " #owith #G%d #omkills#n\n\r", leader_board.mk_number );
+	snprintf( buf, sizeof( buf ), " #owith #G%d #omkills#n\n\r", leader_board.mk_number );
 	send_to_char( buf, ch );
 
 	send_to_char( "   #oMr. Wimpy        #C--->    ", ch );
-	sprintf( buf, "#G%-13s", leader_board.md_name );
+	snprintf( buf, sizeof( buf ), "#G%-13s", leader_board.md_name );
 	send_to_char( buf, ch );
-	sprintf( buf, " #owith #G%d #omdeaths#n\n\r", leader_board.md_number );
+	snprintf( buf, sizeof( buf ), " #owith #G%d #omdeaths#n\n\r", leader_board.md_number );
 	send_to_char( buf, ch );
 
 	send_to_char( "   #oMr. No life      #C--->    ", ch );
-	sprintf( buf, "#G%-13s", leader_board.tt_name );
+	snprintf( buf, sizeof( buf ), "#G%-13s", leader_board.tt_name );
 	send_to_char( buf, ch );
-	sprintf( buf, " #owith #G%d #oHours played#n\n\r", leader_board.tt_number );
+	snprintf( buf, sizeof( buf ), " #owith #G%d #oHours played#n\n\r", leader_board.tt_number );
 	send_to_char( buf, ch );
 
 	send_to_char( "   #oMr. Questor      #C--->    ", ch );
-	sprintf( buf, "#G%-13s", leader_board.qc_name );
+	snprintf( buf, sizeof( buf ), "#G%-13s", leader_board.qc_name );
 	send_to_char( buf, ch );
-	sprintf( buf, " #owith #G%d #oQuests completed#n\n\r", leader_board.qc_number );
+	snprintf( buf, sizeof( buf ), " #owith #G%d #oQuests completed#n\n\r", leader_board.qc_number );
 	send_to_char( buf, ch );
 
 	stc( "\n\r#r-==#L**#r==--==#L**#r==--==#L**#r==--==#L**#r==--==#L**#r==--==#L**#r==--==#L**#r==--==#L**#r==--==#L**#r==#n\n\r", ch );
@@ -273,10 +273,10 @@ void do_top( CHAR_DATA *ch, char *argument ) {
 
 	stc( "#r==--==#L**#r== #GTOP PKSCORE #r==#L**#r==--==#n\n\r\n\r", ch );
 	for ( i = 1; i <= MAX_TOP_PLAYERS; i++ ) {
-		sprintf( buf, " %2d.  %-15s      %-4d\n\r", i, top_board[i].name, top_board[i].pkscore );
+		snprintf( buf, sizeof( buf ), " %2d.  %-15s      %-4d\n\r", i, top_board[i].name, top_board[i].pkscore );
 		send_to_char( buf, ch );
 	}
-	sprintf( buf, "\n\r   #GYou #0:#G                %-4d\n\r", get_ratio( ch ) );
+	snprintf( buf, sizeof( buf ), "\n\r   #GYou #0:#G                %-4d\n\r", get_ratio( ch ) );
 	send_to_char( buf, ch );
 	stc( "\n\r#r==#L**#r==--==#L**#r==--==#L**#r==--==#L**#r==--==#n\n\r", ch );
 	return;

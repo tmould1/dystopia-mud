@@ -41,7 +41,7 @@ void do_lloth( CHAR_DATA *ch, char *argument ) {
 	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 		if ( !IS_CLASS( gch, CLASS_DROW ) && !IS_CLASS( gch, CLASS_DROID ) ) continue;
-		sprintf( buf, "#7[%-20s] [%-7d] [%-7d] [%-7d] [%-7d]#n\n\r",
+		snprintf( buf, sizeof( buf ), "#7[%-20s] [%-7d] [%-7d] [%-7d] [%-7d]#n\n\r",
 			capitalize( gch->name ), gch->hit, gch->mana, gch->move, gch->generation );
 		send_to_char( buf, ch );
 	}
@@ -530,7 +530,7 @@ void do_spiderform( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( IS_SET( ch->newbits, NEW_DFORM ) ) {
-		sprintf( buf, "$n morphs back into %s.", GET_PROPER_NAME( ch ) );
+		snprintf( buf, sizeof( buf ), "$n morphs back into %s.", GET_PROPER_NAME( ch ) );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		stc( "You return to your normal form.\n\r", ch );
 		free(ch->morph);
@@ -549,7 +549,7 @@ void do_spiderform( CHAR_DATA *ch, char *argument ) {
 
 		act( "You mutate into a giant spider.", ch, NULL, NULL, TO_CHAR );
 		act( "$n mutates into a giant spider.", ch, NULL, NULL, TO_ROOM );
-		sprintf( buf, "%s the giant mylochar", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the giant mylochar", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		ch->hitroll += cfg( CFG_ABILITY_DROW_SPIDERFORM_HITROLL_BONUS );
@@ -687,11 +687,11 @@ void do_drowpowers( CHAR_DATA *ch, char *argument ) {
 	if ( IS_SET( ch->special, SPC_DROW_CLE ) )
 		send_to_char( "You are a Drow Cleric.\n\r", ch );
 
-	sprintf( buf, "You have %d drow power points!.\n\r",
+	snprintf( buf, sizeof( buf ), "You have %d drow power points!.\n\r",
 		ch->pcdata->stats[DROW_POWER] );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "You have %d points of magic resistance.\n\r",
+	snprintf( buf, sizeof( buf ), "You have %d points of magic resistance.\n\r",
 		ch->pcdata->stats[DROW_MAGIC] );
 	send_to_char( buf, ch );
 

@@ -86,9 +86,9 @@ void do_leech( CHAR_DATA *ch, char *argument ) {
 		if ( dam > 300 ) dam = 300 + ( dam / 10 );
 		hurt_person( ch, victim, dam );
 		heal_char_over( ch, dam, ch->max_hit + 500 );
-		sprintf( buf, "#1You absorb %d hitpoints.#n\n\r", dam );
+		snprintf( buf, sizeof( buf ), "#1You absorb %d hitpoints.#n\n\r", dam );
 		stc( buf, ch );
-		sprintf( buf, "#1%s absorbed %d of your hitpoints!#n\n\r", ch->name, dam );
+		snprintf( buf, sizeof( buf ), "#1%s absorbed %d of your hitpoints!#n\n\r", ch->name, dam );
 		stc( buf, victim );
 	} else
 		stc( "Nothing seemed to happen.\n\r", ch );
@@ -119,7 +119,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 		objc = NULL;
 	else {
 		obj = create_object( get_obj_index( 30043 ), 0 );
-		sprintf( buf, "A wall of ice is here, blocking your exit north." );
+		snprintf( buf, sizeof( buf ), "A wall of ice is here, blocking your exit north." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 		obj_to_room( obj, ch->in_room );
@@ -130,7 +130,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 		objc = NULL;
 	else {
 		obj = create_object( get_obj_index( 30044 ), 0 );
-		sprintf( buf, "A wall of ice is here, blocking your exit south." );
+		snprintf( buf, sizeof( buf ), "A wall of ice is here, blocking your exit south." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 		obj_to_room( obj, ch->in_room );
@@ -141,7 +141,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 		objc = NULL;
 	else {
 		obj = create_object( get_obj_index( 30045 ), 0 );
-		sprintf( buf, "A wall of ice is here, blocking your exit east." );
+		snprintf( buf, sizeof( buf ), "A wall of ice is here, blocking your exit east." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 		obj_to_room( obj, ch->in_room );
@@ -152,7 +152,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 		objc = NULL;
 	else {
 		obj = create_object( get_obj_index( 30046 ), 0 );
-		sprintf( buf, "A wall of ice is here, blocking your exit west." );
+		snprintf( buf, sizeof( buf ), "A wall of ice is here, blocking your exit west." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 		obj_to_room( obj, ch->in_room );
@@ -249,28 +249,28 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( door == 0 ) {
-		sprintf( direction, "north" );
+		snprintf( direction, sizeof( direction ), "north" );
 		rev_dir = 2;
 	}
 	if ( door == 1 ) {
-		sprintf( direction, "east" );
+		snprintf( direction, sizeof( direction ), "east" );
 		rev_dir = 3;
 	}
 	if ( door == 2 ) {
-		sprintf( direction, "south" );
+		snprintf( direction, sizeof( direction ), "south" );
 		rev_dir = 0;
 	}
 	if ( door == 3 ) {
-		sprintf( direction, "west" );
+		snprintf( direction, sizeof( direction ), "west" );
 		rev_dir = 1;
 	}
 
 	if ( ( pexit = ch->in_room->exit[door] ) == NULL ) {
-		sprintf( buf, "$N flies into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "$N flies into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "$N flies into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "$N flies into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "You smash into the %s wall.", direction );
+		snprintf( buf, sizeof( buf ), "You smash into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
 		dam = dice( victim->size * 3 + 1, ch->power[DISC_DAEM_GELU] * 3 );
 		damage( ch, victim, dam, 0 );
@@ -283,13 +283,13 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 			REMOVE_BIT( pexit->exit_info, EX_LOCKED );
 		if ( IS_SET( pexit->exit_info, EX_CLOSED ) )
 			REMOVE_BIT( pexit->exit_info, EX_CLOSED );
-		sprintf( buf, "$N is blown into the air and flies %s.", direction );
+		snprintf( buf, sizeof( buf ), "$N is blown into the air and flies %s.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "$N is blown into the air and flies %s.", direction );
+		snprintf( buf, sizeof( buf ), "$N is blown into the air and flies %s.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "You are blown into the air and fly %s.", direction );
+		snprintf( buf, sizeof( buf ), "You are blown into the air and fly %s.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
-		sprintf( buf, "There is a loud crash as $n smashes through the $d." );
+		snprintf( buf, sizeof( buf ), "There is a loud crash as $n smashes through the $d." );
 		act( buf, victim, NULL, pexit->keyword, TO_ROOM );
 
 		if ( ( to_room = pexit->to_room ) != NULL && ( pexit_rev = to_room->exit[rev_dir] ) != NULL && pexit_rev->to_room == ch->in_room && pexit_rev->keyword != NULL ) {
@@ -297,31 +297,31 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 				REMOVE_BIT( pexit_rev->exit_info, EX_LOCKED );
 			if ( IS_SET( pexit_rev->exit_info, EX_CLOSED ) )
 				REMOVE_BIT( pexit_rev->exit_info, EX_CLOSED );
-			if ( door == 0 ) sprintf( direction, "south" );
-			if ( door == 1 ) sprintf( direction, "west" );
-			if ( door == 2 ) sprintf( direction, "north" );
-			if ( door == 3 ) sprintf( direction, "east" );
+			if ( door == 0 ) snprintf( direction, sizeof( direction ), "south" );
+			if ( door == 1 ) snprintf( direction, sizeof( direction ), "west" );
+			if ( door == 2 ) snprintf( direction, sizeof( direction ), "north" );
+			if ( door == 3 ) snprintf( direction, sizeof( direction ), "east" );
 			char_from_room( victim );
 			char_to_room( victim, to_room );
-			sprintf( buf, "$n comes smashing in through the %s $d.", direction );
+			snprintf( buf, sizeof( buf ), "$n comes smashing in through the %s $d.", direction );
 			act( buf, victim, NULL, pexit->keyword, TO_ROOM );
 			dam = dice( victim->size * 3 + 1, ch->power[DISC_DAEM_GELU] * 7 );
 			damage( ch, victim, dam, 0 );
 		}
 	} else {
-		sprintf( buf, "$N flies %s.", direction );
+		snprintf( buf, sizeof( buf ), "$N flies %s.", direction );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "$N flies %s.", direction );
+		snprintf( buf, sizeof( buf ), "$N flies %s.", direction );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "You fly %s.", direction );
+		snprintf( buf, sizeof( buf ), "You fly %s.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
-		if ( door == 0 ) sprintf( direction, "south" );
-		if ( door == 1 ) sprintf( direction, "west" );
-		if ( door == 2 ) sprintf( direction, "north" );
-		if ( door == 3 ) sprintf( direction, "east" );
+		if ( door == 0 ) snprintf( direction, sizeof( direction ), "south" );
+		if ( door == 1 ) snprintf( direction, sizeof( direction ), "west" );
+		if ( door == 2 ) snprintf( direction, sizeof( direction ), "north" );
+		if ( door == 3 ) snprintf( direction, sizeof( direction ), "east" );
 		char_from_room( victim );
 		char_to_room( victim, pexit->to_room );
-		sprintf( buf, "$n comes flying in from the %s.", direction );
+		snprintf( buf, sizeof( buf ), "$n comes flying in from the %s.", direction );
 		act( buf, victim, NULL, NULL, TO_ROOM );
 		dam = dice( victim->size * 3 + 1, ch->power[DISC_DAEM_GELU] * 5 );
 		damage( ch, victim, dam, 0 );
@@ -722,7 +722,7 @@ void do_dinferno( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !TIME_UP( ch, TIMER_INFERNO ) ) {
-		sprintf( buf, "You cannot use Inferno for another %d hours.\n\r", ch->tick_timer[TIMER_INFERNO] );
+		snprintf( buf, sizeof( buf ), "You cannot use Inferno for another %d hours.\n\r", ch->tick_timer[TIMER_INFERNO] );
 		stc( buf, ch );
 		return;
 	}

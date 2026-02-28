@@ -32,38 +32,38 @@ void do_dragonstatus( CHAR_DATA *ch, char *argument ) {
 	attune = ch->pcdata->powers[DRAGON_ATTUNEMENT];
 	if ( attune < 0 || attune > 3 ) attune = 0;
 
-	sprintf( buf, "#x202~#x208[#n Dragonkin Status #x208]#x202~#n\n\r" );
+	snprintf( buf, sizeof( buf ), "#x202~#x208[#n Dragonkin Status #x208]#x202~#n\n\r" );
 	send_to_char( buf, ch );
-	sprintf( buf, "Draconic Essence: #x208%d#n / %d\n\r", ch->rage, essence_max );
+	snprintf( buf, sizeof( buf ), "Draconic Essence: #x208%d#n / %d\n\r", ch->rage, essence_max );
 	send_to_char( buf, ch );
-	sprintf( buf, "Elemental Attunement: #x208%s#n\n\r", attune_names[attune] );
+	snprintf( buf, sizeof( buf ), "Elemental Attunement: #x208%s#n\n\r", attune_names[attune] );
 	send_to_char( buf, ch );
 
 	if ( ch->pcdata->powers[DRAGON_SCALESHIELD] > 0 ) {
-		sprintf( buf, "#x208[#nScaleshield: #C%d#n HP remaining#x208]#n\n\r", ch->pcdata->stats[DRAGON_SCALESHIELD_HP] );
+		snprintf( buf, sizeof( buf ), "#x208[#nScaleshield: #C%d#n HP remaining#x208]#n\n\r", ch->pcdata->stats[DRAGON_SCALESHIELD_HP] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[DRAGON_DRAGONHIDE] ) {
 		send_to_char( "#x208[#nDragonhide active#x208]#n\n\r", ch );
 	}
 	if ( ch->pcdata->powers[DRAGON_PRIMALWARDING] > 0 ) {
-		sprintf( buf, "#x208[#nPrimal Warding: #C%d#n ticks remaining#x208]#n\n\r", ch->pcdata->powers[DRAGON_PRIMALWARDING] );
+		snprintf( buf, sizeof( buf ), "#x208[#nPrimal Warding: #C%d#n ticks remaining#x208]#n\n\r", ch->pcdata->powers[DRAGON_PRIMALWARDING] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[DRAGON_DRAKEWINGS] > 0 ) {
-		sprintf( buf, "#x208[#nDrakewings: #C%d#n ticks remaining#x208]#n\n\r", ch->pcdata->powers[DRAGON_DRAKEWINGS] );
+		snprintf( buf, sizeof( buf ), "#x208[#nDrakewings: #C%d#n ticks remaining#x208]#n\n\r", ch->pcdata->powers[DRAGON_DRAKEWINGS] );
 		send_to_char( buf, ch );
 	}
 
 	/* Training levels */
 	send_to_char( "\n\r#x202Training:#n\n\r", ch );
-	sprintf( buf, "  Draconic Breath: %d/3\n\r", ch->pcdata->powers[DRAGON_TRAIN_BREATH] );
+	snprintf( buf, sizeof( buf ), "  Draconic Breath: %d/3\n\r", ch->pcdata->powers[DRAGON_TRAIN_BREATH] );
 	send_to_char( buf, ch );
-	sprintf( buf, "  Dragon Scales:   %d/3\n\r", ch->pcdata->powers[DRAGON_TRAIN_SCALES] );
+	snprintf( buf, sizeof( buf ), "  Dragon Scales:   %d/3\n\r", ch->pcdata->powers[DRAGON_TRAIN_SCALES] );
 	send_to_char( buf, ch );
-	sprintf( buf, "  Dragon Might:    %d/3\n\r", ch->pcdata->powers[DRAGON_TRAIN_MIGHT] );
+	snprintf( buf, sizeof( buf ), "  Dragon Might:    %d/3\n\r", ch->pcdata->powers[DRAGON_TRAIN_MIGHT] );
 	send_to_char( buf, ch );
-	sprintf( buf, "  Essence Mastery: %d/2\n\r", ch->pcdata->powers[DRAGON_TRAIN_ESSENCE] );
+	snprintf( buf, sizeof( buf ), "  Essence Mastery: %d/2\n\r", ch->pcdata->powers[DRAGON_TRAIN_ESSENCE] );
 	send_to_char( buf, ch );
 
 	return;
@@ -194,7 +194,7 @@ void do_dragonbreath( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( ch->rage < cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_ESSENCE_COST ) ) {
-		sprintf( buf, "You need at least %d Essence to use dragonbreath.\n\r", cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_ESSENCE_COST ) );
+		snprintf( buf, sizeof( buf ), "You need at least %d Essence to use dragonbreath.\n\r", cfg( CFG_ABILITY_DRAGONKIN_DRAGONBREATH_ESSENCE_COST ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -207,9 +207,9 @@ void do_dragonbreath( CHAR_DATA *ch, char *argument ) {
 	attune = ch->pcdata->powers[DRAGON_ATTUNEMENT];
 	if ( attune < 0 || attune > 3 ) attune = 0;
 
-	sprintf( buf, "You unleash a devastating cone of %s!", breath_colors[attune] );
+	snprintf( buf, sizeof( buf ), "You unleash a devastating cone of %s!", breath_colors[attune] );
 	act( buf, ch, NULL, NULL, TO_CHAR );
-	sprintf( buf, "$n unleashes a devastating cone of %s!", breath_colors[attune] );
+	snprintf( buf, sizeof( buf ), "$n unleashes a devastating cone of %s!", breath_colors[attune] );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 
 	/* Build some Essence from the attack */
@@ -263,7 +263,7 @@ void do_searingblast( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( ch->rage < cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_ESSENCE_COST ) ) {
-		sprintf( buf, "You need at least %d Essence to use Searing Blast.\n\r", cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_ESSENCE_COST ) );
+		snprintf( buf, sizeof( buf ), "You need at least %d Essence to use Searing Blast.\n\r", cfg( CFG_ABILITY_DRAGONKIN_SEARINGBLAST_ESSENCE_COST ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -280,11 +280,11 @@ void do_searingblast( CHAR_DATA *ch, char *argument ) {
 	dam += ch->rage * 3;
 	dam += ch->pcdata->powers[DRAGON_TRAIN_BREATH] * 75;
 
-	sprintf( buf, "You blast $N with %s!", blast_types[attune] );
+	snprintf( buf, sizeof( buf ), "You blast $N with %s!", blast_types[attune] );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n blasts you with %s!", blast_types[attune] );
+	snprintf( buf, sizeof( buf ), "$n blasts you with %s!", blast_types[attune] );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n blasts $N with %s!", blast_types[attune] );
+	snprintf( buf, sizeof( buf ), "$n blasts $N with %s!", blast_types[attune] );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 
 	/* Apply DoT - stack up to max */
@@ -335,7 +335,7 @@ void do_infernalstorm( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( ch->rage < cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_ESSENCE_COST ) ) {
-		sprintf( buf, "You need at least %d Essence to unleash Infernal Storm.\n\r", cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_ESSENCE_COST ) );
+		snprintf( buf, sizeof( buf ), "You need at least %d Essence to unleash Infernal Storm.\n\r", cfg( CFG_ABILITY_DRAGONKIN_INFERNALSTORM_ESSENCE_COST ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -348,9 +348,9 @@ void do_infernalstorm( CHAR_DATA *ch, char *argument ) {
 	attune = ch->pcdata->powers[DRAGON_ATTUNEMENT];
 	if ( attune < 0 || attune > 3 ) attune = 0;
 
-	sprintf( buf, "You call upon your draconic heritage, unleashing a devastating %s!", storm_colors[attune] );
+	snprintf( buf, sizeof( buf ), "You call upon your draconic heritage, unleashing a devastating %s!", storm_colors[attune] );
 	act( buf, ch, NULL, NULL, TO_CHAR );
-	sprintf( buf, "$n calls upon draconic power, unleashing a devastating %s!", storm_colors[attune] );
+	snprintf( buf, sizeof( buf ), "$n calls upon draconic power, unleashing a devastating %s!", storm_colors[attune] );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 
 	/* Build Essence from the destruction */
@@ -511,11 +511,11 @@ void do_dragonclaw( CHAR_DATA *ch, char *argument ) {
 	dam += ch->rage * 2;
 	dam += ch->pcdata->powers[DRAGON_TRAIN_MIGHT] * 30;
 
-	sprintf( buf, "You rake $N with %s dragon claws!", claw_effects[attune] );
+	snprintf( buf, sizeof( buf ), "You rake $N with %s dragon claws!", claw_effects[attune] );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n rakes you with %s dragon claws!", claw_effects[attune] );
+	snprintf( buf, sizeof( buf ), "$n rakes you with %s dragon claws!", claw_effects[attune] );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n rakes $N with %s dragon claws!", claw_effects[attune] );
+	snprintf( buf, sizeof( buf ), "$n rakes $N with %s dragon claws!", claw_effects[attune] );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 
 	/* Build Essence from combat */
@@ -591,7 +591,7 @@ void do_dragonrush( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( ch->rage < cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_ESSENCE_COST ) ) {
-		sprintf( buf, "You need at least %d Essence to use Dragonrush.\n\r", cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_ESSENCE_COST ) );
+		snprintf( buf, sizeof( buf ), "You need at least %d Essence to use Dragonrush.\n\r", cfg( CFG_ABILITY_DRAGONKIN_DRAGONRUSH_ESSENCE_COST ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -641,13 +641,13 @@ void do_dragontrain( CHAR_DATA *ch, char *argument ) {
 	if ( arg[0] == '\0' ) {
 		send_to_char( "#x202~#x208[#n Dragonkin Training #x208]#x202~#n\n\r", ch );
 		send_to_char( "Available training paths:\n\r", ch );
-		sprintf( buf, "  #x208breath#n  - Draconic Breath (%d/3) - Offensive breath attacks\n\r", ch->pcdata->powers[DRAGON_TRAIN_BREATH] );
+		snprintf( buf, sizeof( buf ), "  #x208breath#n  - Draconic Breath (%d/3) - Offensive breath attacks\n\r", ch->pcdata->powers[DRAGON_TRAIN_BREATH] );
 		send_to_char( buf, ch );
-		sprintf( buf, "  #x208scales#n  - Dragon Scales   (%d/3) - Defensive abilities\n\r", ch->pcdata->powers[DRAGON_TRAIN_SCALES] );
+		snprintf( buf, sizeof( buf ), "  #x208scales#n  - Dragon Scales   (%d/3) - Defensive abilities\n\r", ch->pcdata->powers[DRAGON_TRAIN_SCALES] );
 		send_to_char( buf, ch );
-		sprintf( buf, "  #x208might#n   - Dragon Might    (%d/3) - Combat enhancement\n\r", ch->pcdata->powers[DRAGON_TRAIN_MIGHT] );
+		snprintf( buf, sizeof( buf ), "  #x208might#n   - Dragon Might    (%d/3) - Combat enhancement\n\r", ch->pcdata->powers[DRAGON_TRAIN_MIGHT] );
 		send_to_char( buf, ch );
-		sprintf( buf, "  #x208essence#n - Essence Mastery (%d/2) - Utility powers\n\r", ch->pcdata->powers[DRAGON_TRAIN_ESSENCE] );
+		snprintf( buf, sizeof( buf ), "  #x208essence#n - Essence Mastery (%d/2) - Utility powers\n\r", ch->pcdata->powers[DRAGON_TRAIN_ESSENCE] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rSyntax: dragontrain <path>\n\r", ch );
 		return;
@@ -679,7 +679,7 @@ void do_dragontrain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( *train_ptr >= max_level ) {
-		sprintf( buf, "You have already mastered %s.\n\r", tree_name );
+		snprintf( buf, sizeof( buf ), "You have already mastered %s.\n\r", tree_name );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -687,7 +687,7 @@ void do_dragontrain( CHAR_DATA *ch, char *argument ) {
 	cost = ( *train_ptr + 1 ) * 40;
 
 	if ( ch->practice < cost ) {
-		sprintf( buf, "You need %d primal to train %s level %d.\n\r", cost, tree_name, *train_ptr + 1 );
+		snprintf( buf, sizeof( buf ), "You need %d primal to train %s level %d.\n\r", cost, tree_name, *train_ptr + 1 );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -695,7 +695,7 @@ void do_dragontrain( CHAR_DATA *ch, char *argument ) {
 	ch->practice -= cost;
 	( *train_ptr )++;
 
-	sprintf( buf, "You have trained %s to level %d.\n\r", tree_name, *train_ptr );
+	snprintf( buf, sizeof( buf ), "You have trained %s to level %d.\n\r", tree_name, *train_ptr );
 	send_to_char( buf, ch );
 	return;
 }

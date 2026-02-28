@@ -143,11 +143,11 @@ void do_soulsuck( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	dam = number_range( cfg( CFG_ABILITY_LICH_SOULSUCK_DAMAGE_MIN ), cfg( CFG_ABILITY_LICH_SOULSUCK_DAMAGE_MAX ) );
-	sprintf( buf, "You suck the soul out of $N and use the energy to heal yourself [%d]", dam );
+	snprintf( buf, sizeof( buf ), "You suck the soul out of $N and use the energy to heal yourself [%d]", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n sucks at your soul, damn it's nasty, ooo, hurts to [%d]", dam );
+	snprintf( buf, sizeof( buf ), "$n sucks at your soul, damn it's nasty, ooo, hurts to [%d]", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n looks at $N and grins." );
+	snprintf( buf, sizeof( buf ), "$n looks at $N and grins." );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 	hurt_person( ch, victim, dam );
 	heal_char( ch, dam );
@@ -289,9 +289,9 @@ void do_creepingdoom( CHAR_DATA *ch, char *argument ) {
 		if ( !IS_NPC( ich ) ) continue;
 		if ( is_safe( ch, ich ) ) continue;
 		dam = UMIN( totaldam, ich->hit + 10 );
-		sprintf( buf1, "$N screams in horror as insects from all over swarm over $M and starts eating [#C%d#n]", dam );
-		sprintf( buf2, "Your insects bite $N [#C%d#n]", dam );
-		sprintf( buf3, "$n laughs as insects swarm from nowhere and attack you [#C%d#n]", dam );
+		snprintf( buf1, sizeof( buf1 ), "$N screams in horror as insects from all over swarm over $M and starts eating [#C%d#n]", dam );
+		snprintf( buf2, sizeof( buf2 ), "Your insects bite $N [#C%d#n]", dam );
+		snprintf( buf3, sizeof( buf3 ), "$n laughs as insects swarm from nowhere and attack you [#C%d#n]", dam );
 		act( buf1, ch, NULL, ich, TO_NOTVICT );
 		act( buf2, ch, NULL, ich, TO_CHAR );
 		act( buf3, ch, NULL, ich, TO_VICT );
@@ -439,9 +439,9 @@ void do_planarstorm( CHAR_DATA *ch, char *argument ) {
 		dam = number_range( cfg( CFG_ABILITY_LICH_PLANARSTORM_DAMAGE_MIN ), cfg( CFG_ABILITY_LICH_PLANARSTORM_DAMAGE_MAX ) );
 		dam = cap_dam( ch, ich, dam );
 		if ( ich == ch ) dam = dam / 2;
-		sprintf( buf1, "$N screams in pain as $S body is spread over the planes [#C%d#n]", dam );
-		sprintf( buf2, "Your cackle with glee as the planeshift fills $N with agonising pain [#C%d#n]", dam );
-		sprintf( buf3, "$n cackles with glee as the planshift fills you with extreme pain [#C%d#n]", dam );
+		snprintf( buf1, sizeof( buf1 ), "$N screams in pain as $S body is spread over the planes [#C%d#n]", dam );
+		snprintf( buf2, sizeof( buf2 ), "Your cackle with glee as the planeshift fills $N with agonising pain [#C%d#n]", dam );
+		snprintf( buf3, sizeof( buf3 ), "$n cackles with glee as the planshift fills you with extreme pain [#C%d#n]", dam );
 		act( buf1, ch, NULL, ich, TO_NOTVICT );
 		act( buf2, ch, NULL, ich, TO_CHAR );
 		act( buf3, ch, NULL, ich, TO_VICT );
@@ -544,17 +544,17 @@ void do_lore( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( arg1[0] == '\0' && arg2[0] == '\0' ) {
-		sprintf( lin, "#R============================================================================#n\n\r" );
+		snprintf( lin, sizeof( lin ), "#R============================================================================#n\n\r" );
 		stc( lin, ch );
 		stc( "                                #7Undead Lore#n\n\r", ch );
 		stc( lin, ch );
-		sprintf( buf, "#0        Conjuring     [ %d ]       Death    [ %d ]         Life       [ %d ]\n\r#n",
+		snprintf( buf, sizeof( buf ), "#0        Conjuring     [ %d ]       Death    [ %d ]         Life       [ %d ]\n\r#n",
 			ch->pcdata->powers[CON_LORE], ch->pcdata->powers[DEATH_LORE], ch->pcdata->powers[LIFE_LORE] );
 		stc( buf, ch );
 		stc( lin, ch );
 		stc( "                                #7Necromancy#n\n\r", ch );
 		stc( lin, ch );
-		sprintf( buf, "#0                   Necromantic     [ %d ]       Chaos Magic    [ %d ]       \n\r#n",
+		snprintf( buf, sizeof( buf ), "#0                   Necromantic     [ %d ]       Chaos Magic    [ %d ]       \n\r#n",
 			ch->pcdata->powers[NECROMANTIC], ch->pcdata->powers[CHAOS_MAGIC] );
 		stc( buf, ch );
 		stc( lin, ch );

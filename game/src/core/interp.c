@@ -76,7 +76,7 @@ void do_racecommands( CHAR_DATA *ch, char *argument ) {
 				if ( cmd_table[cmd].discipline == i && ch->power[i] >= cmd_table[cmd].disclevel && IS_CLASS( ch, cmd_table[cmd].race ) ) {
 					if ( !displayed ) {
 						displayed = TRUE;
-						sprintf( buf, " %15s : ", discipline[i] );
+						snprintf( buf, sizeof( buf ), " %15s : ", discipline[i] );
 						send_to_char( buf, ch );
 					}
 					send_to_char( cmd_table[cmd].name, ch );
@@ -91,20 +91,20 @@ void do_racecommands( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 1 ) {
-			sprintf( buf, "           obeah :" );
+			snprintf( buf, sizeof( buf ), "           obeah :" );
 			send_to_char( buf, ch );
 		}
 		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 6 ) {
-			sprintf( buf, " (#Gpurify#n)" );
+			snprintf( buf, sizeof( buf ), " (#Gpurify#n)" );
 			send_to_char( buf, ch );
 		}
 		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 8 ) {
-			sprintf( buf, " (#rBeast control#n)" );
+			snprintf( buf, sizeof( buf ), " (#rBeast control#n)" );
 			send_to_char( buf, ch );
 		}
 
 		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 9 ) {
-			sprintf( buf, " (#7Movement of pure magic#n)" );
+			snprintf( buf, sizeof( buf ), " (#7Movement of pure magic#n)" );
 			send_to_char( buf, ch );
 		}
 
@@ -118,62 +118,62 @@ void do_racecommands( CHAR_DATA *ch, char *argument ) {
 			if ( i == 0 ) {
 				switch ( ch->class ) {
 				case 1:
-					sprintf( buf, " %15s : ", "Demon Kind" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Demon Kind" );
 					break;
 				case 2:
-					sprintf( buf, " %15s : ", "Magi" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Magi" );
 					break;
 				case 4:
-					sprintf( buf, " %15s : ", "Innate" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Innate" );
 					break;
 				case 8:
-					sprintf( buf, " %15s : ", "Innate" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Innate" );
 					break;
 				case 16:
-					sprintf( buf, " %15s : ", "Weaponsmaster" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Weaponsmaster" );
 					break;
 				case 32:
-					sprintf( buf, " %15s : ", "Drow Abilities" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Drow Abilities" );
 					break;
 				case 64:
-					sprintf( buf, " %15s : ", "Monk Abilities" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Monk Abilities" );
 					break;
 				case 128:
-					sprintf( buf, " %15s : ", "Ninja Abilities" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Ninja Abilities" );
 					break;
 				case 256:
-					sprintf( buf, " %15s : ", "Lich Abilities" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Lich Abilities" );
 					break;
 				case 512:
-					sprintf( buf, " %15s : ", "Shapeshifter" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Shapeshifter" );
 					break;
 				case 1024:
-					sprintf( buf, " %15s : ", "Tanar'ri Powers" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Tanar'ri Powers" );
 					break;
 				case 2048:
-					sprintf( buf, " %15s : ", "Angel Abilities" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Angel Abilities" );
 					break;
 				case 4096:
-					sprintf( buf, " %15s : ", "Knight Powers" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Knight Powers" );
 					break;
 				case 8192:
-					sprintf( buf, " %15s : ", "Drider Powers" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Drider Powers" );
 					break;
 				case 16384:
-					sprintf( buf, " %15s : ", "Drone Powers" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Drone Powers" );
 					break;
 				case 32768:
-					sprintf( buf, " %15s : ", "Hobbit Powers" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Hobbit Powers" );
 					break;
 				case 65536:
-					sprintf( buf, " %15s : ", "Fae Powers" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Fae Powers" );
 					break;
 				case 131072:
-					sprintf( buf, " %15s : ", "Giant Powers" );
+					snprintf( buf, sizeof( buf ), " %15s : ", "Giant Powers" );
 					break;
 				}
 			} else if ( i % 4 == 0 ) {
-				sprintf( buf, "\n\r                   " );
+				snprintf( buf, sizeof( buf ), "\n\r                   " );
 			}
 			i++;
 
@@ -1530,7 +1530,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 			if ( ( !str_prefix( command, cmd_table[cmd].name ) || strlen( command ) == 0 ) && can_interpret( ch, cmd ) ) {
 				foundstar = TRUE;
 				star++;
-				sprintf( buf, "%-15s", cmd_table[cmd].name );
+				snprintf( buf, sizeof( buf ), "%-15s", cmd_table[cmd].name );
 				send_to_char( buf, ch );
 				if ( ++col % 5 == 0 )
 					send_to_char( "\n\r", ch );
@@ -1540,7 +1540,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "\n\r", ch );
 
 		if ( foundstar && star != 0 ) {
-			sprintf( buf, "\n%d command%s found.\n\r", star,
+			snprintf( buf, sizeof( buf ), "\n%d command%s found.\n\r", star,
 				( star > 1 ) ? "s" : "" );
 			stc( buf, ch );
 		}
@@ -1559,7 +1559,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 
 		for ( ali = ch->pcdata->alias; ali; ali = ali->next ) {
 			if ( !str_cmp( command, ali->short_n ) ) {
-				sprintf( buf, "%s %s", ali->long_n, argument );
+				snprintf( buf, sizeof( buf ), "%s %s", ali->long_n, argument );
 				interpret( ch, buf );
 				return;
 			}
@@ -1633,7 +1633,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 		strcpy( logline, "XXXXXXXX XXXXXXXX XXXXXXXX" );
 	if ( ( !IS_NPC( ch ) && IS_SET( ch->act, PLR_LOG ) ) || fLogAll || cmd_table[cmd].log == LOG_ALWAYS ) {
 		if ( !IS_CREATOR( ch ) && !IS_NPC( ch ) ) {
-			sprintf( log_buf, "Log %s: %s", ch->pcdata->switchname, logline );
+			snprintf( log_buf, MAX_STRING_LENGTH, "Log %s: %s", ch->pcdata->switchname, logline );
 			log_string( log_buf );
 		}
 	}
@@ -1648,7 +1648,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 		unveil = ch->unveil;
 		if ( unveil->in_room != NULL ) {
 			if ( unveil->in_room->vnum != ch->in_room->vnum ) {
-				sprintf( buf, "You lose your mental link with %s.\n\r", ch->name );
+				snprintf( buf, sizeof( buf ), "You lose your mental link with %s.\n\r", ch->name );
 				stc( buf, unveil );
 			} else {
 				stc( "% ", unveil );
@@ -1718,7 +1718,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 	 */
 
 	if ( last_command != NULL ) free(last_command);
-	sprintf( log_buf, "%s %s BY %s", cmd_table[cmd].name, argument, ch->name );
+	snprintf( log_buf, MAX_STRING_LENGTH, "%s %s BY %s", cmd_table[cmd].name, argument, ch->name );
 	last_command = str_dup( log_buf );
 
 	/* Profile command execution and log slow commands */
@@ -1747,7 +1747,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 			elapsed_us = ( cmd_end.tv_sec - cmd_start.tv_sec ) * 1000000
 			           + ( cmd_end.tv_usec - cmd_start.tv_usec );
 			if ( elapsed_us > PROFILE_CMD_THRESHOLD_US ) {
-				sprintf( log_buf, "SLOW CMD: %s by %s took %ldms",
+				snprintf( log_buf, MAX_STRING_LENGTH, "SLOW CMD: %s by %s took %ldms",
 					cmd_table[cmd].name, cmd_player_name,
 					elapsed_us / 1000 );
 				log_string( log_buf );
@@ -2021,7 +2021,7 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 			ch );
 
 		for ( p = disabled_first; p; p = p->next ) {
-			sprintf( buf, "%-12s %5d   %-12s\n\r", p->command->name, p->level, p->disabled_by );
+			snprintf( buf, sizeof( buf ), "%-12s %5d   %-12s\n\r", p->command->name, p->level, p->disabled_by );
 			send_to_char( buf, ch );
 		}
 		return;

@@ -102,7 +102,7 @@ bool compressStart( DESCRIPTOR_DATA *desc, int version ) {
 	zresult = deflateInit( s, 9 );
 	if ( zresult != Z_OK ) {
 		/* problems with zlib, try to clean up */
-		sprintf( log_buf, "MCCP: deflateInit failed with %d", zresult );
+		snprintf( log_buf, MAX_STRING_LENGTH, "MCCP: deflateInit failed with %d", zresult );
 		log_string( log_buf );
 		free( desc->out_compress_buf );
 		free( s );
@@ -288,15 +288,15 @@ void do_showcompress( CHAR_DATA *ch, char *argument ) {
 			continue;
 		if ( gch->level > 6 ) continue;
 		if ( gch->desc->out_compress ) {
-			sprintf( buf, "%-15s uses mccp\n\r", gch->name );
+			snprintf( buf, sizeof( buf ), "%-15s uses mccp\n\r", gch->name );
 			count1++;
 		} else {
-			sprintf( buf, "%-15s Does not use mccp.\n\r", gch->name );
+			snprintf( buf, sizeof( buf ), "%-15s Does not use mccp.\n\r", gch->name );
 			count2++;
 		}
 		send_to_char( buf, ch );
 	}
-	sprintf( buf, "\n\r%d out of %d players uses mccp\n\r", count1, count2 + count1 );
+	snprintf( buf, sizeof( buf ), "\n\r%d out of %d players uses mccp\n\r", count1, count2 + count1 );
 	send_to_char( buf, ch );
 	return;
 }

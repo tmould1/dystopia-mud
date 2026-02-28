@@ -74,24 +74,24 @@ void do_kingdoms( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	sprintf( buf, "Name          Pkills  Pdeaths  Ratio   REQS : hps    move    mana     qps\n\r" );
+	snprintf( buf, sizeof( buf ), "Name          Pkills  Pdeaths  Ratio   REQS : hps    move    mana     qps\n\r" );
 	for ( i = 1; i <= MAX_KINGDOM; i++ ) {
 		/*
 		 * calculation ratio
 		 */
 		if ( kingdom_table[i].kills > 0 ) {
 			if ( 100 * kingdom_table[i].kills / ( kingdom_table[i].kills + kingdom_table[i].deaths ) < 100 )
-				sprintf( pkratio, "0.%-2d",
+				snprintf( pkratio, sizeof( pkratio ), "0.%-2d",
 					( 100 * kingdom_table[i].kills / ( kingdom_table[i].kills + kingdom_table[i].deaths ) ) );
 			else
-				sprintf( pkratio, "1.00" );
+				snprintf( pkratio, sizeof( pkratio ), "1.00" );
 		} else
-			sprintf( pkratio, "0.00" );
+			snprintf( pkratio, sizeof( pkratio ), "0.00" );
 
 		/*
 		 * buffering everything
 		 */
-		sprintf( buf2, "%-14s  %3d      %3d    %s        %5d   %5d   %5d   %5d\n\r",
+		snprintf( buf2, sizeof( buf2 ), "%-14s  %3d      %3d    %s        %5d   %5d   %5d   %5d\n\r",
 			kingdom_table[i].name, kingdom_table[i].kills, kingdom_table[i].deaths, pkratio,
 			kingdom_table[i].req_hit, kingdom_table[i].req_move, kingdom_table[i].req_mana, kingdom_table[i].req_qps );
 		strcat( buf, buf2 );
@@ -355,12 +355,12 @@ void do_kstats( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You are not a member of any kingdom.\n\r", ch );
 		return;
 	}
-	sprintf( buf, " [***]  The Kingdom stats of %s  [***]\n\r\n\r", kingdom_table[i].whoname );
-	sprintf( buf2, " Current Leader    : %s\n\r", kingdom_table[i].leader );
+	snprintf( buf, sizeof( buf ), " [***]  The Kingdom stats of %s  [***]\n\r\n\r", kingdom_table[i].whoname );
+	snprintf( buf2, sizeof( buf2 ), " Current Leader    : %s\n\r", kingdom_table[i].leader );
 	strcat( buf, buf2 );
-	sprintf( buf2, " Current General   : %s\n\r", kingdom_table[i].general );
+	snprintf( buf2, sizeof( buf2 ), " Current General   : %s\n\r", kingdom_table[i].general );
 	strcat( buf, buf2 );
-	sprintf( buf2, " Treasury          : %d qps\n\r", kingdom_table[i].qps );
+	snprintf( buf2, sizeof( buf2 ), " Treasury          : %d qps\n\r", kingdom_table[i].qps );
 	strcat( buf, buf2 );
 	send_to_char( buf, ch );
 	return;

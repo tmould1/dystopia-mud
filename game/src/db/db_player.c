@@ -601,12 +601,12 @@ bool db_player_delete( const char *name ) {
 		return FALSE;
 
 	if ( remove( path ) == 0 ) {
-		sprintf( log_buf, "Player file deleted: %s", name );
+		snprintf( log_buf, MAX_STRING_LENGTH, "Player file deleted: %s", name );
 		log_string( log_buf );
 		return TRUE;
 	}
 
-	sprintf( log_buf, "Failed to delete player file: %s", name );
+	snprintf( log_buf, MAX_STRING_LENGTH, "Failed to delete player file: %s", name );
 	log_string( log_buf );
 	return FALSE;
 }

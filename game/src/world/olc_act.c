@@ -108,7 +108,7 @@ void show_flag_cmds( CHAR_DATA *ch, const struct flag_type *flag_table ) {
 	col = 0;
 	for ( flag = 0; *flag_table[flag].name; flag++ ) {
 		if ( flag_table[flag].settable ) {
-			sprintf( buf, "%-19.18s", flag_table[flag].name );
+			snprintf( buf, sizeof( buf ), "%-19.18s", flag_table[flag].name );
 			strcat( buf1, buf );
 			if ( ++col % 4 == 0 )
 				strcat( buf1, "\n\r" );
@@ -147,7 +147,7 @@ void show_skill_cmds( CHAR_DATA *ch, int tar ) {
 			continue;
 
 		if ( tar == -1 || skill_table[sn].target == tar ) {
-			sprintf( buf, "%-19.18s", skill_table[sn].name );
+			snprintf( buf, sizeof( buf ), "%-19.18s", skill_table[sn].name );
 			strcat( buf1, buf );
 			if ( ++col % 4 == 0 )
 				strcat( buf1, "\n\r" );
@@ -176,7 +176,7 @@ void show_spec_cmds( CHAR_DATA *ch ) {
 	col = 0;
 	send_to_char( "Preceed special functions with 'spec_'\n\r\n\r", ch );
 	for ( spec = 0; spec_table[spec].spec_fun; spec++ ) {
-		sprintf( buf, "%-19.18s", &spec_table[spec].spec_name[5] );
+		snprintf( buf, sizeof( buf ), "%-19.18s", &spec_table[spec].spec_name[5] );
 		strcat( buf1, buf );
 		if ( ++col % 4 == 0 )
 			strcat( buf1, "\n\r" );
@@ -210,7 +210,7 @@ bool show_help( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Syntax:  ? [command]\n\r\n\r", ch );
 		send_to_char( "[command]  [description]\n\r", ch );
 		for ( cnt = 0; help_table[cnt].command[0] != '\0'; cnt++ ) {
-			sprintf( buf, "%-10.10s -%s\n\r",
+			snprintf( buf, sizeof( buf ), "%-10.10s -%s\n\r",
 				capitalize( help_table[cnt].command ),
 				help_table[cnt].desc );
 			send_to_char( buf, ch );
@@ -290,7 +290,7 @@ bool redit_mlist( CHAR_DATA *ch, char *argument ) {
 		if ( ( pMobIndex = get_mob_index( vnum ) ) ) {
 			if ( fAll || is_name( arg, pMobIndex->player_name ) ) {
 				found = TRUE;
-				sprintf( buf, "[%5d] %-17.16s",
+				snprintf( buf, sizeof( buf ), "[%5d] %-17.16s",
 					pMobIndex->vnum, capitalize( pMobIndex->short_descr ) );
 				strcat( buf1, buf );
 				if ( ++col % 3 == 0 )
@@ -336,7 +336,7 @@ bool redit_olist( CHAR_DATA *ch, char *argument ) {
 		if ( ( pObjIndex = get_obj_index( vnum ) ) ) {
 			if ( fAll || is_name( arg, pObjIndex->name ) || flag_value( type_flags, arg ) == pObjIndex->item_type ) {
 				found = TRUE;
-				sprintf( buf, "[%5d] %-17.16s",
+				snprintf( buf, sizeof( buf ), "[%5d] %-17.16s",
 					pObjIndex->vnum, capitalize( pObjIndex->short_descr ) );
 				strcat( buf1, buf );
 				if ( ++col % 3 == 0 )
@@ -447,37 +447,37 @@ bool aedit_show( CHAR_DATA *ch, char *argument ) {
 
 	EDIT_AREA( ch, pArea );
 
-	sprintf( buf, "Name:     [%5d] %s\n\r", pArea->vnum, pArea->name );
+	snprintf( buf, sizeof( buf ), "Name:     [%5d] %s\n\r", pArea->vnum, pArea->name );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Recall:   [%5d] %s\n\r", pArea->recall,
+	snprintf( buf, sizeof( buf ), "Recall:   [%5d] %s\n\r", pArea->recall,
 		get_room_index( pArea->recall )
 			? get_room_index( pArea->recall )->name
 			: "none" );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "File:     %s\n\r", pArea->filename );
+	snprintf( buf, sizeof( buf ), "File:     %s\n\r", pArea->filename );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Vnums:    [%d-%d]\n\r", pArea->lvnum, pArea->uvnum );
+	snprintf( buf, sizeof( buf ), "Vnums:    [%d-%d]\n\r", pArea->lvnum, pArea->uvnum );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Age:      [%d]\n\r", pArea->age );
+	snprintf( buf, sizeof( buf ), "Age:      [%d]\n\r", pArea->age );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Players:  [%d]\n\r", pArea->nplayer );
+	snprintf( buf, sizeof( buf ), "Players:  [%d]\n\r", pArea->nplayer );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Security: [%d]\n\r", pArea->security );
+	snprintf( buf, sizeof( buf ), "Security: [%d]\n\r", pArea->security );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Builders: [%s]\n\r", pArea->builders );
+	snprintf( buf, sizeof( buf ), "Builders: [%s]\n\r", pArea->builders );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Flags:    [%s]\n\r", flag_string( area_flags, pArea->area_flags ) );
+	snprintf( buf, sizeof( buf ), "Flags:    [%s]\n\r", flag_string( area_flags, pArea->area_flags ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Hidden:   [%s]\n\r", pArea->is_hidden ? "Yes" : "No" );
+	snprintf( buf, sizeof( buf ), "Hidden:   [%s]\n\r", pArea->is_hidden ? "Yes" : "No" );
 	send_to_char( buf, ch );
 
 	return FALSE;
@@ -652,7 +652,7 @@ bool aedit_security( CHAR_DATA *ch, char *argument ) {
 
 	if ( value > ch->pcdata->security || value < 0 ) {
 		if ( ch->pcdata->security != 0 ) {
-			sprintf( buf, "Security is 0-%d.\n\r", ch->pcdata->security );
+			snprintf( buf, sizeof( buf ), "Security is 0-%d.\n\r", ch->pcdata->security );
 			send_to_char( buf, ch );
 		} else
 			send_to_char( "Security is 0 only.\n\r", ch );
@@ -740,7 +740,7 @@ bool aedit_vnum( CHAR_DATA *ch, char *argument ) {
 	if ( ilower <= 0 || ilower >= INT_MAX || iupper <= 0 || iupper >= INT_MAX ) {
 		char output[MAX_STRING_LENGTH];
 
-		sprintf( output, "AEdit: vnum must be between 0 and %d.\n\r", INT_MAX );
+		snprintf( output, sizeof( output ), "AEdit: vnum must be between 0 and %d.\n\r", INT_MAX );
 		send_to_char( output, ch );
 		return FALSE;
 	}
@@ -793,7 +793,7 @@ bool aedit_lvnum( CHAR_DATA *ch, char *argument ) {
 	if ( ilower <= 0 || ilower >= INT_MAX || iupper <= 0 || iupper >= INT_MAX ) {
 		char output[MAX_STRING_LENGTH];
 
-		sprintf( output, "AEdit: vnum must be between 0 and %d.\n\r", INT_MAX );
+		snprintf( output, sizeof( output ), "AEdit: vnum must be between 0 and %d.\n\r", INT_MAX );
 		send_to_char( output, ch );
 		return FALSE;
 	}
@@ -837,7 +837,7 @@ bool aedit_uvnum( CHAR_DATA *ch, char *argument ) {
 	if ( ilower <= 0 || ilower >= INT_MAX || iupper <= 0 || iupper >= INT_MAX ) {
 		char output[MAX_STRING_LENGTH];
 
-		sprintf( output, "AEdit: vnum must be between 0 and %d.\n\r", INT_MAX );
+		snprintf( output, sizeof( output ), "AEdit: vnum must be between 0 and %d.\n\r", INT_MAX );
 		send_to_char( output, ch );
 		return FALSE;
 	}
@@ -874,18 +874,18 @@ bool redit_show( CHAR_DATA *ch, char *argument ) {
 
 	buf1[0] = '\0';
 
-	sprintf( buf, "Description:\n\r%s", pRoom->description );
+	snprintf( buf, sizeof( buf ), "Description:\n\r%s", pRoom->description );
 	strcat( buf1, buf );
 
-	sprintf( buf, "Name:       [%s]\n\rArea:       [%5d] %s\n\r",
+	snprintf( buf, sizeof( buf ), "Name:       [%s]\n\rArea:       [%5d] %s\n\r",
 		pRoom->name, pRoom->area->vnum, pRoom->area->name );
 	strcat( buf1, buf );
 
-	sprintf( buf, "Vnum:       [%5d]\n\rSector:     [%s]\n\r",
+	snprintf( buf, sizeof( buf ), "Vnum:       [%5d]\n\rSector:     [%s]\n\r",
 		pRoom->vnum, flag_string( sector_flags, pRoom->sector_type ) );
 	strcat( buf1, buf );
 
-	sprintf( buf, "Room flags: [%s]\n\r",
+	snprintf( buf, sizeof( buf ), "Room flags: [%s]\n\r",
 		flag_string( room_flags, pRoom->room_flags ) );
 	strcat( buf1, buf );
 
@@ -946,7 +946,7 @@ bool redit_show( CHAR_DATA *ch, char *argument ) {
 			char *state;
 			int i, length;
 
-			sprintf( buf, "-%-5s to [%5d] Key: [%5d]",
+			snprintf( buf, sizeof( buf ), "-%-5s to [%5d] Key: [%5d]",
 				capitalize( dir_name[door] ),
 				pexit->to_room ? pexit->to_room->vnum : 0,
 				pexit->key );
@@ -981,11 +981,11 @@ bool redit_show( CHAR_DATA *ch, char *argument ) {
 			}
 
 			if ( pexit->keyword && pexit->keyword[0] != '\0' ) {
-				sprintf( buf, "Kwds: [%s]\n\r", pexit->keyword );
+				snprintf( buf, sizeof( buf ), "Kwds: [%s]\n\r", pexit->keyword );
 				strcat( buf1, buf );
 			}
 			if ( pexit->description && pexit->description[0] != '\0' ) {
-				sprintf( buf, "%s", pexit->description );
+				snprintf( buf, sizeof( buf ), "%s", pexit->description );
 				strcat( buf1, buf );
 			}
 		}
@@ -1108,7 +1108,7 @@ bool change_exit( CHAR_DATA *ch, char *argument, int door ) {
 		}
 
 		redit_create( ch, arg ); /* Create the room.	*/
-		sprintf( buf, "link %s", arg );
+		snprintf( buf, sizeof( buf ), "link %s", arg );
 		change_exit( ch, buf, door ); /* Create the exits.	*/
 		return TRUE;
 		do_asave( ch, "changed" );
@@ -1451,7 +1451,7 @@ bool redit_create( CHAR_DATA *ch, char *argument ) {
 	if ( argument[0] == '\0' || value <= 0 || value >= INT_MAX ) {
 		char output[MAX_STRING_LENGTH];
 
-		sprintf( output, "Syntax:  create [0 < vnum < %d]\n\r", INT_MAX );
+		snprintf( output, sizeof( output ), "Syntax:  create [0 < vnum < %d]\n\r", INT_MAX );
 		send_to_char( output, ch );
 		return FALSE;
 	}
@@ -1591,7 +1591,7 @@ bool redit_mreset( CHAR_DATA *ch, char *argument ) {
 	newmob = create_mobile( pMobIndex );
 	char_to_room( newmob, pRoom );
 
-	sprintf( output, "%s (%d) has been loaded and added to resets.\n\r"
+	snprintf( output, sizeof( output ), "%s (%d) has been loaded and added to resets.\n\r"
 					 "There will be a maximum of %d loaded to this room.\n\r",
 		capitalize( pMobIndex->short_descr ),
 		pMobIndex->vnum,
@@ -1712,7 +1712,7 @@ bool redit_oreset( CHAR_DATA *ch, char *argument ) {
 		newobj = create_object( pObjIndex, number_fuzzy( olevel ) );
 		obj_to_room( newobj, pRoom );
 
-		sprintf( output, "%s (%d) has been loaded and added to resets.\n\r",
+		snprintf( output, sizeof( output ), "%s (%d) has been loaded and added to resets.\n\r",
 			capitalize( pObjIndex->short_descr ),
 			pObjIndex->vnum );
 		send_to_char( output, ch );
@@ -1732,7 +1732,7 @@ bool redit_oreset( CHAR_DATA *ch, char *argument ) {
 			newobj->cost = 0;
 			obj_to_obj( newobj, to_obj );
 
-			sprintf( output, "%s (%d) has been loaded into "
+			snprintf( output, sizeof( output ), "%s (%d) has been loaded into "
 							 "%s (%d) and added to resets.\n\r",
 				capitalize( newobj->short_descr ),
 				newobj->pIndexData->vnum,
@@ -1758,7 +1758,7 @@ bool redit_oreset( CHAR_DATA *ch, char *argument ) {
 				 * Disallow loading a sword(WEAR_WIELD) into WEAR_HEAD.
 				 */
 				if ( !IS_SET( pObjIndex->wear_flags, wear_bit( wear_loc ) ) ) {
-					sprintf( output,
+					snprintf( output, sizeof( output ),
 						"%s (%d) has wear flags: [%s]\n\r",
 						capitalize( pObjIndex->short_descr ),
 						pObjIndex->vnum,
@@ -1831,7 +1831,7 @@ bool redit_oreset( CHAR_DATA *ch, char *argument ) {
 				if ( pReset->command == 'E' )
 					equip_char( to_mob, newobj, pReset->arg3 );
 
-				sprintf( output, "%s (%d) has been loaded "
+				snprintf( output, sizeof( output ), "%s (%d) has been loaded "
 								 "%s of %s (%d) and added to resets.\n\r",
 					capitalize( pObjIndex->short_descr ),
 					pObjIndex->vnum,
@@ -1861,15 +1861,15 @@ void show_obj_values( CHAR_DATA *ch, OBJ_INDEX_DATA *obj ) {
 
 	case ITEM_LIGHT:
 		if ( obj->value[2] == -1 )
-			sprintf( buf, "[v2] Light:  Infinite[-1]\n\r" );
+			snprintf( buf, sizeof( buf ), "[v2] Light:  Infinite[-1]\n\r" );
 		else
-			sprintf( buf, "[v2] Light:  [%d]\n\r", obj->value[2] );
+			snprintf( buf, sizeof( buf ), "[v2] Light:  [%d]\n\r", obj->value[2] );
 		send_to_char( buf, ch );
 		break;
 
 	case ITEM_WAND:
 	case ITEM_STAFF:
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"[v0] Level:          [%d]\n\r"
 			"[v1] Charges Total:  [%d]\n\r"
 			"[v2] Charges Left:   [%d]\n\r"
@@ -1885,7 +1885,7 @@ void show_obj_values( CHAR_DATA *ch, OBJ_INDEX_DATA *obj ) {
 	case ITEM_SCROLL:
 	case ITEM_POTION:
 	case ITEM_PILL:
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"[v0] Level:  [%d]\n\r"
 			"[v1] Spell:  %s\n\r"
 			"[v2] Spell:  %s\n\r"
@@ -1901,7 +1901,7 @@ void show_obj_values( CHAR_DATA *ch, OBJ_INDEX_DATA *obj ) {
 		break;
 
 	case ITEM_WEAPON:
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"[v0] ItemAffects:    %d\n\r"
 			"[v1] Damage minimum: [%d]\n\r"
 			"[v2] Damage maximum: [%d]\n\r"
@@ -1913,14 +1913,14 @@ void show_obj_values( CHAR_DATA *ch, OBJ_INDEX_DATA *obj ) {
 		send_to_char( buf, ch );
 		break;
 	case ITEM_ARMOR:
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"[v0] Armor Class:  %d\n\r"
 			"[v3] ItemAffects:  %d\n\r",
 			obj->value[0],
 			obj->value[3] );
 		break;
 	case ITEM_CONTAINER:
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"[v0] Weight: [%d kg]\n\r"
 			"[v1] Flags:  [%s]\n\r"
 			"[v2] Key:    %s [%d]\n\r",
@@ -1934,7 +1934,7 @@ void show_obj_values( CHAR_DATA *ch, OBJ_INDEX_DATA *obj ) {
 		break;
 
 	case ITEM_DRINK_CON:
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"[v0] Liquid Total: [%d]\n\r"
 			"[v1] Liquid Left:  [%d]\n\r"
 			"[v2] Liquid:       %s\n\r"
@@ -1947,7 +1947,7 @@ void show_obj_values( CHAR_DATA *ch, OBJ_INDEX_DATA *obj ) {
 		break;
 
 	case ITEM_FOOD:
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"[v0] Food hours: [%d]\n\r"
 			"[v3] Poisoned:   %s\n\r",
 			obj->value[0],
@@ -1956,7 +1956,7 @@ void show_obj_values( CHAR_DATA *ch, OBJ_INDEX_DATA *obj ) {
 		break;
 
 	case ITEM_MONEY:
-		sprintf( buf, "[v0] Gold:   [%d]\n\r", obj->value[0] );
+		snprintf( buf, sizeof( buf ), "[v0] Gold:   [%d]\n\r", obj->value[0] );
 		send_to_char( buf, ch );
 		break;
 	}
@@ -2178,26 +2178,26 @@ bool oedit_show( CHAR_DATA *ch, char *argument ) {
 
 	EDIT_OBJ( ch, pObj );
 
-	sprintf( buf, "Name:        [%s]\n\rArea:        [%5d] %s\n\r",
+	snprintf( buf, sizeof( buf ), "Name:        [%s]\n\rArea:        [%5d] %s\n\r",
 		pObj->name,
 		!pObj->area ? -1 : pObj->area->vnum,
 		!pObj->area ? "No Area" : pObj->area->name );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Vnum:        [%5d]\n\rType:        [%s]\n\r",
+	snprintf( buf, sizeof( buf ), "Vnum:        [%5d]\n\rType:        [%s]\n\r",
 		pObj->vnum,
 		flag_string( type_flags, pObj->item_type ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Wear flags:  [%s]\n\r",
+	snprintf( buf, sizeof( buf ), "Wear flags:  [%s]\n\r",
 		flag_string( wear_flags, pObj->wear_flags ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Extra flags: [%s]\n\r",
+	snprintf( buf, sizeof( buf ), "Extra flags: [%s]\n\r",
 		flag_string( extra_flags, pObj->extra_flags ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Weight:      [%d]\n\rCost:        [%d]\n\r",
+	snprintf( buf, sizeof( buf ), "Weight:      [%d]\n\rCost:        [%d]\n\r",
 		pObj->weight, pObj->cost );
 	send_to_char( buf, ch );
 
@@ -2215,7 +2215,7 @@ bool oedit_show( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "\n\r", ch );
 	}
 
-	sprintf( buf, "Short desc:  %s\n\rLong desc:\n\r     %s\n\r",
+	snprintf( buf, sizeof( buf ), "Short desc:  %s\n\rLong desc:\n\r     %s\n\r",
 		pObj->short_descr, pObj->description );
 	send_to_char( buf, ch );
 
@@ -2225,7 +2225,7 @@ bool oedit_show( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "Number Modifier Affects\n\r", ch );
 			send_to_char( "------ -------- -------\n\r", ch );
 		}
-		sprintf( buf, "[%4d] %-8d %s\n\r", cnt,
+		snprintf( buf, sizeof( buf ), "[%4d] %-8d %s\n\r", cnt,
 			paf->modifier,
 			flag_string( apply_flags, paf->location ) );
 		send_to_char( buf, ch );
@@ -2475,7 +2475,7 @@ bool oedit_create( CHAR_DATA *ch, char *argument ) {
 	if ( argument[0] == '\0' || value <= 0 || value >= INT_MAX ) {
 		char output[MAX_STRING_LENGTH];
 
-		sprintf( output, "Syntax:  create [0 < vnum < %d]\n\r", INT_MAX );
+		snprintf( output, sizeof( output ), "Syntax:  create [0 < vnum < %d]\n\r", INT_MAX );
 		send_to_char( output, ch );
 		return FALSE;
 	}
@@ -2643,49 +2643,49 @@ bool medit_show( CHAR_DATA *ch, char *argument ) {
 
 	EDIT_MOB( ch, pMob );
 
-	sprintf( buf, "Name:        [%s]\n\rArea:        [%5d] %s\n\r",
+	snprintf( buf, sizeof( buf ), "Name:        [%s]\n\rArea:        [%5d] %s\n\r",
 		pMob->player_name,
 		!pMob->area ? -1 : pMob->area->vnum,
 		!pMob->area ? "No Area" : pMob->area->name );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Act:         [%s]\n\r",
+	snprintf( buf, sizeof( buf ), "Act:         [%s]\n\r",
 		flag_string( act_flags, pMob->act ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Vnum:        [%5d]\n\rSex:         [%s]\n\r",
+	snprintf( buf, sizeof( buf ), "Vnum:        [%5d]\n\rSex:         [%s]\n\r",
 		pMob->vnum,
 		pMob->sex == SEX_MALE ? "male" : pMob->sex == SEX_FEMALE ? "female"
 																 : "neutral" );
 	send_to_char( buf, ch );
 
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Level:       [%2d]\n\rAlign:       [%4d]\n\r",
 		pMob->level, pMob->alignment );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Affected by: [%s]\n\r",
+	snprintf( buf, sizeof( buf ), "Affected by: [%s]\n\r",
 		flag_string( affect_flags, pMob->affected_by ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "v0: Damage reduction  [%4d]\n\r", pMob->hitnodice );
+	snprintf( buf, sizeof( buf ), "v0: Damage reduction  [%4d]\n\r", pMob->hitnodice );
 	stc( buf, ch );
-	sprintf( buf, "v1: Damage bonus:     [%4d]\n\r", pMob->hitplus );
+	snprintf( buf, sizeof( buf ), "v1: Damage bonus:     [%4d]\n\r", pMob->hitplus );
 	stc( buf, ch );
-	sprintf( buf, "v2: Attack bonus:     [%4d]\n\r", pMob->hitsizedice );
+	snprintf( buf, sizeof( buf ), "v2: Attack bonus:     [%4d]\n\r", pMob->hitsizedice );
 	stc( buf, ch );
 
 	if ( pMob->spec_fun ) {
-		sprintf( buf, "Spec fun:    [%s]\n\r", spec_string( pMob->spec_fun ) );
+		snprintf( buf, sizeof( buf ), "Spec fun:    [%s]\n\r", spec_string( pMob->spec_fun ) );
 		send_to_char( buf, ch );
 	}
 
-	sprintf( buf, "Short descr: %s\n\rLong descr:\n\r%s",
+	snprintf( buf, sizeof( buf ), "Short descr: %s\n\rLong descr:\n\r%s",
 		pMob->short_descr,
 		pMob->long_descr );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Description:\n\r%s", pMob->description );
+	snprintf( buf, sizeof( buf ), "Description:\n\r%s", pMob->description );
 	send_to_char( buf, ch );
 
 	if ( pMob->pShop ) {
@@ -2694,13 +2694,13 @@ bool medit_show( CHAR_DATA *ch, char *argument ) {
 
 		pShop = pMob->pShop;
 
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"Shop data for [%5d]:\n\r"
 			"  Markup for purchaser: %d%%\n\r"
 			"  Markdown for seller:  %d%%\n\r",
 			pShop->keeper, pShop->profit_buy, pShop->profit_sell );
 		send_to_char( buf, ch );
-		sprintf( buf, "  Hours: %d to %d.\n\r",
+		snprintf( buf, sizeof( buf ), "  Hours: %d to %d.\n\r",
 			pShop->open_hour, pShop->close_hour );
 		send_to_char( buf, ch );
 
@@ -2710,7 +2710,7 @@ bool medit_show( CHAR_DATA *ch, char *argument ) {
 					send_to_char( "  Number Trades Type\n\r", ch );
 					send_to_char( "  ------ -----------\n\r", ch );
 				}
-				sprintf( buf, "  [%4d] %s\n\r", iTrade,
+				snprintf( buf, sizeof( buf ), "  [%4d] %s\n\r", iTrade,
 					flag_string( type_flags, pShop->buy_type[iTrade] ) );
 				send_to_char( buf, ch );
 			}
@@ -2732,7 +2732,7 @@ bool medit_create( CHAR_DATA *ch, char *argument ) {
 	if ( argument[0] == '\0' || value <= 0 || value >= INT_MAX ) {
 		char output[MAX_STRING_LENGTH];
 
-		sprintf( output, "Syntax:  create [0 < vnum < %d]\n\r", INT_MAX );
+		snprintf( output, sizeof( output ), "Syntax:  create [0 < vnum < %d]\n\r", INT_MAX );
 		send_to_char( output, ch );
 		return FALSE;
 	}
@@ -3024,7 +3024,7 @@ bool medit_shop( CHAR_DATA *ch, char *argument ) {
 		}
 
 		if ( atoi( arg1 ) >= MAX_TRADE ) {
-			sprintf( buf, "REdit:  May sell %d items max.\n\r", MAX_TRADE );
+			snprintf( buf, sizeof( buf ), "REdit:  May sell %d items max.\n\r", MAX_TRADE );
 			send_to_char( buf, ch );
 			return FALSE;
 		}
@@ -3199,7 +3199,7 @@ HEDIT( hedit_index ) {
 
 		if ( level > get_trust( ch ) )
 			continue;
-		sprintf( buf, "%-17.16s  ", pHelp->keyword );
+		snprintf( buf, sizeof( buf ), "%-17.16s  ", pHelp->keyword );
 		strcat( output, buf );
 		if ( ++bob % 3 == 0 ) /* column check */
 			strcat( output, "\n\r" );

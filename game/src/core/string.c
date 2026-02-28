@@ -151,7 +151,7 @@ void string_add( CHAR_DATA *ch, char *argument ) {
 
 			*ch->desc->pString =
 				string_replace( *ch->desc->pString, arg2, arg3 );
-			sprintf( buf, "'%s' replaced with '%s'.\n\r", arg2, arg3 );
+			snprintf( buf, sizeof( buf ), "'%s' replaced with '%s'.\n\r", arg2, arg3 );
 			send_to_char( buf, ch );
 			return;
 		}

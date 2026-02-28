@@ -152,7 +152,7 @@ static void nanny_get_name( DESCRIPTOR_DATA *d, char *argument ) {
 		return;
 	}
 
-	sprintf( kav, "%s trying to connect.", argument );
+	snprintf( kav, sizeof( kav ), "%s trying to connect.", argument );
 	log_string( kav );
 	fOld = load_char_short( d, argument );
 	ch = d->character;
@@ -163,7 +163,7 @@ static void nanny_get_name( DESCRIPTOR_DATA *d, char *argument ) {
 		init_char_for_load( d, argument );
 		ch = d->character;
 
-		sprintf( buf, " You want %s engraved on your tombstone (Y/N)? ", argument );
+		snprintf( buf, sizeof( buf ), " You want %s engraved on your tombstone (Y/N)? ", argument );
 		write_to_buffer( d, buf, 0 );
 		d->connected = CON_CONFIRM_NEW_NAME;
 		return;
@@ -171,7 +171,7 @@ static void nanny_get_name( DESCRIPTOR_DATA *d, char *argument ) {
 
 	char_age = years_old( ch );
 	if ( IS_SET( ch->act, PLR_DENY ) ) {
-		sprintf( log_buf, "Denying access to %s@%s.", argument, ch->lasthost );
+		snprintf( log_buf, MAX_STRING_LENGTH, "Denying access to %s@%s.", argument, ch->lasthost );
 		log_string( log_buf );
 		write_to_buffer( d, " You are denied access.\n\r", 0 );
 		close_socket( d );
@@ -179,9 +179,9 @@ static void nanny_get_name( DESCRIPTOR_DATA *d, char *argument ) {
 	} else if ( IS_EXTRA( ch, EXTRA_BORN ) && char_age < 15 ) {
 		char agebuf[MAX_INPUT_LENGTH];
 		if ( char_age == 14 )
-			sprintf( agebuf, "You cannot play for another year.\n\r" );
+			snprintf( agebuf, sizeof( agebuf ), "You cannot play for another year.\n\r" );
 		else
-			sprintf( agebuf, "You cannot play for another %d years.\n\r",
+			snprintf( agebuf, sizeof( agebuf ), "You cannot play for another %d years.\n\r",
 				( 15 - years_old( ch ) ) );
 		write_to_buffer( d, agebuf, 0 );
 		close_socket( d );
@@ -251,7 +251,7 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 	check_pedit_editing( GET_PC_NAME( ch ) );
 
 	if ( ch->level > 1 ) {
-		sprintf( kav, "%s", ch->pcdata->switchname );
+		snprintf( kav, sizeof( kav ), "%s", ch->pcdata->switchname );
 		free_char( d->character );
 		d->character = NULL;
 		fOld = load_char_obj( d, kav );
@@ -259,7 +259,7 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 	}
 
 	if ( !IS_EXTRA( ch, EXTRA_NEWPASS ) && strlen( argument ) > 1 ) {
-		sprintf( kav, "%s %s", argument, argument );
+		snprintf( kav, sizeof( kav ), "%s %s", argument, argument );
 		do_password( ch, kav );
 	}
 
@@ -273,7 +273,7 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 	strtime[strlen( strtime ) - 1] = '\0';
 	free(ch->lasttime);
 	ch->lasttime = str_dup( strtime );
-	sprintf( log_buf, "%s@%s has connected.", ch->name, mask_ip( ch->lasthost ) );
+	snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s has connected.", ch->name, mask_ip( ch->lasthost ) );
 	log_string( log_buf );
 
 	/* In case we have level 4+ players from another merc mud, or
@@ -362,10 +362,10 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 		login_message( ch );
 	else {
 		if ( !ragnarok )
-			sprintf( buf, "#2%s #7enters #R%s.#n",
+			snprintf( buf, sizeof( buf ), "#2%s #7enters #R%s.#n",
 				ch->name, game_config.game_name );
 		else
-			sprintf( buf, "#2%s #7enters #R%s #y(#0Ragnarok#y).#n",
+			snprintf( buf, sizeof( buf ), "#2%s #7enters #R%s #y(#0Ragnarok#y).#n",
 				ch->name, game_config.game_name );
 		enter_info( buf );
 	}
@@ -397,7 +397,7 @@ static void nanny_confirm_new_name( DESCRIPTOR_DATA *d, char *argument ) {
 	switch ( *argument ) {
 	case 'y':
 	case 'Y':
-		sprintf( buf, " New character.\n\r Give me a password for %s: %s",
+		snprintf( buf, sizeof( buf ), " New character.\n\r Give me a password for %s: %s",
 			ch->name, echo_off_str );
 		write_to_buffer( d, buf, 0 );
 		d->connected = CON_GET_NEW_PASSWORD;
@@ -572,7 +572,7 @@ static void nanny_get_new_ansi( DESCRIPTOR_DATA *d, char *argument ) {
 	ch->pcdata->perm_con = number_range( 10, 16 );
 	ch->class = 0;
 	set_learnable_disciplines( ch );
-	sprintf( log_buf, "%s@%s new player.", ch->name, mask_ip( d->host ) );
+	snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s new player.", ch->name, mask_ip( d->host ) );
 	log_string( log_buf );
 	write_to_buffer( d, "\n\r", 2 );
 	do_help( ch, "motd" );
@@ -653,7 +653,7 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 
 		/* Announce entry */
 		players_logged++;
-		sprintf( buf, "#7A #Rnew player#7 named #2%s #7enters #R%s.#n", ch->name, game_config.game_name );
+		snprintf( buf, sizeof( buf ), "#7A #Rnew player#7 named #2%s #7enters #R%s.#n", ch->name, game_config.game_name );
 		enter_info( buf );
 		act( "$n has entered the game.", ch, NULL, NULL, TO_ROOM );
 
@@ -1047,7 +1047,7 @@ bool check_reconnect( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 				send_to_char( "Reconnecting.\n\r", ch );
 				if ( IS_NPC( ch ) || ch->pcdata->obj_vnum == 0 )
 					act( "$n has reconnected.", ch, NULL, NULL, TO_ROOM );
-				sprintf( log_buf, "%s@%s reconnected.", ch->name, ch->lasthost );
+				snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s reconnected.", ch->name, ch->lasthost );
 				log_string( log_buf );
 				d->connected = CON_PLAYING;
 				/* Send GMCP data on reconnect */
@@ -1084,7 +1084,7 @@ bool check_kickoff( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 				ch->timer = 0;
 				send_to_char( "You take over your body, which was already in use.\n\r", ch );
 				act( "...$n's body has been taken over by another spirit!", ch, NULL, NULL, TO_ROOM );
-				sprintf( log_buf, "%s@%s kicking off old link.", ch->name, ch->lasthost );
+				snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s kicking off old link.", ch->name, ch->lasthost );
 				log_string( log_buf );
 				d->connected = CON_PLAYING;
 				/* MTTS auto-upgrade on kickoff */
@@ -1114,7 +1114,7 @@ void check_pedit_editing( const char *name ) {
 			continue;
 
 		/* Found an immortal editing this player - save and close */
-		sprintf( buf, "%s is logging in - saving and closing your edit session.\n\r", name );
+		snprintf( buf, sizeof( buf ), "%s is logging in - saving and closing your edit session.\n\r", name );
 		send_to_char( buf, ch );
 		pedit_save_offline( ch );
 		if ( ch->desc && ch->desc->connected == CON_PFILE )
@@ -1145,7 +1145,7 @@ bool check_playing( DESCRIPTOR_DATA *d, char *name ) {
 			act( "...$n's body has been taken over by another spirit!", d->character, NULL, NULL, TO_ROOM );
 			dold->character = NULL;
 
-			sprintf( buf, "Kicking off old connection %s@%s", d->character->name, d->host );
+			snprintf( buf, sizeof( buf ), "Kicking off old connection %s@%s", d->character->name, d->host );
 			log_string( buf );
 			close_socket( dold ); /*Slam the old connection into the ether*/
 			return TRUE;

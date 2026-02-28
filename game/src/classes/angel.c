@@ -183,11 +183,11 @@ void do_gbanish( CHAR_DATA *ch, char *argument ) {
 		dam = cfg( CFG_ABILITY_ANGEL_GBANISH_DAM_NEUTRAL );
 	else
 		dam = cfg( CFG_ABILITY_ANGEL_GBANISH_DAM_EVIL );
-	sprintf( buf, "Your call for God to banish $N and $S is hurt [%d]", dam );
+	snprintf( buf, sizeof( buf ), "Your call for God to banish $N and $S is hurt [%d]", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n calls for God to banish you, and it hurts BAD! [%d]", dam );
+	snprintf( buf, sizeof( buf ), "$n calls for God to banish you, and it hurts BAD! [%d]", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n calls for God to Banish $N." );
+	snprintf( buf, sizeof( buf ), "$n calls for God to Banish $N." );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 	hurt_person( ch, victim, dam );
 	if ( number_range( 1, 10 ) > 7 ) {
@@ -289,7 +289,7 @@ void do_gfavor( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "God is with you, your now one of his divine.\n\r", ch );
 		SET_BIT( ch->newbits, NEW_CUBEFORM );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
-		sprintf( buf, "%s the angel", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the angel", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		use_move( ch, cfg( CFG_ABILITY_ANGEL_GFAVOR_MOVE_COST ) );

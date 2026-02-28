@@ -305,21 +305,21 @@ void do_testemb( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You can only embrace mortally wounded vampires.\n\r", ch );
 		return;
 	}
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s leaps toward %s baring his fangs.", ch->name, victim->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"You leap toward %s baring your fangs.\n\r", victim->name );
 	send_to_char( buf, ch );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_VAMPIRE_TESTEMB_COOLDOWN ) );
 
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"You sink your teeth into their throat.\n\r" );
 	send_to_char( buf, ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s sinks their teeth into %s's throat.", ch->name, victim->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s sinks their teeth into your throat.\n\r", ch->name );
 	send_to_char( buf, victim );
 	victim->embraced = ch;
@@ -351,14 +351,14 @@ void do_conceal( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( IS_SET( obj->extra_flags, ITEM_INVIS ) ) {
-		sprintf( buf, "%s fades into existance.", obj->short_descr );
+		snprintf( buf, sizeof( buf ), "%s fades into existance.", obj->short_descr );
 		send_to_char( buf, ch );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		REMOVE_BIT( obj->extra_flags, ITEM_INVIS );
 		return;
 	}
 	if ( !IS_SET( obj->extra_flags, ITEM_INVIS ) ) {
-		sprintf( buf, "%s fades out of existance.", obj->short_descr );
+		snprintf( buf, sizeof( buf ), "%s fades out of existance.", obj->short_descr );
 		send_to_char( buf, ch );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		SET_BIT( obj->extra_flags, ITEM_INVIS );
@@ -400,7 +400,7 @@ void do_fear( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( victim->fighting == NULL ) {
-		sprintf( buf, "%s is not fighting anyone.", arg );
+		snprintf( buf, sizeof( buf ), "%s is not fighting anyone.", arg );
 		stc( buf, ch );
 		return;
 	}
@@ -580,9 +580,9 @@ void do_sharpen( CHAR_DATA *ch, char *argument ) {
 	obj->value[2] = 30;
 
 	/*mite as well recycle the arg string*/
-	sprintf( arg, "You grind away at %s until it is razor sharp!", obj->short_descr );
+	snprintf( arg, sizeof( arg ), "You grind away at %s until it is razor sharp!", obj->short_descr );
 	send_to_char( arg, ch );
-	sprintf( arg, "%s grinds away at %s until it is razor sharp!", ch->name, obj->short_descr );
+	snprintf( arg, sizeof( arg ), "%s grinds away at %s until it is razor sharp!", ch->name, obj->short_descr );
 	act( arg, ch, NULL, NULL, TO_ROOM );
 	return;
 }
@@ -625,17 +625,17 @@ void do_gourge( CHAR_DATA *ch, char *argument ) {
 			"Only small creatures are defenceless enough to be gourged on.\n\r", ch );
 		return;
 	}
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s leaps toward %s baring his fangs.", ch->name, victim->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"You leap toward %s baring your fangs.\n\r", victim->name );
 	send_to_char( buf, ch );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_VAMPIRE_GOURGE_COOLDOWN ) );
 
 	send_to_char(
 		"You rip their throat out and gourge on the blood.\n\r", ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s rips %s's throat out, gourging on all of their blood.", ch->name, victim->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	ch->pcdata->condition[COND_THIRST] += number_range( cfg( CFG_ABILITY_VAMPIRE_GOURGE_BLOOD_GAIN_MIN ), cfg( CFG_ABILITY_VAMPIRE_GOURGE_BLOOD_GAIN_MAX ) );
@@ -644,7 +644,7 @@ void do_gourge( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Your bloodlust is sated.\n\r", ch );
 		ch->pcdata->condition[COND_THIRST] = 1000 / ch->generation;
 	}
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s body falls to the ground lifeless.", victim->name );
 	send_to_char( buf, ch );
 	act( buf, ch, NULL, NULL, TO_ROOM );
@@ -738,7 +738,7 @@ void do_spew( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ( sn = skill_lookup( "spew" ) ) < 0 ) {
-		sprintf( buf, "Yep, sn is bieng set to %d.", sn );
+		snprintf( buf, sizeof( buf ), "Yep, sn is bieng set to %d.", sn );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -771,11 +771,11 @@ void do_vampdarkness( CHAR_DATA *ch, char *argument ) {
 	}
 	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_VAMPIRE_VAMPDARKNESS_BLOOD_COST );
 	SET_BIT( inroom->room_flags, ROOM_DARK );
-	sprintf( buf, "A look of concentration passes over %s's face.",
+	snprintf( buf, sizeof( buf ), "A look of concentration passes over %s's face.",
 		ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "A look of concentration passes over your face.\n\r", ch );
-	sprintf( buf, "A complete darkness fills the room.\n\r" );
+	snprintf( buf, sizeof( buf ), "A complete darkness fills the room.\n\r" );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( buf, ch );
 	return;
@@ -828,7 +828,7 @@ void do_dragonform( CHAR_DATA *ch, char *argument ) {
 	act( "$n's body grows and distorts into a large dragon.", ch, NULL,
 		NULL, TO_ROOM );
 	SET_BIT( ch->extra, EXTRA_DRAGON );
-	sprintf( buf, "%s, the huge rabid dragon", ch->name );
+	snprintf( buf, sizeof( buf ), "%s, the huge rabid dragon", ch->name );
 	free(ch->morph);
 	ch->morph = str_dup( buf );
 	ch->damroll = ch->damroll + 100;
@@ -894,7 +894,7 @@ void do_obj( CHAR_DATA *ch, char *argument ) {
 	act( "$n's form shrinks and distorts into $p.", ch, obj, NULL, TO_ROOM );
 	act( "Your form shrinks and distorts into $p.", ch, obj, NULL, TO_CHAR );
 	ch->pcdata->obj_vnum = obj->pIndexData->vnum;
-	sprintf( buf, "%d", ch->pcdata->obj_vnum );
+	snprintf( buf, sizeof( buf ), "%d", ch->pcdata->obj_vnum );
 	send_to_char( buf, ch );
 	obj->chobj = ch;
 	ch->pcdata->chobj = obj;
@@ -988,22 +988,22 @@ void do_facade( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( arg1[0] == '\0' || arg2[0] == '\0' ) {
 		send_to_char( "You have the following stats:\n\r", ch );
-		sprintf( buf, "Hitroll: %d, Actual: %d.\n\r",
+		snprintf( buf, sizeof( buf ), "Hitroll: %d, Actual: %d.\n\r",
 			ch->pcdata->fake_hit, char_hitroll( ch ) );
 		send_to_char( buf, ch );
-		sprintf( buf, "Damroll: %d, Actual: %d.\n\r",
+		snprintf( buf, sizeof( buf ), "Damroll: %d, Actual: %d.\n\r",
 			ch->pcdata->fake_dam, char_damroll( ch ) );
 		send_to_char( buf, ch );
-		sprintf( buf, "Armour: %d, Actual: %d.\n\r",
+		snprintf( buf, sizeof( buf ), "Armour: %d, Actual: %d.\n\r",
 			ch->pcdata->fake_ac, char_ac( ch ) );
 		send_to_char( buf, ch );
-		sprintf( buf, "Hp: %d, Actual: %d.\n\r",
+		snprintf( buf, sizeof( buf ), "Hp: %d, Actual: %d.\n\r",
 			ch->pcdata->fake_hp, ch->hit );
 		send_to_char( buf, ch );
-		sprintf( buf, "Mana: %d, Actual: %d.\n\r",
+		snprintf( buf, sizeof( buf ), "Mana: %d, Actual: %d.\n\r",
 			ch->pcdata->fake_mana, ch->mana );
 		send_to_char( buf, ch );
-		sprintf( buf, "Move: %d, Actual: %d.\n\r",
+		snprintf( buf, sizeof( buf ), "Move: %d, Actual: %d.\n\r",
 			ch->pcdata->fake_move, ch->move );
 		send_to_char( buf, ch );
 		return;
@@ -1094,22 +1094,22 @@ void do_wall( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	ch->pcdata->condition[COND_THIRST] -= 50;
-	sprintf( buf, "A look of concentration passes over %s's face.", ch->name );
+	snprintf( buf, sizeof( buf ), "A look of concentration passes over %s's face.", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "A look of concentration passes over your face.\n\r", ch );
-	if ( !str_cmp( arg, "n" ) ) sprintf( wall, "walln" );
-	if ( !str_cmp( arg, "w" ) ) sprintf( wall, "wallw" );
-	if ( !str_cmp( arg, "s" ) ) sprintf( wall, "walls" );
-	if ( !str_cmp( arg, "e" ) ) sprintf( wall, "walle" );
-	if ( !str_cmp( arg, "d" ) ) sprintf( wall, "walld" );
-	if ( !str_cmp( arg, "u" ) ) sprintf( wall, "wallu" );
+	if ( !str_cmp( arg, "n" ) ) snprintf( wall, sizeof( wall ), "walln" );
+	if ( !str_cmp( arg, "w" ) ) snprintf( wall, sizeof( wall ), "wallw" );
+	if ( !str_cmp( arg, "s" ) ) snprintf( wall, sizeof( wall ), "walls" );
+	if ( !str_cmp( arg, "e" ) ) snprintf( wall, sizeof( wall ), "walle" );
+	if ( !str_cmp( arg, "d" ) ) snprintf( wall, sizeof( wall ), "walld" );
+	if ( !str_cmp( arg, "u" ) ) snprintf( wall, sizeof( wall ), "wallu" );
 	objc = get_obj_list( ch, wall, &ch->in_room->objects );
 	if ( objc != NULL ) {
 		send_to_char( "There is already a wall blocking that direction.\n\r", ch );
 		return;
 	}
 	WAIT_STATE( ch, 25 );
-	sprintf( buf, "A wall of water pours out of the ground." );
+	snprintf( buf, sizeof( buf ), "A wall of water pours out of the ground." );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( buf, ch );
 	if ( !str_cmp( arg, "n" ) ) obj = create_object( get_obj_index( 30043 ), 0 );
@@ -1153,10 +1153,10 @@ void do_inferno( CHAR_DATA *ch, char *argument ) {
 
 	ch->pcdata->condition[COND_THIRST] -= 100;
 	SET_BIT( inroom->room_flags, ROOM_FLAMING );
-	sprintf( buf, "A look of concentration passes over %s's face.\n\r", ch->name );
+	snprintf( buf, sizeof( buf ), "A look of concentration passes over %s's face.\n\r", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "A look of concentration passes over your face.\n\r", ch );
-	sprintf( buf, "This room is engulfed in flames!" );
+	snprintf( buf, sizeof( buf ), "This room is engulfed in flames!" );
 	send_to_char( buf, ch );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	return;
@@ -1204,8 +1204,8 @@ void do_zombie( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->followers++;
 
 	victim = create_mobile( get_mob_index( obj->value[2] ) );
-	sprintf( buf, "the zombie of %s", victim->short_descr );
-	sprintf( buf2, "the zombie of %s is here.\n\r", victim->short_descr );
+	snprintf( buf, sizeof( buf ), "the zombie of %s", victim->short_descr );
+	snprintf( buf2, sizeof( buf2 ), "the zombie of %s is here.\n\r", victim->short_descr );
 	free(victim->short_descr);
 	victim->short_descr = str_dup( buf );
 	free(victim->name);
@@ -1215,9 +1215,9 @@ void do_zombie( CHAR_DATA *ch, char *argument ) {
 	victim->long_descr = str_dup( buf2 );
 	SET_BIT( victim->extra, EXTRA_ZOMBIE );
 	victim->spec_fun = NULL;
-	sprintf( buf, "Rise corpse, and bow before me!" );
+	snprintf( buf, sizeof( buf ), "Rise corpse, and bow before me!" );
 	do_say( ch, buf );
-	sprintf( buf, "%s clambers back up to its feet.\n\r", obj->short_descr );
+	snprintf( buf, sizeof( buf ), "%s clambers back up to its feet.\n\r", obj->short_descr );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( buf, ch );
 
@@ -1289,9 +1289,9 @@ void do_fleshcraft( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You already look like yourself!\n\r", ch );
 			return;
 		}
-		sprintf( buf, "Your flesh molds and transforms into %s.", ch->name );
+		snprintf( buf, sizeof( buf ), "Your flesh molds and transforms into %s.", ch->name );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "%s's flesh molds and transforms into %s.", ch->morph, ch->name );
+		snprintf( buf, sizeof( buf ), "%s's flesh molds and transforms into %s.", ch->morph, ch->name );
 		act( buf, ch, NULL, victim, TO_ROOM );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		REMOVE_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
@@ -1300,21 +1300,21 @@ void do_fleshcraft( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( IS_VAMPAFF( ch, VAM_DISGUISED ) ) {
-		sprintf( buf, "Your flesh molds and transforms into a clone of %s.", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "Your flesh molds and transforms into a clone of %s.", victim->short_descr );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "%s's flesh molds and transforms into a clone of %s.", ch->morph, victim->short_descr );
+		snprintf( buf, sizeof( buf ), "%s's flesh molds and transforms into a clone of %s.", ch->morph, victim->short_descr );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "%s's flesh mols and transforms into a clone of you!", ch->morph );
+		snprintf( buf, sizeof( buf ), "%s's flesh mols and transforms into a clone of you!", ch->morph );
 		act( buf, ch, NULL, victim, TO_VICT );
 		free(ch->morph);
 		ch->morph = str_dup( victim->short_descr );
 		return;
 	}
-	sprintf( buf, "Your flesh molds and transforms into a clone of %s.", victim->short_descr );
+	snprintf( buf, sizeof( buf ), "Your flesh molds and transforms into a clone of %s.", victim->short_descr );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "%s's flesh molds and transforms into a clone of %s.", ch->name, victim->short_descr );
+	snprintf( buf, sizeof( buf ), "%s's flesh molds and transforms into a clone of %s.", ch->name, victim->short_descr );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
-	sprintf( buf, "%s's flesh molds and transforms into a clone of you!", ch->name );
+	snprintf( buf, sizeof( buf ), "%s's flesh molds and transforms into a clone of you!", ch->name );
 	act( buf, ch, NULL, victim, TO_VICT );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
@@ -1358,9 +1358,9 @@ void do_entrance( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( is_safe( ch, victim ) == TRUE ) return;
-	sprintf( buf, "A look of concentration crosses your face." );
+	snprintf( buf, sizeof( buf ), "A look of concentration crosses your face." );
 	act( buf, ch, NULL, NULL, TO_CHAR );
-	sprintf( buf, "A look of concentration crosses over $n's face.\n\r" );
+	snprintf( buf, sizeof( buf ), "A look of concentration crosses over $n's face.\n\r" );
 	act( buf, ch, NULL, victim, TO_ROOM );
 
 	if ( ( sn = skill_lookup( "charm" ) ) < 0 ) return;
@@ -1461,11 +1461,11 @@ void do_lamprey( CHAR_DATA *ch, char *argument ) {
 	if ( dam <= 0 )
 		dam = 1;
 
-	sprintf( buf, "Your tendrils of darkness hits $N incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "Your tendrils of darkness hits $N incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n's tendrils of darkness hits you incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's tendrils of darkness hits you incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n's tendrils of darkness hits $N incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's tendrils of darkness hits $N incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 
 	send_to_char( "\n\r", ch );
@@ -1578,11 +1578,11 @@ void do_assassinate( CHAR_DATA *ch, char *argument ) {
 	dam += number_range( 1, 20 );
 	set_fighting( ch, victim );
 
-	sprintf( buf, "Your assassination hits $N incredibly hard! [%d]", dam );
+	snprintf( buf, sizeof( buf ), "Your assassination hits $N incredibly hard! [%d]", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n's assassination hits you incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's assassination hits you incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n's assassination hits $N incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's assassination hits $N incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 
 	if ( dam > victim->hit ) dam = victim->hit - 1;
@@ -1693,11 +1693,11 @@ void do_tongue( CHAR_DATA *ch, char *argument ) {
 		dam = 1;
 	set_fighting( ch, victim );
 
-	sprintf( buf, "Your tongue of the serpent hits $N incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "Your tongue of the serpent hits $N incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n's tongue of the serpent hits you incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's tongue of the serpent hits you incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n's tongue of the serpent hits $N incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's tongue of the serpent hits $N incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 
 	send_to_char( "\n\r", ch );
@@ -1725,7 +1725,7 @@ void do_objmask( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_SET( ch->flag2, VAMP_OBJMASK ) ) {
 		stc( "You return to your normal form.\n\r", ch );
-		sprintf( buf, "%s transforms back into %s.\n\r", ch->morph, ch->name );
+		snprintf( buf, sizeof( buf ), "%s transforms back into %s.\n\r", ch->morph, ch->name );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		ch->morph = str_dup( "" );
 		ch->objdesc = str_dup( "" );
@@ -1797,7 +1797,7 @@ void do_mirror( CHAR_DATA *ch, char *argument ) {
 
 	victim = create_mobile( get_mob_index( 33004 ) );
 	victim->short_descr = str_dup( ch->name );
-	sprintf( buf, "%s is hovering here.\n\r", ch->name );
+	snprintf( buf, sizeof( buf ), "%s is hovering here.\n\r", ch->name );
 	victim->long_descr = str_dup( buf );
 	victim->name = str_dup( ch->name );
 	victim->level = 20;
@@ -1898,7 +1898,7 @@ void do_formillusion( CHAR_DATA *ch, char *argument ) {
 
 	victim = create_mobile( get_mob_index( 33004 ) );
 	victim->short_descr = str_dup( ch->name );
-	sprintf( buf, "%s is hovering here.\n\r", ch->name );
+	snprintf( buf, sizeof( buf ), "%s is hovering here.\n\r", ch->name );
 	victim->long_descr = str_dup( buf );
 	victim->name = str_dup( ch->name );
 	victim->level = 200;
@@ -2147,9 +2147,9 @@ void do_hagswrinkles( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You already look like yourself!\n\r", ch );
 			return;
 		}
-		sprintf( buf, "Your body wrinkles and reshapes as %s.", ch->name );
+		snprintf( buf, sizeof( buf ), "Your body wrinkles and reshapes as %s.", ch->name );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "%s's body wrinkles and reshapes as %s.", ch->morph, ch->name );
+		snprintf( buf, sizeof( buf ), "%s's body wrinkles and reshapes as %s.", ch->morph, ch->name );
 		act( buf, ch, NULL, victim, TO_ROOM );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		REMOVE_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
@@ -2158,21 +2158,21 @@ void do_hagswrinkles( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( IS_VAMPAFF( ch, VAM_DISGUISED ) ) {
-		sprintf( buf, "Your body wrinkles and reshapes as %s.", victim->name );
+		snprintf( buf, sizeof( buf ), "Your body wrinkles and reshapes as %s.", victim->name );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "%s's body wrinkles and reshapes as %s.", ch->morph, victim->name );
+		snprintf( buf, sizeof( buf ), "%s's body wrinkles and reshapes as %s.", ch->morph, victim->name );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "%s's body wrinkles and reshapes as you!", ch->morph );
+		snprintf( buf, sizeof( buf ), "%s's body wrinkles and reshapes as you!", ch->morph );
 		act( buf, ch, NULL, victim, TO_VICT );
 		free(ch->morph);
 		ch->morph = str_dup( victim->name );
 		return;
 	}
-	sprintf( buf, "Your body wrinkles and reshapes as %s.", victim->name );
+	snprintf( buf, sizeof( buf ), "Your body wrinkles and reshapes as %s.", victim->name );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "%s's body wrinkles and reforms as %s.", ch->name, victim->name );
+	snprintf( buf, sizeof( buf ), "%s's body wrinkles and reforms as %s.", ch->name, victim->name );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
-	sprintf( buf, "%s's body wrinkles and reforms as you!", ch->name );
+	snprintf( buf, sizeof( buf ), "%s's body wrinkles and reforms as you!", ch->name );
 	act( buf, ch, NULL, victim, TO_VICT );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
@@ -2397,17 +2397,17 @@ void do_diablerise( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "%s leaps toward %s baring his fangs.", ch->name, victim->name );
+	snprintf( buf, sizeof( buf ), "%s leaps toward %s baring his fangs.", ch->name, victim->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	sprintf( buf, "You leap toward %s baring your fangs.\n\r", victim->name );
+	snprintf( buf, sizeof( buf ), "You leap toward %s baring your fangs.\n\r", victim->name );
 	send_to_char( buf, ch );
 	WAIT_STATE( ch, 15 );
 
-	sprintf( buf, "You sink your teeth into their throat.\n\r" );
+	snprintf( buf, sizeof( buf ), "You sink your teeth into their throat.\n\r" );
 	send_to_char( buf, ch );
-	sprintf( buf, "%s sinks their teeth into %s's throat.", ch->name, victim->name );
+	snprintf( buf, sizeof( buf ), "%s sinks their teeth into %s's throat.", ch->name, victim->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	sprintf( buf, "%s sinks their teeth into your throat.\n\r", ch->name );
+	snprintf( buf, sizeof( buf ), "%s sinks their teeth into your throat.\n\r", ch->name );
 	send_to_char( buf, victim );
 	victim->embraced = ch;
 	ch->embracing = victim;
@@ -2461,21 +2461,21 @@ void do_embrace( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "%s leaps toward %s baring his fangs.\n\r", ch->name, victim->short_descr );
+	snprintf( buf, sizeof( buf ), "%s leaps toward %s baring his fangs.\n\r", ch->name, victim->short_descr );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	sprintf( buf, "You leap toward %s baring your fangs.\n\r", victim->short_descr );
+	snprintf( buf, sizeof( buf ), "You leap toward %s baring your fangs.\n\r", victim->short_descr );
 	send_to_char( buf, ch );
 	WAIT_STATE( ch, 15 );
 
 	if ( victim->position != POS_STUNNED && victim->position != POS_SLEEPING && victim->position != POS_DEAD ) {
 		send_to_char( "They lunge away from you.\n\r", ch );
-		sprintf( buf, "%s lunges away from %s.", victim->name, ch->short_descr );
+		snprintf( buf, sizeof( buf ), "%s lunges away from %s.", victim->name, ch->short_descr );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		return;
 	}
 
 	send_to_char( "You bury your fangs into their neck, and begins an orgy of blood-sucking!\n\r", ch );
-	sprintf( buf, "%s buries his fangs into %s's neck, and begins an orgy of blood-sucking!\n\r", ch->name, victim->short_descr );
+	snprintf( buf, sizeof( buf ), "%s buries his fangs into %s's neck, and begins an orgy of blood-sucking!\n\r", ch->name, victim->short_descr );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 
 	/* New update send routine, allows for anything to get embraced.         */
@@ -2529,7 +2529,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 		return;
 
 	WAIT_STATE( ch, 35 );
-	sprintf( buf, "A look of concentration crosses over %s's face.", ch->name );
+	snprintf( buf, sizeof( buf ), "A look of concentration crosses over %s's face.", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "A look of concentration crosses over your face.\n\r", ch );
 	if ( IS_ARM_R( victim, LOST_ARM ) && IS_ARM_L( victim, LOST_ARM ) &&
@@ -2549,7 +2549,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 			if ( ( obj = get_eq_char( victim, WEAR_FINGER_R ) ) != NULL )
 				take_item( victim, obj );
 			make_part( victim, "arm" );
-			sprintf( buf,
+			snprintf( buf, sizeof( buf ),
 				"A supernatural force rips %s's arm off!", victim->name );
 			act( buf, ch, NULL, NULL, TO_ROOM );
 			send_to_char( buf, ch );
@@ -2566,7 +2566,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 			if ( ( obj = get_eq_char( victim, WEAR_FINGER_L ) ) != NULL )
 				take_item( victim, obj );
 			make_part( victim, "arm" );
-			sprintf( buf,
+			snprintf( buf, sizeof( buf ),
 				"A supernatural force rips %s's arm off!", victim->name );
 			act( buf, ch, NULL, NULL, TO_ROOM );
 			send_to_char( buf, ch );
@@ -2579,7 +2579,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 			if ( ( obj = get_eq_char( victim, WEAR_LEGS ) ) != NULL )
 				take_item( victim, obj );
 			make_part( victim, "leg" );
-			sprintf( buf,
+			snprintf( buf, sizeof( buf ),
 				"A supernatural force rips %s's leg off!", victim->name );
 			act( buf, ch, NULL, NULL, TO_ROOM );
 			send_to_char( buf, ch );
@@ -2592,7 +2592,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 			if ( ( obj = get_eq_char( victim, WEAR_LEGS ) ) != NULL )
 				take_item( victim, obj );
 			make_part( victim, "leg" );
-			sprintf( buf,
+			snprintf( buf, sizeof( buf ),
 				"A supernatural force rips %s's leg off!", victim->name );
 			act( buf, ch, NULL, NULL, TO_ROOM );
 			send_to_char( buf, ch );
@@ -2636,7 +2636,7 @@ void do_infirmity( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( is_safe( ch, victim ) == TRUE ) return;
 	if ( ( sn = skill_lookup( "infirmity" ) ) < 0 ) {
-		sprintf( buf, "Yep, sn is bieng set to %d.", sn );
+		snprintf( buf, sizeof( buf ), "Yep, sn is bieng set to %d.", sn );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -2678,7 +2678,7 @@ void do_guardian( CHAR_DATA *ch, char *argument ) {
 	victim->armor = 300;
 	SET_BIT( victim->act, ACT_NOEXP );
 
-	sprintf( buf, "Come forth, creature of darkness, and do my bidding!" );
+	snprintf( buf, sizeof( buf ), "Come forth, creature of darkness, and do my bidding!" );
 	do_say( ch, buf );
 
 	send_to_char( "A demon bursts from the ground and bows before you.\n\r", ch );
@@ -2725,7 +2725,7 @@ void do_servant( CHAR_DATA *ch, char *argument ) {
 	victim->damroll = 100;
 	victim->armor = 700;
 
-	sprintf( buf, "Come forth, creature of darkness, and do my bidding!" );
+	snprintf( buf, sizeof( buf ), "Come forth, creature of darkness, and do my bidding!" );
 	do_say( ch, buf );
 
 	send_to_char( "A demonic servant bursts from the ground and bows before you.\n\r", ch );
@@ -2843,11 +2843,11 @@ void do_spit( CHAR_DATA *ch, char *argument ) {
 		dam = 1;
 	set_fighting( ch, victim );
 
-	sprintf( buf, "Your spit of acid hits $N incredibly hard! [%d]", dam );
+	snprintf( buf, sizeof( buf ), "Your spit of acid hits $N incredibly hard! [%d]", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n's spit of acid hits you incredibly hard! [%d]", dam );
+	snprintf( buf, sizeof( buf ), "$n's spit of acid hits you incredibly hard! [%d]", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n's spit of acid hits $N incredibly hard! [%d]", dam );
+	snprintf( buf, sizeof( buf ), "$n's spit of acid hits $N incredibly hard! [%d]", dam );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 
 	send_to_char( "\n\r", ch );
@@ -3001,57 +3001,57 @@ void do_bloodwall( CHAR_DATA *ch, char *argument ) {
 	}
 
 	ch->pcdata->condition[COND_THIRST] -= value;
-	sprintf( buf, "A look of concentration passes over %s's face.", ch->name );
+	snprintf( buf, sizeof( buf ), "A look of concentration passes over %s's face.", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "A look of concentration passes over your face.\n\r", ch );
-	if ( !str_cmp( arg, "n" ) ) sprintf( wall, "walln" );
-	if ( !str_cmp( arg, "w" ) ) sprintf( wall, "wallw" );
-	if ( !str_cmp( arg, "s" ) ) sprintf( wall, "walls" );
-	if ( !str_cmp( arg, "e" ) ) sprintf( wall, "walle" );
-	if ( !str_cmp( arg, "d" ) ) sprintf( wall, "walld" );
-	if ( !str_cmp( arg, "u" ) ) sprintf( wall, "wallu" );
+	if ( !str_cmp( arg, "n" ) ) snprintf( wall, sizeof( wall ), "walln" );
+	if ( !str_cmp( arg, "w" ) ) snprintf( wall, sizeof( wall ), "wallw" );
+	if ( !str_cmp( arg, "s" ) ) snprintf( wall, sizeof( wall ), "walls" );
+	if ( !str_cmp( arg, "e" ) ) snprintf( wall, sizeof( wall ), "walle" );
+	if ( !str_cmp( arg, "d" ) ) snprintf( wall, sizeof( wall ), "walld" );
+	if ( !str_cmp( arg, "u" ) ) snprintf( wall, sizeof( wall ), "wallu" );
 	objc = get_obj_list( ch, wall, &ch->in_room->objects );
 	if ( objc != NULL ) {
 		send_to_char( "There is already a wall blocking that direction.\n\r", ch );
 		return;
 	}
 	WAIT_STATE( ch, 25 );
-	sprintf( buf, "A wall of blood pours out of the ground." );
+	snprintf( buf, sizeof( buf ), "A wall of blood pours out of the ground." );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( buf, ch );
 	if ( !str_cmp( arg, "n" ) ) {
 		obj = create_object( get_obj_index( 30043 ), 0 );
-		sprintf( buf, "A wall of blood is here, blocking your exit north." );
+		snprintf( buf, sizeof( buf ), "A wall of blood is here, blocking your exit north." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "s" ) ) {
 		obj = create_object( get_obj_index( 30044 ), 0 );
-		sprintf( buf, "A wall of blood is here, blocking your exit south." );
+		snprintf( buf, sizeof( buf ), "A wall of blood is here, blocking your exit south." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "e" ) ) {
 		obj = create_object( get_obj_index( 30045 ), 0 );
-		sprintf( buf, "A wall of blood is here, blocking your exit east." );
+		snprintf( buf, sizeof( buf ), "A wall of blood is here, blocking your exit east." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "w" ) ) {
 		obj = create_object( get_obj_index( 30046 ), 0 );
-		sprintf( buf, "A wall of blood is here, blocking your exit west." );
+		snprintf( buf, sizeof( buf ), "A wall of blood is here, blocking your exit west." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "d" ) ) {
 		obj = create_object( get_obj_index( 30047 ), 0 );
-		sprintf( buf, "A wall of blood is here, blocking your exit down." );
+		snprintf( buf, sizeof( buf ), "A wall of blood is here, blocking your exit down." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 	}
 	if ( !str_cmp( arg, "u" ) ) {
 		obj = create_object( get_obj_index( 30048 ), 0 );
-		sprintf( buf, "A wall of blood is here, blocking your exit up." );
+		snprintf( buf, sizeof( buf ), "A wall of blood is here, blocking your exit up." );
 		free(obj->description);
 		obj->description = str_dup( buf );
 	}
@@ -3127,17 +3127,17 @@ void do_shadowgaze( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You cannot Shadow Gaze a person.\n\r", ch );
 		return;
 	}
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s gazes intently at %s.", ch->name, victim->short_descr );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"You gaze deeply into %s's eyes.\n\r", victim->short_descr );
 	send_to_char( buf, ch );
 	WAIT_STATE( ch, 8 );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"You pull %s into the Shadowplane!", victim->short_descr );
 	act( buf, ch, NULL, NULL, TO_CHAR );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s rips %s into the Shadowplane!", ch->name, victim->short_descr );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	SET_BIT( victim->affected_by, AFF_SHADOWPLANE );
@@ -3188,13 +3188,13 @@ void do_grab( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You cannot Grab a mobile!\n\r", ch );
 		return;
 	}
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s pulls %s into the Shadowplane.", ch->name, victim->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"You pull %s into the Shadowplane!\n\r", victim->name );
 	send_to_char( buf, ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"%s pulls you into the Shadowplane!\n\r", ch->name );
 	act( buf, ch, NULL, victim, TO_VICT );
 	WAIT_STATE( ch, 8 );
@@ -3224,7 +3224,7 @@ void do_share( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( ( familiar = ch->pcdata->familiar ) != NULL ) {
-		sprintf( buf, "You release %s.\n\r", familiar->short_descr );
+		snprintf( buf, sizeof( buf ), "You release %s.\n\r", familiar->short_descr );
 		send_to_char( buf, ch );
 		familiar->wizard = NULL;
 		ch->pcdata->familiar = NULL;

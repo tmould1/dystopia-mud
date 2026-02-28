@@ -521,32 +521,32 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( lin, "===========================================================================\n\r" );
+	snprintf( lin, sizeof( lin ), "===========================================================================\n\r" );
 	if ( arg[0] == '\0' ) {
 		stc( " Syntax: Learn <fight|techniques|abilities|chi> <power|chi>\n\r", ch );
 		stc( "=============================|Fight Styles|==============================\n\r", ch );
-		sprintf( buf, "       Trip     [%s] Kick      [%s] Bash     [%s] Elbow    [%s] Knee     [%s]   \n\r",
+		snprintf( buf, sizeof( buf ), "       Trip     [%s] Kick      [%s] Bash     [%s] Elbow    [%s] Knee     [%s]   \n\r",
 			IS_FS( ch, FS_TRIP ) ? "*" : " ",
 			IS_FS( ch, FS_KICK ) ? "*" : " ",
 			IS_FS( ch, FS_BASH ) ? "*" : " ",
 			IS_FS( ch, FS_ELBOW ) ? "*" : " ",
 			IS_FS( ch, FS_KNEE ) ? "*" : " " );
 		stc( buf, ch );
-		sprintf( buf, "       Disarm   [%s] Bite      [%s] Dirt     [%s] Grapple  [%s] Punch    [%s]   \n\r",
+		snprintf( buf, sizeof( buf ), "       Disarm   [%s] Bite      [%s] Dirt     [%s] Grapple  [%s] Punch    [%s]   \n\r",
 			IS_FS( ch, FS_DISARM ) ? "*" : " ",
 			IS_FS( ch, FS_BITE ) ? "*" : " ",
 			IS_FS( ch, FS_DIRT ) ? "*" : " ",
 			IS_FS( ch, FS_GRAPPLE ) ? "*" : " ",
 			IS_FS( ch, FS_PUNCH ) ? "*" : " " );
 		stc( buf, ch );
-		sprintf( buf, "       Rip      [%s] Stamp     [%s] Backfist [%s] Jumpkick [%s] Spinkick [%s]   \n\r",
+		snprintf( buf, sizeof( buf ), "       Rip      [%s] Stamp     [%s] Backfist [%s] Jumpkick [%s] Spinkick [%s]   \n\r",
 			IS_FS( ch, FS_RIP ) ? "*" : " ",
 			IS_FS( ch, FS_STAMP ) ? "*" : " ",
 			IS_FS( ch, FS_BACKFIST ) ? "*" : " ",
 			IS_FS( ch, FS_JUMPKICK ) ? "*" : " ",
 			IS_FS( ch, FS_SPINKICK ) ? "*" : " " );
 		stc( buf, ch );
-		sprintf( buf, "       Sweep    [%s] Charge    [%s] Hurl     [%s] Gouge    [%s] Headbutt [%s]   \n\r",
+		snprintf( buf, sizeof( buf ), "       Sweep    [%s] Charge    [%s] Hurl     [%s] Gouge    [%s] Headbutt [%s]   \n\r",
 			IS_FS( ch, FS_SWEEP ) ? "*" : " ",
 			IS_FS( ch, FS_CHARGE ) ? "*" : " ",
 			IS_FS( ch, FS_HURL ) ? "*" : " ",
@@ -556,13 +556,13 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 		stc( "===========================================================================\n\r", ch );
 		stc( "                                   Techniques                                  \n\r", ch );
 		stc( lin, ch );
-		sprintf( buf, "    Thrust Kick [%s]   Spin Kick   [%s]   Backfist    [%s]   Palm Strike [%s]   \n\r",
+		snprintf( buf, sizeof( buf ), "    Thrust Kick [%s]   Spin Kick   [%s]   Backfist    [%s]   Palm Strike [%s]   \n\r",
 			IS_FS( ch, TECH_THRUST ) ? "*" : " ",
 			IS_FS( ch, TECH_SPIN ) ? "*" : " ",
 			IS_FS( ch, TECH_BACK ) ? "*" : " ",
 			IS_FS( ch, TECH_PALM ) ? "*" : " " );
 		stc( buf, ch );
-		sprintf( buf, "    Elbow       [%s]   Sweep       [%s]   Shin Kick   [%s]   Knee        [%s]   \n\r",
+		snprintf( buf, sizeof( buf ), "    Elbow       [%s]   Sweep       [%s]   Shin Kick   [%s]   Knee        [%s]   \n\r",
 			IS_FS( ch, TECH_ELBOW ) ? "*" : " ",
 			IS_FS( ch, TECH_SWEEP ) ? "*" : " ",
 			IS_FS( ch, TECH_SHIN ) ? "*" : " ",
@@ -571,7 +571,7 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 		stc( lin, ch );
 		stc( "                                   Abilities                                   \n\r", ch );
 		stc( lin, ch );
-		sprintf( buf, "                 Awareness [%s%s%s%s]               Body     [%s%s%s%s]\n\r",
+		snprintf( buf, sizeof( buf ), "                 Awareness [%s%s%s%s]               Body     [%s%s%s%s]\n\r",
 			ch->monkab[AWARE] > 0 ? "*" : " ",
 			ch->monkab[AWARE] > 1 ? "*" : " ",
 			ch->monkab[AWARE] > 2 ? "*" : " ",
@@ -581,7 +581,7 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 			ch->monkab[BODY] > 2 ? "*" : " ",
 			ch->monkab[BODY] > 3 ? "*" : " " );
 		stc( buf, ch );
-		sprintf( buf, "     Combat   [%s%s%s%s]              Spirit    [%s%s%s%s]\n\r",
+		snprintf( buf, sizeof( buf ), "     Combat   [%s%s%s%s]              Spirit    [%s%s%s%s]\n\r",
 			ch->monkab[COMBAT] > 0 ? "*" : " ",
 			ch->monkab[COMBAT] > 1 ? "*" : " ",
 			ch->monkab[COMBAT] > 2 ? "*" : " ",
@@ -594,10 +594,10 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 		stc( lin, ch );
 		stc( "                                      Chi\n\r", ch );
 		stc( lin, ch );
-		sprintf( buf, "                 You have attained a level %d mastery of your Ch'i.\n\r", ch->chi[MAXIMUM] );
+		snprintf( buf, sizeof( buf ), "                 You have attained a level %d mastery of your Ch'i.\n\r", ch->chi[MAXIMUM] );
 		stc( buf, ch );
 		if ( ch->chi[CURRENT] > 0 ) {
-			sprintf( buf, "                     Your ch'i is currently active at level %d\n\r", ch->chi[CURRENT] );
+			snprintf( buf, sizeof( buf ), "                     Your ch'i is currently active at level %d\n\r", ch->chi[CURRENT] );
 			stc( buf, ch );
 		} else
 			stc( "         You are currently not focusing your ch'i\n\r", ch );
@@ -722,7 +722,7 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( ch->exp < cost ) {
-			sprintf( buf, "You need %d experience to gain the next level of mastery of your ch'i.", cost );
+			snprintf( buf, sizeof( buf ), "You need %d experience to gain the next level of mastery of your ch'i.", cost );
 			return;
 		}
 		ch->exp -= cost;

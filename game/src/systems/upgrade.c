@@ -69,22 +69,22 @@ void upgrade2( CHAR_DATA *ch ) {
 	move_needed = move_needed + ch->pcdata->upgrade_level * 10000;
 	pkscore_needed = pkscore_needed + ch->pcdata->upgrade_level * 500;
 	if ( ch->max_hit < hit_needed ) {
-		sprintf( buf, "You need %d more hitpoints.\n\r", hit_needed - ch->max_hit );
+		snprintf( buf, sizeof( buf ), "You need %d more hitpoints.\n\r", hit_needed - ch->max_hit );
 		send_to_char( buf, ch );
 		return;
 	}
 	if ( ch->max_mana < mana_needed ) {
-		sprintf( buf, "You need %d more manapoints.\n\r", mana_needed - ch->max_mana );
+		snprintf( buf, sizeof( buf ), "You need %d more manapoints.\n\r", mana_needed - ch->max_mana );
 		send_to_char( buf, ch );
 		return;
 	}
 	if ( ch->max_move < move_needed ) {
-		sprintf( buf, "You need %d more movepoints.\n\r", move_needed - ch->max_move );
+		snprintf( buf, sizeof( buf ), "You need %d more movepoints.\n\r", move_needed - ch->max_move );
 		send_to_char( buf, ch );
 		return;
 	}
 	if ( ch->pcdata->quest < qp_needed ) {
-		sprintf( buf, "You need %d more qps.\n\r", qp_needed - ch->pcdata->quest );
+		snprintf( buf, sizeof( buf ), "You need %d more qps.\n\r", qp_needed - ch->pcdata->quest );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -112,25 +112,25 @@ void upgrade2( CHAR_DATA *ch ) {
 	ch->mana = 5000;
 	ch->exp = 0;
 	if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) )
-		sprintf( buf, "The torments and horrors of undead life has made %s even more powerful", ch->name );
+		snprintf( buf, sizeof( buf ), "The torments and horrors of undead life has made %s even more powerful", ch->name );
 	else if ( IS_CLASS( ch, CLASS_LICH ) )
-		sprintf( buf, "Through studies of ancient and forbidden texts %s has grown more powerful", ch->name );
+		snprintf( buf, sizeof( buf ), "Through studies of ancient and forbidden texts %s has grown more powerful", ch->name );
 	else if ( IS_CLASS( ch, CLASS_SAMURAI ) )
-		sprintf( buf, "Through hard work and countless battles, %s's skills with weapons have grown beyond that of any mortal", ch->name );
+		snprintf( buf, sizeof( buf ), "Through hard work and countless battles, %s's skills with weapons have grown beyond that of any mortal", ch->name );
 	else if ( IS_CLASS( ch, CLASS_DROID ) )
-		sprintf( buf, "Becoming truly one with Lloth, %s choses to let the queen take more control", ch->name );
+		snprintf( buf, sizeof( buf ), "Becoming truly one with Lloth, %s choses to let the queen take more control", ch->name );
 	else if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) )
-		sprintf( buf, "The Malaugrym grins in truimph as %s uncovers the ancient powers of Malaug", ch->name );
+		snprintf( buf, sizeof( buf ), "The Malaugrym grins in truimph as %s uncovers the ancient powers of Malaug", ch->name );
 	else if ( IS_CLASS( ch, CLASS_ANGEL ) )
-		sprintf( buf, "The sky shakes with thunder as %s is proclaimed the messanger of God", ch->name );
+		snprintf( buf, sizeof( buf ), "The sky shakes with thunder as %s is proclaimed the messanger of God", ch->name );
 	else if ( IS_CLASS( ch, CLASS_TANARRI ) )
-		sprintf( buf, "Through hardwon battles in the famous Blood Wars, %s has gained skills beyond this world", ch->name );
+		snprintf( buf, sizeof( buf ), "Through hardwon battles in the famous Blood Wars, %s has gained skills beyond this world", ch->name );
 	else if ( IS_CLASS( ch, CLASS_SIREN ) )
-		sprintf( buf, "The heavens tremble as %s's voice reaches new heights of power", ch->name );
+		snprintf( buf, sizeof( buf ), "The heavens tremble as %s's voice reaches new heights of power", ch->name );
 	else if ( IS_CLASS( ch, CLASS_WYRM ) )
-		sprintf( buf, "Ancient dragon power flows through %s as they ascend to true Wyrm status", ch->name );
+		snprintf( buf, sizeof( buf ), "Ancient dragon power flows through %s as they ascend to true Wyrm status", ch->name );
 	else
-		sprintf( buf, "%s have upgraded", ch->name );
+		snprintf( buf, sizeof( buf ), "%s have upgraded", ch->name );
 	do_info( ch, buf );
 	return;
 }
@@ -161,22 +161,22 @@ void do_upgrade( CHAR_DATA *ch, char *argument ) {
 		hit_needed += penalty * pkscore_needed;
 	}
 	if ( ch->max_hit < hit_needed ) {
-		sprintf( buf, "You need %d more hitpoints.\n\r", hit_needed - ch->max_hit );
+		snprintf( buf, sizeof( buf ), "You need %d more hitpoints.\n\r", hit_needed - ch->max_hit );
 		send_to_char( buf, ch );
 		return;
 	}
 	if ( ch->max_mana < mana_needed ) {
-		sprintf( buf, "You need %d more manapoints.\n\r", mana_needed - ch->max_mana );
+		snprintf( buf, sizeof( buf ), "You need %d more manapoints.\n\r", mana_needed - ch->max_mana );
 		send_to_char( buf, ch );
 		return;
 	}
 	if ( ch->max_move < move_needed ) {
-		sprintf( buf, "You need %d more movepoints.\n\r", move_needed - ch->max_move );
+		snprintf( buf, sizeof( buf ), "You need %d more movepoints.\n\r", move_needed - ch->max_move );
 		send_to_char( buf, ch );
 		return;
 	}
 	if ( ch->pcdata->quest < qp_needed ) {
-		sprintf( buf, "You need %d more qps.\n\r", qp_needed - ch->pcdata->quest );
+		snprintf( buf, sizeof( buf ), "You need %d more qps.\n\r", qp_needed - ch->pcdata->quest );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -186,48 +186,48 @@ void do_upgrade( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( ch->class == CLASS_DEMON ) {
 		ch->class = CLASS_TANARRI;
-		sprintf( buf, "%s is reborn as a Tanar'ri", ch->name );
+		snprintf( buf, sizeof( buf ), "%s is reborn as a Tanar'ri", ch->name );
 	} else if ( ch->class == CLASS_DROW ) {
 		ch->class = CLASS_DROID;
-		sprintf( buf, "%s makes the ultimate sacrifice to Lloth", ch->name );
+		snprintf( buf, sizeof( buf ), "%s makes the ultimate sacrifice to Lloth", ch->name );
 	} else if ( ch->class == CLASS_NINJA ) {
 		ch->class = CLASS_SAMURAI;
-		sprintf( buf, "%s have become a true master of weapons", ch->name );
+		snprintf( buf, sizeof( buf ), "%s have become a true master of weapons", ch->name );
 	} else if ( ch->class == CLASS_VAMPIRE ) {
 		ch->class = CLASS_UNDEAD_KNIGHT;
-		sprintf( buf, "%s has chosen the darker path", ch->name );
+		snprintf( buf, sizeof( buf ), "%s has chosen the darker path", ch->name );
 	} else if ( ch->class == CLASS_MONK ) {
 		ch->class = CLASS_ANGEL;
-		sprintf( buf, "%s becomes one with God", ch->name );
+		snprintf( buf, sizeof( buf ), "%s becomes one with God", ch->name );
 	} else if ( ch->class == CLASS_WEREWOLF ) {
 		ch->class = CLASS_SHAPESHIFTER;
-		sprintf( buf, "%s reverts to the true form of the Malaugrym", ch->name );
+		snprintf( buf, sizeof( buf ), "%s reverts to the true form of the Malaugrym", ch->name );
 	} else if ( ch->class == CLASS_MAGE ) {
 		ch->class = CLASS_LICH;
-		sprintf( buf, "%s have sacrificed life for power", ch->name );
+		snprintf( buf, sizeof( buf ), "%s have sacrificed life for power", ch->name );
 	} else if ( ch->class == CLASS_DIRGESINGER ) {
 		ch->class = CLASS_SIREN;
-		sprintf( buf, "%s's voice transcends mortality, becoming a Siren", ch->name );
+		snprintf( buf, sizeof( buf ), "%s's voice transcends mortality, becoming a Siren", ch->name );
 	} else if ( ch->class == CLASS_PSION ) {
 		ch->class = CLASS_MINDFLAYER;
-		sprintf( buf, "%s's mind shatters the boundaries of sanity, becoming a Mindflayer", ch->name );
+		snprintf( buf, sizeof( buf ), "%s's mind shatters the boundaries of sanity, becoming a Mindflayer", ch->name );
 	} else if ( ch->class == CLASS_DRAGONKIN ) {
 		ch->class = CLASS_WYRM;
-		sprintf( buf, "%s's draconic blood awakens fully, transforming them into a Wyrm", ch->name );
+		snprintf( buf, sizeof( buf ), "%s's draconic blood awakens fully, transforming them into a Wyrm", ch->name );
 	} else if ( ch->class == CLASS_ARTIFICER ) {
 		ch->class = CLASS_MECHANIST;
-		sprintf( buf, "%s melds with machine, reborn as a Mechanist", ch->name );
+		snprintf( buf, sizeof( buf ), "%s melds with machine, reborn as a Mechanist", ch->name );
 	} else if ( ch->class == CLASS_CULTIST ) {
 		ch->class = CLASS_VOIDBORN;
-		sprintf( buf, "%s surrenders to the void, becoming a Voidborn", ch->name );
+		snprintf( buf, sizeof( buf ), "%s surrenders to the void, becoming a Voidborn", ch->name );
 	} else if ( ch->class == CLASS_CHRONOMANCER ) {
 		ch->class = CLASS_PARADOX;
 		ch->rage = PARA_FLUX_CENTER;
-		sprintf( buf, "%s shatters the timeline, becoming a Paradox", ch->name );
+		snprintf( buf, sizeof( buf ), "%s shatters the timeline, becoming a Paradox", ch->name );
 	} else if ( ch->class == CLASS_SHAMAN ) {
 		ch->class = CLASS_SPIRITLORD;
 		ch->rage = SL_TETHER_CENTER;
-		sprintf( buf, "%s transcends the veil, ascending as a Spirit Lord", ch->name );
+		snprintf( buf, sizeof( buf ), "%s transcends the veil, ascending as a Spirit Lord", ch->name );
 	} else
 		return;
 	clearshit( ch );

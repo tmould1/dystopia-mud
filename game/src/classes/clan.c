@@ -37,96 +37,96 @@ void do_level( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
 
 	send_to_char( "---------------------------=[#6Weapon Levels#n]=--------------------------------\n\r", ch );
-	sprintf( skill, "Slice  : %-4d", ch->wpn[1] );
+	snprintf( skill, sizeof( skill ), "Slice  : %-4d", ch->wpn[1] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Stab   : %-4d", ch->wpn[2] );
+	snprintf( skill, sizeof( skill ), " Stab   : %-4d", ch->wpn[2] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Slash  : %-4d", ch->wpn[3] );
+	snprintf( skill, sizeof( skill ), " Slash  : %-4d", ch->wpn[3] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Whip   : %-4d", ch->wpn[4] );
+	snprintf( skill, sizeof( skill ), " Whip   : %-4d", ch->wpn[4] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Claw   : %-4d\n\r", ch->wpn[5] );
+	snprintf( skill, sizeof( skill ), " Claw   : %-4d\n\r", ch->wpn[5] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Blast  : %-4d", ch->wpn[6] );
+	snprintf( skill, sizeof( skill ), "Blast  : %-4d", ch->wpn[6] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Pound  : %-4d", ch->wpn[7] );
+	snprintf( skill, sizeof( skill ), " Pound  : %-4d", ch->wpn[7] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Crush  : %-4d", ch->wpn[8] );
+	snprintf( skill, sizeof( skill ), " Crush  : %-4d", ch->wpn[8] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Grep   : %-4d", ch->wpn[9] );
+	snprintf( skill, sizeof( skill ), " Grep   : %-4d", ch->wpn[9] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Bite   : %-4d\n\r", ch->wpn[10] );
+	snprintf( skill, sizeof( skill ), " Bite   : %-4d\n\r", ch->wpn[10] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Pierce : %-4d", ch->wpn[11] );
+	snprintf( skill, sizeof( skill ), "Pierce : %-4d", ch->wpn[11] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Suck   : %-4d", ch->wpn[12] );
+	snprintf( skill, sizeof( skill ), " Suck   : %-4d", ch->wpn[12] );
 	send_to_char( skill, ch );
-	sprintf( skill, " Unarmed: %-4d\n\r\n", ch->wpn[0] );
+	snprintf( skill, sizeof( skill ), " Unarmed: %-4d\n\r\n", ch->wpn[0] );
 	send_to_char( skill, ch );
 
 	send_to_char( "---------------------------=[#6Stance Levels#n]=--------------------------------\n\r", ch );
-	sprintf( skill, "Viper    : %-4d", ch->stance[1] );
+	snprintf( skill, sizeof( skill ), "Viper    : %-4d", ch->stance[1] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Crane   : %-4d", ch->stance[2] );
+	snprintf( skill, sizeof( skill ), "Crane   : %-4d", ch->stance[2] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Crab   : %-4d", ch->stance[3] );
+	snprintf( skill, sizeof( skill ), "Crab   : %-4d", ch->stance[3] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Mongoose : %-4d", ch->stance[4] );
+	snprintf( skill, sizeof( skill ), "Mongoose : %-4d", ch->stance[4] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Bull     : %-4d\n\r", ch->stance[5] );
+	snprintf( skill, sizeof( skill ), "Bull     : %-4d\n\r", ch->stance[5] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Mantis   : %-4d", ch->stance[6] );
+	snprintf( skill, sizeof( skill ), "Mantis   : %-4d", ch->stance[6] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Dragon  : %-4d", ch->stance[7] );
+	snprintf( skill, sizeof( skill ), "Dragon  : %-4d", ch->stance[7] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Tiger  : %-4d", ch->stance[8] );
+	snprintf( skill, sizeof( skill ), "Tiger  : %-4d", ch->stance[8] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Monkey   : %-4d", ch->stance[9] );
+	snprintf( skill, sizeof( skill ), "Monkey   : %-4d", ch->stance[9] );
 	send_to_char( skill, ch );
-	sprintf( skill, "Swallow  : %-4d\n\r", ch->stance[10] );
+	snprintf( skill, sizeof( skill ), "Swallow  : %-4d\n\r", ch->stance[10] );
 	send_to_char( skill, ch );
 
 	send_to_char( "\n\r---------------------------=[#6Super Stances#n]=--------------------------------\n\r", ch );
-	sprintf( skill, "SS1      : %-4d", ch->stance[13] );
+	snprintf( skill, sizeof( skill ), "SS1      : %-4d", ch->stance[13] );
 	send_to_char( skill, ch );
-	sprintf( skill, "SS2     : %-4d", ch->stance[14] );
+	snprintf( skill, sizeof( skill ), "SS2     : %-4d", ch->stance[14] );
 	send_to_char( skill, ch );
-	sprintf( skill, "SS3    : %-4d", ch->stance[15] );
+	snprintf( skill, sizeof( skill ), "SS3    : %-4d", ch->stance[15] );
 	send_to_char( skill, ch );
-	sprintf( skill, "SS4      : %-4d", ch->stance[16] );
+	snprintf( skill, sizeof( skill ), "SS4      : %-4d", ch->stance[16] );
 	send_to_char( skill, ch );
-	sprintf( skill, "SS5      : %-4d\n\r", ch->stance[17] );
+	snprintf( skill, sizeof( skill ), "SS5      : %-4d\n\r", ch->stance[17] );
 	send_to_char( skill, ch );
 
 	send_to_char( "\n\r---------------------------=[#6Spell Levels#n]=---------------------------------\n\r", ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		sprintf( skill, "#5Purple#n : %-4d", ch->spl[0] + 20 );
+		snprintf( skill, sizeof( skill ), "#5Purple#n : %-4d", ch->spl[0] + 20 );
 	else
-		sprintf( skill, "#5Purple#n : %-4d", ch->spl[0] );
+		snprintf( skill, sizeof( skill ), "#5Purple#n : %-4d", ch->spl[0] );
 	send_to_char( skill, ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		sprintf( skill, "#4Blue#n : %-4d", ch->spl[2] + 20 );
+		snprintf( skill, sizeof( skill ), "#4Blue#n : %-4d", ch->spl[2] + 20 );
 	else
-		sprintf( skill, "#4Blue#n : %-4d", ch->spl[2] );
+		snprintf( skill, sizeof( skill ), "#4Blue#n : %-4d", ch->spl[2] );
 	send_to_char( skill, ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		sprintf( skill, "#1Red#n : %-4d", ch->spl[1] + 20 );
+		snprintf( skill, sizeof( skill ), "#1Red#n : %-4d", ch->spl[1] + 20 );
 	else
-		sprintf( skill, "#1Red#n : %-4d", ch->spl[1] );
+		snprintf( skill, sizeof( skill ), "#1Red#n : %-4d", ch->spl[1] );
 	send_to_char( skill, ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		sprintf( skill, "#2Green#n : %-4d", ch->spl[3] + 20 );
+		snprintf( skill, sizeof( skill ), "#2Green#n : %-4d", ch->spl[3] + 20 );
 	else
-		sprintf( skill, "#2Green#n : %-4d", ch->spl[3] );
+		snprintf( skill, sizeof( skill ), "#2Green#n : %-4d", ch->spl[3] );
 	send_to_char( skill, ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		sprintf( skill, "#3Yellow#n : %-4d\n\r\n", ch->spl[4] + 20 );
+		snprintf( skill, sizeof( skill ), "#3Yellow#n : %-4d\n\r\n", ch->spl[4] + 20 );
 	else
-		sprintf( skill, "#3Yellow#n : %-4d\n\r\n", ch->spl[4] );
+		snprintf( skill, sizeof( skill ), "#3Yellow#n : %-4d\n\r\n", ch->spl[4] );
 	send_to_char( skill, ch );
 
 	send_to_char( "---------------------------=[#6Misc. Things#n]=---------------------------------\n\r", ch );
-	sprintf( skill, "Recall Room : %d     \n\r", ch->home );
+	snprintf( skill, sizeof( skill ), "Recall Room : %d     \n\r", ch->home );
 	send_to_char( skill, ch );
 	if ( IS_SET( ch->act, PLR_RIGHTHAND ) )
 		send_to_char( "You favor your right arm in combat.\n\r", ch );
@@ -165,7 +165,7 @@ void do_level( CHAR_DATA *ch, char *argument ) {
 		stc( "You are a monk!\n\r", ch );
 	if ( IS_CLASS( ch, CLASS_DROID ) )
 		stc( "You are a Cybernetic drow!\n\r", ch );
-	sprintf( skill, "Generation : %d\n\r", ch->generation );
+	snprintf( skill, sizeof( skill ), "Generation : %d\n\r", ch->generation );
 	send_to_char( skill, ch );
 
 	if ( IS_CLASS( ch, CLASS_TANARRI ) ) {
@@ -255,26 +255,26 @@ void do_introduce( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->generation > 0 && ch->generation < 14 ) {
 		if ( ch->generation == 1 ) {
-			sprintf( buf, "My name is %s.  I am of the First Generation.  I am the Sire of all Kindred.\n\r", ch->name );
+			snprintf( buf, sizeof( buf ), "My name is %s.  I am of the First Generation.  I am the Sire of all Kindred.\n\r", ch->name );
 			do_say( ch, buf );
 		} else if ( ch->generation == 2 ) {
-			sprintf( buf, "My name is %s.  I am of the Second Generation.  My sire is Caine.\n\r", ch->name );
+			snprintf( buf, sizeof( buf ), "My name is %s.  I am of the Second Generation.  My sire is Caine.\n\r", ch->name );
 			do_say( ch, buf );
 		} else if ( ch->generation == 3 ) {
-			sprintf( buf, "My name is %s.  I am of the Third Generation.  My sire is Caine.\n\r", ch->name );
+			snprintf( buf, sizeof( buf ), "My name is %s.  I am of the Third Generation.  My sire is Caine.\n\r", ch->name );
 			do_say( ch, buf );
 		} else if ( ch->generation > 3 ) {
-			sprintf( buf, "My name is %s.  I am of the %dth Generation.  My sire is Caine.\n\r", ch->name, ch->generation );
+			snprintf( buf, sizeof( buf ), "My name is %s.  I am of the %dth Generation.  My sire is Caine.\n\r", ch->name, ch->generation );
 			do_say( ch, buf );
 		} else
 			return;
 	} else if ( IS_CLASS( ch, CLASS_WEREWOLF ) && IS_HERO( ch ) &&
 		ch->generation > 0 && ch->generation < 7 ) {
 		if ( ch->generation == 1 ) {
-			sprintf( buf, "My name is %s.  I am the chosen champion of Gaia.\n\r", ch->name );
+			snprintf( buf, sizeof( buf ), "My name is %s.  I am the chosen champion of Gaia.\n\r", ch->name );
 			do_say( ch, buf );
 		} else if ( ch->generation > 1 ) {
-			sprintf( buf, "My name is %s.  I am the pup of Gaia.", ch->name );
+			snprintf( buf, sizeof( buf ), "My name is %s.  I am the pup of Gaia.", ch->name );
 			do_say( ch, buf );
 		}
 		return;
@@ -354,7 +354,7 @@ void do_flash( CHAR_DATA *ch, char *argument ) {
 	SET_BIT( ch->extra, EXTRA_FLASH );
 	ch->power[DISC_VAMP_CELE] += cfg( CFG_ABILITY_CLAN_FLASH_CELE_BONUS );
 	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_CLAN_FLASH_BLOOD_COST );
-	sprintf( buf, "%s starts moving with lightening speed.", ch->name );
+	snprintf( buf, sizeof( buf ), "%s starts moving with lightening speed.", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You start moving with lightening speed.\n\r", ch );
 	return;
@@ -378,7 +378,7 @@ void do_death( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( RTIMER( ch->in_room, RTIMER_SILENCE ) != 0 ) {
-		sprintf( buf, "The silence leaves the room.\n\r" );
+		snprintf( buf, sizeof( buf ), "The silence leaves the room.\n\r" );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		send_to_char( "The silence leaves the room.\n\r", ch );
 		SET_RTIMER( ch->in_room, RTIMER_SILENCE, 0 );
@@ -390,10 +390,10 @@ void do_death( CHAR_DATA *ch, char *argument ) {
 	}
 	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_CLAN_DEATH_BLOOD_COST );
 	SET_RTIMER( inroom, RTIMER_SILENCE, cfg( CFG_ABILITY_CLAN_DEATH_SILENCE_DURATION ) );
-	sprintf( buf, "A look of concentration passes over %s's face.\n\r", ch->name );
+	snprintf( buf, sizeof( buf ), "A look of concentration passes over %s's face.\n\r", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "A look of concentration passes over your face.\n\r", ch );
-	sprintf( buf, "An eerie silence fills the room.\n\r" );
+	snprintf( buf, sizeof( buf ), "An eerie silence fills the room.\n\r" );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( buf, ch );
 	return;
@@ -676,11 +676,11 @@ void do_dragon( CHAR_DATA *ch, char *argument ) {
 
 	if ( dam <= 0 )
 		dam = 1;
-	sprintf( buf, "Your flame fries $N! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "Your flame fries $N! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n's flame fries you! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's flame fries you! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n's flame fries $N! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's flame fries $N! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 
 	hurt_person( ch, victim, dam );
@@ -795,41 +795,41 @@ void do_taste( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "You examine $N's blood carefully.\n\r" );
+	snprintf( buf, sizeof( buf ), "You examine $N's blood carefully.\n\r" );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n examines your blood carefully.\n\r" );
+	snprintf( buf, sizeof( buf ), "$n examines your blood carefully.\n\r" );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n examines $N's blood carefully.\n\r" );
+	snprintf( buf, sizeof( buf ), "$n examines $N's blood carefully.\n\r" );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 
 	send_to_char( "\n\r", ch );
 	send_to_char( "\n\r", victim );
 
 	if ( victim->pcdata->rank == AGE_ANCILLA )
-		sprintf( age, "Ancilla" );
+		snprintf( age, sizeof( age ), "Ancilla" );
 	else if ( victim->pcdata->rank == AGE_CHILDE )
-		sprintf( age, "Childe" );
+		snprintf( age, sizeof( age ), "Childe" );
 	else if ( victim->pcdata->rank == AGE_NEONATE )
-		sprintf( age, "Neonate" );
+		snprintf( age, sizeof( age ), "Neonate" );
 	else if ( victim->pcdata->rank == AGE_ELDER )
-		sprintf( age, "Elder" );
+		snprintf( age, sizeof( age ), "Elder" );
 	else if ( victim->pcdata->rank == AGE_METHUSELAH )
-		sprintf( age, "Methuselah" );
+		snprintf( age, sizeof( age ), "Methuselah" );
 	else if ( victim->pcdata->rank == AGE_LA_MAGRA )
-		sprintf( age, "La Magra" );
+		snprintf( age, sizeof( age ), "La Magra" );
 	else if ( victim->pcdata->rank == AGE_TRUEBLOOD )
-		sprintf( age, "TrueBlood" );
+		snprintf( age, sizeof( age ), "TrueBlood" );
 	if ( victim->lord == NULL )
-		sprintf( lord, "None" );
+		snprintf( lord, sizeof( lord ), "None" );
 	else
-		sprintf( lord, "%s", victim->lord );
-	sprintf( lin,
+		snprintf( lord, sizeof( lord ), "%s", victim->lord );
+	snprintf( lin, sizeof( lin ),
 		"---------------------------------------------------------------------------\n\r" );
 	send_to_char( lin, ch );
 	send_to_char(
 		"                              Vampire Status\n\r", ch );
 	send_to_char( lin, ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Generation:%d  Bloodpool:%d  Age:%s  Lord:%s\n\r",
 		victim->generation, victim->pcdata->condition[COND_THIRST],
 		age, lord );
@@ -838,31 +838,31 @@ void do_taste( CHAR_DATA *ch, char *argument ) {
 	send_to_char(
 		"                              Disciplines\n\r", ch );
 	send_to_char( lin, ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Animalism:    [%d]             Celerity:   [%d]             Fortitude: [%d]\n\r",
 		victim->power[DISC_VAMP_ANIM],
 		victim->power[DISC_VAMP_CELE],
 		victim->power[DISC_VAMP_FORT] );
 	send_to_char( buf, ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Obtenebration:[%d]             Presence:   [%d]             Quietus:   [%d]\n\r",
 		victim->power[DISC_VAMP_OBTE],
 		victim->power[DISC_VAMP_PRES],
 		victim->power[DISC_VAMP_QUIE] );
 	send_to_char( buf, ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Thaumaturgy:  [%d]             Auspex:     [%d]             Dominate:  [%d]\n\r",
 		victim->power[DISC_VAMP_THAU],
 		victim->power[DISC_VAMP_AUSP],
 		victim->power[DISC_VAMP_DOMI] );
 	send_to_char( buf, ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Obfuscate:    [%d]             Potence:    [%d]             Protean:   [%d]\n\r",
 		victim->power[DISC_VAMP_OBFU],
 		victim->power[DISC_VAMP_POTE],
 		victim->power[DISC_VAMP_PROT] );
 	send_to_char( buf, ch );
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Serpentis:    [%d]             Vicissitude:[%d]             Daimoinon: [%d]\n\r",
 		victim->power[DISC_VAMP_SERP],
 		victim->power[DISC_VAMP_VICI],
@@ -979,7 +979,7 @@ void do_earthmeld( CHAR_DATA *ch, char *argument ) {
 		free(ch->morph);
 		ch->morph = str_dup( "" );
 		send_to_char( "You rise up from the ground.\n\r", ch );
-		sprintf( buf, "%s rises up from the ground", ch->name );
+		snprintf( buf, sizeof( buf ), "%s rises up from the ground", ch->name );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 
 		return;
@@ -992,7 +992,7 @@ void do_earthmeld( CHAR_DATA *ch, char *argument ) {
 	free(ch->morph);
 	ch->morph = str_dup( "Someone" );
 	send_to_char( "You sink into the ground.\n\r", ch );
-	sprintf( buf, "%s sinks into the ground.", ch->name );
+	snprintf( buf, sizeof( buf ), "%s sinks into the ground.", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	return;
 }
@@ -1089,18 +1089,18 @@ void do_theft( CHAR_DATA *ch, char *argument ) {
 	if ( is_safe( ch, victim ) == TRUE ) return;
 
 	if ( !IS_NPC( victim ) ) {
-		sprintf( buf, "A stream of blood shoots from %s into your body.", victim->name );
+		snprintf( buf, sizeof( buf ), "A stream of blood shoots from %s into your body.", victim->name );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "A stream of blood shoots from %s into %s.", victim->name, ch->name );
+		snprintf( buf, sizeof( buf ), "A stream of blood shoots from %s into %s.", victim->name, ch->name );
 		act( buf, ch, NULL, victim, TO_ROOM );
-		sprintf( buf, "A stream of blood shoots from your body into %s.", ch->name );
+		snprintf( buf, sizeof( buf ), "A stream of blood shoots from your body into %s.", ch->name );
 		act( buf, ch, NULL, victim, TO_VICT );
 	} else {
-		sprintf( buf, "A stream of blood shoots from %s into your body.", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "A stream of blood shoots from %s into your body.", victim->short_descr );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "A stream of blood shoots from %s into %s.", victim->short_descr, ch->name );
+		snprintf( buf, sizeof( buf ), "A stream of blood shoots from %s into %s.", victim->short_descr, ch->name );
 		act( buf, ch, NULL, victim, TO_ROOM );
-		sprintf( buf, "A stream of blood shoots from your body into %s.", ch->name );
+		snprintf( buf, sizeof( buf ), "A stream of blood shoots from your body into %s.", ch->name );
 		act( buf, ch, NULL, victim, TO_VICT );
 	}
 	ch->pcdata->condition[COND_THIRST] += number_range( 10, 15 );
@@ -1113,7 +1113,7 @@ void do_theft( CHAR_DATA *ch, char *argument ) {
 		victim->practice -= blpr;
 		ch->pcdata->condition[COND_THIRST] += blpr;
 		if ( victim->practice < 0 ) {
-			sprintf( buf, "%s falls over dead.", victim->short_descr );
+			snprintf( buf, sizeof( buf ), "%s falls over dead.", victim->short_descr );
 			act( buf, ch, NULL, victim, TO_ROOM );
 			act( buf, ch, NULL, victim, TO_CHAR );
 			raw_kill( victim );
@@ -1190,7 +1190,7 @@ void do_demonform( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->mod_dex = 15;
 	SET_BIT( ch->polyaff, POLY_ZULOFORM );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
-	sprintf( buf, "%s the huge hulking demon", ch->name );
+	snprintf( buf, sizeof( buf ), "%s the huge hulking demon", ch->name );
 	free(ch->morph);
 	ch->morph = str_dup( buf );
 	ch->damroll += 200;
@@ -1250,7 +1250,7 @@ void do_zuloform( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->mod_dex = 15;
 	SET_BIT( ch->polyaff, POLY_ZULOFORM );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
-	sprintf( buf, "A big black monster" );
+	snprintf( buf, sizeof( buf ), "A big black monster" );
 	free(ch->morph);
 	ch->morph = str_dup( buf );
 	ch->damroll = ch->damroll + 150;
@@ -1468,7 +1468,7 @@ void do_inconnu( CHAR_DATA *ch, char *argument ) {
 
 	ch->exp -= 1000000;
 	send_to_char( "You are now an Inconnu.\n\r", ch );
-	sprintf( buf, "%s is now an Inconnu!", ch->name );
+	snprintf( buf, sizeof( buf ), "%s is now an Inconnu!", ch->name );
 	do_info( ch, buf );
 	SET_BIT( ch->special, SPC_INCONNU );
 	return;
@@ -1859,9 +1859,9 @@ void do_mask( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You already look like yourself!\n\r", ch );
 			return;
 		}
-		sprintf( buf, "Your form shimmers and transforms into %s.", ch->name );
+		snprintf( buf, sizeof( buf ), "Your form shimmers and transforms into %s.", ch->name );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "%s's form shimmers and transforms into %s.", ch->morph, ch->name );
+		snprintf( buf, sizeof( buf ), "%s's form shimmers and transforms into %s.", ch->morph, ch->name );
 		act( buf, ch, NULL, victim, TO_ROOM );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		REMOVE_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
@@ -1870,21 +1870,21 @@ void do_mask( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( IS_VAMPAFF( ch, VAM_DISGUISED ) ) {
-		sprintf( buf, "Your form shimmers and transforms into a clone of %s.", victim->name );
+		snprintf( buf, sizeof( buf ), "Your form shimmers and transforms into a clone of %s.", victim->name );
 		act( buf, ch, NULL, victim, TO_CHAR );
-		sprintf( buf, "%s's form shimmers and transforms into a clone of %s.", ch->morph, victim->name );
+		snprintf( buf, sizeof( buf ), "%s's form shimmers and transforms into a clone of %s.", ch->morph, victim->name );
 		act( buf, ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "%s's form shimmers and transforms into a clone of you!", ch->morph );
+		snprintf( buf, sizeof( buf ), "%s's form shimmers and transforms into a clone of you!", ch->morph );
 		act( buf, ch, NULL, victim, TO_VICT );
 		free(ch->morph);
 		ch->morph = str_dup( victim->name );
 		return;
 	}
-	sprintf( buf, "Your form shimmers and transforms into a clone of %s.", victim->name );
+	snprintf( buf, sizeof( buf ), "Your form shimmers and transforms into a clone of %s.", victim->name );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "%s's form shimmers and transforms into a clone of %s.", ch->name, victim->name );
+	snprintf( buf, sizeof( buf ), "%s's form shimmers and transforms into a clone of %s.", ch->name, victim->name );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
-	sprintf( buf, "%s's form shimmers and transforms into a clone of you!", ch->name );
+	snprintf( buf, sizeof( buf ), "%s's form shimmers and transforms into a clone of you!", ch->name );
 	act( buf, ch, NULL, victim, TO_VICT );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
@@ -1936,7 +1936,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->polyaff, POLY_BAT );
 		SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_CHANGED );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
-		sprintf( buf, "%s the vampire bat", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the vampire bat", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
@@ -1965,7 +1965,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->polyaff, POLY_WOLF );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
 		SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_CHANGED );
-		sprintf( buf, "%s the dire wolf", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the dire wolf", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
@@ -2006,7 +2006,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 		SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_CHANGED );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
 		SET_BIT( ch->affected_by, AFF_ETHEREAL );
-		sprintf( buf, "%s the white mist", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the white mist", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
@@ -2249,23 +2249,23 @@ void do_clandisc( CHAR_DATA *ch, char *argument ) {
 		cost = ( ch->power[improve] + 1 ) * 10;
 		arg1[0] = UPPER( arg1[0] );
 		if ( ch->power[improve] >= max && ch->pcdata->rank == AGE_METHUSELAH ) {
-			sprintf( buf, "You have already gained all the powers of the %s discipline.\n\r", arg1 );
+			snprintf( buf, sizeof( buf ), "You have already gained all the powers of the %s discipline.\n\r", arg1 );
 			send_to_char( buf, ch );
 			return;
 		}
 		if ( ch->power[improve] >= max ) {
-			sprintf( buf, "You have already maxed %s.\n\r", arg1 );
+			snprintf( buf, sizeof( buf ), "You have already maxed %s.\n\r", arg1 );
 			send_to_char( buf, ch );
 			return;
 		}
 		if ( cost > ch->practice ) {
-			sprintf( buf, "It costs you %d primal to improve your %s discipline.\n\r", cost, arg1 );
+			snprintf( buf, sizeof( buf ), "It costs you %d primal to improve your %s discipline.\n\r", cost, arg1 );
 			send_to_char( buf, ch );
 			return;
 		}
 		ch->power[improve] += 1;
 		ch->practice -= cost;
-		sprintf( buf, "You improve your ability in the %s discipline.\n\r", arg1 );
+		snprintf( buf, sizeof( buf ), "You improve your ability in the %s discipline.\n\r", arg1 );
 		send_to_char( buf, ch );
 	} else
 		send_to_char( "To improve a discipline, type: Clandisc <discipline type> improve.\n\r", ch );
@@ -2642,51 +2642,51 @@ void do_readaura( CHAR_DATA *ch, char *argument ) {
 	act( "$n examines $N intently.", ch, NULL, victim, TO_NOTVICT );
 	act( "$n examines you intently.", ch, NULL, victim, TO_VICT );
 	if ( IS_NPC( victim ) )
-		sprintf( buf, "%s is an NPC.\n\r", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "%s is an NPC.\n\r", victim->short_descr );
 	else {
 		if ( victim->level == 12 )
-			sprintf( buf, "%s is an Implementor.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Implementor.\n\r", victim->name );
 		else if ( victim->level == 11 )
-			sprintf( buf, "%s is a High Judge.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a High Judge.\n\r", victim->name );
 		else if ( victim->level == 10 )
-			sprintf( buf, "%s is a Judge.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Judge.\n\r", victim->name );
 		else if ( victim->level == 9 )
-			sprintf( buf, "%s is an Enforcer.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Enforcer.\n\r", victim->name );
 		else if ( victim->level == 8 )
-			sprintf( buf, "%s is a Quest Maker.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Quest Maker.\n\r", victim->name );
 		else if ( victim->level == 7 )
-			sprintf( buf, "%s is a Builder.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Builder.\n\r", victim->name );
 		else if ( victim->level >= 3 )
-			sprintf( buf, "%s is an Avatar.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Avatar.\n\r", victim->name );
 		else
-			sprintf( buf, "%s is a Mortal.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Mortal.\n\r", victim->name );
 	}
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) ) {
-		sprintf( buf, "Str:%d, Int:%d, Wis:%d, Dex:%d, Con:%d.\n\r", get_curr_str( victim ), get_curr_int( victim ), get_curr_wis( victim ), get_curr_dex( victim ), get_curr_con( victim ) );
+		snprintf( buf, sizeof( buf ), "Str:%d, Int:%d, Wis:%d, Dex:%d, Con:%d.\n\r", get_curr_str( victim ), get_curr_int( victim ), get_curr_wis( victim ), get_curr_dex( victim ), get_curr_con( victim ) );
 		send_to_char( buf, ch );
 	}
 	if ( chaosvalue )
-		sprintf( buf, "Hp:%d/%d, Mana:%d/%d, Move:%d/%d.\n\r", number_range( 1000, 5000 ), number_range( 10000, 20000 ), number_range( 1000, 5000 ),
+		snprintf( buf, sizeof( buf ), "Hp:%d/%d, Mana:%d/%d, Move:%d/%d.\n\r", number_range( 1000, 5000 ), number_range( 10000, 20000 ), number_range( 1000, 5000 ),
 			number_range( 10000, 20000 ), number_range( 1000, 5000 ), number_range( 10000, 20000 ) );
 	else
-		sprintf( buf, "Hp:%d/%d, Mana:%d/%d, Move:%d/%d.\n\r", victim->hit, victim->max_hit, victim->mana, victim->max_mana, victim->move, victim->max_move );
+		snprintf( buf, sizeof( buf ), "Hp:%d/%d, Mana:%d/%d, Move:%d/%d.\n\r", victim->hit, victim->max_hit, victim->mana, victim->max_mana, victim->move, victim->max_move );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) ) {
 		if ( chaosvalue )
-			sprintf( buf, "Hitroll:%d, Damroll:%d, AC:%d.\n\r", number_range( 500, 2500 ), number_range( 500, 2500 ), number_range( -2000, 0 ) );
+			snprintf( buf, sizeof( buf ), "Hitroll:%d, Damroll:%d, AC:%d.\n\r", number_range( 500, 2500 ), number_range( 500, 2500 ), number_range( -2000, 0 ) );
 		else
-			sprintf( buf, "Hitroll:%d, Damroll:%d, AC:%d.\n\r", char_hitroll( victim ), char_damroll( victim ), char_ac( victim ) );
+			snprintf( buf, sizeof( buf ), "Hitroll:%d, Damroll:%d, AC:%d.\n\r", char_hitroll( victim ), char_damroll( victim ), char_ac( victim ) );
 	} else
-		sprintf( buf, "AC:%d.\n\r", char_ac( victim ) );
+		snprintf( buf, sizeof( buf ), "AC:%d.\n\r", char_ac( victim ) );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) ) {
 		if ( IS_CLASS( victim, CLASS_VAMPIRE ) ) {
-			sprintf( buf, "Blood:%d, ", victim->pcdata->condition[COND_THIRST] );
+			snprintf( buf, sizeof( buf ), "Blood:%d, ", victim->pcdata->condition[COND_THIRST] );
 			send_to_char( buf, ch );
 		}
 	}
-	sprintf( buf, "Alignment:%d.\n\r", victim->alignment );
+	snprintf( buf, sizeof( buf ), "Alignment:%d.\n\r", victim->alignment );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) && IS_EXTRA( victim, EXTRA_PREGNANT ) )
 		act( "$N is pregnant.", ch, NULL, victim, TO_CHAR );
@@ -2892,7 +2892,7 @@ void do_serpent( CHAR_DATA *ch, char *argument ) {
 	act( "$n transforms into a huge serpent.", ch, NULL, NULL, TO_ROOM );
 	SET_BIT( ch->polyaff, POLY_SERPENT );
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
-	sprintf( buf, "%s the huge serpent", ch->name );
+	snprintf( buf, sizeof( buf ), "%s the huge serpent", ch->name );
 	free(ch->morph);
 	ch->morph = str_dup( buf );
 	return;
@@ -3380,7 +3380,7 @@ void do_werewolf( CHAR_DATA *ch, char *argument ) {
 	}
 	SET_BIT( ch->affected_by, AFF_POLYMORPH );
 	SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_DISGUISED );
-	sprintf( buf, "%s the werewolf", ch->name );
+	snprintf( buf, sizeof( buf ), "%s the werewolf", ch->name );
 	free(ch->morph);
 	ch->morph = str_dup( buf );
 	ch->rage += 25;
@@ -3479,7 +3479,7 @@ void do_possession( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( ( familiar = ch->pcdata->familiar ) != NULL ) {
-		sprintf( buf, "You break your hold over %s.\n\r", familiar->short_descr );
+		snprintf( buf, sizeof( buf ), "You break your hold over %s.\n\r", familiar->short_descr );
 		send_to_char( buf, ch );
 		familiar->wizard = NULL;
 		ch->pcdata->familiar = NULL;
@@ -3926,44 +3926,44 @@ void do_koryou( CHAR_DATA *ch, char *argument ) {
 	act( "$n examines $N intently.", ch, NULL, victim, TO_NOTVICT );
 	act( "$n examines you intently.", ch, NULL, victim, TO_VICT );
 	if ( IS_NPC( victim ) )
-		sprintf( buf, "%s is an NPC.\n\r", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "%s is an NPC.\n\r", victim->short_descr );
 	else {
 		if ( victim->level == 12 )
-			sprintf( buf, "%s is an Implementor.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Implementor.\n\r", victim->name );
 		else if ( victim->level == 11 )
-			sprintf( buf, "%s is a High Judge.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a High Judge.\n\r", victim->name );
 		else if ( victim->level == 10 )
-			sprintf( buf, "%s is a Judge.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Judge.\n\r", victim->name );
 		else if ( victim->level == 9 )
-			sprintf( buf, "%s is an Enforcer.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Enforcer.\n\r", victim->name );
 		else if ( victim->level == 8 )
-			sprintf( buf, "%s is a Quest Maker.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Quest Maker.\n\r", victim->name );
 		else if ( victim->level == 7 )
-			sprintf( buf, "%s is a Builder.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Builder.\n\r", victim->name );
 		else if ( victim->level >= 3 )
-			sprintf( buf, "%s is an Avatar.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is an Avatar.\n\r", victim->name );
 		else
-			sprintf( buf, "%s is a Mortal.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s is a Mortal.\n\r", victim->name );
 	}
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) ) {
-		sprintf( buf, "Str:%d, Int:%d, Wis:%d, Dex:%d, Con:%d.\n\r", get_curr_str( victim ), get_curr_int( victim ), get_curr_wis( victim ), get_curr_dex( victim ), get_curr_con( victim ) );
+		snprintf( buf, sizeof( buf ), "Str:%d, Int:%d, Wis:%d, Dex:%d, Con:%d.\n\r", get_curr_str( victim ), get_curr_int( victim ), get_curr_wis( victim ), get_curr_dex( victim ), get_curr_con( victim ) );
 		send_to_char( buf, ch );
 	}
-	sprintf( buf, "Hp:%d/%d, Mana:%d/%d, Move:%d/%d.\n\r", victim->hit, victim->max_hit, victim->mana, victim->max_mana, victim->move, victim->max_move );
+	snprintf( buf, sizeof( buf ), "Hp:%d/%d, Mana:%d/%d, Move:%d/%d.\n\r", victim->hit, victim->max_hit, victim->mana, victim->max_mana, victim->move, victim->max_move );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) )
-		sprintf( buf, "Hitroll:%d, Damroll:%d, AC:%d.\n\r", char_hitroll( victim ), char_damroll( victim ), char_ac( victim ) );
+		snprintf( buf, sizeof( buf ), "Hitroll:%d, Damroll:%d, AC:%d.\n\r", char_hitroll( victim ), char_damroll( victim ), char_ac( victim ) );
 	else
-		sprintf( buf, "AC:%d.\n\r", char_ac( victim ) );
+		snprintf( buf, sizeof( buf ), "AC:%d.\n\r", char_ac( victim ) );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) ) {
 		if ( IS_CLASS( victim, CLASS_VAMPIRE ) ) {
-			sprintf( buf, "Blood:%d, ", victim->pcdata->condition[COND_THIRST] );
+			snprintf( buf, sizeof( buf ), "Blood:%d, ", victim->pcdata->condition[COND_THIRST] );
 			send_to_char( buf, ch );
 		}
 	}
-	sprintf( buf, "Alignment:%d.\n\r", victim->alignment );
+	snprintf( buf, sizeof( buf ), "Alignment:%d.\n\r", victim->alignment );
 	send_to_char( buf, ch );
 	if ( !IS_NPC( victim ) && IS_EXTRA( victim, EXTRA_PREGNANT ) )
 		act( "$N is pregnant.", ch, NULL, victim, TO_CHAR );

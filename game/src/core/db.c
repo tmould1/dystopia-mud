@@ -610,7 +610,7 @@ void fix_exits( void ) {
 			pRoomIndex = pRoomIndex->next ) {
 			for ( door = 0; door <= 5; door++ ) {
 				if ( ( pexit = pRoomIndex->exit[door] ) != NULL && ( to_room = pexit->to_room ) != NULL && ( pexit_rev = to_room->exit[rev_dir[door]] ) != NULL && pexit_rev->to_room != pRoomIndex ) {
-					sprintf( buf, "Fix_exits: %d:%d -> %d:%d -> %d.",
+					snprintf( buf, sizeof( buf ), "Fix_exits: %d:%d -> %d:%d -> %d.",
 						pRoomIndex->vnum, door,
 						to_room->vnum, rev_dir[door],
 						( pexit_rev->to_room == NULL )
@@ -1634,19 +1634,19 @@ void do_areas( CHAR_DATA *ch, char *argument ) {
 	for ( i = 0; i < count; i++ ) {
 		pArea = arr[i];
 		if ( pArea->mob_count > 0 ) {
-			sprintf( level_buf, "%d-%d", pArea->min_mob_level, pArea->max_mob_level );
-			sprintf( buf, "%-32.32s %-9s %-10s %s\n\r",
+			snprintf( level_buf, sizeof( level_buf ), "%d-%d", pArea->min_mob_level, pArea->max_mob_level );
+			snprintf( buf, sizeof( buf ), "%-32.32s %-9s %-10s %s\n\r",
 				pArea->name, tier_names[pArea->difficulty_tier],
 				level_buf, pArea->builders );
 		} else {
-			sprintf( buf, "%-32.32s %-9s %-10s %s\n\r",
+			snprintf( buf, sizeof( buf ), "%-32.32s %-9s %-10s %s\n\r",
 				pArea->name, "N/A", "No mobs", pArea->builders );
 		}
 		send_to_char( buf, ch );
 	}
 
 	/* Footer */
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"#w------------------------------------------------------------------------------#n\n\r"
 		"Total: %d areas\n\r",
 		count );
@@ -1658,27 +1658,27 @@ void do_areas( CHAR_DATA *ch, char *argument ) {
 void do_memory( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 
-	sprintf( buf, "Affects %5d\n\r", top_affect );
+	snprintf( buf, sizeof( buf ), "Affects %5d\n\r", top_affect );
 	send_to_char( buf, ch );
-	sprintf( buf, "Areas   %5d\n\r", top_area );
+	snprintf( buf, sizeof( buf ), "Areas   %5d\n\r", top_area );
 	send_to_char( buf, ch );
-	sprintf( buf, "RmTxt   %5d\n\r", top_rt );
+	snprintf( buf, sizeof( buf ), "RmTxt   %5d\n\r", top_rt );
 	send_to_char( buf, ch );
-	sprintf( buf, "ExDes   %5d\n\r", top_ed );
+	snprintf( buf, sizeof( buf ), "ExDes   %5d\n\r", top_ed );
 	send_to_char( buf, ch );
-	sprintf( buf, "Exits   %5d\n\r", top_exit );
+	snprintf( buf, sizeof( buf ), "Exits   %5d\n\r", top_exit );
 	send_to_char( buf, ch );
-	sprintf( buf, "Helps   %5d\n\r", top_help );
+	snprintf( buf, sizeof( buf ), "Helps   %5d\n\r", top_help );
 	send_to_char( buf, ch );
-	sprintf( buf, "Mobs    %5d\n\r", top_mob_index );
+	snprintf( buf, sizeof( buf ), "Mobs    %5d\n\r", top_mob_index );
 	send_to_char( buf, ch );
-	sprintf( buf, "Objs    %5d\n\r", top_obj_index );
+	snprintf( buf, sizeof( buf ), "Objs    %5d\n\r", top_obj_index );
 	send_to_char( buf, ch );
-	sprintf( buf, "Resets  %5d\n\r", top_reset );
+	snprintf( buf, sizeof( buf ), "Resets  %5d\n\r", top_reset );
 	send_to_char( buf, ch );
-	sprintf( buf, "Rooms   %5d\n\r", top_room );
+	snprintf( buf, sizeof( buf ), "Rooms   %5d\n\r", top_room );
 	send_to_char( buf, ch );
-	sprintf( buf, "Shops   %5d\n\r", top_shop );
+	snprintf( buf, sizeof( buf ), "Shops   %5d\n\r", top_shop );
 	send_to_char( buf, ch );
 
 	{
@@ -1695,9 +1695,9 @@ void do_memory( CHAR_DATA *ch, char *argument ) {
 		total_bytes += (long) top_shop * sizeof( SHOP_DATA );
 
 		if ( total_bytes > 1048576 )
-			sprintf( buf, "Estimated boot memory: %.1f MB\n\r", (double) total_bytes / 1048576.0 );
+			snprintf( buf, sizeof( buf ), "Estimated boot memory: %.1f MB\n\r", (double) total_bytes / 1048576.0 );
 		else
-			sprintf( buf, "Estimated boot memory: %ld KB\n\r", total_bytes / 1024 );
+			snprintf( buf, sizeof( buf ), "Estimated boot memory: %ld KB\n\r", total_bytes / 1024 );
 		send_to_char( buf, ch );
 	}
 
@@ -1994,7 +1994,7 @@ void bug( const char *str, int param ) {
 	char buf[MAX_STRING_LENGTH];
 
 	strcpy( buf, "[*****] BUG: " );
-	sprintf( buf + strlen( buf ), str, param );
+	snprintf( buf + strlen( buf ), sizeof( buf ) - strlen( buf ), str, param );
 	log_string( buf );
 
 	db_game_append_bug( 0, "SYSTEM", buf );

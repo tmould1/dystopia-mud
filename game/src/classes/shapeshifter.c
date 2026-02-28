@@ -302,7 +302,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
 			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
-		sprintf( buf, "%s the huge phase tiger", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the huge phase tiger", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
@@ -324,7 +324,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
 			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
-		sprintf( buf, "%s the horrific hydra", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the horrific hydra", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
@@ -346,7 +346,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
 			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
-		sprintf( buf, "%s the black bull", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the black bull", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
@@ -368,7 +368,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
 			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
 		}
-		sprintf( buf, "%s the small pixie", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the small pixie", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		return;
@@ -417,7 +417,7 @@ void do_formlearn( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( arg[0] == '\0' ) {
-		sprintf( buf, "Current levels : Tiger[%d], Hydra[%d], Faerie[%d], Bull[%d], Shiftpowers[%d]\n\r",
+		snprintf( buf, sizeof( buf ), "Current levels : Tiger[%d], Hydra[%d], Faerie[%d], Bull[%d], Shiftpowers[%d]\n\r",
 			ch->pcdata->powers[TIGER_LEVEL], ch->pcdata->powers[HYDRA_LEVEL],
 			ch->pcdata->powers[FAERIE_LEVEL], ch->pcdata->powers[BULL_LEVEL], ch->pcdata->powers[SHAPE_POWERS] );
 		send_to_char( buf, ch );
@@ -651,7 +651,7 @@ void do_shapeshift( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "No way!\n\r", ch );
 		return;
 	}
-	sprintf( buf, "%s's form blurs and shifts to resemble %s.", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s's form blurs and shifts to resemble %s.", ch->name, argument );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	send_to_char( "Your form blurs and shifts to resemble ", ch );
 	send_to_char( argument, ch );

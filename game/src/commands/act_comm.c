@@ -86,7 +86,7 @@ void do_bounty( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->pcdata->quest -= amount;
 		victim->pcdata->bounty += amount;
-		sprintf( buf, "%s puts %d qps on %s's head, who now have a %d qps bounty.", ch->name, amount, victim->name, victim->pcdata->bounty );
+		snprintf( buf, sizeof( buf ), "%s puts %d qps on %s's head, who now have a %d qps bounty.", ch->name, amount, victim->name, victim->pcdata->bounty );
 		do_info( ch, buf );
 		return;
 	}
@@ -111,20 +111,20 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		return;
 	}
 	if ( argument[0] == '\0' ) {
-		sprintf( buf, "%s what?\n\r", verb );
+		snprintf( buf, sizeof( buf ), "%s what?\n\r", verb );
 		buf[0] = UPPER( buf[0] );
 		send_to_char( buf, ch );
 		return;
 	}
 
 	if ( IS_HEAD( ch, LOST_TONGUE ) ) {
-		sprintf( buf, "You can't %s without a tongue!\n\r", verb );
+		snprintf( buf, sizeof( buf ), "You can't %s without a tongue!\n\r", verb );
 		send_to_char( buf, ch );
 		return;
 	}
 
 	if ( IS_EXTRA( ch, GAGGED ) ) {
-		sprintf( buf, "You can't %s with a gag on!\n\r", verb );
+		snprintf( buf, sizeof( buf ), "You can't %s with a gag on!\n\r", verb );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -135,49 +135,49 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 	default:
 
 		if ( ch->flag4 == 1 ) {
-			sprintf( buf, "You whine '#1%s#n'.\n\r", argument );
+			snprintf( buf, sizeof( buf ), "You whine '#1%s#n'.\n\r", argument );
 			send_to_char( buf, ch );
-			sprintf( buf, "%s #Pwhines#n '#1$t#n'.", ch->name );
+			snprintf( buf, sizeof( buf ), "%s #Pwhines#n '#1$t#n'.", ch->name );
 
 		} else if ( channel == CHANNEL_FLAME ) {
-			sprintf( buf, "You %s '#C%s#n'.\n\r", verb, argument );
+			snprintf( buf, sizeof( buf ), "You %s '#C%s#n'.\n\r", verb, argument );
 			send_to_char( buf, ch );
-			sprintf( buf, "%s %ses '#C$t#n'.", ch->name, verb );
+			snprintf( buf, sizeof( buf ), "%s %ses '#C$t#n'.", ch->name, verb );
 		} else if ( channel == CHANNEL_CHAT ) {
-			sprintf( buf, "You %s '#1%s#n'.\n\r", verb, argument );
+			snprintf( buf, sizeof( buf ), "You %s '#1%s#n'.\n\r", verb, argument );
 			send_to_char( buf, ch );
 			if ( ch->trust > 6 )
-				sprintf( buf, "#y(#G*#y)#C%s#y(#G*#y)#n '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "#y(#G*#y)#C%s#y(#G*#y)#n '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_WEREWOLF ) )
-				sprintf( buf, "%s barks '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s barks '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_MAGE ) )
-				sprintf( buf, "%s chants '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s chants '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) )
-				sprintf( buf, "%s whispers '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s whispers '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_VAMPIRE ) )
-				sprintf( buf, "%s snarls '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s snarls '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_ANGEL ) )
-				sprintf( buf, "%s preaches '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s preaches '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_TANARRI ) )
-				sprintf( buf, "%s booms '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s booms '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_LICH ) )
-				sprintf( buf, "%s squicks '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s squicks '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_DEMON ) )
-				sprintf( buf, "%s growls '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s growls '#1$t#n'.", ch->name );
 			else if ( IS_CLASS( ch, CLASS_DROID ) )
-				sprintf( buf, "%s chitters '#1$t#n'.", ch->name );
+				snprintf( buf, sizeof( buf ), "%s chitters '#1$t#n'.", ch->name );
 			else
-				sprintf( buf, "%s %ss '#1$t#n'.", ch->name, verb );
+				snprintf( buf, sizeof( buf ), "%s %ss '#1$t#n'.", ch->name, verb );
 		}
 
 		else {
-			sprintf( buf, "You %s '#1%s#n'.\n\r", verb, argument );
+			snprintf( buf, sizeof( buf ), "You %s '#1%s#n'.\n\r", verb, argument );
 			send_to_char( buf, ch );
-			sprintf( buf, "%s %ss '#1$t#n'.", ch->name, verb );
+			snprintf( buf, sizeof( buf ), "%s %ss '#1$t#n'.", ch->name, verb );
 		}
 		break;
 	case CHANNEL_IMMTALK:
-		sprintf( buf, "#y.:#P%s#y:.#C $t.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#y.:#P%s#y:.#C $t.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -185,7 +185,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_ANGEL:
-		sprintf( buf, "#0[#7%s#0]#C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#0[#7%s#0]#C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -193,7 +193,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_PRAY:
-		sprintf( buf, "#0[#R%s#0]#C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#0[#R%s#0]#C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -201,7 +201,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_MAGETALK:
-		sprintf( buf, "#n{{#0%s#n}}#C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#n{{#0%s#n}}#C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -209,7 +209,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_TELEPATH:
-		sprintf( buf, "#G*#C(>#R%s#C<)#G* #C'$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#G*#C(>#R%s#C<)#G* #C'$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -217,7 +217,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_COMMUNICATE:
-		sprintf( buf, "#p{#0-#p}#0%s#p{#0-#p} #C'$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#p{#0-#p}#0%s#p{#0-#p} #C'$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -225,7 +225,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_HOWL:
-		sprintf( buf, "#y((#L%s#y))#C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#y((#L%s#y))#C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -233,21 +233,21 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_MIKTALK:
-		sprintf( buf, "#C***#y%s#C*** '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#C***#y%s#C*** '$t'.#n", ch->name );
 		position = ch->position;
 		act( buf, ch, argument, NULL, TO_CHAR );
 		ch->position = position;
 		break;
 
 	case CHANNEL_HIGHTALK:
-		sprintf( buf, "#C-=#R%s#C=-  '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#C-=#R%s#C=-  '$t'.#n", ch->name );
 		position = ch->position;
 		act( buf, ch, argument, NULL, TO_CHAR );
 		ch->position = position;
 		break;
 
 	case CHANNEL_KNIGHTTALK:
-		sprintf( buf, "#0.x.#7%s#0.x.#C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#0.x.#7%s#0.x.#C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -255,7 +255,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_TANTALK:
-		sprintf( buf, "#y{#R%s#y}#C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#y{#R%s#y}#C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -263,7 +263,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_LICHTALK:
-		sprintf( buf, "#G>*<#7%s#G>*<#C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#G>*<#7%s#G>*<#C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -272,9 +272,9 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 
 	case CHANNEL_NEWBIE:
 		if ( ( get_age( ch ) - 17 ) < 2 )
-			sprintf( buf, "%s the newbie chats #7'#R$t#7'.#n", ch->name );
+			snprintf( buf, sizeof( buf ), "%s the newbie chats #7'#R$t#7'.#n", ch->name );
 		else
-			sprintf( buf, "%s the newbie helper chats #7'#R$t#7'.#n", ch->name );
+			snprintf( buf, sizeof( buf ), "%s the newbie helper chats #7'#R$t#7'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -282,7 +282,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_KINGDOM:
-		sprintf( buf, "#R{{{ #P%s #R}}}#n '#7$t#n'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#R{{{ #P%s #R}}}#n '#7$t#n'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -290,7 +290,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_SIGN:
-		sprintf( buf, "#P.o0#0%s#P0o.#C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#P.o0#0%s#P0o.#C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -298,7 +298,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_MONK:
-		sprintf( buf, "#0.x[#c%s#0]x. #C '$t'.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#0.x[#c%s#0]x. #C '$t'.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -306,7 +306,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 		break;
 
 	case CHANNEL_VAMPTALK:
-		sprintf( buf, "#R<<#0%s#R>>#C $t.#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#R<<#0%s#R>>#C $t.#n", ch->name );
 		position = ch->position;
 		ch->position = POS_STANDING;
 		act( buf, ch, argument, NULL, TO_CHAR );
@@ -601,9 +601,9 @@ void do_pray( CHAR_DATA *ch, char *argument ) {
 		act( "You hear $n's prayers in your mind.", ch, NULL, victim, TO_VICT );
 		send_to_char( "You feel energy pour into your body.\n\r", victim );
 		if ( ch->pcdata->stats[DEMON_CURRENT] == 1 )
-			sprintf( buf, "You receive a single point of energy.\n\r" );
+			snprintf( buf, sizeof( buf ), "You receive a single point of energy.\n\r" );
 		else
-			sprintf( buf, "You receive %d points of energy.\n\r",
+			snprintf( buf, sizeof( buf ), "You receive %d points of energy.\n\r",
 				ch->pcdata->stats[DEMON_CURRENT] );
 		send_to_char( buf, victim );
 		act( "$n is briefly surrounded by a halo of energy.", victim, NULL, NULL, TO_ROOM );
@@ -673,67 +673,67 @@ void do_say( CHAR_DATA *ch, char *argument ) {
 	secbit[1] = '\0';
 
 	if ( IS_BODY( ch, CUT_THROAT ) ) {
-		sprintf( speak, "rasp" );
-		sprintf( speaks, "rasps" );
+		snprintf( speak, sizeof( speak ), "rasp" );
+		snprintf( speaks, sizeof( speaks ), "rasps" );
 	} else if ( !IS_NPC( ch ) &&
 		( IS_SET( ch->special, SPC_WOLFMAN ) || IS_POLYAFF( ch, POLY_WOLF ) || ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->pcdata->stats[UNI_RAGE] > 0 ) ) ) {
 		if ( number_percent() > 50 ) {
-			sprintf( speak, "growl" );
-			sprintf( speaks, "growls" );
+			snprintf( speak, sizeof( speak ), "growl" );
+			snprintf( speaks, sizeof( speaks ), "growls" );
 		} else {
-			sprintf( speak, "snarl" );
-			sprintf( speaks, "snarls" );
+			snprintf( speak, sizeof( speak ), "snarl" );
+			snprintf( speaks, sizeof( speaks ), "snarls" );
 		}
 	} else if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_BAT ) ) {
-		sprintf( speak, "squeak" );
-		sprintf( speaks, "squeaks" );
+		snprintf( speak, sizeof( speak ), "squeak" );
+		snprintf( speaks, sizeof( speaks ), "squeaks" );
 	} else if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_SERPENT ) ) {
-		sprintf( speak, "hiss" );
-		sprintf( speaks, "hisses" );
+		snprintf( speak, sizeof( speak ), "hiss" );
+		snprintf( speaks, sizeof( speaks ), "hisses" );
 	} else if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_FROG ) ) {
-		sprintf( speak, "croak" );
-		sprintf( speaks, "croaks" );
+		snprintf( speak, sizeof( speak ), "croak" );
+		snprintf( speaks, sizeof( speaks ), "croaks" );
 	} else if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_RAVEN ) ) {
-		sprintf( speak, "squark" );
-		sprintf( speaks, "squarks" );
+		snprintf( speak, sizeof( speak ), "squark" );
+		snprintf( speaks, sizeof( speaks ), "squarks" );
 	} else if ( IS_NPC( ch ) && ch->pIndexData->vnum == MOB_VNUM_FROG ) {
-		sprintf( speak, "croak" );
-		sprintf( speaks, "croaks" );
+		snprintf( speak, sizeof( speak ), "croak" );
+		snprintf( speaks, sizeof( speaks ), "croaks" );
 	} else if ( IS_NPC( ch ) && ch->pIndexData->vnum == MOB_VNUM_RAVEN ) {
-		sprintf( speak, "squark" );
-		sprintf( speaks, "squarks" );
+		snprintf( speak, sizeof( speak ), "squark" );
+		snprintf( speaks, sizeof( speaks ), "squarks" );
 	} else if ( IS_NPC( ch ) && ch->pIndexData->vnum == MOB_VNUM_CAT ) {
-		sprintf( speak, "purr" );
-		sprintf( speaks, "purrs" );
+		snprintf( speak, sizeof( speak ), "purr" );
+		snprintf( speaks, sizeof( speaks ), "purrs" );
 	} else if ( IS_NPC( ch ) && ch->pIndexData->vnum == MOB_VNUM_DOG ) {
-		sprintf( speak, "bark" );
-		sprintf( speaks, "barks" );
+		snprintf( speak, sizeof( speak ), "bark" );
+		snprintf( speaks, sizeof( speaks ), "barks" );
 	} else if ( !str_cmp( endbit, "!" ) ) {
-		sprintf( speak, "exclaim" );
-		sprintf( speaks, "exclaims" );
+		snprintf( speak, sizeof( speak ), "exclaim" );
+		snprintf( speaks, sizeof( speaks ), "exclaims" );
 	} else if ( !str_cmp( endbit, "?" ) ) {
-		sprintf( speak, "ask" );
-		sprintf( speaks, "asks" );
+		snprintf( speak, sizeof( speak ), "ask" );
+		snprintf( speaks, sizeof( speaks ), "asks" );
 	} else if ( secbit[0] != '\0' && str_cmp( secbit, "." ) && !str_cmp( endbit, "." ) ) {
-		sprintf( speak, "state" );
-		sprintf( speaks, "states" );
+		snprintf( speak, sizeof( speak ), "state" );
+		snprintf( speaks, sizeof( speaks ), "states" );
 	} else if ( secbit[0] != '\0' && !str_cmp( secbit, "." ) && !str_cmp( endbit, "." ) ) {
-		sprintf( speak, "mutter" );
-		sprintf( speaks, "mutters" );
+		snprintf( speak, sizeof( speak ), "mutter" );
+		snprintf( speaks, sizeof( speaks ), "mutters" );
 	} else if ( !IS_NPC( ch ) && ch->pcdata->condition[COND_DRUNK] > 10 ) {
-		sprintf( speak, "slur" );
-		sprintf( speaks, "slurs" );
+		snprintf( speak, sizeof( speak ), "slur" );
+		snprintf( speaks, sizeof( speaks ), "slurs" );
 	} else {
-		sprintf( speak, "say" );
-		sprintf( speaks, "says" );
+		snprintf( speak, sizeof( speak ), "say" );
+		snprintf( speaks, sizeof( speaks ), "says" );
 	}
-	sprintf( poly, "You %s '#3$T#n'.", speak );
+	snprintf( poly, sizeof( poly ), "You %s '#3$T#n'.", speak );
 
 	act( poly, ch, NULL, argument, TO_CHAR );
 
 	if ( !IS_NPC( ch ) && IS_SET( ch->act, PLR_SILENCE ) ) return;
 
-	sprintf( poly, "$n %s '#3$T#n'.", speaks );
+	snprintf( poly, sizeof( poly ), "$n %s '#3$T#n'.", speaks );
 	if ( ch->in_room->vnum != ROOM_VNUM_IN_OBJECT ) {
 		act( poly, ch, NULL, argument, TO_ROOM );
 		room_text( ch, strlower( argument ) );
@@ -770,16 +770,16 @@ void do_say( CHAR_DATA *ch, char *argument ) {
 		if ( !is_ok ) continue;
 
 		if ( IS_NPC( ch ) )
-			sprintf( name, "%s", ch->short_descr );
+			snprintf( name, sizeof( name ), "%s", ch->short_descr );
 		else if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_POLYMORPH ) )
-			sprintf( name, "%s", ch->morph );
+			snprintf( name, sizeof( name ), "%s", ch->morph );
 		else if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_SHIFT ) )
-			sprintf( name, "%s", ch->morph );
+			snprintf( name, sizeof( name ), "%s", ch->morph );
 
 		else
-			sprintf( name, "%s", ch->name );
+			snprintf( name, sizeof( name ), "%s", ch->name );
 		name[0] = UPPER( name[0] );
-		sprintf( poly, "%s %s '%s'.\n\r", name, speaks, argument );
+		snprintf( poly, sizeof( poly ), "%s %s '%s'.\n\r", name, speaks, argument );
 		send_to_char( poly, to );
 	}
 
@@ -884,7 +884,7 @@ void room_text( CHAR_DATA *ch, char *argument ) {
 				hop = TRUE;
 				break;
 			case RT_ACTION:
-				sprintf( arg, "%s", argument );
+				snprintf( arg, sizeof( arg ), "%s", argument );
 				argument = one_argument( arg, arg1 );
 				argument = one_argument( arg, arg2 );
 				if ( ( mob = get_char_room( ch, arg2 ) ) == NULL ) continue;
@@ -1010,7 +1010,7 @@ void do_tell( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	sprintf( poly, "You tell $N '#C$t#n'." );
+	snprintf( poly, sizeof( poly ), "You tell $N '#C$t#n'." );
 	act( poly, ch, argument, victim, TO_CHAR );
 
 	if ( !IS_NPC( ch ) && IS_SET( ch->act, PLR_SILENCE ) ) return;
@@ -1018,7 +1018,7 @@ void do_tell( CHAR_DATA *ch, char *argument ) {
 	position = victim->position;
 	victim->position = POS_STANDING;
 
-	sprintf( poly, "$n tells you '#C$t#n'." );
+	snprintf( poly, sizeof( poly ), "$n tells you '#C$t#n'." );
 	act( poly, ch, argument, victim, TO_VICT );
 
 	victim->position = position;
@@ -1090,7 +1090,7 @@ void do_reply( CHAR_DATA *ch, char *argument ) {
 		act( "$E is currently link dead.", ch, 0, victim, TO_CHAR );
 		return;
 	}
-	sprintf( poly, "You reply to $N '#C$t#n'." );
+	snprintf( poly, sizeof( poly ), "You reply to $N '#C$t#n'." );
 	act( poly, ch, argument, victim, TO_CHAR );
 
 	if ( !IS_NPC( ch ) && IS_SET( ch->act, PLR_SILENCE ) ) return;
@@ -1098,7 +1098,7 @@ void do_reply( CHAR_DATA *ch, char *argument ) {
 	position = victim->position;
 	victim->position = POS_STANDING;
 
-	sprintf( poly, "$n replies to you '#C$t#n'." );
+	snprintf( poly, sizeof( poly ), "$n replies to you '#C$t#n'." );
 	act( poly, ch, argument, victim, TO_VICT );
 
 	victim->position = position;
@@ -1171,16 +1171,16 @@ void do_emote( CHAR_DATA *ch, char *argument ) {
 		if ( !is_ok ) continue;
 
 		if ( IS_NPC( ch ) )
-			sprintf( name, "%s", ch->short_descr );
+			snprintf( name, sizeof( name ), "%s", ch->short_descr );
 		else if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_POLYMORPH ) )
-			sprintf( name, "%s", ch->morph );
+			snprintf( name, sizeof( name ), "%s", ch->morph );
 		else if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_SHIFT ) )
-			sprintf( name, "%s", ch->morph );
+			snprintf( name, sizeof( name ), "%s", ch->morph );
 
 		else
-			sprintf( name, "%s", ch->name );
+			snprintf( name, sizeof( name ), "%s", ch->name );
 		name[0] = UPPER( name[0] );
-		sprintf( poly, "%s %s\n\r", name, buf );
+		snprintf( poly, sizeof( poly ), "%s %s\n\r", name, buf );
 		send_to_char( poly, to );
 	}
 	return;
@@ -1254,7 +1254,7 @@ void do_quit( CHAR_DATA *ch, char *argument ) {
 	else if ( IS_SET( ch->pcdata->jflags, JFLAG_SETLOGOUT ) )
 		logout_message( ch );
 	else if ( ch->pcdata->obj_vnum == 0 ) {
-		sprintf( buf, "#2%s #7has fled from #2%s#7.#n",
+		snprintf( buf, sizeof( buf ), "#2%s #7has fled from #2%s#7.#n",
 			ch->pcdata->switchname, game_config.game_name );
 		leave_info( buf );
 	}
@@ -1334,7 +1334,7 @@ void do_quit( CHAR_DATA *ch, char *argument ) {
 	if ( ch->in_room != NULL ) char_from_room( ch );
 	char_to_room( ch, get_room_index( 3 ) );
 
-	sprintf( log_buf, "%s has quit.", ch->name );
+	snprintf( log_buf, MAX_STRING_LENGTH, "%s has quit.", ch->name );
 	log_string( log_buf );
 	if ( ch->pcdata->chobj != NULL ) extract_obj( ch->pcdata->chobj );
 	extract_char( ch, TRUE );
@@ -1611,11 +1611,11 @@ void do_command( CHAR_DATA *ch, char *argument ) {
 		do_say( ch, buf );
 	} else {
 		if ( IS_NPC( victim ) )
-			sprintf( buf, "I think %s wants to %s", victim->short_descr, arg2 );
+			snprintf( buf, sizeof( buf ), "I think %s wants to %s", victim->short_descr, arg2 );
 		else if ( !IS_NPC( victim ) && IS_AFFECTED( victim, AFF_POLYMORPH ) )
-			sprintf( buf, "I think %s wants to %s", victim->morph, arg2 );
+			snprintf( buf, sizeof( buf ), "I think %s wants to %s", victim->morph, arg2 );
 		else
-			sprintf( buf, "I think %s wants to %s", victim->name, arg2 );
+			snprintf( buf, sizeof( buf ), "I think %s wants to %s", victim->name, arg2 );
 		do_say( ch, buf );
 	}
 
@@ -1659,12 +1659,12 @@ void do_group( CHAR_DATA *ch, char *argument ) {
 		CHAR_DATA *leader;
 
 		leader = ( ch->leader != NULL ) ? ch->leader : ch;
-		sprintf( buf, "%s's group:\n\r", PERS( leader, ch ) );
+		snprintf( buf, sizeof( buf ), "%s's group:\n\r", PERS( leader, ch ) );
 		send_to_char( buf, ch );
 
 		LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 			if ( is_same_group( gch, ch ) ) {
-				sprintf( buf,
+				snprintf( buf, sizeof( buf ),
 					"[%-16s] %4d/%4d hp %4d/%4d mana %4d/%4d mv %5d xp\n\r",
 					capitalize( PERS( gch, ch ) ),
 					gch->hit, gch->max_hit,
@@ -1725,7 +1725,7 @@ void do_gtell( CHAR_DATA *ch, char *argument ) {
 	/*
 	 * Note use of send_to_char, so gtell works on sleepers.
 	 */
-	sprintf( buf, "#G%s tells the group #R'#G%s#R'\n\r#n", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "#G%s tells the group #R'#G%s#R'\n\r#n", ch->name, argument );
 	//    LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node )
 	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->character != NULL )

@@ -107,7 +107,7 @@ void do_principles( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( arg1[0] == '\0' && arg2[0] == '\0' ) {
-		sprintf( buf, "Principles: Sora (%d), Chikyu (%d), Ningenno (%d).\n\r",
+		snprintf( buf, sizeof( buf ), "Principles: Sora (%d), Chikyu (%d), Ningenno (%d).\n\r",
 			ch->pcdata->powers[NPOWER_SORA], ch->pcdata->powers[NPOWER_CHIKYU],
 			ch->pcdata->powers[NPOWER_NINGENNO] );
 		send_to_char( buf, ch );
@@ -167,7 +167,7 @@ void do_principles( CHAR_DATA *ch, char *argument ) {
 
 			return;
 		}
-		sprintf( buf, "Principles: Sora (%d), Chikyu (%d), Ningenno (%d).\n\r",
+		snprintf( buf, sizeof( buf ), "Principles: Sora (%d), Chikyu (%d), Ningenno (%d).\n\r",
 			ch->pcdata->powers[NPOWER_SORA], ch->pcdata->powers[NPOWER_CHIKYU],
 			ch->pcdata->powers[NPOWER_NINGENNO] );
 		send_to_char( buf, ch );
@@ -194,18 +194,18 @@ void do_principles( CHAR_DATA *ch, char *argument ) {
 		cost = ( ch->pcdata->powers[improve] + 1 ) * 10;
 		arg1[0] = UPPER( arg1[0] );
 		if ( ch->pcdata->powers[improve] >= max ) {
-			sprintf( buf, "You have already gained all the powers of the %s principle.\n\r", arg1 );
+			snprintf( buf, sizeof( buf ), "You have already gained all the powers of the %s principle.\n\r", arg1 );
 			send_to_char( buf, ch );
 			return;
 		}
 		if ( cost > ch->practice ) {
-			sprintf( buf, "It costs you %d primal to improve your %s principle.\n\r", cost, arg1 );
+			snprintf( buf, sizeof( buf ), "It costs you %d primal to improve your %s principle.\n\r", cost, arg1 );
 			send_to_char( buf, ch );
 			return;
 		}
 		ch->pcdata->powers[improve] += 1;
 		ch->practice -= cost;
-		sprintf( buf, "You improve your ability in the %s principle.\n\r", arg1 );
+		snprintf( buf, sizeof( buf ), "You improve your ability in the %s principle.\n\r", arg1 );
 		send_to_char( buf, ch );
 	} else
 		send_to_char( "To improve a principle, type: Principle <principle type> improve.\n\r", ch );

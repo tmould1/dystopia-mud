@@ -834,37 +834,37 @@ void room_update( void ) {
 	for ( room = room_list; room != NULL; room = room->next_room ) {
 
 		if ( RTIMER( room, RTIMER_WALL_NORTH ) == 1 && room->exit[DIR_NORTH] != NULL && is_wall( room->exit[DIR_NORTH] ) != 0 ) {
-			sprintf( buf, "The %s slowly fades away.", wall[is_wall( room->exit[DIR_NORTH] )] );
+			snprintf( buf, sizeof( buf ), "The %s slowly fades away.", wall[is_wall( room->exit[DIR_NORTH] )] );
 			room_message( room, buf );
 			make_wall( room, DIR_NORTH, 0 );
 		}
 
 		if ( RTIMER( room, RTIMER_WALL_SOUTH ) == 1 && room->exit[DIR_SOUTH] != NULL && is_wall( room->exit[DIR_SOUTH] ) != 0 ) {
-			sprintf( buf, "The %s slowly fades away.", wall[is_wall( room->exit[DIR_SOUTH] )] );
+			snprintf( buf, sizeof( buf ), "The %s slowly fades away.", wall[is_wall( room->exit[DIR_SOUTH] )] );
 			room_message( room, buf );
 			make_wall( room, DIR_SOUTH, 0 );
 		}
 
 		if ( RTIMER( room, RTIMER_WALL_EAST ) == 1 && room->exit[DIR_EAST] != NULL && is_wall( room->exit[DIR_EAST] ) != 0 ) {
-			sprintf( buf, "The %s slowly fades away.", wall[is_wall( room->exit[DIR_EAST] )] );
+			snprintf( buf, sizeof( buf ), "The %s slowly fades away.", wall[is_wall( room->exit[DIR_EAST] )] );
 			room_message( room, buf );
 			make_wall( room, DIR_EAST, 0 );
 		}
 
 		if ( RTIMER( room, RTIMER_WALL_WEST ) == 1 && room->exit[DIR_WEST] != NULL && is_wall( room->exit[DIR_WEST] ) != 0 ) {
-			sprintf( buf, "The %s slowly fades away.", wall[is_wall( room->exit[DIR_WEST] )] );
+			snprintf( buf, sizeof( buf ), "The %s slowly fades away.", wall[is_wall( room->exit[DIR_WEST] )] );
 			room_message( room, buf );
 			make_wall( room, DIR_WEST, 0 );
 		}
 
 		if ( RTIMER( room, RTIMER_WALL_UP ) == 1 && room->exit[DIR_UP] != NULL && is_wall( room->exit[DIR_UP] ) != 0 ) {
-			sprintf( buf, "The %s slowly fades away.", wall[is_wall( room->exit[DIR_UP] )] );
+			snprintf( buf, sizeof( buf ), "The %s slowly fades away.", wall[is_wall( room->exit[DIR_UP] )] );
 			room_message( room, buf );
 			make_wall( room, DIR_UP, 0 );
 		}
 
 		if ( RTIMER( room, RTIMER_WALL_DOWN ) == 1 && room->exit[DIR_DOWN] != NULL && is_wall( room->exit[DIR_DOWN] ) != 0 ) {
-			sprintf( buf, "The %s slowly fades away.", wall[is_wall( room->exit[DIR_DOWN] )] );
+			snprintf( buf, sizeof( buf ), "The %s slowly fades away.", wall[is_wall( room->exit[DIR_DOWN] )] );
 			room_message( room, buf );
 			make_wall( room, DIR_DOWN, 0 );
 		}
@@ -971,7 +971,7 @@ void obj_update( void ) {
 			CHAR_DATA *vch;
 			int wdam;
 
-			sprintf( buf, "%s suddenly explodes in a ball of flame, incinerating you!\n\r", obj->short_descr );
+			snprintf( buf, sizeof( buf ), "%s suddenly explodes in a ball of flame, incinerating you!\n\r", obj->short_descr );
 			buf[0] = UPPER( buf[0] );
 			if ( list_empty( &( locate_obj( obj ) )->characters ) ) break;
 			LIST_FOR_EACH( vch, &( locate_obj( obj ) )->characters, CHAR_DATA, room_node ) {
@@ -983,7 +983,7 @@ void obj_update( void ) {
 				wdam = obj->level + dice( 12, 50 );
 				damage( vch, vch, obj->level + dice( 12, 50 ), gsn_inferno );
 				send_to_char( buf, vch );
-				sprintf( buf, "The flames strike you incredibly hard![%d]\n\r", wdam );
+				snprintf( buf, sizeof( buf ), "The flames strike you incredibly hard![%d]\n\r", wdam );
 				stc( buf, vch );
 			}
 		}
@@ -1033,9 +1033,9 @@ void embrace_update( void ) {
 			victim->practice -= blpr;
 			ch->pcdata->condition[COND_THIRST] += blpr;
 
-			sprintf( buf, "%s shudders in ecstacy as he drinks blood from %s's neck.\n\r", ch->name, victim->short_descr );
+			snprintf( buf, sizeof( buf ), "%s shudders in ecstacy as he drinks blood from %s's neck.\n\r", ch->name, victim->short_descr );
 			act( buf, ch, NULL, NULL, TO_ROOM );
-			sprintf( buf, "You shudder in ecstacy as you drink blood from %s's neck.\n\r", victim->short_descr );
+			snprintf( buf, sizeof( buf ), "You shudder in ecstacy as you drink blood from %s's neck.\n\r", victim->short_descr );
 			send_to_char( buf, ch );
 
 			if ( victim->practice < 0 ) {
@@ -1046,7 +1046,7 @@ void embrace_update( void ) {
 
 			{
 				raw_kill( victim );
-				sprintf( buf, "%s's body falls lifless to the ground!.\n\r", victim->short_descr );
+				snprintf( buf, sizeof( buf ), "%s's body falls lifless to the ground!.\n\r", victim->short_descr );
 				act( buf, ch, NULL, NULL, TO_ROOM );
 				send_to_char( buf, ch );
 				stop_embrace( ch, victim );
@@ -1073,11 +1073,11 @@ void embrace_update( void ) {
 			victim->pcdata->condition[COND_THIRST] = 0;
 
 		ch->pcdata->condition[COND_THIRST] += number_range( 30, 40 );
-		sprintf( buf, "%s shudders in ecstacy as he drinks blood from %s's neck.\n\r", ch->name, victim->name );
+		snprintf( buf, sizeof( buf ), "%s shudders in ecstacy as he drinks blood from %s's neck.\n\r", ch->name, victim->name );
 		act( buf, ch, NULL, NULL, TO_ROOM );
-		sprintf( buf, "You shudder in ecstacy as you drink blood from %s's neck.\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "You shudder in ecstacy as you drink blood from %s's neck.\n\r", victim->name );
 		send_to_char( buf, ch );
-		sprintf( buf, "You feel some of your life slip away as %s drinks from your neck.\n\r", ch->name );
+		snprintf( buf, sizeof( buf ), "You feel some of your life slip away as %s drinks from your neck.\n\r", ch->name );
 		send_to_char( buf, victim );
 		ch->pcdata->condition[COND_THIRST] += number_range( 35, 40 );
 		victim->pcdata->condition[COND_THIRST] -= number_range( 40, 42 );
@@ -1274,7 +1274,7 @@ void update_safe_powers( CHAR_DATA *ch ) {
 		if ( !IS_HEAD( ch, LOST_HEAD ) && IS_EXTRA( ch, EXTRA_OSWITCH ) ) cheating = TRUE;
 		if ( cheating ) {
 			ch->hit = ch->hit / 2; // Punish those bastards
-			sprintf( buf, "%s is cheating in the arena!!!", ch->name );
+			snprintf( buf, sizeof( buf ), "%s is cheating in the arena!!!", ch->name );
 			do_info( ch, buf );
 		}
 	}

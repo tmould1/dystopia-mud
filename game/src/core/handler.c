@@ -766,7 +766,7 @@ void char_to_room( CHAR_DATA *ch, ROOM_INDEX_DATA *pRoomIndex ) {
 	if ( !pRoomIndex ) {
 		char buf[MAX_STRING_LENGTH];
 
-		sprintf( buf, "Char_to_room: %s -> NULL room!  Putting char in limbo (%d)", ch->name, ROOM_VNUM_LIMBO );
+		snprintf( buf, sizeof( buf ), "Char_to_room: %s -> NULL room!  Putting char in limbo (%d)", ch->name, ROOM_VNUM_LIMBO );
 		bug( buf, 0 );
 		/* This used to just return, but there was a problem with crashing
 		   and I saw no reason not to just put the char in limbo. -Narn */
@@ -2029,7 +2029,7 @@ OBJ_DATA *create_money( int amount ) {
 		obj = create_object( get_obj_index( OBJ_VNUM_MONEY_ONE ), 0 );
 	} else {
 		obj = create_object( get_obj_index( OBJ_VNUM_MONEY_SOME ), 0 );
-		sprintf( buf, obj->short_descr, amount );
+		snprintf( buf, sizeof( buf ), obj->short_descr, amount );
 		free(obj->short_descr);
 		obj->short_descr = str_dup( buf );
 		obj->value[0] = amount;

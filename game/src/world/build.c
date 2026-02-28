@@ -332,7 +332,7 @@ void edit_buffer( CHAR_DATA *ch, char *argument ) {
 
 	if ( ch->substate <= SUB_PAUSE ) {
 		send_to_char( "You can't do that!\n\r", ch );
-		sprintf( buf, "Edit_buffer: illegal ch->substate (%d)", ch->substate );
+		snprintf( buf, sizeof( buf ), "Edit_buffer: illegal ch->substate (%d)", ch->substate );
 		bug( buf, 0 );
 		d->connected = CON_PLAYING;
 		return;
@@ -395,14 +395,14 @@ void edit_buffer( CHAR_DATA *ch, char *argument ) {
 			count = 0;
 			wordln = (int) strlen( word1 );
 			(void) strlen( word2 );
-			sprintf( buf, "Replacing all occurrences of %s with %s...\n\r", word1, word2 );
+			snprintf( buf, sizeof( buf ), "Replacing all occurrences of %s with %s...\n\r", word1, word2 );
 			stc( buf, ch );
 			for ( x = edit->on_line; x < edit->numlines; x++ ) {
 				lwptr = edit->line[x];
 				while ( ( wptr = strstr( lwptr, word1 ) ) != NULL ) {
 					sptr = lwptr;
 					lwptr = wptr + wordln;
-					sprintf( buf, "%s%s", word2, wptr + wordln );
+					snprintf( buf, sizeof( buf ), "%s%s", word2, wptr + wordln );
 					lineln = (int) ( wptr - edit->line[x] ) - wordln;
 					++count;
 					if ( (int) strlen( buf ) + lineln > 79 ) {
@@ -415,7 +415,7 @@ void edit_buffer( CHAR_DATA *ch, char *argument ) {
 					strcpy( wptr, buf );
 				}
 			}
-			sprintf( buf, "Found and replaced %d occurrence(s).\n\r> ", count );
+			snprintf( buf, sizeof( buf ), "Found and replaced %d occurrence(s).\n\r> ", count );
 			stc( buf, ch );
 			return;
 		}
@@ -487,7 +487,7 @@ void edit_buffer( CHAR_DATA *ch, char *argument ) {
 					send_to_char( "Out of range.\n\r> ", ch );
 				else {
 					edit->on_line = line;
-					sprintf( buf, "(On line %d)\n\r> ", line + 1 );
+					snprintf( buf, sizeof( buf ), "(On line %d)\n\r> ", line + 1 );
 					stc( buf, ch );
 				}
 			}
@@ -499,7 +499,7 @@ void edit_buffer( CHAR_DATA *ch, char *argument ) {
 			else {
 				send_to_char( "------------------\n\r", ch );
 				for ( x = 0; x < edit->numlines; x++ ) {
-					sprintf( buf, "%2d> %s\n\r", x + 1, edit->line[x] );
+					snprintf( buf, sizeof( buf ), "%2d> %s\n\r", x + 1, edit->line[x] );
 					stc( buf, ch );
 				}
 				send_to_char( "------------------\n\r> ", ch );
@@ -835,17 +835,17 @@ void do_hlist( CHAR_DATA *ch, char *argument ) {
 		min = minlimit;
 		max = maxlimit;
 	}
-	sprintf( buf, "Help Topics in level range %d to %d:\n\r\n\r", min, max );
+	snprintf( buf, sizeof( buf ), "Help Topics in level range %d to %d:\n\r\n\r", min, max );
 	stc( buf, ch );
 	cnt = 0;
 	LIST_FOR_EACH( help, &g_helps, HELP_DATA, node )
 		if ( help->level >= min && help->level <= max ) {
-			sprintf( buf, "  %3d %s\n\r", help->level, help->keyword );
+			snprintf( buf, sizeof( buf ), "  %3d %s\n\r", help->level, help->keyword );
 			stc( buf, ch );
 			++cnt;
 		}
 	if ( cnt ) {
-		sprintf( buf, "\n\r%d pages found.\n\r", cnt );
+		snprintf( buf, sizeof( buf ), "\n\r%d pages found.\n\r", cnt );
 		stc( buf, ch );
 	} else
 		send_to_char( "None found.\n\r", ch );

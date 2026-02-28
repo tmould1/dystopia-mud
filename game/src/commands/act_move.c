@@ -280,65 +280,65 @@ void move_char( CHAR_DATA *ch, int door ) {
 	/* Check for mount message - KaVir */
 	if ( ( mount = ch->mount ) != NULL && ch->mounted == IS_RIDING ) {
 		if ( IS_NPC( mount ) )
-			sprintf( mount2, " on %s.", mount->short_descr );
+			snprintf( mount2, sizeof( mount2 ), " on %s.", mount->short_descr );
 		else
-			sprintf( mount2, " on %s.", mount->name );
+			snprintf( mount2, sizeof( mount2 ), " on %s.", mount->name );
 	} else
-		sprintf( mount2, "." );
+		snprintf( mount2, sizeof( mount2 ), "." );
 
 	if ( IS_HEAD( ch, LOST_HEAD ) || IS_EXTRA( ch, EXTRA_OSWITCH ) )
-		sprintf( leave, "rolls" );
+		snprintf( leave, sizeof( leave ), "rolls" );
 	else if ( IS_AFFECTED( ch, AFF_ETHEREAL ) )
-		sprintf( leave, "floats" );
+		snprintf( leave, sizeof( leave ), "floats" );
 	else if ( ch->in_room->sector_type == SECT_WATER_SWIM )
-		sprintf( leave, "swims" );
+		snprintf( leave, sizeof( leave ), "swims" );
 	else if ( IS_SET( ch->polyaff, POLY_SERPENT ) )
-		sprintf( leave, "slithers" );
+		snprintf( leave, sizeof( leave ), "slithers" );
 	else if ( IS_SET( ch->polyaff, POLY_WOLF ) )
-		sprintf( leave, "stalks" );
+		snprintf( leave, sizeof( leave ), "stalks" );
 	else if ( IS_SET( ch->polyaff, POLY_FROG ) )
-		sprintf( leave, "hops" );
+		snprintf( leave, sizeof( leave ), "hops" );
 	else if ( IS_SET( ch->polyaff, POLY_FISH ) )
-		sprintf( leave, "swims" );
+		snprintf( leave, sizeof( leave ), "swims" );
 	else if ( !IS_NPC( ch ) && IS_DEMAFF( ch, DEM_UNFOLDED ) )
-		sprintf( leave, "flies" );
+		snprintf( leave, sizeof( leave ), "flies" );
 	else if ( IS_BODY( ch, BROKEN_SPINE ) )
-		sprintf( leave, "drags $mself" );
+		snprintf( leave, sizeof( leave ), "drags $mself" );
 	else if ( IS_LEG_L( ch, LOST_LEG ) && IS_LEG_R( ch, LOST_LEG ) )
-		sprintf( leave, "drags $mself" );
+		snprintf( leave, sizeof( leave ), "drags $mself" );
 	else if ( ( IS_LEG_L( ch, BROKEN_LEG ) || IS_LEG_L( ch, LOST_LEG ) || IS_LEG_L( ch, LOST_FOOT ) ) &&
 		( IS_LEG_R( ch, BROKEN_LEG ) || IS_LEG_R( ch, LOST_LEG ) || IS_LEG_R( ch, LOST_FOOT ) ) )
-		sprintf( leave, "crawls" );
+		snprintf( leave, sizeof( leave ), "crawls" );
 	else if ( ch->hit < ( ch->max_hit / 4 ) )
-		sprintf( leave, "crawls" );
+		snprintf( leave, sizeof( leave ), "crawls" );
 	else if ( ( IS_LEG_R( ch, LOST_LEG ) || IS_LEG_R( ch, LOST_FOOT ) ) &&
 		( !IS_LEG_L( ch, BROKEN_LEG ) && !IS_LEG_L( ch, LOST_LEG ) &&
 			!IS_LEG_L( ch, LOST_FOOT ) ) )
-		sprintf( leave, "hops" );
+		snprintf( leave, sizeof( leave ), "hops" );
 	else if ( ( IS_LEG_L( ch, LOST_LEG ) || IS_LEG_L( ch, LOST_FOOT ) ) &&
 		( !IS_LEG_R( ch, BROKEN_LEG ) && !IS_LEG_R( ch, LOST_LEG ) &&
 			!IS_LEG_R( ch, LOST_FOOT ) ) )
-		sprintf( leave, "hops" );
+		snprintf( leave, sizeof( leave ), "hops" );
 	else if ( ( IS_LEG_L( ch, BROKEN_LEG ) || IS_LEG_L( ch, LOST_FOOT ) ) &&
 		( !IS_LEG_R( ch, BROKEN_LEG ) && !IS_LEG_R( ch, LOST_LEG ) &&
 			!IS_LEG_R( ch, LOST_FOOT ) ) )
-		sprintf( leave, "limps" );
+		snprintf( leave, sizeof( leave ), "limps" );
 	else if ( ( IS_LEG_R( ch, BROKEN_LEG ) || IS_LEG_R( ch, LOST_FOOT ) ) &&
 		( !IS_LEG_L( ch, BROKEN_LEG ) && !IS_LEG_L( ch, LOST_LEG ) &&
 			!IS_LEG_L( ch, LOST_FOOT ) ) )
-		sprintf( leave, "limps" );
+		snprintf( leave, sizeof( leave ), "limps" );
 	else if ( ch->hit < ( ch->max_hit / 3 ) )
-		sprintf( leave, "limps" );
+		snprintf( leave, sizeof( leave ), "limps" );
 	else if ( ch->hit < ( ch->max_hit / 2 ) )
-		sprintf( leave, "staggers" );
+		snprintf( leave, sizeof( leave ), "staggers" );
 	else if ( !IS_NPC( ch ) ) {
 
 		if ( ch->pcdata->condition[COND_DRUNK] > 10 )
-			sprintf( leave, "staggers" );
+			snprintf( leave, sizeof( leave ), "staggers" );
 		else
-			sprintf( leave, "walks" );
+			snprintf( leave, sizeof( leave ), "walks" );
 	} else
-		sprintf( leave, "walks" );
+		snprintf( leave, sizeof( leave ), "walks" );
 
 	if ( !IS_NPC( ch ) && ch->stance[0] != -1 ) do_stance( ch, "" );
 	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
@@ -359,22 +359,22 @@ void move_char( CHAR_DATA *ch, int door ) {
 					 IS_AFFECTED( mount, AFF_FLYING ) ) ||
 				IS_AFFECTED( ch, AFF_FLYING ) ||
 				( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_FLYING ) ) )
-				sprintf( poly, "%s flies $T%s", ch->morph, mount2 );
+				snprintf( poly, sizeof( poly ), "%s flies $T%s", ch->morph, mount2 );
 			else if ( ( mount = ch->mount ) != NULL && ch->mounted == IS_RIDING )
-				sprintf( poly, "%s rides $T%s", ch->morph, mount2 );
+				snprintf( poly, sizeof( poly ), "%s rides $T%s", ch->morph, mount2 );
 			else
-				sprintf( poly, "%s %s $T%s", ch->morph, leave, mount2 );
+				snprintf( poly, sizeof( poly ), "%s %s $T%s", ch->morph, leave, mount2 );
 			act( poly, victim, NULL, dir_name[door], TO_CHAR );
 		} else if ( !IS_AFFECTED( ch, AFF_SNEAK ) && ( IS_NPC( ch ) || !IS_SET( ch->act, PLR_WIZINVIS ) ) && can_see( victim, ch ) ) {
 			if ( ( ( mount = ch->mount ) != NULL && ch->mounted == IS_RIDING &&
 					 IS_AFFECTED( mount, AFF_FLYING ) ) ||
 				IS_AFFECTED( ch, AFF_FLYING ) ||
 				( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_FLYING ) ) )
-				sprintf( poly, "$n flies %s%s", dir_name[door], mount2 );
+				snprintf( poly, sizeof( poly ), "$n flies %s%s", dir_name[door], mount2 );
 			else if ( ( mount = ch->mount ) != NULL && ch->mounted == IS_RIDING )
-				sprintf( poly, "$n rides %s%s", dir_name[door], mount2 );
+				snprintf( poly, sizeof( poly ), "$n rides %s%s", dir_name[door], mount2 );
 			else
-				sprintf( poly, "$n %s %s%s", leave, dir_name[door], mount2 );
+				snprintf( poly, sizeof( poly ), "$n %s %s%s", leave, dir_name[door], mount2 );
 			act( poly, ch, NULL, victim, TO_VICT );
 		}
 	}
@@ -399,17 +399,17 @@ void move_char( CHAR_DATA *ch, int door ) {
 	}
 
 	if ( door == 0 )
-		sprintf( buf, "the south" );
+		snprintf( buf, sizeof( buf ), "the south" );
 	else if ( door == 1 )
-		sprintf( buf, "the west" );
+		snprintf( buf, sizeof( buf ), "the west" );
 	else if ( door == 2 )
-		sprintf( buf, "the north" );
+		snprintf( buf, sizeof( buf ), "the north" );
 	else if ( door == 3 )
-		sprintf( buf, "the east" );
+		snprintf( buf, sizeof( buf ), "the east" );
 	else if ( door == 4 )
-		sprintf( buf, "below" );
+		snprintf( buf, sizeof( buf ), "below" );
 	else
-		sprintf( buf, "above" );
+		snprintf( buf, sizeof( buf ), "above" );
 
 	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *victim;
@@ -429,22 +429,22 @@ void move_char( CHAR_DATA *ch, int door ) {
 					 IS_AFFECTED( mount, AFF_FLYING ) ) ||
 				IS_AFFECTED( ch, AFF_FLYING ) ||
 				( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_FLYING ) ) )
-				sprintf( poly, "%s flies in from %s%s", ch->morph, buf, mount2 );
+				snprintf( poly, sizeof( poly ), "%s flies in from %s%s", ch->morph, buf, mount2 );
 			else if ( ( mount = ch->mount ) != NULL && ch->mounted == IS_RIDING )
-				sprintf( poly, "%s rides in from %s%s", ch->morph, buf, mount2 );
+				snprintf( poly, sizeof( poly ), "%s rides in from %s%s", ch->morph, buf, mount2 );
 			else
-				sprintf( poly, "%s %s in from %s%s", ch->morph, leave, buf, mount2 );
+				snprintf( poly, sizeof( poly ), "%s %s in from %s%s", ch->morph, leave, buf, mount2 );
 			act( poly, ch, NULL, victim, TO_VICT );
 		} else if ( !IS_AFFECTED( ch, AFF_SNEAK ) && can_see( victim, ch ) && ( IS_NPC( ch ) || !IS_SET( ch->act, PLR_WIZINVIS ) ) ) {
 			if ( ( ( mount = ch->mount ) != NULL && ch->mounted == IS_RIDING &&
 					 IS_AFFECTED( mount, AFF_FLYING ) ) ||
 				IS_AFFECTED( ch, AFF_FLYING ) ||
 				( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_FLYING ) ) )
-				sprintf( poly, "$n flies in from %s%s", buf, mount2 );
+				snprintf( poly, sizeof( poly ), "$n flies in from %s%s", buf, mount2 );
 			else if ( ( mount = ch->mount ) != NULL && ch->mounted == IS_RIDING )
-				sprintf( poly, "$n rides in from %s%s", buf, mount2 );
+				snprintf( poly, sizeof( poly ), "$n rides in from %s%s", buf, mount2 );
 			else
-				sprintf( poly, "$n %s in from %s%s", leave, buf, mount2 );
+				snprintf( poly, sizeof( poly ), "$n %s in from %s%s", leave, buf, mount2 );
 			act( poly, ch, NULL, victim, TO_VICT );
 		}
 	}
@@ -837,16 +837,16 @@ void do_enter( CHAR_DATA *ch, char *argument ) {
 
 		act( "You step into $p.", ch, obj, NULL, TO_CHAR );
 		if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_POLYMORPH ) )
-			sprintf( poly, "%s steps into $p.", ch->morph );
+			snprintf( poly, sizeof( poly ), "%s steps into $p.", ch->morph );
 		else
-			sprintf( poly, "$n steps into $p." );
+			snprintf( poly, sizeof( poly ), "$n steps into $p." );
 		act( poly, ch, obj, NULL, TO_ROOM );
 		char_from_room( ch );
 		char_to_room( ch, pRoomIndex );
 		if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_POLYMORPH ) )
-			sprintf( poly, "%s steps out of $p.", ch->morph );
+			snprintf( poly, sizeof( poly ), "%s steps out of $p.", ch->morph );
 		else
-			sprintf( poly, "$n steps out of $p." );
+			snprintf( poly, sizeof( poly ), "$n steps out of $p." );
 		act( poly, ch, obj, NULL, TO_ROOM );
 		char_from_room( ch );
 		char_to_room( ch, location );
@@ -912,16 +912,16 @@ void do_enter( CHAR_DATA *ch, char *argument ) {
 		}
 		act( "You step into $p.", ch, obj, NULL, TO_CHAR );
 		if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_POLYMORPH ) )
-			sprintf( poly, "%s steps into $p.", ch->morph );
+			snprintf( poly, sizeof( poly ), "%s steps into $p.", ch->morph );
 		else
-			sprintf( poly, "$n steps into $p." );
+			snprintf( poly, sizeof( poly ), "$n steps into $p." );
 		act( poly, ch, obj, NULL, TO_ROOM );
 		char_from_room( ch );
 		char_to_room( ch, pRoomIndex );
 		if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_POLYMORPH ) )
-			sprintf( poly, "%s steps out of $p.", ch->morph );
+			snprintf( poly, sizeof( poly ), "%s steps out of $p.", ch->morph );
 		else
-			sprintf( poly, "$n steps out of $p." );
+			snprintf( poly, sizeof( poly ), "$n steps out of $p." );
 		act( poly, ch, obj, NULL, TO_ROOM );
 
 		LIST_FOR_EACH_SAFE( portal, portal_next, &ch->in_room->objects, OBJ_DATA, room_node ) {
@@ -1767,11 +1767,11 @@ void do_recall( CHAR_DATA *ch, char *argument ) {
 	if ( ( victim = ch->fighting ) != NULL ) {
 		if ( number_bits( 1 ) == 0 ) {
 			WAIT_STATE( ch, 4 );
-			sprintf( buf, "You failed!\n\r" );
+			snprintf( buf, sizeof( buf ), "You failed!\n\r" );
 			send_to_char( buf, ch );
 			return;
 		}
-		sprintf( buf, "You recall from combat!\n\r" );
+		snprintf( buf, sizeof( buf ), "You recall from combat!\n\r" );
 		send_to_char( buf, ch );
 		stop_fighting( ch, TRUE );
 	}
@@ -1958,7 +1958,7 @@ void do_research( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 
-			sprintf( buf, "You begin your research into %s.\n\r",
+			snprintf( buf, sizeof( buf ), "You begin your research into %s.\n\r",
 				discipline[i] );
 			stc( buf, ch );
 			ch->pcdata->disc_points = 0;
@@ -2031,19 +2031,19 @@ void do_disciplines( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) )
-		sprintf( buf, "---===[ Guardians ]===---" );
+		snprintf( buf, sizeof( buf ), "---===[ Guardians ]===---" );
 	else
-		sprintf( buf, "---===[ Disciplines ]===---" );
+		snprintf( buf, sizeof( buf ), "---===[ Disciplines ]===---" );
 
 	cent_to_char( buf, ch );
 	send_to_char( "\n\r", ch );
 
 	for ( loop = 1; loop < MAX_DISCIPLINES; loop++ ) {
 		if ( discipline[loop][0] != '\0' && strlen( discipline[loop] ) != 0 && ch->power[loop] >= 0 ) {
-			sprintf( buf2, "%s", discipline[loop] );
+			snprintf( buf2, sizeof( buf2 ), "%s", discipline[loop] );
 			buf2[0] = UPPER( buf2[0] );
 
-			sprintf( buf, "     %-14s: %-2d",
+			snprintf( buf, sizeof( buf ), "     %-14s: %-2d",
 				buf2,
 				ch->power[loop] );
 			send_to_char( buf, ch );
@@ -2071,7 +2071,7 @@ void do_disciplines( CHAR_DATA *ch, char *argument ) {
 
 	if ( ch->pcdata->disc_points == 999 ) {
 		stc( "\n\r", ch );
-		sprintf( buf, "You have finished researching %s.",
+		snprintf( buf, sizeof( buf ), "You have finished researching %s.",
 			discipline[ch->pcdata->disc_research] );
 		cent_to_char( buf, ch );
 		stc( "\n\r", ch );
@@ -2081,14 +2081,14 @@ void do_disciplines( CHAR_DATA *ch, char *argument ) {
 
 	if ( ch->pcdata->disc_research < MAX_DISCIPLINES ) {
 		send_to_char( "\n\r", ch );
-		sprintf( buf, "You are currently researching %s.",
+		snprintf( buf, sizeof( buf ), "You are currently researching %s.",
 			discipline[ch->pcdata->disc_research] );
 		cent_to_char( buf, ch );
 	}
 
 	percent = ch->pcdata->disc_points * 40 / disc_points_needed( ch );
 
-	sprintf( buf, "-[#1" );
+	snprintf( buf, sizeof( buf ), "-[#1" );
 
 	for ( i = 0; i < percent; i++ )
 		strcat( buf, "*" );
@@ -2404,7 +2404,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			}
 			ch->exp -= 10000000;
 			ch->pcdata->rank++;
-			sprintf( buf, "%s is now fodder in the Blood Wars!", ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "%s is now fodder in the Blood Wars!", ch->pcdata->switchname );
 			do_info( ch, buf );
 			return;
 		}
@@ -2419,7 +2419,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			}
 			ch->exp -= 20000000;
 			ch->pcdata->rank++;
-			sprintf( buf, "%s is now a fighter in the Blood Wars!", ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "%s is now a fighter in the Blood Wars!", ch->pcdata->switchname );
 			do_info( ch, buf );
 			return;
 		}
@@ -2434,7 +2434,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			}
 			ch->exp -= 40000000;
 			ch->pcdata->rank++;
-			sprintf( buf, "%s is now an elite warrior in the Blood Wars!", ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "%s is now an elite warrior in the Blood Wars!", ch->pcdata->switchname );
 			do_info( ch, buf );
 			return;
 		}
@@ -2449,7 +2449,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			}
 			ch->exp -= 80000000;
 			ch->pcdata->rank++;
-			sprintf( buf, "%s is now a captain in the Blood Wars!", ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "%s is now a captain in the Blood Wars!", ch->pcdata->switchname );
 			do_info( ch, buf );
 			return;
 		}
@@ -2464,7 +2464,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			}
 			ch->exp -= 160000000;
 			ch->pcdata->rank++;
-			sprintf( buf, "%s is now a warlord in the Blood Wars!", ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "%s is now a warlord in the Blood Wars!", ch->pcdata->switchname );
 			do_info( ch, buf );
 			return;
 		}
@@ -2479,7 +2479,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			}
 			ch->exp -= 320000000;
 			ch->pcdata->rank++;
-			sprintf( buf, "%s is now a Tanar'ri Balor!", ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "%s is now a Tanar'ri Balor!", ch->pcdata->switchname );
 			do_info( ch, buf );
 			return;
 		}
@@ -2573,7 +2573,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You gain 1 primal.\n\r", ch );
 		}
 		if ( urin_counter > 1 ) {
-			sprintf( buf, "You gain %d primal.\n\r", urin_counter );
+			snprintf( buf, sizeof( buf ), "You gain %d primal.\n\r", urin_counter );
 			send_to_char( buf, ch );
 		}
 		return;
@@ -2613,7 +2613,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		else if ( urin_counter == 1 )
 			send_to_char( "You gain 1 hp.\n\r", ch );
 		else {
-			sprintf( buf, "You gain %d hps.\n\r", urin_counter );
+			snprintf( buf, sizeof( buf ), "You gain %d hps.\n\r", urin_counter );
 			send_to_char( buf, ch );
 		}
 		return;
@@ -2652,7 +2652,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		else if ( urin_counter == 1 )
 			send_to_char( "You gain 1 move.\n\r", ch );
 		else {
-			sprintf( buf, "You gain %d move.\n\r", urin_counter );
+			snprintf( buf, sizeof( buf ), "You gain %d move.\n\r", urin_counter );
 			send_to_char( buf, ch );
 		}
 		return;
@@ -2691,7 +2691,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		else if ( urin_counter == 1 )
 			send_to_char( "You gain 1 mana.\n\r", ch );
 		else {
-			sprintf( buf, "You gain %d mana.\n\r", urin_counter );
+			snprintf( buf, sizeof( buf ), "You gain %d mana.\n\r", urin_counter );
 			send_to_char( buf, ch );
 		}
 		return;
@@ -2742,9 +2742,9 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		return;
 
 	if ( arg1[0] == '\0' ) {
-		sprintf( buf, "You have %d experience points.\n\r", ch->exp );
+		snprintf( buf, sizeof( buf ), "You have %d experience points.\n\r", ch->exp );
 		send_to_char( buf, ch );
-		sprintf( arg1, "foo" );
+		snprintf( arg1, sizeof( arg1 ), "foo" );
 	}
 	if ( !str_cmp( arg1, "str" ) )
 		is_ok = TRUE;
@@ -2989,7 +2989,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		if ( IS_SET( ch->pcdata->jflags, JFLAG_SETAVATAR ) )
 			avatar_message( ch );
 		else {
-			sprintf( buf, "%s has become an avatar!", ch->pcdata->switchname );
+			snprintf( buf, sizeof( buf ), "%s has become an avatar!", ch->pcdata->switchname );
 			avatar_info( buf );
 		}
 		if ( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_MORTAL ) )
@@ -3031,7 +3031,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 1500000;
 		ch->pcdata->rank = AGE_ANCILLA;
-		sprintf( buf, "%s is now an Ancilla!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s is now an Ancilla!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now an Ancilla.\n\r", ch );
 		return;
@@ -3043,7 +3043,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 7500000;
 		ch->pcdata->rank = AGE_ELDER;
-		sprintf( buf, "%s is now an Elder!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s is now an Elder!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now an Elder!\n\r", ch );
 		return;
@@ -3054,7 +3054,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 15000000;
 		ch->pcdata->rank = AGE_METHUSELAH;
-		sprintf( buf, "%s is now a Methuselah!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s is now a Methuselah!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now Methuselah!\n\r", ch );
 		return;
@@ -3065,7 +3065,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 30000000;
 		ch->pcdata->rank = AGE_LA_MAGRA;
-		sprintf( buf, "%s is now a La Magra!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s is now a La Magra!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now La Magra!\n\r", ch );
 		return;
@@ -3076,7 +3076,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 60000000;
 		ch->pcdata->rank = AGE_TRUEBLOOD;
-		sprintf( buf, "%s is now a TrueBlood!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s is now a TrueBlood!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now TrueBlood!\n\r", ch );
 		return;
@@ -3101,7 +3101,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 5000000;
 		ch->pcdata->rank = BELT_ONE;
-		sprintf( buf, "%s has started martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s has started martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a first dan!\n\r", ch );
 		return;
@@ -3112,7 +3112,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 10000000;
 		ch->pcdata->rank = BELT_TWO;
-		sprintf( buf, "%s advances in their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s advances in their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a second dan!\n\r", ch );
 		return;
@@ -3123,7 +3123,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 15000000;
 		ch->pcdata->rank = BELT_THREE;
-		sprintf( buf, "%s advances in their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s advances in their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a third dan!\n\r", ch );
 		return;
@@ -3134,7 +3134,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 20000000;
 		ch->pcdata->rank = BELT_FOUR;
-		sprintf( buf, "%s advances in their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s advances in their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a fourth dan!\n\r", ch );
 		return;
@@ -3145,7 +3145,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 25000000;
 		ch->pcdata->rank = BELT_FIVE;
-		sprintf( buf, "%s advances in their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s advances in their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a fifth dan!\n\r", ch );
 		return;
@@ -3156,7 +3156,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 30000000;
 		ch->pcdata->rank = BELT_SIX;
-		sprintf( buf, "%s advances in their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s advances in their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a sixth dan!\n\r", ch );
 		return;
@@ -3167,7 +3167,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 35000000;
 		ch->pcdata->rank = BELT_SEVEN;
-		sprintf( buf, "%s advances in their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s advances in their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a seventh dan!\n\r", ch );
 		return;
@@ -3178,7 +3178,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 40000000;
 		ch->pcdata->rank = BELT_EIGHT;
-		sprintf( buf, "%s advances in their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s advances in their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now an eigth dan!\n\r", ch );
 		return;
@@ -3189,7 +3189,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 45000000;
 		ch->pcdata->rank = BELT_NINE;
-		sprintf( buf, "%s advances in their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s advances in their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a ninth dan!\n\r", ch );
 		return;
@@ -3200,7 +3200,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		ch->exp -= 50000000;
 		ch->pcdata->rank = BELT_TEN;
-		sprintf( buf, "%s has completed their martial arts studies!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s has completed their martial arts studies!", ch->name );
 		do_info( ch, buf );
 		send_to_char( "You are now a tenth dan!\n\r", ch );
 		return;
@@ -3407,7 +3407,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 	}
 
 	else {
-		sprintf( buf, "You can train the following:\n\r" );
+		snprintf( buf, sizeof( buf ), "You can train the following:\n\r" );
 		send_to_char( buf, ch );
 
 		send_to_char( "Stats:", ch );
@@ -3422,42 +3422,42 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			send_to_char( ".\n\r", ch );
 
 		if ( ch->level == 2 && ch->max_hit > 1999 ) {
-			sprintf( buf, "Become an avatar -  free.\n\r" );
+			snprintf( buf, sizeof( buf ), "Become an avatar -  free.\n\r" );
 			send_to_char( buf, ch );
 		}
 
 		if ( ch->max_hit < ( 150000 ) ) {
-			sprintf( buf, "Hp               - %d exp per point.\n\r", ( ch->max_hit + 1 ) );
+			snprintf( buf, sizeof( buf ), "Hp               - %d exp per point.\n\r", ( ch->max_hit + 1 ) );
 			send_to_char( buf, ch );
 		}
 
 		if ( ch->max_mana < ( 150000 ) ) {
-			sprintf( buf, "Mana             - %d exp per point.\n\r", ( ch->max_mana + 1 ) );
+			snprintf( buf, sizeof( buf ), "Mana             - %d exp per point.\n\r", ( ch->max_mana + 1 ) );
 			send_to_char( buf, ch );
 		}
 		if ( ch->max_move < ( 150000 ) ) {
-			sprintf( buf, "Move             - %d exp per point.\n\r", ( ch->max_move + 1 ) );
+			snprintf( buf, sizeof( buf ), "Move             - %d exp per point.\n\r", ( ch->max_move + 1 ) );
 			send_to_char( buf, ch );
 		}
 		if ( ch->practice < 999 ) {
-			sprintf( buf, "Primal           - %d exp per point of primal energy.\n\r", ( 1 + ch->practice ) * 500 );
+			snprintf( buf, sizeof( buf ), "Primal           - %d exp per point of primal energy.\n\r", ( 1 + ch->practice ) * 500 );
 			send_to_char( buf, ch );
 		}
 		if ( IS_CLASS( ch, CLASS_ANGEL ) ) {
 			if ( ch->pcdata->powers[ANGEL_JUSTICE] < 5 ) {
-				sprintf( buf, "Angel Justice : %d mill exp\n\r", ( ch->pcdata->powers[ANGEL_JUSTICE] + 1 ) * 10 );
+				snprintf( buf, sizeof( buf ), "Angel Justice : %d mill exp\n\r", ( ch->pcdata->powers[ANGEL_JUSTICE] + 1 ) * 10 );
 				send_to_char( buf, ch );
 			}
 			if ( ch->pcdata->powers[ANGEL_HARMONY] < 5 ) {
-				sprintf( buf, "Angel Harmony : %d mill exp\n\r", ( ch->pcdata->powers[ANGEL_HARMONY] + 1 ) * 10 );
+				snprintf( buf, sizeof( buf ), "Angel Harmony : %d mill exp\n\r", ( ch->pcdata->powers[ANGEL_HARMONY] + 1 ) * 10 );
 				send_to_char( buf, ch );
 			}
 			if ( ch->pcdata->powers[ANGEL_PEACE] < 5 ) {
-				sprintf( buf, "Angel Peace   : %d mill exp\n\r", ( ch->pcdata->powers[ANGEL_PEACE] + 1 ) * 10 );
+				snprintf( buf, sizeof( buf ), "Angel Peace   : %d mill exp\n\r", ( ch->pcdata->powers[ANGEL_PEACE] + 1 ) * 10 );
 				send_to_char( buf, ch );
 			}
 			if ( ch->pcdata->powers[ANGEL_LOVE] < 5 ) {
-				sprintf( buf, "Angel Love    : %d mill exp\n\r", ( ch->pcdata->powers[ANGEL_LOVE] + 1 ) * 10 );
+				snprintf( buf, sizeof( buf ), "Angel Love    : %d mill exp\n\r", ( ch->pcdata->powers[ANGEL_LOVE] + 1 ) * 10 );
 				send_to_char( buf, ch );
 			}
 		}
@@ -3523,23 +3523,23 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			stc( "Immunity to Sunlight - 1,000,000 experience.\n\r", ch );
 		}
 		if ( ch->siltol < 100 && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-			sprintf( buf, "Silver tolerance - %d exp per point of tolerance.\n\r", silver );
+			snprintf( buf, sizeof( buf ), "Silver tolerance - %d exp per point of tolerance.\n\r", silver );
 			send_to_char( buf, ch );
 		}
 		if ( ch->gnosis[GMAXIMUM] < 20 && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-			sprintf( buf, "Gnosis Points - %d exp per point of Gnosis.\n\r", gnosis );
+			snprintf( buf, sizeof( buf ), "Gnosis Points - %d exp per point of Gnosis.\n\r", gnosis );
 			stc( buf, ch );
 		}
 		if ( ch->beast > 0 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-			sprintf( buf, "Beast Control- %d primal per point of Beast.\n\r", beast );
+			snprintf( buf, sizeof( buf ), "Beast Control- %d primal per point of Beast.\n\r", beast );
 			stc( buf, ch );
 		}
 		if ( ch->pcdata->stats[DROW_MAGIC] < 100 && IS_CLASS( ch, CLASS_DROW ) ) {
-			sprintf( buf, "Magic resistance - %d drow points per point of magic.\n\r", magic );
+			snprintf( buf, sizeof( buf ), "Magic resistance - %d drow points per point of magic.\n\r", magic );
 			send_to_char( buf, ch );
 		}
 
-		sprintf( buf, "Natural resistances and immunities - %d exp each.\n\r", immcost );
+		snprintf( buf, sizeof( buf ), "Natural resistances and immunities - %d exp each.\n\r", immcost );
 		send_to_char( buf, ch );
 
 		/* Weapon resistance affects */
@@ -4152,7 +4152,7 @@ bool check_track( CHAR_DATA *ch, int direction ) {
 	if ( !str_cmp( ch->in_room->track[direction], ch->name ) ) return FALSE;
 	if ( strlen( ch->hunting ) > 1 && str_cmp( ch->in_room->track[direction], ch->hunting ) ) return FALSE;
 	door = ch->in_room->track_dir[direction];
-	sprintf( buf, "You sense the trail of %s leading $T from here.", ch->in_room->track[direction] );
+	snprintf( buf, sizeof( buf ), "You sense the trail of %s leading $T from here.", ch->in_room->track[direction] );
 	act( buf, ch, NULL, dir_name[door], TO_CHAR );
 	return TRUE;
 }

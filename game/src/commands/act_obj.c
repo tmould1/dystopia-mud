@@ -1744,7 +1744,7 @@ void do_sacrifice( CHAR_DATA *ch, char *argument ) {
 				continue;
 			}
 			if ( obj->points > 0 && !IS_NPC( ch ) && obj->item_type != ITEM_PAGE ) {
-				sprintf( buf, "You receive a refund of %d quest points from $p.", obj->points );
+				snprintf( buf, sizeof( buf ), "You receive a refund of %d quest points from $p.", obj->points );
 				act( buf, ch, obj, NULL, TO_CHAR );
 				ch->pcdata->quest += obj->points;
 			}
@@ -1783,7 +1783,7 @@ void do_sacrifice( CHAR_DATA *ch, char *argument ) {
 	act( "$n drains the energy from $p.", ch, obj, NULL, TO_ROOM );
 	act( "$p disintegrates into a fine powder.", ch, obj, NULL, TO_ROOM );
 	if ( obj->points > 0 && !IS_NPC( ch ) && obj->item_type != ITEM_PAGE ) {
-		sprintf( buf, "You receive a refund of %d quest points from $p.", obj->points );
+		snprintf( buf, sizeof( buf ), "You receive a refund of %d quest points from $p.", obj->points );
 		act( buf, ch, obj, NULL, TO_CHAR );
 		ch->pcdata->quest += obj->points;
 	}
@@ -2081,7 +2081,7 @@ void do_steal( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Oops.\n\r", ch );
 		act( "$n tried to steal from you.\n\r", ch, NULL, victim, TO_VICT );
 		act( "$n tried to steal from $N.\n\r", ch, NULL, victim, TO_NOTVICT );
-		sprintf( buf, "%s is a bloody thief!", ch->name );
+		snprintf( buf, sizeof( buf ), "%s is a bloody thief!", ch->name );
 		do_yell( victim, buf );
 		if ( !IS_NPC( ch ) ) {
 			if ( IS_NPC( victim ) ) {
@@ -2135,14 +2135,14 @@ static void shop_not_interested( CHAR_DATA *keeper, OBJ_DATA *obj ) {
 
 	pShop = keeper->pIndexData->pShop;
 	if ( pShop == NULL ) {
-		sprintf( buf, "I'm not interested in %s.", obj->short_descr );
+		snprintf( buf, sizeof( buf ), "I'm not interested in %s.", obj->short_descr );
 		do_say( keeper, buf );
 		return;
 	}
 
 	/* General store (buy_type[0] == 0) buys anything, so rejection means duplicate */
 	if ( pShop->buy_type[0] == 0 ) {
-		sprintf( buf, "I've already got %s and don't need another.", obj->short_descr );
+		snprintf( buf, sizeof( buf ), "I've already got %s and don't need another.", obj->short_descr );
 		do_say( keeper, buf );
 		return;
 	}
@@ -2162,11 +2162,11 @@ static void shop_not_interested( CHAR_DATA *keeper, OBJ_DATA *obj ) {
 	}
 
 	if ( count == 0 ) {
-		sprintf( buf, "I'm not buying anything right now." );
+		snprintf( buf, sizeof( buf ), "I'm not buying anything right now." );
 	} else if ( count == 1 ) {
-		sprintf( buf, "I'm only interested in %s.", types );
+		snprintf( buf, sizeof( buf ), "I'm only interested in %s.", types );
 	} else {
-		sprintf( buf, "I only deal in %s.", types );
+		snprintf( buf, sizeof( buf ), "I only deal in %s.", types );
 	}
 	do_say( keeper, buf );
 }
@@ -2191,13 +2191,13 @@ CHAR_DATA *find_keeper( CHAR_DATA *ch ) {
 	 * Shop hours.
 	 */
 	if ( time_info.hour < pShop->open_hour ) {
-		sprintf( buf, "Sorry, come back later." );
+		snprintf( buf, sizeof( buf ), "Sorry, come back later." );
 		do_say( keeper, buf );
 		return NULL;
 	}
 
 	if ( time_info.hour > pShop->close_hour ) {
-		sprintf( buf, "Sorry, come back tomorrow." );
+		snprintf( buf, sizeof( buf ), "Sorry, come back tomorrow." );
 		do_say( keeper, buf );
 		return NULL;
 	}
@@ -2206,7 +2206,7 @@ CHAR_DATA *find_keeper( CHAR_DATA *ch ) {
 	 * Invisible or hidden people.
 	 */
 	if ( !can_see( keeper, ch ) ) {
-		sprintf( buf, "I don't trade with folks I can't see." );
+		snprintf( buf, sizeof( buf ), "I don't trade with folks I can't see." );
 		do_say( keeper, buf );
 		return NULL;
 	}
@@ -2284,7 +2284,7 @@ void do_list( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "[Cost    ] Item\n\r", ch );
 		}
 
-		sprintf( buf, "[%7d] %s.\n\r", cost, obj->short_descr );
+		snprintf( buf, sizeof( buf ), "[%7d] %s.\n\r", cost, obj->short_descr );
 		send_to_char( buf, ch );
 	}
 
@@ -2331,20 +2331,20 @@ void do_buy( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( obj == NULL ) {
-		sprintf( buf, "I don't sell that -- try 'list'." );
+		snprintf( buf, sizeof( buf ), "I don't sell that -- try 'list'." );
 		do_say( keeper, buf );
 		return;
 	}
 
 	cost = get_cost( keeper, obj, TRUE );
 	if ( cost <= 0 ) {
-		sprintf( buf, "I don't sell that -- try 'list'." );
+		snprintf( buf, sizeof( buf ), "I don't sell that -- try 'list'." );
 		do_say( keeper, buf );
 		return;
 	}
 
 	if ( ch->gold < cost ) {
-		sprintf( buf, "You can't afford to buy %s.", obj->short_descr );
+		snprintf( buf, sizeof( buf ), "You can't afford to buy %s.", obj->short_descr );
 		do_say( keeper, buf );
 		return;
 	}
@@ -2360,7 +2360,7 @@ void do_buy( CHAR_DATA *ch, char *argument ) {
 	}
 
 	act( "$n buys $p.", ch, obj, NULL, TO_ROOM );
-	sprintf( buf, "You buy %s for %d gold.\n\r", obj->short_descr, cost );
+	snprintf( buf, sizeof( buf ), "You buy %s for %d gold.\n\r", obj->short_descr, cost );
 	send_to_char( buf, ch );
 	ch->gold -= cost;
 
@@ -2404,7 +2404,7 @@ void do_sell( CHAR_DATA *ch, char *argument ) {
 	}
 
 	act( "$n sells $p.", ch, obj, NULL, TO_ROOM );
-	sprintf( buf, "You sell %s for %d gold.\n\r", obj->short_descr, cost );
+	snprintf( buf, sizeof( buf ), "You sell %s for %d gold.\n\r", obj->short_descr, cost );
 	send_to_char( buf, ch );
 	ch->gold += cost;
 
@@ -2442,7 +2442,7 @@ void do_value( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "I'd give you %d gold for %s.", cost, obj->short_descr );
+	snprintf( buf, sizeof( buf ), "I'd give you %d gold for %s.", cost, obj->short_descr );
 	do_say( keeper, buf );
 
 	return;
@@ -3303,10 +3303,10 @@ void do_recharge( CHAR_DATA *ch, char *argument ) {
 	free(obj->name);
 	obj->name = str_dup( "quest token" );
 	free(obj->short_descr);
-	sprintf( buf, "a %d point quest token", value );
+	snprintf( buf, sizeof( buf ), "a %d point quest token", value );
 	obj->short_descr = str_dup( buf );
 	free(obj->description);
-	sprintf( buf, "A %d point quest token lies on the floor.", value );
+	snprintf( buf, sizeof( buf ), "A %d point quest token lies on the floor.", value );
 	obj->description = str_dup( buf );
 	act( "You take $p from $P.", ch, obj, qobj, TO_CHAR );
 	act( "$n takes $p from $P.", ch, obj, qobj, TO_ROOM );
@@ -3421,7 +3421,7 @@ void do_complete( CHAR_DATA *ch, char *argument ) {
 		if ( qobj->value[0] != -1 ) {
 			pObjIndex = get_obj_index( qobj->value[0] );
 			if ( pObjIndex != NULL ) {
-				sprintf( buf, "     %s.\n\r", pObjIndex->short_descr );
+				snprintf( buf, sizeof( buf ), "     %s.\n\r", pObjIndex->short_descr );
 				buf[5] = UPPER( buf[5] );
 				send_to_char( buf, ch );
 			}
@@ -3429,7 +3429,7 @@ void do_complete( CHAR_DATA *ch, char *argument ) {
 		if ( qobj->value[1] != -1 ) {
 			pObjIndex = get_obj_index( qobj->value[1] );
 			if ( pObjIndex != NULL ) {
-				sprintf( buf, "     %s.\n\r", pObjIndex->short_descr );
+				snprintf( buf, sizeof( buf ), "     %s.\n\r", pObjIndex->short_descr );
 				buf[5] = UPPER( buf[5] );
 				send_to_char( buf, ch );
 			}
@@ -3437,7 +3437,7 @@ void do_complete( CHAR_DATA *ch, char *argument ) {
 		if ( qobj->value[2] != -1 ) {
 			pObjIndex = get_obj_index( qobj->value[2] );
 			if ( pObjIndex != NULL ) {
-				sprintf( buf, "     %s.\n\r", pObjIndex->short_descr );
+				snprintf( buf, sizeof( buf ), "     %s.\n\r", pObjIndex->short_descr );
 				buf[5] = UPPER( buf[5] );
 				send_to_char( buf, ch );
 			}
@@ -3445,7 +3445,7 @@ void do_complete( CHAR_DATA *ch, char *argument ) {
 		if ( qobj->value[3] != -1 ) {
 			pObjIndex = get_obj_index( qobj->value[3] );
 			if ( pObjIndex != NULL ) {
-				sprintf( buf, "     %s.\n\r", pObjIndex->short_descr );
+				snprintf( buf, sizeof( buf ), "     %s.\n\r", pObjIndex->short_descr );
 				buf[5] = UPPER( buf[5] );
 				send_to_char( buf, ch );
 			}
@@ -3669,7 +3669,7 @@ void do_thirdeye( CHAR_DATA *ch, char *argument ) {
 		if ( victim == ch ) continue;
 		if ( !can_see( ch, victim ) ) continue;
 		if ( victim->level > 6 ) continue;
-		sprintf( buf, "#n%-14s - %s\n\r", victim->name, victim->in_room->name );
+		snprintf( buf, sizeof( buf ), "#n%-14s - %s\n\r", victim->name, victim->in_room->name );
 		send_to_char( buf, ch );
 	}
 }

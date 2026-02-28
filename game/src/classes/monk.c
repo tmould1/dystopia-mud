@@ -164,7 +164,7 @@ void do_chi( CHAR_DATA *ch, char *argument ) {
 		if ( ch->chi[MAXIMUM] == 0 )
 			stc( "You have not gained any control of your ch'i.\n\r", ch );
 		else {
-			sprintf( buf, "You cannot focus your ch'i past a level of %d.", ch->chi[MAXIMUM] );
+			snprintf( buf, sizeof( buf ), "You cannot focus your ch'i past a level of %d.", ch->chi[MAXIMUM] );
 			stc( buf, ch );
 		}
 		return;
@@ -339,7 +339,7 @@ void do_mantra( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( arg1[0] == '\0' && arg2[0] == '\0' ) {
-		sprintf( buf, "Mantras Learned (%d).\n\r", ch->pcdata->powers[PMONK] );
+		snprintf( buf, sizeof( buf ), "Mantras Learned (%d).\n\r", ch->pcdata->powers[PMONK] );
 		send_to_char( buf, ch );
 		send_to_char( "Powers you have:\n\r", ch );
 		if ( ch->pcdata->powers[PMONK] < 1 )
@@ -408,19 +408,19 @@ void do_mantra( CHAR_DATA *ch, char *argument ) {
 		cost = ( ch->pcdata->powers[improve] + 1 ) * cfg( CFG_ABILITY_MONK_MANTRA_COST_MULTIPLIER );
 		arg1[0] = UPPER( arg1[0] );
 		if ( ch->pcdata->powers[improve] >= max ) {
-			sprintf( buf, "You have already gained all the known Mantras.\n\r" );
+			snprintf( buf, sizeof( buf ), "You have already gained all the known Mantras.\n\r" );
 			send_to_char( buf, ch );
 			return;
 		}
 		if ( cost > ch->practice ) {
-			sprintf( buf, "It costs you %d primal learn the Mantra.\n\r", cost );
+			snprintf( buf, sizeof( buf ), "It costs you %d primal learn the Mantra.\n\r", cost );
 			send_to_char( buf, ch );
 			return;
 		}
 
 		ch->pcdata->powers[improve] += 1;
 		ch->practice -= cost;
-		sprintf( buf, "You learn a Mantra.\n\r" );
+		snprintf( buf, sizeof( buf ), "You learn a Mantra.\n\r" );
 		send_to_char( buf, ch );
 	} else
 		send_to_char( "To learn a Mantra, type: Mantra power improve.\n\r", ch );
@@ -608,11 +608,11 @@ void do_celestial( CHAR_DATA *ch, char *argument ) {
 	char_from_room( ch );
 	char_to_room( ch, victim->in_room );
 	if ( IS_NPC( victim ) ) {
-		sprintf( buf, "You concentrate and open a Celestial path to %s!\n\r", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "You concentrate and open a Celestial path to %s!\n\r", victim->short_descr );
 		send_to_char( buf, ch );
 	}
 	if ( !IS_NPC( victim ) ) {
-		sprintf( buf, "You concentrate and open a Celestial path to %s!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "You concentrate and open a Celestial path to %s!\n\r", victim->name );
 		send_to_char( buf, ch );
 	}
 	act( "$n appears before you through a Celestial portal!\n\r", ch, NULL, NULL, TO_ROOM );

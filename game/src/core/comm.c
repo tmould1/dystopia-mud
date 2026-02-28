@@ -327,7 +327,7 @@ void boot_headless( const char *exe_path ) {
 	current_time = (time_t) now_time.tv_sec;
 	boot_time = current_time;
 	strcpy( str_boot_time, ctime( &current_time ) );
-	sprintf( crypt_pwd, "Don't bother." );
+	snprintf( crypt_pwd, sizeof( crypt_pwd ), "Don't bother." );
 
 	if ( ( fpReserve = fopen( NULL_FILE, "r" ) ) == NULL ) {
 		perror( NULL_FILE );
@@ -404,7 +404,7 @@ int main( int argc, char **argv ) {
 	boot_time = current_time;
 	last_copyover_time = current_time;
 	strcpy( str_boot_time, ctime( &current_time ) );
-	sprintf( crypt_pwd, "Don't bother." );
+	snprintf( crypt_pwd, sizeof( crypt_pwd ), "Don't bother." );
 
 	/*
 	 * Reserve one channel for our use.
@@ -527,7 +527,7 @@ int main( int argc, char **argv ) {
 	boot_db( fCopyOver );
 
 	arena = FIGHT_OPEN;
-	sprintf( log_buf, "%s is ready to rock on port %d.", game_config.game_name, port );
+	snprintf( log_buf, MAX_STRING_LENGTH, "%s is ready to rock on port %d.", game_config.game_name, port );
 	log_string( log_buf );
 	game_loop( control );
 #if !defined( WIN32 )
@@ -991,11 +991,11 @@ void new_descriptor( int control ) {
 		 */
 		int addr;
 		addr = ntohl( sock.sin_addr.s_addr );
-		sprintf( buf, "%d.%d.%d.%d",
+		snprintf( buf, sizeof( buf ), "%d.%d.%d.%d",
 			( addr >> 24 ) & 0xFF, ( addr >> 16 ) & 0xFF,
 			( addr >> 8 ) & 0xFF, ( addr ) & 0xFF );
 
-		sprintf( log_buf, "Connection Established: %s (fd=%d)", buf, desc );
+		snprintf( log_buf, MAX_STRING_LENGTH, "Connection Established: %s (fd=%d)", buf, desc );
 		log_string( log_buf );
 
 		dnew->host = str_dup( buf ); // set the temporary ip as the host.
@@ -1122,7 +1122,7 @@ void close_socket( DESCRIPTOR_DATA *dclose ) {
 	 * Loose link or free char
 	 */
 	if ( ( ch = dclose->character ) != NULL ) {
-		sprintf( log_buf, "Closing link to %s.", ch->name );
+		snprintf( log_buf, MAX_STRING_LENGTH, "Closing link to %s.", ch->name );
 		log_string( log_buf );
 		/* If ch is writing note or playing, just lose link otherwise clear char */
 		if ( ( dclose->connected == CON_PLAYING ) || ( ( dclose->connected >= CON_NOTE_TO ) && ( dclose->connected <= CON_NOTE_FINISH ) ) ) {
@@ -1194,10 +1194,10 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
 	iStart = (int) strlen( d->inbuf );
 	if ( iStart >= (int) sizeof( d->inbuf ) - 10 ) {
 		if ( d != NULL && d->character != NULL ) {
-			sprintf( log_buf, "%s input overflow!", mask_ip( d->character->lasthost ) );
+			snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->character->lasthost ) );
 			log_string( log_buf );
 		} else if ( d->lookup_status != STATUS_LOOKUP ) {
-			sprintf( log_buf, "%s input overflow!", mask_ip( d->host ) );
+			snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->host ) );
 			log_string( log_buf );
 		}
 		write_to_descriptor( d,
@@ -1235,7 +1235,7 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
 #if !defined( WIN32 )
 			perror( "Read_from_descriptor" );
 #else
-			sprintf( log_buf, "Read_from_descriptor: recv error %d on fd %d.",
+			snprintf( log_buf, MAX_STRING_LENGTH, "Read_from_descriptor: recv error %d on fd %d.",
 				WSAGetLastError(), d->descriptor );
 			log_string( log_buf );
 #endif
@@ -1635,15 +1635,15 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 		} else {
 			if ( ++d->repeat >= 40 ) {
 				if ( d != NULL && d->character != NULL ) {
-					sprintf( log_buf, "%s input overflow!", mask_ip( d->character->lasthost ) );
+					snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->character->lasthost ) );
 					log_string( log_buf );
 				} else if ( d->lookup_status != STATUS_LOOKUP ) {
-					sprintf( log_buf, "%s input overflow!", mask_ip( d->host ) );
+					snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->host ) );
 					log_string( log_buf );
 				}
 				write_to_descriptor( d,
 					"\n\r*** PUT A LID ON IT!!! ***\n\r", 0 );
-				sprintf( d->incomm, "quit" );
+				snprintf( d->incomm, sizeof( d->incomm ), "quit" );
 			}
 		}
 	}
@@ -1746,7 +1746,7 @@ void crashrecov( int iSignal ) {
 		save_char_obj( gch );
 	}
 
-	sprintf( buf, "\n\r <*>          Dystopia has crashed           <*>\n\r\n\r <*>   Attempting to restore last savefile   <*>\n\r" );
+	snprintf( buf, sizeof( buf ), "\n\r <*>          Dystopia has crashed           <*>\n\r\n\r <*>   Attempting to restore last savefile   <*>\n\r" );
 
 	/* For each playing descriptor, save its state */
 	LIST_FOR_EACH_SAFE( d, d_tmp, &g_descriptors, DESCRIPTOR_DATA, node ) {
@@ -1783,8 +1783,8 @@ void crashrecov( int iSignal ) {
 
 	/* exec - descriptors are inherited */
 
-	sprintf( buf, "%d", port );
-	sprintf( buf2, "%d", control );
+	snprintf( buf, sizeof( buf ), "%d", port );
+	snprintf( buf2, sizeof( buf2 ), "%d", control );
 
 	execl( EXE_FILE, "dystopia", buf, "crashrecov", buf2, (char *) NULL );
 
@@ -2527,7 +2527,7 @@ bool write_to_descriptor_2( int desc, char *txt, int length ) {
 				nWrite = 0;
 				continue;
 			}
-			sprintf( log_buf, "Write_to_descriptor: send error %d on fd %d (len=%d).",
+			snprintf( log_buf, MAX_STRING_LENGTH, "Write_to_descriptor: send error %d on fd %d (len=%d).",
 				wsa_err, desc, nBlock );
 			log_string( log_buf );
 			return FALSE;
@@ -2568,7 +2568,7 @@ void merc_logf( char *fmt, ... ) {
 	char buf[2 * MSL];
 	va_list args;
 	va_start( args, fmt );
-	vsprintf( buf, fmt, args );
+	vsnprintf( buf, sizeof( buf ), fmt, args );
 	va_end( args );
 
 	log_string( buf );

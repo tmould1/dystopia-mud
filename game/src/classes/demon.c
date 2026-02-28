@@ -56,7 +56,7 @@ void do_warps( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	sprintf( lin,
+	snprintf( lin, sizeof( lin ),
 		"-=(**)=-=(**)=-=(**)=-=(**)=-=(**)=-=(**)=-=(**)=-=(**)=-=(**)=-=(**)=-=(**)=-\n\r" );
 	send_to_char( lin, ch );
 	send_to_char(
@@ -756,13 +756,13 @@ void do_champions( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	sprintf( buf, "The champions of Hell:\n\r" );
+	snprintf( buf, sizeof( buf ), "The champions of Hell:\n\r" );
 	send_to_char( buf, ch );
 	send_to_char( "[      Name      ] [ Hits ] [ Mana ] [ Move ] [       Power ]\n\r", ch );
 	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 		if ( !IS_CLASS( gch, CLASS_DEMON ) ) continue;
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"[%-16s] [%-6d] [%-6d] [%-6d] [ %-9d%9d ]\n\r",
 			capitalize( gch->name ),
 			gch->hit, gch->mana, gch->move,

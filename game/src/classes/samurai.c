@@ -383,7 +383,7 @@ void do_martial( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( ch->exp < cost ) {
-			sprintf( buf, "You need %d more exp to learn this technique.\n\r", cost - ch->exp );
+			snprintf( buf, sizeof( buf ), "You need %d more exp to learn this technique.\n\r", cost - ch->exp );
 			send_to_char( buf, ch );
 			return;
 		}
@@ -397,7 +397,7 @@ void do_martial( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( ch->exp < cost ) {
-			sprintf( buf, "You need %d more exp to learn this technique.\n\r", cost - ch->exp );
+			snprintf( buf, sizeof( buf ), "You need %d more exp to learn this technique.\n\r", cost - ch->exp );
 			send_to_char( buf, ch );
 			return;
 		}
@@ -411,7 +411,7 @@ void do_martial( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( ch->exp < cost ) {
-			sprintf( buf, "You need %d more exp to learn this technique.\n\r", cost - ch->exp );
+			snprintf( buf, sizeof( buf ), "You need %d more exp to learn this technique.\n\r", cost - ch->exp );
 			send_to_char( buf, ch );
 			return;
 		}
@@ -425,7 +425,7 @@ void do_martial( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( ch->exp < cost ) {
-			sprintf( buf, "You need %d more exp to learn this technique.\n\r", cost - ch->exp );
+			snprintf( buf, sizeof( buf ), "You need %d more exp to learn this technique.\n\r", cost - ch->exp );
 			send_to_char( buf, ch );
 			return;
 		}

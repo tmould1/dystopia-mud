@@ -172,7 +172,7 @@ void do_pedit( CHAR_DATA *ch, char *argument ) {
         send_to_char( "\n\r#7Categories:#n\n\r", ch );
         for ( cmd = 0; pedit_categories[cmd].name[0] != '\0'; cmd++ ) {
             if ( pedit_categories[cmd].trust_level <= ch->level ) {
-                sprintf( buf, "  #3%-12s#n - %s\n\r",
+                snprintf( buf, sizeof( buf ), "  #3%-12s#n - %s\n\r",
                          pedit_categories[cmd].name,
                          pedit_categories[cmd].description );
                 send_to_char( buf, ch );
@@ -198,7 +198,7 @@ void do_pedit( CHAR_DATA *ch, char *argument ) {
             victim = ch->pcdata->pfile;
             if ( ch->desc )
                 ch->desc->connected = CON_PFILE;
-            sprintf( buf, "Now editing #G%s#n (offline). Use 'pedit done' to save.\n\r", victim->name );
+            snprintf( buf, sizeof( buf ), "Now editing #G%s#n (offline). Use 'pedit done' to save.\n\r", victim->name );
             send_to_char( buf, ch );
             return;
         }
@@ -235,7 +235,7 @@ void do_pedit( CHAR_DATA *ch, char *argument ) {
         }
 
         if ( str_cmp( argument, "confirm" ) ) {
-            sprintf( buf, "#RWARNING:#n This will PERMANENTLY delete %s's player file!\n\r", victim->name );
+            snprintf( buf, sizeof( buf ), "#RWARNING:#n This will PERMANENTLY delete %s's player file!\n\r", victim->name );
             send_to_char( buf, ch );
             send_to_char( "To confirm, type: pedit <player> delete confirm\n\r", ch );
             free_char( victim );
@@ -252,7 +252,7 @@ void do_pedit( CHAR_DATA *ch, char *argument ) {
             ch->pcdata->pfile = NULL;
 
             if ( db_player_delete( victim_name ) ) {
-                sprintf( buf, "#RPlayer %s has been permanently deleted.#n\n\r", victim_name );
+                snprintf( buf, sizeof( buf ), "#RPlayer %s has been permanently deleted.#n\n\r", victim_name );
                 send_to_char( buf, ch );
             } else {
                 send_to_char( "Failed to delete player file.\n\r", ch );
@@ -263,7 +263,7 @@ void do_pedit( CHAR_DATA *ch, char *argument ) {
 
     /* If no category given and player is online, show help */
     if ( arg2[0] == '\0' ) {
-        sprintf( buf, "#GPlayer: %s#n is online. Specify a category.\n\r", victim->name );
+        snprintf( buf, sizeof( buf ), "#GPlayer: %s#n is online. Specify a category.\n\r", victim->name );
         send_to_char( buf, ch );
         send_to_char( "Use: pedit <player> <category> <field> <value>\n\r", ch );
         return;
@@ -284,7 +284,7 @@ void do_pedit( CHAR_DATA *ch, char *argument ) {
     }
 
     if ( !found ) {
-        sprintf( buf, "Unknown category '%s'. See 'pedit' for list.\n\r", arg2 );
+        snprintf( buf, sizeof( buf ), "Unknown category '%s'. See 'pedit' for list.\n\r", arg2 );
         send_to_char( buf, ch );
     }
 
@@ -304,58 +304,58 @@ void pedit_show( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
     one_argument( argument, arg );
 
     /* Header */
-    sprintf( buf, "\n\r#G===== Player: %s =====#n\n\r\n\r", victim->name );
+    snprintf( buf, sizeof( buf ), "\n\r#G===== Player: %s =====#n\n\r\n\r", victim->name );
     send_to_char( buf, ch );
 
     /* Identity */
-    sprintf( buf, "#7[Identity]#n\n\r" );
+    snprintf( buf, sizeof( buf ), "#7[Identity]#n\n\r" );
     send_to_char( buf, ch );
-    sprintf( buf, "  Name: %s  Title: %s\n\r", victim->name,
+    snprintf( buf, sizeof( buf ), "  Name: %s  Title: %s\n\r", victim->name,
              victim->pcdata ? victim->pcdata->title : "(none)" );
     send_to_char( buf, ch );
-    sprintf( buf, "  Sex: %s  Class: %d  Level: %d  Trust: %d\n\r",
+    snprintf( buf, sizeof( buf ), "  Sex: %s  Class: %d  Level: %d  Trust: %d\n\r",
              victim->sex == SEX_MALE ? "Male" : victim->sex == SEX_FEMALE ? "Female" : "Neutral",
              victim->class, victim->level, victim->trust );
     send_to_char( buf, ch );
-    sprintf( buf, "  Clan: %s  Generation: %d\n\r",
+    snprintf( buf, sizeof( buf ), "  Clan: %s  Generation: %d\n\r",
              victim->clan ? victim->clan : "(none)", victim->generation );
     send_to_char( buf, ch );
 
     /* Vitals */
-    sprintf( buf, "\n\r#7[Vitals]#n\n\r" );
+    snprintf( buf, sizeof( buf ), "\n\r#7[Vitals]#n\n\r" );
     send_to_char( buf, ch );
-    sprintf( buf, "  HP: %d/%d  Mana: %d/%d  Move: %d/%d\n\r",
+    snprintf( buf, sizeof( buf ), "  HP: %d/%d  Mana: %d/%d  Move: %d/%d\n\r",
              victim->hit, victim->max_hit,
              victim->mana, victim->max_mana,
              victim->move, victim->max_move );
     send_to_char( buf, ch );
 
     /* Resources */
-    sprintf( buf, "\n\r#7[Resources]#n\n\r" );
+    snprintf( buf, sizeof( buf ), "\n\r#7[Resources]#n\n\r" );
     send_to_char( buf, ch );
-    sprintf( buf, "  Gold: %d  Exp: %d  Practice: %d\n\r",
+    snprintf( buf, sizeof( buf ), "  Gold: %d  Exp: %d  Practice: %d\n\r",
              victim->gold, victim->exp, victim->practice );
     send_to_char( buf, ch );
     if ( victim->pcdata ) {
-        sprintf( buf, "  Quest Points: %d\n\r", victim->pcdata->quest );
+        snprintf( buf, sizeof( buf ), "  Quest Points: %d\n\r", victim->pcdata->quest );
         send_to_char( buf, ch );
     }
 
     /* Combat */
-    sprintf( buf, "\n\r#7[Combat]#n\n\r" );
+    snprintf( buf, sizeof( buf ), "\n\r#7[Combat]#n\n\r" );
     send_to_char( buf, ch );
-    sprintf( buf, "  Hitroll: %d  Damroll: %d  Armor: %d\n\r",
+    snprintf( buf, sizeof( buf ), "  Hitroll: %d  Damroll: %d  Armor: %d\n\r",
              victim->hitroll, victim->damroll, victim->armor );
     send_to_char( buf, ch );
-    sprintf( buf, "  Alignment: %d  Saving Throw: %d\n\r",
+    snprintf( buf, sizeof( buf ), "  Alignment: %d  Saving Throw: %d\n\r",
              victim->alignment, victim->saving_throw );
     send_to_char( buf, ch );
 
     /* Stats */
     if ( victim->pcdata ) {
-        sprintf( buf, "\n\r#7[Attributes]#n\n\r" );
+        snprintf( buf, sizeof( buf ), "\n\r#7[Attributes]#n\n\r" );
         send_to_char( buf, ch );
-        sprintf( buf, "  Str: %d  Int: %d  Wis: %d  Dex: %d  Con: %d\n\r",
+        snprintf( buf, sizeof( buf ), "  Str: %d  Int: %d  Wis: %d  Dex: %d  Con: %d\n\r",
                  victim->pcdata->perm_str, victim->pcdata->perm_int,
                  victim->pcdata->perm_wis, victim->pcdata->perm_dex,
                  victim->pcdata->perm_con );
@@ -363,12 +363,12 @@ void pedit_show( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
     }
 
     /* Statistics */
-    sprintf( buf, "\n\r#7[Statistics]#n\n\r" );
+    snprintf( buf, sizeof( buf ), "\n\r#7[Statistics]#n\n\r" );
     send_to_char( buf, ch );
-    sprintf( buf, "  Player Kills: %d  Player Deaths: %d\n\r",
+    snprintf( buf, sizeof( buf ), "  Player Kills: %d  Player Deaths: %d\n\r",
              victim->pkill, victim->pdeath );
     send_to_char( buf, ch );
-    sprintf( buf, "  Mob Kills: %d  Mob Deaths: %d\n\r",
+    snprintf( buf, sizeof( buf ), "  Mob Kills: %d  Mob Deaths: %d\n\r",
              victim->mkill, victim->mdeath );
     send_to_char( buf, ch );
 
@@ -1220,7 +1220,7 @@ void pedit_interp( CHAR_DATA *ch, char *argument ) {
         send_to_char( "\n\r#7Categories (use: <category> <field> <value>):#n\n\r", ch );
         for ( cmd = 0; pedit_categories[cmd].name[0] != '\0'; cmd++ ) {
             if ( pedit_categories[cmd].trust_level <= ch->level ) {
-                sprintf( buf, "  #3%-12s#n - %s\n\r",
+                snprintf( buf, sizeof( buf ), "  #3%-12s#n - %s\n\r",
                          pedit_categories[cmd].name,
                          pedit_categories[cmd].description );
                 send_to_char( buf, ch );
@@ -1244,7 +1244,7 @@ void pedit_interp( CHAR_DATA *ch, char *argument ) {
     }
 
     if ( !found ) {
-        sprintf( buf, "Unknown command '%s'. Type 'help' for available commands.\n\r", command );
+        snprintf( buf, sizeof( buf ), "Unknown command '%s'. Type 'help' for available commands.\n\r", command );
         send_to_char( buf, ch );
     }
 }

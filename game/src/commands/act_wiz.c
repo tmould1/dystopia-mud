@@ -69,7 +69,7 @@ void do_linkdead( CHAR_DATA *ch, char *argument ) {
 	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) || gch->desc ) continue;
 		found = TRUE;
-		sprintf( buf, "Name: %12s. (Room: %5d)\n\r", gch->name, gch->in_room == NULL ? 0 : gch->in_room->vnum );
+		snprintf( buf, sizeof( buf ), "Name: %12s. (Room: %5d)\n\r", gch->name, gch->in_room == NULL ? 0 : gch->in_room->vnum );
 		send_to_char( buf, ch );
 	}
 	if ( !found ) send_to_char( "No Linkdead Players found\n\r", ch );
@@ -105,9 +105,9 @@ void paradox( CHAR_DATA *ch ) {
 	send_to_char( "The sins of your past strike back!\n\r", ch );
 	send_to_char( "The paradox has come for your soul!\n\r", ch );
 	if ( ch->sex == SEX_MALE )
-		sprintf( buf, "#C%s #pscreams in agony as the #RP#Ga#RR#Ga#RD#Go#RX#p wrecks his puny mortal body#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#C%s #pscreams in agony as the #RP#Ga#RR#Ga#RD#Go#RX#p wrecks his puny mortal body#n", ch->name );
 	else
-		sprintf( buf, "#C%s #pscreams in agony as the #RP#Ga#RR#Ga#RD#Go#RX#p wrecks her puny mortal body#n", ch->name );
+		snprintf( buf, sizeof( buf ), "#C%s #pscreams in agony as the #RP#Ga#RR#Ga#RD#Go#RX#p wrecks her puny mortal body#n", ch->name );
 	do_info( ch, buf );
 	ch->hit = -10;
 	ch->max_hit = ( ch->max_hit * 90 ) / 100;
@@ -128,7 +128,7 @@ void do_wizhelp( CHAR_DATA *ch, char *argument ) {
 	col = 0;
 	for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {
 		if ( cmd_table[cmd].level > LEVEL_HERO && cmd_table[cmd].level <= get_trust( ch ) ) {
-			sprintf( buf, "%-12s", cmd_table[cmd].name );
+			snprintf( buf, sizeof( buf ), "%-12s", cmd_table[cmd].name );
 			send_to_char( buf, ch );
 			if ( ++col % 6 == 0 )
 				send_to_char( "\n\r", ch );
@@ -291,7 +291,7 @@ void do_deny( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "%s: Deny %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Deny %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	if ( get_trust( victim ) >= get_trust( ch ) ) {
@@ -315,7 +315,7 @@ void do_disconnect( CHAR_DATA *ch, char *argument ) {
 	DESCRIPTOR_DATA *d;
 	CHAR_DATA *victim;
 
-	sprintf( buf, "%s: Disconnect %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Disconnect %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -410,7 +410,7 @@ void do_echo( CHAR_DATA *ch, char *argument ) {
 	DESCRIPTOR_DATA *d;
 	char buf[MAX_STRING_LENGTH];
 
-	sprintf( buf, "%s: Echo %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Echo %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	if ( argument[0] == '\0' ) {
@@ -432,7 +432,7 @@ void do_recho( CHAR_DATA *ch, char *argument ) {
 	DESCRIPTOR_DATA *d;
 	char buf[MAX_STRING_LENGTH];
 
-	sprintf( buf, "%s: Recho %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Recho %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	if ( argument[0] == '\0' ) {
@@ -485,7 +485,7 @@ void do_transfer( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	CHAR_DATA *mount;
 
-	sprintf( buf, "%s: Transfer %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Transfer %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	argument = one_argument( argument, arg1 );
@@ -500,7 +500,7 @@ void do_transfer( CHAR_DATA *ch, char *argument ) {
 		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			if ( d->connected == CON_PLAYING && d->character != ch && d->character->in_room != NULL && can_see( ch, d->character ) ) {
 				char buf[MAX_STRING_LENGTH];
-				sprintf( buf, "%s %s", d->character->name, arg2 );
+				snprintf( buf, sizeof( buf ), "%s %s", d->character->name, arg2 );
 				do_transfer( ch, buf );
 			}
 		}
@@ -559,7 +559,7 @@ void do_at( CHAR_DATA *ch, char *argument ) {
 	ROOM_INDEX_DATA *original;
 	CHAR_DATA *wch;
 
-	sprintf( buf, "%s: At %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: At %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	argument = one_argument( argument, arg );
@@ -663,19 +663,19 @@ void do_rstat( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "Name: '%s.'\n\rArea: '%s'.\n\r",
+	snprintf( buf, sizeof( buf ), "Name: '%s.'\n\rArea: '%s'.\n\r",
 		location->name,
 		location->area->name );
 	send_to_char( buf, ch );
 
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Vnum: %d.  Sector: %d.  Light: %d.\n\r",
 		location->vnum,
 		location->sector_type,
 		location->light );
 	send_to_char( buf, ch );
 
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Room flags: %d.\n\rDescription:\n\r%s",
 		location->room_flags,
 		location->description );
@@ -712,7 +712,7 @@ void do_rstat( CHAR_DATA *ch, char *argument ) {
 		EXIT_DATA *pexit;
 
 		if ( ( pexit = location->exit[door] ) != NULL ) {
-			sprintf( buf,
+			snprintf( buf, sizeof( buf ),
 				"Door: %d.  To: %d.  Key: %d.  Exit flags: %d.\n\rKeyword: '%s'.  Description: %s",
 
 				door,
@@ -751,27 +751,27 @@ void do_ostat( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( obj->questmaker != NULL && strlen( obj->questmaker ) > 1 )
-		sprintf( nm1, "%s", obj->questmaker );
+		snprintf( nm1, sizeof( nm1 ), "%s", obj->questmaker );
 	else
-		sprintf( nm1, "None" );
+		snprintf( nm1, sizeof( nm1 ), "None" );
 	if ( obj->questowner != NULL && strlen( obj->questowner ) > 1 )
-		sprintf( nm2, "%s", obj->questowner );
+		snprintf( nm2, sizeof( nm2 ), "%s", obj->questowner );
 	else
-		sprintf( nm2, "None" );
+		snprintf( nm2, sizeof( nm2 ), "None" );
 
-	sprintf( buf, "Name: %s.\n\r",
+	snprintf( buf, sizeof( buf ), "Name: %s.\n\r",
 		obj->name );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Vnum: %d.  Type: %s.\n\r",
+	snprintf( buf, sizeof( buf ), "Vnum: %d.  Type: %s.\n\r",
 		obj->pIndexData->vnum, item_type_name( obj ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Short description: %s.\n\rLong description: %s\n\r",
+	snprintf( buf, sizeof( buf ), "Short description: %s.\n\rLong description: %s\n\r",
 		obj->short_descr, obj->description );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Object creator: %s.  Object owner: %s.  Quest points: %d.\n\r", nm1, nm2, obj->points );
+	snprintf( buf, sizeof( buf ), "Object creator: %s.  Object owner: %s.  Quest points: %d.\n\r", nm1, nm2, obj->points );
 	send_to_char( buf, ch );
 	if ( obj->quest != 0 ) {
 		send_to_char( "Quest selections:", ch );
@@ -788,19 +788,19 @@ void do_ostat( CHAR_DATA *ch, char *argument ) {
 		if ( IS_SET( obj->quest, QUEST_AC ) ) send_to_char( " Ac", ch );
 		send_to_char( ".\n\r", ch );
 	}
-	sprintf( buf, "Wear bits: %d.  Extra bits: %s.\n\r",
+	snprintf( buf, sizeof( buf ), "Wear bits: %d.  Extra bits: %s.\n\r",
 		obj->wear_flags, extra_bit_name( obj->extra_flags ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Weight: %d/%d.\n\r",
+	snprintf( buf, sizeof( buf ), "Weight: %d/%d.\n\r",
 		obj->weight, get_obj_weight( obj ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Cost: %d.  Timer: %d.  Level: %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Cost: %d.  Timer: %d.  Level: %d.\n\r",
 		obj->cost, obj->timer, obj->level );
 	send_to_char( buf, ch );
 
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"In room: %d.  In object: %s.  Carried by: %s.  Wear_loc: %d.\n\r",
 		obj->in_room == NULL ? 0 : obj->in_room->vnum,
 		obj->in_obj == NULL ? "(none)" : obj->in_obj->short_descr,
@@ -808,7 +808,7 @@ void do_ostat( CHAR_DATA *ch, char *argument ) {
 		obj->wear_loc );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Values: %d %d %d %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Values: %d %d %d %d.\n\r",
 		obj->value[0], obj->value[1], obj->value[2], obj->value[3] );
 	send_to_char( buf, ch );
 
@@ -833,13 +833,13 @@ void do_ostat( CHAR_DATA *ch, char *argument ) {
 	}
 
 	LIST_FOR_EACH(paf, &obj->affects, AFFECT_DATA, node) {
-		sprintf( buf, "Affects %s by %d.\n\r",
+		snprintf( buf, sizeof( buf ), "Affects %s by %d.\n\r",
 			affect_loc_name( paf->location ), paf->modifier );
 		send_to_char( buf, ch );
 	}
 
 	LIST_FOR_EACH(paf, &obj->pIndexData->affects, AFFECT_DATA, node) {
-		sprintf( buf, "Affects %s by %d.\n\r",
+		snprintf( buf, sizeof( buf ), "Affects %s by %d.\n\r",
 			affect_loc_name( paf->location ), paf->modifier );
 		send_to_char( buf, ch );
 	}
@@ -865,18 +865,18 @@ void do_mstat( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "Name: %s.\n\r",
+	snprintf( buf, sizeof( buf ), "Name: %s.\n\r",
 		victim->name );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Vnum: %d.  Sex: %s.  Room: %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Vnum: %d.  Sex: %s.  Room: %d.\n\r",
 		IS_NPC( victim ) ? victim->pIndexData->vnum : 0,
 		victim->sex == SEX_MALE ? "male" : victim->sex == SEX_FEMALE ? "female"
 																	 : "neutral",
 		victim->in_room == NULL ? 0 : victim->in_room->vnum );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Str: %d.  Int: %d.  Wis: %d.  Dex: %d.  Con: %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Str: %d.  Int: %d.  Wis: %d.  Dex: %d.  Con: %d.\n\r",
 		get_curr_str( victim ),
 		get_curr_int( victim ),
 		get_curr_wis( victim ),
@@ -884,30 +884,30 @@ void do_mstat( CHAR_DATA *ch, char *argument ) {
 		get_curr_con( victim ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Hp: %d/%d.  Mana: %d/%d.  Move: %d/%d.  Primal: %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Hp: %d/%d.  Mana: %d/%d.  Move: %d/%d.  Primal: %d.\n\r",
 		victim->hit, victim->max_hit,
 		victim->mana, victim->max_mana,
 		victim->move, victim->max_move,
 		victim->practice );
 	send_to_char( buf, ch );
 
-	sprintf( buf,
+	snprintf( buf, sizeof( buf ),
 		"Lv: %d.  Align: %d.  AC: %d.  Gold: %d.  Exp: %d.\n\r",
 		victim->level, victim->alignment,
 		char_ac( victim ), victim->gold, victim->exp );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Hitroll: %d.  Damroll: %d.  Position: %d.  Wimpy: %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Hitroll: %d.  Damroll: %d.  Position: %d.  Wimpy: %d.\n\r",
 		char_hitroll( victim ), char_damroll( victim ),
 		victim->position, victim->wimpy );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Fighting: %s.\n\r",
+	snprintf( buf, sizeof( buf ), "Fighting: %s.\n\r",
 		victim->fighting ? victim->fighting->name : "(none)" );
 	send_to_char( buf, ch );
 
 	if ( !IS_NPC( victim ) ) {
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"Thirst: %d.  Full: %d.  Drunk: %d.  Saving throw: %d.\n\r",
 			victim->pcdata->condition[COND_THIRST],
 			victim->pcdata->condition[COND_FULL],
@@ -916,36 +916,36 @@ void do_mstat( CHAR_DATA *ch, char *argument ) {
 		send_to_char( buf, ch );
 
 		if ( IS_CLASS( victim, CLASS_VAMPIRE ) || IS_CLASS( victim, CLASS_WEREWOLF ) ) {
-			sprintf( buf, "Rage: %d. ", victim->rage );
+			snprintf( buf, sizeof( buf ), "Rage: %d. ", victim->rage );
 			send_to_char( buf, ch );
 			if ( IS_CLASS( victim, CLASS_VAMPIRE ) ) {
-				sprintf( buf, "Beast: %d. ", victim->beast );
+				snprintf( buf, sizeof( buf ), "Beast: %d. ", victim->beast );
 				send_to_char( buf, ch );
-				sprintf( buf, "Blood: %d.", victim->pcdata->condition[COND_THIRST] );
+				snprintf( buf, sizeof( buf ), "Blood: %d.", victim->pcdata->condition[COND_THIRST] );
 				send_to_char( buf, ch );
 			}
 			send_to_char( "\n\r", ch );
 		}
 
 		if ( IS_CLASS( victim, CLASS_DEMON ) ) {
-			sprintf( buf, "Demonic armor: %d pieces. ", victim->pcdata->stats[DEMON_POWER] );
+			snprintf( buf, sizeof( buf ), "Demonic armor: %d pieces. ", victim->pcdata->stats[DEMON_POWER] );
 			send_to_char( buf, ch );
-			sprintf( buf, "Power: %d (%d).",
+			snprintf( buf, sizeof( buf ), "Power: %d (%d).",
 				victim->pcdata->stats[DEMON_CURRENT], victim->pcdata->stats[DEMON_TOTAL] );
 			send_to_char( buf, ch );
 			send_to_char( "\n\r", ch );
 		}
 	}
 
-	sprintf( buf, "Carry number: %d.  Carry weight: %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Carry number: %d.  Carry weight: %d.\n\r",
 		victim->carry_number, victim->carry_weight );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Age: %d.  Played: %d.  Timer: %d.  Act: %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Age: %d.  Played: %d.  Timer: %d.  Act: %d.\n\r",
 		get_age( victim ), (int) victim->played, victim->timer, victim->act );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Master: %s.  Leader: %s.  Affected by: %s.\n\r",
+	snprintf( buf, sizeof( buf ), "Master: %s.  Leader: %s.  Affected by: %s.\n\r",
 		victim->master ? victim->master->name : "(none)",
 		victim->leader ? victim->leader->name : "(none)",
 		affect_bit_name( victim->affected_by ) );
@@ -953,11 +953,11 @@ void do_mstat( CHAR_DATA *ch, char *argument ) {
 
 	if ( !IS_NPC( victim ) ) /* OLC */
 	{
-		sprintf( buf, "Security: %d.\n\r", victim->pcdata->security );
+		snprintf( buf, sizeof( buf ), "Security: %d.\n\r", victim->pcdata->security );
 		send_to_char( buf, ch );
 	}
 
-	sprintf( buf, "Short description: %s.\n\rLong  description: %s",
+	snprintf( buf, sizeof( buf ), "Short description: %s.\n\rLong  description: %s",
 		victim->short_descr,
 		victim->long_descr[0] != '\0' ? victim->long_descr : "(none).\n\r" );
 	send_to_char( buf, ch );
@@ -966,7 +966,7 @@ void do_mstat( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Mobile has spec fun.\n\r", ch );
 
 	LIST_FOR_EACH(paf, &victim->affects, AFFECT_DATA, node) {
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"Spell: '%s' modifies %s by %d for %d hours with bits %s.\n\r",
 			skill_table[(int) paf->type].name,
 			affect_loc_name( paf->location ),
@@ -1010,7 +1010,7 @@ void do_mfind( CHAR_DATA *ch, char *argument ) {
 			nMatch++;
 			if ( fAll || is_name( arg, pMobIndex->player_name ) ) {
 				found = TRUE;
-				sprintf( buf, "[%5d] %s\n\r",
+				snprintf( buf, sizeof( buf ), "[%5d] %s\n\r",
 					pMobIndex->vnum, capitalize( pMobIndex->short_descr ) );
 				send_to_char( buf, ch );
 			}
@@ -1054,7 +1054,7 @@ void do_ofind( CHAR_DATA *ch, char *argument ) {
 			nMatch++;
 			if ( fAll || is_name( arg, pObjIndex->name ) ) {
 				found = TRUE;
-				sprintf( buf, "[%5d] %s\n\r",
+				snprintf( buf, sizeof( buf ), "[%5d] %s\n\r",
 					pObjIndex->vnum, capitalize( pObjIndex->short_descr ) );
 				send_to_char( buf, ch );
 			}
@@ -1083,7 +1083,7 @@ void do_mwhere( CHAR_DATA *ch, char *argument ) {
 	LIST_FOR_EACH( victim, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( victim ) && victim->in_room != NULL && is_name( arg, victim->name ) ) {
 			found = TRUE;
-			sprintf( buf, "[%5d] %-28s [%5d] %s\n\r",
+			snprintf( buf, sizeof( buf ), "[%5d] %-28s [%5d] %s\n\r",
 				victim->pIndexData->vnum,
 				victim->short_descr,
 				victim->in_room->vnum,
@@ -1106,7 +1106,7 @@ void do_shutdow( CHAR_DATA *ch, char *argument ) {
 void do_shutdown( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	extern bool merc_down;
-	sprintf( buf, "Shutdown by %s.", ch->name );
+	snprintf( buf, sizeof( buf ), "Shutdown by %s.", ch->name );
 	append_file( ch, SHUTDOWN_FILE, buf );
 	strcat( buf, "\n\r" );
 	do_echo( ch, buf );
@@ -1123,7 +1123,7 @@ void do_snoop( CHAR_DATA *ch, char *argument ) {
 	DESCRIPTOR_DATA *d;
 	CHAR_DATA *victim;
 
-	sprintf( buf, "%s: Snoop %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Snoop %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1187,7 +1187,7 @@ void do_oswitch( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 	CHAR_DATA *mount;
 
-	sprintf( buf, "%s: Oswitch %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Oswitch %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1241,7 +1241,7 @@ void do_oreturn( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	OBJ_DATA *obj;
 
-	sprintf( buf, "%s: Oreturn", ch->name );
+	snprintf( buf, sizeof( buf ), "%s: Oreturn", ch->name );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1271,7 +1271,7 @@ void do_switch( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *victim;
 
-	sprintf( buf, "%s: Switch %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Switch %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1322,7 +1322,7 @@ void do_switch( CHAR_DATA *ch, char *argument ) {
 void do_return( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 
-	sprintf( buf, "%s: Return %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Return %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	if ( ch->desc == NULL )
@@ -1348,7 +1348,7 @@ void do_mload( CHAR_DATA *ch, char *argument ) {
 	MOB_INDEX_DATA *pMobIndex;
 	CHAR_DATA *victim;
 
-	sprintf( buf, "%s: Mload %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Mload %s", ch->name, argument );
 	if ( ch->level < NO_WATCH && ch->trust > 3 ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1392,14 +1392,14 @@ void do_pload( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "%s: Pload %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Pload %s", ch->name, argument );
 	if ( ch->level < NO_WATCH && ch->trust > 3 ) do_watching( ch, buf );
 
 	argument[0] = UPPER( argument[0] );
 
-	sprintf( buf, "You transform into %s.\n\r", argument );
+	snprintf( buf, sizeof( buf ), "You transform into %s.\n\r", argument );
 	send_to_char( buf, ch );
-	sprintf( buf, "$n transforms into %s.", argument );
+	snprintf( buf, sizeof( buf ), "$n transforms into %s.", argument );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 
 	d = ch->desc;
@@ -1428,7 +1428,7 @@ void do_preturn( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	sprintf( arg, "%s", ch->pload );
+	snprintf( arg, sizeof( arg ), "%s", ch->pload );
 	if ( strlen( arg ) < 3 || strlen( arg ) > 8 ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
@@ -1441,9 +1441,9 @@ void do_preturn( CHAR_DATA *ch, char *argument ) {
 
 	d = ch->desc;
 
-	sprintf( buf, "You transform back into %s.\n\r", capitalize( ch->pload ) );
+	snprintf( buf, sizeof( buf ), "You transform back into %s.\n\r", capitalize( ch->pload ) );
 	send_to_char( buf, ch );
-	sprintf( buf, "$n transforms back into %s.", capitalize( ch->pload ) );
+	snprintf( buf, sizeof( buf ), "$n transforms back into %s.", capitalize( ch->pload ) );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	do_autosave( ch, "" );
 	if ( ch != NULL && ch->desc != NULL )
@@ -1477,7 +1477,7 @@ void do_oload( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "%s: Oload %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Oload %s", ch->name, argument );
 	if ( ch->level < NO_WATCH && ch->trust > 3 ) do_watching( ch, buf );
 
 	argument = one_argument( argument, arg1 );
@@ -1571,7 +1571,7 @@ void do_trust( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	int level;
 
-	sprintf( buf, "%s: Trust %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Trust %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	argument = one_argument( argument, arg1 );
@@ -1620,7 +1620,7 @@ void do_restore( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	DESCRIPTOR_DATA *d;
 
-	sprintf( buf, "%s: Restore %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Restore %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1687,7 +1687,7 @@ void do_freeze( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *victim;
 
-	sprintf( buf, "%s: Freeze %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Freeze %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1732,7 +1732,7 @@ void do_log( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *victim;
 
-	sprintf( buf, "%s: Log %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Log %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1785,7 +1785,7 @@ void do_undeny( CHAR_DATA *ch, char *argument ) {
 	DESCRIPTOR_DATA *d;
 	ROOM_INDEX_DATA *in_room;
 
-	sprintf( buf, "%s: Undeny %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Undeny %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1840,7 +1840,7 @@ void do_silence( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *victim;
 
-	sprintf( buf, "%s: Silence %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Silence %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1882,7 +1882,7 @@ void do_peace( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *rch;
 	char buf[MAX_STRING_LENGTH];
 
-	sprintf( buf, "%s: Peace %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Peace %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	LIST_FOR_EACH( rch, &ch->in_room->characters, CHAR_DATA, room_node ) {
@@ -1900,7 +1900,7 @@ void do_ban( CHAR_DATA *ch, char *argument ) {
 	char buf2[MAX_STRING_LENGTH];
 	BAN_DATA *pban;
 
-	sprintf( buf2, "%s: Ban %s", ch->name, argument );
+	snprintf( buf2, sizeof( buf2 ), "%s: Ban %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	if ( IS_NPC( ch ) )
@@ -1951,7 +1951,7 @@ void do_allow( CHAR_DATA *ch, char *argument ) {
 	BAN_DATA *prev;
 	BAN_DATA *curr;
 
-	sprintf( buf, "%s: Allow %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Allow %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	one_argument( argument, arg );
@@ -1986,7 +1986,7 @@ void do_wizlock( CHAR_DATA *ch, char *argument ) {
 	extern bool wizlock;
 	char buf[MAX_STRING_LENGTH];
 
-	sprintf( buf, "%s: Wizlock %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Wizlock %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 	wizlock = !wizlock;
 
@@ -2002,7 +2002,7 @@ void do_closemud( CHAR_DATA *ch, char *argument ) {
 	extern bool wizlock;
 	char buf[MAX_STRING_LENGTH];
 
-	sprintf( buf, "%s: Wizlock %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Wizlock %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 	wizlock = !wizlock;
 
@@ -2029,7 +2029,7 @@ void do_slookup( CHAR_DATA *ch, char *argument ) {
 		for ( sn = 0; sn < MAX_SKILL; sn++ ) {
 			if ( skill_table[sn].name == NULL )
 				break;
-			sprintf( buf, "Sn: %4d Slot: %4d Skill/spell: '%s'\n\r",
+			snprintf( buf, sizeof( buf ), "Sn: %4d Slot: %4d Skill/spell: '%s'\n\r",
 				sn, skill_table[sn].slot, skill_table[sn].name );
 			send_to_char( buf, ch );
 		}
@@ -2039,7 +2039,7 @@ void do_slookup( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		sprintf( buf, "Sn: %4d Slot: %4d Skill/spell: '%s'\n\r",
+		snprintf( buf, sizeof( buf ), "Sn: %4d Slot: %4d Skill/spell: '%s'\n\r",
 			sn, skill_table[sn].slot, skill_table[sn].name );
 		send_to_char( buf, ch );
 	}
@@ -2064,7 +2064,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "%s: Oset %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Oset %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	smash_tilde( argument );
@@ -2560,7 +2560,7 @@ void do_rset( CHAR_DATA *ch, char *argument ) {
 	ROOM_INDEX_DATA *location;
 	int value;
 
-	sprintf( buf, "%s: Rset %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Rset %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	smash_tilde( argument );
@@ -2616,9 +2616,9 @@ void do_omni( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	sprintf( buf, " Name         |Level|Trust|Gen|  Hit | Mana | Move |  HR|  DR|   AC| Quest\n\r" );
+	snprintf( buf, sizeof( buf ), " Name         |Level|Trust|Gen|  Hit | Mana | Move |  HR|  DR|   AC| Quest\n\r" );
 	send_to_char( buf, ch );
-	sprintf( buf, "--------------|-----|-----|---|------|------|------|----|----|-----|------\n\r" );
+	snprintf( buf, sizeof( buf ), "--------------|-----|-----|---|------|------|------|----|----|-----|------\n\r" );
 	send_to_char( buf, ch );
 
 	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
@@ -2627,7 +2627,7 @@ void do_omni( CHAR_DATA *ch, char *argument ) {
 		if ( d->connected != CON_PLAYING ) continue;
 		wch = ( d->original != NULL ) ? d->original : d->character;
 
-		sprintf( buf, "%-14s|%5d|%5d|%3d|%6d|%6d|%6d|%4d|%4d|%5d|%6d\n\r",
+		snprintf( buf, sizeof( buf ), "%-14s|%5d|%5d|%3d|%6d|%6d|%6d|%4d|%4d|%5d|%6d\n\r",
 			wch->pcdata->switchname,
 			wch->level,
 			wch->trust,
@@ -2719,7 +2719,7 @@ void do_users( CHAR_DATA *ch, char *argument ) {
 					? ip_src
 					: mask_ip( ip_src );
 
-				sprintf( buf + strlen( buf ), "#3[#7%3d %16s#3]  #1%s#2@#3%s\n\r",
+				snprintf( buf + strlen( buf ), sizeof( buf ) - strlen( buf ), "#3[#7%3d %16s#3]  #1%s#2@#3%s\n\r",
 					d->descriptor,
 					st,
 					d->original ? d->original->pcdata->switchname : d->character ? d->character->pcdata->switchname
@@ -2729,7 +2729,7 @@ void do_users( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	sprintf( buf2, "%d user%s\n\r", count, count == 1 ? "" : "s" );
+	snprintf( buf2, sizeof( buf2 ), "%d user%s\n\r", count, count == 1 ? "" : "s" );
 	send_to_char( buf2, ch );
 	send_to_char( buf, ch );
 	return;
@@ -2742,7 +2742,7 @@ void do_force( CHAR_DATA *ch, char *argument ) {
 	char arg[MAX_INPUT_LENGTH];
 	char buf[MAX_STRING_LENGTH];
 
-	sprintf( buf, "%s: Force %s", ch->name, argument );
+	snprintf( buf, sizeof( buf ), "%s: Force %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
 	argument = one_argument( argument, arg );
@@ -2889,19 +2889,19 @@ void do_qstat( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You are not carrying that item.\n\r", ch );
 		return;
 	}
-	sprintf( buf, "Object %s.\n\r", obj->short_descr );
+	snprintf( buf, sizeof( buf ), "Object %s.\n\r", obj->short_descr );
 	send_to_char( buf, ch );
-	sprintf( buf, "Owner when worn: %s\n\r", obj->chpoweron );
+	snprintf( buf, sizeof( buf ), "Owner when worn: %s\n\r", obj->chpoweron );
 	send_to_char( buf, ch );
-	sprintf( buf, "Other when worn: %s\n\r", obj->victpoweron );
+	snprintf( buf, sizeof( buf ), "Other when worn: %s\n\r", obj->victpoweron );
 	send_to_char( buf, ch );
-	sprintf( buf, "Owner when removed: %s\n\r", obj->chpoweroff );
+	snprintf( buf, sizeof( buf ), "Owner when removed: %s\n\r", obj->chpoweroff );
 	send_to_char( buf, ch );
-	sprintf( buf, "Other when removed: %s\n\r", obj->victpoweroff );
+	snprintf( buf, sizeof( buf ), "Other when removed: %s\n\r", obj->victpoweroff );
 	send_to_char( buf, ch );
-	sprintf( buf, "Owner when used: %s\n\r", obj->chpoweruse );
+	snprintf( buf, sizeof( buf ), "Owner when used: %s\n\r", obj->chpoweruse );
 	send_to_char( buf, ch );
-	sprintf( buf, "Other when used: %s\n\r", obj->victpoweruse );
+	snprintf( buf, sizeof( buf ), "Other when used: %s\n\r", obj->victpoweruse );
 	send_to_char( buf, ch );
 	send_to_char( "Type:", ch );
 	if ( IS_SET( obj->spectype, SITEM_ACTIVATE ) )
@@ -2933,7 +2933,7 @@ void do_qstat( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_SET( obj->spectype, SITEM_ACTIVATE ) && !IS_SET( obj->spectype, SITEM_TWIST ) && !IS_SET( obj->spectype, SITEM_PRESS ) && !IS_SET( obj->spectype, SITEM_PULL ) && !IS_SET( obj->spectype, SITEM_TARGET ) && !IS_SET( obj->spectype, SITEM_SPELL ) && !IS_SET( obj->spectype, SITEM_TELEPORTER ) && !IS_SET( obj->spectype, SITEM_DELAY1 ) && !IS_SET( obj->spectype, SITEM_DELAY2 ) && !IS_SET( obj->spectype, SITEM_OBJECT ) && !IS_SET( obj->spectype, SITEM_MOBILE ) && !IS_SET( obj->spectype, SITEM_ACTION ) && !IS_SET( obj->spectype, SITEM_TRANSPORTER ) )
 		send_to_char( " No flags set", ch );
 	send_to_char( ".\n\r", ch );
-	sprintf( buf, "Power: %d.\n\r", obj->specpower );
+	snprintf( buf, sizeof( buf ), "Power: %d.\n\r", obj->specpower );
 	send_to_char( buf, ch );
 	return;
 }
@@ -3151,7 +3151,7 @@ void do_qset( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "No such flag to set.\n\r", ch );
 			return;
 		}
-		sprintf( buf, "%s flag toggled.\n\r", capitalize( arg3 ) );
+		snprintf( buf, sizeof( buf ), "%s flag toggled.\n\r", capitalize( arg3 ) );
 		send_to_char( buf, ch );
 		return;
 	} else if ( !str_cmp( arg2, "power" ) )
@@ -3290,11 +3290,11 @@ void do_evileye( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "or spend experience on anything (train commands)\n\r", ch );
 		send_to_char( "is not allowed, and you will regret using such an evileye.\n\r\n\r", ch );
 		if ( ch->poweraction != NULL ) {
-			sprintf( buf, "Current action: %s.\n\r", ch->poweraction );
+			snprintf( buf, sizeof( buf ), "Current action: %s.\n\r", ch->poweraction );
 			send_to_char( buf, ch );
 		}
 		if ( ch->powertype != NULL ) {
-			sprintf( buf, "Current message: %s.\n\r", ch->powertype );
+			snprintf( buf, sizeof( buf ), "Current message: %s.\n\r", ch->powertype );
 			send_to_char( buf, ch );
 		}
 		send_to_char( "Current flags:", ch );
@@ -3332,7 +3332,7 @@ void do_evileye( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "TOGGLE flag should be one of: spell, self, other.\n\r", ch );
 			return;
 		}
-		sprintf( buf, "%s flag toggled.\n\r", capitalize( arg2 ) );
+		snprintf( buf, sizeof( buf ), "%s flag toggled.\n\r", capitalize( arg2 ) );
 		send_to_char( buf, ch );
 		return;
 	} else {
@@ -3341,11 +3341,11 @@ void do_evileye( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Option MESSAGE is a text string shown to the person looking at you.\n\r", ch );
 		send_to_char( "Option TOGGLE has values: spell, self, other.\n\r\n\r", ch );
 		if ( ch->poweraction != NULL ) {
-			sprintf( buf, "Current action: %s.\n\r", ch->poweraction );
+			snprintf( buf, sizeof( buf ), "Current action: %s.\n\r", ch->poweraction );
 			send_to_char( buf, ch );
 		}
 		if ( ch->powertype != NULL ) {
-			sprintf( buf, "Current message: %s.\n\r", ch->powertype );
+			snprintf( buf, sizeof( buf ), "Current message: %s.\n\r", ch->powertype );
 			send_to_char( buf, ch );
 		}
 		send_to_char( "Current flags:", ch );
@@ -3380,10 +3380,10 @@ void do_artifact( CHAR_DATA *ch, char *argument ) {
 		for ( in_obj = obj; in_obj->in_obj != NULL; in_obj = in_obj->in_obj );
 
 		if ( in_obj->carried_by != NULL ) {
-			sprintf( buf, "%s carried by %s.\n\r",
+			snprintf( buf, sizeof( buf ), "%s carried by %s.\n\r",
 				obj->short_descr, PERS( in_obj->carried_by, ch ) );
 		} else {
-			sprintf( buf, "%s in %s.\n\r",
+			snprintf( buf, sizeof( buf ), "%s in %s.\n\r",
 				obj->short_descr, in_obj->in_room == NULL ? "somewhere" : in_obj->in_room->name );
 		}
 
@@ -3419,10 +3419,10 @@ void do_locate( CHAR_DATA *ch, char *argument ) {
 		for ( in_obj = obj; in_obj->in_obj != NULL; in_obj = in_obj->in_obj );
 
 		if ( in_obj->carried_by != NULL ) {
-			sprintf( buf, "%s carried by %s.\n\r",
+			snprintf( buf, sizeof( buf ), "%s carried by %s.\n\r",
 				obj->short_descr, PERS( in_obj->carried_by, ch ) );
 		} else {
-			sprintf( buf, "%s in %s.\n\r",
+			snprintf( buf, sizeof( buf ), "%s in %s.\n\r",
 				obj->short_descr, in_obj->in_room == NULL ? "somewhere" : in_obj->in_room->name );
 		}
 
@@ -3674,7 +3674,7 @@ void do_token( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "Quest token should have a value between 1 and 10000.\n\r", ch );
 			return;
 		} else if ( value > ch->pcdata->quest && !IS_JUDGE( ch ) ) {
-			sprintf( buf, "You only have %d quest points left to put into tokens.\n\r", ch->pcdata->quest );
+			snprintf( buf, sizeof( buf ), "You only have %d quest points left to put into tokens.\n\r", ch->pcdata->quest );
 			send_to_char( buf, ch );
 			return;
 		}
@@ -3700,10 +3700,10 @@ void do_token( CHAR_DATA *ch, char *argument ) {
 	obj->questmaker = str_dup( ch->name );
 	free(obj->name);
 	obj->name = str_dup( "quest token" );
-	sprintf( buf, "a %d point quest token", value );
+	snprintf( buf, sizeof( buf ), "a %d point quest token", value );
 	free(obj->short_descr);
 	obj->short_descr = str_dup( buf );
-	sprintf( buf, "A %d point quest token lies on the floor.", value );
+	snprintf( buf, sizeof( buf ), "A %d point quest token lies on the floor.", value );
 	free(obj->description);
 	obj->description = str_dup( buf );
 	if ( victim != NULL && victim != ch ) {
@@ -4080,7 +4080,7 @@ void do_resetpassword( CHAR_DATA *ch, char *argument ) {
 	victim->pcdata->pwd = str_dup( pwdnew );
 	save_char_obj( victim );
 	send_to_char( "Ok.\n\r", ch );
-	sprintf( buf, "Your password has been changed to %s.", arg2 );
+	snprintf( buf, sizeof( buf ), "Your password has been changed to %s.", arg2 );
 	send_to_char( buf, victim );
 	return;
 }
@@ -4147,7 +4147,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	sprintf( buf, "\n\r (╯°□°)╯︵ ┻━┻ \n\r" );
+	snprintf( buf, sizeof( buf ), "\n\r (╯°□°)╯︵ ┻━┻ \n\r" );
 
 #if defined( WIN32 )
 	/*
@@ -4319,7 +4319,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 	/* exec - descriptors are inherited (on Unix) */
 
-	sprintf( buf, "%d", port );
+	snprintf( buf, sizeof( buf ), "%d", port );
 
 #if defined( WIN32 )
 	/*
@@ -4363,7 +4363,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 		ExitProcess( 99 );
 	}
 #else
-	sprintf( buf2, "%d", control );
+	snprintf( buf2, sizeof( buf2 ), "%d", control );
 
 	/* Log the executable path for debugging */
 	{
@@ -4546,14 +4546,14 @@ void do_implag( CHAR_DATA *ch, char *argument ) {
 			return;
 		} else if ( IS_AFF2( victim, PLR_IMPLAG ) ) {
 			REMOVE_BIT( victim->affected_by2, PLR_IMPLAG );
-			sprintf( buf, "You make %s's life better.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "You make %s's life better.\n\r", victim->name );
 			send_to_char( buf, ch );
-			sprintf( buf, "You suddenly look at the world normally.\n\r" );
+			snprintf( buf, sizeof( buf ), "You suddenly look at the world normally.\n\r" );
 			send_to_char( buf, victim );
 			return;
 		} else {
 			SET_BIT( victim->affected_by2, PLR_IMPLAG );
-			sprintf( buf, "You make %s's life totally suck.\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "You make %s's life totally suck.\n\r", victim->name );
 			send_to_char( buf, ch );
 			return;
 		}
@@ -4584,7 +4584,7 @@ void do_doublexp( CHAR_DATA *ch, char *argument ) {
 		}
 		global_exp = TRUE;
 		pulse_doubleexp = atoi( arg2 );
-		sprintf( buf, "#GH#Ra#Gp#Rp#Gy #GH#Ro#Gu#Rr #0(#7STARTED#0)#n" );
+		snprintf( buf, sizeof( buf ), "#GH#Ra#Gp#Rp#Gy #GH#Ro#Gu#Rr #0(#7STARTED#0)#n" );
 		do_info( ch, buf );
 		return;
 	} else if ( !str_cmp( arg, "qp" ) ) {
@@ -4598,7 +4598,7 @@ void do_doublexp( CHAR_DATA *ch, char *argument ) {
 		}
 		global_qp = TRUE;
 		pulse_doubleqp = atoi( arg2 );
-		sprintf( buf, "#GQ#RU#GE#RS#GT#RO#GR#RS #GD#RE#GL#RI#GG#RH#GT #0(#7STARTED#0)#n" );
+		snprintf( buf, sizeof( buf ), "#GQ#RU#GE#RS#GT#RO#GR#RS #GD#RE#GL#RI#GG#RH#GT #0(#7STARTED#0)#n" );
 		do_info( ch, buf );
 		return;
 	} else

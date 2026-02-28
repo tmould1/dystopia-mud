@@ -1525,7 +1525,7 @@ bool spec_executioner( CHAR_DATA *ch ) {
 					wear_obj( ch, object, FALSE );
 					break; /*
 				 case ITEM_POTION:
-					 sprintf(buf, "Great!  I was feeling a little thirsty!");
+					 snprintf( buf, sizeof( buf ), "Great!  I was feeling a little thirsty!");
 					 do_say(ch,buf);
 					 act( "You quaff $p.", ch, object, NULL ,TO_CHAR );
 					 act( "$n quaffs $p.", ch, object, NULL, TO_ROOM );
@@ -1535,7 +1535,7 @@ bool spec_executioner( CHAR_DATA *ch ) {
 					 extract_obj( object );
 					 break;
 				 case ITEM_SCROLL:
-					 sprintf(buf,"Hmmm I wonder what this says?");
+					 snprintf( buf, sizeof( buf ),"Hmmm I wonder what this says?");
 					 do_say(ch,buf);
 					 act( "You recite $p.", ch, object, NULL, TO_CHAR );
 					 act( "$n recites $p.", ch, object, NULL, TO_ROOM );
@@ -1643,7 +1643,7 @@ bool spec_rogue( CHAR_DATA *ch ) {
 					wear_obj( ch, object, FALSE );
 					break; /*
 				 case ITEM_POTION:
-					 sprintf(buf, "Great!  I was feeling a little thirsty!");
+					 snprintf( buf, sizeof( buf ), "Great!  I was feeling a little thirsty!");
 					 do_say(ch,buf);
 					 act( "You quaff $p.", ch, object, NULL ,TO_CHAR );
 					 act( "$n quaffs $p.", ch, object, NULL, TO_ROOM );
@@ -1653,7 +1653,7 @@ bool spec_rogue( CHAR_DATA *ch ) {
 					 extract_obj( object );
 					 break;
 				 case ITEM_SCROLL:
-					 sprintf(buf,"Hmmm I wonder what this says?");
+					 snprintf( buf, sizeof( buf ),"Hmmm I wonder what this says?");
 					 do_say(ch,buf);
 					 act( "You recite $p.", ch, object, NULL, TO_CHAR );
 					 act( "$n recites $p.", ch, object, NULL, TO_ROOM );

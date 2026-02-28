@@ -43,7 +43,7 @@ void do_multicheck( CHAR_DATA *ch, char *argument ) {
 				if ( d2->connected != CON_PLAYING ) continue;
 				if ( d2->character == NULL || d->character == NULL ) continue;
 				found = TRUE;
-				sprintf( buf, "%s and %s are multiplaying bitches\n\r", d2->character->name, d->character->name );
+				snprintf( buf, sizeof( buf ), "%s and %s are multiplaying bitches\n\r", d2->character->name, d->character->name );
 				send_to_char( buf, ch );
 			}
 		}
@@ -106,7 +106,7 @@ void do_showsilence( CHAR_DATA *ch, char *argument ) {
 		if ( gch->level > 6 ) continue;
 		if ( IS_SET( gch->act, PLR_SILENCE ) ) {
 			found = TRUE;
-			sprintf( buf, "%-15s is silenced\n\r", gch->name );
+			snprintf( buf, sizeof( buf ), "%-15s is silenced\n\r", gch->name );
 			send_to_char( buf, ch );
 		}
 	}

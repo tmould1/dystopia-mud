@@ -40,7 +40,7 @@ void do_bountylist( CHAR_DATA *ch, char *argument ) {
 			if ( !d->connected == CON_PLAYING ) continue;
 			if ( d->character->level > 6 ) continue;
 			if ( !can_see( ch, d->character ) ) continue;
-			sprintf( buf, "  #G%-15s#n    %5d       %5d           %d           %d\n\r", d->character->name, d->character->pcdata->bounty,
+			snprintf( buf, sizeof( buf ), "  #G%-15s#n    %5d       %5d           %d           %d\n\r", d->character->name, d->character->pcdata->bounty,
 				get_ratio( d->character ), d->character->generation, d->character->pcdata->upgrade_level + 1 );
 			stc( buf, ch );
 		}
@@ -241,7 +241,7 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 		if ( !reg ) continue;
 
 		/* Format: #GLabel#n : count (padded to 17 chars total per column) */
-		sprintf( buf, "#G%-11s#n : %-2d   ", reg->mudstat_label, class_counts[i] );
+		snprintf( buf, sizeof( buf ), "#G%-11s#n : %-2d   ", reg->mudstat_label, class_counts[i] );
 		strcat( line, buf );
 		col++;
 
@@ -254,7 +254,7 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 	}
 
 	/* Add newbies and total on the last row */
-	sprintf( buf, "#GNewbies#n     : %-2d   ", newbie_count );
+	snprintf( buf, sizeof( buf ), "#GNewbies#n     : %-2d   ", newbie_count );
 	strcat( line, buf );
 	col++;
 	if ( col == 4 ) {
@@ -264,7 +264,7 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 		col = 0;
 	}
 
-	sprintf( buf, "#GTotal#n       : %-2d   ", total_count );
+	snprintf( buf, sizeof( buf ), "#GTotal#n       : %-2d   ", total_count );
 	strcat( line, buf );
 	col++;
 
@@ -287,22 +287,22 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 	if ( ragnarok )
 		send_to_char( "#CRAGNAROK MODE!!!!!!!#n  Everyone can kill everyone (HELP RAGNAROK)\n\r\n\r", ch );
 	else {
-		sprintf( buf, "#CRagnarok is still %d qps from happening.\n\r\n\r", ragnarok_cost );
+		snprintf( buf, sizeof( buf ), "#CRagnarok is still %d qps from happening.\n\r\n\r", ragnarok_cost );
 		send_to_char( buf, ch );
 	}
-	sprintf( buf, "#RNumber of players connected since last copyover/restart :#C %d\n\r#n", players_logged );
+	snprintf( buf, sizeof( buf ), "#RNumber of players connected since last copyover/restart :#C %d\n\r#n", players_logged );
 	send_to_char( buf, ch );
-	sprintf( buf, "#RNumber of players beheaded since last copyover/restart  :#C %d\n\r#n", players_decap );
+	snprintf( buf, sizeof( buf ), "#RNumber of players beheaded since last copyover/restart  :#C %d\n\r#n", players_decap );
 	send_to_char( buf, ch );
-	sprintf( buf, "#RAmount of generation stolen since last copyover/restart :#C %d\n\r\n\r#n", players_gstolen );
+	snprintf( buf, sizeof( buf ), "#RAmount of generation stolen since last copyover/restart :#C %d\n\r\n\r#n", players_gstolen );
 	send_to_char( buf, ch );
-	sprintf( buf, "#RServer first started at         :#n %s", str_boot_time );
+	snprintf( buf, sizeof( buf ), "#RServer first started at         :#n %s", str_boot_time );
 	send_to_char( buf, ch );
 	if ( last_copyover_time != boot_time ) {
-		sprintf( buf, "#RLast copyover at                :#n %s", (char *) ctime( &last_copyover_time ) );
+		snprintf( buf, sizeof( buf ), "#RLast copyover at                :#n %s", (char *) ctime( &last_copyover_time ) );
 		send_to_char( buf, ch );
 	}
-	sprintf( buf, "#RThe system time is currently     :#n %s\n\r", (char *) ctime( &current_time ) );
+	snprintf( buf, sizeof( buf ), "#RThe system time is currently     :#n %s\n\r", (char *) ctime( &current_time ) );
 	send_to_char( buf, ch );
 	send_to_char( "#R--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==#L**#R==--==--#n\n\r\n\r", ch );
 	return;
@@ -407,7 +407,7 @@ void do_pkobjscry( CHAR_DATA *ch, char *argument ) {
 		}
 		tmp = gch->desc;
 		gch->desc = ch->desc;
-		sprintf( buf, "A pair of eyes grows on %s's %s.\n\rThe eyes blink once, then disappear.\n\r", gch->name, obj->short_descr );
+		snprintf( buf, sizeof( buf ), "A pair of eyes grows on %s's %s.\n\rThe eyes blink once, then disappear.\n\r", gch->name, obj->short_descr );
 		LIST_FOR_EACH( victim, &gch->in_room->characters, CHAR_DATA, room_node ) {
 			if ( victim == gch ) continue; // the victim cannot see this.
 			send_to_char( buf, victim );
@@ -421,7 +421,7 @@ void do_pkobjscry( CHAR_DATA *ch, char *argument ) {
 		if ( afk ) SET_BIT( gch->extra, EXTRA_AFK );
 		return;
 	} else if ( ( location = obj->in_room ) != NULL ) {
-		sprintf( buf, "A pair of eyes grows on %s.\n\rThe eyes blink once, then disappear.\n\r", obj->short_descr );
+		snprintf( buf, sizeof( buf ), "A pair of eyes grows on %s.\n\rThe eyes blink once, then disappear.\n\r", obj->short_descr );
 		LIST_FOR_EACH( victim, &location->characters, CHAR_DATA, room_node ) {
 			if ( victim == ch ) continue; // the player is seeing through the item, and will not see the eyes even if he is in the room.
 			send_to_char( buf, victim );
@@ -515,13 +515,13 @@ void do_pkaura( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Someone is trying to read your aura.\n\r", victim );
 		return;
 	}
-	sprintf( buf, "Hp:%d/%d, Mana:%d/%d,Move:%d/%d.\n\r",
+	snprintf( buf, sizeof( buf ), "Hp:%d/%d, Mana:%d/%d,Move:%d/%d.\n\r",
 		victim->hit, victim->max_hit, victim->mana, victim->max_mana, victim->move, victim->max_move );
 	send_to_char( buf, ch );
 	if ( ch->trust < 7 ) send_to_char( "You are being examined.\n\r", victim );
-	sprintf( buf, "Hitroll:%d, Damroll:%d, AC:%d.\n\r", char_hitroll( victim ), char_damroll( victim ), char_ac( victim ) );
+	snprintf( buf, sizeof( buf ), "Hitroll:%d, Damroll:%d, AC:%d.\n\r", char_hitroll( victim ), char_damroll( victim ), char_ac( victim ) );
 	send_to_char( buf, ch );
-	sprintf( buf, "Generation:%d\n\r", victim->generation );
+	snprintf( buf, sizeof( buf ), "Generation:%d\n\r", victim->generation );
 	send_to_char( buf, ch );
 	if ( ch->level < 7 ) ch->fight_timer += 3;
 	return;
@@ -612,7 +612,7 @@ void do_mastery( CHAR_DATA *ch, char *argument ) {
 	obj = create_object( pObjIndex, 50 );
 	obj_to_char( obj, ch );
 	obj->questowner = str_dup( ch->pcdata->switchname );
-	sprintf( buf, "%s has achieved mastery.", ch->name );
+	snprintf( buf, sizeof( buf ), "%s has achieved mastery.", ch->name );
 	do_info( ch, buf );
 	SET_BIT( ch->newbits, NEW_MASTERY );
 	return;
@@ -836,7 +836,7 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 		send_to_char( " #r*#n You can also type \"setstance show <ss1/ss2/etc>\"                                      #r*#n\n\r", ch );
 		send_to_char( " #r*#n to show the settings on one of your stances.                                          #r*#n\n\r", ch );
 		send_to_char( " #r*---------------------------------------------------------------------------------------*#n\n\r", ch );
-		sprintf( buf, " #r*#n Cost of current stance : %-3d million exp.                                             #r*#n\n\r", cost );
+		snprintf( buf, sizeof( buf ), " #r*#n Cost of current stance : %-3d million exp.                                             #r*#n\n\r", cost );
 		send_to_char( buf, ch );
 		send_to_char( " #r*****************************************************************************************#n\n\r", ch );
 		return;
@@ -883,12 +883,12 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( cost < min_cost ) {
-			sprintf( buf, "You need to spend at least %d million exp on this stance.\n\r", min_cost );
+			snprintf( buf, sizeof( buf ), "You need to spend at least %d million exp on this stance.\n\r", min_cost );
 			send_to_char( buf, ch );
 			return;
 		}
 		if ( cost > max_cost ) {
-			sprintf( buf, "You can only spend %d million exp on this stance.\n\r", max_cost );
+			snprintf( buf, sizeof( buf ), "You can only spend %d million exp on this stance.\n\r", max_cost );
 			send_to_char( buf, ch );
 			return;
 		}
@@ -1256,24 +1256,24 @@ void do_timer( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
 
 	if ( pulse_arena > 1 ) {
-		sprintf( buf, "Next arena will happen in     :  %d hour and %d minutes.\n\r",
+		snprintf( buf, sizeof( buf ), "Next arena will happen in     :  %d hour and %d minutes.\n\r",
 			pulse_arena / 60, pulse_arena - ( pulse_arena / 60 ) * 60 );
 		send_to_char( buf, ch );
 	}
 
 	if ( !ragnarok ) {
-		sprintf( buf, "Bidding on ragnarok starts in :  %d hour and %d minutes.\n\r",
+		snprintf( buf, sizeof( buf ), "Bidding on ragnarok starts in :  %d hour and %d minutes.\n\r",
 			ragnarok_safe_timer / 60, ragnarok_safe_timer - ( ragnarok_safe_timer / 60 ) * 60 );
 		send_to_char( buf, ch );
 	}
 
 	if ( global_exp ) {
-		sprintf( buf, "Happy Hour will end in        :  %d minutes.\n\r", pulse_doubleexp );
+		snprintf( buf, sizeof( buf ), "Happy Hour will end in        :  %d minutes.\n\r", pulse_doubleexp );
 		send_to_char( buf, ch );
 	}
 
 	if ( global_qp ) {
-		sprintf( buf, "Questors Delight will end in  :  %d minutes.\n\r", pulse_doubleqp );
+		snprintf( buf, sizeof( buf ), "Questors Delight will end in  :  %d minutes.\n\r", pulse_doubleqp );
 		send_to_char( buf, ch );
 	}
 
@@ -1316,9 +1316,9 @@ void do_exp( CHAR_DATA *ch, char *argument ) {
 	}
 	cost = ( from + to ) * ( to - from + 1 ) / 2 - from;
 	if ( cost > 500000000 )
-		sprintf( buf, "The total cost in exp will be %d million\n\r", cost / 1000000 );
+		snprintf( buf, sizeof( buf ), "The total cost in exp will be %d million\n\r", cost / 1000000 );
 	else
-		sprintf( buf, "The total cost in exp will be %d\n\r", cost );
+		snprintf( buf, sizeof( buf ), "The total cost in exp will be %d\n\r", cost );
 	send_to_char( buf, ch );
 	return;
 }
@@ -1423,7 +1423,7 @@ void do_showalias( CHAR_DATA *ch, char *argument ) {
 
 	for ( ali = ch->pcdata->alias; ali; ali = ali->next ) {
 		found = TRUE;
-		sprintf( buf, "%s '%s'\n\r", ali->short_n, ali->long_n );
+		snprintf( buf, sizeof( buf ), "%s '%s'\n\r", ali->short_n, ali->long_n );
 		send_to_char( buf, ch );
 	}
 	if ( !found ) send_to_char( "You have no aliases.\n\r", ch );
@@ -1464,7 +1464,7 @@ void do_setdecap( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->quest < cost ) {
-		sprintf( buf, "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
+		snprintf( buf, sizeof( buf ), "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -1495,7 +1495,7 @@ void do_settie( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->quest < cost ) {
-		sprintf( buf, "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
+		snprintf( buf, sizeof( buf ), "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -1526,7 +1526,7 @@ void do_setlogout( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->quest < cost ) {
-		sprintf( buf, "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
+		snprintf( buf, sizeof( buf ), "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -1557,7 +1557,7 @@ void do_setlogin( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->quest < cost ) {
-		sprintf( buf, "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
+		snprintf( buf, sizeof( buf ), "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -1588,7 +1588,7 @@ void do_setavatar( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( ch->pcdata->quest < cost ) {
-		sprintf( buf, "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
+		snprintf( buf, sizeof( buf ), "You need %d more qps to use this command.\n\r", cost - ch->pcdata->quest );
 		send_to_char( buf, ch );
 		return;
 	}

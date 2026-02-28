@@ -41,7 +41,7 @@ void do_bansheewail( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( ch->rage < cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_RESONANCE_REQ ) ) {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You need at least %d resonance to unleash a banshee wail.\n\r", cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_RESONANCE_REQ ) );
+		snprintf( buf, sizeof( buf ), "You need at least %d resonance to unleash a banshee wail.\n\r", cfg( CFG_ABILITY_SIREN_BANSHEEWAIL_RESONANCE_REQ ) );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -555,7 +555,7 @@ void do_ariaofunmaking( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "They had no protections to strip.\n\r", ch );
 	else {
 		char buf[MAX_STRING_LENGTH];
-		sprintf( buf, "You stripped %d protections from your target!\n\r", stripped );
+		snprintf( buf, sizeof( buf ), "You stripped %d protections from your target!\n\r", stripped );
 		send_to_char( buf, ch );
 	}
 	return;
@@ -582,11 +582,11 @@ void do_voicetrain( CHAR_DATA *ch, char *argument ) {
 
 	if ( arg[0] == '\0' ) {
 		send_to_char( "#x039~#x147[#n Voice Training #x147]#x039~#n\n\r", ch );
-		sprintf( buf, "  #x147Devastation#n  [%d/3]  Raw sonic destruction\n\r", ch->pcdata->powers[SIREN_TRAIN_DEVASTATION] );
+		snprintf( buf, sizeof( buf ), "  #x147Devastation#n  [%d/3]  Raw sonic destruction\n\r", ch->pcdata->powers[SIREN_TRAIN_DEVASTATION] );
 		send_to_char( buf, ch );
-		sprintf( buf, "  #x147Domination#n   [%d/4]  Mind control and compulsion\n\r", ch->pcdata->powers[SIREN_TRAIN_DOMINATION] );
+		snprintf( buf, sizeof( buf ), "  #x147Domination#n   [%d/4]  Mind control and compulsion\n\r", ch->pcdata->powers[SIREN_TRAIN_DOMINATION] );
 		send_to_char( buf, ch );
-		sprintf( buf, "  #x147Unmaking#n     [%d/3]  Defense stripping and disruption\n\r", ch->pcdata->powers[SIREN_TRAIN_UNMAKING] );
+		snprintf( buf, sizeof( buf ), "  #x147Unmaking#n     [%d/3]  Defense stripping and disruption\n\r", ch->pcdata->powers[SIREN_TRAIN_UNMAKING] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rSyntax: voicetrain <devastation|domination|unmaking>\n\r", ch );
 
@@ -614,7 +614,7 @@ void do_voicetrain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( *path >= max_level ) {
-		sprintf( buf, "Your %s training is already at maximum (%d).\n\r", path_name, max_level );
+		snprintf( buf, sizeof( buf ), "Your %s training is already at maximum (%d).\n\r", path_name, max_level );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -622,7 +622,7 @@ void do_voicetrain( CHAR_DATA *ch, char *argument ) {
 	cost = ( *path + 1 ) * 50;
 
 	if ( ch->practice < cost ) {
-		sprintf( buf, "You need %d primal to advance %s to level %d.\n\r", cost, path_name, *path + 1 );
+		snprintf( buf, sizeof( buf ), "You need %d primal to advance %s to level %d.\n\r", cost, path_name, *path + 1 );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -630,7 +630,7 @@ void do_voicetrain( CHAR_DATA *ch, char *argument ) {
 	ch->practice -= cost;
 	(*path)++;
 
-	sprintf( buf, "You advance your #x147%s#n training to level %d!\n\r", path_name, *path );
+	snprintf( buf, sizeof( buf ), "You advance your #x147%s#n training to level %d!\n\r", path_name, *path );
 	send_to_char( buf, ch );
 
 	if ( !str_cmp( arg, "devastation" ) ) {

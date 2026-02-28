@@ -47,23 +47,23 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "Syntax: gameconfig <field> <value>\n\r\n\r", ch );
 
-		sprintf( buf, "  %-16s %d\n\r", "base_xp", game_config.base_xp );
+		snprintf( buf, sizeof( buf ), "  %-16s %d\n\r", "base_xp", game_config.base_xp );
 		send_to_char( buf, ch );
-		sprintf( buf, "  %-16s %d\n\r", "max_xp_per_kill", game_config.max_xp_per_kill );
+		snprintf( buf, sizeof( buf ), "  %-16s %d\n\r", "max_xp_per_kill", game_config.max_xp_per_kill );
 		send_to_char( buf, ch );
-		sprintf( buf, "  %-16s \"%s\"\n\r", "game_name", game_config.game_name );
+		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "game_name", game_config.game_name );
 		send_to_char( buf, ch );
-		sprintf( buf, "  %-16s \"%s\"\n\r", "gui_url", game_config.gui_url );
+		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "gui_url", game_config.gui_url );
 		send_to_char( buf, ch );
-		sprintf( buf, "  %-16s \"%s\"\n\r", "gui_version", game_config.gui_version );
+		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "gui_version", game_config.gui_version );
 		send_to_char( buf, ch );
-		sprintf( buf, "  %-16s \"%s\"\n\r", "banner_left", game_config.banner_left );
+		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "banner_left", game_config.banner_left );
 		send_to_char( buf, ch );
-		sprintf( buf, "  %-16s \"%s\"\n\r", "banner_right", game_config.banner_right );
+		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "banner_right", game_config.banner_right );
 		send_to_char( buf, ch );
-		sprintf( buf, "  %-16s \"%s\"\n\r", "banner_fill", game_config.banner_fill );
+		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "banner_fill", game_config.banner_fill );
 		send_to_char( buf, ch );
-		sprintf( buf, "  %-16s \"%s\"\n\r", "audio_url", game_config.audio_url );
+		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "audio_url", game_config.audio_url );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -76,123 +76,123 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		// if arg2 is blank, report the value
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "Base XP: %d\n\r", game_config.base_xp );
+			snprintf( buf, sizeof( buf ), "Base XP: %d\n\r", game_config.base_xp );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "Base XP" );
-		sprintf( old_value, "%d", game_config.base_xp );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "Base XP" );
+		snprintf( old_value, sizeof( old_value ), "%d", game_config.base_xp );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		game_config.base_xp = atoi( new_value );
 	} else if ( !str_cmp( arg, "max_xp_per_kill" ) ) {
 		// if arg2 is blank, report the value
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "Max XP per kill: %d\n\r", game_config.max_xp_per_kill );
+			snprintf( buf, sizeof( buf ), "Max XP per kill: %d\n\r", game_config.max_xp_per_kill );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "Max XP per kill" );
-		sprintf( old_value, "%d", game_config.max_xp_per_kill );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "Max XP per kill" );
+		snprintf( old_value, sizeof( old_value ), "%d", game_config.max_xp_per_kill );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		game_config.max_xp_per_kill = atoi( new_value );
 	} else if ( !str_cmp( arg, "game_name" ) ) {
 		// if arg2 is blank, report the value
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "Game Name: \"%s\"\n\r", game_config.game_name );
+			snprintf( buf, sizeof( buf ), "Game Name: \"%s\"\n\r", game_config.game_name );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "Game Name" );
-		sprintf( old_value, "%s", game_config.game_name );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "Game Name" );
+		snprintf( old_value, sizeof( old_value ), "%s", game_config.game_name );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		free(game_config.game_name);
 		game_config.game_name = str_dup( new_value );
 	} else if ( !str_cmp( arg, "gui_url" ) ) {
 		// if arg2 is blank, report the value
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "GUI URL: \"%s\"\n\r", game_config.gui_url );
+			snprintf( buf, sizeof( buf ), "GUI URL: \"%s\"\n\r", game_config.gui_url );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "GUI URL" );
-		sprintf( old_value, "%s", game_config.gui_url );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "GUI URL" );
+		snprintf( old_value, sizeof( old_value ), "%s", game_config.gui_url );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		free(game_config.gui_url);
 		game_config.gui_url = str_dup( new_value );
 	} else if ( !str_cmp( arg, "gui_version" ) ) {
 		// if arg2 is blank, report the value
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "GUI Version: \"%s\"\n\r", game_config.gui_version );
+			snprintf( buf, sizeof( buf ), "GUI Version: \"%s\"\n\r", game_config.gui_version );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "GUI Version" );
-		sprintf( old_value, "%s", game_config.gui_version );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "GUI Version" );
+		snprintf( old_value, sizeof( old_value ), "%s", game_config.gui_version );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		free(game_config.gui_version);
 		game_config.gui_version = str_dup( new_value );
 	} else if ( !str_cmp( arg, "banner_left" ) ) {
 		// if arg2 is blank, report the value
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "Banner Left Endcap: \"%s\"\n\r", game_config.banner_left );
+			snprintf( buf, sizeof( buf ), "Banner Left Endcap: \"%s\"\n\r", game_config.banner_left );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "Banner Left Endcap" );
-		sprintf( old_value, "%s", game_config.banner_left );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "Banner Left Endcap" );
+		snprintf( old_value, sizeof( old_value ), "%s", game_config.banner_left );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		free(game_config.banner_left);
 		game_config.banner_left = str_dup( new_value );
 	} else if ( !str_cmp( arg, "banner_right" ) ) {
 		// if arg2 is blank, report the value
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "Banner Right Endcap: \"%s\"\n\r", game_config.banner_right );
+			snprintf( buf, sizeof( buf ), "Banner Right Endcap: \"%s\"\n\r", game_config.banner_right );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "Banner Right Endcap" );
-		sprintf( old_value, "%s", game_config.banner_right );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "Banner Right Endcap" );
+		snprintf( old_value, sizeof( old_value ), "%s", game_config.banner_right );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		free(game_config.banner_right);
 		game_config.banner_right = str_dup( new_value );
 	} else if ( !str_cmp( arg, "banner_fill" ) ) {
 		// if arg2 is blank, report the value
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "Banner Fill: \"%s\"\n\r", game_config.banner_fill );
+			snprintf( buf, sizeof( buf ), "Banner Fill: \"%s\"\n\r", game_config.banner_fill );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "Banner Fill" );
-		sprintf( old_value, "%s", game_config.banner_fill );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "Banner Fill" );
+		snprintf( old_value, sizeof( old_value ), "%s", game_config.banner_fill );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		free(game_config.banner_fill);
 		game_config.banner_fill = str_dup( new_value );
 	} else if ( !str_cmp( arg, "audio_url" ) ) {
 		if ( arg2[0] == '\0' ) {
 			char buf[MAX_STRING_LENGTH];
-			sprintf( buf, "MCMP Audio Base URL: \"%s\"\n\r", game_config.audio_url );
+			snprintf( buf, sizeof( buf ), "MCMP Audio Base URL: \"%s\"\n\r", game_config.audio_url );
 			send_to_char( buf, ch );
 			return;
 		}
 
-		sprintf( modified_field, "MCMP Audio Base URL" );
-		sprintf( old_value, "%s", game_config.audio_url );
-		sprintf( new_value, "%s", arg2 );
+		snprintf( modified_field, sizeof( modified_field ), "MCMP Audio Base URL" );
+		snprintf( old_value, sizeof( old_value ), "%s", game_config.audio_url );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		free(game_config.audio_url);
 		game_config.audio_url = str_dup( new_value );
 	}
@@ -205,7 +205,7 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 
 	// Final reporting
 	char buf[MAX_STRING_LENGTH];
-	sprintf( buf, "Done!  %s changed from %s to %s\n\r", modified_field, old_value, new_value );
+	snprintf( buf, sizeof( buf ), "Done!  %s changed from %s to %s\n\r", modified_field, old_value, new_value );
 	send_to_char( buf, ch );
 	save_gameconfig();
 	return;

@@ -186,7 +186,7 @@ void aggr_test( CHAR_DATA *ch ) {
 			}
 			victim = wch;
 			if ( victim == NULL ) continue;
-			sprintf( buf, "%s screams and attacks!\n\r", victim->name );
+			snprintf( buf, sizeof( buf ), "%s screams and attacks!\n\r", victim->name );
 			send_to_char( buf, ch );
 			multi_hit( victim, ch, TYPE_UNDEFINED );
 		}
@@ -285,12 +285,12 @@ bool multicheck( CHAR_DATA *ch ) {
 		if ( strlen( gch->lasthost ) > 2 ) {
 			if ( gch->desc ) {
 				if ( !str_cmp( gch->desc->host, ch->desc->host ) ) {
-					sprintf( buf, "%s has connected from the same IP as %s", ch->name, gch->name );
+					snprintf( buf, sizeof( buf ), "%s has connected from the same IP as %s", ch->name, gch->name );
 					log_string( buf );
 					return TRUE;
 				}
 			} else if ( !str_cmp( gch->lasthost, ch->desc->host ) ) {
-				sprintf( buf, "%s has connected from the same IP as %s", ch->name, gch->name );
+				snprintf( buf, sizeof( buf ), "%s has connected from the same IP as %s", ch->name, gch->name );
 				log_string( buf );
 				return TRUE;
 			}
@@ -513,7 +513,7 @@ void dump_last_command() {
 	/*
 	 * creates a note to the immortals
 	 */
-	sprintf( buf, "It seems we have crashed, the last command typed was\n\r\n\r" );
+	snprintf( buf, sizeof( buf ), "It seems we have crashed, the last command typed was\n\r\n\r" );
 	strcat( buf, last_command );
 	strcat( buf, "\n\r\n\rPlease remember that this doesn't mean that this caused the crash.\n\r\n\rRegards,\n\r\n\rThe Crash Code" );
 	make_note( "Immortal", "Crash Code", "imm", "We Crashed", 7, buf );

@@ -130,11 +130,11 @@ void do_chaossurge( CHAR_DATA *ch, char *argument ) {
 		dam = cfg( CFG_ABILITY_TANARRI_CHAOSSURGE_DAMAGE_NEUTRAL );
 	else
 		dam = cfg( CFG_ABILITY_TANARRI_CHAOSSURGE_DAMAGE_MILDEVIL );
-	sprintf( buf, "Your let chaos envelope $N and $S is hurt [%d]", dam );
+	snprintf( buf, sizeof( buf ), "Your let chaos envelope $N and $S is hurt [%d]", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n points a wicked finger at you and chaos strikes your mind! [%d]", dam );
+	snprintf( buf, sizeof( buf ), "$n points a wicked finger at you and chaos strikes your mind! [%d]", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n strikes $N down with a burst of pure #RCHAOS!#n." );
+	snprintf( buf, sizeof( buf ), "$n strikes $N down with a burst of pure #RCHAOS!#n." );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 	hurt_person( ch, victim, dam );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_TANARRI_CHAOSSURGE_COOLDOWN ) );

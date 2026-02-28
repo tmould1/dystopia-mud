@@ -85,7 +85,7 @@ AREA_DATA *new_area( void ) {
 	pArea->security = 1;
 	pArea->builders = str_dup( "None" );
 	pArea->vnum = top_area - 1;
-	sprintf( buf, "area%d.are", pArea->vnum );
+	snprintf( buf, sizeof( buf ), "area%d.are", pArea->vnum );
 	pArea->filename = str_dup( buf );
 
 	return pArea;

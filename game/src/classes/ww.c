@@ -37,7 +37,7 @@ void do_tribe( CHAR_DATA *ch, char *argument ) {
 	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 		if ( !IS_CLASS( gch, CLASS_WEREWOLF ) ) continue;
-		sprintf( buf, "#7[%-20s] [%-7d] [%-7d] [%-7d]#n\n\r",
+		snprintf( buf, sizeof( buf ), "#7[%-20s] [%-7d] [%-7d] [%-7d]#n\n\r",
 			capitalize( gch->name ), gch->hit, gch->mana, gch->move );
 		send_to_char( buf, ch );
 	}
@@ -543,10 +543,10 @@ void do_roar( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( number_range( 1, 6 ) == 2 ) {
-		sprintf( buf, "%s roars and screams, intimidating the hell out of %s.",
+		snprintf( buf, sizeof( buf ), "%s roars and screams, intimidating the hell out of %s.",
 			ch->name, victim->name );
 		act( buf, ch, NULL, NULL, TO_ROOM );
-		sprintf( buf, "You roar and scream, intimidating the hell out of %s.\n\r",
+		snprintf( buf, sizeof( buf ), "You roar and scream, intimidating the hell out of %s.\n\r",
 			victim->name );
 		send_to_char( buf, ch );
 		do_flee( victim, "" );
@@ -699,11 +699,11 @@ void do_talons( CHAR_DATA *ch, char *argument ) {
 	else
 		dam = number_range( 2000, 4000 );
 
-	sprintf( buf, "Your talons strike $N incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "Your talons strike $N incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_CHAR );
-	sprintf( buf, "$n's talons strike you incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's talons strike you incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_VICT );
-	sprintf( buf, "$n's talons strike $N incredibly hard! [%d]\n\r", dam );
+	snprintf( buf, sizeof( buf ), "$n's talons strike $N incredibly hard! [%d]\n\r", dam );
 	act( buf, ch, NULL, victim, TO_NOTVICT );
 	hurt_person( ch, victim, dam );
 	return;
@@ -744,7 +744,7 @@ void do_devour( CHAR_DATA *ch, char *argument ) {
 	}
 	hpgain = number_range( 100, 250 );
 	heal_char( ch, hpgain );
-	sprintf( buf, "You devour %d hp of life from $p.", hpgain );
+	snprintf( buf, sizeof( buf ), "You devour %d hp of life from $p.", hpgain );
 	act( buf, ch, obj, NULL, TO_CHAR );
 	act( "You devour $p.", ch, obj, NULL, TO_CHAR );
 	act( "$p is devoured by $n.", ch, obj, NULL, TO_ROOM );
@@ -777,7 +777,7 @@ void do_staredown( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( victim->fighting == NULL ) {
-		sprintf( buf, "%s is not fighting anyone.", arg );
+		snprintf( buf, sizeof( buf ), "%s is not fighting anyone.", arg );
 		stc( buf, ch );
 		return;
 	}

@@ -28,33 +28,33 @@ void do_psifocus( CHAR_DATA *ch, char *argument ) {
 
 	focus_cap = IS_CLASS( ch, CLASS_MINDFLAYER ) ? 150 : 100;
 
-	sprintf( buf, "#x033~#x039[#n Focus Status #x039]#x033~#n\n\r" );
+	snprintf( buf, sizeof( buf ), "#x033~#x039[#n Focus Status #x039]#x033~#n\n\r" );
 	send_to_char( buf, ch );
-	sprintf( buf, "Current Focus: #x039%d#n / %d\n\r", ch->rage, focus_cap );
+	snprintf( buf, sizeof( buf ), "Current Focus: #x039%d#n / %d\n\r", ch->rage, focus_cap );
 	send_to_char( buf, ch );
 
 	if ( ch->pcdata->powers[PSION_THOUGHT_SHIELD] > 0 ) {
-		sprintf( buf, "#x039[#nThought Shield: #C%d#n HP, #C%d#n ticks remaining#x039]#n\n\r",
+		snprintf( buf, sizeof( buf ), "#x039[#nThought Shield: #C%d#n HP, #C%d#n ticks remaining#x039]#n\n\r",
 			ch->pcdata->stats[PSION_THOUGHT_SHIELD_HP], ch->pcdata->powers[PSION_THOUGHT_SHIELD] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[PSION_KINETIC_BARRIER] > 0 ) {
-		sprintf( buf, "#x039[#nKinetic Barrier: #C%d#n HP, #C%d#n ticks remaining#x039]#n\n\r",
+		snprintf( buf, sizeof( buf ), "#x039[#nKinetic Barrier: #C%d#n HP, #C%d#n ticks remaining#x039]#n\n\r",
 			ch->pcdata->stats[PSION_KINETIC_BARRIER_HP], ch->pcdata->powers[PSION_KINETIC_BARRIER] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[PSION_LEVITATE] > 0 ) {
-		sprintf( buf, "#x039[#nLevitate: #C%d#n ticks remaining#x039]#n\n\r",
+		snprintf( buf, sizeof( buf ), "#x039[#nLevitate: #C%d#n ticks remaining#x039]#n\n\r",
 			ch->pcdata->powers[PSION_LEVITATE] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[PSION_MENTAL_LINK] > 0 ) {
-		sprintf( buf, "#x039[#nMental Link: #C%d#n ticks remaining#x039]#n\n\r",
+		snprintf( buf, sizeof( buf ), "#x039[#nMental Link: #C%d#n ticks remaining#x039]#n\n\r",
 			ch->pcdata->powers[PSION_MENTAL_LINK] );
 		send_to_char( buf, ch );
 	}
 	if ( ch->pcdata->powers[PSION_MINDSCAN] > 0 ) {
-		sprintf( buf, "#x039[#nMindscan: #C%d#n ticks remaining#x039]#n\n\r",
+		snprintf( buf, sizeof( buf ), "#x039[#nMindscan: #C%d#n ticks remaining#x039]#n\n\r",
 			ch->pcdata->powers[PSION_MINDSCAN] );
 		send_to_char( buf, ch );
 	}
@@ -113,13 +113,13 @@ void do_psitrain( CHAR_DATA *ch, char *argument ) {
 
 	if ( arg[0] == '\0' ) {
 		send_to_char( "#x033~#x039[#n Psion Training #x039]#x033~#n\n\r", ch );
-		sprintf( buf, "Telepathy:      %d/3  (#x039mindscan#n, #x039thoughtshield#n, #x039mentallink#n)\n\r",
+		snprintf( buf, sizeof( buf ), "Telepathy:      %d/3  (#x039mindscan#n, #x039thoughtshield#n, #x039mentallink#n)\n\r",
 			ch->pcdata->powers[PSION_TRAIN_TELEPATHY] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Telekinesis:    %d/3  (#x039forcepush#n, #x039levitate#n, #x039kineticbarrier#n)\n\r",
+		snprintf( buf, sizeof( buf ), "Telekinesis:    %d/3  (#x039forcepush#n, #x039levitate#n, #x039kineticbarrier#n)\n\r",
 			ch->pcdata->powers[PSION_TRAIN_TELEKINESIS] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Psychic Combat: %d/3  (#x039mindspike#n, #x039psychicscream#n, #x039brainburn#n)\n\r",
+		snprintf( buf, sizeof( buf ), "Psychic Combat: %d/3  (#x039mindspike#n, #x039psychicscream#n, #x039brainburn#n)\n\r",
 			ch->pcdata->powers[PSION_TRAIN_COMBAT] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rSyntax: psitrain <category>\n\r", ch );
@@ -148,7 +148,7 @@ void do_psitrain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( *path >= max_level ) {
-		sprintf( buf, "You have already mastered %s.\n\r", path_name );
+		snprintf( buf, sizeof( buf ), "You have already mastered %s.\n\r", path_name );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -156,7 +156,7 @@ void do_psitrain( CHAR_DATA *ch, char *argument ) {
 	cost = ( *path + 1 ) * 40;
 
 	if ( ch->practice < cost ) {
-		sprintf( buf, "You need %d primal to advance %s.\n\r", cost, path_name );
+		snprintf( buf, sizeof( buf ), "You need %d primal to advance %s.\n\r", cost, path_name );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -164,7 +164,7 @@ void do_psitrain( CHAR_DATA *ch, char *argument ) {
 	ch->practice -= cost;
 	(*path)++;
 
-	sprintf( buf, "You have advanced your %s training to level %d!\n\r", path_name, *path );
+	snprintf( buf, sizeof( buf ), "You have advanced your %s training to level %d!\n\r", path_name, *path );
 	send_to_char( buf, ch );
 
 	/* Announce unlocks */
@@ -235,13 +235,13 @@ void do_mindscan( CHAR_DATA *ch, char *argument ) {
 	act( "You probe $N's surface thoughts.", ch, NULL, victim, TO_CHAR );
 	act( "You feel a strange tingling in your mind as $n probes your thoughts.", ch, NULL, victim, TO_VICT );
 
-	sprintf( buf, "$N's status: %d%% HP, %d%% Mana",
+	snprintf( buf, sizeof( buf ), "$N's status: %d%% HP, %d%% Mana",
 		( victim->hit * 100 ) / UMAX( 1, victim->max_hit ),
 		( victim->mana * 100 ) / UMAX( 1, victim->max_mana ) );
 	act( buf, ch, NULL, victim, TO_CHAR );
 
 	if ( victim->fighting != NULL ) {
-		sprintf( buf, "$N is fighting %s.", victim->fighting->name );
+		snprintf( buf, sizeof( buf ), "$N is fighting %s.", victim->fighting->name );
 		act( buf, ch, NULL, victim, TO_CHAR );
 	}
 	return;

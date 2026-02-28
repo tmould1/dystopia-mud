@@ -42,7 +42,7 @@ void do_implant( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( arg1[0] == '\0' && arg2[0] == '\0' ) {
-		sprintf( buf, "Current implant levels: #pFace: %d, Legs: %d, Body: %d.#n\n\r",
+		snprintf( buf, sizeof( buf ), "Current implant levels: #pFace: %d, Legs: %d, Body: %d.#n\n\r",
 			UMIN( ch->pcdata->powers[CYBORG_FACE], cfg( CFG_ABILITY_SPIDERDROID_IMPLANT_FACE_MAX ) ),
 			UMIN( ch->pcdata->powers[CYBORG_LIMBS], cfg( CFG_ABILITY_SPIDERDROID_IMPLANT_LEGS_MAX ) ),
 			UMIN( ch->pcdata->powers[CYBORG_BODY], cfg( CFG_ABILITY_SPIDERDROID_IMPLANT_BODY_MAX ) ) );
@@ -99,7 +99,7 @@ void do_implant( CHAR_DATA *ch, char *argument ) {
 				send_to_char( "You regenerate very fast.\n\r", ch );
 			return;
 		}
-		sprintf( buf, "Current implant levels: #pFace: %d, Legs: %d, Body: %d.#n\n\r",
+		snprintf( buf, sizeof( buf ), "Current implant levels: #pFace: %d, Legs: %d, Body: %d.#n\n\r",
 			UMIN( ch->pcdata->powers[CYBORG_FACE], cfg( CFG_ABILITY_SPIDERDROID_IMPLANT_FACE_MAX ) ),
 			UMIN( ch->pcdata->powers[CYBORG_LIMBS], cfg( CFG_ABILITY_SPIDERDROID_IMPLANT_LEGS_MAX ) ),
 			UMIN( ch->pcdata->powers[CYBORG_BODY], cfg( CFG_ABILITY_SPIDERDROID_IMPLANT_BODY_MAX ) ) );
@@ -140,7 +140,7 @@ void do_implant( CHAR_DATA *ch, char *argument ) {
 			cost = cfg( CFG_ABILITY_SPIDERDROID_IMPLANT_COST_LEVEL0 );
 		arg1[0] = UPPER( arg1[0] );
 		if ( ( ch->pcdata->powers[implant] >= max ) ) {
-			sprintf( buf, "You already have all implants on your %s.\n\r", arg1 );
+			snprintf( buf, sizeof( buf ), "You already have all implants on your %s.\n\r", arg1 );
 			send_to_char( buf, ch );
 			return;
 		}
@@ -160,14 +160,14 @@ void do_implant( CHAR_DATA *ch, char *argument ) {
 		}
 
 		if ( cost > ch->pcdata->stats[DROID_POWER] ) {
-			sprintf( buf, "Your drider power must be greater than %d before you can improve your %s implants.\n\r", cost, arg1 );
+			snprintf( buf, sizeof( buf ), "Your drider power must be greater than %d before you can improve your %s implants.\n\r", cost, arg1 );
 			send_to_char( buf, ch );
 			return;
 		}
 
 		ch->pcdata->powers[implant] += 1;
 		ch->pcdata->stats[DROID_POWER] -= cost;
-		sprintf( buf, "You add an implant to your %s.\n\r", arg1 );
+		snprintf( buf, sizeof( buf ), "You add an implant to your %s.\n\r", arg1 );
 		send_to_char( buf, ch );
 		return;
 	} else
@@ -248,7 +248,7 @@ void do_cubeform( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You let the essence of Lloth invade your body.\n\r", ch );
 		SET_BIT( ch->newbits, NEW_CUBEFORM );
 		SET_BIT( ch->affected_by, AFF_POLYMORPH );
-		sprintf( buf, "%s the avatar of Lloth", ch->name );
+		snprintf( buf, sizeof( buf ), "%s the avatar of Lloth", ch->name );
 		free(ch->morph);
 		ch->morph = str_dup( buf );
 		use_move( ch, cfg( CFG_ABILITY_SPIDERDROID_CUBEFORM_MOVE_COST ) );

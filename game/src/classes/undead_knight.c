@@ -77,11 +77,11 @@ void do_ride( CHAR_DATA *ch, char *argument ) {
 	char_from_room( ch );
 	char_to_room( ch, victim->in_room );
 	if ( IS_NPC( victim ) ) {
-		sprintf( buf, "You ride your skeleton steed to %s!\n\r", victim->short_descr );
+		snprintf( buf, sizeof( buf ), "You ride your skeleton steed to %s!\n\r", victim->short_descr );
 		send_to_char( buf, ch );
 	}
 	if ( !IS_NPC( victim ) ) {
-		sprintf( buf, "You ride your skeleton steed to %s!\n\r", victim->name );
+		snprintf( buf, sizeof( buf ), "You ride your skeleton steed to %s!\n\r", victim->name );
 		send_to_char( buf, ch );
 	}
 	act( "$n rides toward you on $n's skeleton steed!\n\r", ch, NULL, NULL, TO_ROOM );
@@ -202,7 +202,7 @@ void do_gain( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( arg[0] == '\0' ) {
-		sprintf( buf, "Current powers : #LNecromancy [#r%d#L]       Invocation [#r%d#L]         Spirit [#r%d#L]#n\n\r",
+		snprintf( buf, sizeof( buf ), "Current powers : #LNecromancy [#r%d#L]       Invocation [#r%d#L]         Spirit [#r%d#L]#n\n\r",
 			ch->pcdata->powers[NECROMANCY], ch->pcdata->powers[INVOCATION], ch->pcdata->powers[SPIRIT] );
 		send_to_char( buf, ch );
 		send_to_char( "What path of power do you wish to increase? [necromancy,invocation,spirit]\n\r", ch );
@@ -386,9 +386,9 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 				if ( IS_NPC( victim ) && dam > cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_NPC_DAM_CAP ) ) dam = cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_NPC_DAM_CAP );
 				if ( !IS_NPC( victim ) && dam > cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_PC_DAM_CAP ) ) dam = cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_KILL_PC_DAM_CAP );
 				hurt_person( ch, victim, dam );
-				sprintf( buf1, "$n's powerword strikes $N [#C%d#n]", dam );
-				sprintf( buf2, "Your powerword strikes $N [#C%d#n]", dam );
-				sprintf( buf3, "$n's powerword strikes you [#C%d#n]", dam );
+				snprintf( buf1, sizeof( buf1 ), "$n's powerword strikes $N [#C%d#n]", dam );
+				snprintf( buf2, sizeof( buf2 ), "Your powerword strikes $N [#C%d#n]", dam );
+				snprintf( buf3, sizeof( buf3 ), "$n's powerword strikes you [#C%d#n]", dam );
 				act( buf1, ch, NULL, victim, TO_NOTVICT );
 				act( buf2, ch, NULL, victim, TO_CHAR );
 				act( buf3, ch, NULL, victim, TO_VICT );

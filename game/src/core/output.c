@@ -119,10 +119,10 @@ void banner_to_char( char *txt, CHAR_DATA *ch ) {
 	ln = utf8_display_width( txt );
 	txt_bytes = (int) strlen( txt );
 	if ( ln > 16 ) {
-		sprintf( buf, "#4-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[                   ]#4=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-#n" );
+		snprintf( buf, sizeof( buf ), "#4-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[                   ]#4=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-#n" );
 		wdth = ( 17 - ln ) / 2 + 20;
 	} else {
-		sprintf( buf,
+		snprintf( buf, sizeof( buf ),
 			"#4-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[              ] #L=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-=[#6**#4]=-#n" );
 		wdth = ( 11 - ln ) / 2 + 32;
 	}
@@ -136,10 +136,10 @@ void banner2_to_char( char *txt, CHAR_DATA *ch ) {
 	ln = utf8_display_width( txt );
 	txt_bytes = (int) strlen( txt );
 	if ( ln > 16 ) {
-		sprintf( buf, "#4    -   -  - - -#6- ---===#7                               #6===--- -#4- - -  -   -\r\n" );
+		snprintf( buf, sizeof( buf ), "#4    -   -  - - -#6- ---===#7                               #6===--- -#4- - -  -   -\r\n" );
 		wdth = ( 31 - ln ) / 2 + 24;
 	} else {
-		sprintf( buf, "#4     -    -   -  - - -#6- ---====#7                #6====--- -#4- - -  -   -    -\r\n" );
+		snprintf( buf, sizeof( buf ), "#4     -    -   -  - - -#6- ---====#7                #6====--- -#4- - -  -   -    -\r\n" );
 		wdth = ( 16 - ln ) / 2 + 32;
 	}
 	memcpy( buf + wdth + 6, txt, txt_bytes );

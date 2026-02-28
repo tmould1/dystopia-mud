@@ -1310,7 +1310,7 @@ void do_slay( CHAR_DATA *ch, char *argument ) {
 				( !str_prefix( slay_table[i].owner, ch->name ) &&
 					slay_table[i].title[0] != '\0' ) ||
 				strlen( slay_table[i].owner ) < 2 ) {
-				sprintf( buf, "%s\n\r", slay_table[i].title );
+				snprintf( buf, sizeof( buf ), "%s\n\r", slay_table[i].title );
 				send_to_char( buf, ch );
 			}
 
@@ -1348,11 +1348,11 @@ void do_slay( CHAR_DATA *ch, char *argument ) {
 				( slay_table[i].owner == NULL ||
 					!str_prefix( slay_table[i].owner, ch->name ) ) ) {
 				found = TRUE;
-				sprintf( buf, "%s\n\r", slay_table[i].char_msg );
+				snprintf( buf, sizeof( buf ), "%s\n\r", slay_table[i].char_msg );
 				act( buf, ch, NULL, victim, TO_CHAR );
-				sprintf( buf, "%s\n\r", slay_table[i].vict_msg );
+				snprintf( buf, sizeof( buf ), "%s\n\r", slay_table[i].vict_msg );
 				act( buf, ch, NULL, victim, TO_VICT );
-				sprintf( buf, "%s\n\r", slay_table[i].room_msg );
+				snprintf( buf, sizeof( buf ), "%s\n\r", slay_table[i].room_msg );
 				act( buf, ch, NULL, victim, TO_NOTVICT );
 				raw_kill( victim );
 				return;

@@ -226,9 +226,9 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
 			if ( dam > cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_DAM_CAP ) ) dam = number_range( cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_LOW ), cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_HIGH ) );
 		}
-		sprintf( buf1, "$n calls for the forces of #Rhell#n to destroy $N [#C%d#n]", dam );
-		sprintf( buf2, "You call for the forces of #Rhell#n to destroy $N [#C%d#n]", dam );
-		sprintf( buf3, "$n calls for the forces of #Rhell#n to destroy you [#C%d#n]", dam );
+		snprintf( buf1, sizeof( buf1 ), "$n calls for the forces of #Rhell#n to destroy $N [#C%d#n]", dam );
+		snprintf( buf2, sizeof( buf2 ), "You call for the forces of #Rhell#n to destroy $N [#C%d#n]", dam );
+		snprintf( buf3, sizeof( buf3 ), "$n calls for the forces of #Rhell#n to destroy you [#C%d#n]", dam );
 		act( buf1, ch, NULL, victim, TO_NOTVICT );
 		act( buf2, ch, NULL, victim, TO_CHAR );
 		act( buf3, ch, NULL, victim, TO_VICT );
@@ -241,9 +241,9 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
 			if ( dam > cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_DAM_CAP ) ) dam = number_range( cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_LOW ), cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_HIGH ) );
 		}
-		sprintf( buf1, "$n summons a supernatural #Lstorm#n to strike $N with lightning [#C%d#n]", dam );
-		sprintf( buf2, "You summon a supernatural #Lstorm#n to strike $N with lightning [#C%d#n]", dam );
-		sprintf( buf3, "$n summons a supernatural #Lstorm#n to strike you with lightning [#C%d#n]", dam );
+		snprintf( buf1, sizeof( buf1 ), "$n summons a supernatural #Lstorm#n to strike $N with lightning [#C%d#n]", dam );
+		snprintf( buf2, sizeof( buf2 ), "You summon a supernatural #Lstorm#n to strike $N with lightning [#C%d#n]", dam );
+		snprintf( buf3, sizeof( buf3 ), "$n summons a supernatural #Lstorm#n to strike you with lightning [#C%d#n]", dam );
 		act( buf1, ch, NULL, victim, TO_NOTVICT );
 		act( buf2, ch, NULL, victim, TO_CHAR );
 		act( buf3, ch, NULL, victim, TO_VICT );
@@ -256,9 +256,9 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
 			if ( dam > cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_DAM_CAP ) ) dam = number_range( cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_LOW ), cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_HIGH ) );
 		}
-		sprintf( buf1, "$n calls for #Gthorns#n to grow from the earth and pierce $N [#C%d#n]", dam );
-		sprintf( buf2, "You call for #Gthorns#n to grow from the earth and pierce $N [#C%d#n]", dam );
-		sprintf( buf3, "$n calls for #Gthorns#n to grow from the earth and pierce You [#C%d#n]", dam );
+		snprintf( buf1, sizeof( buf1 ), "$n calls for #Gthorns#n to grow from the earth and pierce $N [#C%d#n]", dam );
+		snprintf( buf2, sizeof( buf2 ), "You call for #Gthorns#n to grow from the earth and pierce $N [#C%d#n]", dam );
+		snprintf( buf3, sizeof( buf3 ), "$n calls for #Gthorns#n to grow from the earth and pierce You [#C%d#n]", dam );
 		act( buf1, ch, NULL, victim, TO_NOTVICT );
 		act( buf2, ch, NULL, victim, TO_CHAR );
 		act( buf3, ch, NULL, victim, TO_VICT );
@@ -271,9 +271,9 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
 			if ( dam > cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_DAM_CAP ) ) dam = number_range( cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_LOW ), cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_HIGH ) );
 		}
-		sprintf( buf1, "$n calls on the powers of the #punderdark#n to shatter $N's bones [#C%d#n]", dam );
-		sprintf( buf2, "You call on the powers of the #punderdark#n to shatter $N's bones [#C%d#n]", dam );
-		sprintf( buf3, "$n calls on the powers of the #punderdark#n to shatter your bones [#C%d#n]", dam );
+		snprintf( buf1, sizeof( buf1 ), "$n calls on the powers of the #punderdark#n to shatter $N's bones [#C%d#n]", dam );
+		snprintf( buf2, sizeof( buf2 ), "You call on the powers of the #punderdark#n to shatter $N's bones [#C%d#n]", dam );
+		snprintf( buf3, sizeof( buf3 ), "$n calls on the powers of the #punderdark#n to shatter your bones [#C%d#n]", dam );
 		act( buf1, ch, NULL, victim, TO_NOTVICT );
 		act( buf2, ch, NULL, victim, TO_CHAR );
 		act( buf3, ch, NULL, victim, TO_VICT );
@@ -286,9 +286,9 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 			//      if (IS_CLASS(ch, CLASS_MAGE) && dam > 600) dam = number_range(580,620);
 			if ( dam > cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_DAM_CAP ) ) dam = number_range( cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_LOW ), cfg( CFG_ABILITY_MAGE_CHANT_DAMAGE_PVP_CAP_RANGE_HIGH ) );
 		}
-		sprintf( buf1, "$n spews forth a shower of #yacid#n striking $N [#C%d#n]", dam );
-		sprintf( buf2, "you spew forth a shower of #yacid#n striking $N [#C%d#n]", dam );
-		sprintf( buf3, "$n spews forth a shower of #yacid#n striking you [#C%d#n]", dam );
+		snprintf( buf1, sizeof( buf1 ), "$n spews forth a shower of #yacid#n striking $N [#C%d#n]", dam );
+		snprintf( buf2, sizeof( buf2 ), "you spew forth a shower of #yacid#n striking $N [#C%d#n]", dam );
+		snprintf( buf3, sizeof( buf3 ), "$n spews forth a shower of #yacid#n striking you [#C%d#n]", dam );
 		act( buf1, ch, NULL, victim, TO_NOTVICT );
 		act( buf2, ch, NULL, victim, TO_CHAR );
 		act( buf3, ch, NULL, victim, TO_VICT );
@@ -371,8 +371,8 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 		}
 		use_mana( ch, count * 500 );
 		WAIT_STATE( ch, cfg( CFG_ABILITY_MAGE_CHANT_BLESS_COOLDOWN ) );
-		sprintf( buf1, "You bless $N with the power of the elements." );
-		sprintf( buf2, "The power of the five elements fills your body." );
+		snprintf( buf1, sizeof( buf1 ), "You bless $N with the power of the elements." );
+		snprintf( buf2, sizeof( buf2 ), "The power of the five elements fills your body." );
 		act( buf1, ch, NULL, victim, TO_CHAR );
 		act( buf2, ch, NULL, victim, TO_VICT );
 		return;
@@ -457,8 +457,8 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 		}
 		use_mana( ch, count * 500 );
 		WAIT_STATE( ch, cfg( CFG_ABILITY_MAGE_CHANT_CURSE_COOLDOWN ) );
-		sprintf( buf1, "You curse $N with the power of the elements." );
-		sprintf( buf2, "The power of the five elements wrecks your body." );
+		snprintf( buf1, sizeof( buf1 ), "You curse $N with the power of the elements." );
+		snprintf( buf2, sizeof( buf2 ), "The power of the five elements wrecks your body." );
 		act( buf1, ch, NULL, victim, TO_CHAR );
 		act( buf2, ch, NULL, victim, TO_VICT );
 		return;
@@ -510,7 +510,7 @@ void do_invoke( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "* You have a deeper understanding of magic.\n\r", ch );
 		if ( ch->pcdata->powers[PINVOKE] > 9 )
 			send_to_char( "* You have mastered the art of magic.\n\r", ch );
-		sprintf( buf, "invokes Learned (%d).\n\r", ch->pcdata->powers[PINVOKE] );
+		snprintf( buf, sizeof( buf ), "invokes Learned (%d).\n\r", ch->pcdata->powers[PINVOKE] );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -704,9 +704,9 @@ void do_discharge( CHAR_DATA *ch, char *argument ) {
 					if ( mount == vch ) continue;
 				dam = number_range( magic_power * 7 / 2, magic_power * 9 / 2 ) + ch->damroll;
 				if ( IS_AFFECTED( vch, AFF_SANCTUARY ) ) dam = (int) ( dam * 0.5 );
-				sprintf( buf1, "$n's mystical shields explodes in a shower of flames striking $N [#C%d#n]", dam );
-				sprintf( buf2, "Your mystical shields explodes in a shower of flames striking $N [#C%d#n]", dam );
-				sprintf( buf3, "$n's mystical shields explodes in a shower of flames striking you [#C%d#n]", dam );
+				snprintf( buf1, sizeof( buf1 ), "$n's mystical shields explodes in a shower of flames striking $N [#C%d#n]", dam );
+				snprintf( buf2, sizeof( buf2 ), "Your mystical shields explodes in a shower of flames striking $N [#C%d#n]", dam );
+				snprintf( buf3, sizeof( buf3 ), "$n's mystical shields explodes in a shower of flames striking you [#C%d#n]", dam );
 				act( buf1, ch, NULL, vch, TO_NOTVICT );
 				act( buf2, ch, NULL, vch, TO_CHAR );
 				act( buf3, ch, NULL, vch, TO_VICT );

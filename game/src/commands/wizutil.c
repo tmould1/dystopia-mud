@@ -90,7 +90,7 @@ void room_pair( ROOM_INDEX_DATA *left, ROOM_INDEX_DATA *right, exit_status ex, c
 		sExit = "<>";
 		break;
 	}
-	sprintf( buffer, "%5d %-26.26s %s%5d %-26.26s(%-8.8s)\n\r",
+	snprintf( buffer, sizeof( buffer ), "%5d %-26.26s %s%5d %-26.26s(%-8.8s)\n\r",
 		left->vnum, left->name, sExit, right->vnum, right->name, area_name( right->area ) );
 	return;
 }
@@ -347,9 +347,9 @@ void do_reimb( CHAR_DATA *ch, char *argument ) {
 		vch->mkill = 5;
 		do_autosave( ch, "" );
 	}
-	sprintf( buf, "%s reimbursed %d %s.\n\r", vch->name, v, arg );
+	snprintf( buf, sizeof( buf ), "%s reimbursed %d %s.\n\r", vch->name, v, arg );
 	send_to_char( buf, ch );
-	sprintf( buf, "%s has reimbursed you %d %s.\n\r", ch->name, v, arg );
+	snprintf( buf, sizeof( buf ), "%s has reimbursed you %d %s.\n\r", ch->name, v, arg );
 	send_to_char( buf, vch );
 }
 
@@ -386,10 +386,10 @@ void do_affects( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "You are affected by:\n\r", ch );
 		LIST_FOR_EACH(paf, &ch->affects, AFFECT_DATA, node) {
-			sprintf( buf, "Spell: '%s'", skill_table[paf->type].name );
+			snprintf( buf, sizeof( buf ), "Spell: '%s'", skill_table[paf->type].name );
 			send_to_char( buf, ch );
 			if ( ch->level >= 0 ) {
-				sprintf( buf, " modifies %s by %d for %d hours with bits %s.\n\r",
+				snprintf( buf, sizeof( buf ), " modifies %s by %d for %d hours with bits %s.\n\r",
 					affect_loc_name( paf->location ),
 					paf->modifier,
 					paf->duration,
@@ -524,10 +524,10 @@ void do_pstat( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	sprintf( buf, "Name : %s.\n\r",
+	snprintf( buf, sizeof( buf ), "Name : %s.\n\r",
 		IS_NPC( victim ) ? victim->short_descr : victim->name );
 	send_to_char( buf, ch );
-	sprintf( buf, "Sex : %s. Room : %d. Align : %d. Primal : %d. Quest : %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Sex : %s. Room : %d. Align : %d. Primal : %d. Quest : %d.\n\r",
 		victim->sex == SEX_MALE ? "Male" : victim->sex == SEX_FEMALE ? "Female"
 																	 : "None",
 		victim->in_room == NULL ? 0 : victim->in_room->vnum,
@@ -536,27 +536,27 @@ void do_pstat( CHAR_DATA *ch, char *argument ) {
 		IS_NPC( victim ) ? 0 : victim->pcdata->quest );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Level : %d. Trust : %d. Gold : %d. Exp : %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Level : %d. Trust : %d. Gold : %d. Exp : %d.\n\r",
 		victim->level,
 		victim->trust,
 		victim->gold,
 		victim->exp );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Hit : %d. Dam : %d. AC : %d. Position : %s\n\r",
+	snprintf( buf, sizeof( buf ), "Hit : %d. Dam : %d. AC : %d. Position : %s\n\r",
 		char_hitroll( victim ),
 		char_damroll( victim ),
 		char_ac( victim ),
 		capitalize( get_position_name( victim->position ) ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "HP %d/%d. Mana %d/%d. Move %d/%d.\n\r",
+	snprintf( buf, sizeof( buf ), "HP %d/%d. Mana %d/%d. Move %d/%d.\n\r",
 		victim->hit, victim->max_hit,
 		victim->mana, victim->max_mana,
 		victim->move, victim->max_move );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Str: %d.  Int: %d.  Wis: %d.  Dex: %d.  Con: %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Str: %d.  Int: %d.  Wis: %d.  Dex: %d.  Con: %d.\n\r",
 		get_curr_str( victim ),
 		get_curr_int( victim ),
 		get_curr_wis( victim ),
@@ -564,66 +564,66 @@ void do_pstat( CHAR_DATA *ch, char *argument ) {
 		get_curr_con( victim ) );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Fighting : %s. (%d)\n\r",
+	snprintf( buf, sizeof( buf ), "Fighting : %s. (%d)\n\r",
 		victim->fighting ? victim->fighting->name : "(None)",
 		victim->fighting ? victim->fighting->level : 0 );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Pkill : %d. Pdeath : %d. Mkill : %d. Mdeath : %d.\n\r",
+	snprintf( buf, sizeof( buf ), "Pkill : %d. Pdeath : %d. Mkill : %d. Mdeath : %d.\n\r",
 		IS_NPC( victim ) ? 0 : victim->pkill,
 		IS_NPC( victim ) ? 0 : victim->pdeath,
 		IS_NPC( victim ) ? 0 : victim->mkill,
 		IS_NPC( victim ) ? 0 : victim->mdeath );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "TotExp  : %12d. TotMobLev  : %10d. TotQuestPoints : %10d.\n\r",
+	snprintf( buf, sizeof( buf ), "TotExp  : %12d. TotMobLev  : %10d. TotQuestPoints : %10d.\n\r",
 		IS_NPC( victim ) ? 0 : victim->pcdata->score[SCORE_TOTAL_XP],
 		IS_NPC( victim ) ? 0 : victim->pcdata->score[SCORE_TOTAL_LEVEL],
 		IS_NPC( victim ) ? 0 : victim->pcdata->score[SCORE_QUEST] );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "HighExp : %12d. HighMobLev : %10d. Tot#Quests     : %10d.\n\r",
+	snprintf( buf, sizeof( buf ), "HighExp : %12d. HighMobLev : %10d. Tot#Quests     : %10d.\n\r",
 		IS_NPC( victim ) ? 0 : victim->pcdata->score[SCORE_HIGH_XP],
 		IS_NPC( victim ) ? 0 : victim->pcdata->score[SCORE_HIGH_LEVEL],
 		IS_NPC( victim ) ? 0 : victim->pcdata->score[SCORE_NUM_QUEST] );
 	send_to_char( buf, ch );
 
 	if ( !IS_NPC( victim ) ) {
-		sprintf( buf, "Unarmed : %4d.", victim->wpn[0] );
+		snprintf( buf, sizeof( buf ), "Unarmed : %4d.", victim->wpn[0] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Slice   : %4d.", victim->wpn[1] );
+		snprintf( buf, sizeof( buf ), " Slice   : %4d.", victim->wpn[1] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Stab    : %4d.", victim->wpn[2] );
+		snprintf( buf, sizeof( buf ), " Stab    : %4d.", victim->wpn[2] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Slash   : %4d.", victim->wpn[3] );
+		snprintf( buf, sizeof( buf ), " Slash   : %4d.", victim->wpn[3] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Whip    : %4d.\n\r", victim->wpn[4] );
+		snprintf( buf, sizeof( buf ), " Whip    : %4d.\n\r", victim->wpn[4] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Claw    : %4d.", victim->wpn[5] );
+		snprintf( buf, sizeof( buf ), "Claw    : %4d.", victim->wpn[5] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Blast   : %4d.", victim->wpn[6] );
+		snprintf( buf, sizeof( buf ), " Blast   : %4d.", victim->wpn[6] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Pound   : %4d.", victim->wpn[7] );
+		snprintf( buf, sizeof( buf ), " Pound   : %4d.", victim->wpn[7] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Crush   : %4d.", victim->wpn[8] );
+		snprintf( buf, sizeof( buf ), " Crush   : %4d.", victim->wpn[8] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Grep    : %4d.\n\r", victim->wpn[9] );
+		snprintf( buf, sizeof( buf ), " Grep    : %4d.\n\r", victim->wpn[9] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Bite    : %4d.", victim->wpn[10] );
+		snprintf( buf, sizeof( buf ), "Bite    : %4d.", victim->wpn[10] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Pierce  : %4d.", victim->wpn[11] );
+		snprintf( buf, sizeof( buf ), " Pierce  : %4d.", victim->wpn[11] );
 		send_to_char( buf, ch );
-		sprintf( buf, " Suck    : %4d.\n\r", victim->wpn[12] );
+		snprintf( buf, sizeof( buf ), " Suck    : %4d.\n\r", victim->wpn[12] );
 		send_to_char( buf, ch );
 
-		sprintf( buf, "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
+		snprintf( buf, sizeof( buf ), "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
 			"Purple", victim->spl[PURPLE_MAGIC],
 			"Red", victim->spl[RED_MAGIC],
 			"Blue", victim->spl[BLUE_MAGIC],
 			"Green", victim->spl[GREEN_MAGIC],
 			"Yellow", victim->spl[YELLOW_MAGIC] );
 		send_to_char( buf, ch );
-		sprintf( buf, "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
+		snprintf( buf, sizeof( buf ), "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
 			"Viper", victim->stance[STANCE_VIPER],
 			"Crane", victim->stance[STANCE_CRANE],
 			"Crab", victim->stance[STANCE_CRAB],
@@ -631,7 +631,7 @@ void do_pstat( CHAR_DATA *ch, char *argument ) {
 			"Bull", victim->stance[STANCE_BULL] );
 		send_to_char( buf, ch );
 
-		sprintf( buf, "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %-3d. %-8s : %3d.\n\r",
+		snprintf( buf, sizeof( buf ), "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %-3d. %-8s : %3d.\n\r",
 			"Mantis", victim->stance[STANCE_MANTIS],
 			"Dragon", victim->stance[STANCE_DRAGON],
 			"Tiger", victim->stance[STANCE_TIGER],
@@ -639,7 +639,7 @@ void do_pstat( CHAR_DATA *ch, char *argument ) {
 			"Swallow", victim->stance[STANCE_SWALLOW] );
 
 		send_to_char( buf, ch );
-		sprintf( buf, "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
+		snprintf( buf, sizeof( buf ), "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
 			"ss1", victim->stance[STANCE_SS1],
 			"ss2", victim->stance[STANCE_SS2],
 			"ss3", victim->stance[STANCE_SS3],
@@ -647,16 +647,16 @@ void do_pstat( CHAR_DATA *ch, char *argument ) {
 			"ss5", victim->stance[STANCE_SS5] );
 		send_to_char( buf, ch );
 
-		sprintf( buf, "Act         : %s\n\r", plr_bit_name( victim->act ) );
+		snprintf( buf, sizeof( buf ), "Act         : %s\n\r", plr_bit_name( victim->act ) );
 		send_to_char( buf, ch );
-		sprintf( buf, "Extra       : %s\n\r",
+		snprintf( buf, sizeof( buf ), "Extra       : %s\n\r",
 			victim->extra <= 0 ? "(None)" : extra_plr_bit_name( victim->extra ) );
 		send_to_char( buf, ch );
-		sprintf( buf, "ItemAff     : %s\n\r",
+		snprintf( buf, sizeof( buf ), "ItemAff     : %s\n\r",
 			victim->itemaffect <= 0 ? "(None)" : itemaffect_bit_name( victim->itemaffect ) );
 		send_to_char( buf, ch );
 
-		sprintf( buf, "Affected by : %s.\n\r",
+		snprintf( buf, sizeof( buf ), "Affected by : %s.\n\r",
 			affect_bit_name( victim->affected_by ) );
 		send_to_char( buf, ch );
 

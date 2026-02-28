@@ -906,7 +906,7 @@ void do_accept( CHAR_DATA *ch, char *argument )
 	act( "$n accepts your offer of marriage.", ch, NULL, victim, TO_VICT );
 	save_char_obj( ch );
 	save_char_obj( victim );
-	sprintf( buf, "%s and %s are now engaged!", ch->name, victim->name );
+	snprintf( buf, sizeof( buf ), "%s and %s are now engaged!", ch->name, victim->name );
 	do_info( ch, buf );
 	return;
 }
@@ -1024,7 +1024,7 @@ void do_breakup( CHAR_DATA *ch, char *argument )
 
 		save_char_obj( victim );
 
-		sprintf( buf, "%s and %s have broken up!", ch->name, victim->name );
+		snprintf( buf, sizeof( buf ), "%s and %s have broken up!", ch->name, victim->name );
 
 		do_info( ch, buf );
 
@@ -1104,7 +1104,7 @@ void do_marry( CHAR_DATA *ch, char *argument )
 
 		save_char_obj( victim2 );
 
-		sprintf( buf, "%s and %s are now married!", victim1->name, victim2->name );
+		snprintf( buf, sizeof( buf ), "%s and %s are now married!", victim1->name, victim2->name );
 
 		do_info( ch, buf );
 
@@ -1201,7 +1201,7 @@ void do_divorce( CHAR_DATA *ch, char *argument )
 
 		save_char_obj( victim2 );
 
-		sprintf( buf, "%s and %s are now divorced!", victim1->name, victim2->name );
+		snprintf( buf, sizeof( buf ), "%s and %s are now divorced!", victim1->name, victim2->name );
 
 		do_info( ch, buf );
 
@@ -1271,7 +1271,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( ch->pcdata->quest < value ) {
-			sprintf( buf, "You don't have the required %d quest points.\n\r", value );
+			snprintf( buf, sizeof( buf ), "You don't have the required %d quest points.\n\r", value );
 			send_to_char( buf, ch );
 			return;
 		}
@@ -1433,9 +1433,9 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 			return;
 		} else if ( obj->item_type == ITEM_ARMOR && ( value + obj->value[0] ) > 15 ) {
 			if ( obj->value[0] < 15 )
-				sprintf( buf, "The armor class can be increased by %d.\n\r", ( 15 - obj->value[0] ) );
+				snprintf( buf, sizeof( buf ), "The armor class can be increased by %d.\n\r", ( 15 - obj->value[0] ) );
 			else
-				sprintf( buf, "The armor class cannot be increased any further.\n\r" );
+				snprintf( buf, sizeof( buf ), "The armor class cannot be increased any further.\n\r" );
 			send_to_char( buf, ch );
 			return;
 		} else if ( value > ch->pcdata->quest ) {
@@ -1461,9 +1461,9 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 			return;
 		} else if ( obj->item_type == ITEM_WEAPON && ( value + obj->value[1] ) > 20 ) {
 			if ( obj->value[1] < 20 )
-				sprintf( buf, "The minimum damage can be increased by %d.\n\r", ( 20 - obj->value[1] ) );
+				snprintf( buf, sizeof( buf ), "The minimum damage can be increased by %d.\n\r", ( 20 - obj->value[1] ) );
 			else
-				sprintf( buf, "The minimum damage cannot be increased any further.\n\r" );
+				snprintf( buf, sizeof( buf ), "The minimum damage cannot be increased any further.\n\r" );
 			send_to_char( buf, ch );
 			return;
 		} else if ( value > ch->pcdata->quest ) {
@@ -1489,9 +1489,9 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 			return;
 		} else if ( obj->item_type == ITEM_WEAPON && ( value + obj->value[2] ) > 30 ) {
 			if ( obj->value[2] < 30 )
-				sprintf( buf, "The maximum damage can be increased by %d.\n\r", ( 30 - obj->value[2] ) );
+				snprintf( buf, sizeof( buf ), "The maximum damage can be increased by %d.\n\r", ( 30 - obj->value[2] ) );
 			else
-				sprintf( buf, "The maximum damage cannot be increased any further.\n\r" );
+				snprintf( buf, sizeof( buf ), "The maximum damage cannot be increased any further.\n\r" );
 			send_to_char( buf, ch );
 			return;
 		} else if ( value > ch->pcdata->quest ) {
@@ -1624,7 +1624,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 				send_to_char( "That item is already silver.\n\r", ch );
 				return;
 			} else if ( ch->pcdata->quest < add ) {
-				sprintf( buf, "Sorry, you need %d quest points to set that flag.\n\r", add );
+				snprintf( buf, sizeof( buf ), "Sorry, you need %d quest points to set that flag.\n\r", add );
 
 				send_to_char( buf, ch );
 				return;
@@ -1644,7 +1644,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 			{
 
-				sprintf( buf, "Sorry, you need %d quest points to remove that flag.\n\r", remove );
+				snprintf( buf, sizeof( buf ), "Sorry, you need %d quest points to remove that flag.\n\r", remove );
 
 				send_to_char( buf, ch );
 				return;
@@ -1664,7 +1664,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 			{
 
-				sprintf( buf, "Sorry, you need %d quest points to set that flag.\n\r", add );
+				snprintf( buf, sizeof( buf ), "Sorry, you need %d quest points to set that flag.\n\r", add );
 
 				send_to_char( buf, ch );
 				return;
@@ -2198,7 +2198,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		{
 
-			sprintf( buf, "You can only add %d more spell power to this weapon.\n\r", ( 50 - obj->level ) );
+			snprintf( buf, sizeof( buf ), "You can only add %d more spell power to this weapon.\n\r", ( 50 - obj->level ) );
 
 			send_to_char( buf, ch );
 
@@ -3694,7 +3694,7 @@ void oset_affect( CHAR_DATA *ch, OBJ_DATA *obj, int value, int affect, bool is_q
 
 	{
 
-		sprintf( buf, "You are limited to %d quest points per item.\n\r", max );
+		snprintf( buf, sizeof( buf ), "You are limited to %d quest points per item.\n\r", max );
 
 		send_to_char( buf, ch );
 
@@ -3705,7 +3705,7 @@ void oset_affect( CHAR_DATA *ch, OBJ_DATA *obj, int value, int affect, bool is_q
 
 	{
 
-		sprintf( buf, "That costs %d quest points, while you only have %d.\n\r", cost, ch->pcdata->quest );
+		snprintf( buf, sizeof( buf ), "That costs %d quest points, while you only have %d.\n\r", cost, ch->pcdata->quest );
 
 		send_to_char( buf, ch );
 
@@ -3818,7 +3818,7 @@ void do_makepreg( CHAR_DATA *ch, char *argument )
 
 			save_char_obj( victim2 );
 
-			sprintf( buf, "%s and %s are now pregnant!", victim1->name, victim2->name );
+			snprintf( buf, sizeof( buf ), "%s and %s are now pregnant!", victim1->name, victim2->name );
 
 			do_info( ch, buf );
 

@@ -34,13 +34,13 @@ void do_mindtrain( CHAR_DATA *ch, char *argument ) {
 
 	if ( arg[0] == '\0' ) {
 		send_to_char( "#x029~#x035[#n Mindflayer Training #x035]#x029~#n\n\r", ch );
-		sprintf( buf, "Domination:    %d/4  (#x035enthral#n, #x035puppet#n, #x035hivemind#n, #x035massdomination#n)\n\r",
+		snprintf( buf, sizeof( buf ), "Domination:    %d/4  (#x035enthral#n, #x035puppet#n, #x035hivemind#n, #x035massdomination#n)\n\r",
 			ch->pcdata->powers[MIND_TRAIN_DOMINATION] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Consumption:   %d/3  (#x035mindfeed#n, #x035memorydrain#n, #x035intellectdevour#n)\n\r",
+		snprintf( buf, sizeof( buf ), "Consumption:   %d/3  (#x035mindfeed#n, #x035memorydrain#n, #x035intellectdevour#n)\n\r",
 			ch->pcdata->powers[MIND_TRAIN_CONSUMPTION] );
 		send_to_char( buf, ch );
-		sprintf( buf, "Psionic Storm: %d/3  (#x035psychicmaelstrom#n, #x035mindblast#n, #x035realityfracture#n)\n\r",
+		snprintf( buf, sizeof( buf ), "Psionic Storm: %d/3  (#x035psychicmaelstrom#n, #x035mindblast#n, #x035realityfracture#n)\n\r",
 			ch->pcdata->powers[MIND_TRAIN_PSIONIC] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rSyntax: mindtrain <category>\n\r", ch );
@@ -69,7 +69,7 @@ void do_mindtrain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( *path >= max_level ) {
-		sprintf( buf, "You have already mastered %s.\n\r", path_name );
+		snprintf( buf, sizeof( buf ), "You have already mastered %s.\n\r", path_name );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -77,7 +77,7 @@ void do_mindtrain( CHAR_DATA *ch, char *argument ) {
 	cost = ( *path + 1 ) * 50;
 
 	if ( ch->practice < cost ) {
-		sprintf( buf, "You need %d primal to advance %s.\n\r", cost, path_name );
+		snprintf( buf, sizeof( buf ), "You need %d primal to advance %s.\n\r", cost, path_name );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -85,7 +85,7 @@ void do_mindtrain( CHAR_DATA *ch, char *argument ) {
 	ch->practice -= cost;
 	(*path)++;
 
-	sprintf( buf, "You have advanced your %s training to level %d!\n\r", path_name, *path );
+	snprintf( buf, sizeof( buf ), "You have advanced your %s training to level %d!\n\r", path_name, *path );
 	send_to_char( buf, ch );
 
 	/* Announce unlocks */

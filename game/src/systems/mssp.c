@@ -114,14 +114,14 @@ void mssp_send( DESCRIPTOR_DATA *d ) {
 	/* --- Required --- */
 	pos = mssp_add_var( buf, pos, "NAME", game_config.game_name );
 
-	sprintf( numbuf, "%d", mssp_count_players() );
+	snprintf( numbuf, sizeof( numbuf ), "%d", mssp_count_players() );
 	pos = mssp_add_var( buf, pos, "PLAYERS", numbuf );
 
-	sprintf( numbuf, "%ld", (long) boot_time );
+	snprintf( numbuf, sizeof( numbuf ), "%ld", (long) boot_time );
 	pos = mssp_add_var( buf, pos, "UPTIME", numbuf );
 
 	/* --- Generic --- */
-	sprintf( numbuf, "%d", port );
+	snprintf( numbuf, sizeof( numbuf ), "%d", port );
 	pos = mssp_add_var( buf, pos, "PORT", numbuf );
 
 	pos = mssp_add_var( buf, pos, "CODEBASE", "Diku/Merc/GodWars/Dystopia" );
@@ -143,19 +143,19 @@ void mssp_send( DESCRIPTOR_DATA *d ) {
 	pos = mssp_add_var( buf, pos, "STATUS", "Live" );
 
 	/* --- World --- */
-	sprintf( numbuf, "%d", top_area );
+	snprintf( numbuf, sizeof( numbuf ), "%d", top_area );
 	pos = mssp_add_var( buf, pos, "AREAS", numbuf );
 
-	sprintf( numbuf, "%d", top_help );
+	snprintf( numbuf, sizeof( numbuf ), "%d", top_help );
 	pos = mssp_add_var( buf, pos, "HELPFILES", numbuf );
 
-	sprintf( numbuf, "%d", top_mob_index );
+	snprintf( numbuf, sizeof( numbuf ), "%d", top_mob_index );
 	pos = mssp_add_var( buf, pos, "MOBILES", numbuf );
 
-	sprintf( numbuf, "%d", top_obj_index );
+	snprintf( numbuf, sizeof( numbuf ), "%d", top_obj_index );
 	pos = mssp_add_var( buf, pos, "OBJECTS", numbuf );
 
-	sprintf( numbuf, "%d", top_room );
+	snprintf( numbuf, sizeof( numbuf ), "%d", top_room );
 	pos = mssp_add_var( buf, pos, "ROOMS", numbuf );
 
 	pos = mssp_add_var( buf, pos, "CLASSES", "22" );
