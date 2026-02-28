@@ -346,9 +346,6 @@ bool fBootDb;
 /*
  * Local booting procedures.
  */
-void init_mm args( (void) );
-
-
 void fix_exits args( (void) );
 
 void reset_area args( ( AREA_DATA * pArea ) );

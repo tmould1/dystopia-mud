@@ -4363,6 +4363,7 @@ void load_disabled args( (void) );
 void save_disabled args( (void) );
 
 /* db.c */
+void init_mm args( ( void ) );
 void boot_db args( ( bool fCopyOver ) );
 void area_update args( (void) );
 int calculate_mob_difficulty args( ( MOB_INDEX_DATA * pMob ) );

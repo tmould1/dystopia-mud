@@ -16,6 +16,8 @@ if /i "%~1"=="clean" (
     echo Cleaning test artifacts...
     if exist "obj" rmdir /s /q "obj"
     if exist "run_tests.exe" del /q "run_tests.exe"
+    if exist "run_tests.pdb" del /q "run_tests.pdb"
+    if exist "vc140.pdb" del /q "vc140.pdb"
     echo Clean complete.
     goto :eof
 )
@@ -48,30 +50,42 @@ REM Include paths
 set INC=/I. /I%SRC_DIR%\core /I%SRC_DIR%\classes /I%SRC_DIR%\world /I%SRC_DIR%\systems /I%SRC_DIR%\db
 
 REM Compiler flags: match game Release config (/MD /GL) + TEST_BUILD
-set CFLAGS=/nologo /W3 /O2 /MD /GL /Zi /DTEST_BUILD /D_CRT_SECURE_NO_WARNINGS /DWIN32 /DHAVE_ZLIB %INC%
+REM Note: /GL requires matching game .obj flags; no /Zi to avoid PDB generation
+set CFLAGS=/nologo /W3 /O2 /MD /GL /DTEST_BUILD /D_CRT_SECURE_NO_WARNINGS /DWIN32 /DHAVE_ZLIB /Fd%TEST_OBJ%\tests.pdb %INC%
 
 REM Create obj directory
 if not exist "%TEST_OBJ%" mkdir "%TEST_OBJ%"
 
 echo Building tests...
 
-REM Compile test source files
-for %%f in (test_main.c test_helpers.c test_dice.c test_strings.c test_stats.c) do (
-    echo   %%f
-    cl %CFLAGS% /c %%f /Fo%TEST_OBJ%\ >nul
+REM Compile test source files (auto-discover test_*.c + test_helpers.c)
+set TEST_OBJS=
+for %%f in (test_main.c test_helpers.c) do (
+    cl %CFLAGS% /c %%f /Fo%TEST_OBJ%\
     if errorlevel 1 (
         echo FAILED to compile %%f
         exit /b 1
     )
+    set "TEST_OBJS=!TEST_OBJS! %TEST_OBJ%\%%~nf.obj"
+)
+for %%f in (test_*.c) do (
+    if /i not "%%f"=="test_main.c" if /i not "%%f"=="test_helpers.c" (
+        cl %CFLAGS% /c %%f /Fo%TEST_OBJ%\
+        if errorlevel 1 (
+            echo FAILED to compile %%f
+            exit /b 1
+        )
+        set "TEST_OBJS=!TEST_OBJS! %TEST_OBJ%\%%~nf.obj"
+    )
 )
 
 REM Recompile comm.c with TEST_BUILD to exclude main()
-echo   comm.c (TEST_BUILD)
-cl %CFLAGS% /c %SRC_DIR%\core\comm.c /Fo%TEST_OBJ%\comm_test.obj >nul
+cl %CFLAGS% /c %SRC_DIR%\core\comm.c /Fo%TEST_OBJ%\comm_test.obj
 if errorlevel 1 (
     echo FAILED to compile comm.c with TEST_BUILD
     exit /b 1
 )
+set "TEST_OBJS=!TEST_OBJS! %TEST_OBJ%\comm_test.obj"
 
 REM Collect all game .obj files EXCEPT comm.obj (flat directory on Windows)
 set GAME_OBJS=
@@ -85,9 +99,9 @@ for %%f in (%GAME_OBJ%\*.obj) do (
 REM Libraries
 set LIBS=ws2_32.lib bcrypt.lib ..\lib\win64\Release\zlib.lib
 
-REM Link
+REM Link (PDB goes into obj/ to keep tests/ clean)
 echo Linking...
-link /nologo /LTCG /DEBUG /OUT:run_tests.exe %TEST_OBJ%\test_main.obj %TEST_OBJ%\test_helpers.obj %TEST_OBJ%\test_dice.obj %TEST_OBJ%\test_strings.obj %TEST_OBJ%\test_stats.obj %TEST_OBJ%\comm_test.obj %GAME_OBJS% %LIBS%
+link /nologo /LTCG /PDB:%TEST_OBJ%\run_tests.pdb /OUT:run_tests.exe %TEST_OBJS% %GAME_OBJS% %LIBS%
 if errorlevel 1 (
     echo LINK FAILED
     exit /b 1
