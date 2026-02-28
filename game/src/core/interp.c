@@ -37,9 +37,6 @@ int can_interpret args( ( CHAR_DATA * ch, int cmd ) );
 int can_interpret( CHAR_DATA *ch, int cmd ) {
 	bool cando = FALSE;
 
-	if ( ch->level == 12 )
-		cando = TRUE;
-
 	if ( cmd_table[cmd].level > get_trust( ch ) ) return 0;
 
 	if ( cmd_table[cmd].race == 0 && cmd_table[cmd].discipline == 0 )
@@ -234,8 +231,6 @@ int total_descriptors = 0;
 bool check_disabled( const struct cmd_type *command );
 DISABLED_DATA *disabled_first;
 BAN_DATA *ban_list;
-
-pthread_mutex_t memory_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 /*
@@ -1480,7 +1475,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 	int cmd;
 	int trust;
 	bool found, foundstar = FALSE;
-	sh_int col = 0;
+	int col = 0;
 	int star = 0;
 	char cmd_copy[MAX_INPUT_LENGTH];
 
@@ -1578,6 +1573,13 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 	trust = get_trust( ch );
 	for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {
 		if ( command[0] == cmd_table[cmd].name[0] && !str_prefix( command, cmd_table[cmd].name ) && cmd_table[cmd].level <= trust ) {
+			/* Skip class/discipline-restricted commands the player can't use */
+			if ( cmd_table[cmd].race > 0 && cmd_table[cmd].discipline == 0
+			     && ch->class != cmd_table[cmd].race )
+				continue;
+			if ( cmd_table[cmd].discipline > 0
+			     && ch->power[cmd_table[cmd].discipline] < cmd_table[cmd].disclevel )
+				continue;
 			/* State-based command restrictions using binary search O(log n) instead of 100+ str_cmp() calls */
 			if ( IS_HEAD( ch, LOST_HEAD ) || IS_EXTRA( ch, EXTRA_OSWITCH ) ) {
 				if ( is_cmd_in_list( cmd_table[cmd].name, cmd_allow_headless, cmd_allow_headless_count ) )
@@ -2053,7 +2055,7 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 		}
 
 		free_string( p->disabled_by );			/* free name of disabler */
-		free_mem( p, sizeof( DISABLED_DATA ) ); /* free node */
+		free( p ); /* free node */
 
 		save_disabled(); /* save to disk */
 		send_to_char( "Command enabled.\n\r", ch );
@@ -2084,7 +2086,8 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 
 		/* Disable the command */
 
-		p = alloc_mem( sizeof( DISABLED_DATA ) );
+		p = calloc( 1, sizeof( DISABLED_DATA ) );
+		if ( !p ) { bug( "do_disable: calloc failed", 0 ); return; }
 
 		p->command = &cmd_table[i];
 		p->disabled_by = str_dup( ch->pcdata->switchname ); /* save name of disabler */
