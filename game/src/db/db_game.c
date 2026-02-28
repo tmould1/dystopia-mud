@@ -24,8 +24,8 @@ extern LEADER_BOARD leader_board;
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
 extern BOARD_DATA boards[];
-extern BAN_DATA *ban_list;
-extern DISABLED_DATA *disabled_first;
+extern list_head_t ban_list;
+extern list_head_t disabled_list;
 extern const struct cmd_type cmd_table[];
 extern time_t current_time;
 
@@ -1043,15 +1043,12 @@ void db_game_load_bans( void ) {
 	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 
-	ban_list = NULL;
-
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 		BAN_DATA *p = calloc( 1, sizeof( BAN_DATA ) );
 		if ( !p ) { bug( "db_game_load_bans: calloc failed", 0 ); exit( 1 ); }
 		p->name   = str_dup( col_text( stmt, 0 ) );
 		p->reason = str_dup( col_text( stmt, 1 ) );
-		p->next   = ban_list;
-		ban_list  = p;
+		list_push_front( &ban_list, &p->node );
 	}
 
 	sqlite3_finalize( stmt );
@@ -1077,7 +1074,7 @@ void db_game_save_bans( void ) {
 		return;
 	}
 
-	for ( p = ban_list; p; p = p->next ) {
+	LIST_FOR_EACH( p, &ban_list, BAN_DATA, node ) {
 		sqlite3_reset( stmt );
 		sqlite3_bind_text( stmt, 1, p->name, -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, 2, p->reason, -1, SQLITE_TRANSIENT );
@@ -1105,8 +1102,6 @@ void db_game_load_disabled( void ) {
 	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 
-	disabled_first = NULL;
-
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 		const char *name = col_text( stmt, 0 );
 		DISABLED_DATA *p;
@@ -1123,8 +1118,7 @@ void db_game_load_disabled( void ) {
 		p->command     = &cmd_table[i];
 		p->level       = (int)sqlite3_column_int( stmt, 1 );
 		p->disabled_by = str_dup( col_text( stmt, 2 ) );
-		p->next        = disabled_first;
-		disabled_first = p;
+		list_push_front( &disabled_list, &p->node );
 	}
 
 	sqlite3_finalize( stmt );
@@ -1142,7 +1136,7 @@ void db_game_save_disabled( void ) {
 	db_begin( db );
 	sqlite3_exec( db, "DELETE FROM disabled_commands", NULL, NULL, NULL );
 
-	if ( disabled_first ) {
+	if ( !list_empty( &disabled_list ) ) {
 		if ( sqlite3_prepare_v2( db,
 				"INSERT INTO disabled_commands (command_name, level, disabled_by) "
 				"VALUES (?,?,?)",
@@ -1152,7 +1146,7 @@ void db_game_save_disabled( void ) {
 			return;
 		}
 
-		for ( p = disabled_first; p; p = p->next ) {
+		LIST_FOR_EACH( p, &disabled_list, DISABLED_DATA, node ) {
 			sqlite3_reset( stmt );
 			sqlite3_bind_text( stmt, 1, p->command->name, -1, SQLITE_TRANSIENT );
 			sqlite3_bind_int( stmt, 2, p->level );

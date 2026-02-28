@@ -229,8 +229,8 @@ int closed_sockets = 0;
 int removed_sockets = 0;
 int total_descriptors = 0;
 bool check_disabled( const struct cmd_type *command );
-DISABLED_DATA *disabled_first;
-BAN_DATA *ban_list;
+list_head_t disabled_list;
+list_head_t ban_list;
 
 
 /*
@@ -2000,7 +2000,7 @@ disable <command> - toggles disable status of command
 
 void do_disable( CHAR_DATA *ch, char *argument ) {
 	int i;
-	DISABLED_DATA *p, *q;
+	DISABLED_DATA *p;
 	char buf[100];
 
 	if ( IS_NPC( ch ) ) {
@@ -2010,7 +2010,7 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 
 	if ( !argument[0] ) /* Nothing specified. Show disabled commands. */
 	{
-		if ( !disabled_first ) /* Any disabled at all ? */
+		if ( list_empty( &disabled_list ) ) /* Any disabled at all ? */
 		{
 			send_to_char( "There are no commands disabled.\n\r", ch );
 			return;
@@ -2020,7 +2020,7 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 					  "Command      Level   Disabled by\n\r",
 			ch );
 
-		for ( p = disabled_first; p; p = p->next ) {
+		LIST_FOR_EACH( p, &disabled_list, DISABLED_DATA, node ) {
 			snprintf( buf, sizeof( buf ), "%-12s %5d   %-12s\n\r", p->command->name, p->level, p->disabled_by );
 			send_to_char( buf, ch );
 		}
@@ -2030,7 +2030,7 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 	/* command given */
 
 	/* First check if it is one of the disabled commands */
-	for ( p = disabled_first; p; p = p->next )
+	LIST_FOR_EACH( p, &disabled_list, DISABLED_DATA, node )
 		if ( !str_cmp( argument, p->command->name ) )
 			break;
 
@@ -2046,16 +2046,9 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 
 		/* Remove */
 
-		if ( disabled_first == p ) /* node to be removed == head ? */
-			disabled_first = p->next;
-		else /* Find the node before this one */
-		{
-			for ( q = disabled_first; q->next != p; q = q->next ); /* empty for */
-			q->next = p->next;
-		}
-
-		free(p->disabled_by);			/* free name of disabler */
-		free( p ); /* free node */
+		list_remove( &disabled_list, &p->node );
+		free(p->disabled_by);
+		free( p );
 
 		save_disabled(); /* save to disk */
 		send_to_char( "Command enabled.\n\r", ch );
@@ -2092,8 +2085,7 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 		p->command = &cmd_table[i];
 		p->disabled_by = str_dup( ch->pcdata->switchname ); /* save name of disabler */
 		p->level = get_trust( ch );							/* save trust */
-		p->next = disabled_first;
-		disabled_first = p; /* add before the current first element */
+		list_push_front( &disabled_list, &p->node );
 
 		send_to_char( "Command disabled.\n\r", ch );
 		save_disabled(); /* save to disk */
@@ -2107,7 +2099,7 @@ void do_disable( CHAR_DATA *ch, char *argument ) {
 bool check_disabled( const struct cmd_type *command ) {
 	DISABLED_DATA *p;
 
-	for ( p = disabled_first; p; p = p->next )
+	LIST_FOR_EACH( p, &disabled_list, DISABLED_DATA, node )
 		if ( p->command->do_fun == command->do_fun )
 			return TRUE;
 

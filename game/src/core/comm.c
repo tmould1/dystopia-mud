@@ -936,8 +936,7 @@ void new_descriptor( int control ) {
 		return;
 	}
 	dummyarg->status = 1;
-	dummyarg->next = dummy_list;
-	dummy_list = dummyarg;
+	list_push_front( &dummy_list, &dummyarg->node );
 
 	size = sizeof( sock );
 	getsockname( control, (struct sockaddr *) &sock, &size );
@@ -1088,7 +1087,7 @@ void lookup_address( DUMMY_ARG *darg ) {
 bool check_banned( DESCRIPTOR_DATA *dnew ) {
 	BAN_DATA *pban;
 
-	for ( pban = ban_list; pban != NULL; pban = pban->next )
+	LIST_FOR_EACH( pban, &ban_list, BAN_DATA, node )
 		if ( !str_suffix( pban->name, dnew->host ) ) return TRUE;
 	return FALSE;
 }

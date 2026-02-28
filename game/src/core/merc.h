@@ -124,12 +124,12 @@ typedef struct disabled_data DISABLED_DATA;
 
 /* one disabled command */
 struct disabled_data {
-	DISABLED_DATA *next;			/* pointer to next node */
+	list_node_t node;
 	struct cmd_type const *command; /* pointer to the command struct*/
 	char *disabled_by;				/* name of disabler */
 	int level;					/* level of disabler */
 };
-extern DISABLED_DATA *disabled_first;
+extern list_head_t disabled_list;
 
 /*
  * Function types.
@@ -261,7 +261,7 @@ void save_gameconfig (void);
  * Site ban structure.
  */
 struct ban_data {
-	BAN_DATA *next;
+	list_node_t node;
 	char *name;
 	char *reason;
 };
@@ -530,7 +530,7 @@ typedef enum {
  * Needed for threads - Jobo
  */
 struct dummy_arg {
-	DUMMY_ARG *next;
+	list_node_t node;
 	DESCRIPTOR_DATA *d;
 	char *buf;
 	int status;
@@ -2851,13 +2851,13 @@ extern int social_count;
 extern SHOP_DATA *shop_first;
 
 extern list_head_t g_helps;
-extern BAN_DATA *ban_list;
+extern list_head_t ban_list;
 extern list_head_t g_characters;
 extern list_head_t g_descriptors;
 extern list_head_t g_objects;
 
 extern ROOM_INDEX_DATA *room_list;
-extern DUMMY_ARG *dummy_list;
+extern list_head_t dummy_list;
 extern char bug_buf[];
 extern time_t current_time;
 extern time_t boot_time;

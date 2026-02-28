@@ -1910,7 +1910,7 @@ void do_ban( CHAR_DATA *ch, char *argument ) {
 
 	if ( arg[0] == '\0' ) {
 		strcpy( buf, "Banned sites:\n\r" );
-		for ( pban = ban_list; pban != NULL; pban = pban->next ) {
+		LIST_FOR_EACH( pban, &ban_list, BAN_DATA, node ) {
 			strcat( buf, pban->name );
 			strcat( buf, "    (" );
 			strcat( buf, pban->reason );
@@ -1920,7 +1920,7 @@ void do_ban( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	for ( pban = ban_list; pban != NULL; pban = pban->next ) {
+	LIST_FOR_EACH( pban, &ban_list, BAN_DATA, node ) {
 		if ( !str_cmp( arg, pban->name ) ) {
 			send_to_char( "That site is already banned!\n\r", ch );
 			return;
@@ -1938,8 +1938,7 @@ void do_ban( CHAR_DATA *ch, char *argument ) {
 		pban->reason = str_dup( "no reason given" );
 	else
 		pban->reason = str_dup( argument );
-	pban->next = ban_list;
-	ban_list = pban;
+	list_push_front( &ban_list, &pban->node );
 	send_to_char( "Ok.\n\r", ch );
 	save_bans();
 	return;
@@ -1948,7 +1947,6 @@ void do_ban( CHAR_DATA *ch, char *argument ) {
 void do_allow( CHAR_DATA *ch, char *argument ) {
 	char arg[MAX_INPUT_LENGTH];
 	char buf[MAX_STRING_LENGTH];
-	BAN_DATA *prev;
 	BAN_DATA *curr;
 
 	snprintf( buf, sizeof( buf ), "%s: Allow %s", ch->name, argument );
@@ -1961,14 +1959,9 @@ void do_allow( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	prev = NULL;
-	for ( curr = ban_list; curr != NULL; prev = curr, curr = curr->next ) {
+	LIST_FOR_EACH( curr, &ban_list, BAN_DATA, node ) {
 		if ( !str_cmp( arg, curr->name ) ) {
-			if ( prev == NULL )
-				ban_list = ban_list->next;
-			else
-				prev->next = curr->next;
-
+			list_remove( &ban_list, &curr->node );
 			free(curr->name);
 			free(curr->reason);
 			free( curr );

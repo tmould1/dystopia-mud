@@ -977,27 +977,12 @@ void update_arena() {
 
 void recycle_dummys() {
 	DUMMY_ARG *dummy;
-	DUMMY_ARG *dummy_next;
+	DUMMY_ARG *dummy_tmp;
 
-	for ( dummy = dummy_list; dummy; dummy = dummy_next ) {
-		dummy_next = dummy->next;
+	LIST_FOR_EACH_SAFE( dummy, dummy_tmp, &dummy_list, DUMMY_ARG, node ) {
 		if ( dummy->status == 1 ) continue; // being used
 
-		if ( dummy == dummy_list ) {
-			dummy_list = dummy_list->next;
-		} else {
-			DUMMY_ARG *prev;
-
-			/* we find the prev dummy arg */
-			for ( prev = dummy_list; prev && prev->next != dummy; prev = prev->next );
-			if ( prev != NULL )
-				prev->next = dummy->next;
-			else {
-				bug( "Recycle_dymmys: dummy not found.", 0 );
-				continue;
-			}
-		}
-
+		list_remove( &dummy_list, &dummy->node );
 		free( dummy );
 	}
 }

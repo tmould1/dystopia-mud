@@ -147,7 +147,7 @@ void mud_init_paths( const char *exe_path ) {
  */
 SHOP_DATA *shop_first;
 SHOP_DATA *shop_last;
-DUMMY_ARG *dummy_list;
+list_head_t dummy_list;
 
 char bug_buf[MAX_STRING_LENGTH];
 list_head_t g_characters;
@@ -320,6 +320,9 @@ void boot_db( bool fCopyOver ) {
 	list_init( &g_objects );
 	list_init( &g_areas );
 	list_init( &g_helps );
+	list_init( &disabled_list );
+	list_init( &ban_list );
+	list_init( &dummy_list );
 
 	/*
 	 * Init random number generator.
