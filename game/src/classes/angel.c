@@ -365,7 +365,7 @@ void do_martyr( CHAR_DATA *ch, char *argument ) {
 	ch->level = 12;
 	act( "You call for God to transfer the pain of these mortals to yourself.", ch, NULL, NULL, TO_CHAR );
 	act( "$n says '#yLet not these followers of God suffer, let their pain be mine instead#n'.", ch, NULL, NULL, TO_ROOM );
-	for ( ich = ch->in_room->people; ich != NULL; ich = ich->next_in_room )
+	LIST_FOR_EACH(ich, &ch->in_room->characters, CHAR_DATA, room_node)
 		if ( !IS_NPC( ich ) ) do_restore( ch, ich->pcdata->switchname );
 	ch->level = 3;
 	ch->hit = 1;

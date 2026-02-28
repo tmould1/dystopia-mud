@@ -34,7 +34,7 @@ void do_tribe( CHAR_DATA *ch, char *argument ) {
 	}
 	send_to_char( "#C          -*-  The Tribe of Gaia  -*-#n\n\r", ch );
 	send_to_char( "#7[#CName                #7] [#C  Hp   #7] [#C Mana  #7] [#C Move  #7]#n\n\r", ch );
-	for ( gch = char_list; gch != NULL; gch = gch->next ) {
+	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 		if ( !IS_CLASS( gch, CLASS_WEREWOLF ) ) continue;
 		sprintf( buf, "#7[%-20s] [%-7d] [%-7d] [%-7d]#n\n\r",
@@ -729,7 +729,7 @@ void do_devour( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Devour what?\n\r", ch );
 		return;
 	}
-	obj = get_obj_list( ch, arg, ch->in_room->contents );
+	obj = get_obj_list( ch, arg, &ch->in_room->objects );
 	if ( obj == NULL ) {
 		send_to_char( "You can't find it.\n\r", ch );
 		return;

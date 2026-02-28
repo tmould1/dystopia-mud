@@ -115,7 +115,7 @@ int count_thralls( CHAR_DATA *ch ) {
 	CHAR_DATA *fch;
 	int count = 0;
 
-	for ( fch = char_list; fch != NULL; fch = fch->next ) {
+	LIST_FOR_EACH( fch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( fch ) && IS_AFFECTED( fch, AFF_CHARM ) && fch->master == ch )
 			count++;
 	}
@@ -350,8 +350,7 @@ void do_massdomination( CHAR_DATA *ch, char *argument ) {
 	act( "You unleash a wave of psychic domination!", ch, NULL, NULL, TO_CHAR );
 	act( "$n unleashes a wave of psychic domination!", ch, NULL, NULL, TO_ROOM );
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = victim_next ) {
-		victim_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, victim_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( victim == ch ) continue;
 		if ( !IS_NPC( victim ) ) continue;
@@ -570,8 +569,7 @@ void do_psychicmaelstrom( CHAR_DATA *ch, char *argument ) {
 	act( "You unleash a psychic maelstrom!", ch, NULL, NULL, TO_CHAR );
 	act( "$n unleashes a psychic maelstrom!", ch, NULL, NULL, TO_ROOM );
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = victim_next ) {
-		victim_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, victim_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( victim == ch ) continue;
 		if ( is_same_group( ch, victim ) ) continue;
@@ -635,8 +633,7 @@ void do_psiblast( CHAR_DATA *ch, char *argument ) {
 	act( "You project a devastating cone of psionic force!", ch, NULL, NULL, TO_CHAR );
 	act( "$n projects a devastating cone of psionic force!", ch, NULL, NULL, TO_ROOM );
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = victim_next ) {
-		victim_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, victim_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( victim == ch ) continue;
 		if ( is_same_group( ch, victim ) ) continue;
@@ -698,8 +695,7 @@ void do_realityfracture( CHAR_DATA *ch, char *argument ) {
 	act( "#x035You tear at the very fabric of reality!#n", ch, NULL, NULL, TO_CHAR );
 	act( "#x035$n tears at the very fabric of reality!#n", ch, NULL, NULL, TO_ROOM );
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = victim_next ) {
-		victim_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, victim_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( victim == ch ) continue;
 		if ( is_same_group( ch, victim ) ) continue;

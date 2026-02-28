@@ -504,8 +504,7 @@ void do_cast( CHAR_DATA *ch, char *argument ) {
 		CHAR_DATA *vch;
 		CHAR_DATA *vch_next;
 
-		for ( vch = ch->in_room->people; vch; vch = vch_next ) {
-			vch_next = vch->next_in_room;
+		LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( victim == vch && victim->fighting == NULL ) {
 				multi_hit( victim, ch, TYPE_UNDEFINED );
 				break;
@@ -578,8 +577,7 @@ void obj_cast_spell( int sn, int level, CHAR_DATA *ch, CHAR_DATA *victim, OBJ_DA
 		CHAR_DATA *vch;
 		CHAR_DATA *vch_next;
 
-		for ( vch = ch->in_room->people; vch; vch = vch_next ) {
-			vch_next = vch->next_in_room;
+		LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( victim == vch && victim->fighting == NULL ) {
 				multi_hit( victim, ch, TYPE_UNDEFINED );
 				break;
@@ -720,7 +718,7 @@ void spell_blindness( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 void spell_burning_hands( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
-	static const sh_int dam_each[] =
+	static const int dam_each[] =
 		{
 			4,
 			6, 8, 10, 12, 14, 17, 20, 23, 26, 29,
@@ -772,8 +770,7 @@ void spell_call_lightning( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	act( "$n calls God's lightning to strike $s foes!",
 		ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( vch->in_room == NULL )
 			continue;
 		if ( vch->in_room == ch->in_room ) {
@@ -877,7 +874,7 @@ void spell_charm_person( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_chill_touch( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	bool no_dam = FALSE;
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
-	static const sh_int dam_each[] =
+	static const int dam_each[] =
 		{
 			9,
 			10, 10, 10, 11, 11, 12, 12, 13, 13, 13,
@@ -920,7 +917,7 @@ void spell_chill_touch( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 void spell_colour_spray( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
-	static const sh_int dam_each[] =
+	static const int dam_each[] =
 		{
 			10,
 			15, 15, 15, 15, 15, 20, 20, 20, 20, 20,
@@ -1236,13 +1233,13 @@ void spell_dispel_magic( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 
-	if ( !( victim->affected ) && !IS_SET( victim->flag2, AFF_TOTALBLIND ) ) {
+	if ( list_empty(&victim->affects) && !IS_SET( victim->flag2, AFF_TOTALBLIND ) ) {
 		send_to_char( "Nothing happens.\n\r", ch );
 		return;
 	}
 
-	while ( victim->affected )
-		affect_remove( victim, victim->affected );
+	while ( !list_empty(&victim->affects) )
+		affect_remove( victim, LIST_ENTRY(victim->affects.sentinel.next, AFFECT_DATA, node) );
 
 	if ( dark == TRUE ) REMOVE_BIT( ch->in_room->room_flags, ROOM_TOTAL_DARKNESS );
 
@@ -1273,8 +1270,7 @@ void spell_earthquake( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	send_to_char( "The earth trembles beneath your feet!\n\r", ch );
 	act( "$n makes the earth tremble and shiver.", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( vch->in_room == NULL || !can_see( ch, vch ) )
 			continue;
 		if ( vch->in_room == ch->in_room ) {
@@ -1299,39 +1295,29 @@ void spell_enchant_weapon( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 
-	if ( affect_free == NULL ) {
-		paf = alloc_perm( sizeof( *paf ) );
-	} else {
-		paf = affect_free;
-		affect_free = affect_free->next;
+	paf = calloc( 1, sizeof( *paf ) );
+	if ( !paf ) {
+		bug( "spell_enchant_weapon: calloc failed", 0 );
+		return;
 	}
-	/*
-		paf->type		= 0;
-	*/
 	paf->type = sn;
 	paf->duration = -1;
 	paf->location = APPLY_HITROLL;
 	paf->modifier = level / 5;
 	paf->bitvector = 0;
-	paf->next = obj->affected;
-	obj->affected = paf;
+	list_push_front(&obj->affects, &paf->node);
 
-	if ( affect_free == NULL ) {
-		paf = alloc_perm( sizeof( *paf ) );
-	} else {
-		paf = affect_free;
-		affect_free = affect_free->next;
+	paf = calloc( 1, sizeof( *paf ) );
+	if ( !paf ) {
+		bug( "spell_enchant_weapon: calloc failed", 0 );
+		return;
 	}
-	/*
-		paf->type		= -1;
-	*/
 	paf->type = sn;
 	paf->duration = -1;
 	paf->location = APPLY_DAMROLL;
 	paf->modifier = level / 10;
 	paf->bitvector = 0;
-	paf->next = obj->affected;
-	obj->affected = paf;
+	list_push_front(&obj->affects, &paf->node);
 
 	if ( IS_GOOD( ch ) ) {
 		SET_BIT( obj->extra_flags, ITEM_ANTI_EVIL );
@@ -1361,47 +1347,36 @@ void spell_enchant_armor( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 
-	if ( affect_free == NULL ) {
-		paf = alloc_perm( sizeof( *paf ) );
-	} else {
-		paf = affect_free;
-		affect_free = affect_free->next;
+	paf = calloc( 1, sizeof( *paf ) );
+	if ( !paf ) {
+		bug( "spell_enchant_armor: calloc failed", 0 );
+		return;
 	}
-	/*
-		paf->type		= 0;
-	*/
 	paf->type = sn;
 	paf->duration = -1;
 	paf->location = APPLY_HITROLL;
 	paf->modifier = level / 5;
 	paf->bitvector = 0;
-	paf->next = obj->affected;
-	obj->affected = paf;
+	list_push_front(&obj->affects, &paf->node);
 
-	if ( affect_free == NULL ) {
-		paf = alloc_perm( sizeof( *paf ) );
-	} else {
-		paf = affect_free;
-		affect_free = affect_free->next;
+	paf = calloc( 1, sizeof( *paf ) );
+	if ( !paf ) {
+		bug( "spell_enchant_armor: calloc failed", 0 );
+		return;
 	}
-	/*
-		paf->type		= -1;
-	*/
 	paf->type = sn;
 	paf->duration = -1;
 	paf->location = APPLY_DAMROLL;
 	paf->modifier = level / 5;
 	paf->bitvector = 0;
-	paf->next = obj->affected;
-	obj->affected = paf;
+	list_push_front(&obj->affects, &paf->node);
 
 	paf->type = sn;
 	paf->duration = -1;
 	paf->location = APPLY_AC;
 	paf->modifier = -level / 5;
 	paf->bitvector = 0;
-	paf->next = obj->affected;
-	obj->affected = paf;
+	list_push_front(&obj->affects, &paf->node);
 
 	if ( IS_GOOD( ch ) ) {
 		SET_BIT( obj->extra_flags, ITEM_ANTI_EVIL );
@@ -1542,7 +1517,7 @@ void spell_imp_teleport( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 void spell_fireball( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
-	static const sh_int dam_each[] =
+	static const int dam_each[] =
 		{
 			20,
 			20, 20, 20, 20, 20, 25, 25, 25, 25, 25,
@@ -1647,8 +1622,7 @@ void spell_spew( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *vch_next;
 	int dam;
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch->trust > 6 ) continue;
 		if ( IS_NPC( vch ) ) dam = 250 * level;
 		if ( !IS_NPC( vch ) ) dam = 100 * level;
@@ -1734,7 +1708,7 @@ void spell_faerie_fog( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	act( "$n conjures a cloud of purple smoke.", ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You conjure a cloud of purple smoke.\n\r", ch );
 
-	for ( ich = ch->in_room->people; ich != NULL; ich = ich->next_in_room ) {
+	LIST_FOR_EACH(ich, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( ich == ch || ich->trust > 6 ) continue;
 
@@ -1760,7 +1734,7 @@ void spell_faerie_fog( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		send_to_char( "You are revealed!\n\r", ich );
 	}
 	if ( IS_SET( ch->in_room->room_flags, ROOM_TOTAL_DARKNESS ) ) {
-		for ( ich = ch->in_room->people; ich != NULL; ich = ich->next_in_room ) {
+		LIST_FOR_EACH(ich, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( IS_CLASS( ich, CLASS_DROW ) && IS_SET( ich->newbits, NEW_DARKNESS ) )
 				still_dark = TRUE;
 		}
@@ -1842,7 +1816,7 @@ void spell_harm( int sn, int level, CHAR_DATA *ch, void *vo ) {
 void spell_group_heal( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *ich;
 
-	for ( ich = ch->in_room->people; ich != NULL; ich = ich->next_in_room ) {
+	LIST_FOR_EACH(ich, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( is_same_group( ich, ch ) ) {
 			heal_char( ich, number_range( 150, 250 ) );
 			send_to_char( "You feel healed.\n\r", ich );
@@ -2187,7 +2161,7 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		break;
 	}
 
-	for ( paf = obj->pIndexData->affected; paf != NULL; paf = paf->next ) {
+	LIST_FOR_EACH(paf, &obj->pIndexData->affects, AFFECT_DATA, node) {
 		if ( paf->location != APPLY_NONE && paf->modifier != 0 ) {
 			snprintf( buf, sizeof( buf ), "Affects %s by %d.\n\r",
 				affect_loc_name( paf->location ), paf->modifier );
@@ -2195,7 +2169,7 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		}
 	}
 
-	for ( paf = obj->affected; paf != NULL; paf = paf->next ) {
+	LIST_FOR_EACH(paf, &obj->affects, AFFECT_DATA, node) {
 		if ( paf->location != APPLY_NONE && paf->modifier != 0 ) {
 			snprintf( buf, sizeof( buf ), "Affects %s by %d.\n\r",
 				affect_loc_name( paf->location ), paf->modifier );
@@ -2277,7 +2251,7 @@ void spell_know_alignment( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 void spell_lightning_bolt( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
-	static const sh_int dam_each[] =
+	static const int dam_each[] =
 		{
 			10,
 			15, 15, 15, 20, 20, 25, 25, 25, 25, 28,
@@ -2314,7 +2288,7 @@ void spell_locate_object( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	int count = 0;
 
 	found = FALSE;
-	for ( obj = object_list; obj != NULL; obj = obj->next ) {
+	LIST_FOR_EACH( obj, &g_objects, OBJ_DATA, obj_node ) {
 		if ( !can_see_obj( ch, obj ) || !is_name( target_name, obj->name ) || ( ch->level < 7 && ( ( obj->item_type == ITEM_ADAMANTITE ) || ( obj->item_type == ITEM_STEEL ) || ( obj->item_type == ITEM_IRON ) || ( obj->item_type == ITEM_COPPER ) || ( obj->item_type == ITEM_HILT ) || ( obj->item_type == ITEM_GEMSTONE ) ) ) )
 			continue;
 
@@ -2347,7 +2321,7 @@ void spell_locate_object( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 void spell_magic_missile( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	CHAR_DATA *victim = (CHAR_DATA *) vo;
-	static const sh_int dam_each[] =
+	static const int dam_each[] =
 		{
 			0,
 			3, 3, 4, 4, 5, 6, 6, 6, 6, 6,
@@ -2372,7 +2346,7 @@ void spell_mass_invis( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	AFFECT_DATA af;
 	CHAR_DATA *gch;
 
-	for ( gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room ) {
+	LIST_FOR_EACH(gch, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( !is_same_group( gch, ch ) || IS_AFFECTED( gch, AFF_INVISIBLE ) )
 			continue;
 		act( "$n slowly fades out of existence.", gch, NULL, NULL, TO_ROOM );
@@ -2780,7 +2754,7 @@ void spell_ventriloquate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	snprintf( buf2, sizeof( buf2 ), "Someone makes %s say '%s'.\n\r", speaker, target_name );
 	buf1[0] = UPPER( buf1[0] );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch->next_in_room ) {
+	LIST_FOR_EACH(vch, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( !is_name( speaker, vch->name ) )
 			send_to_char( saves_spell( level, vch ) ? buf2 : buf1, vch );
 	}
@@ -2873,8 +2847,7 @@ void spell_gas_breath( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	int hpch;
 	int chhp;
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( can_see( ch, vch ) )
 			if ( IS_NPC( ch ) ? !IS_NPC( vch ) : IS_NPC( vch ) ) {
 				hpch = UMAX( 10, ch->hit );
@@ -4421,8 +4394,7 @@ void spell_scan( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	OBJ_DATA *obj_next;
 	bool found = FALSE;
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->condition < 100 && can_see_obj( ch, obj ) ) {
 			found = TRUE;
 			act( "$p needs repairing.", ch, obj, NULL, TO_CHAR );
@@ -4440,8 +4412,7 @@ void spell_repair( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	OBJ_DATA *obj_next;
 	bool found = FALSE;
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->condition < 100 && can_see_obj( ch, obj ) ) {
 			found = TRUE;
 			obj->condition = 100;

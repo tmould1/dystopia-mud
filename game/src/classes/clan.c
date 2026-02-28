@@ -3390,8 +3390,7 @@ void do_werewolf( CHAR_DATA *ch, char *argument ) {
 	if ( ch->rage > 300 )
 		ch->rage = 300;
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( vch->in_room == NULL )
 			continue;
 		if ( ch == vch ) {

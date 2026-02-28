@@ -181,9 +181,7 @@ void show_string args( ( DESCRIPTOR_DATA * d, char *input ) );
 /*
  * Global variables.
  */
-DESCRIPTOR_DATA *descriptor_free; /* Free list for descriptors	*/
-DESCRIPTOR_DATA *descriptor_list; /* All open descriptors		*/
-DESCRIPTOR_DATA *d_next;		  /* Next descriptor in loop	*/
+list_head_t g_descriptors;		  /* All open descriptors		*/
 FILE *fpReserve;				  /* Reserved file handle		*/
 bool god;						  /* All new chars are gods!	*/
 bool merc_down;					  /* Shutdown			*/
@@ -315,20 +313,13 @@ void boot_headless( const char *exe_path ) {
 #if defined( WIN32 )
 	setvbuf( stderr, NULL, _IONBF, 0 );
 	setvbuf( stdout, NULL, _IONBF, 0 );
-	{
-		extern pthread_mutex_t memory_mutex;
-		InitializeCriticalSection( &memory_mutex );
-	}
-#else
-	{
-		extern pthread_mutex_t memory_mutex;
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init( &attr );
-		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE );
-		pthread_mutex_init( &memory_mutex, &attr );
-		pthread_mutexattr_destroy( &attr );
-	}
 #endif
+
+	/*
+	 * Init descriptor list before paths, because log_string() calls
+	 * logchan() which iterates g_descriptors.
+	 */
+	list_init( &g_descriptors );
 
 	mud_init_paths( exe_path );
 
@@ -356,24 +347,13 @@ int main( int argc, char **argv ) {
 	/* Windows buffers stderr by default - disable for immediate log output */
 	setvbuf( stderr, NULL, _IONBF, 0 );
 	setvbuf( stdout, NULL, _IONBF, 0 );
-	/* Initialize mutex for memory allocation (Windows CRITICAL_SECTION needs runtime init) */
-	{
-		extern pthread_mutex_t memory_mutex;
-		InitializeCriticalSection( &memory_mutex );
-	}
-#else
-	/* Initialize memory mutex as recursive to prevent deadlock in crash handler.
-	 * If a crash occurs while holding the mutex, the signal handler needs to
-	 * be able to allocate memory for crash logging without deadlocking. */
-	{
-		extern pthread_mutex_t memory_mutex;
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init( &attr );
-		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE );
-		pthread_mutex_init( &memory_mutex, &attr );
-		pthread_mutexattr_destroy( &attr );
-	}
 #endif
+
+	/*
+	 * Init descriptor list before paths, because log_string() calls
+	 * logchan() which iterates g_descriptors.
+	 */
+	list_init( &g_descriptors );
 
 	/*
 	 * Initialize paths based on executable location.
@@ -575,11 +555,11 @@ int init_socket( int port ) {
 		exit( 1 );
 	}
 #else
-	WORD wVersionRequested = MAKEWORD( 1, 1 );
+	WORD wVersionRequested = MAKEWORD( 2, 2 );
 	WSADATA wsaData;
 	int err = WSAStartup( wVersionRequested, &wsaData );
 	if ( err != 0 ) {
-		perror( "No useable WINSOCK.DLL" );
+		perror( "WSAStartup failed" );
 		exit( 1 );
 	}
 
@@ -654,9 +634,7 @@ void excessive_cpu( int blx ) {
 	CHAR_DATA *vch;
 	CHAR_DATA *vch_next;
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
-
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( vch ) ) {
 			send_to_char( "Mud frozen: Autosave and quit.  The mud will reboot in 2 seconds.\n\r", vch );
 			interpret( vch, "quit" );
@@ -689,7 +667,7 @@ void game_loop( int control ) {
 		fd_set in_set;
 		fd_set out_set;
 		fd_set exc_set;
-		DESCRIPTOR_DATA *d;
+		DESCRIPTOR_DATA *d, *d_tmp;
 		int maxdesc;
 
 #if defined( MALLOC_DEBUG )
@@ -710,7 +688,7 @@ void game_loop( int control ) {
 		/* kavirpoint
 			maxdesc	= control * 2;
 		*/
-		for ( d = descriptor_list; d != NULL; d = d->next ) {
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			maxdesc = UMAX( maxdesc, d->descriptor );
 			FD_SET( d->descriptor, &in_set );
 			FD_SET( d->descriptor, &out_set );
@@ -731,8 +709,7 @@ void game_loop( int control ) {
 		/*
 		 * Kick out the freaky folks.
 		 */
-		for ( d = descriptor_list; d != NULL; d = d_next ) {
-			d_next = d->next;
+		LIST_FOR_EACH_SAFE( d, d_tmp, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			if ( FD_ISSET( d->descriptor, &exc_set ) ) {
 				FD_CLR( d->descriptor, &in_set );
 				FD_CLR( d->descriptor, &out_set );
@@ -746,8 +723,7 @@ void game_loop( int control ) {
 		/*
 		 * Process input.
 		 */
-		for ( d = descriptor_list; d != NULL; d = d_next ) {
-			d_next = d->next;
+		LIST_FOR_EACH_SAFE( d, d_tmp, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			d->fcommand = FALSE;
 
 			if ( FD_ISSET( d->descriptor, &in_set ) ) {
@@ -826,9 +802,7 @@ void game_loop( int control ) {
 		/*
 		 * Output.
 		 */
-		for ( d = descriptor_list; d != NULL; d = d_next ) {
-			d_next = d->next;
-
+		LIST_FOR_EACH_SAFE( d, d_tmp, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			if ( ( d->fcommand || d->outtop > 0 ) && FD_ISSET( d->descriptor, &out_set ) ) {
 				if ( !process_output( d, TRUE ) ) {
 					if ( d->character != NULL )
@@ -923,7 +897,8 @@ void init_descriptor( DESCRIPTOR_DATA *dnew, int desc ) {
 	dnew->pString = NULL; /* OLC */
 	dnew->editor = 0;	  /* OLC */
 	dnew->outsize = 2000;
-	dnew->outbuf = alloc_mem( dnew->outsize );
+	dnew->outbuf = calloc( 1, dnew->outsize );
+	if ( !dnew->outbuf ) { bug( "new_descriptor: calloc failed for outbuf", 0 ); exit( 1 ); }
 	dnew->mxp_enabled = FALSE;
 	/* NAWS defaults */
 	dnew->naws_enabled = FALSE;
@@ -955,11 +930,10 @@ void new_descriptor( int control ) {
 	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
 	/* New Dummy Argument */
-	if ( dummy_free == NULL ) {
-		dummyarg = alloc_perm( sizeof( *dummyarg ) );
-	} else {
-		dummyarg = dummy_free;
-		dummy_free = dummy_free->next;
+	dummyarg = calloc( 1, sizeof( *dummyarg ) );
+	if ( !dummyarg ) {
+		bug( "new_descriptor: calloc failed for dummyarg", 0 );
+		return;
 	}
 	dummyarg->status = 1;
 	dummyarg->next = dummy_list;
@@ -998,11 +972,10 @@ void new_descriptor( int control ) {
 	/*
 	 * Cons a new descriptor.
 	 */
-	if ( descriptor_free == NULL ) {
-		dnew = alloc_perm( sizeof( *dnew ) );
-	} else {
-		dnew = descriptor_free;
-		descriptor_free = descriptor_free->next;
+	dnew = calloc( 1, sizeof( *dnew ) );
+	if ( !dnew ) {
+		bug( "new_descriptor: calloc failed", 0 );
+		return;
 	}
 
 	init_descriptor( dnew, desc );
@@ -1022,7 +995,7 @@ void new_descriptor( int control ) {
 			( addr >> 24 ) & 0xFF, ( addr >> 16 ) & 0xFF,
 			( addr >> 8 ) & 0xFF, ( addr ) & 0xFF );
 
-		sprintf( log_buf, "Connection Established: %s", buf );
+		sprintf( log_buf, "Connection Established: %s (fd=%d)", buf, desc );
 		log_string( log_buf );
 
 		dnew->host = str_dup( buf ); // set the temporary ip as the host.
@@ -1049,8 +1022,7 @@ void new_descriptor( int control ) {
 	/*
 	 * Init descriptor data.
 	 */
-	dnew->next = descriptor_list;
-	descriptor_list = dnew;
+	list_push_back( &g_descriptors, &dnew->node );
 
 	if ( DOS_ATTACK ) {
 		write_to_buffer( dnew, "Sorry, currently under attack, try again later.\n\r", 0 );
@@ -1062,15 +1034,19 @@ void new_descriptor( int control ) {
 	 * Must use write_to_descriptor (not write_to_buffer) because
 	 * write_to_buffer appends ESC[0m ANSI reset after each call,
 	 * corrupting the 3-byte telnet sequences.
-	 * Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
-	write_to_descriptor( dnew, (char *) compress2_will, (int) strlen( compress2_will ) );
-	write_to_descriptor( dnew, (char *) compress_will, (int) strlen( compress_will ) );
-	write_to_descriptor( dnew, (char *) mssp_will, (int) strlen( mssp_will ) );
-	write_to_descriptor( dnew, (char *) gmcp_will, (int) strlen( gmcp_will ) );
-	write_to_descriptor( dnew, (char *) mxp_will, (int) strlen( mxp_will ) );
-	write_to_descriptor( dnew, (char *) naws_do, (int) strlen( naws_do ) );
-	write_to_descriptor( dnew, (char *) ttype_do, (int) strlen( ttype_do ) );
-	write_to_descriptor( dnew, (char *) charset_will, (int) strlen( charset_will ) );
+	 * Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last.
+	 * Short-circuit on first failure — if the connection is already dead
+	 * (e.g. client probe-connect), don't spam error logs with 7 failures. */
+	if ( write_to_descriptor( dnew, (char *) compress2_will, (int) strlen( compress2_will ) )
+	  && write_to_descriptor( dnew, (char *) compress_will, (int) strlen( compress_will ) )
+	  && write_to_descriptor( dnew, (char *) mssp_will, (int) strlen( mssp_will ) )
+	  && write_to_descriptor( dnew, (char *) gmcp_will, (int) strlen( gmcp_will ) )
+	  && write_to_descriptor( dnew, (char *) mxp_will, (int) strlen( mxp_will ) )
+	  && write_to_descriptor( dnew, (char *) naws_do, (int) strlen( naws_do ) )
+	  && write_to_descriptor( dnew, (char *) ttype_do, (int) strlen( ttype_do ) )
+	  && write_to_descriptor( dnew, (char *) charset_will, (int) strlen( charset_will ) ) ) {
+		/* All telnet negotiation sent successfully */
+	}
 
 	/* Enter capability detection state.
 	 * Intro will be sent after telnet negotiation completes (or times out).
@@ -1138,7 +1114,7 @@ void close_socket( DESCRIPTOR_DATA *dclose ) {
 	{
 		DESCRIPTOR_DATA *d;
 
-		for ( d = descriptor_list; d != NULL; d = d->next )
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node )
 			if ( d->snoop_by == dclose ) d->snoop_by = NULL;
 	}
 
@@ -1159,7 +1135,6 @@ void close_socket( DESCRIPTOR_DATA *dclose ) {
 			free_char( dclose->character );
 		}
 	}
-	if ( d_next == dclose ) d_next = d_next->next;
 	dclose->connected = CON_NOT_PLAYING;
 	return;
 }
@@ -1186,7 +1161,7 @@ void close_socket2( DESCRIPTOR_DATA *dclose, bool kickoff ) {
 	{
 		DESCRIPTOR_DATA *d;
 
-		for ( d = descriptor_list; d != NULL; d = d->next )
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node )
 			if ( d->snoop_by == dclose ) d->snoop_by = NULL;
 	}
 
@@ -1200,7 +1175,6 @@ void close_socket2( DESCRIPTOR_DATA *dclose, bool kickoff ) {
 			free_char( dclose->character );
 		}
 	}
-	if ( d_next == dclose ) d_next = d_next->next;
 	dclose->connected = CON_NOT_PLAYING;
 	return;
 }
@@ -1261,7 +1235,9 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
 #if !defined( WIN32 )
 			perror( "Read_from_descriptor" );
 #else
-			log_string( "Read_from_descriptor: recv error." );
+			sprintf( log_buf, "Read_from_descriptor: recv error %d on fd %d.",
+				WSAGetLastError(), d->descriptor );
+			log_string( log_buf );
 #endif
 			return FALSE;
 		}
@@ -1699,7 +1675,7 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 void crashrecov( int iSignal ) {
 	CHAR_DATA *gch;
 	FILE *fp;
-	DESCRIPTOR_DATA *d, *d_next;
+	DESCRIPTOR_DATA *d, *d_tmp;
 	char buf[200], buf2[100];
 	int pid;
 #ifndef WIN32
@@ -1748,7 +1724,7 @@ void crashrecov( int iSignal ) {
 		return;
 	}
 
-	for ( gch = char_list; gch != NULL; gch = gch->next ) {
+	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 
 		/* Fix any possibly head/object forms */
@@ -1773,11 +1749,10 @@ void crashrecov( int iSignal ) {
 	sprintf( buf, "\n\r <*>          Dystopia has crashed           <*>\n\r\n\r <*>   Attempting to restore last savefile   <*>\n\r" );
 
 	/* For each playing descriptor, save its state */
-	for ( d = descriptor_list; d; d = d_next ) {
+	LIST_FOR_EACH_SAFE( d, d_tmp, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *och = d->character;
 
 		compressEnd2( d );
-		d_next = d->next;						  /* We delete from the list , so need to save this */
 		if ( !d->character || d->connected != 0 ) /* drop those logging on */
 		{
 			write_to_descriptor_2( d->descriptor, "\n\rSorry, the mud has crashed.\n\rPlease log on another char and report this, your char MAY be bugged.\n\r", 0 );
@@ -1850,14 +1825,16 @@ void retell_protocols( DESCRIPTOR_DATA *d ) {
 
 	/* Now send WILL/DO to offer protocols fresh */
 	/* Order matters - Mudlet expects: MCCP, MSSP, GMCP, then MXP last */
-	write_to_descriptor( d, (char *) compress2_will, (int) strlen( compress2_will ) ); /* MCCP v2 */
-	write_to_descriptor( d, (char *) compress_will, (int) strlen( compress_will ) );   /* MCCP v1 */
-	write_to_descriptor( d, (char *) mssp_will, (int) strlen( mssp_will ) );		   /* MSSP */
-	write_to_descriptor( d, (char *) gmcp_will, (int) strlen( gmcp_will ) );		   /* GMCP */
-	write_to_descriptor( d, (char *) mxp_will, (int) strlen( mxp_will ) );			   /* MXP */
-	write_to_descriptor( d, (char *) naws_do, (int) strlen( naws_do ) );			   /* NAWS */
-	write_to_descriptor( d, (char *) ttype_do, (int) strlen( ttype_do ) );			   /* TTYPE */
-	write_to_descriptor( d, (char *) charset_will, (int) strlen( charset_will ) );	   /* CHARSET */
+	if ( write_to_descriptor( d, (char *) compress2_will, (int) strlen( compress2_will ) )
+	  && write_to_descriptor( d, (char *) compress_will, (int) strlen( compress_will ) )
+	  && write_to_descriptor( d, (char *) mssp_will, (int) strlen( mssp_will ) )
+	  && write_to_descriptor( d, (char *) gmcp_will, (int) strlen( gmcp_will ) )
+	  && write_to_descriptor( d, (char *) mxp_will, (int) strlen( mxp_will ) )
+	  && write_to_descriptor( d, (char *) naws_do, (int) strlen( naws_do ) )
+	  && write_to_descriptor( d, (char *) ttype_do, (int) strlen( ttype_do ) )
+	  && write_to_descriptor( d, (char *) charset_will, (int) strlen( charset_will ) ) ) {
+		/* All protocol offers sent successfully */
+	}
 	return;
 }
 
@@ -2497,9 +2474,14 @@ void write_to_buffer( DESCRIPTOR_DATA *d, const char *txt, int length ) {
 			close_socket( d );
 			return;
 		}
-		obuf = alloc_mem( 2 * d->outsize );
+		obuf = calloc( 1, 2 * d->outsize );
+		if ( !obuf ) {
+			bug( "write_to_buffer: calloc failed for outbuf resize", 0 );
+			close_socket( d );
+			return;
+		}
 		memcpy( obuf, d->outbuf, d->outtop );
-		free_mem( d->outbuf, d->outsize );
+		free( d->outbuf );
 		d->outbuf = obuf;
 		d->outsize *= 2;
 	}
@@ -2540,11 +2522,14 @@ bool write_to_descriptor_2( int desc, char *txt, int length ) {
 		}
 #else
 		if ( ( nWrite = send( desc, txt + iStart, nBlock, 0 ) ) < 0 ) {
-			if ( WSAGetLastError() == WSAEWOULDBLOCK ) {
+			int wsa_err = WSAGetLastError();
+			if ( wsa_err == WSAEWOULDBLOCK ) {
 				nWrite = 0;
 				continue;
 			}
-			log_string( "Write_to_descriptor: send error." );
+			sprintf( log_buf, "Write_to_descriptor: send error %d on fd %d (len=%d).",
+				wsa_err, desc, nBlock );
+			log_string( log_buf );
 			return FALSE;
 		}
 #endif

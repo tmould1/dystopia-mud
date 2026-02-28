@@ -91,11 +91,10 @@ bool pedit_load_offline( CHAR_DATA *ch, const char *name ) {
     }
 
     /* Allocate temporary descriptor */
-    if ( descriptor_free == NULL ) {
-        dummy = alloc_perm( sizeof( *dummy ) );
-    } else {
-        dummy = descriptor_free;
-        descriptor_free = descriptor_free->next;
+    dummy = calloc( 1, sizeof( *dummy ) );
+    if ( !dummy ) {
+        bug( "pedit_load: calloc failed", 0 );
+        return FALSE;
     }
 
     /* Load the player */
@@ -105,9 +104,8 @@ bool pedit_load_offline( CHAR_DATA *ch, const char *name ) {
         send_to_char( "No such player file.\n\r", ch );
     }
 
-    /* Return descriptor to free list */
-    dummy->next = descriptor_free;
-    descriptor_free = dummy;
+    /* Free temporary descriptor */
+    free( dummy );
 
     if ( ch->pcdata->pfile == NULL )
         return FALSE;

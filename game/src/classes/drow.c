@@ -38,7 +38,7 @@ void do_lloth( CHAR_DATA *ch, char *argument ) {
 	}
 	send_to_char( "#p          -*-  The Church of Lloth  -*-#n\n\r", ch );
 	send_to_char( "#7[#pName                #7] [#p  Hp   #7] [#p Mana  #7] [#p Move  #7] [#p Gen  #7 ]#n\n\r", ch );
-	for ( gch = char_list; gch != NULL; gch = gch->next ) {
+	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 		if ( !IS_CLASS( gch, CLASS_DROW ) && !IS_CLASS( gch, CLASS_DROID ) ) continue;
 		sprintf( buf, "#7[%-20s] [%-7d] [%-7d] [%-7d] [%-7d]#n\n\r",
@@ -880,9 +880,7 @@ void do_earthshatter( CHAR_DATA *ch, char *argument ) {
 	send_to_char( "You summon the power of the underworld, shattering the earth.\n\r", ch );
 	act( "$n causes the earth to shatter", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
-
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( vch->trust > 6 ) continue;
 		dam = dice( level, 7 );

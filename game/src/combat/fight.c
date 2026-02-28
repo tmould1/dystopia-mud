@@ -74,7 +74,7 @@ void violence_update( void ) {
 
 	PROFILE_START( "violence_update" );
 
-	for ( ch = char_list; ch != NULL; ch = ch->next ) {
+	LIST_FOR_EACH( ch, &g_characters, CHAR_DATA, char_node ) {
 		/* Quick skip: no violence-related state */
 		if ( ch->fighting == NULL
 		     && ch->blinkykill == NULL
@@ -209,8 +209,7 @@ void violence_update( void ) {
 		/*
 		 * Fun for the whole family!
 		 */
-		for ( rch = ch->in_room->people; rch != NULL; rch = rch_next ) {
-			rch_next = rch->next_in_room;
+		LIST_FOR_EACH_SAFE(rch, rch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( IS_AWAKE( rch ) && rch->fighting == NULL ) {
 				/*
 				 * Mount's auto-assist their riders and vice versa.
@@ -238,7 +237,7 @@ void violence_update( void ) {
 
 						target = NULL;
 						number = 0;
-						for ( vch = ch->in_room->people; vch; vch = vch->next ) {
+						LIST_FOR_EACH(vch, &ch->in_room->characters, CHAR_DATA, room_node) {
 							if ( can_see( rch, vch ) && is_same_group( vch, victim ) && number_range( 0, number ) == 0 ) {
 								target = vch;
 								number++;
@@ -2531,7 +2530,7 @@ void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx ) {
 			bool has_mob = FALSE;
 			if ( room == NULL || room == ch->in_room )
 				continue;
-			for ( rch = room->people; rch; rch = rch->next_in_room ) {
+			LIST_FOR_EACH(rch, &room->characters, CHAR_DATA, room_node) {
 				if ( IS_NPC( rch ) && rch->position != POS_DEAD ) {
 					has_mob = TRUE;
 					break;
@@ -3356,7 +3355,7 @@ void stop_fighting( CHAR_DATA *ch, bool fBoth ) {
 		return;
 	}
 
-	for ( fch = char_list; fch != NULL; fch = fch->next ) {
+	LIST_FOR_EACH( fch, &g_characters, CHAR_DATA, char_node ) {
 		if ( fch == ch || fch->fighting == ch ) {
 			fch->fighting = NULL;
 			fch->position = POS_STANDING;
@@ -3398,8 +3397,7 @@ void make_corpse( CHAR_DATA *ch ) {
 	snprintf( buf, sizeof(buf), corpse->description, name );
 	free_string( corpse->description );
 	corpse->description = str_dup( buf );
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		obj_from_char( obj );
 		if ( IS_SET( obj->extra_flags, ITEM_VANISH ) )
 			extract_obj( obj );
@@ -3592,8 +3590,8 @@ void raw_kill( CHAR_DATA *victim ) {
 		return;
 	}
 	extract_char( victim, FALSE );
-	while ( victim->affected )
-		affect_remove( victim, victim->affected );
+	while ( !list_empty(&victim->affects) )
+		affect_remove( victim, LIST_ENTRY(victim->affects.sentinel.next, AFFECT_DATA, node) );
 	if ( IS_AFFECTED( victim, AFF_POLYMORPH ) && IS_AFFECTED( victim, AFF_ETHEREAL ) ) {
 		victim->affected_by = AFF_POLYMORPH + AFF_ETHEREAL;
 	} else if ( IS_AFFECTED( victim, AFF_POLYMORPH ) )
@@ -3647,8 +3645,8 @@ void behead( CHAR_DATA *victim ) {
 		return;
 	}
 	make_part( victim, "head" );
-	while ( victim->affected )
-		affect_remove( victim, victim->affected );
+	while ( !list_empty(&victim->affects) )
+		affect_remove( victim, LIST_ENTRY(victim->affects.sentinel.next, AFFECT_DATA, node) );
 	victim->affected_by = 0;
 	REMOVE_BIT( victim->immune, IMM_STAKE );
 	REMOVE_BIT( victim->extra, TIED_UP );
@@ -3707,7 +3705,7 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		return;
 
 	members = 0;
-	for ( gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room ) {
+	LIST_FOR_EACH(gch, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( is_same_group( gch, ch ) )
 			members++;
 	}
@@ -3717,7 +3715,7 @@ void group_gain( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		members = 1;
 	}
 
-	for ( gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room ) {
+	LIST_FOR_EACH(gch, &ch->in_room->characters, CHAR_DATA, room_node) {
 		int xp_modifier = 100;
 
 		if ( !is_same_group( gch, ch ) ) continue;
@@ -4888,8 +4886,7 @@ void do_berserk( CHAR_DATA *ch, char *argument ) {
 	}
 	act( "You go BERSERK!", ch, NULL, NULL, TO_CHAR );
 	act( "$n goes BERSERK!", ch, NULL, NULL, TO_ROOM );
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( number_hit > 4 ) continue;
 		if ( vch->in_room == NULL ) continue;
 		if ( !IS_NPC( vch ) ) continue;
@@ -4927,8 +4924,7 @@ void do_berserk2( CHAR_DATA *ch, char *argument ) {
 	}
 	act( "You go BERSERK!", ch, NULL, NULL, TO_CHAR );
 	act( "$n goes BERSERK!", ch, NULL, NULL, TO_ROOM );
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( number_hit > 4 ) continue;
 		if ( vch->in_room == NULL ) continue;
 		if ( !IS_NPC( vch ) && vch->pcdata->chobj != NULL ) continue;

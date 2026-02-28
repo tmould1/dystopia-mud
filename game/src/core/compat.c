@@ -278,8 +278,6 @@ extern int write_to_descriptor_2( int desc, char *txt, int length );
 extern void recycle_descriptors( void );
 
 /* These are defined in comm.c */
-extern void *char_list;
-extern void *descriptor_list;
 extern void *fpReserve;
 extern int port;
 extern int control;

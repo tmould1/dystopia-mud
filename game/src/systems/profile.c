@@ -111,7 +111,7 @@ void profile_reset( void ) {
     profile_stats.sample_start_time = current_time;
 
     /* Clear per-area profiling stats */
-    for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+    LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
         pArea->profile_reset_count = 0;
         pArea->profile_reset_time_us = 0;
     }
@@ -383,7 +383,7 @@ void profile_report( CHAR_DATA *ch ) {
         int j;
 
         /* Find top 5 areas by reset time */
-        for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+        LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
             if ( pArea->profile_reset_count == 0 )
                 continue;
 

@@ -26,6 +26,8 @@ int test_summary( void ) {
 extern void suite_dice( void );
 extern void suite_strings( void );
 extern void suite_stats( void );
+extern void suite_list( void );
+extern void suite_boot( void );
 
 int main( int argc, char **argv ) {
 	(void) argc;
@@ -37,6 +39,8 @@ int main( int argc, char **argv ) {
 	RUN_SUITE( "Dice & Math", suite_dice );
 	RUN_SUITE( "String Utilities", suite_strings );
 	RUN_SUITE( "Character Stats", suite_stats );
+	RUN_SUITE( "Intrusive List", suite_list );
+	RUN_SUITE( "Game Boot", suite_boot );
 
 	return test_summary();
 }

@@ -32,10 +32,12 @@ void do_multicheck( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	bool found = FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->lookup_status != STATUS_DONE ) continue;
 		if ( d->connected != CON_PLAYING ) continue;
-		for ( d2 = d->next; d2 != NULL; d2 = d2->next ) {
+		for ( d2 = LIST_ENTRY( d->node.next, DESCRIPTOR_DATA, node );
+			  &d2->node != &g_descriptors.sentinel;
+			  d2 = LIST_ENTRY( d2->node.next, DESCRIPTOR_DATA, node ) ) {
 			if ( d2->lookup_status != STATUS_DONE ) continue;
 			if ( !str_cmp( d->host, d2->host ) ) {
 				if ( d2->connected != CON_PLAYING ) continue;
@@ -95,7 +97,7 @@ void do_showsilence( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected != CON_PLAYING ) continue;
 		if ( d->character != NULL )
 			gch = d->character;
@@ -198,11 +200,10 @@ void do_offline( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	arg[0] = UPPER( arg[0] );
-	if ( descriptor_free == NULL ) {
-		dummy = alloc_perm( sizeof( *dummy ) );
-	} else {
-		dummy = descriptor_free;
-		descriptor_free = descriptor_free->next;
+	dummy = calloc( 1, sizeof( *dummy ) );
+	if ( !dummy ) {
+		bug( "do_pforce: calloc failed", 0 );
+		return;
 	}
 	if ( load_char_obj( dummy, arg ) ) {
 		victim = dummy->character;
@@ -212,8 +213,7 @@ void do_offline( CHAR_DATA *ch, char *argument ) {
 		victim->desc = temp;
 	} else {
 		send_to_char( "Player doesn't exist.\n\r", ch );
-		dummy->next = descriptor_free;
-		descriptor_free = dummy;
+		free( dummy );
 		return;
 	}
 
@@ -222,7 +222,6 @@ void do_offline( CHAR_DATA *ch, char *argument ) {
 	 */
 	save_char_obj( victim );
 	free_char( victim );
-	dummy->next = descriptor_free;
-	descriptor_free = dummy;
+	free( dummy );
 	return;
 }

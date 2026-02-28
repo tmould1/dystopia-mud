@@ -26,7 +26,7 @@ static const int dir_x[] = { 0, 1, 0, -1, 0, 0 };
 static const int dir_y[] = { 1, 0, -1, 0, 0, 0 };
 
 /* Reverse directions - use map_rev_dir to avoid conflict with global rev_dir */
-static const sh_int map_rev_dir[] = { 2, 3, 0, 1, 5, 4 };
+static const int map_rev_dir[] = { 2, 3, 0, 1, 5, 4 };
 
 /* Map data structure */
 typedef struct map_data {

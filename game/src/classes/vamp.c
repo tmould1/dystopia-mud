@@ -235,8 +235,7 @@ void do_scream( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 
 		if ( vch->in_room == NULL )
 			continue;
@@ -1104,7 +1103,7 @@ void do_wall( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg, "e" ) ) sprintf( wall, "walle" );
 	if ( !str_cmp( arg, "d" ) ) sprintf( wall, "walld" );
 	if ( !str_cmp( arg, "u" ) ) sprintf( wall, "wallu" );
-	objc = get_obj_list( ch, wall, ch->in_room->contents );
+	objc = get_obj_list( ch, wall, &ch->in_room->objects );
 	if ( objc != NULL ) {
 		send_to_char( "There is already a wall blocking that direction.\n\r", ch );
 		return;
@@ -3011,7 +3010,7 @@ void do_bloodwall( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg, "e" ) ) sprintf( wall, "walle" );
 	if ( !str_cmp( arg, "d" ) ) sprintf( wall, "walld" );
 	if ( !str_cmp( arg, "u" ) ) sprintf( wall, "wallu" );
-	objc = get_obj_list( ch, wall, ch->in_room->contents );
+	objc = get_obj_list( ch, wall, &ch->in_room->objects );
 	if ( objc != NULL ) {
 		send_to_char( "There is already a wall blocking that direction.\n\r", ch );
 		return;

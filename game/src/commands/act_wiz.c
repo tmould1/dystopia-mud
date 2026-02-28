@@ -66,7 +66,7 @@ void do_linkdead( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	bool found = FALSE;
 
-	for ( gch = char_list; gch != NULL; gch = gch->next ) {
+	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) || gch->desc ) continue;
 		found = TRUE;
 		sprintf( buf, "Name: %12s. (Room: %5d)\n\r", gch->name, gch->in_room == NULL ? 0 : gch->in_room->vnum );
@@ -334,7 +334,7 @@ void do_disconnect( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d == victim->desc ) {
 			close_socket( d );
 			send_to_char( "Ok.\n\r", ch );
@@ -354,7 +354,7 @@ void do_info( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING && d->character != NULL && !IS_SET( d->character->deaf, CHANNEL_INFO ) ) {
 			send_to_char( "#C<- #RInfo #C->#n ", d->character );
 			send_to_char( argument, d->character );
@@ -372,7 +372,7 @@ void do_watching( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING &&
 			IS_SET( d->character->act, PLR_WATCHER ) &&
 			!IS_SET( d->character->deaf, CHANNEL_INFO ) ) {
@@ -393,7 +393,7 @@ void logchan( char *argument ) {
 		return;
 	}
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( ( ch = d->character ) == NULL ) continue;
 		if ( ( d->connected == CON_PLAYING ) && IS_JUDGE( ch ) &&
 			!IS_SET( ch->deaf, CHANNEL_LOG ) ) {
@@ -418,7 +418,7 @@ void do_echo( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING ) {
 			send_to_char( argument, d->character );
 			send_to_char( "\n\r", d->character );
@@ -440,7 +440,7 @@ void do_recho( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING && d->character->in_room == ch->in_room ) {
 			send_to_char( argument, d->character );
 			send_to_char( "\n\r", d->character );
@@ -497,7 +497,7 @@ void do_transfer( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( arg1, "all" ) ) {
-		for ( d = descriptor_list; d != NULL; d = d->next ) {
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			if ( d->connected == CON_PLAYING && d->character != ch && d->character->in_room != NULL && can_see( ch, d->character ) ) {
 				char buf[MAX_STRING_LENGTH];
 				sprintf( buf, "%s %s", d->character->name, arg2 );
@@ -588,7 +588,7 @@ void do_at( CHAR_DATA *ch, char *argument ) {
 	 * See if 'ch' still exists before continuing!
 	 * Handles 'at XXXX quit' case.
 	 */
-	for ( wch = char_list; wch != NULL; wch = wch->next ) {
+	LIST_FOR_EACH( wch, &g_characters, CHAR_DATA, char_node ) {
 		if ( wch == ch ) {
 			char_from_room( ch );
 			char_to_room( ch, original );
@@ -694,14 +694,14 @@ void do_rstat( CHAR_DATA *ch, char *argument ) {
 	}
 
 	send_to_char( "Characters:", ch );
-	for ( rch = location->people; rch; rch = rch->next_in_room ) {
+	LIST_FOR_EACH( rch, &location->characters, CHAR_DATA, room_node ) {
 		send_to_char( " ", ch );
 		one_argument( rch->name, buf );
 		send_to_char( buf, ch );
 	}
 
 	send_to_char( ".\n\rObjects:   ", ch );
-	for ( obj = location->contents; obj; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &location->objects, OBJ_DATA, room_node ) {
 		send_to_char( " ", ch );
 		one_argument( obj->name, buf );
 		send_to_char( buf, ch );
@@ -832,13 +832,13 @@ void do_ostat( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "'.\n\r", ch );
 	}
 
-	for ( paf = obj->affected; paf != NULL; paf = paf->next ) {
+	LIST_FOR_EACH(paf, &obj->affects, AFFECT_DATA, node) {
 		sprintf( buf, "Affects %s by %d.\n\r",
 			affect_loc_name( paf->location ), paf->modifier );
 		send_to_char( buf, ch );
 	}
 
-	for ( paf = obj->pIndexData->affected; paf != NULL; paf = paf->next ) {
+	LIST_FOR_EACH(paf, &obj->pIndexData->affects, AFFECT_DATA, node) {
 		sprintf( buf, "Affects %s by %d.\n\r",
 			affect_loc_name( paf->location ), paf->modifier );
 		send_to_char( buf, ch );
@@ -965,7 +965,7 @@ void do_mstat( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( victim ) && victim->spec_fun != 0 )
 		send_to_char( "Mobile has spec fun.\n\r", ch );
 
-	for ( paf = victim->affected; paf != NULL; paf = paf->next ) {
+	LIST_FOR_EACH(paf, &victim->affects, AFFECT_DATA, node) {
 		sprintf( buf,
 			"Spell: '%s' modifies %s by %d for %d hours with bits %s.\n\r",
 			skill_table[(int) paf->type].name,
@@ -1080,7 +1080,7 @@ void do_mwhere( CHAR_DATA *ch, char *argument ) {
 	}
 
 	found = FALSE;
-	for ( victim = char_list; victim != NULL; victim = victim->next ) {
+	LIST_FOR_EACH( victim, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( victim ) && victim->in_room != NULL && is_name( arg, victim->name ) ) {
 			found = TRUE;
 			sprintf( buf, "[%5d] %-28s [%5d] %s\n\r",
@@ -1145,7 +1145,7 @@ void do_snoop( CHAR_DATA *ch, char *argument ) {
 
 	if ( victim == ch ) {
 		send_to_char( "Cancelling all snoops.\n\r", ch );
-		for ( d = descriptor_list; d != NULL; d = d->next ) {
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			if ( d->snoop_by == ch->desc )
 				d->snoop_by = NULL;
 		}
@@ -1409,8 +1409,7 @@ void do_pload( CHAR_DATA *ch, char *argument ) {
 	d->character = NULL;
 	(void) load_char_obj( d, argument );
 	ch = d->character;
-	ch->next = char_list;
-	char_list = ch;
+	list_push_back( &g_characters, &ch->char_node );
 	char_to_room( ch, in_room );
 	return;
 }
@@ -1453,8 +1452,7 @@ void do_preturn( CHAR_DATA *ch, char *argument ) {
 		extract_char( ch, TRUE );
 	if ( ch->desc ) ch->desc->character = NULL;
 	/*
-		ch->next = char_list;
-		char_list = ch;
+		list_push_back( &g_characters, &ch->char_node );
 	*/
 	(void) load_char_obj( d, capitalize( arg ) );
 	if ( ch->in_room != NULL )
@@ -1537,8 +1535,7 @@ void do_purge( CHAR_DATA *ch, char *argument ) {
 		/* 'purge' */
 		CHAR_DATA *vnext;
 
-		for ( victim = ch->in_room->people; victim != NULL; victim = vnext ) {
-			vnext = victim->next_in_room;
+		LIST_FOR_EACH_SAFE( victim, vnext, &ch->in_room->characters, CHAR_DATA, room_node ) {
 			if ( IS_NPC( victim ) && victim->desc == NULL && ( mount = victim->mount ) == NULL )
 				extract_char( victim, TRUE );
 		}
@@ -1631,7 +1628,7 @@ void do_restore( CHAR_DATA *ch, char *argument ) {
 	if ( get_trust( ch ) >= MAX_LEVEL - 2 && !str_cmp( arg, "all" ) ) {
 		/* cure all */
 
-		for ( d = descriptor_list; d != NULL; d = d->next ) {
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			victim = d->character;
 
 			if ( victim == NULL || IS_NPC( victim ) )
@@ -1815,8 +1812,7 @@ void do_undeny( CHAR_DATA *ch, char *argument ) {
 	d->character = NULL;
 	load_char_obj( d, arg );
 	ch = d->character;
-	ch->next = char_list;
-	char_list = ch;
+	list_push_back( &g_characters, &ch->char_node );
 	char_to_room( ch, in_room );
 
 	if ( IS_SET( ch->act, PLR_DENY ) ) {
@@ -1833,8 +1829,7 @@ void do_undeny( CHAR_DATA *ch, char *argument ) {
 	d->character = NULL;
 	load_char_obj( d, oldname );
 	ch = d->character;
-	ch->next = char_list;
-	char_list = ch;
+	list_push_back( &g_characters, &ch->char_node );
 	char_to_room( ch, in_room );
 
 	return;
@@ -1890,7 +1885,7 @@ void do_peace( CHAR_DATA *ch, char *argument ) {
 	sprintf( buf, "%s: Peace %s", ch->name, argument );
 	if ( ch->level < NO_WATCH ) do_watching( ch, buf );
 
-	for ( rch = ch->in_room->people; rch != NULL; rch = rch->next_in_room ) {
+	LIST_FOR_EACH( rch, &ch->in_room->characters, CHAR_DATA, room_node ) {
 		if ( rch->fighting != NULL )
 			stop_fighting( rch, TRUE );
 	}
@@ -1932,11 +1927,10 @@ void do_ban( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	if ( ban_free == NULL ) {
-		pban = alloc_perm( sizeof( *pban ) );
-	} else {
-		pban = ban_free;
-		ban_free = ban_free->next;
+	pban = calloc( 1, sizeof( *pban ) );
+	if ( !pban ) {
+		bug( "do_ban: calloc failed", 0 );
+		return;
 	}
 
 	pban->name = str_dup( arg );
@@ -1977,8 +1971,7 @@ void do_allow( CHAR_DATA *ch, char *argument ) {
 
 			free_string( curr->name );
 			free_string( curr->reason );
-			curr->next = ban_free;
-			ban_free = curr;
+			free( curr );
 			send_to_char( "Ok.\n\r", ch );
 			save_bans();
 			return;
@@ -2536,11 +2529,10 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		if ( extra_descr_free == NULL ) {
-			ed = alloc_perm( sizeof( *ed ) );
-		} else {
-			ed = extra_descr_free;
-			extra_descr_free = extra_descr_free->next;
+		ed = calloc( 1, sizeof( *ed ) );
+		if ( !ed ) {
+			bug( "do_oset: calloc failed for extra_descr", 0 );
+			return;
 		}
 
 		ed->keyword = str_dup( arg3 );
@@ -2629,7 +2621,7 @@ void do_omni( CHAR_DATA *ch, char *argument ) {
 	sprintf( buf, "--------------|-----|-----|---|------|------|------|----|----|-----|------\n\r" );
 	send_to_char( buf, ch );
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *wch;
 
 		if ( d->connected != CON_PLAYING ) continue;
@@ -2663,7 +2655,7 @@ void do_users( CHAR_DATA *ch, char *argument ) {
 
 	count = 0;
 	buf[0] = '\0';
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->lookup_status != STATUS_DONE ) continue;
 
 		if ( d->character != NULL && can_see( ch, d->character ) ) {
@@ -2768,9 +2760,7 @@ void do_force( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "Not at your level!\n\r", ch );
 			return;
 		}
-		for ( vch = char_list; vch != NULL; vch = vch_next ) {
-			vch_next = vch->next;
-
+		LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 			if ( !IS_NPC( vch ) && get_trust( vch ) < get_trust( ch ) ) {
 				act( buf, ch, NULL, vch, TO_VICT );
 				interpret( vch, argument );
@@ -2808,9 +2798,7 @@ void do_forceauto( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *vch;
 	CHAR_DATA *vch_next;
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
-
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( vch ) && vch != ch ) {
 			act( "Autocommand: $t.", ch, argument, vch, TO_VICT );
 			interpret( vch, argument );
@@ -3259,21 +3247,19 @@ void do_oclone( CHAR_DATA *ch, char *argument ) {
 	/*****************************************/
 	obj_to_char( obj2, ch );
 
-	if ( obj->affected != NULL ) {
-		for ( paf = obj->affected; paf != NULL; paf = paf->next ) {
-			if ( affect_free == NULL )
-				paf2 = alloc_perm( sizeof( *paf ) );
-			else {
-				paf2 = affect_free;
-				affect_free = affect_free->next;
+	if ( !list_empty(&obj->affects) ) {
+		LIST_FOR_EACH(paf, &obj->affects, AFFECT_DATA, node) {
+			paf2 = calloc( 1, sizeof( *paf2 ) );
+			if ( !paf2 ) {
+				bug( "do_clone: calloc failed for affect", 0 );
+				return;
 			}
 			paf2->type = 0;
 			paf2->duration = paf->duration;
 			paf2->location = paf->location;
 			paf2->modifier = paf->modifier;
 			paf2->bitvector = 0;
-			paf2->next = obj2->affected;
-			obj2->affected = paf2;
+			list_push_front(&obj2->affects, &paf2->node);
 		}
 	}
 
@@ -3386,7 +3372,7 @@ void do_artifact( CHAR_DATA *ch, char *argument ) {
 	}
 
 	found = FALSE;
-	for ( obj = object_list; obj != NULL; obj = obj->next ) {
+	LIST_FOR_EACH( obj, &g_objects, OBJ_DATA, obj_node ) {
 		if ( !IS_SET( obj->quest, QUEST_ARTIFACT ) ) continue;
 
 		found = TRUE;
@@ -3423,7 +3409,7 @@ void do_locate( CHAR_DATA *ch, char *argument ) {
 	}
 
 	found = FALSE;
-	for ( obj = object_list; obj != NULL; obj = obj->next ) {
+	LIST_FOR_EACH( obj, &g_objects, OBJ_DATA, obj_node ) {
 		if ( !can_see_obj( ch, obj ) || obj->questowner == NULL ||
 			strlen( obj->questowner ) < 2 || str_cmp( ch->pcdata->switchname, obj->questowner ) )
 			continue;
@@ -3792,16 +3778,15 @@ void do_clearstats( CHAR_DATA *ch, char *argument ) {
 
 	powerdown( ch ); /* remove class shit - Jobo */
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->wear_loc != WEAR_NONE ) {
 			obj_from_char( obj );
 			obj_to_char( obj, ch );
 		}
 	}
 
-	while ( ch->affected )
-		affect_remove( ch, ch->affected );
+	while ( !list_empty(&ch->affects) )
+		affect_remove( ch, LIST_ENTRY(ch->affects.sentinel.next, AFFECT_DATA, node) );
 
 	if ( IS_SET( ch->affected_by, AFF_POLYMORPH ) ) REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 	if ( IS_SET( ch->affected_by, AFF_ETHEREAL ) ) REMOVE_BIT( ch->affected_by, AFF_ETHEREAL );
@@ -4023,14 +4008,13 @@ void do_hreload( CHAR_DATA *ch, char *argument ) {
 
 	/* Remove existing help entry from in-memory list */
 	keyword_saved[0] = '\0';
-	for ( h = first_help; h; h = h_next ) {
-		h_next = h->next;
+	LIST_FOR_EACH_SAFE( h, h_next, &g_helps, HELP_DATA, node ) {
 		if ( is_name( arg, h->keyword ) ) {
 			snprintf( keyword_saved, sizeof( keyword_saved ), "%s", h->keyword );
-			UNLINK( h, first_help, last_help, next, prev );
+			list_remove( &g_helps, &h->node );
 			free_string( h->keyword );
 			free_string( h->text );
-			free_mem( h, sizeof( *h ) );
+			free( h );
 			found = TRUE;
 		}
 	}
@@ -4136,7 +4120,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 	/* Headform off - hmm, work on this*/
 
-	for ( gch = char_list; gch != NULL; gch = gch->next ) {
+	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( gch ) && ( IS_HEAD( gch, LOST_HEAD ) || IS_SET( gch->extra, EXTRA_OSWITCH ) ) ) {
 			if ( IS_HEAD( gch, LOST_HEAD ) ) REMOVE_BIT( gch->loc_hp[0], LOST_HEAD );
 			REMOVE_BIT( gch->affected_by, AFF_POLYMORPH );
@@ -4152,7 +4136,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 	/* Have to disable compression when doing a copyover */
 
-	for ( d = descriptor_list; d; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->lookup_status != STATUS_DONE ) continue;
 		if ( d->character != NULL )
 			gch = d->character;
@@ -4253,10 +4237,8 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 		merc_logf( "do_copyover: wrote control socket (target child PID=%lu)", child_pid );
 
 		/* For each playing descriptor, duplicate socket for child PID and save state */
-		for ( d = descriptor_list; d; d = d_next ) {
+		LIST_FOR_EACH_SAFE( d, d_next, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			CHAR_DATA *och = CH( d );
-
-			d_next = d->next;
 
 			if ( !d->character || d->connected != 0 ) {
 				write_to_descriptor_2( d->descriptor, "\n\rSorry, we are rebooting. Come back in 30 seconds.\n\r", 0 );
@@ -4294,9 +4276,8 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 	}
 #else
 	/* For each playing descriptor, save its state */
-	for ( d = descriptor_list; d; d = d_next ) {
+	LIST_FOR_EACH_SAFE( d, d_next, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *och = CH( d );
-		d_next = d->next; /* We delete from the list , so need to save this */
 
 		if ( !d->character || d->connected != 0 ) /* drop those logging on */
 		{
@@ -4479,7 +4460,11 @@ void copyover_recover() {
 		}
 #endif
 
-		d = alloc_perm( sizeof( DESCRIPTOR_DATA ) );
+		d = calloc( 1, sizeof( DESCRIPTOR_DATA ) );
+		if ( !d ) {
+			bug( "copyover_recover: calloc failed", 0 );
+			continue;
+		}
 		init_descriptor( d, desc ); /* set up various stuff */
 
 		/* Re-negotiate protocols FIRST, before any text output */
@@ -4500,15 +4485,14 @@ void copyover_recover() {
 			close( desc ); /* nope */
 #endif
 			/* Clean up the descriptor we just allocated */
-			free_mem( d->outbuf, d->outsize );
+			free( d->outbuf );
 			continue;
 		}
 
 		players_logged++;
 
 		d->host = str_dup( host );
-		d->next = descriptor_list;
-		descriptor_list = d;
+		list_push_back( &g_descriptors, &d->node );
 		d->connected = CON_COPYOVER_RECOVER; /* -15, so close_socket frees the char */
 
 		/* Now, find the pfile */
@@ -4528,8 +4512,7 @@ void copyover_recover() {
 				d->character->in_room = get_room_index( ROOM_VNUM_TEMPLE );
 
 			/* Insert in the char_list */
-			d->character->next = char_list;
-			char_list = d->character;
+			list_push_back( &g_characters, &d->character->char_node );
 
 			char_to_room( d->character, d->character->in_room );
 			/* Skip auto-look: protocols aren't negotiated yet so MXP won't work */
@@ -4637,7 +4620,7 @@ void do_mudclients( CHAR_DATA *ch, char *argument ) {
 	int total = 0;
 	int i, j;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		const char *cname;
 
 		if ( d->connected != CON_PLAYING )
@@ -4711,7 +4694,7 @@ void do_dwho( CHAR_DATA *ch, char *argument ) {
 
 	send_to_char( "#C--- Debug Who ---#n\n\r", ch );
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *wch;
 		const char *client;
 		const char *term;
@@ -4916,7 +4899,8 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 				}
 			}
 
-			pf = alloc_mem( sizeof( PROFANITY_FILTER ) );
+			pf = calloc( 1, sizeof( PROFANITY_FILTER ) );
+			if ( !pf ) { bug( "do_cfilter add profanity: calloc failed", 0 ); return; }
 			pf->pattern  = str_dup( arg2 );
 			pf->added_by = str_dup( ch->name );
 			pf->next     = profanity_filter_list;
@@ -4951,7 +4935,8 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 				}
 			}
 
-			fn = alloc_mem( sizeof( FORBIDDEN_NAME ) );
+			fn = calloc( 1, sizeof( FORBIDDEN_NAME ) );
+			if ( !fn ) { bug( "do_cfilter add forbidden: calloc failed", 0 ); return; }
 			fn->name     = str_dup( arg2 );
 			fn->type     = type;
 			fn->added_by = str_dup( ch->name );
@@ -4985,7 +4970,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 
 					free_string( pf->pattern );
 					free_string( pf->added_by );
-					free_mem( pf, sizeof( PROFANITY_FILTER ) );
+					free( pf );
 
 					db_game_save_profanity_filters();
 
@@ -5022,7 +5007,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 
 					free_string( fn->name );
 					free_string( fn->added_by );
-					free_mem( fn, sizeof( FORBIDDEN_NAME ) );
+					free( fn );
 
 					db_game_save_forbidden_names();
 

@@ -30,11 +30,11 @@ char *const dir_name[] =
 	{
 		"north", "east", "south", "west", "up", "down" };
 
-const sh_int rev_dir[] =
+const int rev_dir[] =
 	{
 		2, 3, 0, 1, 5, 4 };
 
-const sh_int movement_loss[SECT_MAX] =
+const int movement_loss[SECT_MAX] =
 	{
 		1, 2, 2, 3, 4, 6, 4, 1, 6, 10, 6 };
 
@@ -76,17 +76,17 @@ void move_char( CHAR_DATA *ch, int door ) {
 		return;
 	}
 
-	if ( door == DIR_NORTH && ( ( obj = get_obj_list( ch, "walln", ch->in_room->contents ) ) != NULL || ( obj = get_obj_list( ch, "walls", to_room->contents ) ) != NULL ) ) bad_wall = TRUE;
+	if ( door == DIR_NORTH && ( ( obj = get_obj_list( ch, "walln", &ch->in_room->objects ) ) != NULL || ( obj = get_obj_list( ch, "walls", &to_room->objects ) ) != NULL ) ) bad_wall = TRUE;
 
-	if ( door == DIR_SOUTH && ( ( obj = get_obj_list( ch, "walls", ch->in_room->contents ) ) != NULL || ( obj = get_obj_list( ch, "walln", to_room->contents ) ) != NULL ) ) bad_wall = TRUE;
+	if ( door == DIR_SOUTH && ( ( obj = get_obj_list( ch, "walls", &ch->in_room->objects ) ) != NULL || ( obj = get_obj_list( ch, "walln", &to_room->objects ) ) != NULL ) ) bad_wall = TRUE;
 
-	if ( door == DIR_EAST && ( ( obj = get_obj_list( ch, "walle", ch->in_room->contents ) ) != NULL || ( obj = get_obj_list( ch, "wallw", to_room->contents ) ) != NULL ) ) bad_wall = TRUE;
+	if ( door == DIR_EAST && ( ( obj = get_obj_list( ch, "walle", &ch->in_room->objects ) ) != NULL || ( obj = get_obj_list( ch, "wallw", &to_room->objects ) ) != NULL ) ) bad_wall = TRUE;
 
-	if ( door == DIR_WEST && ( ( obj = get_obj_list( ch, "wallw", ch->in_room->contents ) ) != NULL || ( obj = get_obj_list( ch, "walle", to_room->contents ) ) != NULL ) ) bad_wall = TRUE;
+	if ( door == DIR_WEST && ( ( obj = get_obj_list( ch, "wallw", &ch->in_room->objects ) ) != NULL || ( obj = get_obj_list( ch, "walle", &to_room->objects ) ) != NULL ) ) bad_wall = TRUE;
 
-	if ( door == DIR_UP && ( ( obj = get_obj_list( ch, "wallu", ch->in_room->contents ) ) != NULL || ( obj = get_obj_list( ch, "walld", to_room->contents ) ) != NULL ) ) bad_wall = TRUE;
+	if ( door == DIR_UP && ( ( obj = get_obj_list( ch, "wallu", &ch->in_room->objects ) ) != NULL || ( obj = get_obj_list( ch, "walld", &to_room->objects ) ) != NULL ) ) bad_wall = TRUE;
 
-	if ( door == DIR_DOWN && ( ( obj = get_obj_list( ch, "walld", ch->in_room->contents ) ) != NULL || ( obj = get_obj_list( ch, "wallu", to_room->contents ) ) != NULL ) ) bad_wall = TRUE;
+	if ( door == DIR_DOWN && ( ( obj = get_obj_list( ch, "walld", &ch->in_room->objects ) ) != NULL || ( obj = get_obj_list( ch, "wallu", &to_room->objects ) ) != NULL ) ) bad_wall = TRUE;
 	if ( bad_wall ) {
 		send_to_char( "You are unable to pass the wall.\n\r", ch );
 		return;
@@ -187,7 +187,7 @@ void move_char( CHAR_DATA *ch, int door ) {
 			else if ( !IS_NPC( ch ) && ( IS_CLASS( ch, CLASS_DROW ) && IS_SET( ch->pcdata->powers[1], DPOWER_LEVITATION ) ) )
 				found = TRUE;
 			if ( !found ) {
-				for ( obj = ch->carrying; obj != NULL; obj = obj->next_content ) {
+				LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
 					if ( obj->item_type == ITEM_BOAT ) {
 						found = TRUE;
 						break;
@@ -341,7 +341,7 @@ void move_char( CHAR_DATA *ch, int door ) {
 		sprintf( leave, "walks" );
 
 	if ( !IS_NPC( ch ) && ch->stance[0] != -1 ) do_stance( ch, "" );
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *victim;
 
 		if ( ( victim = d->character ) == NULL )
@@ -411,7 +411,7 @@ void move_char( CHAR_DATA *ch, int door ) {
 	else
 		sprintf( buf, "above" );
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *victim;
 
 		if ( ( victim = d->character ) == NULL )
@@ -460,8 +460,7 @@ void move_char( CHAR_DATA *ch, int door ) {
 
 	do_look( ch, "auto" );
 
-	for ( fch = in_room->people; fch != NULL; fch = fch_next ) {
-		fch_next = fch->next_in_room;
+	LIST_FOR_EACH_SAFE( fch, fch_next, &in_room->characters, CHAR_DATA, room_node ) {
 		if ( ( mount = fch->mount ) != NULL && mount == ch && IS_SET( fch->mounted, IS_MOUNT ) ) {
 			act( "$N digs $S heels into you.", fch, NULL, ch, TO_CHAR );
 			char_from_room( fch );
@@ -802,7 +801,7 @@ void do_enter( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	obj = get_obj_list( ch, arg, ch->in_room->contents );
+	obj = get_obj_list( ch, arg, &ch->in_room->objects );
 	if ( obj == NULL ) {
 		act( "I see no $T here.", ch, NULL, arg, TO_CHAR );
 		return;
@@ -869,8 +868,7 @@ void do_enter( CHAR_DATA *ch, char *argument ) {
 		char_from_room( ch );
 		char_to_room( ch, pRoomIndex );
 		found = FALSE;
-		for ( portal = ch->in_room->contents; portal != NULL; portal = portal_next ) {
-			portal_next = portal->next_content;
+		LIST_FOR_EACH_SAFE( portal, portal_next, &ch->in_room->objects, OBJ_DATA, room_node ) {
 			if ( ( obj->value[0] == portal->value[3] ) && ( obj->value[3] == portal->value[0] ) ) {
 				found = TRUE;
 				/* Leave this out for now, as it doesn't seem to work properly. KaVir
@@ -926,8 +924,7 @@ void do_enter( CHAR_DATA *ch, char *argument ) {
 			sprintf( poly, "$n steps out of $p." );
 		act( poly, ch, obj, NULL, TO_ROOM );
 
-		for ( portal = ch->in_room->contents; portal != NULL; portal = portal_next ) {
-			portal_next = portal->next_content;
+		LIST_FOR_EACH_SAFE( portal, portal_next, &ch->in_room->objects, OBJ_DATA, room_node ) {
 			if ( ( obj->value[0] == portal->value[3] ) && ( obj->value[3] == portal->value[0] ) ) {
 				found = TRUE;
 				/* Leave this out for now, as it doesn't seem to work properly. KaVir
@@ -1021,7 +1018,7 @@ void do_open( CHAR_DATA *ch, char *argument ) {
 			CHAR_DATA *rch;
 
 			REMOVE_BIT( pexit_rev->exit_info, EX_CLOSED );
-			for ( rch = to_room->people; rch != NULL; rch = rch->next_in_room )
+			LIST_FOR_EACH( rch, &to_room->characters, CHAR_DATA, room_node )
 				act( "The $d opens.", rch, NULL, pexit_rev->keyword, TO_CHAR );
 		}
 	}
@@ -1087,7 +1084,7 @@ void do_close( CHAR_DATA *ch, char *argument ) {
 			CHAR_DATA *rch;
 
 			SET_BIT( pexit_rev->exit_info, EX_CLOSED );
-			for ( rch = to_room->people; rch != NULL; rch = rch->next_in_room )
+			LIST_FOR_EACH( rch, &to_room->characters, CHAR_DATA, room_node )
 				act( "The $d closes.", rch, NULL, pexit_rev->keyword, TO_CHAR );
 		}
 	}
@@ -1161,7 +1158,7 @@ void do_turn( CHAR_DATA *ch, char *argument ) {
 bool has_key( CHAR_DATA *ch, int key ) {
 	OBJ_DATA *obj;
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->pIndexData->vnum == key )
 			return TRUE;
 	}
@@ -1341,7 +1338,7 @@ void do_pick( CHAR_DATA *ch, char *argument ) {
 	WAIT_STATE( ch, skill_table[gsn_pick_lock].beats );
 
 	/* look for guards */
-	for ( gch = ch->in_room->people; gch; gch = gch->next_in_room ) {
+	LIST_FOR_EACH( gch, &ch->in_room->characters, CHAR_DATA, room_node ) {
 		if ( IS_NPC( gch ) && IS_AWAKE( gch ) && ch->level + 5 < gch->level ) {
 			act( "$N is standing too close to the lock.",
 				ch, NULL, gch, TO_CHAR );
@@ -2341,8 +2338,8 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_STRING_LENGTH];
 	char arg2[MAX_STRING_LENGTH];
 	char buf[MAX_STRING_LENGTH];
-	sh_int *pAbility = NULL;
-	sh_int quiet_pointer = 0;
+	int *pAbility = NULL;
+	int quiet_pointer = 0;
 	char *pOutput = NULL;
 	int cost;
 	int magic;
@@ -3837,7 +3834,7 @@ void do_tie( CHAR_DATA *ch, char *argument ) {
 			do_call( victim, "all" );
 			/*  Check for winner  */
 			found = FALSE;
-			for ( victim = char_list; victim != NULL; victim = victim->next ) {
+			LIST_FOR_EACH( victim, &g_characters, CHAR_DATA, char_node ) {
 				if ( IS_NPC( victim ) ) continue;
 				if ( victim->in_room != NULL &&
 					victim->in_room->area == ch->in_room->area &&
@@ -4294,8 +4291,7 @@ void drow_hate( CHAR_DATA *ch ) {
 
 	if ( number_percent() < 25 ) {
 
-		for ( vch = char_list; vch != NULL; vch = vch_next ) {
-			vch_next = vch->next;
+		LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 			if ( ch == vch ) continue;
 			if ( vch->in_room == NULL ) continue;
 			if ( vch->in_room == ch->in_room ) {

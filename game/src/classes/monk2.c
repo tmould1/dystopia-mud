@@ -447,8 +447,7 @@ void do_spinkick( CHAR_DATA *ch, char *argument ) {
 		ch->monkcrap = 0;
 		stc( "You spin around and around, going berserk.\n\r", ch );
 		act( "$n body speeds up, and $e spins around rapidly.", ch, NULL, victim, TO_ROOM );
-		for ( vch = char_list; vch != NULL; vch = vch_next ) {
-			vch_next = vch->next;
+		LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 			if ( number_hit > ( ch->chi[CURRENT] + 1 ) ) continue;
 			if ( vch->in_room == NULL )
 				continue;

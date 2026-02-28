@@ -30,163 +30,6 @@
 #include "merc.h"
 #include "../db/db_game.h"
 
-extern int top_ed;
-
-EXTRA_DESCR_DATA *SetRExtra( ROOM_INDEX_DATA *room, char *keywords ) {
-	EXTRA_DESCR_DATA *ed;
-
-	for ( ed = room->first_extradesc; ed; ed = ed->next ) {
-		if ( is_name( keywords, ed->keyword ) )
-			break;
-	}
-	if ( !ed ) {
-		CREATE( ed, EXTRA_DESCR_DATA, 1 );
-		LINK( ed, room->first_extradesc, room->last_extradesc, next, prev );
-		ed->keyword = STRALLOC( keywords );
-		ed->description = STRALLOC( "" );
-		top_ed++;
-	}
-	return ed;
-}
-
-bool DelRExtra( ROOM_INDEX_DATA *room, char *keywords ) {
-	EXTRA_DESCR_DATA *rmed;
-
-	for ( rmed = room->first_extradesc; rmed; rmed = rmed->next ) {
-		if ( is_name( keywords, rmed->keyword ) )
-			break;
-	}
-	if ( !rmed )
-		return FALSE;
-	UNLINK( rmed, room->first_extradesc, room->last_extradesc, next, prev );
-	STRFREE( rmed->keyword );
-	STRFREE( rmed->description );
-	DISPOSE( rmed );
-	top_ed--;
-	return TRUE;
-}
-
-EXTRA_DESCR_DATA *SetOExtra( OBJ_DATA *obj, char *keywords ) {
-	EXTRA_DESCR_DATA *ed;
-
-	for ( ed = obj->first_extradesc; ed; ed = ed->next ) {
-		if ( is_name( keywords, ed->keyword ) )
-			break;
-	}
-	if ( !ed ) {
-		CREATE( ed, EXTRA_DESCR_DATA, 1 );
-		LINK( ed, obj->first_extradesc, obj->last_extradesc, next, prev );
-		ed->keyword = STRALLOC( keywords );
-		ed->description = STRALLOC( "" );
-		top_ed++;
-	}
-	return ed;
-}
-
-bool DelOExtra( OBJ_DATA *obj, char *keywords ) {
-	EXTRA_DESCR_DATA *rmed;
-
-	for ( rmed = obj->first_extradesc; rmed; rmed = rmed->next ) {
-		if ( is_name( keywords, rmed->keyword ) )
-			break;
-	}
-	if ( !rmed )
-		return FALSE;
-	UNLINK( rmed, obj->first_extradesc, obj->last_extradesc, next, prev );
-	STRFREE( rmed->keyword );
-	STRFREE( rmed->description );
-	DISPOSE( rmed );
-	top_ed--;
-	return TRUE;
-}
-
-EXTRA_DESCR_DATA *SetOExtraProto( OBJ_INDEX_DATA *obj, char *keywords ) {
-	EXTRA_DESCR_DATA *ed;
-
-	for ( ed = obj->first_extradesc; ed; ed = ed->next ) {
-		if ( is_name( keywords, ed->keyword ) )
-			break;
-	}
-	if ( !ed ) {
-		CREATE( ed, EXTRA_DESCR_DATA, 1 );
-		LINK( ed, obj->first_extradesc, obj->last_extradesc, next, prev );
-		ed->keyword = STRALLOC( keywords );
-		ed->description = STRALLOC( "" );
-		top_ed++;
-	}
-	return ed;
-}
-
-bool DelOExtraProto( OBJ_INDEX_DATA *obj, char *keywords ) {
-	EXTRA_DESCR_DATA *rmed;
-
-	for ( rmed = obj->first_extradesc; rmed; rmed = rmed->next ) {
-		if ( is_name( keywords, rmed->keyword ) )
-			break;
-	}
-	if ( !rmed )
-		return FALSE;
-	UNLINK( rmed, obj->first_extradesc, obj->last_extradesc, next, prev );
-	STRFREE( rmed->keyword );
-	STRFREE( rmed->description );
-	DISPOSE( rmed );
-	top_ed--;
-	return TRUE;
-}
-
-/*
- * Function to get the equivelant exit of DIR 0-MAXDIR out of linked list.
- * Made to allow old-style diku-merc exit functions to work.	-Thoric
- */
-EXIT_DATA *get_exit( ROOM_INDEX_DATA *room, sh_int dir ) {
-	EXIT_DATA *xit;
-
-	if ( !room ) {
-		bug( "Get_exit: NULL room", 0 );
-		return NULL;
-	}
-
-	for ( xit = room->first_exit; xit; xit = xit->next )
-		if ( xit->vdir == dir )
-			return xit;
-	return NULL;
-}
-
-/*
- * Function to get an exit, leading the the specified room
- */
-EXIT_DATA *get_exit_to( ROOM_INDEX_DATA *room, sh_int dir, int vnum ) {
-	EXIT_DATA *xit;
-
-	if ( !room ) {
-		bug( "Get_exit: NULL room", 0 );
-		return NULL;
-	}
-
-	for ( xit = room->first_exit; xit; xit = xit->next )
-		if ( xit->vdir == dir && xit->vnum == vnum )
-			return xit;
-	return NULL;
-}
-
-/*
- * Function to get the nth exit of a room			-Thoric
- */
-EXIT_DATA *get_exit_num( ROOM_INDEX_DATA *room, sh_int count ) {
-	EXIT_DATA *xit;
-	int cnt;
-
-	if ( !room ) {
-		bug( "Get_exit: NULL room", 0 );
-		return NULL;
-	}
-
-	for ( cnt = 0, xit = room->first_exit; xit; xit = xit->next )
-		if ( ++cnt == count )
-			return xit;
-	return NULL;
-}
-
 /*
  * Returns value 0 - 9 based on directional text.
  */
@@ -473,7 +316,7 @@ void edit_buffer( CHAR_DATA *ch, char *argument ) {
 	EDITOR_DATA *edit;
 	char cmd[MAX_INPUT_LENGTH];
 	char buf[MAX_STRING_LENGTH];
-	sh_int x, line, max_buf_lines;
+	int x, line, max_buf_lines;
 	bool save;
 
 	if ( ( d = ch->desc ) == NULL ) {
@@ -757,7 +600,7 @@ void smush_tilde( char *str ) {
 
 void start_editing( CHAR_DATA *ch, char *data ) {
 	EDITOR_DATA *edit;
-	sh_int lines, size, lpos;
+	int lines, size, lpos;
 	char c;
 
 	if ( !ch->desc ) {
@@ -810,7 +653,7 @@ void start_editing( CHAR_DATA *ch, char *data ) {
 char *copy_buffer( CHAR_DATA *ch ) {
 	char buf[MAX_STRING_LENGTH];
 	char tmp[100];
-	sh_int x, len;
+	int x, len;
 
 	if ( !ch ) {
 		bug( "copy_buffer: null ch", 0 );
@@ -826,7 +669,7 @@ char *copy_buffer( CHAR_DATA *ch ) {
 	for ( x = 0; x < ch->editor->numlines; x++ ) {
 		strcpy( tmp, ch->editor->line[x] );
 		smush_tilde( tmp );
-		len = (sh_int) strlen( tmp );
+		len = (int) strlen( tmp );
 		if ( tmp[0] != '\0' && tmp[len - 1] == '~' )
 			tmp[len - 1] = '\0';
 		else
@@ -880,7 +723,7 @@ HELP_DATA *get_help( CHAR_DATA *ch, char *argument ) {
 		strcat( argall, argone );
 	}
 
-	for ( pHelp = first_help; pHelp; pHelp = pHelp->next ) {
+	LIST_FOR_EACH( pHelp, &g_helps, HELP_DATA, node ) {
 		if ( pHelp->level > get_trust( ch ) )
 			continue;
 		if ( lev != -2 && pHelp->level != lev )
@@ -947,7 +790,7 @@ void do_hset( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg1, "remove" ) ) {
-		UNLINK( pHelp, first_help, last_help, next, prev );
+		list_remove( &g_helps, &pHelp->node );
 		STRFREE( pHelp->text );
 		STRFREE( pHelp->keyword );
 		DISPOSE( pHelp );
@@ -994,7 +837,8 @@ void do_hlist( CHAR_DATA *ch, char *argument ) {
 	}
 	sprintf( buf, "Help Topics in level range %d to %d:\n\r\n\r", min, max );
 	stc( buf, ch );
-	for ( cnt = 0, help = first_help; help; help = help->next )
+	cnt = 0;
+	LIST_FOR_EACH( help, &g_helps, HELP_DATA, node )
 		if ( help->level >= min && help->level <= max ) {
 			sprintf( buf, "  %3d %s\n\r", help->level, help->keyword );
 			stc( buf, ch );

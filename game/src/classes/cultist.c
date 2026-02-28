@@ -755,8 +755,7 @@ void do_gibbering( CHAR_DATA *ch, char *argument ) {
 		ch, NULL, NULL, TO_ROOM );
 
 	/* AoE flee chance for NPCs */
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( !IS_NPC( vch ) ) continue;
 		if ( vch->fighting != ch ) continue;

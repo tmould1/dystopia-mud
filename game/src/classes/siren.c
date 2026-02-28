@@ -53,8 +53,7 @@ void do_bansheewail( CHAR_DATA *ch, char *argument ) {
 	act( "You open your mouth and release an unearthly #Rbanshee wail#n!", ch, NULL, NULL, TO_CHAR );
 	act( "$n opens $s mouth and releases an unearthly #Rbanshee wail#n!", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
@@ -231,8 +230,7 @@ void do_cacophony( CHAR_DATA *ch, char *argument ) {
 	act( "You unleash a cacophony of maddening dissonance!", ch, NULL, NULL, TO_CHAR );
 	act( "$n unleashes a cacophony of maddening dissonance!", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
@@ -347,8 +345,7 @@ void do_sirensong( CHAR_DATA *ch, char *argument ) {
 	act( "You sing an enchanting siren song that fills the room!", ch, NULL, NULL, TO_CHAR );
 	act( "$n sings an enchanting siren song that fills the room!", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( !IS_NPC( vch ) ) continue; /* Only affects NPCs */
 
@@ -533,8 +530,7 @@ void do_ariaofunmaking( CHAR_DATA *ch, char *argument ) {
 	act( "$n sings the #RAria of Unmaking#n at $N!", ch, NULL, victim, TO_NOTVICT );
 
 	/* Strip magical affects */
-	for ( paf = victim->affected; paf != NULL; paf = paf_next ) {
-		paf_next = paf->next;
+	LIST_FOR_EACH_SAFE(paf, paf_next, &victim->affects, AFFECT_DATA, node) {
 		affect_remove( victim, paf );
 		stripped++;
 		if ( stripped >= 3 ) break; /* Cap at 3 affects stripped */

@@ -427,7 +427,7 @@ void do_artdetonate( CHAR_DATA *ch, char *argument ) {
 
 	/* Find the bomber drone */
 	drone = NULL;
-	for ( vch = char_list; vch != NULL; vch = vch->next ) {
+	LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( vch ) ) continue;
 		if ( vch->pIndexData == NULL ) continue;
 		if ( vch->pIndexData->vnum != VNUM_MECH_BOMBER_DRONE ) continue;
@@ -453,8 +453,7 @@ void do_artdetonate( CHAR_DATA *ch, char *argument ) {
 	}
 
 	/* AoE explosion in the drone's room */
-	for ( vch = drone->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &drone->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( vch == drone ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) ) continue;  /* No PvP splash */
@@ -578,7 +577,7 @@ void do_dronearmy( CHAR_DATA *ch, char *argument ) {
 	/* Also grant HP bonus to existing drones */
 	if ( spawned < MECH_MAX_DRONES ) {
 		CHAR_DATA *vch;
-		for ( vch = char_list; vch != NULL; vch = vch->next ) {
+		LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
 			if ( !IS_NPC( vch ) ) continue;
 			if ( vch->pIndexData == NULL ) continue;
 			if ( vch->pIndexData->vnum != VNUM_MECH_COMBAT_DRONE ) continue;
@@ -714,8 +713,7 @@ void do_empburst( CHAR_DATA *ch, char *argument ) {
 		act( buf, ch, NULL, NULL, TO_ROOM );
 	}
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) ) continue;  /* No PvP splash */
 		if ( IS_NPC( vch ) && vch->fighting == NULL ) continue;
@@ -1108,7 +1106,7 @@ void do_dronestatus( CHAR_DATA *ch, char *argument ) {
 	send_to_char( buf, ch );
 
 	/* Show individual combat drone HP */
-	for ( vch = char_list; vch != NULL; vch = vch->next ) {
+	LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( vch ) ) continue;
 		if ( vch->pIndexData == NULL ) continue;
 		if ( vch->wizard != ch ) continue;
@@ -1123,7 +1121,7 @@ void do_dronestatus( CHAR_DATA *ch, char *argument ) {
 
 	/* Show bomber drone */
 	if ( ch->pcdata->powers[MECH_BOMBER_ACTIVE] ) {
-		for ( vch = char_list; vch != NULL; vch = vch->next ) {
+		LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
 			if ( !IS_NPC( vch ) ) continue;
 			if ( vch->pIndexData == NULL ) continue;
 			if ( vch->pIndexData->vnum != VNUM_MECH_BOMBER_DRONE ) continue;
@@ -1172,8 +1170,7 @@ void do_dronerecall( CHAR_DATA *ch, char *argument ) {
 	}
 
 	/* Find and extract all drone mobs */
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 
 		if ( !IS_NPC( vch ) ) continue;
 		if ( vch->pIndexData == NULL ) continue;
@@ -1260,7 +1257,7 @@ void update_mechanist( CHAR_DATA *ch ) {
 		if ( ch->pcdata->powers[MECH_DRONE_COUNT] > 0 || ch->pcdata->powers[MECH_BOMBER_ACTIVE] ) {
 			CHAR_DATA *vch;
 			int dheal = cfg( CFG_ABILITY_MECHANIST_REPAIRSWARM_DRONE_HEAL );
-			for ( vch = char_list; vch != NULL; vch = vch->next ) {
+			LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
 				if ( !IS_NPC( vch ) ) continue;
 				if ( vch->pIndexData == NULL ) continue;
 				if ( vch->wizard != ch ) continue;
@@ -1322,8 +1319,7 @@ void update_mechanist( CHAR_DATA *ch ) {
 			/* AoE splash: hit other enemies for reduced damage */
 			if ( victim->position != POS_DEAD && ch->fighting != NULL ) {
 				int aoe_pct = cfg( CFG_ABILITY_MECHANIST_ORBITAL_AOE_PCT );
-				for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-					vch_next = vch->next_in_room;
+				LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 					if ( vch == ch ) continue;
 					if ( vch == victim ) continue;
 					if ( !IS_NPC( vch ) && !IS_NPC( ch ) ) continue;
@@ -1383,8 +1379,7 @@ void mechanist_move_drones( CHAR_DATA *ch, ROOM_INDEX_DATA *to_room ) {
 
 	if ( to_room == NULL ) return;
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 
 		if ( !IS_NPC( vch ) ) continue;
 		if ( vch->pIndexData == NULL ) continue;
@@ -1419,7 +1414,7 @@ void mechanist_drone_attacks( CHAR_DATA *ch ) {
 	bonus_pct = ( ch->pcdata->powers[MECH_DRONE_ARMY] > 0 )
 		? cfg( CFG_ABILITY_MECHANIST_DRONEARMY_DAM_BONUS_PCT ) : 0;
 
-	for ( drone = ch->in_room->people; drone != NULL; drone = drone->next_in_room ) {
+	LIST_FOR_EACH(drone, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( !IS_NPC( drone ) ) continue;
 		if ( drone->pIndexData == NULL ) continue;
 		if ( drone->pIndexData->vnum != VNUM_MECH_COMBAT_DRONE ) continue;

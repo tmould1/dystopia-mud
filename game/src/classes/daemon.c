@@ -79,8 +79,8 @@ void do_leech( CHAR_DATA *ch, char *argument ) {
 	act( "$n stares intently at you.", ch, NULL, victim, TO_VICT );
 
 	if ( victim->hit >= 1000 ) {
-		sh_int power;
-		sh_int dam;
+		int power;
+		int dam;
 		power = 20;
 		dam = dice( power, power * 2 );
 		if ( dam > 300 ) dam = 300 + ( dam / 10 );
@@ -115,7 +115,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ( objc = get_obj_list( ch, "walln", ch->in_room->contents ) ) != NULL )
+	if ( ( objc = get_obj_list( ch, "walln", &ch->in_room->objects ) ) != NULL )
 		objc = NULL;
 	else {
 		obj = create_object( get_obj_index( 30043 ), 0 );
@@ -126,7 +126,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 		obj->timer = 5;
 		obj->item_type = ITEM_WALL;
 	}
-	if ( ( objc = get_obj_list( ch, "walls", ch->in_room->contents ) ) != NULL )
+	if ( ( objc = get_obj_list( ch, "walls", &ch->in_room->objects ) ) != NULL )
 		objc = NULL;
 	else {
 		obj = create_object( get_obj_index( 30044 ), 0 );
@@ -137,7 +137,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 		obj->timer = 5;
 		obj->item_type = ITEM_WALL;
 	}
-	if ( ( objc = get_obj_list( ch, "walle", ch->in_room->contents ) ) != NULL )
+	if ( ( objc = get_obj_list( ch, "walle", &ch->in_room->objects ) ) != NULL )
 		objc = NULL;
 	else {
 		obj = create_object( get_obj_index( 30045 ), 0 );
@@ -148,7 +148,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 		obj->timer = 5;
 		obj->item_type = ITEM_WALL;
 	}
-	if ( ( objc = get_obj_list( ch, "wallw", ch->in_room->contents ) ) != NULL )
+	if ( ( objc = get_obj_list( ch, "wallw", &ch->in_room->objects ) ) != NULL )
 		objc = NULL;
 	else {
 		obj = create_object( get_obj_index( 30046 ), 0 );
@@ -530,7 +530,7 @@ void do_hellfire( CHAR_DATA *ch, char *argument ) {
 	act( "$n summons the Abyssal fires of Hell!", ch, NULL, NULL, TO_ROOM );
 }
 
-const sh_int revdir[6] =
+const int revdir[6] =
 	{
 		2, 3, 0, 1, 5, 4 };
 
@@ -712,7 +712,8 @@ void do_immolate( CHAR_DATA *ch, char *argument ) {
 }
 
 void do_dinferno( CHAR_DATA *ch, char *argument ) {
-	CHAR_DATA *vch, *vch_next;
+	CHAR_DATA *vch;
+	CHAR_DATA *vch_next;
 	char buf[MAX_STRING_LENGTH];
 
 	if ( !IS_DEMPOWER( ch, DEM_INFERNO ) && ch->power[DISC_DAEM_HELL] < 3 ) {
@@ -733,8 +734,7 @@ void do_dinferno( CHAR_DATA *ch, char *argument ) {
 
 	act( "$n explodes, sending forth a massive fireballs in all directions.", ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You explode in a huge blast of abyssal flame.\n\r", ch );
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch != ch ) {
 			damage( vch, ch, number_range( 1500, 2000 ), gsn_inferno );
 			damage( ch, ch, number_range( 1500, 2000 ), gsn_inferno );
@@ -751,10 +751,10 @@ void acid_effect( void *vo, int level, int dam, int target ) {
 	if ( target == TARGET_ROOM ) /* nail objects on the floor */
 	{
 		ROOM_INDEX_DATA *room = (ROOM_INDEX_DATA *) vo;
-		OBJ_DATA *obj, *obj_next;
+		OBJ_DATA *obj;
+		OBJ_DATA *obj_next;
 
-		for ( obj = room->contents; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE(obj, obj_next, &room->objects, OBJ_DATA, room_node) {
 			acid_effect( obj, level, dam, TARGET_OBJ );
 		}
 		return;
@@ -766,8 +766,7 @@ void acid_effect( void *vo, int level, int dam, int target ) {
 		OBJ_DATA *obj, *obj_next;
 
 		/* let's toast some gear */
-		for ( obj = victim->carrying; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &victim->carrying, OBJ_DATA, content_node ) {
 			acid_effect( obj, level, dam, TARGET_OBJ );
 		}
 		return;
@@ -821,14 +820,13 @@ void acid_effect( void *vo, int level, int dam, int target ) {
 
 		if ( obj->carried_by != NULL )
 			act( msg, obj->carried_by, obj, NULL, TO_ALL );
-		else if ( obj->in_room != NULL && obj->in_room->people != NULL )
-			act( msg, obj->in_room->people, obj, NULL, TO_ALL );
+		else if ( obj->in_room != NULL && !list_empty(&obj->in_room->characters) )
+			act( msg, LIST_ENTRY(obj->in_room->characters.sentinel.next, CHAR_DATA, room_node), obj, NULL, TO_ALL );
 
 		/* get rid of the object */
-		if ( obj->contains ) /* dump contents */
+		if ( !list_empty( &obj->contents ) ) /* dump contents */
 		{
-			for ( t_obj = obj->contains; t_obj != NULL; t_obj = n_obj ) {
-				n_obj = t_obj->next_content;
+			LIST_FOR_EACH_SAFE( t_obj, n_obj, &obj->contents, OBJ_DATA, content_node ) {
 				obj_from_obj( t_obj );
 				if ( obj->in_room != NULL )
 					obj_to_room( t_obj, obj->in_room );
@@ -851,10 +849,10 @@ void acid_effect( void *vo, int level, int dam, int target ) {
 void shock_effect( void *vo, int level, int dam, int target ) {
 	if ( target == TARGET_ROOM ) {
 		ROOM_INDEX_DATA *room = (ROOM_INDEX_DATA *) vo;
-		OBJ_DATA *obj, *obj_next;
+		OBJ_DATA *obj;
+		OBJ_DATA *obj_next;
 
-		for ( obj = room->contents; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE(obj, obj_next, &room->objects, OBJ_DATA, room_node) {
 			shock_effect( obj, level, dam, TARGET_OBJ );
 		}
 		return;
@@ -865,8 +863,7 @@ void shock_effect( void *vo, int level, int dam, int target ) {
 		OBJ_DATA *obj, *obj_next;
 
 		/* toast some gear */
-		for ( obj = victim->carrying; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &victim->carrying, OBJ_DATA, content_node ) {
 			shock_effect( obj, level, dam, TARGET_OBJ );
 		}
 		return;
@@ -909,8 +906,8 @@ void shock_effect( void *vo, int level, int dam, int target ) {
 
 		if ( obj->carried_by != NULL )
 			act( msg, obj->carried_by, obj, NULL, TO_ALL );
-		else if ( obj->in_room != NULL && obj->in_room->people != NULL )
-			act( msg, obj->in_room->people, obj, NULL, TO_ALL );
+		else if ( obj->in_room != NULL && !list_empty(&obj->in_room->characters) )
+			act( msg, LIST_ENTRY(obj->in_room->characters.sentinel.next, CHAR_DATA, room_node), obj, NULL, TO_ALL );
 
 		extract_obj( obj );
 		return;
@@ -921,10 +918,10 @@ void fire_effect( void *vo, int level, int dam, int target ) {
 	if ( target == TARGET_ROOM ) /* nail objects on the floor */
 	{
 		ROOM_INDEX_DATA *room = (ROOM_INDEX_DATA *) vo;
-		OBJ_DATA *obj, *obj_next;
+		OBJ_DATA *obj;
+		OBJ_DATA *obj_next;
 
-		for ( obj = room->contents; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE(obj, obj_next, &room->objects, OBJ_DATA, room_node) {
 			fire_effect( obj, level, dam, TARGET_OBJ );
 		}
 		return;
@@ -952,8 +949,7 @@ void fire_effect( void *vo, int level, int dam, int target ) {
 		}
 
 		/* let's toast some gear! */
-		for ( obj = victim->carrying; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &victim->carrying, OBJ_DATA, content_node ) {
 			fire_effect( obj, level, dam, TARGET_OBJ );
 		}
 		return;
@@ -1016,14 +1012,13 @@ void fire_effect( void *vo, int level, int dam, int target ) {
 
 		if ( obj->carried_by != NULL )
 			act( msg, obj->carried_by, obj, NULL, TO_ALL );
-		else if ( obj->in_room != NULL && obj->in_room->people != NULL )
-			act( msg, obj->in_room->people, obj, NULL, TO_ALL );
+		else if ( obj->in_room != NULL && !list_empty(&obj->in_room->characters) )
+			act( msg, LIST_ENTRY(obj->in_room->characters.sentinel.next, CHAR_DATA, room_node), obj, NULL, TO_ALL );
 
-		if ( obj->contains ) {
+		if ( !list_empty( &obj->contents ) ) {
 			/* dump the contents */
 
-			for ( t_obj = obj->contains; t_obj != NULL; t_obj = n_obj ) {
-				n_obj = t_obj->next_content;
+			LIST_FOR_EACH_SAFE( t_obj, n_obj, &obj->contents, OBJ_DATA, content_node ) {
 				obj_from_obj( t_obj );
 				if ( obj->in_room != NULL )
 					obj_to_room( t_obj, obj->in_room );
@@ -1176,7 +1171,7 @@ void do_dgate( CHAR_DATA *ch, char *argument ) {
 		if ( ch->generation > 2 ) {
 			send_to_char( "You do not yet have the power to gate all demons.\n\r", ch );
 		} else {
-			for ( d = descriptor_list; d != NULL; d = d->next ) {
+			LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 				if ( d->connected == CON_PLAYING && d->character != ch && d->character->in_room != NULL && can_see( ch, d->character ) && d->character->generation > ch->generation && d->character->class == CLASS_DEMON ) {
 					if ( d->character->fighting != NULL ) stop_fighting( d->character, TRUE );
 					act( "A scaly hand reaches down and drags $n away.", d->character, NULL, NULL, TO_ROOM );
@@ -1257,9 +1252,9 @@ void do_frostbreath( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( arg, "all" ) ) {
-		CHAR_DATA *vch, *vch_next;
-		for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-			vch_next = vch->next_in_room;
+		CHAR_DATA *vch;
+		CHAR_DATA *vch_next;
+		LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( vch == ch ) continue;
 
 			if ( is_safe( ch, vch ) && ( ch->fighting != vch || vch->fighting != ch ) )
@@ -1285,10 +1280,10 @@ void cold_effect( void *vo, int level, int dam, int target ) {
 	if ( target == TARGET_ROOM ) /* nail objects on the floor */
 	{
 		ROOM_INDEX_DATA *room = (ROOM_INDEX_DATA *) vo;
-		OBJ_DATA *obj, *obj_next;
+		OBJ_DATA *obj;
+		OBJ_DATA *obj_next;
 
-		for ( obj = room->contents; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE(obj, obj_next, &room->objects, OBJ_DATA, room_node) {
 			cold_effect( obj, level, dam, TARGET_OBJ );
 		}
 		return;
@@ -1313,8 +1308,7 @@ void cold_effect( void *vo, int level, int dam, int target ) {
 		affect_to_char( victim, &af );
 
 		/* let's toast some gear */
-		for ( obj = victim->carrying; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &victim->carrying, OBJ_DATA, content_node ) {
 			cold_effect( obj, level, dam, TARGET_OBJ );
 		}
 		return;
@@ -1361,8 +1355,8 @@ void cold_effect( void *vo, int level, int dam, int target ) {
 
 		if ( obj->carried_by != NULL )
 			act( msg, obj->carried_by, obj, NULL, TO_ALL );
-		else if ( obj->in_room != NULL && obj->in_room->people != NULL )
-			act( msg, obj->in_room->people, obj, NULL, TO_ALL );
+		else if ( obj->in_room != NULL && !list_empty(&obj->in_room->characters) )
+			act( msg, LIST_ENTRY(obj->in_room->characters.sentinel.next, CHAR_DATA, room_node), obj, NULL, TO_ALL );
 
 		extract_obj( obj );
 		return;
@@ -1370,7 +1364,8 @@ void cold_effect( void *vo, int level, int dam, int target ) {
 }
 
 void frost_breath( CHAR_DATA *ch, CHAR_DATA *victim, bool all ) {
-	CHAR_DATA *vch, *vch_next;
+	CHAR_DATA *vch;
+	CHAR_DATA *vch_next;
 	int dam;
 	int power;
 
@@ -1385,8 +1380,7 @@ void frost_breath( CHAR_DATA *ch, CHAR_DATA *victim, bool all ) {
 		act( "$n breathes forth a stream of frost over you.", ch, NULL, NULL, TO_ROOM );
 		act( "You breath forth a stream of frost.", ch, NULL, NULL, TO_CHAR );
 
-		for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-			vch_next = vch->next_in_room;
+		LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( vch == ch ) continue;
 
 			if ( is_safe( ch, vch ) && ( ch->fighting != vch || vch->fighting != ch ) )

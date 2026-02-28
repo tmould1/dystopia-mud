@@ -759,7 +759,7 @@ void do_champions( CHAR_DATA *ch, char *argument ) {
 	sprintf( buf, "The champions of Hell:\n\r" );
 	send_to_char( buf, ch );
 	send_to_char( "[      Name      ] [ Hits ] [ Mana ] [ Move ] [       Power ]\n\r", ch );
-	for ( gch = char_list; gch != NULL; gch = gch->next ) {
+	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 		if ( !IS_CLASS( gch, CLASS_DEMON ) ) continue;
 		sprintf( buf,

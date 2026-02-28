@@ -414,7 +414,11 @@ static void sql_load_mobiles( sqlite3 *db, AREA_DATA *pArea ) {
 		}
 		fBootDb = TRUE;
 
-		pMobIndex = alloc_perm( sizeof( *pMobIndex ) );
+		pMobIndex = calloc( 1, sizeof( *pMobIndex ) );
+		if ( !pMobIndex ) {
+			bug( "load_mobiles: calloc failed", 0 );
+			exit( 1 );
+		}
 		pMobIndex->vnum         = vnum;
 		pMobIndex->area         = pArea;
 		pMobIndex->player_name  = str_dup( col_text( stmt, 1 ) );
@@ -501,7 +505,11 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 		}
 		fBootDb = TRUE;
 
-		pObjIndex = alloc_perm( sizeof( *pObjIndex ) );
+		pObjIndex = calloc( 1, sizeof( *pObjIndex ) );
+		if ( !pObjIndex ) {
+			bug( "load_objects: calloc failed", 0 );
+			exit( 1 );
+		}
 		pObjIndex->vnum        = vnum;
 		pObjIndex->area        = pArea;
 		pObjIndex->name        = str_dup( col_text( stmt, 1 ) );
@@ -537,7 +545,7 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 		pObjIndex->spectype    = sqlite3_column_int( stmt, 19 );
 		pObjIndex->specpower   = sqlite3_column_int( stmt, 20 );
 
-		pObjIndex->affected    = NULL;
+		list_init( &pObjIndex->affects );
 		pObjIndex->extra_descr = NULL;
 
 		/* Load affects */
@@ -546,19 +554,19 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 			sqlite3_bind_int( af_stmt, 1, vnum );
 			while ( sqlite3_step( af_stmt ) == SQLITE_ROW ) {
 				AFFECT_DATA *paf;
-				AFFECT_DATA **paf_last;
 
-				paf = alloc_perm( sizeof( *paf ) );
+				paf = calloc( 1, sizeof( *paf ) );
+				if ( !paf ) {
+					bug( "load_objects: calloc failed", 0 );
+					exit( 1 );
+				}
 				paf->type      = -1;
 				paf->duration  = -1;
 				paf->location  = sqlite3_column_int( af_stmt, 0 );
 				paf->modifier  = sqlite3_column_int( af_stmt, 1 );
 				paf->bitvector = 0;
-				paf->next      = NULL;
 
-				for ( paf_last = &pObjIndex->affected; *paf_last;
-					  paf_last = &( *paf_last )->next );
-				*paf_last = paf;
+				list_push_back( &pObjIndex->affects, &paf->node );
 				top_affect++;
 			}
 		}
@@ -571,7 +579,11 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 				EXTRA_DESCR_DATA *ed;
 				EXTRA_DESCR_DATA **ed_last;
 
-				ed = alloc_perm( sizeof( *ed ) );
+				ed = calloc( 1, sizeof( *ed ) );
+				if ( !ed ) {
+					bug( "load_objects: calloc failed", 0 );
+					exit( 1 );
+				}
 				ed->keyword     = str_dup( col_text( ed_stmt, 0 ) );
 				ed->description = str_dup( col_text( ed_stmt, 1 ) );
 				ed->next        = NULL;
@@ -649,9 +661,13 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		}
 		fBootDb = TRUE;
 
-		pRoomIndex = alloc_perm( sizeof( *pRoomIndex ) );
-		pRoomIndex->people      = NULL;
-		pRoomIndex->contents    = NULL;
+		pRoomIndex = calloc( 1, sizeof( *pRoomIndex ) );
+		if ( !pRoomIndex ) {
+			bug( "load_rooms: calloc failed", 0 );
+			exit( 1 );
+		}
+		list_init( &pRoomIndex->characters );
+		list_init( &pRoomIndex->objects );
 		pRoomIndex->extra_descr = NULL;
 		pRoomIndex->area        = pArea;
 		pRoomIndex->vnum        = vnum;
@@ -681,7 +697,11 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 				if ( door < 0 || door > 5 )
 					continue;
 
-				pexit = alloc_perm( sizeof( *pexit ) );
+				pexit = calloc( 1, sizeof( *pexit ) );
+				if ( !pexit ) {
+					bug( "load_rooms: calloc failed", 0 );
+					exit( 1 );
+				}
 				pexit->description = str_dup( col_text( exit_stmt, 1 ) );
 				pexit->keyword     = str_dup( col_text( exit_stmt, 2 ) );
 				pexit->exit_info   = sqlite3_column_int( exit_stmt, 3 );
@@ -702,7 +722,11 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 				EXTRA_DESCR_DATA *ed;
 				EXTRA_DESCR_DATA **ed_last;
 
-				ed = alloc_perm( sizeof( *ed ) );
+				ed = calloc( 1, sizeof( *ed ) );
+				if ( !ed ) {
+					bug( "load_rooms: calloc failed", 0 );
+					exit( 1 );
+				}
 				ed->keyword     = str_dup( col_text( ed_stmt, 0 ) );
 				ed->description = str_dup( col_text( ed_stmt, 1 ) );
 				ed->next        = NULL;
@@ -722,7 +746,11 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 				ROOMTEXT_DATA *rt;
 				ROOMTEXT_DATA **rt_last;
 
-				rt = alloc_perm( sizeof( *rt ) );
+				rt = calloc( 1, sizeof( *rt ) );
+				if ( !rt ) {
+					bug( "load_rooms: calloc failed", 0 );
+					exit( 1 );
+				}
 				rt->input    = str_dup( col_text( rt_stmt, 0 ) );
 				rt->output   = str_dup( col_text( rt_stmt, 1 ) );
 				rt->choutput = str_dup( col_text( rt_stmt, 2 ) );
@@ -782,7 +810,11 @@ static void sql_load_resets( sqlite3 *db ) {
 			continue;
 		letter = cmd_str[0];
 
-		pReset = alloc_perm( sizeof( *pReset ) );
+		pReset = calloc( 1, sizeof( *pReset ) );
+		if ( !pReset ) {
+			bug( "load_resets: calloc failed", 0 );
+			exit( 1 );
+		}
 		pReset->command = letter;
 		pReset->arg1    = sqlite3_column_int( stmt, 1 );
 		pReset->arg2    = sqlite3_column_int( stmt, 2 );
@@ -864,7 +896,11 @@ static void sql_load_shops( sqlite3 *db ) {
 		SHOP_DATA *pShop;
 		MOB_INDEX_DATA *pMobIndex;
 
-		pShop = alloc_perm( sizeof( *pShop ) );
+		pShop = calloc( 1, sizeof( *pShop ) );
+		if ( !pShop ) {
+			bug( "load_shops: calloc failed", 0 );
+			exit( 1 );
+		}
 		pShop->keeper      = sqlite3_column_int( stmt, 0 );
 		pShop->buy_type[0] = sqlite3_column_int( stmt, 1 );
 		pShop->buy_type[1] = sqlite3_column_int( stmt, 2 );
@@ -950,7 +986,11 @@ void db_sql_load_area( const char *area_filename ) {
 		return;
 	}
 
-	pArea = alloc_perm( sizeof( *pArea ) );
+	pArea = calloc( 1, sizeof( *pArea ) );
+	if ( !pArea ) {
+		bug( "load_area_from_db: calloc failed", 0 );
+		exit( 1 );
+	}
 	top_area++;
 	pArea->name      = str_dup( col_text( stmt, 0 ) );
 	pArea->builders  = str_dup( col_text( stmt, 1 ) );
@@ -967,12 +1007,8 @@ void db_sql_load_area( const char *area_filename ) {
 	sqlite3_finalize( stmt );
 
 	/* Link area into global area list */
-	if ( area_first == NULL )
-		area_first = pArea;
-	if ( area_last != NULL )
-		area_last->next = pArea;
+	list_push_back( &g_areas, &pArea->node );
 	area_last = pArea;
-	pArea->next = NULL;
 
 	snprintf( buf, sizeof( buf ), "  [%5d-%5d] %s (sqlite)",
 		pArea->lvnum, pArea->uvnum, pArea->name );
@@ -1133,7 +1169,7 @@ static void sql_save_objects( sqlite3 *db, AREA_DATA *pArea ) {
 
 		/* Save affects */
 		order = 0;
-		for ( paf = pObjIndex->affected; paf; paf = paf->next ) {
+		LIST_FOR_EACH( paf, &pObjIndex->affects, AFFECT_DATA, node ) {
 			sqlite3_reset( af_stmt );
 			sqlite3_bind_int( af_stmt, 1, vnum );
 			sqlite3_bind_int( af_stmt, 2, paf->location );

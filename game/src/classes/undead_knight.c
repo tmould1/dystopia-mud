@@ -410,16 +410,12 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		stc( "#gYou raise your hands to encompass the room and scream, #n'#rBURN!!!#n'\n\r", ch );
-		ich_next = ch->in_room->people;
-		ich = ich_next;
-		while ( ich_next != NULL ) {
-			ich_next = ich->next_in_room;
+		LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( ich != ch ) {
 				if ( is_safe( ch, ich ) ) break;
 				one_hit( ch, ich, gsn_fireball, 1 );
 				one_hit( ch, ich, gsn_fireball, 1 );
 			}
-			ich = ich_next;
 		}
 		WAIT_STATE( ch, cfg( CFG_ABILITY_UNDEAD_KNIGHT_POWERWORD_FLAMES_COOLDOWN ) );
 		ch->pcdata->powers[POWER_TICK] = 2;

@@ -16,8 +16,7 @@
 
 /* External globals */
 extern char mud_db_dir[MUD_PATH_MAX];
-extern HELP_DATA *first_help;
-extern HELP_DATA *last_help;
+extern list_head_t g_helps;
 extern char *help_greeting;
 extern int top_help;
 extern TOP_BOARD top_board[MAX_TOP_PLAYERS + 1];
@@ -405,7 +404,7 @@ static int load_helps_from_db( sqlite3 *db ) {
 		HELP_DATA *pHelp;
 
 		CREATE( pHelp, HELP_DATA, 1 );
-		pHelp->level   = (sh_int)sqlite3_column_int( stmt, 0 );
+		pHelp->level   = (int)sqlite3_column_int( stmt, 0 );
 		pHelp->keyword = str_dup( col_text( stmt, 1 ) );
 		pHelp->text    = str_dup( col_text( stmt, 2 ) );
 		pHelp->area    = NULL;
@@ -471,7 +470,7 @@ void db_game_save_helps( void ) {
 		return;
 	}
 
-	for ( pHelp = first_help; pHelp; pHelp = pHelp->next ) {
+	LIST_FOR_EACH( pHelp, &g_helps, HELP_DATA, node ) {
 		sqlite3_reset( stmt );
 		sqlite3_bind_int( stmt, 1, pHelp->level );
 		sqlite3_bind_text( stmt, 2, pHelp->keyword, -1, SQLITE_TRANSIENT );
@@ -515,7 +514,7 @@ bool db_game_reload_help( const char *keyword ) {
 			HELP_DATA *pHelp;
 
 			CREATE( pHelp, HELP_DATA, 1 );
-			pHelp->level   = (sh_int)sqlite3_column_int( stmt, 0 );
+			pHelp->level   = (int)sqlite3_column_int( stmt, 0 );
 			pHelp->keyword = str_dup( col_text( stmt, 1 ) );
 			pHelp->text    = str_dup( col_text( stmt, 2 ) );
 			pHelp->area    = NULL;
@@ -899,7 +898,11 @@ void db_game_load_notes( int board_idx ) {
 	boards[board_idx].note_first = NULL;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		NOTE_DATA *pnote = alloc_perm( sizeof( NOTE_DATA ) );
+		NOTE_DATA *pnote = calloc( 1, sizeof( NOTE_DATA ) );
+		if ( !pnote ) {
+			bug( "load_board_notes: calloc failed", 0 );
+			exit( 1 );
+		}
 		pnote->sender     = str_dup( col_text( stmt, 0 ) );
 		pnote->date       = str_dup( col_text( stmt, 1 ) );
 		pnote->date_stamp = (time_t)sqlite3_column_int64( stmt, 2 );
@@ -1043,7 +1046,8 @@ void db_game_load_bans( void ) {
 	ban_list = NULL;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		BAN_DATA *p = alloc_mem( sizeof( BAN_DATA ) );
+		BAN_DATA *p = calloc( 1, sizeof( BAN_DATA ) );
+		if ( !p ) { bug( "db_game_load_bans: calloc failed", 0 ); exit( 1 ); }
 		p->name   = str_dup( col_text( stmt, 0 ) );
 		p->reason = str_dup( col_text( stmt, 1 ) );
 		p->next   = ban_list;
@@ -1114,9 +1118,10 @@ void db_game_load_disabled( void ) {
 		if ( !cmd_table[i].name[0] )
 			continue;
 
-		p = alloc_mem( sizeof( DISABLED_DATA ) );
+		p = calloc( 1, sizeof( DISABLED_DATA ) );
+		if ( !p ) { bug( "db_game_load_disabled: calloc failed", 0 ); exit( 1 ); }
 		p->command     = &cmd_table[i];
-		p->level       = (sh_int)sqlite3_column_int( stmt, 1 );
+		p->level       = (int)sqlite3_column_int( stmt, 1 );
 		p->disabled_by = str_dup( col_text( stmt, 2 ) );
 		p->next        = disabled_first;
 		disabled_first = p;
@@ -1406,7 +1411,7 @@ void db_game_load_audio_config( void ) {
 			if ( audio_entries[i].caption )    free_string( audio_entries[i].caption );
 			if ( audio_entries[i].use_key )    free_string( audio_entries[i].use_key );
 		}
-		free_mem( audio_entries, audio_entry_alloc * sizeof( AUDIO_ENTRY ) );
+		free( audio_entries );
 		audio_entries = NULL;
 		audio_entry_count = 0;
 		audio_entry_alloc = 0;
@@ -1432,7 +1437,8 @@ void db_game_load_audio_config( void ) {
 	}
 
 	/* Allocate array */
-	audio_entries = alloc_mem( audio_entry_alloc * sizeof( AUDIO_ENTRY ) );
+	audio_entries = calloc( 1, audio_entry_alloc * sizeof( AUDIO_ENTRY ) );
+	if ( !audio_entries ) { bug( "db_game_load_audio: calloc failed", 0 ); exit( 1 ); }
 
 	/* Load entries */
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
@@ -1746,7 +1752,7 @@ void db_game_load_pretitles( void ) {
 			if ( pretitle_entries[i].set_by )
 				free_string( pretitle_entries[i].set_by );
 		}
-		free_mem( pretitle_entries, pretitle_count * sizeof( PRETITLE_ENTRY ) );
+		free( pretitle_entries );
 		pretitle_entries = NULL;
 		pretitle_count = 0;
 	}
@@ -1773,7 +1779,8 @@ void db_game_load_pretitles( void ) {
 	}
 
 	/* Allocate array */
-	pretitle_entries = alloc_mem( count * sizeof( PRETITLE_ENTRY ) );
+	pretitle_entries = calloc( 1, count * sizeof( PRETITLE_ENTRY ) );
+	if ( !pretitle_entries ) { bug( "db_game_load_pretitles: calloc failed", 0 ); exit( 1 ); }
 
 	/* Load entries */
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
@@ -2058,7 +2065,7 @@ void db_game_load_forbidden_names( void ) {
 		FORBIDDEN_NAME *next = forbidden_name_list->next;
 		free_string( forbidden_name_list->name );
 		free_string( forbidden_name_list->added_by );
-		free_mem( forbidden_name_list, sizeof( FORBIDDEN_NAME ) );
+		free( forbidden_name_list );
 		forbidden_name_list = next;
 	}
 
@@ -2066,7 +2073,8 @@ void db_game_load_forbidden_names( void ) {
 		return;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		FORBIDDEN_NAME *p = alloc_mem( sizeof( FORBIDDEN_NAME ) );
+		FORBIDDEN_NAME *p = calloc( 1, sizeof( FORBIDDEN_NAME ) );
+		if ( !p ) { bug( "db_game_load_forbidden_names: calloc failed", 0 ); exit( 1 ); }
 		p->name     = str_dup( col_text( stmt, 0 ) );
 		p->type     = sqlite3_column_int( stmt, 1 );
 		p->added_by = str_dup( col_text( stmt, 2 ) );
@@ -2141,7 +2149,7 @@ void db_game_load_profanity_filters( void ) {
 		PROFANITY_FILTER *next = profanity_filter_list->next;
 		free_string( profanity_filter_list->pattern );
 		free_string( profanity_filter_list->added_by );
-		free_mem( profanity_filter_list, sizeof( PROFANITY_FILTER ) );
+		free( profanity_filter_list );
 		profanity_filter_list = next;
 	}
 
@@ -2149,7 +2157,8 @@ void db_game_load_profanity_filters( void ) {
 		return;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		PROFANITY_FILTER *p = alloc_mem( sizeof( PROFANITY_FILTER ) );
+		PROFANITY_FILTER *p = calloc( 1, sizeof( PROFANITY_FILTER ) );
+		if ( !p ) { bug( "db_game_load_profanity_filters: calloc failed", 0 ); exit( 1 ); }
 		p->pattern  = str_dup( col_text( stmt, 0 ) );
 		p->added_by = str_dup( col_text( stmt, 1 ) );
 		p->next     = NULL;
@@ -2221,7 +2230,7 @@ void db_game_load_confusables( void ) {
 
 	/* Free existing table */
 	if ( confusable_table != NULL ) {
-		free_mem( confusable_table, confusable_count * sizeof( CONFUSABLE_ENTRY ) );
+		free( confusable_table );
 		confusable_table = NULL;
 		confusable_count = 0;
 	}
@@ -2240,7 +2249,8 @@ void db_game_load_confusables( void ) {
 	}
 
 	/* Allocate sorted array */
-	confusable_table = alloc_mem( alloc * sizeof( CONFUSABLE_ENTRY ) );
+	confusable_table = calloc( 1, alloc * sizeof( CONFUSABLE_ENTRY ) );
+	if ( !confusable_table ) { bug( "db_game_load_confusables: calloc failed", 0 ); exit( 1 ); }
 
 	/* Load entries (already sorted by ORDER BY codepoint ASC) */
 	while ( sqlite3_step( stmt ) == SQLITE_ROW && count < alloc ) {

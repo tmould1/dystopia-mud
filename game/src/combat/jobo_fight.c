@@ -39,7 +39,7 @@ void do_pkcall( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	do_say( ch, "TO ARMS!!! TO ARMS!!!!" );
-	for ( gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room ) {
+	LIST_FOR_EACH(gch, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( !IS_NPC( gch ) ) continue;
 		if ( gch == ch->fighting ) continue;
 		if ( gch->fighting != NULL ) continue;

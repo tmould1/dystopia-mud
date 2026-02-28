@@ -147,118 +147,111 @@ void mud_init_paths( const char *exe_path ) {
  */
 SHOP_DATA *shop_first;
 SHOP_DATA *shop_last;
-DUMMY_ARG *dummy_free;
 DUMMY_ARG *dummy_list;
-CHAR_DATA *char_free;
-EXTRA_DESCR_DATA *extra_descr_free;
-NOTE_DATA *note_free;
-OBJ_DATA *obj_free;
-PC_DATA *pcdata_free;
-BAN_DATA *ban_free;
 
 char bug_buf[MAX_STRING_LENGTH];
-CHAR_DATA *char_list;
+list_head_t g_characters;
 char *help_greeting;
 char log_buf[MAX_STRING_LENGTH];
 KILL_DATA kill_table[MAX_LEVEL];
-OBJ_DATA *object_list;
+list_head_t g_objects;
 TIME_INFO_DATA time_info;
 WEATHER_DATA weather_info;
-sh_int gsn_stuntubes;
-sh_int gsn_thrownpie;
-sh_int gsn_bash;
-sh_int gsn_smack;
-sh_int gsn_thwack;
-sh_int gsn_mocha;
-sh_int gsn_plasma;
-sh_int gsn_telekinetic;
-sh_int gsn_potato;
-sh_int gsn_laser;
-sh_int gsn_backstab;
-sh_int gsn_shred;
-sh_int gsn_quills;
-sh_int gsn_stinger;
-sh_int gsn_bladespin;
-sh_int gsn_fiery;
-sh_int gsn_hooves;
-sh_int gsn_fireball;
-sh_int gsn_tentacle;
-sh_int gsn_lightning;
-sh_int gsn_supreme;
-sh_int gsn_deathaura;
-sh_int gsn_wrathofgod;
-sh_int gsn_claws;
-sh_int gsn_heavenlyaura;
-sh_int gsn_mageshield;
-sh_int gsn_breath;
-sh_int gsn_darktendrils;
-sh_int gsn_cheapshot;
-sh_int gsn_spit;
-sh_int gsn_venomtong;
-sh_int gsn_spiketail;
-sh_int gsn_badbreath;
-sh_int gsn_magma;
-sh_int gsn_hellfire;
-sh_int gsn_shards;
-sh_int gsn_hide;
-sh_int gsn_peek;
-sh_int gsn_pick_lock;
-sh_int gsn_sneak;
-sh_int gsn_steal;
-sh_int gsn_spiderform;
-sh_int gsn_garotte;
-sh_int gsn_disarm;
-sh_int gsn_tendrils;
-sh_int gsn_berserk;
-sh_int gsn_punch;
-sh_int gsn_headbutt;
-sh_int gsn_spiket;
-sh_int gsn_venomt;
-sh_int gsn_shards;
-sh_int gsn_magma;
-sh_int gsn_shiroken;
-sh_int gsn_inferno;
-sh_int gsn_blinky;
-sh_int gsn_fangs;
-sh_int gsn_buffet;
-sh_int gsn_sweep;
-sh_int gsn_knee;
-sh_int gsn_lightningslash;
-sh_int gsn_rfangs;
-sh_int gsn_thrustkick;
-sh_int gsn_spinkick;
-sh_int gsn_backfist;
-sh_int gsn_elbow;
-sh_int gsn_shinkick;
-sh_int gsn_palmstrike;
-sh_int gsn_lightningkick;
-sh_int gsn_tornadokick;
-sh_int gsn_jumpkick;
-sh_int gsn_spinkick;
-sh_int gsn_monksweep;
-sh_int gsn_circle;
-sh_int gsn_booming;
-sh_int gsn_chillhand;
-sh_int gsn_kick;
-sh_int gsn_hurl;
-sh_int gsn_rescue;
-sh_int gsn_track;
-sh_int gsn_polymorph;
-sh_int gsn_web;
-sh_int gsn_drowfire;
-sh_int gsn_infirmity;
-sh_int gsn_spew;
-sh_int gsn_blindness;
-sh_int gsn_charm_person;
-sh_int gsn_curse;
-sh_int gsn_invis;
-sh_int gsn_mass_invis;
-sh_int gsn_poison;
-sh_int gsn_sleep;
-sh_int gsn_multiplearms;
+int gsn_stuntubes;
+int gsn_thrownpie;
+int gsn_bash;
+int gsn_smack;
+int gsn_thwack;
+int gsn_mocha;
+int gsn_plasma;
+int gsn_telekinetic;
+int gsn_potato;
+int gsn_laser;
+int gsn_backstab;
+int gsn_shred;
+int gsn_quills;
+int gsn_stinger;
+int gsn_bladespin;
+int gsn_fiery;
+int gsn_hooves;
+int gsn_fireball;
+int gsn_tentacle;
+int gsn_lightning;
+int gsn_supreme;
+int gsn_deathaura;
+int gsn_wrathofgod;
+int gsn_claws;
+int gsn_heavenlyaura;
+int gsn_mageshield;
+int gsn_breath;
+int gsn_darktendrils;
+int gsn_cheapshot;
+int gsn_spit;
+int gsn_venomtong;
+int gsn_spiketail;
+int gsn_badbreath;
+int gsn_magma;
+int gsn_hellfire;
+int gsn_shards;
+int gsn_hide;
+int gsn_peek;
+int gsn_pick_lock;
+int gsn_sneak;
+int gsn_steal;
+int gsn_spiderform;
+int gsn_garotte;
+int gsn_disarm;
+int gsn_tendrils;
+int gsn_berserk;
+int gsn_punch;
+int gsn_headbutt;
+int gsn_spiket;
+int gsn_venomt;
+int gsn_shards;
+int gsn_magma;
+int gsn_shiroken;
+int gsn_inferno;
+int gsn_blinky;
+int gsn_fangs;
+int gsn_buffet;
+int gsn_sweep;
+int gsn_knee;
+int gsn_lightningslash;
+int gsn_rfangs;
+int gsn_thrustkick;
+int gsn_spinkick;
+int gsn_backfist;
+int gsn_elbow;
+int gsn_shinkick;
+int gsn_palmstrike;
+int gsn_lightningkick;
+int gsn_tornadokick;
+int gsn_jumpkick;
+int gsn_spinkick;
+int gsn_monksweep;
+int gsn_circle;
+int gsn_booming;
+int gsn_chillhand;
+int gsn_kick;
+int gsn_hurl;
+int gsn_rescue;
+int gsn_track;
+int gsn_polymorph;
+int gsn_web;
+int gsn_drowfire;
+int gsn_infirmity;
+int gsn_spew;
+int gsn_blindness;
+int gsn_charm_person;
+int gsn_curse;
+int gsn_invis;
+int gsn_mass_invis;
+int gsn_poison;
+int gsn_sleep;
+int gsn_multiplearms;
 
-sh_int gsn_darkness;
-sh_int gsn_paradox;
+int gsn_darkness;
+int gsn_paradox;
 
 /*
  * Locals.
@@ -266,18 +259,14 @@ sh_int gsn_paradox;
 MOB_INDEX_DATA *mob_index_hash[MAX_KEY_HASH];
 OBJ_INDEX_DATA *obj_index_hash[MAX_KEY_HASH];
 ROOM_INDEX_DATA *room_index_hash[MAX_KEY_HASH];
-char *string_hash[MAX_KEY_HASH];
 
-AREA_DATA *area_first;
+list_head_t g_areas;
 AREA_DATA *area_last;
 
 ROOM_INDEX_DATA *room_list;
 
-HELP_DATA *first_help;
-HELP_DATA *last_help;
+list_head_t g_helps;
 
-char *string_space;
-char *top_string;
 char str_empty[1];
 
 int top_affect;
@@ -306,39 +295,6 @@ bool CLAWS = FALSE;
 bool ITEMAFFMANTIS = FALSE;
 bool ITEMAFFENTROPY = FALSE;
 /*
- * Memory management.
- * Increase MAX_STRING if you have too.
- * Tune the others only if you understand what you're doing.
-
-#define			MAX_STRING	1048576
-
- */
-
-#define MAX_STRING	   2072864
-#define MAX_PERM_BLOCK 131072
-#define MAX_MEM_LIST   11
-
-/* MEM_DEBUG: heap corruption detection via canary bytes, free list pointer
- * validation, and freed memory poisoning.
- * Auto-enabled in Visual Studio Debug builds (_DEBUG).
- * For Linux/Makefile: make MEM_DEBUG=1
- * To force on everywhere: uncomment the #define below. */
-/* #define MEM_DEBUG */
-#if defined( _DEBUG ) && !defined( MEM_DEBUG )
-#define MEM_DEBUG
-#endif
-
-void *rgFreeList[MAX_MEM_LIST];
-const int rgSizeList[MAX_MEM_LIST] =
-	{
-		16, 32, 64, 128, 256, 1024, 2048, 4096, 8192, 16384, 32768 - 64 };
-
-int nAllocString;
-int sAllocString;
-int nAllocPerm;
-int sAllocPerm;
-
-/*
  * Semi-locals.
  */
 bool fBootDb;
@@ -355,17 +311,17 @@ void reset_area args( ( AREA_DATA * pArea ) );
  */
 void boot_db( bool fCopyOver ) {
 
-	/*
-	 * Init some data space stuff.
-	 */
 	{
-		if ( ( string_space = calloc( 1, MAX_STRING ) ) == NULL ) {
-			bug( "Boot_db: can't alloc %d string space.", MAX_STRING );
-			exit( 1 );
-		}
-		top_string = string_space;
 		fBootDb = TRUE;
 	}
+
+	/*
+	 * Init global entity lists.
+	 */
+	list_init( &g_characters );
+	list_init( &g_objects );
+	list_init( &g_areas );
+	list_init( &g_helps );
 
 	/*
 	 * Init random number generator.
@@ -487,7 +443,7 @@ void boot_db( bool fCopyOver ) {
 		 * This bypasses the deferred reset logic which would skip empty areas. */
 		{
 			AREA_DATA *pArea;
-			for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+			LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 				reset_area( pArea );
 				pArea->needs_reset = FALSE;
 			}
@@ -565,39 +521,19 @@ char *strupper( const char *str ) {
  */
 void add_help( HELP_DATA *pHelp ) {
 	HELP_DATA *tHelp;
-	/* char buf[MAX_STRING_LENGTH];*/
 	int match;
 
-	for ( tHelp = first_help; tHelp; tHelp = tHelp->next )
-		/*
-			if ( pHelp->level == tHelp->level
-			&&  !strcmp(pHelp->keyword, tHelp->keyword) )
-			{
-				sprintf(buf, "Duplicate %s. Deleting Help.\n\r",pHelp->keyword);
-				bug(buf,0);
-				STRFREE( pHelp->text );
-				STRFREE( pHelp->keyword );
-				DISPOSE( pHelp );
-				return;
-			}
-			else
-		*/
+	LIST_FOR_EACH( tHelp, &g_helps, HELP_DATA, node ) {
 		if ( ( match = strcmp( pHelp->keyword[0] == '\'' ? pHelp->keyword + 1 : pHelp->keyword,
 				   tHelp->keyword[0] == '\'' ? tHelp->keyword + 1 : tHelp->keyword ) ) < 0 ||
 			( match == 0 && pHelp->level > tHelp->level ) ) {
-			if ( !tHelp->prev )
-				first_help = pHelp;
-			else
-				tHelp->prev->next = pHelp;
-			pHelp->prev = tHelp->prev;
-			pHelp->next = tHelp;
-			tHelp->prev = pHelp;
-			break;
+			list_insert_before( &g_helps, &pHelp->node, &tHelp->node );
+			top_help++;
+			return;
 		}
+	}
 
-	if ( !tHelp )
-		LINK( pHelp, first_help, last_help, next, prev );
-
+	list_push_back( &g_helps, &pHelp->node );
 	top_help++;
 }
 
@@ -639,7 +575,7 @@ void new_reset( ROOM_INDEX_DATA *pR, RESET_DATA *pReset ) {
  * Check for bad reverse exits.
  */
 void fix_exits( void ) {
-	extern const sh_int rev_dir[];
+	extern const int rev_dir[];
 	char buf[MAX_STRING_LENGTH];
 	ROOM_INDEX_DATA *pRoomIndex;
 	ROOM_INDEX_DATA *to_room;
@@ -699,7 +635,7 @@ void area_update( void ) {
 
 	PROFILE_START( "area_update" );
 
-	for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 		CHAR_DATA *pch;
 
 		if ( ++pArea->age < 3 )
@@ -709,7 +645,7 @@ void area_update( void ) {
 		 * Check for PC's.
 		 */
 		if ( pArea->nplayer > 0 && pArea->age == 15 - 1 && profile_stats.tick_multiplier <= 1 ) {
-			for ( pch = char_list; pch != NULL; pch = pch->next ) {
+			LIST_FOR_EACH( pch, &g_characters, CHAR_DATA, char_node ) {
 				if ( !IS_NPC( pch ) && IS_AWAKE( pch ) && pch->in_room != NULL && pch->in_room->area == pArea ) {
 					send_to_char( "You hear the sound of a bell in the distance.\n\r", pch );
 					if ( pch->desc != NULL )
@@ -843,7 +779,7 @@ void reset_room( ROOM_INDEX_DATA *pRoom ) {
 				continue;
 			}
 
-			if ( pRoom->area->nplayer > 0 || count_obj_list( pObjIndex, pRoom->contents ) > 0 )
+			if ( pRoom->area->nplayer > 0 || count_obj_room( pObjIndex, &pRoom->objects ) > 0 )
 				break;
 
 			pObj = create_object( pObjIndex, number_fuzzy( level ) );
@@ -861,7 +797,7 @@ void reset_room( ROOM_INDEX_DATA *pRoom ) {
 				continue;
 			}
 
-			if ( pRoom->area->nplayer > 0 || !( LastObj = get_obj_type( pObjToIndex ) ) || count_obj_list( pObjIndex, LastObj->contains ) > 0 )
+			if ( pRoom->area->nplayer > 0 || !( LastObj = get_obj_type( pObjToIndex ) ) || count_obj_list( pObjIndex, &LastObj->contents ) > 0 )
 				break;
 
 			pObj = create_object( pObjIndex, number_fuzzy( level ) );
@@ -1034,11 +970,10 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA *pMobIndex ) {
 		exit( 1 );
 	}
 
-	if ( char_free == NULL ) {
-		mob = alloc_perm( sizeof( *mob ) );
-	} else {
-		mob = char_free;
-		char_free = char_free->next;
+	mob = calloc( 1, sizeof( *mob ) );
+	if ( !mob ) {
+		bug( "create_mobile: calloc failed", 0 );
+		exit( 1 );
 	}
 
 	clear_char( mob );
@@ -1112,8 +1047,7 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA *pMobIndex ) {
 	/*
 	 * Insert in list.
 	 */
-	mob->next = char_list;
-	char_list = mob;
+	list_push_back( &g_characters, &mob->char_node );
 	pMobIndex->count++;
 	return mob;
 }
@@ -1122,7 +1056,6 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA *pMobIndex ) {
  * Create an instance of an object.
  */
 OBJ_DATA *create_object( OBJ_INDEX_DATA *pObjIndex, int level ) {
-	static OBJ_DATA obj_zero;
 	OBJ_DATA *obj;
 
 	if ( pObjIndex == NULL ) {
@@ -1130,14 +1063,17 @@ OBJ_DATA *create_object( OBJ_INDEX_DATA *pObjIndex, int level ) {
 		exit( 1 );
 	}
 
-	if ( obj_free == NULL ) {
-		obj = alloc_perm( sizeof( *obj ) );
-	} else {
-		obj = obj_free;
-		obj_free = obj_free->next;
+	obj = calloc( 1, sizeof( *obj ) );
+	if ( !obj ) {
+		bug( "create_object: calloc failed", 0 );
+		exit( 1 );
 	}
-
-	*obj = obj_zero;
+	/* calloc already zeroes memory, no need for obj_zero */
+	list_node_init( &obj->obj_node );
+	list_node_init( &obj->room_node );
+	list_node_init( &obj->content_node );
+	list_init( &obj->affects );
+	list_init( &obj->contents );
 	obj->pIndexData = pObjIndex;
 	obj->in_room = NULL;
 	obj->level = level;
@@ -1306,8 +1242,7 @@ OBJ_DATA *create_object( OBJ_INDEX_DATA *pObjIndex, int level ) {
 		break;
 	}
 
-	obj->next = object_list;
-	object_list = obj;
+	list_push_back( &g_objects, &obj->obj_node );
 	pObjIndex->count++;
 
 	return obj;
@@ -1336,6 +1271,10 @@ void clear_char( CHAR_DATA *ch ) {
 	ch->cprompt = &str_empty[0];
 	ch->hunting = &str_empty[0];
 
+	list_node_init( &ch->char_node );
+	list_node_init( &ch->room_node );
+	list_init( &ch->affects );
+	list_init( &ch->carrying );
 	ch->logon = current_time;
 	ch->armor = 100;
 	ch->position = POS_STANDING;
@@ -1370,13 +1309,11 @@ void free_char( CHAR_DATA *ch ) {
 	ALIAS_DATA *ali;
 	ALIAS_DATA *ali_next;
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		extract_obj( obj );
 	}
 
-	for ( paf = ch->affected; paf != NULL; paf = paf_next ) {
-		paf_next = paf->next;
+	LIST_FOR_EACH_SAFE( paf, paf_next, &ch->affects, AFFECT_DATA, node ) {
 		affect_remove( ch, paf );
 	}
 
@@ -1416,12 +1353,10 @@ void free_char( CHAR_DATA *ch ) {
 		free_string( ch->pcdata->parents );
 		free_string( ch->pcdata->cparents );
 		free_string( ch->pcdata->marriage );
-		ch->pcdata->next = pcdata_free;
-		pcdata_free = ch->pcdata;
+		free( ch->pcdata );
 	}
 
-	ch->next = char_free;
-	char_free = ch;
+	free( ch );
 	return;
 }
 
@@ -1502,306 +1437,45 @@ ROOM_INDEX_DATA *get_room_index( int vnum ) {
 	return NULL;
 }
 
-#ifdef MEM_DEBUG
-#define MEM_CANARY_BYTE  0xFD  /* Written in slack space after requested size */
-#define MEM_FREE_BYTE    0xDD  /* Written over freed blocks (after free list ptr) */
-
-static void mem_debug_dump( const char *label, void *ptr, int size ) {
-	unsigned char *p = (unsigned char *) ptr;
-	char buf[MAX_STRING_LENGTH];
-	int dump_len = ( size < 128 ) ? size : 128;
-	int off = 0;
-
-	off += snprintf( buf + off, sizeof( buf ) - off,
-		"MEM_DEBUG %s ptr=%p size=%d hex: ", label, ptr, size );
-	for ( int i = 0; i < dump_len && off < (int) sizeof( buf ) - 4; i++ )
-		off += snprintf( buf + off, sizeof( buf ) - off, "%02X ", p[i] );
-	log_string( buf );
-
-	off = 0;
-	off += snprintf( buf + off, sizeof( buf ) - off, "MEM_DEBUG %s ascii: ", label );
-	for ( int i = 0; i < dump_len && off < (int) sizeof( buf ) - 4; i++ )
-		off += snprintf( buf + off, sizeof( buf ) - off, "%c",
-			( p[i] >= 32 && p[i] < 127 ) ? (char) p[i] : '.' );
-	log_string( buf );
-}
-
-static bool mem_debug_valid_ptr( void *ptr ) {
-	uintptr_t addr;
-	if ( ptr == NULL ) return TRUE;
-	addr = (uintptr_t) ptr;
-	if ( addr % sizeof( void * ) != 0 ) return FALSE;
-	if ( addr < 0x10000 ) return FALSE;
-	return TRUE;
-}
-
-/* Scan all free lists for corruption. Call periodically from game loop. */
+/*
+ * Legacy stub — custom allocators have been replaced by standard calloc/free.
+ * mem_debug_check_freelists is called from update.c but is now a no-op.
+ */
 void mem_debug_check_freelists( void ) {
-	int iList;
-
-	pthread_mutex_lock( &memory_mutex );
-	for ( iList = 0; iList < MAX_MEM_LIST; iList++ ) {
-		void *cur = rgFreeList[iList];
-		int count = 0;
-		while ( cur != NULL && count < 100000 ) {
-			void *next = *( (void **) cur );
-			if ( !mem_debug_valid_ptr( next ) ) {
-				char dbuf[256];
-				snprintf( dbuf, sizeof( dbuf ),
-					"MEM_DEBUG CORRUPTION: free_list[%d] (bucket %d) node #%d at %p has invalid next=%p",
-					iList, rgSizeList[iList], count, cur, next );
-				log_string( dbuf );
-				mem_debug_dump( "Corrupted free node", cur, rgSizeList[iList] );
-				/* Truncate the chain here to prevent crashes */
-				*( (void **) cur ) = NULL;
-				break;
-			}
-			cur = next;
-			count++;
-		}
-	}
-	pthread_mutex_unlock( &memory_mutex );
-}
-#endif /* MEM_DEBUG */
-
-/*
- * Allocate some ordinary memory,
- *   with the expectation of freeing it someday.
- */
-void *alloc_mem( int sMem ) {
-	void *pMem;
-	int iList;
-
-	pthread_mutex_lock( &memory_mutex );
-
-	for ( iList = 0; iList < MAX_MEM_LIST; iList++ ) {
-		if ( sMem <= rgSizeList[iList] )
-			break;
-	}
-
-	if ( iList == MAX_MEM_LIST ) {
-		bug( "Alloc_mem: size %d too large.", sMem );
-		exit( 1 );
-	}
-
-	if ( rgFreeList[iList] == NULL ) {
-		pthread_mutex_unlock( &memory_mutex );
-		pMem = alloc_perm( rgSizeList[iList] );
-		pthread_mutex_lock( &memory_mutex );
-	} else {
-#ifdef MEM_DEBUG
-		/* Validate free list head's next pointer before following it */
-		void *next = *( (void **) rgFreeList[iList] );
-		if ( !mem_debug_valid_ptr( next ) ) {
-			char dbuf[256];
-			snprintf( dbuf, sizeof( dbuf ),
-				"MEM_DEBUG CORRUPTION in alloc_mem: free_list[%d] (bucket %d) head=%p has invalid next=%p",
-				iList, rgSizeList[iList], rgFreeList[iList], next );
-			log_string( dbuf );
-			mem_debug_dump( "Corrupted free list head", rgFreeList[iList], rgSizeList[iList] );
-			dump_last_command();
-			/* Discard corrupted chain, allocate fresh */
-			rgFreeList[iList] = NULL;
-			pthread_mutex_unlock( &memory_mutex );
-			pMem = alloc_perm( rgSizeList[iList] );
-			pthread_mutex_lock( &memory_mutex );
-		} else {
-			pMem = rgFreeList[iList];
-			rgFreeList[iList] = next;
-		}
-#else
-		pMem = rgFreeList[iList];
-		rgFreeList[iList] = *( (void **) rgFreeList[iList] );
-#endif
-	}
-
-#ifdef MEM_DEBUG
-	/* Write canary bytes in the slack space between requested size and bucket size */
-	{
-		int slack = rgSizeList[iList] - sMem;
-		if ( slack > 0 )
-			memset( (unsigned char *) pMem + sMem, MEM_CANARY_BYTE, slack );
-	}
-#endif
-
-	pthread_mutex_unlock( &memory_mutex );
-	return pMem;
-}
-
-/*
- * Free some memory.
- * Recycle it back onto the free list for blocks of that size.
- */
-void free_mem( void *pMem, int sMem ) {
-	int iList;
-
-	pthread_mutex_lock( &memory_mutex );
-
-	for ( iList = 0; iList < MAX_MEM_LIST; iList++ ) {
-		if ( sMem <= rgSizeList[iList] )
-			break;
-	}
-
-	if ( iList == MAX_MEM_LIST ) {
-		bug( "Free_mem: size %d too large.", sMem );
-		exit( 1 );
-	}
-
-#ifdef MEM_DEBUG
-	/* Check for double-free: if bytes after the free list pointer are all 0xDD,
-	 * this block was already freed and is being freed again. */
-	if ( rgSizeList[iList] > (int) sizeof( void * ) ) {
-		unsigned char *post_ptr = (unsigned char *) pMem + sizeof( void * );
-		int check_len = rgSizeList[iList] - (int) sizeof( void * );
-		int all_poison = 1;
-		int j;
-		for ( j = 0; j < check_len; j++ ) {
-			if ( post_ptr[j] != MEM_FREE_BYTE ) {
-				all_poison = 0;
-				break;
-			}
-		}
-		if ( all_poison ) {
-			char dbuf[512];
-			snprintf( dbuf, sizeof( dbuf ),
-				"MEM_DEBUG DOUBLE-FREE: ptr=%p req_size=%d bucket=%d - block already has free poison!",
-				pMem, sMem, rgSizeList[iList] );
-			log_string( dbuf );
-			/* Show the free list pointer stored in this already-freed block */
-			{
-				void *stale_next = *( (void **) pMem );
-				snprintf( dbuf, sizeof( dbuf ),
-					"MEM_DEBUG DOUBLE-FREE: stale free-list next=%p (block is already on free list)",
-					stale_next );
-				log_string( dbuf );
-			}
-			mem_debug_dump( "Double-freed block", pMem, rgSizeList[iList] );
-			dump_last_command();
-			/* Skip the free to avoid corrupting the free list further */
-			pthread_mutex_unlock( &memory_mutex );
-			return;
-		}
-	}
-
-	/* Check canary bytes in slack space - detects buffer overflows */
-	{
-		int slack = rgSizeList[iList] - sMem;
-		if ( slack > 0 ) {
-			unsigned char *canary = (unsigned char *) pMem + sMem;
-			int i;
-			for ( i = 0; i < slack; i++ ) {
-				if ( canary[i] != MEM_CANARY_BYTE )
-					break;
-			}
-			if ( i < slack ) {
-				char dbuf[256];
-				snprintf( dbuf, sizeof( dbuf ),
-					"MEM_DEBUG OVERFLOW in free_mem: ptr=%p req_size=%d bucket=%d canary corrupted at offset %d",
-					pMem, sMem, rgSizeList[iList], sMem + i );
-				log_string( dbuf );
-				mem_debug_dump( "Overflowed block", pMem, rgSizeList[iList] );
-				dump_last_command();
-			}
-		}
-	}
-
-	/* Poison freed memory (after free list pointer) to detect use-after-free */
-	if ( rgSizeList[iList] > (int) sizeof( void * ) )
-		memset( (unsigned char *) pMem + sizeof( void * ), MEM_FREE_BYTE,
-			rgSizeList[iList] - (int) sizeof( void * ) );
-#endif
-
-	*( (void **) pMem ) = rgFreeList[iList];
-	rgFreeList[iList] = pMem;
-
-	pthread_mutex_unlock( &memory_mutex );
-	return;
-}
-
-#ifndef MEM_DEBUG
-void mem_debug_check_freelists( void ) {
-	/* No-op when MEM_DEBUG is not enabled */
-}
-#endif
-
-/*
- * Allocate some permanent memory.
- * Permanent memory is never freed,
- *   pointers into it may be copied safely.
- */
-void *alloc_perm( int sMem ) {
-	static char *pMemPerm;
-	static int iMemPerm;
-	void *pMem;
-
-	pthread_mutex_lock( &memory_mutex );
-
-	while ( sMem % sizeof( long ) != 0 )
-		sMem++;
-	if ( sMem > MAX_PERM_BLOCK ) {
-		bug( "Alloc_perm: %d too large.", sMem );
-		exit( 1 );
-	}
-
-	if ( pMemPerm == NULL || iMemPerm + sMem > MAX_PERM_BLOCK ) {
-		iMemPerm = 0;
-		if ( ( pMemPerm = calloc( 1, MAX_PERM_BLOCK ) ) == NULL ) {
-			dump_last_command();
-			perror( "Alloc_perm" );
-			exit( 1 );
-		}
-	}
-
-	pMem = pMemPerm + iMemPerm;
-	iMemPerm += sMem;
-	nAllocPerm += 1;
-	sAllocPerm += sMem;
-
-	pthread_mutex_unlock( &memory_mutex );
-	return pMem;
 }
 
 /*
  * Duplicate a string into dynamic memory.
- * Fread_strings are read-only and shared.
+ * Returns &str_empty[0] for empty strings so callers can compare against it.
  */
 char *str_dup( const char *str ) {
 	char *str_new;
-	size_t len;
 
 	if ( str[0] == '\0' ) {
 		return &str_empty[0];
 	}
-	if ( str >= string_space && str < top_string ) {
-		return (char *) str;
-	}
 
-	len = strlen( str );
-	/* Check if string is too large for alloc_mem (max is 32704 bytes) */
-	if ( len >= 32704 ) {
-		bug( "str_dup: string too large (%d bytes), truncating to 32700", (int)len );
-		len = 32700; /* Leave room for null terminator */
+#if defined( WIN32 )
+	str_new = _strdup( str );
+#else
+	str_new = strdup( str );
+#endif
+	if ( !str_new ) {
+		bug( "str_dup: strdup failed", 0 );
+		exit( 1 );
 	}
-
-	str_new = alloc_mem( (int) len + 1 );
-	strncpy( str_new, str, len );
-	str_new[len] = '\0';
 	return str_new;
 }
 
 /*
  * Free a string.
- * Null is legal here to simplify callers.
- * Read-only shared strings are not touched.
+ * Null and str_empty are legal here to simplify callers.
  */
 void free_string( char *pstr ) {
-
-	if ( pstr == NULL || pstr == &str_empty[0] || ( pstr >= string_space && pstr < top_string ) ) {
+	if ( pstr == NULL || pstr == &str_empty[0] ) {
 		return;
 	}
-
-	free_mem( pstr, (int) strlen( pstr ) + 1 );
-	return;
+	free( pstr );
 }
 
 /*
@@ -1908,7 +1582,7 @@ void calculate_area_difficulty( AREA_DATA *pArea ) {
 void calculate_all_area_difficulties( void ) {
 	AREA_DATA *pArea;
 
-	for ( pArea = area_first; pArea != NULL; pArea = pArea->next )
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node )
 		calculate_area_difficulty( pArea );
 }
 
@@ -1924,7 +1598,7 @@ void do_areas( CHAR_DATA *ch, char *argument ) {
 	WAIT_STATE( ch, 10 );
 
 	/* Count visible areas (skip hidden) */
-	for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 		if ( !pArea->is_hidden )
 			count++;
 	}
@@ -1935,11 +1609,15 @@ void do_areas( CHAR_DATA *ch, char *argument ) {
 	}
 
 	/* Allocate array for sorting */
-	arr = alloc_mem( sizeof( AREA_DATA * ) * count );
+	arr = calloc( count, sizeof( AREA_DATA * ) );
+	if ( !arr ) {
+		send_to_char( "Memory allocation failed.\n\r", ch );
+		return;
+	}
 
 	/* Fill array (skip hidden) */
 	i = 0;
-	for ( pArea = area_first; pArea != NULL; pArea = pArea->next ) {
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 		if ( !pArea->is_hidden )
 			arr[i++] = pArea;
 	}
@@ -1987,7 +1665,7 @@ void do_areas( CHAR_DATA *ch, char *argument ) {
 		count );
 	send_to_char( buf, ch );
 
-	free_mem( arr, sizeof( AREA_DATA * ) * count );
+	free( arr );
 }
 
 void do_memory( CHAR_DATA *ch, char *argument ) {
@@ -2016,13 +1694,25 @@ void do_memory( CHAR_DATA *ch, char *argument ) {
 	sprintf( buf, "Shops   %5d\n\r", top_shop );
 	send_to_char( buf, ch );
 
-	sprintf( buf, "Strings %5d strings of %7d bytes (max %d).\n\r",
-		nAllocString, sAllocString, MAX_STRING );
-	send_to_char( buf, ch );
+	{
+		long total_bytes = 0;
+		total_bytes += (long) top_affect * sizeof( AFFECT_DATA );
+		total_bytes += (long) top_area * sizeof( AREA_DATA );
+		total_bytes += (long) top_ed * sizeof( EXTRA_DESCR_DATA );
+		total_bytes += (long) top_exit * sizeof( EXIT_DATA );
+		total_bytes += (long) top_help * sizeof( HELP_DATA );
+		total_bytes += (long) top_mob_index * sizeof( MOB_INDEX_DATA );
+		total_bytes += (long) top_obj_index * sizeof( OBJ_INDEX_DATA );
+		total_bytes += (long) top_reset * sizeof( RESET_DATA );
+		total_bytes += (long) top_room * sizeof( ROOM_INDEX_DATA );
+		total_bytes += (long) top_shop * sizeof( SHOP_DATA );
 
-	sprintf( buf, "Perms   %5d blocks  of %7d bytes.\n\r",
-		nAllocPerm, sAllocPerm );
-	send_to_char( buf, ch );
+		if ( total_bytes > 1048576 )
+			sprintf( buf, "Estimated boot memory: %.1f MB\n\r", (double) total_bytes / 1048576.0 );
+		else
+			sprintf( buf, "Estimated boot memory: %ld KB\n\r", total_bytes / 1024 );
+		send_to_char( buf, ch );
+	}
 
 	return;
 }
@@ -2172,93 +1862,94 @@ void smash_tilde( char *str ) {
 }
 
 /*
- * Compare strings, case insensitive.
- * Return TRUE if different
- *   (compatibility with historical functions).
+ * Case-insensitive string comparison.
+ * Returns 0 if equal, nonzero if different (like strcasecmp).
+ * NULL-safe: logs a bug and returns nonzero for NULL arguments.
  */
-bool str_cmp( const char *astr, const char *bstr ) {
+/*
+ * Case-insensitive string comparison.
+ * Returns 0 if equal, nonzero otherwise (same convention as strcmp).
+ */
+int str_cmp( const char *astr, const char *bstr ) {
 	if ( astr == NULL ) {
 		bug( "Str_cmp: null astr.", 0 );
-		return TRUE;
+		return 1;
 	}
 
 	if ( bstr == NULL ) {
 		bug( "Str_cmp: null bstr.", 0 );
-		return TRUE;
+		return 1;
 	}
 
 	for ( ; *astr || *bstr; astr++, bstr++ ) {
 		if ( LOWER( *astr ) != LOWER( *bstr ) )
-			return TRUE;
+			return 1;
 	}
 
-	return FALSE;
+	return 0;
 }
 
 /*
- * Compare strings, case insensitive, for prefix matching.
- * Return TRUE if astr not a prefix of bstr
- *   (compatibility with historical functions).
+ * Case-insensitive prefix comparison.
+ * Returns 0 if astr is a prefix of bstr, nonzero otherwise.
  */
-bool str_prefix( const char *astr, const char *bstr ) {
+int str_prefix( const char *astr, const char *bstr ) {
 	if ( astr == NULL ) {
-		bug( "Strn_cmp: null astr.", 0 );
-		return TRUE;
+		bug( "Str_prefix: null astr.", 0 );
+		return 1;
 	}
 
 	if ( bstr == NULL ) {
-		bug( "Strn_cmp: null bstr.", 0 );
-		return TRUE;
+		bug( "Str_prefix: null bstr.", 0 );
+		return 1;
 	}
 
 	for ( ; *astr; astr++, bstr++ ) {
 		if ( LOWER( *astr ) != LOWER( *bstr ) )
-			return TRUE;
+			return 1;
 	}
 
-	return FALSE;
+	return 0;
 }
 
 /*
- * Compare strings, case insensitive, for match anywhere.
- * Returns TRUE is astr not part of bstr.
- *   (compatibility with historical functions).
+ * Case-insensitive infix (substring) check.
+ * Returns 0 if astr is found anywhere in bstr, nonzero otherwise.
  */
-bool str_infix( const char *astr, const char *bstr ) {
+int str_infix( const char *astr, const char *bstr ) {
 	int sstr1;
 	int sstr2;
 	int ichar;
 	char c0;
 
 	if ( ( c0 = LOWER( astr[0] ) ) == '\0' )
-		return FALSE;
+		return 0;
 
 	sstr1 = (int) strlen( astr );
 	sstr2 = (int) strlen( bstr );
 
 	for ( ichar = 0; ichar <= sstr2 - sstr1; ichar++ ) {
 		if ( c0 == LOWER( bstr[ichar] ) && !str_prefix( astr, bstr + ichar ) )
-			return FALSE;
+			return 0;
 	}
 
-	return TRUE;
+	return 1;
 }
 
 /*
- * Compare strings, case insensitive, for suffix matching.
- * Return TRUE if astr not a suffix of bstr
- *   (compatibility with historical functions).
+ * Case-insensitive suffix comparison.
+ * Returns 0 if astr is a suffix of bstr, nonzero otherwise.
  */
-bool str_suffix( const char *astr, const char *bstr ) {
+int str_suffix( const char *astr, const char *bstr ) {
 	int sstr1;
 	int sstr2;
 
 	sstr1 = (int) strlen( astr );
 	sstr2 = (int) strlen( bstr );
 	if ( sstr1 <= sstr2 && !str_cmp( astr, bstr + sstr2 - sstr1 ) )
-		return FALSE;
+		return 0;
 	else
-		return TRUE;
+		return 1;
 }
 
 /*
@@ -2357,6 +2048,7 @@ void log_string( const char *str ) {
 		}
 	}
 
+	if ( fBootDb ) return; /* Skip logchan during boot — no descriptors yet */
 	strcpy( logout, str );
 	logchan( logout );
 	return;

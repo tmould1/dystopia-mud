@@ -24,7 +24,6 @@
 #include "gmcp.h"
 #include "../db/db_class.h"
 
-AFFECT_DATA *affect_free;
 
 /*
  * Local functions.
@@ -481,17 +480,6 @@ void affect_modify( CHAR_DATA *ch, AFFECT_DATA *paf, bool fAdd, OBJ_DATA *obj ) 
 	return;
 }
 
-/*
- * Remove an exit from a room					-Thoric
- */
-void extract_exit( ROOM_INDEX_DATA *room, EXIT_DATA *pexit ) {
-	UNLINK( pexit, room->first_exit, room->last_exit, next, prev );
-	if ( pexit->rexit )
-		pexit->rexit->rexit = NULL;
-	STRFREE( pexit->keyword );
-	STRFREE( pexit->description );
-	DISPOSE( pexit );
-}
 
 void set_learnable_disciplines( CHAR_DATA *ch ) {
 	int i;
@@ -598,16 +586,18 @@ void set_learnable_disciplines( CHAR_DATA *ch ) {
 void affect_to_obj( OBJ_DATA *obj, AFFECT_DATA *paf ) {
 	AFFECT_DATA *paf_new;
 
-	if ( affect_free == NULL ) {
-		paf_new = alloc_perm( sizeof( *paf_new ) );
-	} else {
-		paf_new = affect_free;
-		affect_free = affect_free->next;
+	paf_new = calloc( 1, sizeof( *paf_new ) );
+	if ( !paf_new ) {
+		bug( "affect_to_obj: calloc failed", 0 );
+		exit( 1 );
 	}
 
-	*paf_new = *paf;
-	paf_new->next = obj->affected;
-	obj->affected = paf_new;
+	paf_new->type = paf->type;
+	paf_new->duration = paf->duration;
+	paf_new->location = paf->location;
+	paf_new->modifier = paf->modifier;
+	paf_new->bitvector = paf->bitvector;
+	list_push_front( &obj->affects, &paf_new->node );
 
 	return;
 }
@@ -618,16 +608,18 @@ void affect_to_obj( OBJ_DATA *obj, AFFECT_DATA *paf ) {
 void affect_to_char( CHAR_DATA *ch, AFFECT_DATA *paf ) {
 	AFFECT_DATA *paf_new;
 
-	if ( affect_free == NULL ) {
-		paf_new = alloc_perm( sizeof( *paf_new ) );
-	} else {
-		paf_new = affect_free;
-		affect_free = affect_free->next;
+	paf_new = calloc( 1, sizeof( *paf_new ) );
+	if ( !paf_new ) {
+		bug( "affect_to_char: calloc failed", 0 );
+		exit( 1 );
 	}
 
-	*paf_new = *paf;
-	paf_new->next = ch->affected;
-	ch->affected = paf_new;
+	paf_new->type = paf->type;
+	paf_new->duration = paf->duration;
+	paf_new->location = paf->location;
+	paf_new->modifier = paf->modifier;
+	paf_new->bitvector = paf->bitvector;
+	list_push_front( &ch->affects, &paf_new->node );
 
 	affect_modify( ch, paf_new, TRUE, NULL );
 	return;
@@ -655,8 +647,9 @@ void alias_remove( CHAR_DATA *ch, ALIAS_DATA *ali ) {
 			return;
 		}
 	}
-	ali->next = alias_free;
-	alias_free = ali;
+	free_string( ali->short_n );
+	free_string( ali->long_n );
+	free( ali );
 	return;
 }
 
@@ -664,33 +657,20 @@ void alias_remove( CHAR_DATA *ch, ALIAS_DATA *ali ) {
  * Remove an affect from a char.
  */
 void affect_remove( CHAR_DATA *ch, AFFECT_DATA *paf ) {
-	if ( ch->affected == NULL ) {
+	if ( list_empty( &ch->affects ) ) {
 		bug( "Affect_remove: no affect.", 0 );
 		return;
 	}
 
 	affect_modify( ch, paf, FALSE, NULL );
 
-	if ( paf == ch->affected ) {
-		ch->affected = paf->next;
-	} else {
-		AFFECT_DATA *prev;
-
-		for ( prev = ch->affected; prev != NULL; prev = prev->next ) {
-			if ( prev->next == paf ) {
-				prev->next = paf->next;
-				break;
-			}
-		}
-
-		if ( prev == NULL ) {
-			bug( "Affect_remove: cannot find paf.", 0 );
-			return;
-		}
+	if ( !list_node_is_linked( &paf->node ) ) {
+		bug( "Affect_remove: cannot find paf.", 0 );
+		return;
 	}
 
-	paf->next = affect_free;
-	affect_free = paf;
+	list_remove( &ch->affects, &paf->node );
+	free( paf );
 	return;
 }
 
@@ -701,8 +681,7 @@ void affect_strip( CHAR_DATA *ch, int sn ) {
 	AFFECT_DATA *paf;
 	AFFECT_DATA *paf_next;
 
-	for ( paf = ch->affected; paf != NULL; paf = paf_next ) {
-		paf_next = paf->next;
+	LIST_FOR_EACH_SAFE( paf, paf_next, &ch->affects, AFFECT_DATA, node ) {
 		if ( paf->type == sn )
 			affect_remove( ch, paf );
 	}
@@ -716,7 +695,7 @@ void affect_strip( CHAR_DATA *ch, int sn ) {
 bool is_affected( CHAR_DATA *ch, int sn ) {
 	AFFECT_DATA *paf;
 
-	for ( paf = ch->affected; paf != NULL; paf = paf->next ) {
+	LIST_FOR_EACH( paf, &ch->affects, AFFECT_DATA, node ) {
 		if ( paf->type == sn )
 			return TRUE;
 	}
@@ -731,7 +710,7 @@ void affect_join( CHAR_DATA *ch, AFFECT_DATA *paf ) {
 	AFFECT_DATA *paf_old;
 	bool found = FALSE;
 	(void) found; /* Suppress unused warning */
-	for ( paf_old = ch->affected; paf_old != NULL; paf_old = paf_old->next ) {
+	LIST_FOR_EACH( paf_old, &ch->affects, AFFECT_DATA, node ) {
 		if ( paf_old->type == paf->type ) {
 			paf->duration += paf_old->duration;
 			paf->modifier += paf_old->modifier;
@@ -768,24 +747,13 @@ void char_from_room( CHAR_DATA *ch ) {
 			REMOVE_BIT( ch->in_room->room_flags, ROOM_TOTAL_DARKNESS );
 	}
 
-	if ( ch == ch->in_room->people ) {
-		ch->in_room->people = ch->next_in_room;
+	if ( !list_node_is_linked( &ch->room_node ) ) {
+		bug( "Char_from_room: ch not found.", 0 );
 	} else {
-		CHAR_DATA *prev;
-
-		for ( prev = ch->in_room->people; prev; prev = prev->next_in_room ) {
-			if ( prev->next_in_room == ch ) {
-				prev->next_in_room = ch->next_in_room;
-				break;
-			}
-		}
-
-		if ( prev == NULL )
-			bug( "Char_from_room: ch not found.", 0 );
+		list_remove( &ch->in_room->characters, &ch->room_node );
 	}
 
 	ch->in_room = NULL;
-	ch->next_in_room = NULL;
 	return;
 }
 
@@ -806,8 +774,7 @@ void char_to_room( CHAR_DATA *ch, ROOM_INDEX_DATA *pRoomIndex ) {
 	}
 
 	ch->in_room = pRoomIndex;
-	ch->next_in_room = pRoomIndex->people;
-	pRoomIndex->people = ch;
+	list_push_front( &pRoomIndex->characters, &ch->room_node );
 
 	if ( !IS_NPC(ch) && ch->in_room->area != NULL ) {
 		++ch->in_room->area->nplayer;
@@ -836,8 +803,7 @@ void char_to_room( CHAR_DATA *ch, ROOM_INDEX_DATA *pRoomIndex ) {
  */
 void obj_to_char( OBJ_DATA *obj, CHAR_DATA *ch ) {
 	if ( obj == NULL ) return;
-	obj->next_content = ch->carrying;
-	ch->carrying = obj;
+	list_push_front( &ch->carrying, &obj->content_node );
 	obj->carried_by = ch;
 	obj->in_room = NULL;
 	obj->in_obj = NULL;
@@ -860,25 +826,13 @@ void obj_from_char( OBJ_DATA *obj ) {
 	if ( obj->wear_loc != WEAR_NONE )
 		unequip_char( ch, obj );
 
-	if ( ch->carrying == obj ) {
-		ch->carrying = obj->next_content;
+	if ( !list_node_is_linked( &obj->content_node ) ) {
+		log_string( "Obj_from_char: obj not in list." );
 	} else {
-		OBJ_DATA *prev;
-
-		for ( prev = ch->carrying; prev != NULL; prev = prev->next_content ) {
-			if ( prev->next_content == obj ) {
-				prev->next_content = obj->next_content;
-				break;
-			}
-		}
-
-		if ( prev == NULL )
-
-			log_string( "Obj_from_char: obj not in list." );
+		list_remove( &ch->carrying, &obj->content_node );
 	}
 
 	obj->carried_by = NULL;
-	obj->next_content = NULL;
 	ch->carry_number -= 1;
 	ch->carry_weight -= get_obj_weight( obj );
 	return;
@@ -941,7 +895,7 @@ int apply_ac( OBJ_DATA *obj, int iWear ) {
 OBJ_DATA *get_eq_char( CHAR_DATA *ch, int iWear ) {
 	OBJ_DATA *obj;
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->wear_loc == iWear )
 			return obj;
 	}
@@ -1069,9 +1023,9 @@ void equip_char( CHAR_DATA *ch, OBJ_DATA *obj, int iWear ) {
 		ch->armor -= apply_ac( obj, iWear );
 	obj->wear_loc = iWear;
 
-	for ( paf = obj->pIndexData->affected; paf != NULL; paf = paf->next )
+	LIST_FOR_EACH( paf, &obj->pIndexData->affects, AFFECT_DATA, node )
 		affect_modify( ch, paf, TRUE, obj );
-	for ( paf = obj->affected; paf != NULL; paf = paf->next )
+	LIST_FOR_EACH( paf, &obj->affects, AFFECT_DATA, node )
 		affect_modify( ch, paf, TRUE, obj );
 
 	if ( obj->item_type == ITEM_LIGHT && obj->value[2] != 0 && ch->in_room != NULL )
@@ -1329,9 +1283,9 @@ void unequip_char( CHAR_DATA *ch, OBJ_DATA *obj ) {
 		ch->armor += apply_ac( obj, obj->wear_loc );
 	obj->wear_loc = -1;
 
-	for ( paf = obj->pIndexData->affected; paf != NULL; paf = paf->next )
+	LIST_FOR_EACH( paf, &obj->pIndexData->affects, AFFECT_DATA, node )
 		affect_modify( ch, paf, FALSE, obj );
-	for ( paf = obj->affected; paf != NULL; paf = paf->next )
+	LIST_FOR_EACH( paf, &obj->affects, AFFECT_DATA, node )
 		affect_modify( ch, paf, FALSE, obj );
 
 	if ( obj->item_type == ITEM_LIGHT && obj->value[2] != 0 && ch->in_room != NULL && ch->in_room->light > 0 )
@@ -1483,12 +1437,28 @@ void unequip_char( CHAR_DATA *ch, OBJ_DATA *obj ) {
 /*
  * Count occurrences of an obj in a list.
  */
-int count_obj_list( OBJ_INDEX_DATA *pObjIndex, OBJ_DATA *list ) {
+int count_obj_list( OBJ_INDEX_DATA *pObjIndex, list_head_t *list ) {
 	OBJ_DATA *obj;
 	int nMatch;
 
 	nMatch = 0;
-	for ( obj = list; obj != NULL; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, list, OBJ_DATA, content_node ) {
+		if ( obj->pIndexData == pObjIndex )
+			nMatch++;
+	}
+
+	return nMatch;
+}
+
+/*
+ * Count occurrences of an obj in a room's intrusive object list.
+ */
+int count_obj_room( OBJ_INDEX_DATA *pObjIndex, list_head_t *list ) {
+	OBJ_DATA *obj;
+	int nMatch;
+
+	nMatch = 0;
+	LIST_FOR_EACH( obj, list, OBJ_DATA, room_node ) {
 		if ( obj->pIndexData == pObjIndex )
 			nMatch++;
 	}
@@ -1508,26 +1478,13 @@ void obj_from_room( OBJ_DATA *obj ) {
 		return;
 	}
 
-	if ( obj == in_room->contents ) {
-		in_room->contents = obj->next_content;
-	} else {
-		OBJ_DATA *prev;
-
-		for ( prev = in_room->contents; prev; prev = prev->next_content ) {
-			if ( prev->next_content == obj ) {
-				prev->next_content = obj->next_content;
-				break;
-			}
-		}
-
-		if ( prev == NULL ) {
-			bug( "Obj_from_room: obj not found.", 0 );
-			return;
-		}
+	if ( !list_node_is_linked( &obj->room_node ) ) {
+		bug( "Obj_from_room: obj not found.", 0 );
+		return;
 	}
 
+	list_remove( &in_room->objects, &obj->room_node );
 	obj->in_room = NULL;
-	obj->next_content = NULL;
 	return;
 }
 
@@ -1537,8 +1494,7 @@ void obj_from_room( OBJ_DATA *obj ) {
 void obj_to_room( OBJ_DATA *obj, ROOM_INDEX_DATA *pRoomIndex ) {
 	if ( obj == NULL ) return;
 	if ( pRoomIndex == NULL ) return;
-	obj->next_content = pRoomIndex->contents;
-	pRoomIndex->contents = obj;
+	list_push_front( &pRoomIndex->objects, &obj->room_node );
 	obj->in_room = pRoomIndex;
 	obj->carried_by = NULL;
 	obj->in_obj = NULL;
@@ -1550,8 +1506,7 @@ void obj_to_room( OBJ_DATA *obj, ROOM_INDEX_DATA *pRoomIndex ) {
  */
 void obj_to_obj( OBJ_DATA *obj, OBJ_DATA *obj_to ) {
 	if ( obj == NULL ) return;
-	obj->next_content = obj_to->contains;
-	obj_to->contains = obj;
+	list_push_front( &obj_to->contents, &obj->content_node );
 	obj->in_obj = obj_to;
 	obj->in_room = NULL;
 	obj->carried_by = NULL;
@@ -1576,25 +1531,12 @@ void obj_from_obj( OBJ_DATA *obj ) {
 		return;
 	}
 
-	if ( obj == obj_from->contains ) {
-		obj_from->contains = obj->next_content;
-	} else {
-		OBJ_DATA *prev;
-
-		for ( prev = obj_from->contains; prev; prev = prev->next_content ) {
-			if ( prev->next_content == obj ) {
-				prev->next_content = obj->next_content;
-				break;
-			}
-		}
-
-		if ( prev == NULL ) {
-			bug( "Obj_from_obj: obj not found.", 0 );
-			return;
-		}
+	if ( !list_node_is_linked( &obj->content_node ) ) {
+		bug( "Obj_from_obj: obj not found.", 0 );
+		return;
 	}
 
-	obj->next_content = NULL;
+	list_remove( &obj_from->contents, &obj->content_node );
 	obj->in_obj = NULL;
 
 	for ( ; obj_from != NULL; obj_from = obj_from->in_obj ) {
@@ -1611,15 +1553,13 @@ void obj_from_obj( OBJ_DATA *obj ) {
 void extract_obj( OBJ_DATA *obj ) {
 	CHAR_DATA *ch;
 	OBJ_DATA *obj_content;
-	OBJ_DATA *obj_next;
 
 	if ( obj == NULL ) return;
 
-	if ( obj->item_type == ITEM_CORPSE_PC && obj->contains ) {
+	if ( obj->item_type == ITEM_CORPSE_PC && !list_empty( &obj->contents ) ) {
 		OBJ_DATA *t_obj, *next_obj;
 
-		for ( t_obj = obj->contains; t_obj != NULL; t_obj = next_obj ) {
-			next_obj = t_obj->next_content;
+		LIST_FOR_EACH_SAFE( t_obj, next_obj, &obj->contents, OBJ_DATA, content_node ) {
 			obj_from_obj( t_obj );
 
 			if ( obj->in_obj ) /* in another object */
@@ -1678,37 +1618,24 @@ void extract_obj( OBJ_DATA *obj ) {
 		bug( "Extract_obj: obj %d chobj invalid.", obj->pIndexData->vnum );
 	}
 
-	for ( obj_content = obj->contains; obj_content; obj_content = obj_next ) {
-		obj_next = obj_content->next_content;
-		if ( obj->contains != NULL ) extract_obj( obj->contains );
+	while ( !list_empty( &obj->contents ) ) {
+		obj_content = LIST_ENTRY( obj->contents.sentinel.next, OBJ_DATA, content_node );
+		extract_obj( obj_content );
 	}
 
-	if ( object_list == obj ) {
-		object_list = obj->next;
-	} else {
-		OBJ_DATA *prev;
-
-		for ( prev = object_list; prev != NULL; prev = prev->next ) {
-			if ( prev->next == obj ) {
-				prev->next = obj->next;
-				break;
-			}
-		}
-
-		if ( prev == NULL ) {
-			bug( "Extract_obj: obj %d not found.", obj->pIndexData->vnum );
-			return;
-		}
+	if ( !list_node_is_linked( &obj->obj_node ) ) {
+		bug( "Extract_obj: obj %d not found.", obj->pIndexData->vnum );
+		return;
 	}
+	list_remove( &g_objects, &obj->obj_node );
 
 	{
 		AFFECT_DATA *paf;
 		AFFECT_DATA *paf_next;
 
-		for ( paf = obj->affected; paf != NULL; paf = paf_next ) {
-			paf_next = paf->next;
-			paf->next = affect_free;
-			affect_free = paf;
+		LIST_FOR_EACH_SAFE( paf, paf_next, &obj->affects, AFFECT_DATA, node ) {
+			list_remove( &obj->affects, &paf->node );
+			free( paf );
 		}
 	}
 
@@ -1722,8 +1649,7 @@ void extract_obj( OBJ_DATA *obj ) {
 			free_string( ed->description );
 			free_string( ed->keyword );
 
-			ed->next = extra_descr_free;
-			extra_descr_free = ed;
+			free( ed );
 		}
 	}
 
@@ -1739,8 +1665,7 @@ void extract_obj( OBJ_DATA *obj ) {
 	if ( obj->questmaker != NULL ) free_string( obj->questmaker );
 	if ( obj->questowner != NULL ) free_string( obj->questowner );
 	--obj->pIndexData->count;
-	obj->next = obj_free;
-	obj_free = obj;
+	free( obj );
 	return;
 }
 
@@ -1752,7 +1677,6 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 	CHAR_DATA *familiar;
 	CHAR_DATA *wizard;
 	OBJ_DATA *obj;
-	OBJ_DATA *obj_next;
 
 	if ( ch == NULL ) return;
 
@@ -1766,8 +1690,8 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 
 	stop_fighting( ch, TRUE );
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	while ( !list_empty( &ch->carrying ) ) {
+		obj = LIST_ENTRY( ch->carrying.sentinel.next, OBJ_DATA, content_node );
 		extract_obj( obj );
 	}
 
@@ -1789,29 +1713,23 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 		do_return( ch, "" );
 
 	/*
-	 * Single consolidated pass: clear reply/propose/partner pointers,
-	 * remove ch from char_list, and decrement follower counts.
-	 * (Previously 3-4 separate full list scans.)
+	 * Remove ch from global character list (O(1) with intrusive list),
+	 * then clear reply/propose/partner pointers and decrement follower counts.
 	 */
+	if ( !list_node_is_linked( &ch->char_node ) ) {
+		bug( "Extract_char: char not found.", 0 );
+		return;
+	}
+	list_remove( &g_characters, &ch->char_node );
+
 	{
 		bool is_npc_ch       = IS_NPC( ch );
 		bool check_propose   = !is_npc_ch;
 		bool check_followers = is_npc_ch && strlen( ch->lord ) > 1;
-		bool removed         = FALSE;
 
-		if ( ch == char_list ) {
-			char_list = ch->next;
-			removed = TRUE;
-		}
-
-		for ( wch = char_list; wch != NULL; wch = wch->next ) {
+		LIST_FOR_EACH( wch, &g_characters, CHAR_DATA, char_node ) {
 			if ( wch->reply == ch )
 				wch->reply = NULL;
-
-			if ( !removed && wch->next == ch ) {
-				wch->next = ch->next;
-				removed = TRUE;
-			}
 
 			if ( check_propose && !IS_NPC( wch ) ) {
 				if ( wch->pcdata->propose != NULL && wch->pcdata->propose == ch )
@@ -1824,11 +1742,6 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 				if ( !str_cmp( wch->name, ch->lord ) && wch->pcdata->followers > 0 )
 					wch->pcdata->followers--;
 			}
-		}
-
-		if ( !removed ) {
-			bug( "Extract_char: char not found.", 0 );
-			return;
 		}
 	}
 
@@ -1871,7 +1784,7 @@ CHAR_DATA *get_char_room( CHAR_DATA *ch, char *argument ) {
 	count = 0;
 	if ( !str_cmp( arg, "self" ) && ( IS_NPC( ch ) || ch->pcdata->chobj == NULL ) )
 		return ch;
-	for ( rch = ch->in_room->people; rch != NULL; rch = rch->next_in_room ) {
+	LIST_FOR_EACH( rch, &ch->in_room->characters, CHAR_DATA, room_node ) {
 		if ( !IS_NPC( rch ) && IS_HEAD( rch, LOST_HEAD ) )
 			continue;
 		else if ( !IS_NPC( rch ) && IS_EXTRA( rch, EXTRA_OSWITCH ) )
@@ -1899,7 +1812,7 @@ CHAR_DATA *get_char_world( CHAR_DATA *ch, char *argument ) {
 
 	number = number_argument( argument, arg );
 	count = 0;
-	for ( wch = char_list; wch != NULL; wch = wch->next ) {
+	LIST_FOR_EACH( wch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( wch ) && IS_HEAD( wch, LOST_HEAD ) )
 			continue;
 		else if ( !IS_NPC( wch ) && IS_EXTRA( wch, EXTRA_OSWITCH ) )
@@ -1924,7 +1837,7 @@ CHAR_DATA *get_char_world( CHAR_DATA *ch, char *argument ) {
 OBJ_DATA *get_obj_type( OBJ_INDEX_DATA *pObjIndex ) {
 	OBJ_DATA *obj;
 
-	for ( obj = object_list; obj != NULL; obj = obj->next ) {
+	LIST_FOR_EACH( obj, &g_objects, OBJ_DATA, obj_node ) {
 		if ( obj->pIndexData == pObjIndex )
 			return obj;
 	}
@@ -1935,7 +1848,7 @@ OBJ_DATA *get_obj_type( OBJ_INDEX_DATA *pObjIndex ) {
 /*
  * Find an obj in a list.
  */
-OBJ_DATA *get_obj_list( CHAR_DATA *ch, char *argument, OBJ_DATA *list ) {
+OBJ_DATA *get_obj_list( CHAR_DATA *ch, char *argument, list_head_t *list ) {
 	char arg[MAX_INPUT_LENGTH];
 	OBJ_DATA *obj;
 	int number;
@@ -1943,7 +1856,25 @@ OBJ_DATA *get_obj_list( CHAR_DATA *ch, char *argument, OBJ_DATA *list ) {
 
 	number = number_argument( argument, arg );
 	count = 0;
-	for ( obj = list; obj != NULL; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, list, OBJ_DATA, room_node ) {
+		if ( can_see_obj( ch, obj ) && is_name( arg, obj->name ) ) {
+			if ( ++count == number )
+				return obj;
+		}
+	}
+
+	return NULL;
+}
+
+OBJ_DATA *get_obj_content( CHAR_DATA *ch, char *argument, list_head_t *list ) {
+	char arg[MAX_INPUT_LENGTH];
+	OBJ_DATA *obj;
+	int number;
+	int count;
+
+	number = number_argument( argument, arg );
+	count = 0;
+	LIST_FOR_EACH( obj, list, OBJ_DATA, content_node ) {
 		if ( can_see_obj( ch, obj ) && is_name( arg, obj->name ) ) {
 			if ( ++count == number )
 				return obj;
@@ -1971,7 +1902,7 @@ OBJ_DATA *get_obj_in_obj( CHAR_DATA *ch, char *argument ) {
 	if ( obj->in_obj->item_type != ITEM_CONTAINER && obj->in_obj->item_type != ITEM_CORPSE_NPC &&
 		obj->in_obj->item_type != ITEM_CORPSE_PC ) return NULL;
 
-	for ( obj2 = obj->in_obj->contains; obj2 != NULL; obj2 = obj2->next_content ) {
+	LIST_FOR_EACH( obj2, &obj->in_obj->contents, OBJ_DATA, content_node ) {
 		if ( obj != obj2 && is_name( arg, obj2->name ) ) {
 			if ( ++count == number )
 				return obj2;
@@ -1992,7 +1923,7 @@ OBJ_DATA *get_obj_carry( CHAR_DATA *ch, char *argument ) {
 
 	number = number_argument( argument, arg );
 	count = 0;
-	for ( obj = ch->carrying; obj != NULL; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->wear_loc == WEAR_NONE && can_see_obj( ch, obj ) && is_name( arg, obj->name ) ) {
 			if ( ++count == number )
 				return obj;
@@ -2013,7 +1944,7 @@ OBJ_DATA *get_obj_wear( CHAR_DATA *ch, char *argument ) {
 
 	number = number_argument( argument, arg );
 	count = 0;
-	for ( obj = ch->carrying; obj != NULL; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->wear_loc != WEAR_NONE && can_see_obj( ch, obj ) && is_name( arg, obj->name ) ) {
 			if ( ++count == number )
 				return obj;
@@ -2029,7 +1960,7 @@ OBJ_DATA *get_obj_wear( CHAR_DATA *ch, char *argument ) {
 OBJ_DATA *get_obj_here( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 
-	obj = get_obj_list( ch, argument, ch->in_room->contents );
+	obj = get_obj_list( ch, argument, &ch->in_room->objects );
 	if ( obj != NULL )
 		return obj;
 
@@ -2051,7 +1982,7 @@ OBJ_DATA *get_obj_here( CHAR_DATA *ch, char *argument ) {
 OBJ_DATA *get_obj_room( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 
-	obj = get_obj_list( ch, argument, ch->in_room->contents );
+	obj = get_obj_list( ch, argument, &ch->in_room->objects );
 	if ( obj != NULL )
 		return obj;
 
@@ -2072,7 +2003,7 @@ OBJ_DATA *get_obj_world( CHAR_DATA *ch, char *argument ) {
 
 	number = number_argument( argument, arg );
 	count = 0;
-	for ( obj = object_list; obj != NULL; obj = obj->next ) {
+	LIST_FOR_EACH( obj, &g_objects, OBJ_DATA, obj_node ) {
 		if ( can_see_obj( ch, obj ) && is_name( arg, obj->name ) ) {
 			if ( ++count == number )
 				return obj;
@@ -2114,8 +2045,11 @@ int get_obj_weight( OBJ_DATA *obj ) {
 	int weight;
 
 	weight = obj->weight;
-	for ( obj = obj->contains; obj != NULL; obj = obj->next_content )
-		weight += get_obj_weight( obj );
+	{
+		OBJ_DATA *content;
+		LIST_FOR_EACH( content, &obj->contents, OBJ_DATA, content_node )
+			weight += get_obj_weight( content );
+	}
 
 	return weight;
 }
@@ -2147,7 +2081,7 @@ bool room_is_private( ROOM_INDEX_DATA *pRoomIndex ) {
 	int count;
 
 	count = 0;
-	for ( rch = pRoomIndex->people; rch != NULL; rch = rch->next_in_room )
+	LIST_FOR_EACH( rch, &pRoomIndex->characters, CHAR_DATA, room_node )
 		if ( !IS_NPC( rch ) ) count++;
 
 	if ( IS_SET( pRoomIndex->room_flags, ROOM_PRIVATE ) && count >= 2 )
@@ -2527,7 +2461,7 @@ CHAR_DATA *get_char_world2( CHAR_DATA *ch, char *argument ) {
 
 	if ( argument[0] == '\0' ) return NULL;
 
-	for ( wch = char_list; wch != NULL; wch = wch->next ) {
+	LIST_FOR_EACH( wch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( wch ) && !str_cmp( argument, wch->short_descr ) ) return wch;
 	}
 
@@ -2540,7 +2474,7 @@ OBJ_DATA *get_obj_world2( CHAR_DATA *ch, char *argument ) {
 
 	if ( argument[0] == '\0' ) return NULL;
 
-	for ( obj = object_list; obj != NULL; obj = obj->next ) {
+	LIST_FOR_EACH( obj, &g_objects, OBJ_DATA, obj_node ) {
 		if ( !str_cmp( argument, obj->short_descr ) ) {
 			if ( ( vnum = obj->pIndexData->vnum ) == 30037 || vnum == 30041 )
 				continue;

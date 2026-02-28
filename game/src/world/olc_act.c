@@ -47,7 +47,11 @@ struct olc_help_type {
 };
 HELP_DATA *new_help( void ) {
 	HELP_DATA *pHelp;
-	pHelp = alloc_perm( sizeof( *pHelp ) );
+	pHelp = calloc( 1, sizeof( *pHelp ) );
+	if ( !pHelp ) {
+		bug( "new_help: calloc failed", 0 );
+		exit( 1 );
+	}
 	pHelp->level = 0;
 	return pHelp;
 }
@@ -410,7 +414,7 @@ bool check_range( int lower, int upper ) {
 	AREA_DATA *pArea;
 	int cnt = 0;
 
-	for ( pArea = area_first; pArea; pArea = pArea->next ) {
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 		/*
 		 * lower < area < upper
 		 */
@@ -426,7 +430,7 @@ bool check_range( int lower, int upper ) {
 AREA_DATA *get_vnum_area( int vnum ) {
 	AREA_DATA *pArea;
 
-	for ( pArea = area_first; pArea; pArea = pArea->next ) {
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 		if ( vnum >= pArea->lvnum && vnum <= pArea->uvnum )
 			return pArea;
 	}
@@ -516,7 +520,7 @@ bool aedit_create( CHAR_DATA *ch, char *argument ) {
 	}
 
 	pArea = new_area();
-	area_last->next = pArea;
+	list_push_back( &g_areas, &pArea->node );
 	area_last = pArea; /* Thanks, Walker. */
 	ch->desc->pEdit = (void *) pArea;
 
@@ -899,7 +903,7 @@ bool redit_show( CHAR_DATA *ch, char *argument ) {
 
 	strcat( buf1, "Characters: [" );
 	fcnt = FALSE;
-	for ( rch = pRoom->people; rch; rch = rch->next_in_room ) {
+	LIST_FOR_EACH( rch, &pRoom->characters, CHAR_DATA, room_node ) {
 		one_argument( rch->name, buf );
 		strcat( buf1, buf );
 		strcat( buf1, " " );
@@ -917,7 +921,7 @@ bool redit_show( CHAR_DATA *ch, char *argument ) {
 
 	strcat( buf1, "Objects:    [" );
 	fcnt = FALSE;
-	for ( obj = pRoom->contents; obj; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &pRoom->objects, OBJ_DATA, room_node ) {
 		one_argument( obj->name, buf );
 		strcat( buf1, buf );
 		strcat( buf1, " " );
@@ -1716,7 +1720,7 @@ bool redit_oreset( CHAR_DATA *ch, char *argument ) {
 		/*
 		 * Load into object's inventory.
 		 */
-		if ( argument[0] == '\0' && ( ( to_obj = get_obj_list( ch, arg2, pRoom->contents ) ) != NULL ) ) {
+		if ( argument[0] == '\0' && ( ( to_obj = get_obj_list( ch, arg2, &pRoom->objects ) ) != NULL ) ) {
 			pReset = new_reset_data();
 			pReset->command = 'P';
 			pReset->arg1 = pObjIndex->vnum;
@@ -2215,7 +2219,8 @@ bool oedit_show( CHAR_DATA *ch, char *argument ) {
 		pObj->short_descr, pObj->description );
 	send_to_char( buf, ch );
 
-	for ( cnt = 0, paf = pObj->affected; paf; paf = paf->next ) {
+	cnt = 0;
+	LIST_FOR_EACH(paf, &pObj->affects, AFFECT_DATA, node) {
 		if ( cnt == 0 ) {
 			send_to_char( "Number Modifier Affects\n\r", ch );
 			send_to_char( "------ -------- -------\n\r", ch );
@@ -2257,8 +2262,7 @@ bool oedit_addaffect( CHAR_DATA *ch, char *argument ) {
 	pAf->type = -1;
 	pAf->duration = -1;
 	pAf->bitvector = 0;
-	pAf->next = pObj->affected;
-	pObj->affected = pAf;
+	list_push_front(&pObj->affects, &pAf->node);
 
 	send_to_char( "Affect added.\n\r", ch );
 	return TRUE;
@@ -2292,30 +2296,26 @@ bool oedit_delaffect( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	if ( !( pAf = pObj->affected ) ) {
+	if ( list_empty(&pObj->affects) ) {
 		send_to_char( "OEdit:  Non-existant affect.\n\r", ch );
 		return FALSE;
 	}
 
-	if ( value == 0 ) /* First case: Remove first affect */
-	{
-		pAf = pObj->affected;
-		pObj->affected = pAf->next;
-		free_affect( pAf );
-	} else /* Affect to remove is not the first */
-	{
-		while ( ( pAf_next = pAf->next ) && ( ++cnt < value ) )
+	pAf = NULL;
+	LIST_FOR_EACH(pAf_next, &pObj->affects, AFFECT_DATA, node) {
+		if ( cnt == value ) {
 			pAf = pAf_next;
-
-		if ( pAf_next ) /* See if it's the next affect */
-		{
-			pAf->next = pAf_next->next;
-			free_affect( pAf_next );
-		} else /* Doesn't exist */
-		{
-			send_to_char( "No such affect.\n\r", ch );
-			return FALSE;
+			break;
 		}
+		cnt++;
+	}
+
+	if ( pAf ) {
+		list_remove(&pObj->affects, &pAf->node);
+		free_affect( pAf );
+	} else {
+		send_to_char( "No such affect.\n\r", ch );
+		return FALSE;
 	}
 
 	send_to_char( "Affect removed.\n\r", ch );
@@ -3111,7 +3111,7 @@ HEDIT( hedit_keyword ) {
 	EDIT_HELP( ch, pHelp );
 
 	if ( !is_number( argument ) ) {
-		for ( tHelp = first_help; tHelp != NULL; tHelp = tHelp->next ) {
+		LIST_FOR_EACH( tHelp, &g_helps, HELP_DATA, node ) {
 			if ( is_name( argument, tHelp->keyword ) ) {
 				send_to_char( "{b That keyword already exits.{x\n\r", ch );
 				return FALSE;
@@ -3148,9 +3148,9 @@ HEDIT( hedit_delete ) {
 		send_to_char( "{r Synatx: Hedit delete 'keyword'{x\n\r", ch );
 		return FALSE;
 	}
-	for ( target = first_help; target != NULL; target = target->next ) {
+	LIST_FOR_EACH( target, &g_helps, HELP_DATA, node ) {
 		if ( is_name( argument, target->keyword ) ) {
-			UNLINK( target, first_help, last_help, next, prev );
+			list_remove( &g_helps, &target->node );
 			top_help--;
 			send_to_char( "{rHelp removed.{x\n\r", ch );
 			return TRUE;
@@ -3168,7 +3168,7 @@ HEDIT( hedit_change ) {
 		send_to_char( " Syntax: Hedit change 'keyword'\n\r", ch );
 		return FALSE;
 	}
-	for ( tHelp = first_help; tHelp != NULL; tHelp = tHelp->next ) {
+	LIST_FOR_EACH( tHelp, &g_helps, HELP_DATA, node ) {
 		if ( is_name( argument, tHelp->keyword ) ) {
 			send_to_char( " Help found, Entering String editor\n\r", ch );
 
@@ -3194,7 +3194,7 @@ HEDIT( hedit_index ) {
 	buf[0] = '\0';
 	output[0] = '\0';
 
-	for ( pHelp = first_help; pHelp != NULL; pHelp = pHelp->next ) {
+	LIST_FOR_EACH( pHelp, &g_helps, HELP_DATA, node ) {
 		level = ( pHelp->level < 0 ) ? -1 * pHelp->level - 1 : pHelp->level;
 
 		if ( level > get_trust( ch ) )
@@ -3212,7 +3212,6 @@ HEDIT( hedit_index ) {
 /* create a new help */
 HEDIT( hedit_create ) {
 	extern int top_help;
-	extern HELP_DATA *last_help;
 	HELP_DATA *pHelp;
 	HELP_DATA *tHelp;
 
@@ -3221,7 +3220,7 @@ HEDIT( hedit_create ) {
 		return FALSE;
 	}
 
-	for ( tHelp = first_help; tHelp != NULL; tHelp = tHelp->next ) {
+	LIST_FOR_EACH( tHelp, &g_helps, HELP_DATA, node ) {
 		if ( is_name( argument, tHelp->keyword ) ) {
 			send_to_char( "{b That Help already exits.{x\n\r", ch );
 			return FALSE;

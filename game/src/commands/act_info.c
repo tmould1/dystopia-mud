@@ -153,7 +153,7 @@ char *format_obj_to_char args( ( OBJ_DATA * obj, CHAR_DATA *ch,
 	bool fShort ) );
 void show_char_to_char_0 args( ( CHAR_DATA * victim, CHAR_DATA *ch ) );
 void show_char_to_char_1 args( ( CHAR_DATA * victim, CHAR_DATA *ch ) );
-void show_char_to_char args( ( CHAR_DATA * list, CHAR_DATA *ch ) );
+void show_char_to_char args( ( list_head_t * list, CHAR_DATA *ch ) );
 bool check_blind args( ( CHAR_DATA * ch ) );
 
 void evil_eye args( ( CHAR_DATA * victim, CHAR_DATA *ch ) );
@@ -543,7 +543,7 @@ int char_ac( CHAR_DATA *ch ) {
  *
  * in_room: TRUE if items are on the ground (MXP: get), FALSE if inventory (MXP: identify)
  */
-void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNothing, bool in_room ) {
+void show_list_to_char( void *list, CHAR_DATA *ch, bool fShort, bool fShowNothing, bool in_room ) {
 	char buf[MAX_STRING_LENGTH];
 	char **prgpstrShow;		/* Full string for comparison (prefix + desc) */
 	char **prgpstrPrefix;	/* Just the MXP-tagged prefixes */
@@ -563,10 +563,18 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	if ( ch->desc == NULL )
 		return;
 
-	if ( list == NULL ) {
-		if ( fShowNothing )
-			send_to_char( "     Nothing.\n\r", ch );
-		return;
+	if ( in_room ) {
+		if ( list_empty( (list_head_t *) list ) ) {
+			if ( fShowNothing )
+				send_to_char( "     Nothing.\n\r", ch );
+			return;
+		}
+	} else {
+		if ( (OBJ_DATA *) list == NULL ) {
+			if ( fShowNothing )
+				send_to_char( "     Nothing.\n\r", ch );
+			return;
+		}
 	}
 
 	/* Check if MXP is enabled for this character */
@@ -576,51 +584,85 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	 * Alloc space for output lines.
 	 */
 	count = 0;
-	for ( obj = list; obj != NULL; obj = obj->next_content )
-		count++;
-	prgpstrShow = alloc_mem( count * sizeof( char * ) );
-	prgpstrPrefix = alloc_mem( count * sizeof( char * ) );
-	prgpstrDesc = alloc_mem( count * sizeof( char * ) );
-	prgpObjShow = alloc_mem( count * sizeof( OBJ_DATA * ) );
-	prgnShow = alloc_mem( count * sizeof( int ) );
+	if ( in_room ) {
+		LIST_FOR_EACH( obj, (list_head_t *) list, OBJ_DATA, room_node )
+			count++;
+	} else {
+		LIST_FOR_EACH( obj, (list_head_t *) list, OBJ_DATA, content_node )
+			count++;
+	}
+	prgpstrShow = calloc( count, sizeof( char * ) );
+	prgpstrPrefix = calloc( count, sizeof( char * ) );
+	prgpstrDesc = calloc( count, sizeof( char * ) );
+	prgpObjShow = calloc( count, sizeof( OBJ_DATA * ) );
+	prgnShow = calloc( count, sizeof( int ) );
+	if ( !prgpstrShow || !prgpstrPrefix || !prgpstrDesc || !prgpObjShow || !prgnShow )
+		return;
 	nShow = 0;
 
 	/*
 	 * Format the list of objects.
+	 * Room objects use the intrusive doubly-linked list with room_node;
+	 * container/inventory objects use the intrusive doubly-linked list with content_node.
 	 */
-	for ( obj = list; obj != NULL; obj = obj->next_content ) {
-		if ( !IS_NPC( ch ) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch )
-			continue;
-		if ( obj->wear_loc == WEAR_NONE && can_see_obj( ch, obj ) ) {
-			pstrShow = format_obj_to_char( obj, ch, fShort );
-			pstrPrefix = format_obj_prefixes( obj, ch );
-			pstrDesc = format_obj_desc( obj, ch, fShort );
-			fCombine = FALSE;
+	if ( in_room ) {
+		LIST_FOR_EACH( obj, (list_head_t *) list, OBJ_DATA, room_node ) {
+			if ( !IS_NPC( ch ) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch )
+				continue;
+			if ( obj->wear_loc == WEAR_NONE && can_see_obj( ch, obj ) ) {
+				pstrShow = format_obj_to_char( obj, ch, fShort );
+				pstrPrefix = format_obj_prefixes( obj, ch );
+				pstrDesc = format_obj_desc( obj, ch, fShort );
+				fCombine = FALSE;
 
-			if ( IS_NPC( ch ) || IS_SET( ch->act, PLR_COMBINE ) ) {
-				/*
-				 * Look for duplicates, case sensitive.
-				 * Matches tend to be near end so run loop backwords.
-				 */
-				for ( iShow = nShow - 1; iShow >= 0; iShow-- ) {
-					if ( !strcmp( prgpstrShow[iShow], pstrShow ) ) {
-						prgnShow[iShow]++;
-						fCombine = TRUE;
-						break;
+				if ( IS_NPC( ch ) || IS_SET( ch->act, PLR_COMBINE ) ) {
+					for ( iShow = nShow - 1; iShow >= 0; iShow-- ) {
+						if ( !strcmp( prgpstrShow[iShow], pstrShow ) ) {
+							prgnShow[iShow]++;
+							fCombine = TRUE;
+							break;
+						}
 					}
 				}
-			}
 
-			/*
-			 * Couldn't combine, or didn't want to.
-			 */
-			if ( !fCombine ) {
-				prgpstrShow[nShow] = str_dup( pstrShow );
-				prgpstrPrefix[nShow] = str_dup( pstrPrefix );
-				prgpstrDesc[nShow] = str_dup( pstrDesc );
-				prgpObjShow[nShow] = obj; /* Save first object for MXP link */
-				prgnShow[nShow] = 1;
-				nShow++;
+				if ( !fCombine ) {
+					prgpstrShow[nShow] = str_dup( pstrShow );
+					prgpstrPrefix[nShow] = str_dup( pstrPrefix );
+					prgpstrDesc[nShow] = str_dup( pstrDesc );
+					prgpObjShow[nShow] = obj;
+					prgnShow[nShow] = 1;
+					nShow++;
+				}
+			}
+		}
+	} else {
+		LIST_FOR_EACH( obj, (list_head_t *) list, OBJ_DATA, content_node ) {
+			if ( !IS_NPC( ch ) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch )
+				continue;
+			if ( obj->wear_loc == WEAR_NONE && can_see_obj( ch, obj ) ) {
+				pstrShow = format_obj_to_char( obj, ch, fShort );
+				pstrPrefix = format_obj_prefixes( obj, ch );
+				pstrDesc = format_obj_desc( obj, ch, fShort );
+				fCombine = FALSE;
+
+				if ( IS_NPC( ch ) || IS_SET( ch->act, PLR_COMBINE ) ) {
+					for ( iShow = nShow - 1; iShow >= 0; iShow-- ) {
+						if ( !strcmp( prgpstrShow[iShow], pstrShow ) ) {
+							prgnShow[iShow]++;
+							fCombine = TRUE;
+							break;
+						}
+					}
+				}
+
+				if ( !fCombine ) {
+					prgpstrShow[nShow] = str_dup( pstrShow );
+					prgpstrPrefix[nShow] = str_dup( pstrPrefix );
+					prgpstrDesc[nShow] = str_dup( pstrDesc );
+					prgpObjShow[nShow] = obj;
+					prgnShow[nShow] = 1;
+					nShow++;
+				}
 			}
 		}
 	}
@@ -676,11 +718,11 @@ void show_list_to_char( OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNo
 	/*
 	 * Clean up.
 	 */
-	free_mem( prgpstrShow, count * sizeof( char * ) );
-	free_mem( prgpstrPrefix, count * sizeof( char * ) );
-	free_mem( prgpstrDesc, count * sizeof( char * ) );
-	free_mem( prgpObjShow, count * sizeof( OBJ_DATA * ) );
-	free_mem( prgnShow, count * sizeof( int ) );
+	free( prgpstrShow );
+	free( prgpstrPrefix );
+	free( prgpstrDesc );
+	free( prgpObjShow );
+	free( prgnShow );
 
 	return;
 }
@@ -1155,16 +1197,16 @@ void show_char_to_char_1( CHAR_DATA *victim, CHAR_DATA *ch ) {
 
 	if ( victim != ch && !IS_NPC( ch ) && !IS_HEAD( victim, LOST_HEAD ) && number_percent() < ch->pcdata->learned[gsn_peek] ) {
 		send_to_char( "\n\rYou peek at the inventory:\n\r", ch );
-		show_list_to_char( victim->carrying, ch, TRUE, TRUE, FALSE );
+		show_list_to_char( &victim->carrying, ch, TRUE, TRUE, FALSE );
 	}
 
 	return;
 }
 
-void show_char_to_char( CHAR_DATA *list, CHAR_DATA *ch ) {
+void show_char_to_char( list_head_t *list, CHAR_DATA *ch ) {
 	CHAR_DATA *rch;
 
-	for ( rch = list; rch != NULL; rch = rch->next_in_room ) {
+	LIST_FOR_EACH( rch, list, CHAR_DATA, room_node ) {
 		if ( rch == ch )
 			continue;
 
@@ -1229,7 +1271,6 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *wizard;
 	OBJ_DATA *obj;
 	OBJ_DATA *portal;
-	OBJ_DATA *portal_next;
 	ROOM_INDEX_DATA *pRoomIndex;
 	ROOM_INDEX_DATA *location;
 	char *pdesc;
@@ -1266,7 +1307,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 
 	if ( !IS_NPC( ch ) && !IS_SET( ch->act, PLR_HOLYLIGHT ) && !IS_ITEMAFF( ch, ITEMA_VISION ) && !IS_VAMPAFF( ch, VAM_NIGHTSIGHT ) && !IS_AFFECTED( ch, AFF_SHADOWPLANE ) && !( ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT && !IS_NPC( ch ) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL ) && room_is_dark( ch->in_room ) ) {
 		send_to_char( "It is pitch black ... \n\r", ch );
-		show_char_to_char( ch->in_room->people, ch );
+		show_char_to_char( &ch->in_room->characters, ch );
 		return;
 	}
 
@@ -1294,7 +1335,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 
 		if ( ch->in_room != NULL && ch->in_room->vnum == ROOM_VNUM_IN_OBJECT && !IS_NPC( ch ) && ch->pcdata->chobj != NULL && ch->pcdata->chobj->in_obj != NULL ) {
 			act( "You are inside $p.", ch, ch->pcdata->chobj->in_obj, NULL, TO_CHAR );
-			show_list_to_char( ch->pcdata->chobj->in_obj->contains, ch, FALSE, FALSE, FALSE );
+			show_list_to_char( &ch->pcdata->chobj->in_obj->contents, ch, FALSE, FALSE, FALSE );
 		} else if ( ( arg1[0] == '\0' || !str_cmp( arg1, "auto" ) ) && IS_AFFECTED( ch, AFF_SHADOWPLANE ) )
 			send_to_char( "You are standing in complete darkness.\n\r", ch );
 		else if ( ( !IS_NPC( ch ) && !IS_SET( ch->act, PLR_BRIEF ) ) &&
@@ -1327,7 +1368,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 		if ( IS_SET( ch->in_room->room_flags, ROOM_FLAMING ) )
 			send_to_char( "..This room is engulfed in flames!\n\r", ch );
 
-		show_list_to_char( ch->in_room->contents, ch, FALSE, FALSE, TRUE );
+		show_list_to_char( &ch->in_room->objects, ch, FALSE, FALSE, TRUE );
 
 		for ( door = 0; door < 6; door++ ) {
 			if ( ch->in_room == NULL ) continue;
@@ -1360,7 +1401,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 			}
 		}
 
-		show_char_to_char( ch->in_room->people, ch );
+		show_char_to_char( &ch->in_room->characters, ch );
 		if ( str_cmp( arg1, "scry" ) ) aggr_test( ch );
 		return;
 	}
@@ -1397,8 +1438,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 			char_to_room( ch, pRoomIndex );
 
 			found = FALSE;
-			for ( portal = ch->in_room->contents; portal != NULL; portal = portal_next ) {
-				portal_next = portal->next_content;
+			LIST_FOR_EACH( portal, &ch->in_room->objects, OBJ_DATA, room_node ) {
 				if ( ( obj->value[0] == portal->value[3] ) && ( obj->value[3] == portal->value[0] ) ) {
 					found = TRUE;
 					if ( IS_AFFECTED( ch, AFF_SHADOWPLANE ) &&
@@ -1461,7 +1501,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 			}
 
 			act( "$p contains:", ch, obj, NULL, TO_CHAR );
-			show_list_to_char( obj->contains, ch, TRUE, TRUE, FALSE );
+			show_list_to_char( &obj->contents, ch, TRUE, TRUE, FALSE );
 			break;
 		}
 		return;
@@ -1473,8 +1513,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( vch->in_room == NULL )
 			continue;
 		if ( vch->in_room == ch->in_room ) {
@@ -1496,7 +1535,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( !IS_NPC( ch ) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch )
 			continue;
 		if ( can_see_obj( ch, obj ) ) {
@@ -1520,7 +1559,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	for ( obj = ch->in_room->contents; obj != NULL; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 		if ( !IS_NPC( ch ) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch )
 			continue;
 		if ( can_see_obj( ch, obj ) ) {
@@ -2646,7 +2685,7 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 	buf16[0] = '\0';
 	buf17[0] = '\0';
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		char const *title;
 		char padded_title[256];  /* 16 visible chars * up to 16 bytes each (color codes + char) */
 
@@ -3064,7 +3103,6 @@ void do_inventory( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_INPUT_LENGTH];
 	OBJ_DATA *obj;
 	OBJ_DATA *portal;
-	OBJ_DATA *portal_next;
 	ROOM_INDEX_DATA *pRoomIndex;
 	ROOM_INDEX_DATA *location;
 	bool found = FALSE;
@@ -3094,8 +3132,7 @@ void do_inventory( CHAR_DATA *ch, char *argument ) {
 			char_to_room( ch, pRoomIndex );
 
 			found = FALSE;
-			for ( portal = ch->in_room->contents; portal != NULL; portal = portal_next ) {
-				portal_next = portal->next_content;
+			LIST_FOR_EACH( portal, &ch->in_room->objects, OBJ_DATA, room_node ) {
 				if ( ( obj->value[0] == portal->value[3] ) && ( obj->value[3] == portal->value[0] ) ) {
 					found = TRUE;
 					if ( IS_AFFECTED( ch, AFF_SHADOWPLANE ) &&
@@ -3151,13 +3188,13 @@ void do_inventory( CHAR_DATA *ch, char *argument ) {
 		case ITEM_CORPSE_NPC:
 		case ITEM_CORPSE_PC:
 			act( "$p contain:", ch, obj, NULL, TO_CHAR );
-			show_list_to_char( obj->contains, ch, TRUE, TRUE, FALSE );
+			show_list_to_char( &obj->contents, ch, TRUE, TRUE, FALSE );
 			break;
 		}
 		return;
 	}
 	send_to_char( "You are carrying:\n\r", ch );
-	show_list_to_char( ch->carrying, ch, TRUE, TRUE, FALSE );
+	show_list_to_char( &ch->carrying, ch, TRUE, TRUE, FALSE );
 	return;
 }
 
@@ -3223,7 +3260,7 @@ void do_where( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "Players near you in %s:\n\r", ch->in_room->area->name );
 		send_to_char( buf, ch );
 		found = FALSE;
-		for ( d = descriptor_list; d != NULL; d = d->next ) {
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			if ( ( d->connected == CON_PLAYING || d->connected == CON_EDITING ) && ( victim = d->character ) != NULL && !IS_NPC( victim ) && victim->in_room != NULL && victim->in_room->area == ch->in_room->area && victim->pcdata->chobj == NULL && can_see( ch, victim ) ) {
 				found = TRUE;
 				sprintf( buf, "%-28s %s\n\r",
@@ -3235,7 +3272,7 @@ void do_where( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "None\n\r", ch );
 	} else {
 		found = FALSE;
-		for ( victim = char_list; victim != NULL; victim = victim->next ) {
+		LIST_FOR_EACH( victim, &g_characters, CHAR_DATA, char_node ) {
 			if ( victim->in_room != NULL && victim->in_room->area == ch->in_room->area && !IS_AFFECTED( victim, AFF_HIDE ) && !IS_AFFECTED( victim, AFF_SNEAK ) && can_see( ch, victim ) && is_name( arg, victim->name ) ) {
 				found = TRUE;
 				sprintf( buf, "%-28s %s\n\r",
@@ -3547,8 +3584,7 @@ void do_report( CHAR_DATA *ch, char *argument ) {
 
 	send_to_char( buf, ch );
 
-	for ( vch = char_list; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 		if ( vch == NULL ) continue;
 		if ( vch == ch ) continue;
 		if ( vch->in_room == NULL ) continue;
@@ -5157,7 +5193,7 @@ void obj_score( CHAR_DATA *ch, OBJ_DATA *obj ) {
 		break;
 	}
 
-	for ( paf = obj->pIndexData->affected; paf != NULL; paf = paf->next ) {
+	LIST_FOR_EACH(paf, &obj->pIndexData->affects, AFFECT_DATA, node) {
 		if ( paf->location != APPLY_NONE && paf->modifier != 0 ) {
 			sprintf( buf, "You affect %s by %d.\n\r",
 				affect_loc_name( paf->location ), paf->modifier );
@@ -5165,7 +5201,7 @@ void obj_score( CHAR_DATA *ch, OBJ_DATA *obj ) {
 		}
 	}
 
-	for ( paf = obj->affected; paf != NULL; paf = paf->next ) {
+	LIST_FOR_EACH(paf, &obj->affects, AFFECT_DATA, node) {
 		if ( paf->location != APPLY_NONE && paf->modifier != 0 ) {
 			sprintf( buf, "You affect %s by %d.\n\r",
 				affect_loc_name( paf->location ), paf->modifier );

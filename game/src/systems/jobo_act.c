@@ -29,15 +29,13 @@
 
 extern GAMECONFIG_DATA game_config;
 
-ALIAS_DATA *alias_free;
-
 void do_bountylist( CHAR_DATA *ch, char *argument ) {
 	char buf[MAX_STRING_LENGTH];
 	DESCRIPTOR_DATA *d;
 
 	stc( "#r--==#L**#r==--==#L**#r==--==#L**#r==      #RBOUNTY LIST    #r==#L**#r==--==#L**#r==--==#L**#r==--#n\n\r", ch );
 	stc( "  #CName               Bounty     Pkscore      Generation    Level\n\r#n", ch );
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->character != NULL ) {
 			if ( !d->connected == CON_PLAYING ) continue;
 			if ( d->character->level > 6 ) continue;
@@ -205,7 +203,7 @@ void do_mudstat( CHAR_DATA *ch, char *argument ) {
 		class_counts[i] = 0;
 
 	/* Count players by class */
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->character != NULL )
 			gch = d->character;
 		else
@@ -410,7 +408,7 @@ void do_pkobjscry( CHAR_DATA *ch, char *argument ) {
 		tmp = gch->desc;
 		gch->desc = ch->desc;
 		sprintf( buf, "A pair of eyes grows on %s's %s.\n\rThe eyes blink once, then disappear.\n\r", gch->name, obj->short_descr );
-		for ( victim = gch->in_room->people; victim != NULL; victim = victim->next_in_room ) {
+		LIST_FOR_EACH( victim, &gch->in_room->characters, CHAR_DATA, room_node ) {
 			if ( victim == gch ) continue; // the victim cannot see this.
 			send_to_char( buf, victim );
 		}
@@ -424,7 +422,7 @@ void do_pkobjscry( CHAR_DATA *ch, char *argument ) {
 		return;
 	} else if ( ( location = obj->in_room ) != NULL ) {
 		sprintf( buf, "A pair of eyes grows on %s.\n\rThe eyes blink once, then disappear.\n\r", obj->short_descr );
-		for ( victim = location->people; victim != NULL; victim = victim->next_in_room ) {
+		LIST_FOR_EACH( victim, &location->characters, CHAR_DATA, room_node ) {
 			if ( victim == ch ) continue; // the player is seeing through the item, and will not see the eyes even if he is in the room.
 			send_to_char( buf, victim );
 		}
@@ -1402,11 +1400,10 @@ void do_alias( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	if ( alias_free == NULL ) {
-		ali = alloc_perm( sizeof( *ali ) );
-	} else {
-		ali = alias_free;
-		alias_free = alias_free->next;
+	ali = calloc( 1, sizeof( *ali ) );
+	if ( !ali ) {
+		bug( "do_alias: calloc failed", 0 );
+		return;
 	}
 	ali->short_n = str_dup( arg1 );
 	ali->long_n = str_dup( argument );

@@ -563,8 +563,7 @@ void do_psychicscream( CHAR_DATA *ch, char *argument ) {
 	act( "You unleash a devastating psychic scream!", ch, NULL, NULL, TO_CHAR );
 	act( "$n unleashes a devastating psychic scream!", ch, NULL, NULL, TO_ROOM );
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = victim_next ) {
-		victim_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, victim_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( victim == ch ) continue;
 		if ( is_same_group( ch, victim ) ) continue;

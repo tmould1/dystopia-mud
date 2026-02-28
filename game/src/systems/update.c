@@ -178,8 +178,7 @@ void char_update( void ) {
 
 	save_time = current_time;
 
-	for ( ch = char_list; ch != NULL; ch = ch_next ) {
-		ch_next = ch->next;
+	LIST_FOR_EACH_SAFE( ch, ch_next, &g_characters, CHAR_DATA, char_node ) {
 		count++;
 
 		/*
@@ -229,12 +228,11 @@ void char_update( void ) {
 		/*
 		 * updating spells on all mobs and players
 		 */
-		for ( paf = ch->affected; paf != NULL; paf = paf_next ) {
-			paf_next = paf->next;
+		LIST_FOR_EACH_SAFE(paf, paf_next, &ch->affects, AFFECT_DATA, node) {
 			if ( paf->duration > 0 )
 				paf->duration--;
 			else {
-				if ( paf_next == NULL || paf_next->type != paf->type || paf_next->duration > 0 ) {
+				if ( &paf_next->node == &ch->affects.sentinel || paf_next->type != paf->type || paf_next->duration > 0 ) {
 					if ( paf->type > 0 && skill_table[paf->type].msg_off && !is_obj ) {
 						send_to_char( skill_table[paf->type].msg_off, ch );
 						send_to_char( "\n\r", ch );
@@ -434,8 +432,7 @@ void char_update( void ) {
 	 * Autosave, Autoquit checks
 	 */
 	if ( ch_save != NULL || ch_quit != NULL ) {
-		for ( ch = char_list; ch != NULL; ch = ch_next ) {
-			ch_next = ch->next;
+		LIST_FOR_EACH_SAFE( ch, ch_next, &g_characters, CHAR_DATA, char_node ) {
 			if ( ch == ch_save ) save_char_obj( ch );
 			if ( ch == ch_quit ) do_quit( ch, "" );
 		}
@@ -459,8 +456,7 @@ void mobile_update( void ) {
 	PROFILE_START( "mobile_update" );
 
 	/* Examine all mobs. */
-	for ( ch = char_list; ch != NULL; ch = ch_next ) {
-		ch_next = ch->next;
+	LIST_FOR_EACH_SAFE( ch, ch_next, &g_characters, CHAR_DATA, char_node ) {
 
 		if ( ch->in_room == NULL ) continue;
 
@@ -570,11 +566,11 @@ void mobile_update( void ) {
 				PROFILE_END( "mob_npc_ai" );
 				continue;
 			}
-			if ( IS_SET( ch->act, ACT_SCAVENGER ) && ch->in_room->contents != NULL && number_bits( 2 ) == 0 ) {
+			if ( IS_SET( ch->act, ACT_SCAVENGER ) && !list_empty( &ch->in_room->objects ) && number_bits( 2 ) == 0 ) {
 				OBJ_DATA *obj;
 				OBJ_DATA *obj_best = 0;
 				int max = 1;
-				for ( obj = ch->in_room->contents; obj; obj = obj->next_content ) {
+				LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 					if ( CAN_WEAR( obj, ITEM_TAKE ) && obj->cost > max ) {
 						obj_best = obj;
 						max = obj->cost;
@@ -598,9 +594,7 @@ void mobile_update( void ) {
 				CHAR_DATA *rch;
 				bool found;
 				found = FALSE;
-				for ( rch = pexit->to_room->people;
-					rch != NULL;
-					rch = rch->next_in_room ) {
+				LIST_FOR_EACH( rch, &pexit->to_room->characters, CHAR_DATA, room_node ) {
 					if ( !IS_NPC( rch ) ) {
 						found = TRUE;
 						break;
@@ -658,7 +652,7 @@ void weather_update( void ) {
 	case 24:
 		time_info.hour = 0;
 		time_info.day++;
-		for ( d = descriptor_list; d != NULL; d = d->next ) {
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			char_up = FALSE;
 			if ( ( d->connected == CON_PLAYING || d->connected == CON_EDITING ) && ( ch = d->character ) != NULL && !IS_NPC( ch ) ) {
 				if ( ch->fighting == NULL && !IS_SET( ch->newbits, NEW_NATURAL ) && ch->monkab[SPIRIT] >= 2 )
@@ -798,7 +792,7 @@ weather_change:
 	}
 
 	if ( buf[0] != '\0' ) {
-		for ( d = descriptor_list; d != NULL; d = d->next ) {
+		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			if ( ( d->connected == CON_PLAYING || d->connected == CON_EDITING ) && IS_OUTSIDE( d->character ) && IS_AWAKE( d->character ) ) {
 				send_to_char( buf, d->character );
 				mcmp_time_of_day( d->character, time_info.hour );
@@ -922,18 +916,15 @@ void room_update( void ) {
  */
 void obj_update( void ) {
 	OBJ_DATA *obj;
-	OBJ_DATA *obj_prev = NULL;
+	OBJ_DATA *obj_next;
 
 	PROFILE_START( "obj_update" );
 
-	obj = object_list;
-	while ( obj != NULL ) {
+	LIST_FOR_EACH_SAFE( obj, obj_next, &g_objects, OBJ_DATA, obj_node ) {
 		CHAR_DATA *rch;
 		char *message;
 
 		if ( obj->timer <= 0 || --obj->timer > 0 ) {
-			obj_prev = obj;
-			obj = obj->next;
 			continue;
 		}
 
@@ -969,20 +960,21 @@ void obj_update( void ) {
 
 		if ( obj->carried_by != NULL && !IS_OBJ_STAT2( obj, ITEM_DAEMONSEED ) ) {
 			act( message, obj->carried_by, obj, NULL, TO_CHAR );
-		} else if ( obj->in_room != NULL && ( rch = obj->in_room->people ) != NULL && !IS_OBJ_STAT2( obj, ITEM_DAEMONSEED ) ) {
+		} else if ( obj->in_room != NULL && !list_empty( &obj->in_room->characters ) && !IS_OBJ_STAT2( obj, ITEM_DAEMONSEED ) ) {
+			rch = LIST_ENTRY( obj->in_room->characters.sentinel.next, CHAR_DATA, room_node );
 			act( message, rch, obj, NULL, TO_ROOM );
 			act( message, rch, obj, NULL, TO_CHAR );
 		}
 
-		if ( IS_OBJ_STAT2( obj, ITEM_DAEMONSEED ) && obj != NULL && obj->in_obj == NULL && ( locate_obj( obj ) )->people ) {
+		if ( IS_OBJ_STAT2( obj, ITEM_DAEMONSEED ) && obj != NULL && obj->in_obj == NULL && !list_empty( &( locate_obj( obj ) )->characters ) ) {
 			char buf[MAX_STRING_LENGTH];
 			CHAR_DATA *vch;
 			int wdam;
 
 			sprintf( buf, "%s suddenly explodes in a ball of flame, incinerating you!\n\r", obj->short_descr );
 			buf[0] = UPPER( buf[0] );
-			if ( ( locate_obj( obj ) )->people == NULL ) break;
-			for ( vch = ( locate_obj( obj ) )->people; vch != NULL; vch = vch->next_in_room ) {
+			if ( list_empty( &( locate_obj( obj ) )->characters ) ) break;
+			LIST_FOR_EACH( vch, &( locate_obj( obj ) )->characters, CHAR_DATA, room_node ) {
 				if ( vch->class == 0 || ( !IS_NPC( vch ) && vch->level < 3 ) ) continue;
 				if ( IS_SET( vch->in_room->room_flags, ROOM_SAFE ) ) {
 					stc( "You are unaffected by the blast.\n\r", vch );
@@ -996,14 +988,7 @@ void obj_update( void ) {
 			}
 		}
 
-		/*
-		 * Extract the object safely. Use tracked obj_prev to resume
-		 * iteration from the correct point, avoiding the obj_free list
-		 * corruption bug (previously required an O(n) predecessor scan).
-		 */
 		extract_obj( obj );
-		obj = obj_prev ? obj_prev->next : object_list;
-		/* obj_prev stays the same — it didn't move. */
 	}
 
 	PROFILE_END( "obj_update" );
@@ -1017,7 +1002,7 @@ void embrace_update( void ) {
 	int blpr; /* variable to check for amout of blood sucked. Shakti */
 	char buf[MAX_STRING_LENGTH];
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 
 		if ( ( ch = d->character ) == NULL )
 			continue;
@@ -1122,7 +1107,7 @@ void ww_update( void ) {
 
 	PROFILE_START( "ww_update" );
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || IS_CLASS( victim, CLASS_WEREWOLF ) ) {
 			continue;
 		}

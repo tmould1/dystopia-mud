@@ -566,15 +566,14 @@ void clear_stats( CHAR_DATA *ch ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->wear_loc != WEAR_NONE ) {
 			obj_from_char( obj );
 			obj_to_char( obj, ch );
 		}
 	}
-	while ( ch->affected )
-		affect_remove( ch, ch->affected );
+	while ( !list_empty(&ch->affects) )
+		affect_remove( ch, LIST_ENTRY(ch->affects.sentinel.next, AFFECT_DATA, node) );
 	ch->armor = 100;
 	ch->hitroll = 0;
 	ch->damroll = 0;
@@ -3722,13 +3721,10 @@ void oset_affect( CHAR_DATA *ch, OBJ_DATA *obj, int value, int affect, bool is_q
 
 	obj->questmaker = str_dup( ch->name );
 
-	if ( affect_free == NULL ) {
-		paf = alloc_perm( sizeof( *paf ) );
-	}
-
-	else {
-		paf = affect_free;
-		affect_free = affect_free->next;
+	paf = calloc( 1, sizeof( *paf ) );
+	if ( !paf ) {
+		bug( "do_oset: calloc failed for affect", 0 );
+		return;
 	}
 
 	paf->type = 0;
@@ -3736,8 +3732,7 @@ void oset_affect( CHAR_DATA *ch, OBJ_DATA *obj, int value, int affect, bool is_q
 	paf->location = affect;
 	paf->modifier = value;
 	paf->bitvector = 0;
-	paf->next = obj->affected;
-	obj->affected = paf;
+	list_push_front(&obj->affects, &paf->node);
 
 	/*
 	send_to_char("Ok.\n\r",ch);

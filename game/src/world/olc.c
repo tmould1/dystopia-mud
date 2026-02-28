@@ -326,7 +326,7 @@ const struct olc_cmd_type medit_table[] =
 AREA_DATA *get_area_data( int vnum ) {
 	AREA_DATA *pArea;
 
-	for ( pArea = area_first; pArea; pArea = pArea->next ) {
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 		if ( pArea->vnum == vnum )
 			return pArea;
 	}
@@ -1248,7 +1248,7 @@ void do_alist( CHAR_DATA *ch, char *argument ) {
 	sprintf( buf, "[%3s] [%-27s] (%-5s-%5s) [%-10s] %3s [%-10s] %s\n\r",
 		"Num", "Area Name", "lvnum", "uvnum", "Filename", "Sec", "Builders", "Hid" );
 	send_to_char( buf, ch );
-	for ( pArea = area_first; pArea; pArea = pArea->next ) {
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 		sprintf( buf, "[%3d] %-29.29s (%-5d-%5d) %-12.12s [%d] [%-10.10s] %s\n\r",
 			pArea->vnum,
 			pArea->name,

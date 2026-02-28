@@ -76,7 +76,7 @@ void do_asave( CHAR_DATA *ch, char *argument ) {
 
 	if ( !ch ) /* Do an autosave */
 	{
-		for ( pArea = area_first; pArea; pArea = pArea->next ) {
+		LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 			save_area( pArea );
 			REMOVE_BIT( pArea->area_flags, AREA_CHANGED | AREA_ADDED );
 		}
@@ -131,7 +131,7 @@ void do_asave( CHAR_DATA *ch, char *argument ) {
 	/* -------------------------------------- */
 
 	if ( !str_cmp( "world", arg1 ) ) {
-		for ( pArea = area_first; pArea; pArea = pArea->next ) {
+		LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 			/* Builder must be assigned this area. */
 			if ( !IS_BUILDER( ch, pArea ) )
 				continue;
@@ -162,7 +162,7 @@ void do_asave( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Saved zones:\n\r", ch );
 		sprintf( buf, "None.\n\r" );
 
-		for ( pArea = area_first; pArea; pArea = pArea->next ) {
+		LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 			/* Builder must be assigned this area. */
 			if ( !IS_BUILDER( ch, pArea ) )
 				continue;

@@ -33,7 +33,6 @@
 #include <string.h>
 
 /* External references */
-extern DESCRIPTOR_DATA *descriptor_list;
 extern GAMECONFIG_DATA game_config;
 extern time_t current_time;
 extern time_t boot_time;
@@ -65,7 +64,7 @@ static int mssp_count_players( void ) {
 	DESCRIPTOR_DATA *d;
 	int count = 0;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING && d->character != NULL )
 			count++;
 	}

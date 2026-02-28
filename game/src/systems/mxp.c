@@ -388,7 +388,7 @@ static void mxp_build_ground_menu( OBJ_DATA *obj, CHAR_DATA *ch,
 		OBJ_DATA *drink_con;
 		bool has_container = FALSE;
 
-		for ( drink_con = ch->carrying; drink_con != NULL; drink_con = drink_con->next_content ) {
+		LIST_FOR_EACH( drink_con, &ch->carrying, OBJ_DATA, content_node ) {
 			if ( drink_con->item_type == ITEM_DRINK_CON ) {
 				has_container = TRUE;
 				break;
@@ -581,11 +581,13 @@ static void mxp_build_inventory_menu( OBJ_DATA *obj, CHAR_DATA *ch,
 	strncat( hint_buf, "Identify", hint_size - strlen( hint_buf ) - 1 );
 
 	/* Add "Put in <container>" for each container in player's inventory (limit to 3) */
-	if ( obj->item_type != ITEM_CONTAINER && obj->item_type != ITEM_CORPSE_NPC && obj->item_type != ITEM_CORPSE_PC && ch->carrying != NULL ) {
+	if ( obj->item_type != ITEM_CONTAINER && obj->item_type != ITEM_CORPSE_NPC && obj->item_type != ITEM_CORPSE_PC && !list_empty( &ch->carrying ) ) {
 		int container_count = 0;
 		const int max_containers = 3;
 
-		for ( cont = ch->carrying; cont != NULL && container_count < max_containers; cont = cont->next_content ) {
+		LIST_FOR_EACH( cont, &ch->carrying, OBJ_DATA, content_node ) {
+			if ( container_count >= max_containers )
+				break;
 			/* Skip the item itself, skip non-containers, skip closed containers */
 			if ( cont == obj )
 				continue;
@@ -616,14 +618,16 @@ static void mxp_build_inventory_menu( OBJ_DATA *obj, CHAR_DATA *ch,
 		bool is_gem = ( obj->item_type == ITEM_GEMSTONE );
 		bool is_hilt = ( obj->item_type == ITEM_HILT );
 
-		if ( ( is_metal || is_gem || is_hilt ) && ch->carrying != NULL ) {
+		if ( ( is_metal || is_gem || is_hilt ) && !list_empty( &ch->carrying ) ) {
 			char target_keywords[MAX_INPUT_LENGTH];
 			OBJ_DATA *count_obj;
 			int item_index;
 			int forge_count = 0;
 			const int max_forge_targets = 5;
 
-			for ( cont = ch->carrying; cont != NULL && forge_count < max_forge_targets; cont = cont->next_content ) {
+			LIST_FOR_EACH( cont, &ch->carrying, OBJ_DATA, content_node ) {
+				if ( forge_count >= max_forge_targets )
+					break;
 				/* Skip the forging material itself */
 				if ( cont == obj )
 					continue;
@@ -655,7 +659,9 @@ static void mxp_build_inventory_menu( OBJ_DATA *obj, CHAR_DATA *ch,
 
 				/* Count how many items with same vnum come before this one */
 				item_index = 1;
-				for ( count_obj = ch->carrying; count_obj != cont; count_obj = count_obj->next_content ) {
+				LIST_FOR_EACH( count_obj, &ch->carrying, OBJ_DATA, content_node ) {
+					if ( count_obj == cont )
+						break;
 					if ( count_obj->pIndexData->vnum == cont->pIndexData->vnum && count_obj->wear_loc == WEAR_NONE )
 						item_index++;
 				}
@@ -1038,7 +1044,7 @@ char *mxp_exit_link( EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_te
 
 		/* Build list of visible characters - players first, then NPCs */
 		/* First pass: count and add players */
-		for ( vch = to_room->people; vch != NULL; vch = vch->next_in_room ) {
+		LIST_FOR_EACH( vch, &to_room->characters, CHAR_DATA, room_node ) {
 			if ( IS_NPC( vch ) )
 				continue;
 			if ( !can_see( ch, vch ) )
@@ -1062,7 +1068,7 @@ char *mxp_exit_link( EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_te
 
 		/* Second pass: add NPCs if we haven't hit the limit */
 		if ( count <= 3 ) {
-			for ( vch = to_room->people; vch != NULL; vch = vch->next_in_room ) {
+			LIST_FOR_EACH( vch, &to_room->characters, CHAR_DATA, room_node ) {
 				if ( !IS_NPC( vch ) )
 					continue;
 				if ( !can_see( ch, vch ) )
@@ -1118,7 +1124,7 @@ char *mxp_exit_link( EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_te
 			len = strlen( simple_hint );
 
 			/* Add occupants - players first, then NPCs */
-			for ( vch = to_room->people; vch != NULL; vch = vch->next_in_room ) {
+			LIST_FOR_EACH( vch, &to_room->characters, CHAR_DATA, room_node ) {
 				char name_buf[64];
 				const char *name;
 
@@ -1147,7 +1153,7 @@ char *mxp_exit_link( EXIT_DATA *pexit, int door, CHAR_DATA *ch, char *display_te
 
 			/* Second pass: NPCs */
 			if ( count <= 4 ) {
-				for ( vch = to_room->people; vch != NULL; vch = vch->next_in_room ) {
+				LIST_FOR_EACH( vch, &to_room->characters, CHAR_DATA, room_node ) {
 					char name_buf[64];
 
 					if ( !IS_NPC( vch ) )

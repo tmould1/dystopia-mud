@@ -569,7 +569,8 @@ void do_age( CHAR_DATA *ch, char *argument ) {
  * do_temporalcollapse - AoE damage to all enemies in room (Entropy 2)
  */
 void do_temporalcollapse( CHAR_DATA *ch, char *argument ) {
-	CHAR_DATA *victim, *vch_next;
+	CHAR_DATA *victim;
+	CHAR_DATA *vch_next;
 	int dam, power_mod, targets;
 	char buf[MSL];
 
@@ -618,8 +619,7 @@ void do_temporalcollapse( CHAR_DATA *ch, char *argument ) {
 	act( "Time itself collapses around $n in a devastating temporal shockwave!", ch, NULL, NULL, TO_ROOM );
 
 	targets = 0;
-	for ( victim = ch->in_room->people; victim != NULL; victim = vch_next ) {
-		vch_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( victim == ch ) continue;
 		if ( is_safe( ch, victim ) ) continue;

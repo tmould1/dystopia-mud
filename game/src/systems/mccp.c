@@ -79,8 +79,15 @@ bool compressStart( DESCRIPTOR_DATA *desc, int version ) {
 		return TRUE;
 
 	/* allocate and init stream, buffer */
-	s = (z_stream *) alloc_mem( sizeof( *s ) );
-	desc->out_compress_buf = (unsigned char *) alloc_mem( COMPRESS_BUF_SIZE );
+	s = (z_stream *) calloc( 1, sizeof( *s ) );
+	desc->out_compress_buf = (unsigned char *) calloc( 1, COMPRESS_BUF_SIZE );
+	if ( !s || !desc->out_compress_buf ) {
+		bug( "compressStart: calloc failed", 0 );
+		if ( s ) free( s );
+		if ( desc->out_compress_buf ) free( desc->out_compress_buf );
+		desc->out_compress_buf = NULL;
+		return FALSE;
+	}
 
 	s->next_in = NULL;
 	s->avail_in = 0;
@@ -97,8 +104,8 @@ bool compressStart( DESCRIPTOR_DATA *desc, int version ) {
 		/* problems with zlib, try to clean up */
 		sprintf( log_buf, "MCCP: deflateInit failed with %d", zresult );
 		log_string( log_buf );
-		free_mem( desc->out_compress_buf, COMPRESS_BUF_SIZE );
-		free_mem( s, sizeof( z_stream ) );
+		free( desc->out_compress_buf );
+		free( s );
 		return FALSE;
 	}
 
@@ -135,8 +142,8 @@ bool compressEnd( DESCRIPTOR_DATA *desc ) {
 		return FALSE;
 
 	deflateEnd( desc->out_compress );
-	free_mem( desc->out_compress_buf, COMPRESS_BUF_SIZE );
-	free_mem( desc->out_compress, sizeof( z_stream ) );
+	free( desc->out_compress_buf );
+	free( desc->out_compress );
 	desc->out_compress = NULL;
 	desc->out_compress_buf = NULL;
 
@@ -273,7 +280,7 @@ void do_showcompress( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected != CON_PLAYING ) continue;
 		if ( d->character != NULL )
 			gch = d->character;

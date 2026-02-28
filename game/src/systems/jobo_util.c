@@ -105,16 +105,15 @@ void do_clearstats2( CHAR_DATA *ch, char *argument ) {
 
 	powerdown( ch ); /* remove class shit */
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( obj->wear_loc != WEAR_NONE ) {
 			obj_from_char( obj );
 			obj_to_char( obj, ch );
 		}
 	}
 
-	while ( ch->affected )
-		affect_remove( ch, ch->affected );
+	while ( !list_empty(&ch->affects) )
+		affect_remove( ch, LIST_ENTRY(ch->affects.sentinel.next, AFFECT_DATA, node) );
 
 	if ( IS_SET( ch->affected_by, AFF_POLYMORPH ) ) REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 	if ( IS_SET( ch->affected_by, AFF_ETHEREAL ) ) REMOVE_BIT( ch->affected_by, AFF_ETHEREAL );
@@ -162,7 +161,7 @@ void ragnarok_stop() {
 
 	ragnarok = FALSE;
 	do_info( NULL, "#CPeace has been restored in the realms, the time of ragnarok is no more#n" );
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->character && d->connected == CON_PLAYING ) {
 			d->character->fight_timer = 0;
 			d->character->pcdata->safe_counter = 5;
@@ -181,8 +180,7 @@ void aggr_test( CHAR_DATA *ch ) {
 	CHAR_DATA *victim;
 
 	if ( !IS_NPC( ch ) && ch->level < 7 && ch->in_room != NULL && !IS_SET( ch->in_room->room_flags, ROOM_SAFE ) ) {
-		for ( wch = ch->in_room->people; wch != NULL; wch = wch_next ) {
-			wch_next = wch->next_in_room;
+		LIST_FOR_EACH_SAFE( wch, wch_next, &ch->in_room->characters, CHAR_DATA, room_node ) {
 			if ( !IS_NPC( wch ) || !IS_SET( wch->act, ACT_AGGRESSIVE ) || wch->fighting != NULL || IS_AFFECTED( wch, AFF_CHARM ) || !IS_AWAKE( wch ) || ( IS_SET( wch->act, ACT_WIMPY ) && IS_AWAKE( ch ) ) || !can_see( wch, ch ) || number_bits( 2 ) == 0 ) {
 				continue;
 			}
@@ -281,7 +279,7 @@ bool multicheck( CHAR_DATA *ch ) {
 	CHAR_DATA *gch;
 	char buf[MAX_STRING_LENGTH];
 
-	for ( gch = char_list; gch; gch = gch->next ) {
+	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 		if ( gch == ch ) continue;
 		if ( strlen( gch->lasthost ) > 2 ) {
@@ -311,7 +309,7 @@ bool reachedDecapLimit( CHAR_DATA *ch ) {
 	if ( ch->level > 6 ) return FALSE;
 
 	if ( !IS_CLASS( ch, CLASS_SAMURAI ) ) {
-		for ( paf = ch->affected; paf != NULL; paf = paf->next ) {
+		LIST_FOR_EACH(paf, &ch->affects, AFFECT_DATA, node) {
 			if ( paf->location == APPLY_HIT )
 				spellhps += paf->modifier;
 		}
@@ -319,11 +317,11 @@ bool reachedDecapLimit( CHAR_DATA *ch ) {
 	for ( i = 0; i < MAX_WEAR; i++ ) {
 		if ( ( obj = get_eq_char( ch, i ) ) == NULL ) continue;
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && obj->pIndexData->vnum != 33177 ) continue;
-		for ( paf = obj->pIndexData->affected; paf; paf = paf->next ) {
+		LIST_FOR_EACH(paf, &obj->pIndexData->affects, AFFECT_DATA, node) {
 			if ( paf->location == APPLY_HIT )
 				objhps += paf->modifier;
 		}
-		for ( paf = obj->affected; paf; paf = paf->next ) {
+		LIST_FOR_EACH(paf, &obj->affects, AFFECT_DATA, node) {
 			if ( paf->location == APPLY_HIT )
 				objhps += paf->modifier;
 		}
@@ -374,7 +372,7 @@ void death_info( char *str ) {
 
 	if ( str[0] == '\0' ) return;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING && d->character != NULL ) {
 			send_to_char( "#C<- #RDeath #C->#n ", d->character );
 			send_to_char( str, d->character );
@@ -389,7 +387,7 @@ void avatar_info( char *str ) {
 
 	if ( str[0] == '\0' ) return;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING && d->character != NULL ) {
 			send_to_char( "#C<- #RAvatar #C->#n ", d->character );
 			send_to_char( str, d->character );
@@ -404,7 +402,7 @@ void leave_info( char *str ) {
 
 	if ( str[0] == '\0' ) return;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING && d->character != NULL ) {
 			send_to_char( "#C<- #RLeaves #C->#n ", d->character );
 			send_to_char( str, d->character );
@@ -419,7 +417,7 @@ void enter_info( char *str ) {
 
 	if ( str[0] == '\0' ) return;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING && d->character != NULL ) {
 			send_to_char( "#C<- #REnters #C->#n ", d->character );
 			send_to_char( str, d->character );
@@ -437,7 +435,7 @@ int getMight( CHAR_DATA *ch ) {
 	int might, temp, i;
 
 	if ( !IS_CLASS( ch, CLASS_SAMURAI ) ) {
-		for ( paf = ch->affected; paf != NULL; paf = paf->next ) {
+		LIST_FOR_EACH(paf, &ch->affects, AFFECT_DATA, node) {
 			if ( paf->location == APPLY_HIT )
 				spellhps += paf->modifier;
 		}
@@ -446,11 +444,11 @@ int getMight( CHAR_DATA *ch ) {
 	for ( i = 0; i < MAX_WEAR; i++ ) {
 		if ( ( obj = get_eq_char( ch, i ) ) == NULL ) continue;
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && obj->pIndexData->vnum != 33177 ) continue;
-		for ( paf = obj->pIndexData->affected; paf != NULL; paf = paf->next ) {
+		LIST_FOR_EACH(paf, &obj->pIndexData->affects, AFFECT_DATA, node) {
 			if ( paf->location == APPLY_HIT )
 				objhps += paf->modifier;
 		}
-		for ( paf = obj->affected; paf; paf = paf->next ) {
+		LIST_FOR_EACH(paf, &obj->affects, AFFECT_DATA, node) {
 			if ( paf->location == APPLY_HIT )
 				objhps += paf->modifier;
 		}
@@ -601,7 +599,7 @@ void logout_message( CHAR_DATA *ch ) {
 	*ptr++ = '\n';
 	*ptr++ = '\r';
 
-	for ( d = descriptor_list; d; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->lookup_status != STATUS_DONE ) continue;
 		if ( d->connected != CON_PLAYING ) continue;
 		write_to_buffer( d, buf, (int) ( ptr - buf ) );
@@ -677,7 +675,7 @@ void tie_message( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	*ptr++ = '\n';
 	*ptr++ = '\r';
 
-	for ( d = descriptor_list; d; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->lookup_status != STATUS_DONE ) continue;
 		if ( d->connected != CON_PLAYING ) continue;
 		write_to_buffer( d, buf, (int) ( ptr - buf ) );
@@ -742,7 +740,7 @@ void login_message( CHAR_DATA *ch ) {
 	*ptr++ = '\n';
 	*ptr++ = '\r';
 
-	for ( d = descriptor_list; d; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->lookup_status != STATUS_DONE ) continue;
 		if ( d->connected != CON_PLAYING ) continue;
 		write_to_buffer( d, buf, (int) ( ptr - buf ) );
@@ -818,7 +816,7 @@ void special_decap_message( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	*ptr++ = '\n';
 	*ptr++ = '\r';
 
-	for ( d = descriptor_list; d; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->lookup_status != STATUS_DONE ) continue;
 		if ( d->connected != CON_PLAYING ) continue;
 		write_to_buffer( d, buf, (int) ( ptr - buf ) );
@@ -883,7 +881,7 @@ void avatar_message( CHAR_DATA *ch ) {
 	*ptr++ = '\n';
 	*ptr++ = '\r';
 
-	for ( d = descriptor_list; d; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->lookup_status != STATUS_DONE ) continue;
 		if ( d->connected != CON_PLAYING ) continue;
 		write_to_buffer( d, buf, (int) ( ptr - buf ) );
@@ -893,42 +891,29 @@ void avatar_message( CHAR_DATA *ch ) {
 
 void recycle_descriptors() {
 	DESCRIPTOR_DATA *dclose;
-	DESCRIPTOR_DATA *dclose_next;
+	DESCRIPTOR_DATA *dclose_tmp;
 
-	for ( dclose = descriptor_list; dclose; dclose = dclose_next ) {
-		dclose_next = dclose->next;
+	LIST_FOR_EACH_SAFE( dclose, dclose_tmp, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( dclose->lookup_status != STATUS_CLOSED ) continue;
 
 		/*
 		 * First let's get it out of the descriptor list.
 		 */
-		if ( dclose == descriptor_list ) {
-			descriptor_list = descriptor_list->next;
-		} else {
-			DESCRIPTOR_DATA *d;
-
-			for ( d = descriptor_list; d && d->next != dclose; d = d->next );
-			if ( d != NULL )
-				d->next = dclose->next;
-			else {
-				bug( "Recycle_descriptors: dclose not found.", 0 );
-				continue;
-			}
-		}
+		list_remove( &g_descriptors, &dclose->node );
 
 		/*
 		 * Clear out that memory
 		 */
 		free_string( dclose->host );
-		free_mem( dclose->outbuf, dclose->outsize );
+		free( dclose->outbuf );
 
 		/*
 		 * Mccp
 		 */
 		if ( dclose->out_compress ) {
 			deflateEnd( dclose->out_compress );
-			free_mem( dclose->out_compress_buf, COMPRESS_BUF_SIZE );
-			free_mem( dclose->out_compress, sizeof( z_stream ) );
+			free( dclose->out_compress_buf );
+			free( dclose->out_compress );
 		}
 
 		/*
@@ -944,10 +929,9 @@ void recycle_descriptors() {
 #endif
 
 		/*
-		 * And then we recycle
+		 * Free the descriptor
 		 */
-		dclose->next = descriptor_free;
-		descriptor_free = dclose;
+		free( dclose );
 	}
 }
 
@@ -1012,10 +996,8 @@ void recycle_dummys() {
 				bug( "Recycle_dymmys: dummy not found.", 0 );
 				continue;
 			}
-
-			/* recycle */
-			dummy->next = dummy_free;
-			dummy_free = dummy;
 		}
+
+		free( dummy );
 	}
 }

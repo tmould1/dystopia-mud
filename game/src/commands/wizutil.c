@@ -53,7 +53,7 @@ extern ROOM_INDEX_DATA *room_index_hash[MAX_KEY_HASH];
 typedef enum { exit_from,
 	exit_to,
 	exit_both } exit_status;
-const sh_int opposite_dir[6] = { DIR_SOUTH, DIR_WEST, DIR_NORTH, DIR_EAST, DIR_DOWN, DIR_UP };
+const int opposite_dir[6] = { DIR_SOUTH, DIR_WEST, DIR_NORTH, DIR_EAST, DIR_DOWN, DIR_UP };
 
 /*
  * get the 'short' name of an area (e.g. MIDGAARD, MIRROR etc.
@@ -378,14 +378,14 @@ void do_affects( CHAR_DATA *ch, char *argument ) {
 	if ( IS_AFFECTED( ch, AFF_FLYING ) )
 		send_to_char( "#cFly#n\n\r", ch );
 	send_to_char( "\n\r", ch );
-	if ( ch->affected == NULL ) {
+	if ( list_empty(&ch->affects) ) {
 		send_to_char( "You have nothing affecting you at this time.\n\r", ch );
 		return;
 	}
-	if ( ch->affected != NULL ) {
+	if ( !list_empty(&ch->affects) ) {
 
 		send_to_char( "You are affected by:\n\r", ch );
-		for ( paf = ch->affected; paf != NULL; paf = paf->next ) {
+		LIST_FOR_EACH(paf, &ch->affects, AFFECT_DATA, node) {
 			sprintf( buf, "Spell: '%s'", skill_table[paf->type].name );
 			send_to_char( buf, ch );
 			if ( ch->level >= 0 ) {

@@ -216,8 +216,7 @@ void do_dragonbreath( CHAR_DATA *ch, char *argument ) {
 	essence_max = IS_CLASS( ch, CLASS_WYRM ) ? WYRM_ESSENCE_MAX : DRAGONKIN_ESSENCE_MAX;
 	ch->rage = UMIN( ch->rage + 5, essence_max );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
@@ -358,8 +357,7 @@ void do_infernalstorm( CHAR_DATA *ch, char *argument ) {
 	essence_max = IS_CLASS( ch, CLASS_WYRM ) ? WYRM_ESSENCE_MAX : DRAGONKIN_ESSENCE_MAX;
 	ch->rage = UMIN( ch->rage + 10, essence_max );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;

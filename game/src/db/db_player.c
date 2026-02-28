@@ -374,7 +374,7 @@ static int format_int_array( char *buf, size_t bufsize, const int *arr, int coun
 /*
  * Format a short int array as a space-separated string into buffer.
  */
-static int format_short_array( char *buf, size_t bufsize, const sh_int *arr, int count ) {
+static int format_short_array( char *buf, size_t bufsize, const int *arr, int count ) {
 	int temp[64];
 	int i;
 	for ( i = 0; i < count && i < 64; i++ )
@@ -532,12 +532,12 @@ static void load_int_array( const char *data, int *arr, int count ) {
 /*
  * Load a short int array from a space-separated string.
  */
-static void load_short_array( const char *data, sh_int *arr, int count ) {
+static void load_short_array( const char *data, int *arr, int count ) {
 	int temp[64];
 	int i;
 	load_int_array( data, temp, count < 64 ? count : 64 );
 	for ( i = 0; i < count && i < 64; i++ )
-		arr[i] = (sh_int)temp[i];
+		arr[i] = (int)temp[i];
 }
 
 
@@ -673,7 +673,7 @@ static void save_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		OBJ_DATA *list[512];
 		int count = 0;
 		int i;
-		for ( obj = ch->carrying; obj; obj = obj->next_content ) {
+		LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
 			if ( count < 512 )
 				list[count++] = obj;
 		}
@@ -762,7 +762,7 @@ static void save_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		obj_id = sqlite3_last_insert_rowid( db );
 
 		/* Object affects */
-		for ( paf = obj->affected; paf; paf = paf->next ) {
+		LIST_FOR_EACH(paf, &obj->affects, AFFECT_DATA, node) {
 			sqlite3_reset( aff_stmt );
 			sqlite3_bind_int64( aff_stmt, 1, obj_id );
 			sqlite3_bind_int( aff_stmt, 2, paf->duration );
@@ -781,12 +781,12 @@ static void save_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		}
 
 		/* Push contained objects (reverse order so first pops first) */
-		if ( obj->contains ) {
+		if ( !list_empty( &obj->contents ) ) {
 			OBJ_DATA *list[512];
 			int count = 0;
 			int i;
 			OBJ_DATA *c;
-			for ( c = obj->contains; c; c = c->next_content ) {
+			LIST_FOR_EACH( c, &obj->contents, OBJ_DATA, content_node ) {
 				if ( count < 512 )
 					list[count++] = c;
 			}
@@ -1066,7 +1066,7 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 			"INSERT INTO affects (skill_name, duration, modifier, location, bitvector)"
 			" VALUES (?,?,?,?,?)";
 		if ( sqlite3_prepare_v2( db, af_sql, -1, &stmt, NULL ) == SQLITE_OK ) {
-			for ( paf = ch->affected; paf; paf = paf->next ) {
+			LIST_FOR_EACH(paf, &ch->affects, AFFECT_DATA, node) {
 				if ( paf->type < 0 || paf->type >= MAX_SKILL )
 					continue;
 				sqlite3_reset( stmt );
@@ -1105,7 +1105,7 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 	/* ================================================================
 	 * Objects (inventory + equipment)
 	 * ================================================================ */
-	if ( ch->carrying != NULL )
+	if ( !list_empty( &ch->carrying ) )
 		save_objects( db, ch );
 
 	/* Schema version */
@@ -1212,26 +1212,23 @@ void db_player_save( CHAR_DATA *ch ) {
  * Returns the allocated CHAR_DATA.
  */
 CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
-	static PC_DATA pcdata_zero;
 	CHAR_DATA *ch;
 	char *strtime;
 	int sn;
 
-	if ( char_free == NULL ) {
-		ch = alloc_perm( sizeof( *ch ) );
-	} else {
-		ch = char_free;
-		char_free = char_free->next;
+	ch = calloc( 1, sizeof( *ch ) );
+	if ( !ch ) {
+		bug( "load_char_obj: calloc failed for ch", 0 );
+		exit( 1 );
 	}
 	clear_char( ch );
 
-	if ( pcdata_free == NULL ) {
-		ch->pcdata = alloc_perm( sizeof( *ch->pcdata ) );
-	} else {
-		ch->pcdata = pcdata_free;
-		pcdata_free = pcdata_free->next;
+	ch->pcdata = calloc( 1, sizeof( *ch->pcdata ) );
+	if ( !ch->pcdata ) {
+		bug( "load_char_obj: calloc failed for pcdata", 0 );
+		exit( 1 );
 	}
-	*ch->pcdata = pcdata_zero;
+	/* calloc already zeroes memory, no need for pcdata_zero */
 
 	d->character = ch;
 	ch->desc = d;
@@ -1730,11 +1727,10 @@ static void load_player_aliases( sqlite3 *db, CHAR_DATA *ch ) {
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 		ALIAS_DATA *ali;
 
-		if ( alias_free == NULL ) {
-			ali = alloc_perm( sizeof( *ali ) );
-		} else {
-			ali = alias_free;
-			alias_free = alias_free->next;
+		ali = calloc( 1, sizeof( *ali ) );
+		if ( !ali ) {
+			bug( "load_aliases: calloc failed", 0 );
+			exit( 1 );
 		}
 		ali->short_n = str_dup( col_text( stmt, 0 ) );
 		ali->long_n = str_dup( col_text( stmt, 1 ) );
@@ -1766,11 +1762,10 @@ static void load_player_affects( sqlite3 *db, CHAR_DATA *ch ) {
 		if ( sn < 0 )
 			continue;
 
-		if ( affect_free == NULL ) {
-			paf = alloc_perm( sizeof( *paf ) );
-		} else {
-			paf = affect_free;
-			affect_free = affect_free->next;
+		paf = calloc( 1, sizeof( *paf ) );
+		if ( !paf ) {
+			bug( "load_char_affects: calloc failed", 0 );
+			exit( 1 );
 		}
 
 		paf->type = sn;
@@ -1778,8 +1773,7 @@ static void load_player_affects( sqlite3 *db, CHAR_DATA *ch ) {
 		paf->modifier = sqlite3_column_int( stmt, 2 );
 		paf->location = sqlite3_column_int( stmt, 3 );
 		paf->bitvector = sqlite3_column_int( stmt, 4 );
-		paf->next = ch->affected;
-		ch->affected = paf;
+		list_push_front(&ch->affects, &paf->node);
 	}
 
 	sqlite3_finalize( stmt );
@@ -1848,19 +1842,21 @@ static void load_player_objects( sqlite3 *db, CHAR_DATA *ch ) {
 	}
 
 	while ( sqlite3_step( obj_stmt ) == SQLITE_ROW ) {
-		static OBJ_DATA obj_zero;
 		OBJ_DATA *obj;
 		sqlite3_int64 obj_id;
 		int nest, vnum, col;
 		const char *s;
 
-		if ( obj_free == NULL ) {
-			obj = alloc_perm( sizeof( *obj ) );
-		} else {
-			obj = obj_free;
-			obj_free = obj_free->next;
+		obj = calloc( 1, sizeof( *obj ) );
+		if ( !obj ) {
+			bug( "load_char_objects: calloc failed", 0 );
+			exit( 1 );
 		}
-		*obj = obj_zero;
+		list_node_init( &obj->obj_node );
+		list_node_init( &obj->room_node );
+		list_node_init( &obj->content_node );
+		list_init( &obj->affects );
+		list_init( &obj->contents );
 
 		col = 0;
 		obj_id = sqlite3_column_int64( obj_stmt, col++ );
@@ -1930,19 +1926,17 @@ static void load_player_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_bind_int64( aff_stmt, 1, obj_id );
 		while ( sqlite3_step( aff_stmt ) == SQLITE_ROW ) {
 			AFFECT_DATA *paf;
-			if ( affect_free == NULL ) {
-				paf = alloc_perm( sizeof( *paf ) );
-			} else {
-				paf = affect_free;
-				affect_free = affect_free->next;
+			paf = calloc( 1, sizeof( *paf ) );
+			if ( !paf ) {
+				bug( "load_char_objects: calloc failed for affect", 0 );
+				exit( 1 );
 			}
 			paf->type = 0;
 			paf->duration = sqlite3_column_int( aff_stmt, 0 );
 			paf->modifier = sqlite3_column_int( aff_stmt, 1 );
 			paf->location = sqlite3_column_int( aff_stmt, 2 );
 			paf->bitvector = 0;
-			paf->next = obj->affected;
-			obj->affected = paf;
+			list_push_front(&obj->affects, &paf->node);
 		}
 
 		/* Load extra descriptions */
@@ -1950,11 +1944,10 @@ static void load_player_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_bind_int64( ed_stmt, 1, obj_id );
 		while ( sqlite3_step( ed_stmt ) == SQLITE_ROW ) {
 			EXTRA_DESCR_DATA *ed;
-			if ( extra_descr_free == NULL ) {
-				ed = alloc_perm( sizeof( *ed ) );
-			} else {
-				ed = extra_descr_free;
-				extra_descr_free = extra_descr_free->next;
+			ed = calloc( 1, sizeof( *ed ) );
+			if ( !ed ) {
+				bug( "load_char_objects: calloc failed for extra_descr", 0 );
+				exit( 1 );
 			}
 			ed->keyword = str_dup( col_text( ed_stmt, 0 ) );
 			ed->description = str_dup( col_text( ed_stmt, 1 ) );
@@ -1963,8 +1956,7 @@ static void load_player_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		}
 
 		/* Link into global object list */
-		obj->next = object_list;
-		object_list = obj;
+		list_push_back( &g_objects, &obj->obj_node );
 		obj->pIndexData->count++;
 
 		/* Nest into inventory or container */

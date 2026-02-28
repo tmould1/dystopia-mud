@@ -211,16 +211,17 @@ void act( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2,
 		return;
 	}
 
-	to = ch->in_room->people;
+	{
+	list_head_t *to_list = &ch->in_room->characters;
 	if ( type == TO_VICT ) {
 		if ( vch == NULL || vch->in_room == NULL ) {
 			/*	    bug( "Act: null vch with TO_VICT.", 0 );*/
 			return;
 		}
-		to = vch->in_room->people;
+		to_list = &vch->in_room->characters;
 	}
 
-	for ( ; to != NULL; to = to->next_in_room ) {
+	LIST_FOR_EACH( to, to_list, CHAR_DATA, room_node ) {
 
 		is_fam = FALSE;
 		to_old = to;
@@ -393,6 +394,7 @@ void act( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2,
 
 		if ( is_fam ) to = to_old;
 	}
+	}
 	return;
 }
 
@@ -424,16 +426,17 @@ void act2( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2
 	if ( format == NULL || format[0] == '\0' )
 		return;
 
-	to = ch->in_room->people;
+	{
+	list_head_t *to_list = &ch->in_room->characters;
 	if ( type == TO_VICT ) {
 		if ( vch == NULL || vch->in_room == NULL ) {
 			bug( "Act: null vch with TO_VICT.", 0 );
 			return;
 		}
-		to = vch->in_room->people;
+		to_list = &vch->in_room->characters;
 	}
 
-	for ( ; to != NULL; to = to->next_in_room ) {
+	LIST_FOR_EACH( to, to_list, CHAR_DATA, room_node ) {
 
 		is_fam = FALSE;
 		to_old = to;
@@ -620,6 +623,7 @@ void act2( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2
 
 		if ( is_fam ) to = to_old;
 	}
+	}
 	return;
 }
 
@@ -644,16 +648,17 @@ void kavitem( const char *format, CHAR_DATA *ch, const void *arg1, const void *a
 	if ( format == NULL || format[0] == '\0' )
 		return;
 
-	to = ch->in_room->people;
+	{
+	list_head_t *to_list = &ch->in_room->characters;
 	if ( type == TO_VICT ) {
 		if ( vch == NULL ) {
 			bug( "Act: null vch with TO_VICT.", 0 );
 			return;
 		}
-		to = vch->in_room->people;
+		to_list = &vch->in_room->characters;
 	}
 
-	for ( ; to != NULL; to = to->next_in_room ) {
+	LIST_FOR_EACH( to, to_list, CHAR_DATA, room_node ) {
 		if ( to->desc == NULL || !IS_AWAKE( to ) )
 			continue;
 
@@ -760,6 +765,7 @@ void kavitem( const char *format, CHAR_DATA *ch, const void *arg1, const void *a
 		}
 		buf[0] = UPPER( buf[0] );
 		write_to_buffer( to->desc, buf, (int) ( point - buf ) );
+	}
 	}
 
 	return;

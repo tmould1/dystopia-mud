@@ -3,8 +3,8 @@
  *
  * Tests: str_cmp(), str_prefix(), one_argument()
  *
- * Note: str_cmp/str_prefix return TRUE for mismatch, FALSE for match
- * (opposite of strcmp convention).
+ * str_cmp/str_prefix return 0 for match, nonzero for mismatch
+ * (standard C convention, like strcmp/strcasecmp).
  */
 
 #include "test_framework.h"
@@ -13,66 +13,66 @@
 /* --- str_cmp() tests --- */
 
 void test_str_cmp_equal( void ) {
-	/* Same string: should return FALSE (match) */
-	TEST_ASSERT_FALSE( str_cmp( "hello", "hello" ) );
+	/* Same string: should return 0 (match) */
+	TEST_ASSERT_EQ( str_cmp( "hello", "hello" ), 0 );
 }
 
 void test_str_cmp_case_insensitive( void ) {
-	/* Case-insensitive match: should return FALSE */
-	TEST_ASSERT_FALSE( str_cmp( "Hello", "hello" ) );
-	TEST_ASSERT_FALSE( str_cmp( "HELLO", "hello" ) );
-	TEST_ASSERT_FALSE( str_cmp( "hElLo", "HeLlO" ) );
+	/* Case-insensitive match: should return 0 */
+	TEST_ASSERT_EQ( str_cmp( "Hello", "hello" ), 0 );
+	TEST_ASSERT_EQ( str_cmp( "HELLO", "hello" ), 0 );
+	TEST_ASSERT_EQ( str_cmp( "hElLo", "HeLlO" ), 0 );
 }
 
 void test_str_cmp_different( void ) {
-	/* Different strings: should return TRUE (mismatch) */
-	TEST_ASSERT_TRUE( str_cmp( "hello", "world" ) );
-	TEST_ASSERT_TRUE( str_cmp( "hello", "hell" ) );
-	TEST_ASSERT_TRUE( str_cmp( "hell", "hello" ) );
+	/* Different strings: should return nonzero */
+	TEST_ASSERT_NEQ( str_cmp( "hello", "world" ), 0 );
+	TEST_ASSERT_NEQ( str_cmp( "hello", "hell" ), 0 );
+	TEST_ASSERT_NEQ( str_cmp( "hell", "hello" ), 0 );
 }
 
 void test_str_cmp_empty( void ) {
 	/* Empty strings match each other */
-	TEST_ASSERT_FALSE( str_cmp( "", "" ) );
+	TEST_ASSERT_EQ( str_cmp( "", "" ), 0 );
 
 	/* Empty vs non-empty: mismatch */
-	TEST_ASSERT_TRUE( str_cmp( "", "hello" ) );
-	TEST_ASSERT_TRUE( str_cmp( "hello", "" ) );
+	TEST_ASSERT_NEQ( str_cmp( "", "hello" ), 0 );
+	TEST_ASSERT_NEQ( str_cmp( "hello", "" ), 0 );
 }
 
 /* --- str_prefix() tests --- */
 
 void test_str_prefix_match( void ) {
-	/* "hel" is a prefix of "hello": should return FALSE (match) */
-	TEST_ASSERT_FALSE( str_prefix( "hel", "hello" ) );
+	/* "hel" is a prefix of "hello": should return 0 (match) */
+	TEST_ASSERT_EQ( str_prefix( "hel", "hello" ), 0 );
 }
 
 void test_str_prefix_case_insensitive( void ) {
 	/* Case-insensitive prefix match */
-	TEST_ASSERT_FALSE( str_prefix( "HEL", "hello" ) );
-	TEST_ASSERT_FALSE( str_prefix( "Hel", "HELLO" ) );
+	TEST_ASSERT_EQ( str_prefix( "HEL", "hello" ), 0 );
+	TEST_ASSERT_EQ( str_prefix( "Hel", "HELLO" ), 0 );
 }
 
 void test_str_prefix_exact( void ) {
 	/* Exact match is also a valid prefix */
-	TEST_ASSERT_FALSE( str_prefix( "hello", "hello" ) );
+	TEST_ASSERT_EQ( str_prefix( "hello", "hello" ), 0 );
 }
 
 void test_str_prefix_no_match( void ) {
-	/* Not a prefix: should return TRUE */
-	TEST_ASSERT_TRUE( str_prefix( "world", "hello" ) );
+	/* Not a prefix: should return nonzero */
+	TEST_ASSERT_NEQ( str_prefix( "world", "hello" ), 0 );
 }
 
 void test_str_prefix_longer( void ) {
 	/* Prefix longer than string: should fail when astr has chars left
 	 * but bstr runs out */
-	TEST_ASSERT_TRUE( str_prefix( "hello world", "hello" ) );
+	TEST_ASSERT_NEQ( str_prefix( "hello world", "hello" ), 0 );
 }
 
 void test_str_prefix_empty( void ) {
 	/* Empty prefix matches anything (loop body never executes) */
-	TEST_ASSERT_FALSE( str_prefix( "", "hello" ) );
-	TEST_ASSERT_FALSE( str_prefix( "", "" ) );
+	TEST_ASSERT_EQ( str_prefix( "", "hello" ), 0 );
+	TEST_ASSERT_EQ( str_prefix( "", "" ), 0 );
 }
 
 /* --- one_argument() tests --- */

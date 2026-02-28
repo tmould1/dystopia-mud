@@ -418,8 +418,7 @@ void do_starspawn( CHAR_DATA *ch, char *argument ) {
 	damage( ch, victim, dam, TYPE_UNDEFINED );
 
 	/* AoE secondary damage */
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch || vch == victim ) continue;
 		if ( !IS_NPC( vch ) ) continue;
 		if ( vch->fighting != ch ) continue;
@@ -570,8 +569,7 @@ void update_voidborn( CHAR_DATA *ch ) {
 			CHAR_DATA *vch_next;
 			int rift_dam = cfg( CFG_VOIDBORN_DIMREND_HAZARD_DAMAGE );
 
-			for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-				vch_next = vch->next_in_room;
+			LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 				if ( vch == ch ) continue;
 				if ( !IS_NPC( vch ) ) continue;
 				if ( vch->fighting != ch ) continue;
@@ -595,8 +593,7 @@ void update_voidborn( CHAR_DATA *ch ) {
 			CHAR_DATA *vch_next;
 			int ent_dam = number_range( 100, 200 );
 
-			for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-				vch_next = vch->next_in_room;
+			LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 				if ( vch == ch ) continue;
 				if ( !IS_NPC( vch ) ) continue;
 				if ( vch->fighting != ch ) continue;

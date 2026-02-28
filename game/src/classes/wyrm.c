@@ -29,7 +29,8 @@ static const char *wyrm_attune_name( int attune ) {
  * Wyrmbreath - Enhanced breath, larger area, higher damage
  */
 void do_wyrmbreath( CHAR_DATA *ch, char *argument ) {
-	CHAR_DATA *vch, *vch_next;
+	CHAR_DATA *vch;
+	CHAR_DATA *vch_next;
 	char buf[MAX_STRING_LENGTH];
 	int dam, cost, attune;
 	const char *attack_name;
@@ -66,8 +67,7 @@ void do_wyrmbreath( CHAR_DATA *ch, char *argument ) {
 	act( "You rear back and unleash a devastating torrent of $t!", ch, attack_name, NULL, TO_CHAR );
 	act( "$n rears back and unleashes a devastating torrent of $t!", ch, attack_name, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
@@ -82,7 +82,8 @@ void do_wyrmbreath( CHAR_DATA *ch, char *argument ) {
  * Cataclysm - Massive AoE, leaves lingering damage field
  */
 void do_cataclysm( CHAR_DATA *ch, char *argument ) {
-	CHAR_DATA *vch, *vch_next;
+	CHAR_DATA *vch;
+	CHAR_DATA *vch_next;
 	char buf[MAX_STRING_LENGTH];
 	int dam, cost;
 
@@ -117,8 +118,7 @@ void do_cataclysm( CHAR_DATA *ch, char *argument ) {
 	/* Set terrain effect for lingering damage */
 	ch->pcdata->powers[DRAGON_TERRAIN_TYPE] = ch->pcdata->powers[DRAGON_ATTUNEMENT] + 1;
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
@@ -196,7 +196,8 @@ void do_annihilate( CHAR_DATA *ch, char *argument ) {
  * Apocalypse - Ultimate: room-wide devastation + terrain effect
  */
 void do_apocalypse( CHAR_DATA *ch, char *argument ) {
-	CHAR_DATA *vch, *vch_next;
+	CHAR_DATA *vch;
+	CHAR_DATA *vch_next;
 	char buf[MAX_STRING_LENGTH];
 	int dam, cost;
 
@@ -228,8 +229,7 @@ void do_apocalypse( CHAR_DATA *ch, char *argument ) {
 	send_to_char( "#x160You unleash the APOCALYPSE!#n\n\r", ch );
 	act( "#x160$n unleashes the APOCALYPSE!#n", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
@@ -244,7 +244,8 @@ void do_apocalypse( CHAR_DATA *ch, char *argument ) {
  * Dragonfear - AoE fear effect, chance to flee/stun
  */
 void do_dragonfear( CHAR_DATA *ch, char *argument ) {
-	CHAR_DATA *vch, *vch_next;
+	CHAR_DATA *vch;
+	CHAR_DATA *vch_next;
 	char buf[MAX_STRING_LENGTH];
 	int cost, stun_chance;
 
@@ -272,8 +273,7 @@ void do_dragonfear( CHAR_DATA *ch, char *argument ) {
 	send_to_char( "#x160You unleash your terrifying draconic presence!#n\n\r", ch );
 	act( "$n unleashes a wave of terrifying draconic presence!", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;

@@ -130,7 +130,7 @@ void call_all( CHAR_DATA *ch ) {
 	ROOM_INDEX_DATA *objroom;
 	bool found = FALSE;
 
-	for ( obj = object_list; obj != NULL; obj = obj->next ) {
+	LIST_FOR_EACH( obj, &g_objects, OBJ_DATA, obj_node ) {
 		if ( obj->questowner == NULL || strlen( obj->questowner ) < 2 ||
 			str_cmp( ch->pcdata->switchname, obj->questowner ) || obj->item_type == ITEM_PAGE )
 			continue;
@@ -181,7 +181,7 @@ void call_all( CHAR_DATA *ch ) {
 	if ( !found && !IS_HEAD( ch, LOST_HEAD ) )
 		send_to_char( "Nothing happens.\n\r", ch );
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected != CON_PLAYING ) continue;
 		if ( ( victim = d->character ) == NULL ) continue;
 		if ( IS_NPC( victim ) ) continue;
@@ -244,8 +244,7 @@ void get_obj( CHAR_DATA *ch, OBJ_DATA *obj, OBJ_DATA *container ) {
 		}
 		act( "You get $p from $P.", ch, obj, container, TO_CHAR );
 		act( "$n gets $p from $P.", ch, obj, container, TO_ROOM );
-		for ( obj2 = container->contains; obj2 != NULL; obj2 = obj_next ) {
-			obj_next = obj2->next_content;
+		LIST_FOR_EACH_SAFE( obj2, obj_next, &container->contents, OBJ_DATA, content_node ) {
 			if ( obj2->chobj != NULL ) {
 				act( "A hand reaches inside $P and takes $p out.", obj2->chobj, obj, container, TO_CHAR );
 				move_ch = TRUE;
@@ -353,7 +352,7 @@ void do_get( CHAR_DATA *ch, char *argument ) {
 	if ( arg2[0] == '\0' ) {
 		if ( str_cmp( arg1, "all" ) && str_prefix( "all.", arg1 ) ) {
 			/* 'get obj' */
-			obj = get_obj_list( ch, arg1, ch->in_room->contents );
+			obj = get_obj_list( ch, arg1, &ch->in_room->objects );
 			if ( obj == NULL ) {
 				act( "I see no $T here.", ch, NULL, arg1, TO_CHAR );
 				return;
@@ -367,8 +366,7 @@ void do_get( CHAR_DATA *ch, char *argument ) {
 		} else {
 			/* 'get all' or 'get all.obj' */
 			found = FALSE;
-			for ( obj = ch->in_room->contents; obj != NULL; obj = obj_next ) {
-				obj_next = obj->next_content;
+			LIST_FOR_EACH_SAFE( obj, obj_next, &ch->in_room->objects, OBJ_DATA, room_node ) {
 				if ( ( arg1[3] == '\0' || is_name( &arg1[4], obj->name ) ) && can_see_obj( ch, obj ) ) {
 					found = TRUE;
 					get_obj( ch, obj, NULL );
@@ -433,7 +431,7 @@ void do_get( CHAR_DATA *ch, char *argument ) {
 
 		if ( str_cmp( arg1, "all" ) && str_prefix( "all.", arg1 ) ) {
 			/* 'get obj container' */
-			obj = get_obj_list( ch, arg1, container->contains );
+			obj = get_obj_content( ch, arg1, &container->contents );
 			if ( obj == NULL ) {
 				act( "I see nothing like that in the $T.",
 					ch, NULL, arg2, TO_CHAR );
@@ -443,8 +441,7 @@ void do_get( CHAR_DATA *ch, char *argument ) {
 		} else {
 			/* 'get all container' or 'get all.obj container' */
 			found = FALSE;
-			for ( obj = container->contains; obj != NULL; obj = obj_next ) {
-				obj_next = obj->next_content;
+			LIST_FOR_EACH_SAFE( obj, obj_next, &container->contents, OBJ_DATA, content_node ) {
 				if ( ( arg1[3] == '\0' || is_name( &arg1[4], obj->name ) ) && can_see_obj( ch, obj ) ) {
 					found = TRUE;
 					get_obj( ch, obj, container );
@@ -541,8 +538,7 @@ void do_put( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		for ( obj2 = container->contains; obj2 != NULL; obj2 = obj_next2 ) {
-			obj_next2 = obj2->next_content;
+		LIST_FOR_EACH_SAFE( obj2, obj_next2, &container->contents, OBJ_DATA, content_node ) {
 			if ( obj2->chobj != NULL && obj != obj2 )
 				act( "A hand reaches inside $P and drops $p.", obj2->chobj, obj, container, TO_CHAR );
 		}
@@ -552,12 +548,10 @@ void do_put( CHAR_DATA *ch, char *argument ) {
 		act( "You put $p in $P.", ch, obj, container, TO_CHAR );
 	} else {
 		/* 'put all container' or 'put all.obj container' */
-		for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 
 			if ( ( arg1[3] == '\0' || is_name( &arg1[4], obj->name ) ) && can_see_obj( ch, obj ) && obj->wear_loc == WEAR_NONE && obj != container && !IS_SET( obj->quest, QUEST_ARTIFACT ) && can_drop_obj( ch, obj ) && get_obj_weight( obj ) + get_obj_weight( container ) <= container->value[0] ) {
-				for ( obj2 = container->contains; obj2 != NULL; obj2 = obj_next2 ) {
-					obj_next2 = obj2->next_content;
+				LIST_FOR_EACH_SAFE( obj2, obj_next2, &container->contents, OBJ_DATA, content_node ) {
 					if ( obj2->chobj != NULL && obj2->chobj->in_room != NULL ) {
 						if ( objroom != get_room_index( obj2->chobj->in_room->vnum ) ) {
 							char_from_room( obj2->chobj );
@@ -617,8 +611,7 @@ void do_drop( CHAR_DATA *ch, char *argument ) {
 	} else {
 		/* 'drop all' or 'drop all.obj' */
 		found = FALSE;
-		for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 
 			if ( ( arg[3] == '\0' || is_name( &arg[4], obj->name ) ) && can_see_obj( ch, obj ) && obj->wear_loc == WEAR_NONE && can_drop_obj( ch, obj ) ) {
 				found = TRUE;
@@ -735,8 +728,7 @@ void do_fill( CHAR_DATA *ch, char *argument ) {
 	}
 
 	found = FALSE;
-	for ( fountain = ch->in_room->contents; fountain != NULL;
-		fountain = fountain->next_content ) {
+	LIST_FOR_EACH( fountain, &ch->in_room->objects, OBJ_DATA, room_node ) {
 		if ( fountain->item_type == ITEM_FOUNTAIN ) {
 			found = TRUE;
 			break;
@@ -799,7 +791,7 @@ void do_drink( CHAR_DATA *ch, char *argument ) {
 	one_argument( argument, arg );
 
 	if ( arg[0] == '\0' ) {
-		for ( obj = ch->in_room->contents; obj; obj = obj->next_content ) {
+		LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 			if ( obj->item_type == ITEM_FOUNTAIN )
 				break;
 		}
@@ -1645,8 +1637,7 @@ void do_wear( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg, "all" ) ) {
 		OBJ_DATA *obj_next;
 
-		for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 			if ( obj->wear_loc == WEAR_NONE && can_see_obj( ch, obj ) )
 				wear_obj( ch, obj, FALSE );
 		}
@@ -1692,8 +1683,7 @@ void do_remove( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg, "all" ) ) {
 		OBJ_DATA *obj_next;
 
-		for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 			if ( obj->wear_loc != WEAR_NONE && can_see_obj( ch, obj ) ) {
 				if ( obj->item_type == ITEM_ARMOR )
 					sn = obj->value[3];
@@ -1743,9 +1733,7 @@ void do_sacrifice( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg, "all" ) || !str_prefix( "all.", arg ) ) {
-		next_obj = ch->in_room->contents;
-		for ( obj = ch->in_room->contents; next_obj != NULL; obj = next_obj ) {
-			next_obj = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, next_obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 			if ( arg[3] != '\0' && !is_name( &arg[4], obj->name ) ) continue;
 			if ( ++i > 35 ) break;
 			if ( !CAN_WEAR( obj, ITEM_TAKE ) || obj->item_type == ITEM_QUEST || IS_SET( obj->quest, QUEST_ARTIFACT ) || ( obj->questowner != NULL && strlen( obj->questowner ) > 1 && str_cmp( ch->name, obj->questowner ) ) ) {
@@ -1775,7 +1763,7 @@ void do_sacrifice( CHAR_DATA *ch, char *argument ) {
 			act( "$n destroys most of the items in the room.", ch, NULL, NULL, TO_ROOM );
 		return;
 	}
-	obj = get_obj_list( ch, arg, ch->in_room->contents );
+	obj = get_obj_list( ch, arg, &ch->in_room->objects );
 	if ( obj == NULL ) {
 		send_to_char( "You can't find it.\n\r", ch );
 		return;
@@ -1945,8 +1933,7 @@ void do_brandish( CHAR_DATA *ch, char *argument ) {
 	if ( staff->value[2] > 0 ) {
 		act( "$n brandishes $p.", ch, staff, NULL, TO_ROOM );
 		act( "You brandish $p.", ch, staff, NULL, TO_CHAR );
-		for ( vch = ch->in_room->people; vch; vch = vch_next ) {
-			vch_next = vch->next_in_room;
+		LIST_FOR_EACH_SAFE( vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node ) {
 
 			switch ( skill_table[sn].target ) {
 			default:
@@ -2190,7 +2177,7 @@ CHAR_DATA *find_keeper( CHAR_DATA *ch ) {
 	char buf[MAX_STRING_LENGTH];
 
 	pShop = NULL;
-	for ( keeper = ch->in_room->people; keeper; keeper = keeper->next_in_room ) {
+	LIST_FOR_EACH( keeper, &ch->in_room->characters, CHAR_DATA, room_node ) {
 		if ( IS_NPC( keeper ) && ( pShop = keeper->pIndexData->pShop ) != NULL )
 			break;
 	}
@@ -2253,7 +2240,7 @@ int get_cost( CHAR_DATA *keeper, OBJ_DATA *obj, bool fBuy ) {
 			}
 		}
 
-		for ( obj2 = keeper->carrying; obj2; obj2 = obj2->next_content ) {
+		LIST_FOR_EACH( obj2, &keeper->carrying, OBJ_DATA, content_node ) {
 			if ( obj->pIndexData == obj2->pIndexData ) {
 				cost = 0;
 				break;
@@ -2278,7 +2265,7 @@ void do_list( CHAR_DATA *ch, char *argument ) {
 		return;
 
 	found = FALSE;
-	for ( obj = keeper->carrying; obj; obj = obj->next_content ) {
+	LIST_FOR_EACH( obj, &keeper->carrying, OBJ_DATA, content_node ) {
 		if ( obj->wear_loc != WEAR_NONE )
 			continue;
 
@@ -2329,13 +2316,18 @@ void do_buy( CHAR_DATA *ch, char *argument ) {
 		return;
 
 	obj = NULL;
-	for ( obj = keeper->carrying; obj; obj = obj->next_content ) {
-		if ( obj->wear_loc != WEAR_NONE )
-			continue;
-		if ( !can_see_obj( ch, obj ) )
-			continue;
-		if ( is_name( arg, obj->name ) )
-			break;
+	{
+		OBJ_DATA *tmp;
+		LIST_FOR_EACH( tmp, &keeper->carrying, OBJ_DATA, content_node ) {
+			if ( tmp->wear_loc != WEAR_NONE )
+				continue;
+			if ( !can_see_obj( ch, tmp ) )
+				continue;
+			if ( is_name( arg, tmp->name ) ) {
+				obj = tmp;
+				break;
+			}
+		}
 	}
 
 	if ( obj == NULL ) {
@@ -2593,8 +2585,7 @@ void do_activate( CHAR_DATA *ch, char *argument ) {
 		interpret( ch, obj->victpoweron );
 		if ( obj->victpoweroff != NULL && str_cmp( obj->victpoweroff, "(null)" ) &&
 			obj->victpoweroff[0] != '\0' ) {
-			for ( victim = char_list; victim != NULL; victim = victim_next ) {
-				victim_next = victim->next;
+			LIST_FOR_EACH_SAFE( victim, victim_next, &g_characters, CHAR_DATA, char_node ) {
 				if ( victim->in_room == NULL ) continue;
 				if ( victim == ch ) continue;
 				if ( victim->in_room == ch->in_room ) {
@@ -2753,8 +2744,7 @@ void do_press( CHAR_DATA *ch, char *argument ) {
 		interpret( ch, obj->victpoweron );
 		if ( obj->victpoweroff != NULL && str_cmp( obj->victpoweroff, "(null)" ) &&
 			obj->victpoweroff[0] != '\0' ) {
-			for ( victim = char_list; victim != NULL; victim = victim_next ) {
-				victim_next = victim->next;
+			LIST_FOR_EACH_SAFE( victim, victim_next, &g_characters, CHAR_DATA, char_node ) {
 				if ( victim->in_room == NULL ) continue;
 				if ( victim == ch ) continue;
 				if ( victim->in_room == ch->in_room ) {
@@ -2913,8 +2903,7 @@ void do_twist( CHAR_DATA *ch, char *argument ) {
 		interpret( ch, obj->victpoweron );
 		if ( obj->victpoweroff != NULL && str_cmp( obj->victpoweroff, "(null)" ) &&
 			obj->victpoweroff[0] != '\0' ) {
-			for ( victim = char_list; victim != NULL; victim = victim_next ) {
-				victim_next = victim->next;
+			LIST_FOR_EACH_SAFE( victim, victim_next, &g_characters, CHAR_DATA, char_node ) {
 				if ( victim->in_room == NULL ) continue;
 				if ( victim == ch ) continue;
 				if ( victim->in_room == ch->in_room ) {
@@ -3073,8 +3062,7 @@ void do_pull( CHAR_DATA *ch, char *argument ) {
 		interpret( ch, obj->victpoweron );
 		if ( obj->victpoweroff != NULL && str_cmp( obj->victpoweroff, "(null)" ) &&
 			obj->victpoweroff[0] != '\0' ) {
-			for ( victim = char_list; victim != NULL; victim = victim_next ) {
-				victim_next = victim->next;
+			LIST_FOR_EACH_SAFE( victim, victim_next, &g_characters, CHAR_DATA, char_node ) {
 				if ( victim->in_room == NULL ) continue;
 				if ( victim == ch ) continue;
 				if ( victim->in_room == ch->in_room ) {
@@ -3674,7 +3662,7 @@ void do_thirdeye( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	send_to_char( "#CYou experience the world through your third eye.#n\n\r", ch );
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected != CON_PLAYING ) continue;
 		if ( ( victim = d->character ) == NULL ) continue;
 		if ( IS_NPC( victim ) || victim->in_room == NULL ) continue;

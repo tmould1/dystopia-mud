@@ -83,8 +83,8 @@ void do_pentagram( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You failed, the victim was fighting someone.\n\r", ch );
 		return;
 	}
-	gch = ch->in_room->people;
-	while ( ( gch = gch->next_in_room ) != NULL ) pcounter++;
+	LIST_FOR_EACH(gch, &ch->in_room->characters, CHAR_DATA, room_node) pcounter++;
+	if ( pcounter > 0 ) pcounter--;  /* original counted all except first */
 	if ( pcounter > 30 ) {
 		send_to_char( "The room is to crowded.\n\r", ch );
 		return;
@@ -263,7 +263,7 @@ void do_painwreck( CHAR_DATA *ch, char *argument ) {
 
 void do_creepingdoom( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *ich;
-	CHAR_DATA *dummychar = ch;
+	CHAR_DATA *ich_next;
 	int totaldam = ch->hit;
 	int dam;
 	char buf1[MAX_STRING_LENGTH];
@@ -284,9 +284,8 @@ void do_creepingdoom( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	send_to_char( "You send out a call for the insects in the area.\n\r", ch );
-	for ( ich = ch->in_room->people; dummychar != NULL; ich = dummychar ) {
+	LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( totaldam <= 0 ) break;
-		dummychar = ich->next_in_room;
 		if ( !IS_NPC( ich ) ) continue;
 		if ( is_safe( ch, ich ) ) continue;
 		dam = UMIN( totaldam, ich->hit + 10 );
@@ -415,7 +414,7 @@ void do_powertransfer( CHAR_DATA *ch, char *argument ) {
 
 void do_planarstorm( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *ich;
-	CHAR_DATA *dummychar = ch;
+	CHAR_DATA *ich_next;
 	int dam;
 	char buf1[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];
@@ -435,8 +434,7 @@ void do_planarstorm( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	send_to_char( "You merge the plane of chaos and the plane of death with the prime material plane.\n\r", ch );
-	for ( ich = ch->in_room->people; dummychar != NULL; ich = dummychar ) {
-		dummychar = ich->next_in_room;
+	LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( is_safe( ch, ich ) ) continue;
 		dam = number_range( cfg( CFG_ABILITY_LICH_PLANARSTORM_DAMAGE_MIN ), cfg( CFG_ABILITY_LICH_PLANARSTORM_DAMAGE_MAX ) );
 		dam = cap_dam( ch, ich, dam );

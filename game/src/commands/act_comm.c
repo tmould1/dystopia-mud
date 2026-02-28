@@ -316,7 +316,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 
 	if ( !IS_NPC( ch ) && IS_SET( ch->act, PLR_SILENCE ) ) return; // silenced, and they don't know it :)
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *och;
 		CHAR_DATA *vch;
 
@@ -401,7 +401,8 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 void room_message( ROOM_INDEX_DATA *room, char *message ) {
 	CHAR_DATA *rch;
 
-	if ( ( rch = room->people ) == NULL ) return;
+	if ( list_empty( &room->characters ) ) return;
+	rch = LIST_ENTRY( room->characters.sentinel.next, CHAR_DATA, room_node );
 
 	act( message, rch, NULL, NULL, TO_ROOM );
 	act( message, rch, NULL, NULL, TO_CHAR );
@@ -739,8 +740,7 @@ void do_say( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	to = ch->in_room->people;
-	for ( ; to != NULL; to = to->next_in_room ) {
+	LIST_FOR_EACH( to, &ch->in_room->characters, CHAR_DATA, room_node ) {
 		is_ok = FALSE;
 
 		if ( to->desc == NULL || !IS_AWAKE( to ) )
@@ -807,8 +807,7 @@ void room_text( CHAR_DATA *ch, char *argument ) {
 			mobfound = TRUE;
 			if ( rt->mob != 0 ) {
 				mobfound = FALSE;
-				for ( vch = char_list; vch != NULL; vch = vch_next ) {
-					vch_next = vch->next;
+				LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 					if ( vch->in_room == NULL ) continue;
 					if ( !IS_NPC( vch ) ) continue;
 					if ( vch->in_room == ch->in_room && vch->pIndexData->vnum == rt->mob ) {
@@ -1142,8 +1141,7 @@ void do_emote( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	to = ch->in_room->people;
-	for ( ; to != NULL; to = to->next_in_room ) {
+	LIST_FOR_EACH( to, &ch->in_room->characters, CHAR_DATA, room_node ) {
 		is_ok = FALSE;
 
 		if ( to->desc == NULL || !IS_AWAKE( to ) )
@@ -1446,7 +1444,7 @@ void die_follower( CHAR_DATA *ch ) {
 
 	ch->leader = NULL;
 
-	for ( fch = char_list; fch != NULL; fch = fch->next ) {
+	LIST_FOR_EACH( fch, &g_characters, CHAR_DATA, char_node ) {
 		if ( fch->master == ch )
 			stop_follower( fch );
 		if ( fch->leader == ch )
@@ -1512,8 +1510,7 @@ void do_order( CHAR_DATA *ch, char *argument ) {
 	}
 
 	found = FALSE;
-	for ( och = ch->in_room->people; och != NULL; och = och_next ) {
-		och_next = och->next_in_room;
+	LIST_FOR_EACH_SAFE( och, och_next, &ch->in_room->characters, CHAR_DATA, room_node ) {
 		if ( och == ch ) continue;
 
 		if ( ( IS_AFFECTED( och, AFF_CHARM ) && och->master == ch && ( fAll || och == victim ) ) || ( ch->pcdata->stats[UNI_GEN] == 2 && ( fAll || och == victim ) && ch->pcdata->kingdom == och->pcdata->kingdom ) ) {
@@ -1665,7 +1662,7 @@ void do_group( CHAR_DATA *ch, char *argument ) {
 		sprintf( buf, "%s's group:\n\r", PERS( leader, ch ) );
 		send_to_char( buf, ch );
 
-		for ( gch = char_list; gch != NULL; gch = gch->next ) {
+		LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 			if ( is_same_group( gch, ch ) ) {
 				sprintf( buf,
 					"[%-16s] %4d/%4d hp %4d/%4d mana %4d/%4d mv %5d xp\n\r",
@@ -1729,8 +1726,8 @@ void do_gtell( CHAR_DATA *ch, char *argument ) {
 	 * Note use of send_to_char, so gtell works on sleepers.
 	 */
 	sprintf( buf, "#G%s tells the group #R'#G%s#R'\n\r#n", ch->name, argument );
-	//    for ( gch = char_list; gch != NULL; gch = gch->next )
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	//    LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node )
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->character != NULL )
 			gch = d->character;
 		else
@@ -1835,10 +1832,8 @@ void move_lift( CHAR_DATA *ch, int to_room ) {
 
 bool same_floor( CHAR_DATA *ch, int cmp_room ) {
 	OBJ_DATA *obj;
-	OBJ_DATA *obj_next;
 
-	for ( obj = ch->in_room->contents; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 		if ( obj->item_type != ITEM_PORTAL ) continue;
 		if ( obj->pIndexData->vnum == 30001 ) continue;
 		if ( obj->value[0] == cmp_room )
@@ -1851,10 +1846,8 @@ bool same_floor( CHAR_DATA *ch, int cmp_room ) {
 
 bool is_open( CHAR_DATA *ch ) {
 	OBJ_DATA *obj;
-	OBJ_DATA *obj_next;
 
-	for ( obj = ch->in_room->contents; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 		if ( obj->item_type != ITEM_PORTAL ) continue;
 		if ( obj->pIndexData->vnum == 30001 ) continue;
 		if ( obj->value[2] == 0 )
@@ -1867,11 +1860,9 @@ bool is_open( CHAR_DATA *ch ) {
 
 void move_door( CHAR_DATA *ch ) {
 	OBJ_DATA *obj;
-	OBJ_DATA *obj_next;
 	ROOM_INDEX_DATA *pRoomIndex;
 
-	for ( obj = ch->in_room->contents; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 		if ( obj->item_type != ITEM_PORTAL ) continue;
 		if ( obj->pIndexData->vnum == 30001 ) continue;
 		pRoomIndex = get_room_index( obj->value[0] );
@@ -1884,10 +1875,8 @@ void move_door( CHAR_DATA *ch ) {
 
 void thru_door( CHAR_DATA *ch, int doorexit ) {
 	OBJ_DATA *obj;
-	OBJ_DATA *obj_next;
 
-	for ( obj = ch->in_room->contents; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 		if ( obj->item_type != ITEM_PORTAL ) continue;
 		if ( obj->pIndexData->vnum == 30001 ) continue;
 		obj->value[0] = doorexit;
@@ -1898,10 +1887,8 @@ void thru_door( CHAR_DATA *ch, int doorexit ) {
 
 void open_door( CHAR_DATA *ch, bool be_open ) {
 	OBJ_DATA *obj;
-	OBJ_DATA *obj_next;
 
-	for ( obj = ch->in_room->contents; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
 		if ( obj->item_type != ITEM_PORTAL ) continue;
 		if ( obj->pIndexData->vnum == 30001 ) continue;
 		if ( obj->value[2] == 0 && !be_open )

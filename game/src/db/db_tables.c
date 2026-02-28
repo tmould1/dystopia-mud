@@ -242,9 +242,9 @@ void db_tables_load_liquids( void ) {
 
 		liq_table[id].liq_name     = str_dup( col_text( stmt, 1 ) );
 		liq_table[id].liq_color    = str_dup( col_text( stmt, 2 ) );
-		liq_table[id].liq_affect[0] = (sh_int)sqlite3_column_int( stmt, 3 );
-		liq_table[id].liq_affect[1] = (sh_int)sqlite3_column_int( stmt, 4 );
-		liq_table[id].liq_affect[2] = (sh_int)sqlite3_column_int( stmt, 5 );
+		liq_table[id].liq_affect[0] = (int)sqlite3_column_int( stmt, 3 );
+		liq_table[id].liq_affect[1] = (int)sqlite3_column_int( stmt, 4 );
+		liq_table[id].liq_affect[2] = (int)sqlite3_column_int( stmt, 5 );
 		i++;
 	}
 

@@ -757,9 +757,8 @@ void do_soulstorm( CHAR_DATA *ch, char *argument )
 		ch, NULL, NULL, TO_ROOM );
 
 	/* AoE: hit everyone fighting us */
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next )
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node)
 	{
-		vch_next = vch->next_in_room;
 
 		if ( vch->fighting != ch )
 			continue;
@@ -1144,9 +1143,8 @@ void update_spiritlord( CHAR_DATA *ch )
 			CHAR_DATA *vch_next;
 
 			/* Despawn all spirit warriors */
-			for ( vch = char_list; vch != NULL; vch = vch_next )
+			LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node )
 			{
-				vch_next = vch->next;
 
 				if ( IS_NPC( vch )
 				&&   vch->wizard == ch

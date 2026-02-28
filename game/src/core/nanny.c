@@ -97,8 +97,7 @@ static void remove_illegal_items( CHAR_DATA *ch, bool remove_artifacts ) {
 	if ( IS_NPC( ch ) )
 		return;
 
-	for ( obj = ch->carrying; obj != NULL; obj = obj_next ) {
-		obj_next = obj->next_content;
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		if ( remove_artifacts && IS_SET( obj->quest, QUEST_ARTIFACT ) ) {
 			extract_obj( obj );
 			continue;
@@ -194,15 +193,8 @@ static void nanny_get_name( DESCRIPTOR_DATA *d, char *argument ) {
 	} else {
 		/* Check max number of players - KaVir */
 
-		DESCRIPTOR_DATA *dcheck;
-		DESCRIPTOR_DATA *dcheck_next;
-		int countdesc = 0;
+		int countdesc = list_count( &g_descriptors );
 		int max_players = 150;
-
-		for ( dcheck = descriptor_list; dcheck != NULL; dcheck = dcheck_next ) {
-			dcheck_next = dcheck->next;
-			countdesc++;
-		}
 
 		if ( countdesc > max_players && !IS_IMMORTAL( ch ) ) {
 			write_to_buffer( d, " Too many players connected, please try again in a couple of minutes.\n\r", 0 );
@@ -304,8 +296,7 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 		*/
 	}
 
-	ch->next = char_list;
-	char_list = ch;
+	list_push_back( &g_characters, &ch->char_node );
 	d->connected = CON_PLAYING;
 
 	/* MTTS auto-upgrade: apply detected terminal capabilities */
@@ -593,8 +584,7 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 	CHAR_DATA *ch = d->character;
 	int i;
 
-	ch->next = char_list;
-	char_list = ch;
+	list_push_back( &g_characters, &ch->char_node );
 	d->connected = CON_PLAYING;
 
 	/* Apply saved protocol preferences for returning players */
@@ -678,8 +668,7 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 			/* Loop until nothing more can be equipped (handles dual slots like rings) */
 			do {
 				equipped = FALSE;
-				for ( nobj = ch->carrying; nobj != NULL; nobj = nobj_next ) {
-					nobj_next = nobj->next_content;
+				LIST_FOR_EACH_SAFE( nobj, nobj_next, &ch->carrying, OBJ_DATA, content_node ) {
 					if ( nobj->wear_loc == WEAR_NONE && can_see_obj( ch, nobj ) ) {
 						/* Check finger slots */
 						if ( CAN_WEAR( nobj, ITEM_WEAR_FINGER ) ) {
@@ -1045,7 +1034,7 @@ bool check_parse_name( char *name ) {
 bool check_reconnect( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 	CHAR_DATA *ch;
 
-	for ( ch = char_list; ch != NULL; ch = ch->next ) {
+	LIST_FOR_EACH( ch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( ch ) && !IS_EXTRA( ch, EXTRA_SWITCH ) && ( !fConn || ch->desc == NULL ) && !str_cmp( GET_PC_NAME( d->character ), GET_PC_NAME( ch ) ) ) {
 			if ( fConn == FALSE ) {
 				free_string( d->character->pcdata->pwd );
@@ -1083,7 +1072,7 @@ bool check_reconnect( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 bool check_kickoff( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 	CHAR_DATA *ch;
 
-	for ( ch = char_list; ch != NULL; ch = ch->next ) {
+	LIST_FOR_EACH( ch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( ch ) && ( !fConn || ch->desc == NULL ) && !str_cmp( GET_PC_NAME( d->character ), GET_PC_NAME( ch ) ) ) {
 			if ( fConn == FALSE ) {
 				free_string( d->character->pcdata->pwd );
@@ -1116,7 +1105,7 @@ void check_pedit_editing( const char *name ) {
 	CHAR_DATA *ch;
 	char buf[MAX_STRING_LENGTH];
 
-	for ( ch = char_list; ch != NULL; ch = ch->next ) {
+	LIST_FOR_EACH( ch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( ch ) || ch->pcdata == NULL )
 			continue;
 		if ( ch->pcdata->pfile == NULL )
@@ -1140,7 +1129,7 @@ void check_pedit_editing( const char *name ) {
 bool check_playing( DESCRIPTOR_DATA *d, char *name ) {
 	DESCRIPTOR_DATA *dold;
 
-	for ( dold = descriptor_list; dold != NULL; dold = dold->next ) {
+	LIST_FOR_EACH( dold, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( dold != d && dold->character != NULL && dold->connected != CON_GET_NAME && dold->connected != CON_GET_OLD_PASSWORD && !str_cmp( name, dold->original ? GET_PC_NAME( dold->original ) : GET_PC_NAME( dold->character ) ) ) {
 			char buf[MAX_STRING_LENGTH];
 			if ( d->character != NULL ) {

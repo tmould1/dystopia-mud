@@ -124,7 +124,7 @@ void intro_load( void ) {
 		intro_text[tier] = NULL;
 
 	/* Walk the help list looking for intro keywords */
-	for ( pHelp = first_help; pHelp != NULL; pHelp = pHelp->next ) {
+	LIST_FOR_EACH( pHelp, &g_helps, HELP_DATA, node ) {
 		for ( tier = 0; tier < INTRO_TIER_MAX; tier++ ) {
 			if ( !str_cmp( pHelp->keyword, intro_keywords[tier] ) ) {
 				intro_text[tier] = pHelp->text;

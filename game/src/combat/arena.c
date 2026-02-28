@@ -49,7 +49,7 @@ void do_arenastats( CHAR_DATA *ch, char *argument ) {
 	send_to_char( "#G            People in the arena#n\n\r\n\r", ch );
 	send_to_char( "#RName                Health   Stamina     Mana#n\n\r", ch );
 	send_to_char( "#0----------------------------------------------#n\n\r", ch );
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->character != NULL ) {
 			if ( d->character->in_room != NULL ) {
 				if ( !IS_SET( d->character->in_room->room_flags, ROOM_ARENA ) ) continue;
@@ -85,7 +85,7 @@ void close_arena() {
 	arenaopen = FALSE;
 
 	/* unfreeze all players */
-	for ( vch = char_list; vch != NULL; vch = vch->next ) {
+	LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( vch ) ) continue;
 		if ( vch->in_room != NULL ) {
 			if ( IS_SET( vch->in_room->room_flags, ROOM_ARENA ) ) {
@@ -134,7 +134,7 @@ void do_arenajoin( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->character != NULL ) {
 			if ( !d->connected == CON_PLAYING ) continue;
 			if ( d->character->in_room != NULL ) {
@@ -179,7 +179,7 @@ void do_resign( CHAR_DATA *ch, char *argument ) {
 	do_restore( ch, "self" );
 	do_call( ch, "all" );
 	ch->pcdata->alosses++;
-	for ( victim = char_list; victim != NULL; victim = victim->next ) {
+	LIST_FOR_EACH( victim, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( victim ) ) continue;
 		if ( victim->in_room != NULL && IS_SET( victim->in_room->room_flags, ROOM_ARENA ) && victim->pcdata->chobj == NULL ) {
 			gch = victim;

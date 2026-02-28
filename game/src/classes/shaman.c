@@ -384,9 +384,8 @@ static void shaman_despawn_totem( CHAR_DATA *ch )
 	CHAR_DATA *mob;
 	CHAR_DATA *mob_next;
 
-	for ( mob = char_list; mob != NULL; mob = mob_next )
+	LIST_FOR_EACH_SAFE( mob, mob_next, &g_characters, CHAR_DATA, char_node )
 	{
-		mob_next = mob->next;
 
 		if ( !IS_NPC( mob ) ) continue;
 		if ( mob->pIndexData == NULL ) continue;

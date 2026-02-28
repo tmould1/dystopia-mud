@@ -41,7 +41,7 @@ void do_reveal( CHAR_DATA *ch, char *argument ) {
 	}
 	act( "$n mumles a few words, and you are suddenly blinded by a flash.", ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You reveal everything hidden in the room.\n\r", ch );
-	for ( ich = ch->in_room->people; ich != NULL; ich = ich->next_in_room ) {
+	LIST_FOR_EACH(ich, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( ich == ch || ich->trust > 6 ) continue;
 		affect_strip( ich, gsn_invis );
 		affect_strip( ich, gsn_mass_invis );
@@ -697,8 +697,7 @@ void do_discharge( CHAR_DATA *ch, char *argument ) {
 		magic_power += cfg( CFG_ABILITY_MAGE_DISCHARGE_ENTROPY_BONUS );
 	if ( IS_ITEMAFF( ch, ITEMA_MAGESHIELD ) ) {
 		REMOVE_BIT( ch->itemaffect, ITEMA_MAGESHIELD );
-		for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-			vch_next = vch->next_in_room;
+		LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( vch != ch ) {
 				if ( is_safe( ch, vch ) ) continue;
 				if ( ( mount = ch->mount ) != NULL )

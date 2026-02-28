@@ -71,8 +71,7 @@ bool spec_vladd_decap( CHAR_DATA *ch ) {
 	if ( ch->fighting != NULL )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		/* this should kill mobs as well as players */
 		if ( !IS_CLASS( ch, CLASS_MAGE ) )
 			break;
@@ -119,8 +118,7 @@ bool spec_assassin( CHAR_DATA *ch ) {
 	if ( ch->fighting != NULL )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		/* this should kill mobs as well as players */
 		if ( !IS_CLASS( ch, CLASS_MAGE ) )
 			break;
@@ -160,7 +158,7 @@ bool spec_guard_werewolf( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_WEREWOLF ) ) {
@@ -205,7 +203,7 @@ bool spec_guard_dragon( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_SHAPESHIFTER ) ) {
@@ -250,7 +248,7 @@ bool spec_guard_mage( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_MAGE ) ) {
@@ -295,7 +293,7 @@ bool spec_guard_highlander( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_SAMURAI ) ) {
@@ -340,7 +338,7 @@ bool spec_guard_vampire( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_VAMPIRE ) ) {
@@ -385,7 +383,7 @@ bool spec_guard_demon( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_DEMON ) ) {
@@ -430,7 +428,7 @@ bool spec_guard_drow( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_DROW ) ) {
@@ -475,7 +473,7 @@ bool spec_guard_monk( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_MONK ) ) {
@@ -520,7 +518,7 @@ bool spec_guard_ninja( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_NINJA ) ) {
@@ -567,8 +565,7 @@ bool dragon( CHAR_DATA *ch, char *spell_name ) {
 	if ( ch->position != POS_FIGHTING )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( victim->fighting == ch && number_bits( 2 ) == 0 )
 			break;
 	}
@@ -643,8 +640,7 @@ bool spec_cast_adept( CHAR_DATA *ch ) {
 	if ( !IS_AWAKE( ch ) )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( victim != ch && can_see( ch, victim ) && number_bits( 1 ) == 0 )
 			break;
 	}
@@ -699,8 +695,7 @@ bool spec_cast_cleric( CHAR_DATA *ch ) {
 	if ( ch->position != POS_FIGHTING )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( victim->fighting == ch && number_bits( 2 ) == 0 )
 			break;
 	}
@@ -775,8 +770,7 @@ bool spec_cast_judge( CHAR_DATA *ch ) {
 	if ( ch->position != POS_FIGHTING )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( victim->fighting == ch && number_bits( 2 ) == 0 )
 			break;
 	}
@@ -800,8 +794,7 @@ bool spec_cast_mage( CHAR_DATA *ch ) {
 	if ( ch->position != POS_FIGHTING )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( victim->fighting == ch && number_bits( 2 ) == 0 )
 			break;
 	}
@@ -872,8 +865,7 @@ bool spec_cast_undead( CHAR_DATA *ch ) {
 	if ( ch->position != POS_FIGHTING )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( victim->fighting == ch && number_bits( 2 ) == 0 )
 			break;
 	}
@@ -942,14 +934,12 @@ bool spec_fido( CHAR_DATA *ch ) {
 	if ( !IS_AWAKE( ch ) )
 		return FALSE;
 
-	for ( corpse = ch->in_room->contents; corpse != NULL; corpse = c_next ) {
-		c_next = corpse->next_content;
+	LIST_FOR_EACH_SAFE(corpse, c_next, &ch->in_room->objects, OBJ_DATA, room_node) {
 		if ( corpse->item_type != ITEM_CORPSE_NPC )
 			continue;
 
 		act( "$n savagely devours a corpse.", ch, NULL, NULL, TO_ROOM );
-		for ( obj = corpse->contains; obj; obj = obj_next ) {
-			obj_next = obj->next_content;
+		LIST_FOR_EACH_SAFE( obj, obj_next, &corpse->contents, OBJ_DATA, content_node ) {
 			obj_from_obj( obj );
 			obj_to_room( obj, ch->in_room );
 		}
@@ -974,8 +964,7 @@ bool spec_guard( CHAR_DATA *ch ) {
 	max_evil = 300;
 	ech = NULL;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( victim->fighting != NULL && victim->fighting != ch && victim->alignment < max_evil ) {
 			max_evil = victim->alignment;
@@ -1032,8 +1021,7 @@ bool spec_janitor( CHAR_DATA *ch ) {
 	if ( !IS_AWAKE( ch ) )
 		return FALSE;
 
-	for ( trash = ch->in_room->contents; trash != NULL; trash = trash_next ) {
-		trash_next = trash->next_content;
+	LIST_FOR_EACH_SAFE(trash, trash_next, &ch->in_room->objects, OBJ_DATA, room_node) {
 		if ( !IS_SET( trash->wear_flags, ITEM_TAKE ) )
 			continue;
 		if ( trash->item_type == ITEM_DRINK_CON || trash->item_type == ITEM_TRASH || trash->cost < 10 ) {
@@ -1163,8 +1151,7 @@ bool spec_thief( CHAR_DATA *ch ) {
 	if ( ch->position != POS_STANDING )
 		return FALSE;
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 
 		if ( IS_NPC( victim ) || ( !IS_NPC( victim ) && IS_IMMUNE( victim, IMM_STEAL ) ) || victim->level >= LEVEL_IMMORTAL || number_bits( 2 ) != 0 || !can_see( ch, victim ) ) /* Thx Glop */
 			continue;
@@ -1230,8 +1217,7 @@ bool spec_gremlin_original( CHAR_DATA *ch ) {
 		/* Lets make this mob DO things!  KaVir */
 		int speech;
 		speech = number_range( 1, 8 );
-		for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-			v_next = victim->next_in_room;
+		LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( victim != ch && can_see( ch, victim ) && number_bits( 1 ) == 0 )
 				break;
 		}
@@ -1283,8 +1269,7 @@ bool spec_gremlin_original( CHAR_DATA *ch ) {
 	}
 
 	do_drop( ch, "all" );
-	for ( object = ch->in_room->contents; object; object = object_next ) {
-		object_next = object->next_content;
+	LIST_FOR_EACH_SAFE(object, object_next, &ch->in_room->objects, OBJ_DATA, room_node) {
 		if ( !IS_SET( object->wear_flags, ITEM_TAKE ) )
 			continue;
 
@@ -1342,8 +1327,7 @@ bool spec_gremlin_born( CHAR_DATA *ch ) {
 	if ( !IS_AWAKE( ch ) )
 		return FALSE;
 
-	for ( object = ch->in_room->contents; object; object = object_next ) {
-		object_next = object->next_content;
+	LIST_FOR_EACH_SAFE(object, object_next, &ch->in_room->objects, OBJ_DATA, room_node) {
 		if ( !IS_SET( object->wear_flags, ITEM_TAKE ) )
 			continue;
 
@@ -1405,7 +1389,7 @@ bool spec_gremlin_born( CHAR_DATA *ch ) {
 		/*	return FALSE; */
 	}
 	/* Now we check the room for someone to kill */
-	for ( victim = char_list; victim; victim = victim->next ) {
+	LIST_FOR_EACH( victim, &g_characters, CHAR_DATA, char_node ) {
 		if ( victim->in_room != ch->in_room || !victim->in_room || victim == ch || ( !IS_NPC( victim ) && IS_HERO( victim ) && victim->hit < 0 ) || ( ( victim->name == ch->name ) && ( ch->max_move > 30 ) ) || ( ( victim->level > ch->level ) && ( ch->level < 12 ) ) || IS_IMMORTAL( victim ) )
 			continue;
 
@@ -1441,8 +1425,7 @@ bool spec_executioner( CHAR_DATA *ch ) {
 	if ( ch->position == POS_FIGHTING )
 		do_kick( ch, "victim" );
 
-	for ( victim = ch->in_room->people; victim != NULL; victim = v_next ) {
-		v_next = victim->next_in_room;
+	LIST_FOR_EACH_SAFE(victim, v_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		/* this should kill mobs as well as players */
 		if ( !IS_CLASS( ch, CLASS_MAGE ) )
 			break;
@@ -1479,8 +1462,7 @@ bool spec_executioner( CHAR_DATA *ch ) {
 		return FALSE;
 	if ( IS_NPC( victim ) )
 		return FALSE;
-	for ( object = ch->in_room->contents; object; object = object_next ) {
-		object_next = object->next_content;
+	LIST_FOR_EACH_SAFE(object, object_next, &ch->in_room->objects, OBJ_DATA, room_node) {
 		if ( object == NULL )
 			continue;
 
@@ -1501,9 +1483,15 @@ bool spec_executioner( CHAR_DATA *ch ) {
 			obj_from_room( object );
 			obj_to_char( object, ch );
 			/*Now compare it to what we already have*/
-			for ( obj2 = ch->carrying; obj2; obj2 = obj2->next_content ) {
-				if ( obj2->wear_loc != WEAR_NONE && can_see_obj( ch, obj2 ) && object->item_type == obj2->item_type && ( object->wear_flags & obj2->wear_flags & ~ITEM_TAKE ) != 0 )
-					break;
+			obj2 = NULL;
+			{
+				OBJ_DATA *tmp;
+				LIST_FOR_EACH( tmp, &ch->carrying, OBJ_DATA, content_node ) {
+					if ( tmp->wear_loc != WEAR_NONE && can_see_obj( ch, tmp ) && object->item_type == tmp->item_type && ( object->wear_flags & tmp->wear_flags & ~ITEM_TAKE ) != 0 ) {
+						obj2 = tmp;
+						break;
+					}
+				}
 			}
 			if ( !obj2 ) {
 				switch ( object->item_type ) {
@@ -1592,8 +1580,7 @@ bool spec_rogue( CHAR_DATA *ch ) {
 	if ( ch->position == POS_FIGHTING )
 		do_kick( ch, "victim" );
 
-	for ( object = ch->in_room->contents; object; object = object_next ) {
-		object_next = object->next_content;
+	LIST_FOR_EACH_SAFE(object, object_next, &ch->in_room->objects, OBJ_DATA, room_node) {
 		if ( object == NULL )
 			continue;
 
@@ -1614,9 +1601,15 @@ bool spec_rogue( CHAR_DATA *ch ) {
 			obj_from_room( object );
 			obj_to_char( object, ch );
 			/*Now compare it to what we already have*/
-			for ( obj2 = ch->carrying; obj2; obj2 = obj2->next_content ) {
-				if ( obj2->wear_loc != WEAR_NONE && can_see_obj( ch, obj2 ) && object->item_type == obj2->item_type && ( object->wear_flags & obj2->wear_flags & ~ITEM_TAKE ) != 0 )
-					break;
+			obj2 = NULL;
+			{
+				OBJ_DATA *tmp;
+				LIST_FOR_EACH( tmp, &ch->carrying, OBJ_DATA, content_node ) {
+					if ( tmp->wear_loc != WEAR_NONE && can_see_obj( ch, tmp ) && object->item_type == tmp->item_type && ( object->wear_flags & tmp->wear_flags & ~ITEM_TAKE ) != 0 ) {
+						obj2 = tmp;
+						break;
+					}
+				}
 			}
 			if ( !obj2 ) {
 				switch ( object->item_type ) {
@@ -1711,7 +1704,7 @@ bool spec_clan_guardian(CHAR_DATA *ch)
 */
 /*if (ch->in_room < 6645 && ch->in_room > 6657) break;*/
 /*
-   for (d = descriptor_list; d != NULL; d = d->next)
+   LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node )
    {
 	   if (!IS_PLAYING(d)
 	   || (victim = d->character) == NULL
@@ -1784,7 +1777,7 @@ bool spec_guard_cyborg( CHAR_DATA *ch ) {
 
 	if ( ch->in_room == NULL ) return FALSE;
 
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( !IS_PLAYING( d ) || ( victim = d->character ) == NULL || IS_NPC( victim ) || IS_IMMORTAL( victim ) || victim->in_room == NULL || victim->pcdata->chobj != NULL || victim->in_room->area != ch->in_room->area
 			/*           || victim->in_room == ch->in_room*/
 			|| IS_CLASS( victim, CLASS_DROW ) ) {
@@ -1971,8 +1964,7 @@ bool spec_zombie_lord( CHAR_DATA *ch ) {
 			act( "$n clambers to $s feet.", victim, NULL, NULL, TO_ROOM );
 			free_string( victim->powertype );
 			victim->powertype = str_dup( "zombie" );
-			for ( obj_content = obj->contains; obj_content != NULL; obj_content = obj_next ) {
-				obj_next = obj_content->next_content;
+			LIST_FOR_EACH_SAFE( obj_content, obj_next, &obj->contents, OBJ_DATA, content_node ) {
 				obj_from_obj( obj_content );
 				obj_to_char( obj_content, victim );
 			}
@@ -2072,7 +2064,7 @@ bool spec_zombie_lord( CHAR_DATA *ch ) {
 			break;
 		}
 
-		for ( victim = char_list; victim != NULL; victim = victim->next ) {
+		LIST_FOR_EACH( victim, &g_characters, CHAR_DATA, char_node ) {
 			if ( victim->in_room == NULL ) continue;
 			if ( victim->in_room != ch->in_room || victim == ch || ( !IS_NPC( victim ) && IS_HERO( victim ) && victim->hit < 0 ) || IS_IMMORTAL( victim ) || is_safe( ch, victim ) || !IS_NPC( victim ) || !can_see( ch, victim ) )
 				continue;
@@ -2424,8 +2416,7 @@ bool spec_dog( CHAR_DATA *ch ) {
 				if ( option == 5 )
 					act( "$n scratches at the downward door.", ch, NULL, NULL, TO_ROOM );
 				act( "$n barks loudly at the door.", ch, NULL, NULL, TO_ROOM );
-				for ( vch = char_list; vch != NULL; vch = vch_next ) {
-					vch_next = vch->next;
+				LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
 					if ( vch->in_room == NULL || IS_NPC( vch ) )
 						continue;
 					if ( vch->in_room == ch->in_room )
@@ -2462,8 +2453,7 @@ bool spec_dog( CHAR_DATA *ch ) {
 		}
 	}
 
-	for ( obj = ch->in_room->contents; obj != NULL; obj = o_next ) {
-		o_next = obj->next_content;
+	LIST_FOR_EACH_SAFE(obj, o_next, &ch->in_room->objects, OBJ_DATA, room_node) {
 		if ( number_range( 1, 2 ) == 1 ) continue;
 		act( "$n sniffs $p.", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_FOOD ) {

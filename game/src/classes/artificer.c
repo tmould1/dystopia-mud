@@ -778,8 +778,7 @@ void do_grenade( CHAR_DATA *ch, char *argument ) {
 	act( "You hurl an explosive grenade into the fray!", ch, NULL, NULL, TO_CHAR );
 	act( "$n hurls an explosive grenade into the fray!", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) ) continue;  /* No PvP splash */
 		if ( IS_NPC( vch ) && vch->fighting == NULL && vch != victim ) continue;  /* Hit target + combatants */
@@ -1103,8 +1102,9 @@ void update_artificer( CHAR_DATA *ch ) {
 			OBJ_DATA *obj_next;
 			bool repaired = FALSE;
 
-			for ( obj = ch->carrying; obj != NULL && !repaired; obj = obj_next ) {
-				obj_next = obj->next_content;
+			LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
+				if ( repaired )
+					break;
 				if ( obj->condition < 100 && obj->wear_loc != WEAR_NONE ) {
 					obj->condition = 100;
 					act( "Your repair bot welds $p back together.", ch, obj, NULL, TO_CHAR );
@@ -1170,8 +1170,7 @@ void artificer_despawn_turrets( CHAR_DATA *ch ) {
 	CHAR_DATA *turret_next;
 	bool found = FALSE;
 
-	for ( turret = char_list; turret != NULL; turret = turret_next ) {
-		turret_next = turret->next;
+	LIST_FOR_EACH_SAFE( turret, turret_next, &g_characters, CHAR_DATA, char_node ) {
 
 		if ( !IS_NPC( turret ) ) continue;
 		if ( turret->pIndexData == NULL ) continue;
@@ -1203,7 +1202,7 @@ void artificer_turret_attacks( CHAR_DATA *ch ) {
 	if ( ( victim = ch->fighting ) == NULL ) return;
 	if ( ch->in_room == NULL ) return;
 
-	for ( turret = ch->in_room->people; turret != NULL; turret = turret->next_in_room ) {
+	LIST_FOR_EACH(turret, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( !IS_NPC( turret ) ) continue;
 		if ( turret->pIndexData == NULL ) continue;
 		if ( turret->pIndexData->vnum != VNUM_ART_TURRET ) continue;

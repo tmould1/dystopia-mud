@@ -329,7 +329,7 @@ void do_kleave( CHAR_DATA *ch, char *argument ) {
 
 	/* Notify kingdom members before leaving */
 	snprintf( buf, sizeof( buf ), "#R%s has left the kingdom.#n\n\r", ch->name );
-	for ( d = descriptor_list; d != NULL; d = d->next ) {
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		if ( d->connected == CON_PLAYING && d->character != NULL
 			&& !IS_NPC( d->character )
 			&& d->character->pcdata->kingdom == kingdom

@@ -263,8 +263,7 @@ void do_thunderclap( CHAR_DATA *ch, char *argument ) {
 	act( "You clap your hands together, unleashing a devastating sonic shockwave!", ch, NULL, NULL, TO_CHAR );
 	act( "$n claps $s hands together, unleashing a devastating sonic shockwave!", ch, NULL, NULL, TO_ROOM );
 
-	for ( vch = ch->in_room->people; vch != NULL; vch = vch_next ) {
-		vch_next = vch->next_in_room;
+	LIST_FOR_EACH_SAFE(vch, vch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( vch == ch ) continue;
 		if ( is_safe( ch, vch ) ) continue;
 		if ( !IS_NPC( vch ) && !IS_NPC( ch ) && vch->fighting != ch ) continue;
@@ -399,7 +398,7 @@ void do_rally( CHAR_DATA *ch, char *argument ) {
 	act( "You raise your voice in an inspiring rally, healing wounds around you!", ch, NULL, NULL, TO_CHAR );
 	act( "$n raises $s voice in an inspiring rally!", ch, NULL, NULL, TO_ROOM );
 
-	for ( gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room ) {
+	LIST_FOR_EACH(gch, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( !is_same_group( gch, ch ) ) continue;
 		gch->hit = UMIN( gch->hit + heal, gch->max_hit );
 		send_to_char( "You feel invigorated by the rallying cry!\n\r", gch );

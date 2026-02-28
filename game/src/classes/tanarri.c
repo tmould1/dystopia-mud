@@ -504,15 +504,11 @@ void do_earthquake( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	send_to_char( "You summon an earthquake.\n\r", ch );
-	ich_next = ch->in_room->people;
-	ich = ich_next;
-	while ( ich_next != NULL ) {
-		ich_next = ich->next_in_room;
+	LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( ich != ch && !IS_AFFECTED( ich, AFF_FLYING ) ) {
 			if ( is_safe( ch, ich ) ) break;
 			one_hit( ch, ich, 32, 1 );
 		}
-		ich = ich_next;
 	}
 	use_mana( ch, cfg( CFG_ABILITY_TANARRI_EARTHQUAKE_MANA_COST ) );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_TANARRI_EARTHQUAKE_COOLDOWN ) );
@@ -537,16 +533,12 @@ void do_tornado( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	send_to_char( "You summon a supernatural storm.\n\r", ch );
-	ich_next = ch->in_room->people;
-	ich = ich_next;
-	while ( ich_next != NULL ) {
-		ich_next = ich->next_in_room;
+	LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( ich != ch && IS_AFFECTED( ich, AFF_FLYING ) ) {
 			if ( is_safe( ch, ich ) ) break;
 			one_hit( ch, ich, gsn_lightning, 1 );
 			one_hit( ch, ich, gsn_lightning, 1 );
 		}
-		ich = ich_next;
 	}
 	use_mana( ch, cfg( CFG_ABILITY_TANARRI_TORNADO_MANA_COST ) );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_TANARRI_TORNADO_COOLDOWN ) );
@@ -581,16 +573,12 @@ void do_infernal( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You summon the infernal flames of the abyss.\n\r", ch );
 	else
 		send_to_char( "You mutter an incantation and a fireball flies from your hands.\n\r", ch );
-	ich_next = ch->in_room->people;
-	ich = ich_next;
-	while ( ich_next != NULL ) {
-		ich_next = ich->next_in_room;
+	LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( ich != ch ) {
 			if ( is_safe( ch, ich ) ) break;
 			one_hit( ch, ich, gsn_fireball, 1 );
 			one_hit( ch, ich, gsn_fireball, 1 );
 		}
-		ich = ich_next;
 	}
 	use_mana( ch, cfg( CFG_ABILITY_TANARRI_INFERNAL_MANA_COST ) );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_TANARRI_INFERNAL_COOLDOWN ) );
