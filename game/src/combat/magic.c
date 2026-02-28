@@ -388,7 +388,7 @@ void do_cast( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		if ( !IS_NPC( victim ) && ( !CAN_PK( ch ) || !CAN_PK( victim ) ) && ( ch != victim ) ) {
+		if ( !IS_NPC( victim ) && ( get_trust( ch ) < LEVEL_AVATAR || get_trust( victim ) < LEVEL_AVATAR ) && ( ch != victim ) ) {
 			send_to_char( "You are unable to affect them.\n\r", ch );
 			return;
 		}

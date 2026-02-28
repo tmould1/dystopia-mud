@@ -521,10 +521,7 @@ int char_hitroll( CHAR_DATA *ch ) {
 int char_ac( CHAR_DATA *ch ) {
 	int value = 0;
 
-	value = GET_AC( ch );
-
-	if ( IS_AWAKE( ch ) )
-		value += dex_app[get_curr_dex( ch )].defensive;
+	value = ch->armor + ( IS_AWAKE( ch ) ? dex_app[get_curr_dex( ch )].defensive : 0 );
 
 	/* Highlander */
 	if ( IS_CLASS( ch, CLASS_SAMURAI ) && ( get_eq_char( ch, WEAR_WIELD ) != NULL ) ) {

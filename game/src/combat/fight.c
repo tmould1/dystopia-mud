@@ -2603,7 +2603,7 @@ bool is_safe( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	if ( !ch->in_room ) return TRUE; // when someone calls a one_hit or similar on something/someone who COULD be dead/gone.
 	if ( !victim->in_room ) return TRUE;
 	if ( !IS_NPC( victim ) && !IS_NPC( ch ) ) {
-		if ( !CAN_PK( ch ) || !CAN_PK( victim ) ) {
+		if ( get_trust( ch ) < LEVEL_AVATAR || get_trust( victim ) < LEVEL_AVATAR ) {
 			send_to_char( "Both players must be avatars to fight.\n\r", ch );
 			return TRUE;
 		}

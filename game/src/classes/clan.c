@@ -3404,7 +3404,7 @@ void do_werewolf( CHAR_DATA *ch, char *argument ) {
 				act( "$n throws back $s head and howls with rage!", ch, NULL, vch, TO_VICT );
 			else if ( vch->in_room->area == ch->in_room->area )
 				send_to_char( "You hear a fearsome howl close by!\n\r", vch );
-			else if ( !CAN_PK( vch ) )
+			else if ( get_trust( vch ) < LEVEL_AVATAR || get_trust( vch ) > MAX_LEVEL )
 				continue;
 		}
 		if ( vch->in_room == ch->in_room && can_see( ch, vch ) ) {

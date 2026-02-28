@@ -2719,23 +2719,6 @@ extern int gsn_multiplearms;
 #define REMOVE_BIT( var, bit ) ( ( var ) &= ~( bit ) )
 #define TOGGLE_BIT( var, bit ) ( ( var ) ^= ( bit ) )
 
-/* double-linked list handling macros -Thoric */
-
-#define ASSIGN_GSN( gsn, skill )                                  \
-	do {                                                          \
-		if ( ( ( gsn ) = skill_lookup( ( skill ) ) ) == -1 )      \
-			fprintf( stderr, "ASSIGN_GSN: Skill %s not found.\n", \
-				( skill ) );                                      \
-	} while ( 0 )
-
-#define CHECK_SUBRESTRICTED( ch )                                                               \
-	do {                                                                                        \
-		if ( ( ch )->substate == SUB_RESTRICTED ) {                                             \
-			send_to_char( "You cannot use this command from within another command.\n\r", ch ); \
-			return;                                                                             \
-		}                                                                                       \
-	} while ( 0 )
-
 /*
  * Character macros.
  */
@@ -2755,10 +2738,6 @@ extern int gsn_multiplearms;
 #define IS_IMMORTAL( ch ) ( get_trust( ch ) >= LEVEL_IMMORTAL )
 #define IS_HERO( ch )	  ( get_trust( ch ) >= LEVEL_HERO )
 
-#define IS_DAY()   ( ( weather_info.sunlight == SUN_RISE || weather_info.sunlight == SUN_LIGHT ) )
-#define IS_NIGHT() ( ( !IS_DAY() ) )
-
-#define CAN_PK( ch )		  ( get_trust( ch ) >= 3 && get_trust( ch ) <= 12 )
 #define IS_AFFECTED( ch, sn ) ( IS_SET( ( ch )->affected_by, ( sn ) ) )
 #define IS_AFF2( ch, sn )	  ( IS_SET( ( ch )->affected_by2, ( sn ) ) )
 #define IS_SPEAKING( ch, sn ) ( IS_SET( ( ch )->pcdata->language[0], ( sn ) ) )
@@ -2791,17 +2770,16 @@ extern int gsn_multiplearms;
 #define IS_NEUTRAL( ch ) ( !IS_GOOD( ch ) && !IS_EVIL( ch ) )
 
 #define IS_AWAKE( ch )	  ( ch->position > POS_SLEEPING )
-#define GET_AC( ch )	  ( ( ch )->armor + ( IS_AWAKE( ch ) ? dex_app[get_curr_dex( ch )].defensive : 0 ) )
-#define GET_HITROLL( ch ) ( ( ch )->hitroll + str_app[get_curr_str( ch )].tohit )
-#define GET_DAMROLL( ch ) ( ( ch )->damroll + str_app[get_curr_str( ch )].todam )
 
 #define IS_OUTSIDE( ch ) ( !IS_SET( \
 	( ch )->in_room->room_flags,    \
 	ROOM_INDOORS ) )
 
-#define WAIT_STATE( ch, npulse ) \
-	if ( !IS_CREATOR( ( ch ) ) ) \
-	( ( ch )->wait = UMAX( ( ch )->wait, ( npulse ) ) )
+int get_trust ( CHAR_DATA * ch );
+static inline void WAIT_STATE( CHAR_DATA *ch, int npulse ) {
+	if ( !IS_CREATOR( ch ) )
+		ch->wait = UMAX( ch->wait, npulse );
+}
 
 /*
  * Object Macros.
