@@ -112,7 +112,7 @@ void talk_channel( CHAR_DATA *ch, char *argument, int channel, const char *verb 
 	}
 	if ( argument[0] == '\0' ) {
 		snprintf( buf, sizeof( buf ), "%s what?\n\r", verb );
-		buf[0] = UPPER( buf[0] );
+		buf[0] = toupper( buf[0] );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -778,7 +778,7 @@ void do_say( CHAR_DATA *ch, char *argument ) {
 
 		else
 			snprintf( name, sizeof( name ), "%s", ch->name );
-		name[0] = UPPER( name[0] );
+		name[0] = toupper( name[0] );
 		snprintf( poly, sizeof( poly ), "%s %s '%s'.\n\r", name, speaks, argument );
 		send_to_char( poly, to );
 	}
@@ -1179,7 +1179,7 @@ void do_emote( CHAR_DATA *ch, char *argument ) {
 
 		else
 			snprintf( name, sizeof( name ), "%s", ch->name );
-		name[0] = UPPER( name[0] );
+		name[0] = toupper( name[0] );
 		snprintf( poly, sizeof( poly ), "%s %s\n\r", name, buf );
 		send_to_char( poly, to );
 	}

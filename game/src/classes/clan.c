@@ -2247,7 +2247,7 @@ void do_clandisc( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		cost = ( ch->power[improve] + 1 ) * 10;
-		arg1[0] = UPPER( arg1[0] );
+		arg1[0] = toupper( arg1[0] );
 		if ( ch->power[improve] >= max && ch->pcdata->rank == AGE_METHUSELAH ) {
 			snprintf( buf, sizeof( buf ), "You have already gained all the powers of the %s discipline.\n\r", arg1 );
 			send_to_char( buf, ch );

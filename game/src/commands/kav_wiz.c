@@ -2638,7 +2638,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		strcpy( arg3, capitalize( arg3 ) );
 
-		arg3[0] = LOWER( arg3[0] );
+		arg3[0] = tolower( arg3[0] );
 
 		endchar[0] = ( arg3[strlen( arg3 ) - 1] );
 
@@ -2844,7 +2844,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		ch->pcdata->quest -= value;
 
-		arg3[0] = UPPER( arg3[0] );
+		arg3[0] = toupper( arg3[0] );
 
 		endchar[0] = ( arg3[strlen( arg3 ) - 1] );
 
@@ -2940,7 +2940,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 
 		if ( !str_cmp( arg3, "pull" ) ) SET_BIT( obj->spectype, SITEM_PULL );
 
-		arg3[0] = UPPER( arg3[0] );
+		arg3[0] = toupper( arg3[0] );
 
 		{
 			char flag_msg[32];

@@ -2041,7 +2041,7 @@ void do_disciplines( CHAR_DATA *ch, char *argument ) {
 	for ( loop = 1; loop < MAX_DISCIPLINES; loop++ ) {
 		if ( discipline[loop][0] != '\0' && strlen( discipline[loop] ) != 0 && ch->power[loop] >= 0 ) {
 			snprintf( buf2, sizeof( buf2 ), "%s", discipline[loop] );
-			buf2[0] = UPPER( buf2[0] );
+			buf2[0] = toupper( buf2[0] );
 
 			snprintf( buf, sizeof( buf ), "     %-14s: %-2d",
 				buf2,

@@ -388,7 +388,7 @@ void act( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2,
 			}
 		}
 
-		buf[0] = UPPER( buf[0] );
+		buf[0] = toupper( buf[0] );
 		if ( to->desc && ( to->desc->connected == CON_PLAYING ) )
 			write_to_buffer( to->desc, buf, (int) ( point - buf ) );
 
@@ -618,7 +618,7 @@ void act2( const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2
 			}
 		}
 
-		buf[0] = UPPER( buf[0] );
+		buf[0] = toupper( buf[0] );
 		write_to_buffer( to->desc, buf, (int) ( point - buf ) );
 
 		if ( is_fam ) to = to_old;
@@ -763,7 +763,7 @@ void kavitem( const char *format, CHAR_DATA *ch, const void *arg1, const void *a
 			*point++ = '\n';
 			*point++ = '\r';
 		}
-		buf[0] = UPPER( buf[0] );
+		buf[0] = toupper( buf[0] );
 		write_to_buffer( to->desc, buf, (int) ( point - buf ) );
 	}
 	}

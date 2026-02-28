@@ -173,11 +173,11 @@ bool is_name( char *str, char *namelist ) {
 		return FALSE;
 
 	/* Quick first-character check: scan namelist for any word starting with same char */
-	first = LOWER( str[0] );
+	first = tolower( str[0] );
 	p = namelist;
 	found_potential = FALSE;
 	while ( *p ) {
-		if ( LOWER( *p ) == first ) {
+		if ( tolower( *p ) == first ) {
 			found_potential = TRUE;
 			break;
 		}

@@ -771,7 +771,7 @@ void do_staredown( CHAR_DATA *ch, char *argument ) {
 		stc( "They aren't here.\n\r", ch );
 		return;
 	}
-	arg[0] = UPPER( arg[0] );
+	arg[0] = toupper( arg[0] );
 	if ( ch->fighting == NULL ) {
 		stc( "You must be fighting to use the gift of Staredown.\n\r", ch );
 		return;

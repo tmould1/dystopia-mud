@@ -3316,7 +3316,7 @@ void do_recharge( CHAR_DATA *ch, char *argument ) {
 		//	sprintf(buf,"%s has completed a quest!.",ch->name);
 	}
 	//    else sprintf(buf,"%s has completed a quest!.",ch->pcdata->switchname);
-	//    buf[0] = UPPER(buf[0]);
+	//    buf[0] = toupper(buf[0]);
 	//    do_info(ch,buf);
 	do_autosave( ch, "" );
 	return;
@@ -3422,7 +3422,7 @@ void do_complete( CHAR_DATA *ch, char *argument ) {
 			pObjIndex = get_obj_index( qobj->value[0] );
 			if ( pObjIndex != NULL ) {
 				snprintf( buf, sizeof( buf ), "     %s.\n\r", pObjIndex->short_descr );
-				buf[5] = UPPER( buf[5] );
+				buf[5] = toupper( buf[5] );
 				send_to_char( buf, ch );
 			}
 		}
@@ -3430,7 +3430,7 @@ void do_complete( CHAR_DATA *ch, char *argument ) {
 			pObjIndex = get_obj_index( qobj->value[1] );
 			if ( pObjIndex != NULL ) {
 				snprintf( buf, sizeof( buf ), "     %s.\n\r", pObjIndex->short_descr );
-				buf[5] = UPPER( buf[5] );
+				buf[5] = toupper( buf[5] );
 				send_to_char( buf, ch );
 			}
 		}
@@ -3438,7 +3438,7 @@ void do_complete( CHAR_DATA *ch, char *argument ) {
 			pObjIndex = get_obj_index( qobj->value[2] );
 			if ( pObjIndex != NULL ) {
 				snprintf( buf, sizeof( buf ), "     %s.\n\r", pObjIndex->short_descr );
-				buf[5] = UPPER( buf[5] );
+				buf[5] = toupper( buf[5] );
 				send_to_char( buf, ch );
 			}
 		}
@@ -3446,7 +3446,7 @@ void do_complete( CHAR_DATA *ch, char *argument ) {
 			pObjIndex = get_obj_index( qobj->value[3] );
 			if ( pObjIndex != NULL ) {
 				snprintf( buf, sizeof( buf ), "     %s.\n\r", pObjIndex->short_descr );
-				buf[5] = UPPER( buf[5] );
+				buf[5] = toupper( buf[5] );
 				send_to_char( buf, ch );
 			}
 		}

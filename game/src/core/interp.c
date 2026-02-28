@@ -1950,7 +1950,7 @@ char *one_argument( char *argument, char *arg_first ) {
 			argument++;
 			break;
 		}
-		*arg_first = LOWER( *argument );
+		*arg_first = tolower( *argument );
 		arg_first++;
 		argument++;
 	}

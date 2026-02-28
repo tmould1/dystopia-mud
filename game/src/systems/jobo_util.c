@@ -24,7 +24,7 @@ bool is_contained( const char *astr, const char *bstr ) {
 	if ( alen > blen ) return FALSE;
 	for ( i = 0; i <= ( blen - alen ); i++ ) {
 		count = 0;
-		while ( count < alen && UPPER( astr[count] ) == UPPER( bstr[i + count] ) ) count++;
+		while ( count < alen && toupper( astr[count] ) == toupper( bstr[i + count] ) ) count++;
 		if ( count == alen ) return TRUE;
 	}
 	return FALSE;

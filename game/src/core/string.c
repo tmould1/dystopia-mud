@@ -292,7 +292,7 @@ char *format_string( char *oldstring /*, bool fSpace */ ) {
 			xbuf[i] = *rdesc;
 			if ( cap ) {
 				cap = FALSE;
-				xbuf[i] = UPPER( xbuf[i] );
+				xbuf[i] = toupper( xbuf[i] );
 			}
 			i++;
 		}
@@ -398,7 +398,7 @@ char *first_arg( char *argument, char *arg_first, bool fCase ) {
 			break;
 		}
 		if ( fCase )
-			*arg_first = LOWER( *argument );
+			*arg_first = tolower( *argument );
 		else
 			*arg_first = *argument;
 		arg_first++;
@@ -453,7 +453,7 @@ char *string_proper( char *argument ) {
 
 	while ( *s != '\0' ) {
 		if ( *s != ' ' ) {
-			*s = UPPER( *s );
+			*s = toupper( *s );
 			while ( *s != ' ' && *s != '\0' )
 				s++;
 		} else {
@@ -471,7 +471,7 @@ char *all_capitalize( const char *str ) {
 	static char strcap[MAX_STRING_LENGTH];
 	int i;
 	for ( i = 0; str[i] != '\0'; i++ )
-		strcap[i] = UPPER( str[i] );
+		strcap[i] = toupper( str[i] );
 	strcap[i] = '\0';
 	return strcap;
 }

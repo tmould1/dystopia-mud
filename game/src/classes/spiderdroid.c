@@ -138,7 +138,7 @@ void do_implant( CHAR_DATA *ch, char *argument ) {
 			cost = 800000;
 		else
 			cost = cfg( CFG_ABILITY_SPIDERDROID_IMPLANT_COST_LEVEL0 );
-		arg1[0] = UPPER( arg1[0] );
+		arg1[0] = toupper( arg1[0] );
 		if ( ( ch->pcdata->powers[implant] >= max ) ) {
 			snprintf( buf, sizeof( buf ), "You already have all implants on your %s.\n\r", arg1 );
 			send_to_char( buf, ch );

@@ -972,7 +972,7 @@ void obj_update( void ) {
 			int wdam;
 
 			snprintf( buf, sizeof( buf ), "%s suddenly explodes in a ball of flame, incinerating you!\n\r", obj->short_descr );
-			buf[0] = UPPER( buf[0] );
+			buf[0] = toupper( buf[0] );
 			if ( list_empty( &( locate_obj( obj ) )->characters ) ) break;
 			LIST_FOR_EACH( vch, &( locate_obj( obj ) )->characters, CHAR_DATA, room_node ) {
 				if ( vch->class == 0 || ( !IS_NPC( vch ) && vch->level < 3 ) ) continue;

@@ -1395,7 +1395,7 @@ void do_pload( CHAR_DATA *ch, char *argument ) {
 	snprintf( buf, sizeof( buf ), "%s: Pload %s", ch->name, argument );
 	if ( ch->level < NO_WATCH && ch->trust > 3 ) do_watching( ch, buf );
 
-	argument[0] = UPPER( argument[0] );
+	argument[0] = toupper( argument[0] );
 
 	snprintf( buf, sizeof( buf ), "You transform into %s.\n\r", argument );
 	send_to_char( buf, ch );
@@ -3387,7 +3387,7 @@ void do_artifact( CHAR_DATA *ch, char *argument ) {
 				obj->short_descr, in_obj->in_room == NULL ? "somewhere" : in_obj->in_room->name );
 		}
 
-		buf[0] = UPPER( buf[0] );
+		buf[0] = toupper( buf[0] );
 		send_to_char( buf, ch );
 	}
 
@@ -3426,7 +3426,7 @@ void do_locate( CHAR_DATA *ch, char *argument ) {
 				obj->short_descr, in_obj->in_room == NULL ? "somewhere" : in_obj->in_room->name );
 		}
 
-		buf[0] = UPPER( buf[0] );
+		buf[0] = toupper( buf[0] );
 		send_to_char( buf, ch );
 	}
 

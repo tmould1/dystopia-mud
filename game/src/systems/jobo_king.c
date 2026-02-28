@@ -230,18 +230,18 @@ void imm_kset( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( !str_cmp( arg2, "leader" ) ) {
 		free(kingdom_table[i].leader);
-		arg3[0] = UPPER( arg3[0] );
+		arg3[0] = toupper( arg3[0] );
 		kingdom_table[i].leader = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "name" ) ) {
 		free(kingdom_table[i].name);
-		arg3[0] = UPPER( arg3[0] );
+		arg3[0] = toupper( arg3[0] );
 		kingdom_table[i].name = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "whoname" ) ) {
 		free(kingdom_table[i].whoname);
 		kingdom_table[i].whoname = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "general" ) ) {
 		free(kingdom_table[i].general);
-		arg3[0] = UPPER( arg3[0] );
+		arg3[0] = toupper( arg3[0] );
 		kingdom_table[i].general = str_dup( arg3 );
 	} else if ( !str_cmp( arg2, "kills" ) ) {
 		kingdom_table[i].kills = atoi( arg3 );

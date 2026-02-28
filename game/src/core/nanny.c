@@ -143,10 +143,10 @@ static void nanny_get_name( DESCRIPTOR_DATA *d, char *argument ) {
 		return;
 	}
 
-	argument[0] = UPPER( argument[0] );
+	argument[0] = toupper( argument[0] );
 	/* Normalize name: first letter upper, rest lower for case-insensitive uniqueness */
 	for ( int i = 1; argument[i] != '\0'; i++ )
-		argument[i] = LOWER( argument[i] );
+		argument[i] = tolower( argument[i] );
 	if ( !check_parse_name( argument ) && strcmp( argument, "Vladd" ) != 0 ) {
 		write_to_buffer( d, " Illegal name, try another.\n\r Enter thy name brave traveler: ", 0 );
 		return;
@@ -996,7 +996,7 @@ bool check_parse_name( char *name ) {
 		bool fIll = TRUE;
 
 		for ( pc = name; *pc != '\0'; pc++ ) {
-			if ( LOWER( *pc ) != 'i' && LOWER( *pc ) != 'l' )
+			if ( tolower( *pc ) != 'i' && tolower( *pc ) != 'l' )
 				fIll = FALSE;
 		}
 

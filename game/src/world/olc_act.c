@@ -680,7 +680,7 @@ bool aedit_builder( CHAR_DATA *ch, char *argument ) {
 		return FALSE;
 	}
 
-	name[0] = UPPER( name[0] );
+	name[0] = toupper( name[0] );
 
 	if ( strstr( pArea->builders, name ) != NULL ) {
 		pArea->builders = string_replace( pArea->builders, name, "\0" );
@@ -2351,7 +2351,7 @@ bool oedit_short( CHAR_DATA *ch, char *argument ) {
 
 	free(pObj->short_descr);
 	pObj->short_descr = str_dup( argument );
-	pObj->short_descr[0] = LOWER( pObj->short_descr[0] );
+	pObj->short_descr[0] = tolower( pObj->short_descr[0] );
 
 	send_to_char( "Short description set.\n\r", ch );
 	return TRUE;
@@ -2369,7 +2369,7 @@ bool oedit_long( CHAR_DATA *ch, char *argument ) {
 
 	free(pObj->description);
 	pObj->description = str_dup( argument );
-	pObj->description[0] = UPPER( pObj->description[0] );
+	pObj->description[0] = toupper( pObj->description[0] );
 
 	send_to_char( "Long description set.\n\r", ch );
 	return TRUE;
@@ -2918,7 +2918,7 @@ bool medit_long( CHAR_DATA *ch, char *argument ) {
 	free(pMob->long_descr);
 	strcat( argument, "\n\r" );
 	pMob->long_descr = str_dup( argument );
-	pMob->long_descr[0] = UPPER( pMob->long_descr[0] );
+	pMob->long_descr[0] = toupper( pMob->long_descr[0] );
 
 	send_to_char( "Long description set.\n\r", ch );
 	return TRUE;

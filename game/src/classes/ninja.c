@@ -192,7 +192,7 @@ void do_principles( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		cost = ( ch->pcdata->powers[improve] + 1 ) * 10;
-		arg1[0] = UPPER( arg1[0] );
+		arg1[0] = toupper( arg1[0] );
 		if ( ch->pcdata->powers[improve] >= max ) {
 			snprintf( buf, sizeof( buf ), "You have already gained all the powers of the %s principle.\n\r", arg1 );
 			send_to_char( buf, ch );

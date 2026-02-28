@@ -406,7 +406,7 @@ void do_mantra( CHAR_DATA *ch, char *argument ) {
 		}
 
 		cost = ( ch->pcdata->powers[improve] + 1 ) * cfg( CFG_ABILITY_MONK_MANTRA_COST_MULTIPLIER );
-		arg1[0] = UPPER( arg1[0] );
+		arg1[0] = toupper( arg1[0] );
 		if ( ch->pcdata->powers[improve] >= max ) {
 			snprintf( buf, sizeof( buf ), "You have already gained all the known Mantras.\n\r" );
 			send_to_char( buf, ch );

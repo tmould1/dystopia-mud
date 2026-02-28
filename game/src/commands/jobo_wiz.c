@@ -199,7 +199,7 @@ void do_offline( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "What do you want the player to do?\n\r", ch );
 		return;
 	}
-	arg[0] = UPPER( arg[0] );
+	arg[0] = toupper( arg[0] );
 	dummy = calloc( 1, sizeof( *dummy ) );
 	if ( !dummy ) {
 		bug( "do_pforce: calloc failed", 0 );

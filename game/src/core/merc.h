@@ -2709,11 +2709,9 @@ extern int gsn_multiplearms;
 /*
  * Utility macros.
  */
-#define UMIN( a, b )		   ( ( a ) < ( b ) ? ( a ) : ( b ) )
-#define UMAX( a, b )		   ( ( a ) > ( b ) ? ( a ) : ( b ) )
-#define URANGE( a, b, c )	   ( ( b ) < ( a ) ? ( a ) : ( ( b ) > ( c ) ? ( c ) : ( b ) ) )
-#define LOWER( c )			   ( ( c ) >= 'A' && ( c ) <= 'Z' ? ( c ) + 'a' - 'A' : ( c ) )
-#define UPPER( c )			   ( ( c ) >= 'a' && ( c ) <= 'z' ? ( c ) + 'A' - 'a' : ( c ) )
+static inline int UMIN( int a, int b ) { return a < b ? a : b; }
+static inline int UMAX( int a, int b ) { return a > b ? a : b; }
+static inline int URANGE( int a, int b, int c ) { return b < a ? a : ( b > c ? c : b ); }
 #define IS_SET( flag, bit )	   ( ( flag ) & ( bit ) )
 #define SET_BIT( var, bit )	   ( ( var ) |= ( bit ) )
 #define REMOVE_BIT( var, bit ) ( ( var ) &= ~( bit ) )

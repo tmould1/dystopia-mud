@@ -392,7 +392,7 @@ void do_fear( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	arg[0] = UPPER( arg[0] );
+	arg[0] = toupper( arg[0] );
 
 	if ( ch->fighting == NULL ) {
 		stc( "You must be fighting to use Fear.\n\r", ch );

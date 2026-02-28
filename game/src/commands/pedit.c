@@ -82,7 +82,7 @@ bool pedit_load_offline( CHAR_DATA *ch, const char *name ) {
 
     /* Capitalize name */
     strncpy( cap_name, name, MAX_INPUT_LENGTH - 1 );
-    cap_name[0] = UPPER( cap_name[0] );
+    cap_name[0] = toupper( cap_name[0] );
 
     /* Check if player is online */
     if ( get_char_world( ch, cap_name ) != NULL ) {

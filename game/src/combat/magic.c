@@ -134,7 +134,7 @@ int skill_lookup( const char *name ) {
 	for ( sn = 0; sn < MAX_SKILL; sn++ ) {
 		if ( skill_table[sn].name == NULL )
 			break;
-		if ( LOWER( name[0] ) == LOWER( skill_table[sn].name[0] ) && !str_prefix( name, skill_table[sn].name ) )
+		if ( tolower( name[0] ) == tolower( skill_table[sn].name[0] ) && !str_prefix( name, skill_table[sn].name ) )
 			return sn;
 	}
 
@@ -2304,7 +2304,7 @@ void spell_locate_object( int sn, int level, CHAR_DATA *ch, void *vo ) {
 				obj->short_descr, in_obj->in_room == NULL ? "somewhere" : in_obj->in_room->name );
 		}
 
-		buf[0] = UPPER( buf[0] );
+		buf[0] = toupper( buf[0] );
 		send_to_char( buf, ch );
 
 		if ( count > 50 )
@@ -2752,7 +2752,7 @@ void spell_ventriloquate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	snprintf( buf1, sizeof( buf1 ), "%s says '%s'.\n\r", speaker, target_name );
 	snprintf( buf2, sizeof( buf2 ), "Someone makes %s say '%s'.\n\r", speaker, target_name );
-	buf1[0] = UPPER( buf1[0] );
+	buf1[0] = toupper( buf1[0] );
 
 	LIST_FOR_EACH(vch, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( !is_name( speaker, vch->name ) )
@@ -2983,14 +2983,14 @@ void spell_soulblade( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		snprintf( buf, sizeof( buf ), "%s's soul %s", ch->short_descr, wpnname );
 	else
 		snprintf( buf, sizeof( buf ), "%s's soul %s", ch->pcdata->switchname, wpnname );
-	buf[0] = UPPER( buf[0] );
+	buf[0] = toupper( buf[0] );
 	obj->short_descr = str_dup( buf );
 	free(obj->description);
 	if ( IS_NPC( ch ) )
 		snprintf( buf, sizeof( buf ), "%s's soul %s is lying here.", ch->short_descr, wpnname );
 	else
 		snprintf( buf, sizeof( buf ), "%s's soul %s is lying here.", ch->name, wpnname );
-	buf[0] = UPPER( buf[0] );
+	buf[0] = toupper( buf[0] );
 	obj->description = str_dup( buf );
 
 	if ( IS_NPC( ch ) )

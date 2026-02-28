@@ -426,8 +426,8 @@ static void sql_load_mobiles( sqlite3 *db, AREA_DATA *pArea ) {
 		pMobIndex->long_descr   = str_dup( col_text( stmt, 3 ) );
 		pMobIndex->description  = str_dup( col_text( stmt, 4 ) );
 
-		pMobIndex->long_descr[0]  = UPPER( pMobIndex->long_descr[0] );
-		pMobIndex->description[0] = UPPER( pMobIndex->description[0] );
+		pMobIndex->long_descr[0]  = toupper( pMobIndex->long_descr[0] );
+		pMobIndex->description[0] = toupper( pMobIndex->description[0] );
 
 		pMobIndex->act          = sqlite3_column_int( stmt, 5 ) | ACT_IS_NPC;
 		pMobIndex->affected_by  = sqlite3_column_int( stmt, 6 );
@@ -516,8 +516,8 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 		pObjIndex->short_descr = str_dup( col_text( stmt, 2 ) );
 		pObjIndex->description = str_dup( col_text( stmt, 3 ) );
 
-		pObjIndex->short_descr[0] = LOWER( pObjIndex->short_descr[0] );
-		pObjIndex->description[0] = UPPER( pObjIndex->description[0] );
+		pObjIndex->short_descr[0] = tolower( pObjIndex->short_descr[0] );
+		pObjIndex->description[0] = toupper( pObjIndex->description[0] );
 
 		pObjIndex->item_type   = sqlite3_column_int( stmt, 4 );
 		pObjIndex->extra_flags = sqlite3_column_int( stmt, 5 );

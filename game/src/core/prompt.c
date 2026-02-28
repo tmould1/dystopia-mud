@@ -144,7 +144,7 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 					snprintf( buf2, sizeof( buf2 ), "%s", victim->short_descr );
 				else
 					snprintf( buf2, sizeof( buf2 ), "%s", victim->name );
-				buf2[0] = UPPER( buf2[0] );
+				buf2[0] = toupper( buf2[0] );
 			}
 			i = buf2;
 			break;
@@ -162,7 +162,7 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 					snprintf( buf2, sizeof( buf2 ), "%s", tank->short_descr );
 				else
 					snprintf( buf2, sizeof( buf2 ), "%s", tank->name );
-				buf2[0] = UPPER( buf2[0] );
+				buf2[0] = toupper( buf2[0] );
 			}
 			i = buf2;
 			break;
@@ -306,7 +306,7 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 					snprintf( buf2, sizeof( buf2 ), "%s", victim->short_descr );
 				else
 					snprintf( buf2, sizeof( buf2 ), "%s", victim->name );
-				buf2[0] = UPPER( buf2[0] );
+				buf2[0] = toupper( buf2[0] );
 			}
 			i = buf2;
 			break;
@@ -353,7 +353,7 @@ void show_string( DESCRIPTOR_DATA *d, char *input ) {
 
 	one_argument( input, arg );
 
-	switch ( UPPER( *arg ) ) {
+	switch ( toupper( *arg ) ) {
 		/* Show the next page */
 
 	case '\0':

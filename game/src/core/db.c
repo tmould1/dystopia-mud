@@ -507,7 +507,7 @@ char *strupper( const char *str ) {
 	int i;
 
 	for ( i = 0; str[i] != '\0'; i++ )
-		strup[i] = UPPER( str[i] );
+		strup[i] = toupper( str[i] );
 	strup[i] = '\0';
 	return strup;
 }
@@ -1869,7 +1869,7 @@ int str_cmp( const char *astr, const char *bstr ) {
 	}
 
 	for ( ; *astr || *bstr; astr++, bstr++ ) {
-		if ( LOWER( *astr ) != LOWER( *bstr ) )
+		if ( tolower( *astr ) != tolower( *bstr ) )
 			return 1;
 	}
 
@@ -1892,7 +1892,7 @@ int str_prefix( const char *astr, const char *bstr ) {
 	}
 
 	for ( ; *astr; astr++, bstr++ ) {
-		if ( LOWER( *astr ) != LOWER( *bstr ) )
+		if ( tolower( *astr ) != tolower( *bstr ) )
 			return 1;
 	}
 
@@ -1909,14 +1909,14 @@ int str_infix( const char *astr, const char *bstr ) {
 	int ichar;
 	char c0;
 
-	if ( ( c0 = LOWER( astr[0] ) ) == '\0' )
+	if ( ( c0 = tolower( astr[0] ) ) == '\0' )
 		return 0;
 
 	sstr1 = (int) strlen( astr );
 	sstr2 = (int) strlen( bstr );
 
 	for ( ichar = 0; ichar <= sstr2 - sstr1; ichar++ ) {
-		if ( c0 == LOWER( bstr[ichar] ) && !str_prefix( astr, bstr + ichar ) )
+		if ( c0 == tolower( bstr[ichar] ) && !str_prefix( astr, bstr + ichar ) )
 			return 0;
 	}
 
@@ -1956,7 +1956,7 @@ char *capitalize( const char *str ) {
 			continue;
 		}
 		if ( !found_alpha && isalpha( (unsigned char) str[i] ) ) {
-			strcap[i] = UPPER( str[i] );
+			strcap[i] = toupper( str[i] );
 			found_alpha = TRUE;
 		}
 	}

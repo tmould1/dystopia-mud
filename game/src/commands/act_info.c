@@ -740,7 +740,7 @@ static void output_char_display( CHAR_DATA *ch, CHAR_DATA *victim,
 	/* Build final description with suffix */
 	snprintf( final_desc, sizeof( final_desc ), "%s%s", desc_buf, suffix_buf );
 	if ( final_desc[0] != '\0' )
-		final_desc[0] = UPPER( final_desc[0] );
+		final_desc[0] = toupper( final_desc[0] );
 
 	/* Output description wrapped with attack/look/consider */
 	send_to_char( mxp_char_link( victim, ch, final_desc ), ch );
@@ -1140,7 +1140,7 @@ void show_char_to_char_1( CHAR_DATA *victim, CHAR_DATA *ch ) {
 	else
 		strcat( buf, " is DYING.\n\r" );
 
-	buf[0] = UPPER( buf[0] );
+	buf[0] = toupper( buf[0] );
 	send_to_char( buf, ch );
 
 	if ( !IS_NPC( victim ) ) {
@@ -3607,7 +3607,7 @@ void do_report( CHAR_DATA *ch, char *argument ) {
 				mana_str, mmana_str,
 				move_str, mmove_str,
 				exp_str );
-		buf[0] = UPPER( buf[0] );
+		buf[0] = toupper( buf[0] );
 		send_to_char( buf, vch );
 	}
 	return;
