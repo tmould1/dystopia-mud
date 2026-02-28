@@ -146,9 +146,14 @@ Each class has its own source file with powers and abilities:
 ## Code Conventions
 
 - All source files include `merc.h` first
-- Use `snprintf` instead of `sprintf` for buffer safety
+- Use `snprintf` instead of `sprintf` for buffer safety (zero `sprintf` calls remain in codebase)
+- Use `str_dup()` instead of `strdup()` for cross-platform compatibility (handles `_strdup` on Windows)
+- Use `free()` directly for freeing strings and memory (legacy `free_string`/`STRFREE`/`DISPOSE` wrappers removed)
+- Use full type names (`CHAR_DATA`, `OBJ_DATA`, etc.) not shorthand (`CD`, `OD`, etc.) — shorthand typedefs removed
 - String comparisons: use `!strcmp()` or `str_cmp()`, not `==`
 - Check first character of strings: `arg[0] == '\0'`, not `arg == '\0'`
+- Use `calloc`/`free` directly for allocation (legacy free-list recycling and `CREATE`/`RECREATE` macros largely removed)
+- Global lists use intrusive doubly-linked lists via `list.h` (`list_push_back`, `LIST_FOR_EACH`, etc.)
 - Windows builds define `WIN32` and use `compat.h` abstractions
 
 ## Key Data Structures (in merc.h)
