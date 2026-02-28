@@ -2739,21 +2739,6 @@ extern int gsn_multiplearms;
 		}                                                                                      \
 	} while ( 0 )
 
-#define DISPOSE( point )                                                               \
-	do {                                                                               \
-		if ( !( point ) ) {                                                            \
-			bug( "Freeing null pointer", 0 );                                          \
-			fprintf( stderr, "DISPOSEing NULL in %s, line %d\n", __FILE__, __LINE__ ); \
-		} else                                                                         \
-			free( point );                                                             \
-		point = NULL;                                                                  \
-	} while ( 0 )
-
-#define STRALLOC( point )	 str_dup( ( point ) )
-#define QUICKLINK( point )	 str_dup( ( point ) )
-#define QUICKMATCH( p1, p2 ) ( strcmp( ( p1 ), ( p2 ) ) == 0 )
-#define STRFREE( point )	 free( ( point ) )
-
 /* double-linked list handling macros -Thoric */
 
 #define ASSIGN_GSN( gsn, skill )                                  \
@@ -4032,13 +4017,6 @@ void mud_init_paths( const char *exe_path );
  * Our function prototypes.
  * One big lump ... this is every function in Merc.
  */
-#define CD	CHAR_DATA
-#define MID MOB_INDEX_DATA
-#define OD	OBJ_DATA
-#define OID OBJ_INDEX_DATA
-#define RID ROOM_INDEX_DATA
-#define SF	SPEC_FUN
-#define ED	EXIT_DATA
 
 /* act_comm.c */
 void add_follower ( CHAR_DATA * ch, CHAR_DATA *master );
@@ -4079,10 +4057,10 @@ void check_hunt ( CHAR_DATA * ch );
 
 int disc_points_needed ( CHAR_DATA * ch );
 void gain_disc_points ( CHAR_DATA * ch, int points );
-RID *get_random_room ( CHAR_DATA * ch );
-RID *get_rand_room ();
-RID *get_treemeld_room ();
-RID *get_rand_room_by_sect ( int sect );
+ROOM_INDEX_DATA *get_random_room ( CHAR_DATA * ch );
+ROOM_INDEX_DATA *get_rand_room ();
+ROOM_INDEX_DATA *get_treemeld_room ();
+ROOM_INDEX_DATA *get_rand_room_by_sect ( int sect );
 
 /* act_obj.c */
 bool is_ok_to_wear ( CHAR_DATA * ch, bool wolf_ok, char *argument );
@@ -4186,15 +4164,15 @@ void area_update (void);
 int calculate_mob_difficulty ( MOB_INDEX_DATA * pMob );
 void calculate_area_difficulty ( AREA_DATA * pArea );
 void calculate_all_area_difficulties (void);
-CD *create_mobile ( MOB_INDEX_DATA * pMobIndex );
-OD *create_object ( OBJ_INDEX_DATA * pObjIndex, int level );
+CHAR_DATA *create_mobile ( MOB_INDEX_DATA * pMobIndex );
+OBJ_DATA *create_object ( OBJ_INDEX_DATA * pObjIndex, int level );
 void clear_char ( CHAR_DATA * ch );
 void free_char ( CHAR_DATA * ch );
 char *get_extra_descr ( char *name, EXTRA_DESCR_DATA *ed );
 char *get_roomtext ( const char *name, ROOMTEXT_DATA *rt );
-MID *get_mob_index ( int vnum );
-OID *get_obj_index ( int vnum );
-RID *get_room_index ( int vnum );
+MOB_INDEX_DATA *get_mob_index ( int vnum );
+OBJ_INDEX_DATA *get_obj_index ( int vnum );
+ROOM_INDEX_DATA *get_room_index ( int vnum );
 void mem_debug_check_freelists ( void );
 char *str_dup ( const char *str );
 int number_fuzzy ( int number );
@@ -4224,10 +4202,10 @@ void add_help ( HELP_DATA * pHelp );
 HELP_DATA *get_help ( CHAR_DATA *ch, char *argument );
 char *strupper ( const char *str );
 /*
-RID *	make_room	( int vnum );
-OID *	make_object	( int vnum, int cvnum, char *name );
-MID *	make_mobile	( int vnum, int cvnum, char *name );
-ED  *	make_exit	( ROOM_INDEX_DATA *pRoomIndex, ROOM_INDEX_DATA *to_room, int door );
+ROOM_INDEX_DATA *make_room   ( int vnum );
+OBJ_INDEX_DATA  *make_object ( int vnum, int cvnum, char *name );
+MOB_INDEX_DATA  *make_mobile ( int vnum, int cvnum, char *name );
+EXIT_DATA       *make_exit   ( ROOM_INDEX_DATA *pRoomIndex, ROOM_INDEX_DATA *to_room, int door );
 */
 
 /*
@@ -4282,7 +4260,7 @@ void make_wall ( ROOM_INDEX_DATA * room, int dir, int wall );
 
 /* fight.c */
 
-int cap_dam ( CD * ch, CD *victim, int dam );
+int cap_dam ( CHAR_DATA * ch, CHAR_DATA *victim, int dam );
 int randomize_damage ( CHAR_DATA * ch, int dam, int am );
 
 void violence_update (void);
@@ -4327,7 +4305,7 @@ void char_to_room ( CHAR_DATA * ch, ROOM_INDEX_DATA *pRoomIndex );
 void obj_to_char ( OBJ_DATA * obj, CHAR_DATA *ch );
 void obj_from_char ( OBJ_DATA * obj );
 int apply_ac ( OBJ_DATA * obj, int iWear );
-OD *get_eq_char ( CHAR_DATA * ch, int iWear );
+OBJ_DATA *get_eq_char ( CHAR_DATA * ch, int iWear );
 void equip_char ( CHAR_DATA * ch, OBJ_DATA *obj, int iWear );
 void unequip_char ( CHAR_DATA * ch, OBJ_DATA *obj );
 int count_obj_list ( OBJ_INDEX_DATA * obj, list_head_t *list );
@@ -4339,22 +4317,22 @@ void obj_to_obj ( OBJ_DATA * obj, OBJ_DATA *obj_to );
 void obj_from_obj ( OBJ_DATA * obj );
 void extract_obj ( OBJ_DATA * obj );
 void extract_char ( CHAR_DATA * ch, bool fPull );
-CD *get_char_room ( CHAR_DATA * ch, char *argument );
-CD *get_char_world ( CHAR_DATA * ch, char *argument );
-CD *get_char_world2 ( CHAR_DATA * ch, char *argument );
-OD *get_obj_type ( OBJ_INDEX_DATA * pObjIndexData );
-OD *get_obj_list ( CHAR_DATA * ch, char *argument,
+CHAR_DATA *get_char_room ( CHAR_DATA * ch, char *argument );
+CHAR_DATA *get_char_world ( CHAR_DATA * ch, char *argument );
+CHAR_DATA *get_char_world2 ( CHAR_DATA * ch, char *argument );
+OBJ_DATA *get_obj_type ( OBJ_INDEX_DATA * pObjIndexData );
+OBJ_DATA *get_obj_list ( CHAR_DATA * ch, char *argument,
 	list_head_t *list );
-OD *get_obj_content ( CHAR_DATA * ch, char *argument,
+OBJ_DATA *get_obj_content ( CHAR_DATA * ch, char *argument,
 	list_head_t *list );
-OD *get_obj_in_obj ( CHAR_DATA * ch, char *argument );
-OD *get_obj_carry ( CHAR_DATA * ch, char *argument );
-OD *get_obj_wear ( CHAR_DATA * ch, char *argument );
-OD *get_obj_here ( CHAR_DATA * ch, char *argument );
-OD *get_obj_room ( CHAR_DATA * ch, char *argument );
-OD *get_obj_world ( CHAR_DATA * ch, char *argument );
-OD *get_obj_world2 ( CHAR_DATA * ch, char *argument );
-OD *create_money ( int amount );
+OBJ_DATA *get_obj_in_obj ( CHAR_DATA * ch, char *argument );
+OBJ_DATA *get_obj_carry ( CHAR_DATA * ch, char *argument );
+OBJ_DATA *get_obj_wear ( CHAR_DATA * ch, char *argument );
+OBJ_DATA *get_obj_here ( CHAR_DATA * ch, char *argument );
+OBJ_DATA *get_obj_room ( CHAR_DATA * ch, char *argument );
+OBJ_DATA *get_obj_world ( CHAR_DATA * ch, char *argument );
+OBJ_DATA *get_obj_world2 ( CHAR_DATA * ch, char *argument );
+OBJ_DATA *create_money ( int amount );
 int get_obj_number ( OBJ_DATA * obj );
 int get_obj_weight ( OBJ_DATA * obj );
 bool room_is_dark ( ROOM_INDEX_DATA * pRoomIndex );
@@ -4404,7 +4382,7 @@ bool load_char_obj ( DESCRIPTOR_DATA * d, char *name );
 bool load_char_short ( DESCRIPTOR_DATA * d, char *name );
 
 /* special.c */
-SF *spec_lookup ( const char *name );
+SPEC_FUN *spec_lookup ( const char *name );
 
 /* mccp.c */
 bool compressStart( DESCRIPTOR_DATA *desc, int version );
@@ -4476,20 +4454,13 @@ void oset_affect ( CHAR_DATA * ch, OBJ_DATA *obj, int value, int affect, bool is
 void reg_mend ( CHAR_DATA * ch );
 void vamp_rage ( CHAR_DATA * ch );
 bool char_exists ( bool backup, char *argument );
-OD *get_page ( OBJ_DATA * book, int page_num );
+OBJ_DATA *get_page ( OBJ_DATA * book, int page_num );
 
 /* vic.c */
 DECLARE_DO_FUN( do_relevel2 );
 void reset_weapon ( CHAR_DATA * ch, int dtype );
 void reset_spell ( CHAR_DATA * ch, int dtype );
 
-#undef CD
-#undef MID
-#undef OD
-#undef OID
-#undef RID
-#undef SF
-#undef ED
 
 /*****************************************************************************
  *                                    OLC                                    *

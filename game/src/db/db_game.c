@@ -410,9 +410,9 @@ static int load_helps_from_db( sqlite3 *db ) {
 		pHelp->area    = NULL;
 
 		if ( pHelp->keyword[0] == '\0' ) {
-			STRFREE( pHelp->text );
-			STRFREE( pHelp->keyword );
-			DISPOSE( pHelp );
+			free( pHelp->text );
+			free( pHelp->keyword );
+			free( pHelp );
 			continue;
 		}
 

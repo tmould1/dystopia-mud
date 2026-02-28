@@ -657,12 +657,12 @@ char *copy_buffer( CHAR_DATA *ch ) {
 
 	if ( !ch ) {
 		bug( "copy_buffer: null ch", 0 );
-		return STRALLOC( "" );
+		return str_dup( "" );
 	}
 
 	if ( !ch->editor ) {
 		bug( "copy_buffer: null editor", 0 );
-		return STRALLOC( "" );
+		return str_dup( "" );
 	}
 
 	buf[0] = '\0';
@@ -676,11 +676,11 @@ char *copy_buffer( CHAR_DATA *ch ) {
 			strcat( tmp, "\n\r" );
 		strcat( buf, tmp );
 	}
-	return STRALLOC( buf );
+	return str_dup( buf );
 }
 
 void stop_editing( CHAR_DATA *ch ) {
-	DISPOSE( ch->editor );
+	free( ch->editor );
 	ch->editor = NULL;
 	send_to_char( "Done.\n\r", ch );
 	ch->dest_buf = NULL;
@@ -791,9 +791,9 @@ void do_hset( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( !str_cmp( arg1, "remove" ) ) {
 		list_remove( &g_helps, &pHelp->node );
-		STRFREE( pHelp->text );
-		STRFREE( pHelp->keyword );
-		DISPOSE( pHelp );
+		free( pHelp->text );
+		free( pHelp->keyword );
+		free( pHelp );
 		send_to_char( "Removed.\n\r", ch );
 		return;
 	}
@@ -803,8 +803,8 @@ void do_hset( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg1, "keyword" ) ) {
-		STRFREE( pHelp->keyword );
-		pHelp->keyword = STRALLOC( strupper( arg2 ) );
+		free( pHelp->keyword );
+		pHelp->keyword = str_dup( strupper( arg2 ) );
 		send_to_char( "Done.\n\r", ch );
 		return;
 	}
