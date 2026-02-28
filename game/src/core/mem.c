@@ -156,6 +156,7 @@ ROOM_INDEX_DATA *new_room_index( void ) {
 	list_init( &pRoom->objects );
 	list_init( &pRoom->extra_descr );
 	list_init( &pRoom->roomtext );
+	list_init( &pRoom->resets );
 	pRoom->name = str_dup( "" );
 	pRoom->description = str_dup( "" );
 
@@ -184,8 +185,8 @@ void free_room_index( ROOM_INDEX_DATA *pRoom ) {
 		free_extra_descr( pExtra );
 	}
 
-	for ( pReset = pRoom->reset_first; pReset; pReset = pReset_next ) {
-		pReset_next = pReset->next;
+	LIST_FOR_EACH_SAFE( pReset, pReset_next, &pRoom->resets, RESET_DATA, node ) {
+		list_remove( &pRoom->resets, &pReset->node );
 		free_reset_data( pReset );
 	}
 

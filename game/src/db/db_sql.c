@@ -665,6 +665,7 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		list_init( &pRoomIndex->characters );
 		list_init( &pRoomIndex->objects );
 		list_init( &pRoomIndex->extra_descr );
+		list_init( &pRoomIndex->resets );
 		pRoomIndex->area        = pArea;
 		pRoomIndex->vnum        = vnum;
 		pRoomIndex->name        = str_dup( col_text( stmt, 1 ) );
@@ -904,13 +905,6 @@ static void sql_load_shops( sqlite3 *db ) {
 		if ( pMobIndex )
 			pMobIndex->pShop = pShop;
 
-		if ( shop_first == NULL )
-			shop_first = pShop;
-		if ( shop_last != NULL )
-			shop_last->next = pShop;
-
-		shop_last = pShop;
-		pShop->next = NULL;
 		top_shop++;
 	}
 
@@ -1299,7 +1293,7 @@ static void sql_save_resets( sqlite3 *db, AREA_DATA *pArea ) {
 		if ( !pRoomIndex || pRoomIndex->area != pArea )
 			continue;
 
-		for ( pReset = pRoomIndex->reset_first; pReset; pReset = pReset->next ) {
+		LIST_FOR_EACH( pReset, &pRoomIndex->resets, RESET_DATA, node ) {
 			cmd[0] = pReset->command;
 			cmd[1] = '\0';
 

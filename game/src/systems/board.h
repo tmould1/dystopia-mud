@@ -38,7 +38,7 @@ struct board_data {
 
 	/* Non-constant data */
 
-	NOTE_DATA *note_first; /* pointer to board's first note */
+	list_head_t notes;     /* board's note list */
 	bool changed;		   /* currently unused */
 };
 

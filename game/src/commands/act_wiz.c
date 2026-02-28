@@ -4820,7 +4820,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 
 		send_to_char( "#GForbidden Names:#n\n\r", ch );
 
-		for ( fn = forbidden_name_list; fn; fn = fn->next ) {
+		LIST_FOR_EACH( fn, &forbidden_name_list, FORBIDDEN_NAME, node ) {
 			const char *type_str;
 
 			switch ( fn->type ) {
@@ -4842,7 +4842,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "\n\r#GProfanity Filters:#n\n\r", ch );
 		count = 0;
 
-		for ( pf = profanity_filter_list; pf; pf = pf->next ) {
+		LIST_FOR_EACH( pf, &profanity_filter_list, PROFANITY_FILTER, node ) {
 			snprintf( buf, sizeof( buf ), "  %-15s  (by %s)\n\r",
 				pf->pattern, pf->added_by );
 			send_to_char( buf, ch );
@@ -4886,7 +4886,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 			PROFANITY_FILTER *pf;
 
 			/* Check for duplicate */
-			for ( pf = profanity_filter_list; pf; pf = pf->next ) {
+			LIST_FOR_EACH( pf, &profanity_filter_list, PROFANITY_FILTER, node ) {
 				if ( !str_cmp( arg2, pf->pattern ) ) {
 					send_to_char( "That profanity pattern already exists.\n\r", ch );
 					return;
@@ -4897,8 +4897,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 			if ( !pf ) { bug( "do_cfilter add profanity: calloc failed", 0 ); return; }
 			pf->pattern  = str_dup( arg2 );
 			pf->added_by = str_dup( ch->name );
-			pf->next     = profanity_filter_list;
-			profanity_filter_list = pf;
+			list_push_front( &profanity_filter_list, &pf->node );
 
 			db_game_save_profanity_filters();
 
@@ -4922,7 +4921,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 			}
 
 			/* Check for duplicate */
-			for ( fn = forbidden_name_list; fn; fn = fn->next ) {
+			LIST_FOR_EACH( fn, &forbidden_name_list, FORBIDDEN_NAME, node ) {
 				if ( !str_cmp( arg2, fn->name ) && fn->type == type ) {
 					send_to_char( "That forbidden name entry already exists.\n\r", ch );
 					return;
@@ -4934,8 +4933,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 			fn->name     = str_dup( arg2 );
 			fn->type     = type;
 			fn->added_by = str_dup( ch->name );
-			fn->next     = forbidden_name_list;
-			forbidden_name_list = fn;
+			list_push_front( &forbidden_name_list, &fn->node );
 
 			db_game_save_forbidden_names();
 
@@ -4953,14 +4951,11 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 		}
 
 		if ( !str_cmp( arg3, "profanity" ) ) {
-			PROFANITY_FILTER *pf, *prev = NULL;
+			PROFANITY_FILTER *pf;
 
-			for ( pf = profanity_filter_list; pf; prev = pf, pf = pf->next ) {
+			LIST_FOR_EACH( pf, &profanity_filter_list, PROFANITY_FILTER, node ) {
 				if ( !str_cmp( arg2, pf->pattern ) ) {
-					if ( prev == NULL )
-						profanity_filter_list = pf->next;
-					else
-						prev->next = pf->next;
+					list_remove( &profanity_filter_list, &pf->node );
 
 					free(pf->pattern);
 					free(pf->added_by);
@@ -4978,7 +4973,7 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "That profanity pattern was not found.\n\r", ch );
 		}
 		else {
-			FORBIDDEN_NAME *fn, *prev = NULL;
+			FORBIDDEN_NAME *fn;
 			int type;
 
 			if ( !str_cmp( arg3, "reserved" ) )
@@ -4992,12 +4987,9 @@ void do_nameban( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 
-			for ( fn = forbidden_name_list; fn; prev = fn, fn = fn->next ) {
+			LIST_FOR_EACH( fn, &forbidden_name_list, FORBIDDEN_NAME, node ) {
 				if ( !str_cmp( arg2, fn->name ) && fn->type == type ) {
-					if ( prev == NULL )
-						forbidden_name_list = fn->next;
-					else
-						prev->next = fn->next;
+					list_remove( &forbidden_name_list, &fn->node );
 
 					free(fn->name);
 					free(fn->added_by);

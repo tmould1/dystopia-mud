@@ -53,8 +53,8 @@ static void db_game_migrate_schema( void );
 static void db_game_seed_name_rules( void );
 
 /* In-memory name validation lists */
-FORBIDDEN_NAME  *forbidden_name_list  = NULL;
-PROFANITY_FILTER *profanity_filter_list = NULL;
+list_head_t forbidden_name_list;
+list_head_t profanity_filter_list;
 
 /* Schema for help.db */
 static const char *HELP_SCHEMA_SQL =
@@ -200,6 +200,9 @@ static const char *GAME_SCHEMA_SQL =
 void db_game_init( void ) {
 	char path[MUD_PATH_MAX];
 	char *errmsg = NULL;
+
+	list_init( &forbidden_name_list );
+	list_init( &profanity_filter_list );
 
 	/* Create game/ subdirectory */
 	if ( snprintf( mud_db_game_dir, sizeof( mud_db_game_dir ), "%s%sgame",
@@ -872,7 +875,6 @@ void db_game_save_kingdoms( void ) {
  */
 void db_game_load_notes( int board_idx ) {
 	sqlite3_stmt *del_stmt, *stmt;
-	NOTE_DATA *last = NULL;
 
 	if ( !game_db )
 		return;
@@ -895,7 +897,6 @@ void db_game_load_notes( int board_idx ) {
 		return;
 
 	sqlite3_bind_int( stmt, 1, board_idx );
-	boards[board_idx].note_first = NULL;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 		NOTE_DATA *pnote = calloc( 1, sizeof( NOTE_DATA ) );
@@ -910,13 +911,8 @@ void db_game_load_notes( int board_idx ) {
 		pnote->to_list    = str_dup( col_text( stmt, 4 ) );
 		pnote->subject    = str_dup( col_text( stmt, 5 ) );
 		pnote->text       = str_dup( col_text( stmt, 6 ) );
-		pnote->next       = NULL;
 
-		if ( !boards[board_idx].note_first )
-			boards[board_idx].note_first = pnote;
-		else
-			last->next = pnote;
-		last = pnote;
+		list_push_back( &boards[board_idx].notes, &pnote->node );
 	}
 
 	sqlite3_finalize( stmt );
@@ -952,7 +948,7 @@ void db_game_save_board_notes( int board_idx ) {
 		return;
 	}
 
-	for ( note = boards[board_idx].note_first; note; note = note->next ) {
+	LIST_FOR_EACH( note, &boards[board_idx].notes, NOTE_DATA, node ) {
 		sqlite3_reset( ins_stmt );
 		sqlite3_bind_int( ins_stmt, 1, board_idx );
 		sqlite3_bind_text( ins_stmt, 2, note->sender, -1, SQLITE_TRANSIENT );
@@ -2047,7 +2043,7 @@ static void db_game_seed_name_rules( void ) {
 void db_game_load_forbidden_names( void ) {
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT name, type, added_by FROM forbidden_names ORDER BY id";
-	FORBIDDEN_NAME *tail = NULL;
+	FORBIDDEN_NAME *p, *tmp;
 	char buf[256];
 	int count = 0;
 
@@ -2055,30 +2051,24 @@ void db_game_load_forbidden_names( void ) {
 		return;
 
 	/* Free existing list */
-	while ( forbidden_name_list ) {
-		FORBIDDEN_NAME *next = forbidden_name_list->next;
-		free(forbidden_name_list->name);
-		free(forbidden_name_list->added_by);
-		free( forbidden_name_list );
-		forbidden_name_list = next;
+	LIST_FOR_EACH_SAFE( p, tmp, &forbidden_name_list, FORBIDDEN_NAME, node ) {
+		list_remove( &forbidden_name_list, &p->node );
+		free( p->name );
+		free( p->added_by );
+		free( p );
 	}
 
 	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		FORBIDDEN_NAME *p = calloc( 1, sizeof( FORBIDDEN_NAME ) );
+		p = calloc( 1, sizeof( FORBIDDEN_NAME ) );
 		if ( !p ) { bug( "db_game_load_forbidden_names: calloc failed", 0 ); exit( 1 ); }
 		p->name     = str_dup( col_text( stmt, 0 ) );
 		p->type     = sqlite3_column_int( stmt, 1 );
 		p->added_by = str_dup( col_text( stmt, 2 ) );
-		p->next     = NULL;
 
-		if ( !forbidden_name_list )
-			forbidden_name_list = p;
-		else
-			tail->next = p;
-		tail = p;
+		list_push_back( &forbidden_name_list, &p->node );
 		count++;
 	}
 
@@ -2111,7 +2101,7 @@ void db_game_save_forbidden_names( void ) {
 		return;
 	}
 
-	for ( p = forbidden_name_list; p; p = p->next ) {
+	LIST_FOR_EACH( p, &forbidden_name_list, FORBIDDEN_NAME, node ) {
 		sqlite3_reset( stmt );
 		sqlite3_bind_text( stmt, 1, p->name, -1, SQLITE_TRANSIENT );
 		sqlite3_bind_int( stmt, 2, p->type );
@@ -2131,7 +2121,7 @@ void db_game_save_forbidden_names( void ) {
 void db_game_load_profanity_filters( void ) {
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT pattern, added_by FROM profanity_filters ORDER BY id";
-	PROFANITY_FILTER *tail = NULL;
+	PROFANITY_FILTER *p, *tmp;
 	char buf[256];
 	int count = 0;
 
@@ -2139,29 +2129,23 @@ void db_game_load_profanity_filters( void ) {
 		return;
 
 	/* Free existing list */
-	while ( profanity_filter_list ) {
-		PROFANITY_FILTER *next = profanity_filter_list->next;
-		free(profanity_filter_list->pattern);
-		free(profanity_filter_list->added_by);
-		free( profanity_filter_list );
-		profanity_filter_list = next;
+	LIST_FOR_EACH_SAFE( p, tmp, &profanity_filter_list, PROFANITY_FILTER, node ) {
+		list_remove( &profanity_filter_list, &p->node );
+		free( p->pattern );
+		free( p->added_by );
+		free( p );
 	}
 
 	if ( sqlite3_prepare_v2( game_db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		PROFANITY_FILTER *p = calloc( 1, sizeof( PROFANITY_FILTER ) );
+		p = calloc( 1, sizeof( PROFANITY_FILTER ) );
 		if ( !p ) { bug( "db_game_load_profanity_filters: calloc failed", 0 ); exit( 1 ); }
 		p->pattern  = str_dup( col_text( stmt, 0 ) );
 		p->added_by = str_dup( col_text( stmt, 1 ) );
-		p->next     = NULL;
 
-		if ( !profanity_filter_list )
-			profanity_filter_list = p;
-		else
-			tail->next = p;
-		tail = p;
+		list_push_back( &profanity_filter_list, &p->node );
 		count++;
 	}
 
@@ -2194,7 +2178,7 @@ void db_game_save_profanity_filters( void ) {
 		return;
 	}
 
-	for ( p = profanity_filter_list; p; p = p->next ) {
+	LIST_FOR_EACH( p, &profanity_filter_list, PROFANITY_FILTER, node ) {
 		sqlite3_reset( stmt );
 		sqlite3_bind_text( stmt, 1, p->pattern, -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, 2, p->added_by, -1, SQLITE_TRANSIENT );

@@ -145,8 +145,6 @@ void mud_init_paths( const char *exe_path ) {
 /*
  * Globals.
  */
-SHOP_DATA *shop_first;
-SHOP_DATA *shop_last;
 list_head_t g_dns_lookups;
 
 char bug_buf[MAX_STRING_LENGTH];
@@ -545,24 +543,12 @@ void add_help( HELP_DATA *pHelp ) {
  * Similar to add_reset in olc.c
  */
 void new_reset( ROOM_INDEX_DATA *pR, RESET_DATA *pReset ) {
-	RESET_DATA *pr;
-
 	if ( !pR )
 		return;
 
-	pr = pR->reset_last;
-
-	if ( !pr ) {
-		pR->reset_first = pReset;
-		pR->reset_last = pReset;
-	} else {
-		pR->reset_last->next = pReset;
-		pR->reset_last = pReset;
-		pR->reset_last->next = NULL;
-	}
+	list_push_back( &pR->resets, &pReset->node );
 
 	top_reset++;
-	return;
 }
 
 
@@ -715,7 +701,7 @@ void reset_room( ROOM_INDEX_DATA *pRoom ) {
 		}
 	}
 
-	for ( pReset = pRoom->reset_first; pReset != NULL; pReset = pReset->next ) {
+	LIST_FOR_EACH( pReset, &pRoom->resets, RESET_DATA, node ) {
 		MOB_INDEX_DATA *pMobIndex;
 		OBJ_INDEX_DATA *pObjIndex;
 		OBJ_INDEX_DATA *pObjToIndex;

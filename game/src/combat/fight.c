@@ -2551,7 +2551,7 @@ void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx ) {
 				RESET_DATA *pReset;
 				if ( room == NULL || room == ch->in_room )
 					continue;
-				for ( pReset = room->reset_first; pReset; pReset = pReset->next ) {
+				LIST_FOR_EACH( pReset, &room->resets, RESET_DATA, node ) {
 					if ( pReset->command == 'M' ) {
 						spawn_candidates[spawn_count++] = room;
 						break;
@@ -2562,7 +2562,7 @@ void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx ) {
 				RESET_DATA *pReset;
 				dest = spawn_candidates[number_range( 0, spawn_count - 1 )];
 				/* Force-spawn the mob from this room's reset */
-				for ( pReset = dest->reset_first; pReset; pReset = pReset->next ) {
+				LIST_FOR_EACH( pReset, &dest->resets, RESET_DATA, node ) {
 					if ( pReset->command == 'M' ) {
 						MOB_INDEX_DATA *pMobIdx = get_mob_index( pReset->arg1 );
 						if ( pMobIdx ) {

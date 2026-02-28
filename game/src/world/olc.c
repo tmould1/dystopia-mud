@@ -844,7 +844,7 @@ void display_resets( CHAR_DATA *ch ) {
 		"\n\r",
 		ch );
 
-	for ( pReset = pRoom->reset_first; pReset; pReset = pReset->next ) {
+	LIST_FOR_EACH( pReset, &pRoom->resets, RESET_DATA, node ) {
 		OBJ_INDEX_DATA *pObj;
 		MOB_INDEX_DATA *pMobIndex;
 		OBJ_INDEX_DATA *pObjIndex;
@@ -1029,10 +1029,8 @@ void add_reset( ROOM_INDEX_DATA *room, RESET_DATA *pReset, int index ) {
 	RESET_DATA *reset;
 	int iReset = 0;
 
-	if ( !room->reset_first ) {
-		room->reset_first = pReset;
-		room->reset_last = pReset;
-		pReset->next = NULL;
+	if ( list_empty( &room->resets ) ) {
+		list_push_back( &room->resets, &pReset->node );
 		return;
 	}
 
@@ -1040,24 +1038,24 @@ void add_reset( ROOM_INDEX_DATA *room, RESET_DATA *pReset, int index ) {
 
 	if ( index == 0 ) /* First slot (1) selected. */
 	{
-		pReset->next = room->reset_first;
-		room->reset_first = pReset;
+		list_push_front( &room->resets, &pReset->node );
 		return;
 	}
 
 	/*
 	 * If negative slot( <= 0 selected) then this will find the last.
 	 */
-	for ( reset = room->reset_first; reset->next; reset = reset->next ) {
+	LIST_FOR_EACH( reset, &room->resets, RESET_DATA, node ) {
 		if ( ++iReset == index )
 			break;
 	}
 
-	pReset->next = reset->next;
-	reset->next = pReset;
-	if ( !pReset->next )
-		room->reset_last = pReset;
-	return;
+	if ( reset ) {
+		/* Insert after 'reset' */
+		list_insert_before( &room->resets, &pReset->node, reset->node.next );
+	} else {
+		list_push_back( &room->resets, &pReset->node );
+	}
 }
 
 void do_resets( CHAR_DATA *ch, char *argument ) {
@@ -1084,7 +1082,7 @@ void do_resets( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( arg1[0] == '\0' ) {
-		if ( ch->in_room->reset_first ) {
+		if ( !list_empty( &ch->in_room->resets ) ) {
 			send_to_char(
 				"Resets: M = mobile, R = room, O = object, "
 				"P = pet, S = shopkeeper\n\r",
@@ -1107,44 +1105,24 @@ void do_resets( CHAR_DATA *ch, char *argument ) {
 		 */
 		if ( !str_cmp( arg2, "delete" ) ) {
 			int insert_loc = atol( arg1 );
+			int iReset = 0;
 
-			if ( !ch->in_room->reset_first ) {
+			if ( list_empty( &ch->in_room->resets ) ) {
 				send_to_char( "No resets in this area.\n\r", ch );
 				return;
 			}
 
-			if ( insert_loc - 1 <= 0 ) {
-				pReset = pRoom->reset_first;
-				pRoom->reset_first = pRoom->reset_first->next;
-				if ( !pRoom->reset_first )
-					pRoom->reset_last = NULL;
-			} else {
-				int iReset = 0;
-				RESET_DATA *prev = NULL;
-
-				for ( pReset = pRoom->reset_first;
-					pReset;
-					pReset = pReset->next ) {
-					if ( ++iReset == insert_loc )
-						break;
-					prev = pReset;
-				}
-
-				if ( !pReset ) {
-					send_to_char( "Reset not found.\n\r", ch );
-					return;
-				}
-
-				if ( prev )
-					prev->next = prev->next->next;
-				else
-					pRoom->reset_first = pRoom->reset_first->next;
-
-				for ( pRoom->reset_last = pRoom->reset_first;
-					pRoom->reset_last->next;
-					pRoom->reset_last = pRoom->reset_last->next );
+			LIST_FOR_EACH( pReset, &pRoom->resets, RESET_DATA, node ) {
+				if ( ++iReset == insert_loc )
+					break;
 			}
 
+			if ( !pReset ) {
+				send_to_char( "Reset not found.\n\r", ch );
+				return;
+			}
+
+			list_remove( &pRoom->resets, &pReset->node );
 			free_reset_data( pReset );
 			send_to_char( "Reset deleted.\n\r", ch );
 		} else

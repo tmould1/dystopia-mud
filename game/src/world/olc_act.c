@@ -2966,7 +2966,6 @@ bool medit_shop( CHAR_DATA *ch, char *argument ) {
 		if ( !pMob->pShop ) {
 			pMob->pShop = new_shop();
 			pMob->pShop->keeper = pMob->vnum;
-			shop_last->next = pMob->pShop;
 		}
 
 		pMob->pShop->open_hour = atoi( arg1 );
@@ -2985,7 +2984,6 @@ bool medit_shop( CHAR_DATA *ch, char *argument ) {
 		if ( !pMob->pShop ) {
 			pMob->pShop = new_shop();
 			pMob->pShop->keeper = pMob->vnum;
-			shop_last->next = pMob->pShop;
 		}
 
 		pMob->pShop->profit_buy = atoi( arg1 );
@@ -3018,7 +3016,6 @@ bool medit_shop( CHAR_DATA *ch, char *argument ) {
 		if ( !pMob->pShop ) {
 			pMob->pShop = new_shop();
 			pMob->pShop->keeper = pMob->vnum;
-			shop_last->next = pMob->pShop;
 		}
 
 		pMob->pShop->buy_type[atoi( arg1 )] = value;
@@ -3028,36 +3025,13 @@ bool medit_shop( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( command, "delete" ) ) {
-		SHOP_DATA *pShop;
-		SHOP_DATA *pShop_next;
-		int value;
-		int cnt = 0;
-
-		if ( arg1[0] == '\0' || !is_number( arg1 ) ) {
-			send_to_char( "Syntax:  shop delete [#0-4]\n\r", ch );
-			return FALSE;
-		}
-
-		value = atoi( argument );
-
 		if ( !pMob->pShop ) {
 			send_to_char( "REdit:  Non-existant shop.\n\r", ch );
 			return FALSE;
 		}
 
-		if ( value == 0 ) {
-			pShop = pMob->pShop;
-			pMob->pShop = pMob->pShop->next;
-			free_shop( pShop );
-		} else
-			for ( pShop = pMob->pShop, cnt = 0; pShop; pShop = pShop_next, cnt++ ) {
-				pShop_next = pShop->next;
-				if ( cnt + 1 == value ) {
-					pShop->next = pShop_next->next;
-					free_shop( pShop_next );
-					break;
-				}
-			}
+		free_shop( pMob->pShop );
+		pMob->pShop = NULL;
 
 		send_to_char( "Shop deleted.\n\r", ch );
 		return TRUE;

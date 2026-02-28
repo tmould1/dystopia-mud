@@ -81,20 +81,20 @@ void db_game_list_pretitles( CHAR_DATA *ch );
 #define NAMETYPE_BLOCKED    2  /* Exact name block */
 
 typedef struct forbidden_name {
-	struct forbidden_name *next;
+	list_node_t node;
 	char *name;
 	int   type;      /* NAMETYPE_RESERVED, NAMETYPE_PROTECTED, NAMETYPE_BLOCKED */
 	char *added_by;
 } FORBIDDEN_NAME;
 
 typedef struct profanity_filter {
-	struct profanity_filter *next;
+	list_node_t node;
 	char *pattern;
 	char *added_by;
 } PROFANITY_FILTER;
 
-extern FORBIDDEN_NAME  *forbidden_name_list;
-extern PROFANITY_FILTER *profanity_filter_list;
+extern list_head_t forbidden_name_list;
+extern list_head_t profanity_filter_list;
 
 void db_game_load_forbidden_names( void );
 void db_game_save_forbidden_names( void );

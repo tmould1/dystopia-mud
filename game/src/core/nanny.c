@@ -953,7 +953,7 @@ bool check_parse_name( char *name ) {
 	{
 		FORBIDDEN_NAME *fn;
 
-		for ( fn = forbidden_name_list; fn; fn = fn->next ) {
+		LIST_FOR_EACH( fn, &forbidden_name_list, FORBIDDEN_NAME, node ) {
 			switch ( fn->type ) {
 			case NAMETYPE_RESERVED:
 			case NAMETYPE_BLOCKED:
@@ -982,7 +982,7 @@ bool check_parse_name( char *name ) {
 
 		utf8_skeletonize( name, skeleton, sizeof( skeleton ) );
 
-		for ( pf = profanity_filter_list; pf; pf = pf->next ) {
+		LIST_FOR_EACH( pf, &profanity_filter_list, PROFANITY_FILTER, node ) {
 			if ( is_contained( pf->pattern, skeleton ) )
 				return FALSE;
 		}

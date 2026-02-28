@@ -60,14 +60,14 @@
 BOARD_DATA boards[MAX_BOARD] =
 	{
 
-		{ "General", "General discussion", 0, 2, "all", DEF_INCLUDE, 14, NULL, FALSE },
-		{ "Ideas", "Suggestion for improvement", 0, 2, "all", DEF_NORMAL, 14, NULL, FALSE },
-		{ "Announce", "Announcements from Immortals", 0, 8, "all", DEF_NORMAL, 60, NULL, FALSE },
-		{ "Bugs", "Typos, bugs, errors", 2, 2, "imm", DEF_INCLUDE, 60, NULL, FALSE },
-		{ "Personal", "Personal messages", 0, 2, "all", DEF_EXCLUDE, 14, NULL, FALSE },
-		{ "Immortal", "Immortal Board", 8, 8, "imm", DEF_INCLUDE, 60, NULL, FALSE },
-		{ "Builder", "Builder Board", 7, 7, "imm", DEF_INCLUDE, 20, NULL, FALSE },
-		{ "Kingdom", "Kingdom messages", 0, 2, "all", DEF_EXCLUDE, 20, NULL, FALSE } };
+		{ "General", "General discussion", 0, 2, "all", DEF_INCLUDE, 14, {0}, FALSE },
+		{ "Ideas", "Suggestion for improvement", 0, 2, "all", DEF_NORMAL, 14, {0}, FALSE },
+		{ "Announce", "Announcements from Immortals", 0, 8, "all", DEF_NORMAL, 60, {0}, FALSE },
+		{ "Bugs", "Typos, bugs, errors", 2, 2, "imm", DEF_INCLUDE, 60, {0}, FALSE },
+		{ "Personal", "Personal messages", 0, 2, "all", DEF_EXCLUDE, 14, {0}, FALSE },
+		{ "Immortal", "Immortal Board", 8, 8, "imm", DEF_INCLUDE, 60, {0}, FALSE },
+		{ "Builder", "Builder Board", 7, 7, "imm", DEF_INCLUDE, 20, {0}, FALSE },
+		{ "Kingdom", "Kingdom messages", 0, 2, "all", DEF_EXCLUDE, 20, {0}, FALSE } };
 
 /* The prompt that the character is given after finishing a note with ~ or END */
 const char *szFinishPrompt = "(" BOLD "C" NO_COLOR ")ontinue, (" BOLD "V" NO_COLOR ")iew, (" BOLD "P" NO_COLOR ")ost or (" BOLD "F" NO_COLOR ")orget it?";
@@ -155,8 +155,6 @@ NOTE_DATA *new_note() {
 
 /* Save a note in a given board */
 void finish_note( BOARD_DATA *board, NOTE_DATA *note ) {
-	NOTE_DATA *p;
-
 	/* The following is done in order to generate unique date_stamps */
 
 	if ( last_note_stamp >= current_time )
@@ -166,13 +164,7 @@ void finish_note( BOARD_DATA *board, NOTE_DATA *note ) {
 		last_note_stamp = (long) current_time;
 	}
 
-	if ( board->note_first ) /* are there any notes in there now? */
-	{
-		for ( p = board->note_first; p->next; p = p->next ); /* empty */
-
-		p->next = note;
-	} else /* nope. empty list. */
-		board->note_first = note;
+	list_push_back( &board->notes, &note->node );
 
 	/* Persist note to SQLite */
 	db_game_append_note( board_number( board ), note );
@@ -200,19 +192,9 @@ int board_lookup( const char *name ) {
 	return -1;
 }
 
-/* Remove list from the list. Do not free note */
+/* Remove note from the list. Do not free note */
 static void unlink_note( BOARD_DATA *board, NOTE_DATA *note ) {
-	NOTE_DATA *p;
-
-	if ( board->note_first == note )
-		board->note_first = note->next;
-	else {
-		for ( p = board->note_first; p && p->next != note; p = p->next );
-		if ( !p )
-			bug( "unlink_note: could not find note.", 0 );
-		else
-			p->next = note->next;
-	}
+	list_remove( &board->notes, &note->node );
 }
 
 /* Find the nth note on a board. Return NULL if ch has no access to that note */
@@ -220,11 +202,11 @@ static NOTE_DATA *find_note( CHAR_DATA *ch, BOARD_DATA *board, int num ) {
 	int count = 0;
 	NOTE_DATA *p;
 
-	for ( p = board->note_first; p; p = p->next )
+	LIST_FOR_EACH( p, &board->notes, NOTE_DATA, node )
 		if ( ++count == num )
 			break;
 
-	if ( ( count == num ) && is_note_to( ch, p ) )
+	if ( p && ( count == num ) && is_note_to( ch, p ) )
 		return p;
 	else
 		return NULL;
@@ -269,8 +251,10 @@ static void load_board( BOARD_DATA *board ) {
 void load_boards() {
 	int i;
 
-	for ( i = 0; i < MAX_BOARD; i++ )
+	for ( i = 0; i < MAX_BOARD; i++ ) {
+		list_init( &boards[i].notes );
 		load_board( &boards[i] );
+	}
 }
 
 /* Returns TRUE if the specified note is address to ch */
@@ -314,7 +298,7 @@ int unread_notes( CHAR_DATA *ch, BOARD_DATA *board ) {
 
 	last_read = ch->pcdata->last_note[board_number( board )];
 
-	for ( note = board->note_first; note; note = note->next )
+	LIST_FOR_EACH( note, &board->notes, NOTE_DATA, node )
 		if ( is_note_to( ch, note ) && ( (long) last_read < (long) note->date_stamp ) )
 			count++;
 
@@ -440,7 +424,7 @@ static void do_nread( CHAR_DATA *ch, char *argument ) {
 	} else if ( is_number( argument ) ) {
 		number = atoi( argument );
 
-		for ( p = ch->pcdata->board->note_first; p; p = p->next )
+		LIST_FOR_EACH( p, &ch->pcdata->board->notes, NOTE_DATA, node )
 			if ( ++count == number )
 				break;
 
@@ -459,18 +443,20 @@ static void do_nread( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You are not on a board.\n\r", ch );
 			return;
 		}
-		if ( ch->pcdata->board->note_first == NULL ) {
+		if ( list_empty( &ch->pcdata->board->notes ) ) {
 			send_to_char( "There are no notes.\n\r", ch );
 			return;
 		}
 
-		for ( p = ch->pcdata->board->note_first; p; p = p->next, count++ )
+		LIST_FOR_EACH( p, &ch->pcdata->board->notes, NOTE_DATA, node ) {
 			if ( ( p->date_stamp > *last_note ) && is_note_to( ch, p ) ) {
 				show_note_to_char( ch, p, count );
 				/* Advance if new note is newer than the currently newest for that char */
 				*last_note = UMAX( *last_note, p->date_stamp );
 				return;
 			}
+			count++;
+		}
 
 		send_to_char( "No new notes in this board.\n\r", ch );
 
@@ -521,7 +507,7 @@ static void do_nlist( CHAR_DATA *ch, char *argument ) {
 	{
 		show = atoi( argument );
 
-		for ( p = ch->pcdata->board->note_first; p; p = p->next )
+		LIST_FOR_EACH( p, &ch->pcdata->board->notes, NOTE_DATA, node )
 			if ( is_note_to( ch, p ) )
 				count++;
 	}
@@ -530,7 +516,7 @@ static void do_nlist( CHAR_DATA *ch, char *argument ) {
 
 	last_note = ch->pcdata->last_note[board_number( ch->pcdata->board )];
 
-	for ( p = ch->pcdata->board->note_first; p; p = p->next ) {
+	LIST_FOR_EACH( p, &ch->pcdata->board->notes, NOTE_DATA, node ) {
 		num++;
 		if ( is_note_to( ch, p ) ) {
 			char row_text[256];
@@ -550,14 +536,15 @@ static void do_nlist( CHAR_DATA *ch, char *argument ) {
 
 /* catch up with some notes */
 static void do_ncatchup( CHAR_DATA *ch, char *argument ) {
-	NOTE_DATA *p;
+	list_node_t *last;
 
 	/* Find last note */
-	for ( p = ch->pcdata->board->note_first; p && p->next; p = p->next );
+	last = list_last( &ch->pcdata->board->notes );
 
-	if ( !p )
+	if ( !last )
 		send_to_char( "Alas, there are no notes in that board.\n\r", ch );
 	else {
+		NOTE_DATA *p = LIST_ENTRY( last, NOTE_DATA, node );
 		ch->pcdata->last_note[board_number( ch->pcdata->board )] = p->date_stamp;
 		send_to_char( "All mesages skipped.\n\r", ch );
 	}

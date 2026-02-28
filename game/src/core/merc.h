@@ -641,7 +641,6 @@ struct help_data {
 #define MAX_TRADE 5
 
 struct shop_data {
-	SHOP_DATA *next;			/* Next shop in list		*/
 	int keeper;					/* Vnum of shop keeper mob	*/
 	int buy_type[MAX_TRADE]; /* Item types shop will buy	*/
 	int profit_buy;			/* Cost multiplier for buying	*/
@@ -654,7 +653,7 @@ struct shop_data {
  * Data structure for notes.
  */
 struct note_data {
-	NOTE_DATA *next;
+	list_node_t node;
 	char *sender;
 	char *date;
 	char *to_list;
@@ -2238,7 +2237,6 @@ struct char_data {
  * Data which only PC's have.
  */
 struct pc_data {
-	PC_DATA *next;
 	CHAR_DATA *familiar;
 	CHAR_DATA *partner;
 	CHAR_DATA *propose;
@@ -2482,7 +2480,7 @@ typedef struct roomtext_data {
  * Area-reset definition.
  */
 struct reset_data {
-	RESET_DATA *next;
+	list_node_t node;
 	char command;
 	int arg1;
 	int arg2;
@@ -2537,8 +2535,7 @@ struct room_index_data {
 	AREA_DATA *area;
 	EXIT_DATA *exit[6];
 	list_head_t roomtext;
-	RESET_DATA *reset_first; /* OLC */
-	RESET_DATA *reset_last;	 /* OLC */
+	list_head_t resets;      /* OLC */
 
 	char *track[5];
 	char *name;
@@ -2847,8 +2844,6 @@ extern int social_count;
 /*
  * Global variables.
  */
-extern SHOP_DATA *shop_first;
-
 extern list_head_t g_helps;
 extern list_head_t ban_list;
 extern list_head_t g_characters;
@@ -4690,7 +4685,6 @@ extern const struct spec_type spec_table[];
 
 extern list_head_t g_areas;
 extern AREA_DATA *area_last;
-extern SHOP_DATA *shop_last;
 
 extern int top_affect;
 extern int top_area;
