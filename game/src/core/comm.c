@@ -252,7 +252,7 @@ void stop_idling ( CHAR_DATA * ch );
 void bust_a_prompt ( DESCRIPTOR_DATA * d );
 void bust_a_header ( DESCRIPTOR_DATA * d );
 
-void lookup_address ( DUMMY_ARG * dummyarg ); // Only threaded calls, please.
+void lookup_address ( DNS_LOOKUP * lookup ); // Only threaded calls, please.
 bool check_banned ( DESCRIPTOR_DATA * dnew ); // Ban check
 
 #if defined( WIN32 )
@@ -813,6 +813,11 @@ void game_loop( int control ) {
 			}
 		}
 
+		/*
+		 * Free completed DNS lookup tasks.
+		 */
+		recycle_dns_lookups();
+
 		PROFILE_END("game_loop_work");
 
 		/*
@@ -923,20 +928,20 @@ void new_descriptor( int control ) {
 	socklen_t size;
 	pthread_attr_t attr;
 	pthread_t thread_lookup;
-	DUMMY_ARG *dummyarg;
+	DNS_LOOKUP *lookup;
 	bool DOS_ATTACK = FALSE;
 
 	pthread_attr_init( &attr );
 	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
-	/* New Dummy Argument */
-	dummyarg = calloc( 1, sizeof( *dummyarg ) );
-	if ( !dummyarg ) {
-		bug( "new_descriptor: calloc failed for dummyarg", 0 );
+	/* Allocate DNS lookup task for the worker thread */
+	lookup = calloc( 1, sizeof( *lookup ) );
+	if ( !lookup ) {
+		bug( "new_descriptor: calloc failed for dns lookup", 0 );
 		return;
 	}
-	dummyarg->status = 1;
-	list_push_front( &dummy_list, &dummyarg->node );
+	lookup->status = 1;
+	list_push_front( &g_dns_lookups, &lookup->node );
 
 	size = sizeof( sock );
 	getsockname( control, (struct sockaddr *) &sock, &size );
@@ -1005,14 +1010,14 @@ void new_descriptor( int control ) {
 			dnew->lookup_status = STATUS_DONE;
 			dnew->host = str_dup( "localhost" );
 		} else {
-			/* Set up the dummyarg for use in lookup_address */
-			dummyarg->buf = str_dup( (char *) &sock.sin_addr );
-			dummyarg->d = dnew;
+			/* Set up the DNS lookup task for the worker thread */
+			lookup->buf = str_dup( (char *) &sock.sin_addr );
+			lookup->d = dnew;
 
 			if ( thread_count < 50 ) /* should be more than plenty */
 			{
 				/* just use the ip, then make the thread do the lookup */
-				pthread_create( &thread_lookup, &attr, (void *) &lookup_address, (void *) dummyarg );
+				pthread_create( &thread_lookup, &attr, (void *) &lookup_address, (void *) lookup );
 			} else
 				DOS_ATTACK = TRUE;
 		}
@@ -1056,7 +1061,7 @@ void new_descriptor( int control ) {
 	return;
 }
 
-void lookup_address( DUMMY_ARG *darg ) {
+void lookup_address( DNS_LOOKUP *lookup ) {
 	struct hostent *from = 0;
 	struct hostent ent;
 	char buf[16384]; // enough ??
@@ -1064,20 +1069,17 @@ void lookup_address( DUMMY_ARG *darg ) {
 
 	thread_count++;
 
-	gethostbyaddr_r( darg->buf, sizeof( darg->buf ), AF_INET, &ent, buf, 16384, &from, &err );
+	gethostbyaddr_r( lookup->buf, sizeof( lookup->buf ), AF_INET, &ent, buf, 16384, &from, &err );
 
 	if ( from && from->h_name ) {
-		free(darg->d->host);
-		darg->d->host = str_dup( from->h_name );
+		free(lookup->d->host);
+		lookup->d->host = str_dup( from->h_name );
 	}
 
-	/*
-	 * Brilliant system there Mr. Jobo
-	 */
-	darg->d->lookup_status++;
+	lookup->d->lookup_status++;
 
-	free(darg->buf);
-	darg->status = 0;
+	free(lookup->buf);
+	lookup->status = 0;
 
 	thread_count--;
 
