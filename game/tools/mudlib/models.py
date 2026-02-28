@@ -240,6 +240,9 @@ ARMOR_SPECIALS = {
     88: 'unknown_88', 139: 'protect_good',
 }
 
+# Container flags (merc.h CONT_* defines, value[1] for containers)
+CONTAINER_FLAGS = {1: 'Closeable', 2: 'Pickproof', 4: 'Closed', 8: 'Locked'}
+
 # Weapon proficiency names (index -> name)
 WEAPON_NAMES = {
     0: 'Unarmed', 1: 'Slice', 2: 'Stab', 3: 'Slash', 4: 'Whip',

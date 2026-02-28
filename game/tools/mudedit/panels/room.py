@@ -1,7 +1,8 @@
 """
 Room editor panel with exit sub-editor.
 
-Provides CRUD interface for room entities including exits and room texts.
+Provides CRUD interface for room entities including exits, room texts,
+sector column in list, and cross-references showing spawned entities.
 """
 
 import tkinter as tk
@@ -12,9 +13,9 @@ from pathlib import Path
 
 # Add mudlib to path for model imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-from mudlib.models import SECTOR_NAMES, DIR_NAMES, ROOM_FLAGS, EXIT_FLAGS
+from mudlib.models import SECTOR_NAMES, DIR_NAMES, ROOM_FLAGS, EXIT_FLAGS, WEAR_LOCATIONS
 
-from ..db.repository import RoomRepository, ExitRepository
+from ..db.repository import RoomRepository, ExitRepository, ResetRepository
 from ..widgets import ColorTextEditor, EntityListPanel, strip_colors
 
 
@@ -27,6 +28,7 @@ class RoomEditorPanel(ttk.Frame):
     - Description with color preview
     - Room flags
     - Exits (6 directions with destination, door flags, key)
+    - Cross-references (entities spawned in this room)
     """
 
     def __init__(
@@ -34,21 +36,18 @@ class RoomEditorPanel(ttk.Frame):
         parent,
         repository: RoomRepository,
         on_status: Optional[Callable[[str], None]] = None,
+        reset_repo: Optional[ResetRepository] = None,
+        mob_repo=None,
+        obj_repo=None,
         **kwargs
     ):
-        """
-        Initialize the room editor panel.
-
-        Args:
-            parent: Parent Tkinter widget
-            repository: RoomRepository for database operations
-            on_status: Callback for status messages
-            **kwargs: Additional arguments passed to ttk.Frame
-        """
         super().__init__(parent, **kwargs)
 
         self.repository = repository
         self.exit_repository = ExitRepository(repository.conn)
+        self.reset_repo = reset_repo
+        self.mob_repo = mob_repo
+        self.obj_repo = obj_repo
         self.on_status = on_status or (lambda msg: None)
 
         self.current_vnum: Optional[int] = None
@@ -56,15 +55,25 @@ class RoomEditorPanel(ttk.Frame):
 
         # Cache room names for exit display
         self._room_cache: Dict[int, str] = {}
+        self._mob_cache: Dict[int, str] = {}
+        self._obj_cache: Dict[int, str] = {}
 
         self._build_ui()
-        self._build_room_cache()
+        self._build_caches()
         self._load_entries()
 
-    def _build_room_cache(self):
-        """Build cache of room vnum -> name for exit display."""
+    def _build_caches(self):
+        """Build caches for entity name resolution."""
         rooms = self.repository.list_all()
         self._room_cache = {r['vnum']: r['name'] for r in rooms}
+
+        if self.mob_repo:
+            for mob in self.mob_repo.list_all():
+                self._mob_cache[mob['vnum']] = mob.get('short_descr', f"mob#{mob['vnum']}")
+
+        if self.obj_repo:
+            for obj in self.obj_repo.list_all():
+                self._obj_cache[obj['vnum']] = obj.get('short_descr', f"obj#{obj['vnum']}")
 
     def _build_ui(self):
         """Build the panel UI."""
@@ -72,12 +81,13 @@ class RoomEditorPanel(ttk.Frame):
         paned = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
         paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
 
-        # Left panel: entity list
+        # Left panel: entity list with sector column
         self.list_panel = EntityListPanel(
             paned,
             columns=[
                 ('vnum', 'Vnum', 60),
                 ('name', 'Name', 200),
+                ('sector', 'Sector', 80),
             ],
             on_select=self._on_entry_select,
             search_columns=['name', 'description']
@@ -88,27 +98,34 @@ class RoomEditorPanel(ttk.Frame):
         right_container = ttk.Frame(paned)
         paned.add(right_container, weight=3)
 
-        canvas = tk.Canvas(right_container, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(right_container, orient=tk.VERTICAL, command=canvas.yview)
+        self._canvas = tk.Canvas(right_container, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(right_container, orient=tk.VERTICAL, command=self._canvas.yview)
 
-        self.editor_frame = ttk.Frame(canvas)
+        self.editor_frame = ttk.Frame(self._canvas)
 
-        canvas.configure(yscrollcommand=scrollbar.set)
+        self._canvas.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self._canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        canvas_frame = canvas.create_window((0, 0), window=self.editor_frame, anchor=tk.NW)
+        canvas_frame = self._canvas.create_window((0, 0), window=self.editor_frame, anchor=tk.NW)
 
         def configure_scroll(event):
-            canvas.configure(scrollregion=canvas.bbox("all"))
-            canvas.itemconfig(canvas_frame, width=event.width)
+            self._canvas.configure(scrollregion=self._canvas.bbox("all"))
+            self._canvas.itemconfig(canvas_frame, width=event.width)
 
-        self.editor_frame.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-        canvas.bind('<Configure>', configure_scroll)
+        self.editor_frame.bind('<Configure>', lambda e: self._canvas.configure(scrollregion=self._canvas.bbox("all")))
+        self._canvas.bind('<Configure>', configure_scroll)
 
-        def on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-        canvas.bind_all('<MouseWheel>', on_mousewheel)
+        # Mousewheel: bind only when hovering over this canvas
+        def _on_enter(event):
+            self._canvas.bind_all('<MouseWheel>',
+                                  lambda e: self._canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+
+        def _on_leave(event):
+            self._canvas.unbind_all('<MouseWheel>')
+
+        self._canvas.bind('<Enter>', _on_enter)
+        self._canvas.bind('<Leave>', _on_leave)
 
         self._build_editor(self.editor_frame)
 
@@ -230,6 +247,27 @@ class RoomEditorPanel(ttk.Frame):
                 'key_var': key_var,
             }
 
+        # === Room Contents (cross-references) ===
+        refs_frame = ttk.LabelFrame(parent, text="Room Contents (from Resets)")
+        refs_frame.pack(fill=tk.X, padx=4, pady=2)
+
+        self.refs_tree = ttk.Treeview(
+            refs_frame,
+            columns=('type', 'vnum', 'name', 'detail'),
+            show='headings',
+            height=5,
+            selectmode='browse'
+        )
+        self.refs_tree.heading('type', text='Type')
+        self.refs_tree.heading('vnum', text='Vnum')
+        self.refs_tree.heading('name', text='Name')
+        self.refs_tree.heading('detail', text='Detail')
+        self.refs_tree.column('type', width=50, stretch=False)
+        self.refs_tree.column('vnum', width=60, stretch=False)
+        self.refs_tree.column('name', width=200)
+        self.refs_tree.column('detail', width=120)
+        self.refs_tree.pack(fill=tk.X, padx=4, pady=4)
+
         # === Button Bar ===
         btn_frame = ttk.Frame(parent)
         btn_frame.pack(fill=tk.X, padx=4, pady=4)
@@ -260,8 +298,12 @@ class RoomEditorPanel(ttk.Frame):
         self._mark_unsaved()
 
     def _load_entries(self):
-        """Load all rooms from database."""
+        """Load all rooms from database with sector column."""
         entries = self.repository.list_all()
+        # Add sector display name for the list column
+        for entry in entries:
+            sector_id = entry.get('sector_type', 0)
+            entry['sector'] = SECTOR_NAMES.get(sector_id, f'#{sector_id}')
         self.list_panel.set_items(entries, id_column='vnum')
         self.on_status(f"Loaded {len(entries)} rooms")
 
@@ -322,8 +364,69 @@ class RoomEditorPanel(ttk.Frame):
                 if key and key > 0:
                     widgets['key_var'].set(str(key))
 
+        # Cross-references
+        self._update_refs(vnum)
+
         self.unsaved = False
         self.on_status(f"Loaded room [{vnum}] {room.get('name', '')}")
+
+    def _update_refs(self, vnum: int):
+        """Populate room contents from resets."""
+        self.refs_tree.delete(*self.refs_tree.get_children())
+
+        if not self.reset_repo:
+            return
+
+        try:
+            resets = self.reset_repo.list_all()
+        except Exception:
+            return
+
+        # Walk resets to find what spawns in this room
+        # M commands set the "current mob" context; G/E follow the last M
+        last_mob_vnum = None
+        last_mob_room = None
+
+        for reset in resets:
+            cmd = reset.get('command', '?')
+            arg1 = reset.get('arg1', 0)
+            arg2 = reset.get('arg2', 0)
+            arg3 = reset.get('arg3', 0)
+
+            if cmd == 'M':
+                last_mob_vnum = arg1
+                last_mob_room = arg3
+                if arg3 == vnum:
+                    mob_name = self._mob_cache.get(arg1, f'#{arg1}')
+                    self.refs_tree.insert('', tk.END,
+                                          values=('Mob', arg1, mob_name, f'max {arg2}'))
+
+            elif cmd == 'O':
+                last_mob_vnum = None
+                last_mob_room = None
+                if arg3 == vnum:
+                    obj_name = self._obj_cache.get(arg1, f'#{arg1}')
+                    self.refs_tree.insert('', tk.END,
+                                          values=('Obj', arg1, obj_name, 'in room'))
+
+            elif cmd == 'G':
+                if last_mob_room == vnum and last_mob_vnum:
+                    obj_name = self._obj_cache.get(arg1, f'#{arg1}')
+                    mob_name = self._mob_cache.get(last_mob_vnum, f'#{last_mob_vnum}')
+                    self.refs_tree.insert('', tk.END,
+                                          values=('Give', arg1, obj_name,
+                                                  f'to {mob_name[:20]}'))
+
+            elif cmd == 'E':
+                if last_mob_room == vnum and last_mob_vnum:
+                    obj_name = self._obj_cache.get(arg1, f'#{arg1}')
+                    wear_name = WEAR_LOCATIONS.get(arg3, f'loc_{arg3}')
+                    self.refs_tree.insert('', tk.END,
+                                          values=('Equip', arg1, obj_name, wear_name))
+
+            elif cmd in ('D', 'R'):
+                last_mob_vnum = None
+                last_mob_room = None
 
     def _mark_unsaved(self):
         """Mark the current entry as having unsaved changes."""
@@ -392,7 +495,7 @@ class RoomEditorPanel(ttk.Frame):
         self.repository.conn.commit()
 
         # Refresh
-        self._build_room_cache()
+        self._build_caches()
         self._load_entries()
         self.list_panel.select_item(self.current_vnum)
 
@@ -424,7 +527,7 @@ class RoomEditorPanel(ttk.Frame):
             'sector_type': 0,
         })
 
-        self._build_room_cache()
+        self._build_caches()
         self._load_entries()
         self.list_panel.select_item(vnum)
         self._load_entry(vnum)
@@ -446,7 +549,7 @@ class RoomEditorPanel(ttk.Frame):
 
         old_vnum = self.current_vnum
         self._clear_editor()
-        self._build_room_cache()
+        self._build_caches()
         self._load_entries()
 
         self.on_status(f"Deleted room [{old_vnum}] {name}")
@@ -462,6 +565,7 @@ class RoomEditorPanel(ttk.Frame):
         self.desc_editor.clear()
         for direction in range(6):
             self._clear_exit(direction)
+        self.refs_tree.delete(*self.refs_tree.get_children())
         self.unsaved = False
 
     def check_unsaved(self) -> bool:

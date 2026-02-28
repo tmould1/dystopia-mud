@@ -149,8 +149,9 @@ class MudEditorApp:
         self.notebook.bind('<Button-2>', self._on_tab_middle_click)
         self.notebook.bind('<Button-3>', self._on_tab_right_click)
 
-        # Keyboard shortcut to close current tab
+        # Keyboard shortcuts
         self.root.bind('<Control-w>', self._close_current_tab)
+        self.root.bind('<Control-s>', self._save_current_panel)
 
         # Create tab context menu
         self._tab_menu = tk.Menu(self.root, tearoff=0)
@@ -214,6 +215,9 @@ class MudEditorApp:
                 self.notebook.select(panel)
                 self._open_tabs[tab_id] = (category, db_path, entity_type, panel)
 
+                # Wire unsaved tab indicator
+                self._wire_unsaved_indicator(panel, title)
+
                 self.status_var.set(f"Opened {title}")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open editor: {e}")
@@ -267,18 +271,33 @@ class MudEditorApp:
 
             elif entity_type == 'objects':
                 repository = ObjectRepository(conn)
+                # Provide liquids from tables.db for drink type editing
+                liquids_repo = None
+                try:
+                    tables_conn = self.db_manager.get_connection(
+                        self.db_manager.get_tables_db_path())
+                    liquids_repo = LiquidsRepository(tables_conn)
+                except Exception:
+                    pass
                 return ObjectEditorPanel(
                     self.notebook,
                     repository,
-                    on_status=self._set_status
+                    on_status=self._set_status,
+                    liquids_repo=liquids_repo,
                 )
 
             elif entity_type == 'rooms':
                 repository = RoomRepository(conn)
+                reset_repo = ResetRepository(conn)
+                mob_repo = MobileRepository(conn)
+                obj_repo = ObjectRepository(conn)
                 return RoomEditorPanel(
                     self.notebook,
                     repository,
-                    on_status=self._set_status
+                    on_status=self._set_status,
+                    reset_repo=reset_repo,
+                    mob_repo=mob_repo,
+                    obj_repo=obj_repo,
                 )
 
             elif entity_type == 'resets':
@@ -660,6 +679,46 @@ class MudEditorApp:
             current = self.notebook.index(self.notebook.select())
             if current > 0:  # Don't close welcome tab
                 self._close_tab(current)
+        except tk.TclError:
+            pass
+
+    def _wire_unsaved_indicator(self, panel, title: str):
+        """Wrap panel's _mark_unsaved and _save to update tab title with * indicator."""
+        notebook = self.notebook
+
+        if hasattr(panel, '_mark_unsaved'):
+            original_mark = panel._mark_unsaved
+
+            def mark_with_indicator():
+                original_mark()
+                try:
+                    notebook.tab(panel, text=f"* {title}")
+                except tk.TclError:
+                    pass
+
+            panel._mark_unsaved = mark_with_indicator
+
+        if hasattr(panel, '_save'):
+            original_save = panel._save
+
+            def save_with_indicator():
+                original_save()
+                try:
+                    notebook.tab(panel, text=title)
+                except tk.TclError:
+                    pass
+
+            panel._save = save_with_indicator
+
+    def _save_current_panel(self, event=None):
+        """Save the currently active panel (Ctrl+S)."""
+        try:
+            current = self.notebook.select()
+            if not current:
+                return
+            panel = self.notebook.nametowidget(current)
+            if hasattr(panel, '_save'):
+                panel._save()
         except tk.TclError:
             pass
 

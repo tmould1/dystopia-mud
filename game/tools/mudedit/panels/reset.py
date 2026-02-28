@@ -1,12 +1,19 @@
 """
 Reset editor panel.
 
-Provides interface for editing area reset commands (mob/object spawning).
+Provides interface for editing area reset commands (mob/object spawning)
+with hierarchical grouping: G/E commands nest under their parent M command.
 """
 
 import tkinter as tk
 from tkinter import ttk, messagebox
 from typing import Callable, Dict, Optional
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from mudlib.models import WEAR_LOCATIONS
 
 from ..db.repository import ResetRepository, MobileRepository, ObjectRepository, RoomRepository
 
@@ -27,7 +34,8 @@ class ResetEditorPanel(ttk.Frame):
     """
     Editor panel for area reset commands.
 
-    Displays resets with resolved entity names and allows editing.
+    Displays resets with resolved entity names. G/E commands are shown as
+    children of their preceding M command in the treeview hierarchy.
     """
 
     def __init__(
@@ -81,20 +89,27 @@ class ResetEditorPanel(ttk.Frame):
         left_frame = ttk.Frame(paned)
         paned.add(left_frame, weight=1)
 
-        # Treeview for resets
+        # Treeview for resets (tree mode for hierarchy)
         tree_frame = ttk.Frame(left_frame)
         tree_frame.pack(fill=tk.BOTH, expand=True)
 
         self.tree = ttk.Treeview(
             tree_frame,
             columns=('cmd', 'description'),
-            show='headings',
+            show='tree headings',
             selectmode='browse'
         )
         self.tree.heading('cmd', text='Cmd')
         self.tree.heading('description', text='Description')
+        self.tree.column('#0', width=20, stretch=False)
         self.tree.column('cmd', width=40, stretch=False)
         self.tree.column('description', width=350)
+
+        # Row color tags
+        self.tree.tag_configure('mob', background='#2a2a3a')
+        self.tree.tag_configure('give', background='#1a2a1a')
+        self.tree.tag_configure('obj', background='#2a2a1a')
+        self.tree.tag_configure('door', background='#2a1a1a')
 
         scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
@@ -220,6 +235,8 @@ class ResetEditorPanel(ttk.Frame):
                 name = self._room_cache.get(vnum, '(unknown room)')
             elif arg_idx == 2 and cmd == 'P':
                 name = self._obj_cache.get(vnum, '(unknown container)')
+            elif arg_idx == 2 and cmd == 'E':
+                name = WEAR_LOCATIONS.get(vnum, f'loc_{vnum}')
         elif cmd in ('D', 'R'):
             if arg_idx == 0:
                 name = self._room_cache.get(vnum, '(unknown room)')
@@ -243,10 +260,11 @@ class ResetEditorPanel(ttk.Frame):
             return f"Load {obj} in {room}"
         elif cmd == 'G':
             obj = self._obj_cache.get(arg1, f'#{arg1}')
-            return f"Give {obj} to last mob"
+            return f"Give {obj}"
         elif cmd == 'E':
             obj = self._obj_cache.get(arg1, f'#{arg1}')
-            return f"Equip {obj} on last mob (loc {arg3})"
+            wear_name = WEAR_LOCATIONS.get(arg3, f'loc_{arg3}')
+            return f"Equip {obj} ({wear_name})"
         elif cmd == 'P':
             obj = self._obj_cache.get(arg1, f'#{arg1}')
             cont = self._obj_cache.get(arg3, f'#{arg3}')
@@ -263,14 +281,43 @@ class ResetEditorPanel(ttk.Frame):
             return f"{cmd} {arg1} {arg2} {arg3}"
 
     def _load_entries(self):
-        """Load all resets from database."""
+        """Load all resets with hierarchical grouping."""
         entries = self.repository.list_all()
 
         self.tree.delete(*self.tree.get_children())
+
+        current_mob_iid = ''  # iid of the last M command
+
         for reset in entries:
+            cmd = reset.get('command', '?')
             desc = self._format_reset(reset)
-            self.tree.insert('', tk.END, iid=str(reset['id']),
-                           values=(reset['command'], desc))
+            iid = str(reset['id'])
+
+            if cmd == 'M':
+                # Root-level mob spawn
+                self.tree.insert('', tk.END, iid=iid,
+                                 values=(cmd, desc), tags=('mob',), open=True)
+                current_mob_iid = iid
+            elif cmd in ('G', 'E'):
+                # Child of last M command
+                parent = current_mob_iid if current_mob_iid else ''
+                tag = 'give'
+                self.tree.insert(parent, tk.END, iid=iid,
+                                 values=(cmd, desc), tags=(tag,))
+            elif cmd == 'O':
+                # Root-level object spawn
+                self.tree.insert('', tk.END, iid=iid,
+                                 values=(cmd, desc), tags=('obj',))
+                current_mob_iid = ''  # O breaks mob chain
+            elif cmd in ('D', 'R'):
+                # Root-level door/random
+                self.tree.insert('', tk.END, iid=iid,
+                                 values=(cmd, desc), tags=('door',))
+                current_mob_iid = ''
+            else:
+                self.tree.insert('', tk.END, iid=iid,
+                                 values=(cmd, desc))
+                current_mob_iid = ''
 
         self.count_var.set(f"{len(entries)} resets")
         self.on_status(f"Loaded {len(entries)} resets")
