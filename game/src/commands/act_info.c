@@ -1536,13 +1536,13 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 		if ( !IS_NPC( ch ) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch )
 			continue;
 		if ( can_see_obj( ch, obj ) ) {
-			pdesc = get_extra_descr( arg1, obj->extra_descr );
+			pdesc = get_extra_descr( arg1, &obj->extra_descr );
 			if ( pdesc != NULL ) {
 				send_to_char( pdesc, ch );
 				return;
 			}
 
-			pdesc = get_extra_descr( arg1, obj->pIndexData->extra_descr );
+			pdesc = get_extra_descr( arg1, &obj->pIndexData->extra_descr );
 			if ( pdesc != NULL ) {
 				send_to_char( pdesc, ch );
 				return;
@@ -1560,13 +1560,13 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 		if ( !IS_NPC( ch ) && ch->pcdata->chobj != NULL && obj->chobj != NULL && obj->chobj == ch )
 			continue;
 		if ( can_see_obj( ch, obj ) ) {
-			pdesc = get_extra_descr( arg1, obj->extra_descr );
+			pdesc = get_extra_descr( arg1, &obj->extra_descr );
 			if ( pdesc != NULL ) {
 				send_to_char( pdesc, ch );
 				return;
 			}
 
-			pdesc = get_extra_descr( arg1, obj->pIndexData->extra_descr );
+			pdesc = get_extra_descr( arg1, &obj->pIndexData->extra_descr );
 			if ( pdesc != NULL ) {
 				send_to_char( pdesc, ch );
 				return;
@@ -1580,7 +1580,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	pdesc = get_extra_descr( arg1, ch->in_room->extra_descr );
+	pdesc = get_extra_descr( arg1, &ch->in_room->extra_descr );
 	if ( pdesc != NULL ) {
 		send_to_char( pdesc, ch );
 		return;

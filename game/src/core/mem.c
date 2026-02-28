@@ -154,6 +154,8 @@ ROOM_INDEX_DATA *new_room_index( void ) {
 
 	list_init( &pRoom->characters );
 	list_init( &pRoom->objects );
+	list_init( &pRoom->extra_descr );
+	list_init( &pRoom->roomtext );
 	pRoom->name = str_dup( "" );
 	pRoom->description = str_dup( "" );
 
@@ -163,7 +165,7 @@ ROOM_INDEX_DATA *new_room_index( void ) {
 void free_room_index( ROOM_INDEX_DATA *pRoom ) {
 	int door;
 	EXTRA_DESCR_DATA *pExtra;
-	EXTRA_DESCR_DATA *pExtra_next;
+	EXTRA_DESCR_DATA *pExtra_tmp;
 	RESET_DATA *pReset;
 	RESET_DATA *pReset_next;
 
@@ -177,8 +179,8 @@ void free_room_index( ROOM_INDEX_DATA *pRoom ) {
 			free_exit( pRoom->exit[door] );
 	}
 
-	for ( pExtra = pRoom->extra_descr; pExtra; pExtra = pExtra_next ) {
-		pExtra_next = pExtra->next;
+	LIST_FOR_EACH_SAFE( pExtra, pExtra_tmp, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
+		list_remove( &pRoom->extra_descr, &pExtra->node );
 		free_extra_descr( pExtra );
 	}
 
@@ -241,6 +243,7 @@ OBJ_INDEX_DATA *new_obj_index( void ) {
 	top_obj_index++;
 
 	list_init( &pObj->affects );
+	list_init( &pObj->extra_descr );
 	pObj->name = str_dup( "no name" );
 	pObj->short_descr = str_dup( "(no short description)" );
 	pObj->description = str_dup( "(no description)" );
@@ -251,7 +254,7 @@ OBJ_INDEX_DATA *new_obj_index( void ) {
 
 void free_obj_index( OBJ_INDEX_DATA *pObj ) {
 	EXTRA_DESCR_DATA *pExtra;
-	EXTRA_DESCR_DATA *pExtra_next;
+	EXTRA_DESCR_DATA *pExtra_tmp;
 	AFFECT_DATA *pAf;
 	AFFECT_DATA *pAf_next;
 
@@ -266,8 +269,8 @@ void free_obj_index( OBJ_INDEX_DATA *pObj ) {
 		free_affect( pAf );
 	}
 
-	for ( pExtra = pObj->extra_descr; pExtra; pExtra = pExtra_next ) {
-		pExtra_next = pExtra->next;
+	LIST_FOR_EACH_SAFE( pExtra, pExtra_tmp, &pObj->extra_descr, EXTRA_DESCR_DATA, node ) {
+		list_remove( &pObj->extra_descr, &pExtra->node );
 		free_extra_descr( pExtra );
 	}
 

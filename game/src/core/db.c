@@ -147,7 +147,7 @@ void mud_init_paths( const char *exe_path ) {
  */
 SHOP_DATA *shop_first;
 SHOP_DATA *shop_last;
-list_head_t dummy_list;
+list_head_t g_dns_lookups;
 
 char bug_buf[MAX_STRING_LENGTH];
 list_head_t g_characters;
@@ -322,7 +322,7 @@ void boot_db( bool fCopyOver ) {
 	list_init( &g_helps );
 	list_init( &disabled_list );
 	list_init( &ban_list );
-	list_init( &dummy_list );
+	list_init( &g_dns_lookups );
 
 	/*
 	 * Init random number generator.
@@ -1075,6 +1075,7 @@ OBJ_DATA *create_object( OBJ_INDEX_DATA *pObjIndex, int level ) {
 	list_node_init( &obj->content_node );
 	list_init( &obj->affects );
 	list_init( &obj->contents );
+	list_init( &obj->extra_descr );
 	obj->pIndexData = pObjIndex;
 	obj->in_room = NULL;
 	obj->level = level;
@@ -1308,7 +1309,7 @@ void free_char( CHAR_DATA *ch ) {
 	AFFECT_DATA *paf;
 	AFFECT_DATA *paf_next;
 	ALIAS_DATA *ali;
-	ALIAS_DATA *ali_next;
+	ALIAS_DATA *ali_tmp;
 
 	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
 		extract_obj( obj );
@@ -1335,8 +1336,7 @@ void free_char( CHAR_DATA *ch ) {
 	free(ch->hunting);
 
 	if ( ch->pcdata != NULL ) {
-		for ( ali = ch->pcdata->alias; ali; ali = ali_next ) {
-			ali_next = ali->next;
+		LIST_FOR_EACH_SAFE( ali, ali_tmp, &ch->pcdata->aliases, ALIAS_DATA, node ) {
 			alias_remove( ch, ali );
 		}
 
@@ -1364,8 +1364,9 @@ void free_char( CHAR_DATA *ch ) {
 /*
  * Get an extra description from a list.
  */
-char *get_extra_descr( char *name, EXTRA_DESCR_DATA *ed ) {
-	for ( ; ed != NULL; ed = ed->next ) {
+char *get_extra_descr( char *name, list_head_t *ed_list ) {
+	EXTRA_DESCR_DATA *ed;
+	LIST_FOR_EACH( ed, ed_list, EXTRA_DESCR_DATA, node ) {
 		if ( is_name( name, ed->keyword ) )
 			return ed->description;
 	}

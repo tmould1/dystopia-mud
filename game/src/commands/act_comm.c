@@ -800,7 +800,7 @@ void room_text( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_INPUT_LENGTH];
 	char arg2[MAX_INPUT_LENGTH];
 
-	for ( rt = ch->in_room->roomtext; rt != NULL; rt = rt->next ) {
+	LIST_FOR_EACH( rt, &ch->in_room->roomtext, ROOMTEXT_DATA, node ) {
 		if ( !strcmp( argument, rt->input ) || is_in( argument, rt->input ) || all_in( argument, rt->input ) ) {
 			if ( rt->name != NULL && rt->name[0] != '\0' && str_cmp( rt->name, "all" ) && str_cmp( rt->name, "|all*" ) )
 				if ( !is_in( ch->name, rt->name ) ) continue;

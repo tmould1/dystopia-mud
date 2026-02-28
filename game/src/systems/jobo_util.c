@@ -975,14 +975,14 @@ void update_arena() {
 	}
 }
 
-void recycle_dummys() {
-	DUMMY_ARG *dummy;
-	DUMMY_ARG *dummy_tmp;
+void recycle_dns_lookups() {
+	DNS_LOOKUP *dns;
+	DNS_LOOKUP *dns_next;
 
-	LIST_FOR_EACH_SAFE( dummy, dummy_tmp, &dummy_list, DUMMY_ARG, node ) {
-		if ( dummy->status == 1 ) continue; // being used
+	LIST_FOR_EACH_SAFE( dns, dns_next, &g_dns_lookups, DNS_LOOKUP, node ) {
+		if ( dns->status == 1 ) continue; // being used
 
-		list_remove( &dummy_list, &dummy->node );
-		free( dummy );
+		list_remove( &g_dns_lookups, &dns->node );
+		free( dns );
 	}
 }

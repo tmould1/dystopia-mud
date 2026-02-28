@@ -546,7 +546,7 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 		pObjIndex->specpower   = sqlite3_column_int( stmt, 20 );
 
 		list_init( &pObjIndex->affects );
-		pObjIndex->extra_descr = NULL;
+		list_init( &pObjIndex->extra_descr );
 
 		/* Load affects */
 		if ( af_stmt ) {
@@ -577,7 +577,6 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 			sqlite3_bind_int( ed_stmt, 1, vnum );
 			while ( sqlite3_step( ed_stmt ) == SQLITE_ROW ) {
 				EXTRA_DESCR_DATA *ed;
-				EXTRA_DESCR_DATA **ed_last;
 
 				ed = calloc( 1, sizeof( *ed ) );
 				if ( !ed ) {
@@ -586,11 +585,8 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 				}
 				ed->keyword     = str_dup( col_text( ed_stmt, 0 ) );
 				ed->description = str_dup( col_text( ed_stmt, 1 ) );
-				ed->next        = NULL;
 
-				for ( ed_last = &pObjIndex->extra_descr; *ed_last;
-					  ed_last = &( *ed_last )->next );
-				*ed_last = ed;
+				list_push_back( &pObjIndex->extra_descr, &ed->node );
 				top_ed++;
 			}
 		}
@@ -668,7 +664,7 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		}
 		list_init( &pRoomIndex->characters );
 		list_init( &pRoomIndex->objects );
-		pRoomIndex->extra_descr = NULL;
+		list_init( &pRoomIndex->extra_descr );
 		pRoomIndex->area        = pArea;
 		pRoomIndex->vnum        = vnum;
 		pRoomIndex->name        = str_dup( col_text( stmt, 1 ) );
@@ -677,7 +673,7 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		pRoomIndex->sector_type = sqlite3_column_int( stmt, 4 );
 		pRoomIndex->light       = 0;
 		pRoomIndex->blood       = 0;
-		pRoomIndex->roomtext    = NULL;
+		list_init( &pRoomIndex->roomtext );
 
 		for ( door = 0; door <= 4; door++ ) {
 			pRoomIndex->track[door]     = str_dup( "" );
@@ -720,7 +716,6 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 			sqlite3_bind_int( ed_stmt, 1, vnum );
 			while ( sqlite3_step( ed_stmt ) == SQLITE_ROW ) {
 				EXTRA_DESCR_DATA *ed;
-				EXTRA_DESCR_DATA **ed_last;
 
 				ed = calloc( 1, sizeof( *ed ) );
 				if ( !ed ) {
@@ -729,11 +724,8 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 				}
 				ed->keyword     = str_dup( col_text( ed_stmt, 0 ) );
 				ed->description = str_dup( col_text( ed_stmt, 1 ) );
-				ed->next        = NULL;
 
-				for ( ed_last = &pRoomIndex->extra_descr; *ed_last;
-					  ed_last = &( *ed_last )->next );
-				*ed_last = ed;
+				list_push_back( &pRoomIndex->extra_descr, &ed->node );
 				top_ed++;
 			}
 		}
@@ -744,7 +736,6 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 			sqlite3_bind_int( rt_stmt, 1, vnum );
 			while ( sqlite3_step( rt_stmt ) == SQLITE_ROW ) {
 				ROOMTEXT_DATA *rt;
-				ROOMTEXT_DATA **rt_last;
 
 				rt = calloc( 1, sizeof( *rt ) );
 				if ( !rt ) {
@@ -758,11 +749,8 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 				rt->type     = sqlite3_column_int( rt_stmt, 4 );
 				rt->power    = sqlite3_column_int( rt_stmt, 5 );
 				rt->mob      = sqlite3_column_int( rt_stmt, 6 );
-				rt->next     = NULL;
 
-				for ( rt_last = &pRoomIndex->roomtext; *rt_last;
-					  rt_last = &( *rt_last )->next );
-				*rt_last = rt;
+				list_push_back( &pRoomIndex->roomtext, &rt->node );
 				top_rt++;
 			}
 		}
@@ -1180,7 +1168,7 @@ static void sql_save_objects( sqlite3 *db, AREA_DATA *pArea ) {
 
 		/* Save extra descriptions */
 		order = 0;
-		for ( ed = pObjIndex->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pObjIndex->extra_descr, EXTRA_DESCR_DATA, node ) {
 			sqlite3_reset( ed_stmt );
 			sqlite3_bind_int( ed_stmt, 1, vnum );
 			sqlite3_bind_text( ed_stmt, 2, ed->keyword, -1, SQLITE_TRANSIENT );
@@ -1260,7 +1248,7 @@ static void sql_save_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 
 		/* Save extra descriptions */
 		order = 0;
-		for ( ed = pRoomIndex->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pRoomIndex->extra_descr, EXTRA_DESCR_DATA, node ) {
 			sqlite3_reset( ed_stmt );
 			sqlite3_bind_int( ed_stmt, 1, vnum );
 			sqlite3_bind_text( ed_stmt, 2, ed->keyword, -1, SQLITE_TRANSIENT );
@@ -1271,7 +1259,7 @@ static void sql_save_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 
 		/* Save room texts */
 		order = 0;
-		for ( rt = pRoomIndex->roomtext; rt; rt = rt->next ) {
+		LIST_FOR_EACH( rt, &pRoomIndex->roomtext, ROOMTEXT_DATA, node ) {
 			sqlite3_reset( rt_stmt );
 			sqlite3_bind_int( rt_stmt, 1, vnum );
 			sqlite3_bind_text( rt_stmt, 2, rt->input, -1, SQLITE_TRANSIENT );

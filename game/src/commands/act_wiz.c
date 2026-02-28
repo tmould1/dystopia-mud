@@ -681,14 +681,15 @@ void do_rstat( CHAR_DATA *ch, char *argument ) {
 		location->description );
 	send_to_char( buf, ch );
 
-	if ( location->extra_descr != NULL ) {
+	if ( !list_empty( &location->extra_descr ) ) {
 		EXTRA_DESCR_DATA *ed;
+		bool first = TRUE;
 
 		send_to_char( "Extra description keywords: '", ch );
-		for ( ed = location->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &location->extra_descr, EXTRA_DESCR_DATA, node ) {
+			if ( !first ) send_to_char( " ", ch );
 			send_to_char( ed->keyword, ch );
-			if ( ed->next != NULL )
-				send_to_char( " ", ch );
+			first = FALSE;
 		}
 		send_to_char( "'.\n\r", ch );
 	}
@@ -812,21 +813,22 @@ void do_ostat( CHAR_DATA *ch, char *argument ) {
 		obj->value[0], obj->value[1], obj->value[2], obj->value[3] );
 	send_to_char( buf, ch );
 
-	if ( obj->extra_descr != NULL || obj->pIndexData->extra_descr != NULL ) {
+	if ( !list_empty( &obj->extra_descr ) || !list_empty( &obj->pIndexData->extra_descr ) ) {
 		EXTRA_DESCR_DATA *ed;
+		bool first = TRUE;
 
 		send_to_char( "Extra description keywords: '", ch );
 
-		for ( ed = obj->extra_descr; ed != NULL; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &obj->extra_descr, EXTRA_DESCR_DATA, node ) {
+			if ( !first ) send_to_char( " ", ch );
 			send_to_char( ed->keyword, ch );
-			if ( ed->next != NULL )
-				send_to_char( " ", ch );
+			first = FALSE;
 		}
 
-		for ( ed = obj->pIndexData->extra_descr; ed != NULL; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &obj->pIndexData->extra_descr, EXTRA_DESCR_DATA, node ) {
+			if ( !first ) send_to_char( " ", ch );
 			send_to_char( ed->keyword, ch );
-			if ( ed->next != NULL )
-				send_to_char( " ", ch );
+			first = FALSE;
 		}
 
 		send_to_char( "'.\n\r", ch );
@@ -2530,8 +2532,7 @@ void do_oset( CHAR_DATA *ch, char *argument ) {
 
 		ed->keyword = str_dup( arg3 );
 		ed->description = str_dup( argument );
-		ed->next = obj->extra_descr;
-		obj->extra_descr = ed;
+		list_push_front( &obj->extra_descr, &ed->node );
 		send_to_char( "Ok.\n\r", ch );
 		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->name );

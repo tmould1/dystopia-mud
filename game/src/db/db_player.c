@@ -772,7 +772,7 @@ static void save_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		}
 
 		/* Extra descriptions */
-		for ( ed = obj->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &obj->extra_descr, EXTRA_DESCR_DATA, node ) {
 			sqlite3_reset( ed_stmt );
 			sqlite3_bind_int64( ed_stmt, 1, obj_id );
 			sqlite3_bind_text( ed_stmt, 2, ed->keyword, -1, SQLITE_TRANSIENT );
@@ -1046,7 +1046,7 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 	{
 		const char *al_sql = "INSERT INTO aliases (short_n, long_n) VALUES (?,?)";
 		if ( sqlite3_prepare_v2( db, al_sql, -1, &stmt, NULL ) == SQLITE_OK ) {
-			for ( ali = ch->pcdata->alias; ali; ali = ali->next ) {
+			LIST_FOR_EACH( ali, &ch->pcdata->aliases, ALIAS_DATA, node ) {
 				sqlite3_reset( stmt );
 				sqlite3_bind_text( stmt, 1, ali->short_n, -1, SQLITE_TRANSIENT );
 				sqlite3_bind_text( stmt, 2, ali->long_n, -1, SQLITE_TRANSIENT );
@@ -1229,6 +1229,7 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 		exit( 1 );
 	}
 	/* calloc already zeroes memory, no need for pcdata_zero */
+	list_init( &ch->pcdata->aliases );
 
 	d->character = ch;
 	ch->desc = d;
@@ -1734,9 +1735,7 @@ static void load_player_aliases( sqlite3 *db, CHAR_DATA *ch ) {
 		}
 		ali->short_n = str_dup( col_text( stmt, 0 ) );
 		ali->long_n = str_dup( col_text( stmt, 1 ) );
-		ali->next = ch->pcdata->alias;
-		ch->pcdata->alias = ali;
-		ch->pcdata->alias_count++;
+		list_push_front( &ch->pcdata->aliases, &ali->node );
 	}
 
 	sqlite3_finalize( stmt );
@@ -1951,8 +1950,7 @@ static void load_player_objects( sqlite3 *db, CHAR_DATA *ch ) {
 			}
 			ed->keyword = str_dup( col_text( ed_stmt, 0 ) );
 			ed->description = str_dup( col_text( ed_stmt, 1 ) );
-			ed->next = obj->extra_descr;
-			obj->extra_descr = ed;
+			list_push_front( &obj->extra_descr, &ed->node );
 		}
 
 		/* Link into global object list */

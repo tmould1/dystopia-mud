@@ -889,14 +889,15 @@ bool redit_show( CHAR_DATA *ch, char *argument ) {
 		flag_string( room_flags, pRoom->room_flags ) );
 	strcat( buf1, buf );
 
-	if ( pRoom->extra_descr ) {
+	if ( !list_empty( &pRoom->extra_descr ) ) {
 		EXTRA_DESCR_DATA *ed;
+		bool first = TRUE;
 
 		strcat( buf1, "Desc Kwds:  [" );
-		for ( ed = pRoom->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
+			if ( !first ) strcat( buf1, " " );
 			strcat( buf1, ed->keyword );
-			if ( ed->next )
-				strcat( buf1, " " );
+			first = FALSE;
 		}
 		strcat( buf1, "]\n\r" );
 	}
@@ -1345,8 +1346,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 		ed = new_extra_descr();
 		ed->keyword = str_dup( keyword );
 		ed->description = str_dup( "" );
-		ed->next = pRoom->extra_descr;
-		pRoom->extra_descr = ed;
+		list_push_front( &pRoom->extra_descr, &ed->node );
 
 		string_append( ch, &ed->description );
 
@@ -1359,7 +1359,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		for ( ed = pRoom->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
 		}
@@ -1375,17 +1375,14 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( command, "delete" ) ) {
-		EXTRA_DESCR_DATA *ped = NULL;
-
 		if ( keyword[0] == '\0' ) {
 			send_to_char( "Syntax:  ed delete [keyword]\n\r", ch );
 			return FALSE;
 		}
 
-		for ( ed = pRoom->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
-			ped = ed;
 		}
 
 		if ( !ed ) {
@@ -1393,11 +1390,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		if ( !ped )
-			pRoom->extra_descr = ed->next;
-		else
-			ped->next = ed->next;
-
+		list_remove( &pRoom->extra_descr, &ed->node );
 		free_extra_descr( ed );
 
 		send_to_char( "Extra description deleted.\n\r", ch );
@@ -1410,7 +1403,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		for ( ed = pRoom->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
 		}
@@ -2201,12 +2194,12 @@ bool oedit_show( CHAR_DATA *ch, char *argument ) {
 		pObj->weight, pObj->cost );
 	send_to_char( buf, ch );
 
-	if ( pObj->extra_descr ) {
+	if ( !list_empty( &pObj->extra_descr ) ) {
 		EXTRA_DESCR_DATA *ed;
 
 		send_to_char( "Ex desc kwd: ", ch );
 
-		for ( ed = pObj->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pObj->extra_descr, EXTRA_DESCR_DATA, node ) {
 			send_to_char( "[", ch );
 			send_to_char( ed->keyword, ch );
 			send_to_char( "]", ch );
@@ -2539,8 +2532,7 @@ bool oedit_ed( CHAR_DATA *ch, char *argument ) {
 
 		ed = new_extra_descr();
 		ed->keyword = str_dup( keyword );
-		ed->next = pObj->extra_descr;
-		pObj->extra_descr = ed;
+		list_push_front( &pObj->extra_descr, &ed->node );
 
 		string_append( ch, &ed->description );
 
@@ -2553,7 +2545,7 @@ bool oedit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		for ( ed = pObj->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pObj->extra_descr, EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
 		}
@@ -2569,17 +2561,14 @@ bool oedit_ed( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( command, "delete" ) ) {
-		EXTRA_DESCR_DATA *ped = NULL;
-
 		if ( keyword[0] == '\0' ) {
 			send_to_char( "Syntax:  ed delete [keyword]\n\r", ch );
 			return FALSE;
 		}
 
-		for ( ed = pObj->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pObj->extra_descr, EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
-			ped = ed;
 		}
 
 		if ( !ed ) {
@@ -2587,11 +2576,7 @@ bool oedit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		if ( !ped )
-			pObj->extra_descr = ed->next;
-		else
-			ped->next = ed->next;
-
+		list_remove( &pObj->extra_descr, &ed->node );
 		free_extra_descr( ed );
 
 		send_to_char( "Extra description deleted.\n\r", ch );
@@ -2599,19 +2584,15 @@ bool oedit_ed( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( command, "format" ) ) {
-		EXTRA_DESCR_DATA *ped = NULL;
-
 		if ( keyword[0] == '\0' ) {
 			send_to_char( "Syntax:  ed format [keyword]\n\r", ch );
 			return FALSE;
 		}
 
-		for ( ed = pObj->extra_descr; ed; ed = ed->next ) {
+		LIST_FOR_EACH( ed, &pObj->extra_descr, EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
-			ped = ed;
 		}
-		(void) ped; /* Suppress unused warning */
 
 		if ( !ed ) {
 			send_to_char( "OEdit:  Extra description keyword not found.\n\r", ch );

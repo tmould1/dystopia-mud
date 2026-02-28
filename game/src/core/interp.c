@@ -1557,7 +1557,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_NPC( ch ) ) {
 		ALIAS_DATA *ali;
 
-		for ( ali = ch->pcdata->alias; ali; ali = ali->next ) {
+		LIST_FOR_EACH( ali, &ch->pcdata->aliases, ALIAS_DATA, node ) {
 			if ( !str_cmp( command, ali->short_n ) ) {
 				snprintf( buf, sizeof( buf ), "%s %s", ali->long_n, argument );
 				interpret( ch, buf );

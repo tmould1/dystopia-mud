@@ -1365,7 +1365,7 @@ void do_alias( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You must be at the Temple Altar of Midgaard to create a new alias.\n\r", ch );
 		return;
 	}
-	if ( ch->pcdata->alias_count >= MAX_ALIAS ) {
+	if ( list_count( &ch->pcdata->aliases ) >= MAX_ALIAS ) {
 		send_to_char( "Sorry, you have reached the limit for aliases, you need to remove some before you can make more.\n\r", ch );
 		return;
 	}
@@ -1390,7 +1390,7 @@ void do_alias( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You really shouldn't alias the alias commands.\n\r", ch );
 		return;
 	}
-	for ( ali = ch->pcdata->alias; ali; ali = ali->next ) {
+	LIST_FOR_EACH( ali, &ch->pcdata->aliases, ALIAS_DATA, node ) {
 		if ( !str_cmp( arg1, ali->short_n ) ) {
 			send_to_char( "You already have such an alias.\n\r", ch );
 			return;
@@ -1407,9 +1407,7 @@ void do_alias( CHAR_DATA *ch, char *argument ) {
 	}
 	ali->short_n = str_dup( arg1 );
 	ali->long_n = str_dup( argument );
-	ali->next = ch->pcdata->alias;
-	ch->pcdata->alias = ali;
-	ch->pcdata->alias_count++;
+	list_push_front( &ch->pcdata->aliases, &ali->node );
 	send_to_char( "Ok.\n\r", ch );
 	return;
 }
@@ -1421,7 +1419,7 @@ void do_showalias( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	for ( ali = ch->pcdata->alias; ali; ali = ali->next ) {
+	LIST_FOR_EACH( ali, &ch->pcdata->aliases, ALIAS_DATA, node ) {
 		found = TRUE;
 		snprintf( buf, sizeof( buf ), "%s '%s'\n\r", ali->short_n, ali->long_n );
 		send_to_char( buf, ch );
@@ -1442,11 +1440,10 @@ void do_removealias( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Remove which alias?\n\r", ch );
 		return;
 	}
-	for ( ali = ch->pcdata->alias; ali; ali = ali->next ) {
+	LIST_FOR_EACH( ali, &ch->pcdata->aliases, ALIAS_DATA, node ) {
 		if ( !str_cmp( arg, ali->short_n ) ) {
 			alias_remove( ch, ali );
 			send_to_char( "Alias removed.\n\r", ch );
-			ch->pcdata->alias_count--;
 			return;
 		}
 	}

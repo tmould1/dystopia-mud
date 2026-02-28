@@ -627,26 +627,11 @@ void affect_to_char( CHAR_DATA *ch, AFFECT_DATA *paf ) {
 
 void alias_remove( CHAR_DATA *ch, ALIAS_DATA *ali ) {
 	if ( IS_NPC( ch ) ) return;
-	if ( ch->pcdata->alias == NULL ) {
+	if ( list_empty( &ch->pcdata->aliases ) ) {
 		bug( "Alias_remove: no alias.", 0 );
 		return;
 	}
-	if ( ali == ch->pcdata->alias ) {
-		ch->pcdata->alias = ali->next;
-	} else {
-		ALIAS_DATA *prev;
-
-		for ( prev = ch->pcdata->alias; prev; prev = prev->next ) {
-			if ( prev->next == ali ) {
-				prev->next = ali->next;
-				break;
-			}
-		}
-		if ( prev == NULL ) {
-			bug( "Alias_remove: cannot find ali.", 0 );
-			return;
-		}
-	}
+	list_remove( &ch->pcdata->aliases, &ali->node );
 	free(ali->short_n);
 	free(ali->long_n);
 	free( ali );
@@ -1641,14 +1626,12 @@ void extract_obj( OBJ_DATA *obj ) {
 
 	{
 		EXTRA_DESCR_DATA *ed;
-		EXTRA_DESCR_DATA *ed_next;
+		EXTRA_DESCR_DATA *ed_tmp;
 
-		for ( ed = obj->extra_descr; ed != NULL; ed = ed_next ) {
-			ed_next = ed->next;
-
+		LIST_FOR_EACH_SAFE( ed, ed_tmp, &obj->extra_descr, EXTRA_DESCR_DATA, node ) {
+			list_remove( &obj->extra_descr, &ed->node );
 			free(ed->description);
 			free(ed->keyword);
-
 			free( ed );
 		}
 	}

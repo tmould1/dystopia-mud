@@ -102,7 +102,7 @@ typedef struct l_board LEADER_BOARD;
 
 typedef struct editor_data EDITOR_DATA;
 
-typedef struct dummy_arg DUMMY_ARG;
+typedef struct dns_lookup DNS_LOOKUP;
 typedef struct descriptor_data DESCRIPTOR_DATA;
 typedef struct exit_data EXIT_DATA;
 typedef struct extra_descr_data EXTRA_DESCR_DATA;
@@ -527,9 +527,9 @@ typedef enum {
 #define MAX_RTIMER				30
 
 /*
- * Needed for threads - Jobo
+ * DNS reverse-lookup task, passed to a worker thread.
  */
-struct dummy_arg {
+struct dns_lookup {
 	list_node_t node;
 	DESCRIPTOR_DATA *d;
 	char *buf;
@@ -680,7 +680,7 @@ struct affect_data {
  * An alias
  */
 struct alias_data {
-	ALIAS_DATA *next;
+	list_node_t node;
 	char *short_n;
 	char *long_n;
 };
@@ -2248,7 +2248,7 @@ struct pc_data {
 	BOARD_DATA *board;			 /* The current board */
 	time_t last_note[MAX_BOARD]; /* last note for the boards */
 	NOTE_DATA *in_progress;
-	ALIAS_DATA *alias;
+	list_head_t aliases;
 	char *last_decap[2];
 	char *pwd;
 	char *bamfin;
@@ -2265,7 +2265,6 @@ struct pc_data {
 	char *avatarmessage;
 	char *tiemessage;
 	int revision;
-	int alias_count;
 	int rune_count;
 	int souls;
 	int upgrade_level;
@@ -2346,7 +2345,7 @@ struct liq_type {
  * Extra description data for a room or object.
  */
 struct extra_descr_data {
-	EXTRA_DESCR_DATA *next; /* Next in list                     */
+	list_node_t node;
 	char *keyword;			/* Keyword in look/examine          */
 	char *description;		/* What to see                      */
 };
@@ -2356,7 +2355,7 @@ struct extra_descr_data {
  */
 struct obj_index_data {
 	OBJ_INDEX_DATA *next;
-	EXTRA_DESCR_DATA *extra_descr;
+	list_head_t extra_descr;
 	list_head_t affects;
 	AREA_DATA *area; /* OLC */
 	char *name;
@@ -2400,7 +2399,7 @@ struct obj_data {
 	OBJ_DATA *in_obj;
 	CHAR_DATA *carried_by;
 	CHAR_DATA *chobj;
-	EXTRA_DESCR_DATA *extra_descr;
+	list_head_t extra_descr;
 	list_head_t affects;
 	OBJ_INDEX_DATA *pIndexData;
 	ROOM_INDEX_DATA *in_room;
@@ -2463,7 +2462,7 @@ typedef struct roomtext_data {
 	char *output;
 	char *choutput;
 	char *name;
-	struct roomtext_data *next;
+	list_node_t node;
 } ROOMTEXT_DATA;
 
 /*
@@ -2534,10 +2533,10 @@ struct room_index_data {
 	ROOM_INDEX_DATA *next_room;
 	list_head_t characters;
 	list_head_t objects;
-	EXTRA_DESCR_DATA *extra_descr;
+	list_head_t extra_descr;
 	AREA_DATA *area;
 	EXIT_DATA *exit[6];
-	ROOMTEXT_DATA *roomtext;
+	list_head_t roomtext;
 	RESET_DATA *reset_first; /* OLC */
 	RESET_DATA *reset_last;	 /* OLC */
 
@@ -2857,7 +2856,7 @@ extern list_head_t g_descriptors;
 extern list_head_t g_objects;
 
 extern ROOM_INDEX_DATA *room_list;
-extern list_head_t dummy_list;
+extern list_head_t g_dns_lookups;
 extern char bug_buf[];
 extern time_t current_time;
 extern time_t boot_time;
@@ -4033,6 +4032,9 @@ void logchan ( char *argument );
 void close_arena (void);
 void open_arena (void);
 
+/* jobo_util.c */
+void recycle_dns_lookups (void);
+
 /* build.c */
 
 char *copy_buffer ( CHAR_DATA * ch );
@@ -4124,8 +4126,7 @@ CHAR_DATA *create_mobile ( MOB_INDEX_DATA * pMobIndex );
 OBJ_DATA *create_object ( OBJ_INDEX_DATA * pObjIndex, int level );
 void clear_char ( CHAR_DATA * ch );
 void free_char ( CHAR_DATA * ch );
-char *get_extra_descr ( char *name, EXTRA_DESCR_DATA *ed );
-char *get_roomtext ( const char *name, ROOMTEXT_DATA *rt );
+char *get_extra_descr ( char *name, list_head_t *ed_list );
 MOB_INDEX_DATA *get_mob_index ( int vnum );
 OBJ_INDEX_DATA *get_obj_index ( int vnum );
 ROOM_INDEX_DATA *get_room_index ( int vnum );

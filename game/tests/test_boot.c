@@ -372,6 +372,7 @@ void test_boot_login_char_safe( void ) {
 	ch = calloc( 1, sizeof( *ch ) );
 	clear_char( ch );
 	ch->pcdata = calloc( 1, sizeof( *ch->pcdata ) );
+	list_init( &ch->pcdata->aliases );
 	d->character = ch;
 	ch->desc = d;
 	ch->name = str_dup( "TestLogin" );
