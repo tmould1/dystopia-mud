@@ -3109,7 +3109,8 @@ void do_inventory( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You are not a container.\n\r", ch );
 		return;
 	} else if ( !IS_NPC( ch ) && IS_EXTRA( ch, EXTRA_OSWITCH ) ) {
-		if ( !IS_NPC( ch ) && ( obj = ch->pcdata->chobj ) == NULL ) {
+		obj = ch->pcdata->chobj;
+		if ( obj == NULL ) {
 			send_to_char( "You are not a container.\n\r", ch );
 			return;
 		}

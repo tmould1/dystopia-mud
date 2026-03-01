@@ -221,7 +221,6 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 	char kav[MAX_STRING_LENGTH];
 	CHAR_DATA *ch = d->character;
 	char *strtime;
-	bool fOld;
 	int i;
 
 #if defined( unix )
@@ -255,7 +254,7 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 		snprintf( kav, sizeof( kav ), "%s", ch->pcdata->switchname );
 		free_char( d->character );
 		d->character = NULL;
-		fOld = load_char_obj( d, kav );
+		load_char_obj( d, kav );
 		ch = d->character;
 	}
 

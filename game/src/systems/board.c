@@ -60,14 +60,14 @@
 BOARD_DATA boards[MAX_BOARD] =
 	{
 
-		{ "General", "General discussion", 0, 2, "all", DEF_INCLUDE, 14, {0}, FALSE },
-		{ "Ideas", "Suggestion for improvement", 0, 2, "all", DEF_NORMAL, 14, {0}, FALSE },
-		{ "Announce", "Announcements from Immortals", 0, 8, "all", DEF_NORMAL, 60, {0}, FALSE },
-		{ "Bugs", "Typos, bugs, errors", 2, 2, "imm", DEF_INCLUDE, 60, {0}, FALSE },
-		{ "Personal", "Personal messages", 0, 2, "all", DEF_EXCLUDE, 14, {0}, FALSE },
-		{ "Immortal", "Immortal Board", 8, 8, "imm", DEF_INCLUDE, 60, {0}, FALSE },
-		{ "Builder", "Builder Board", 7, 7, "imm", DEF_INCLUDE, 20, {0}, FALSE },
-		{ "Kingdom", "Kingdom messages", 0, 2, "all", DEF_EXCLUDE, 20, {0}, FALSE } };
+		{ "General", "General discussion", 0, 2, "all", DEF_INCLUDE, 14, {{0}}, FALSE },
+		{ "Ideas", "Suggestion for improvement", 0, 2, "all", DEF_NORMAL, 14, {{0}}, FALSE },
+		{ "Announce", "Announcements from Immortals", 0, 8, "all", DEF_NORMAL, 60, {{0}}, FALSE },
+		{ "Bugs", "Typos, bugs, errors", 2, 2, "imm", DEF_INCLUDE, 60, {{0}}, FALSE },
+		{ "Personal", "Personal messages", 0, 2, "all", DEF_EXCLUDE, 14, {{0}}, FALSE },
+		{ "Immortal", "Immortal Board", 8, 8, "imm", DEF_INCLUDE, 60, {{0}}, FALSE },
+		{ "Builder", "Builder Board", 7, 7, "imm", DEF_INCLUDE, 20, {{0}}, FALSE },
+		{ "Kingdom", "Kingdom messages", 0, 2, "all", DEF_EXCLUDE, 20, {{0}}, FALSE } };
 
 /* The prompt that the character is given after finishing a note with ~ or END */
 const char *szFinishPrompt = "(" BOLD "C" NO_COLOR ")ontinue, (" BOLD "V" NO_COLOR ")iew, (" BOLD "P" NO_COLOR ")ost or (" BOLD "F" NO_COLOR ")orget it?";

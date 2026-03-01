@@ -73,7 +73,7 @@ char *area_name( AREA_DATA *pArea ) {
 	return buffer;
 }
 
-void room_pair( ROOM_INDEX_DATA *left, ROOM_INDEX_DATA *right, exit_status ex, char *buffer ) {
+void room_pair( ROOM_INDEX_DATA *left, ROOM_INDEX_DATA *right, exit_status ex, char *buffer, size_t bufsize ) {
 	char *sExit;
 
 	switch ( ex ) {
@@ -90,7 +90,7 @@ void room_pair( ROOM_INDEX_DATA *left, ROOM_INDEX_DATA *right, exit_status ex, c
 		sExit = "<>";
 		break;
 	}
-	snprintf( buffer, sizeof( buffer ), "%5d %-26.26s %s%5d %-26.26s(%-8.8s)\n\r",
+	snprintf( buffer, bufsize, "%5d %-26.26s %s%5d %-26.26s(%-8.8s)\n\r",
 		left->vnum, left->name, sExit, right->vnum, right->name, area_name( right->area ) );
 	return;
 }
@@ -113,14 +113,14 @@ void checkexits( ROOM_INDEX_DATA *room, AREA_DATA *pArea, char *buffer ) {
 		if ( to_room ) {
 			if ( ( room->area == pArea ) && ( to_room->area != pArea ) ) {
 				if ( to_room->exit[opposite_dir[i]] && to_room->exit[opposite_dir[i]]->to_room == room )
-					room_pair( room, to_room, exit_both, buf ); /* <> */
+					room_pair( room, to_room, exit_both, buf, sizeof( buf ) ); /* <> */
 				else
-					room_pair( room, to_room, exit_to, buf ); /* > */
+					room_pair( room, to_room, exit_to, buf, sizeof( buf ) ); /* > */
 				strcat( buffer, buf );
 			} else {
 				if ( ( room->area != pArea ) && ( exit->to_room->area == pArea ) ) {								/* an exit from another area to our area */
 					if ( !( to_room->exit[opposite_dir[i]] && to_room->exit[opposite_dir[i]]->to_room == room ) ) { /* two-way exits are handled in the other if */
-						room_pair( to_room, room, exit_from, buf );
+						room_pair( to_room, room, exit_from, buf, sizeof( buf ) );
 						strcat( buffer, buf );
 					}
 				} /* if room->area */
