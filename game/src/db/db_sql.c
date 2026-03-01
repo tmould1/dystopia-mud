@@ -8,6 +8,7 @@
 
 #include "db_util.h"
 #include "db_sql.h"
+#include "db_tables.h"
 #include "../script/script.h"
 
 #include <stdio.h>
@@ -141,15 +142,16 @@ static const char *SCHEMA_SQL =
 	");"
 
 	"CREATE TABLE IF NOT EXISTS scripts ("
-	"  id          INTEGER PRIMARY KEY AUTOINCREMENT,"
-	"  owner_type  TEXT NOT NULL,"
-	"  owner_vnum  INTEGER NOT NULL,"
-	"  trigger     INTEGER NOT NULL,"
-	"  name        TEXT NOT NULL DEFAULT '',"
-	"  code        TEXT NOT NULL,"
-	"  pattern     TEXT DEFAULT NULL,"
-	"  chance      INTEGER DEFAULT 0,"
-	"  sort_order  INTEGER DEFAULT 0"
+	"  id           INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  owner_type   TEXT NOT NULL,"
+	"  owner_vnum   INTEGER NOT NULL,"
+	"  trigger      INTEGER NOT NULL DEFAULT 0,"
+	"  name         TEXT NOT NULL DEFAULT '',"
+	"  code         TEXT NOT NULL DEFAULT '',"
+	"  pattern      TEXT DEFAULT NULL,"
+	"  chance       INTEGER DEFAULT 0,"
+	"  sort_order   INTEGER DEFAULT 0,"
+	"  library_name TEXT DEFAULT NULL"
 	");";
 
 
@@ -884,7 +886,8 @@ static void sql_load_shops( sqlite3 *db ) {
 static void sql_load_scripts( sqlite3 *db ) {
 	sqlite3_stmt *stmt;
 	const char *sql =
-		"SELECT owner_type, owner_vnum, trigger, name, code, pattern, chance"
+		"SELECT owner_type, owner_vnum, trigger, name, code, pattern, chance,"
+		"  library_name"
 		" FROM scripts ORDER BY owner_vnum, sort_order";
 
 	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
@@ -899,8 +902,29 @@ static void sql_load_scripts( sqlite3 *db ) {
 		const char *pat  = ( sqlite3_column_type( stmt, 5 ) != SQLITE_NULL )
 			? (const char *) sqlite3_column_text( stmt, 5 ) : NULL;
 		int chance      = sqlite3_column_int( stmt, 6 );
+		const char *lib_name = ( sqlite3_column_type( stmt, 7 ) != SQLITE_NULL )
+			? (const char *) sqlite3_column_text( stmt, 7 ) : NULL;
 		list_head_t *list = NULL;
 		SCRIPT_DATA *script;
+
+		/* Resolve library reference — override inline fields */
+		if ( lib_name != NULL ) {
+			const SCRIPT_LIBRARY_ENTRY *entry =
+				db_tables_get_script_library( lib_name );
+			if ( entry == NULL ) {
+				char buf[MAX_STRING_LENGTH];
+				snprintf( buf, sizeof( buf ),
+					"sql_load_scripts: unknown library '%s' for %s vnum %d",
+					lib_name, owner_type, vnum );
+				bug( buf, 0 );
+				continue;
+			}
+			trigger = entry->trigger;
+			name    = entry->name;
+			code    = entry->code;
+			pat     = entry->pattern;
+			chance  = entry->chance;
+		}
 
 		if ( !strcmp( owner_type, "mob" ) ) {
 			MOB_INDEX_DATA *pMob = get_mob_index( vnum );
@@ -925,11 +949,12 @@ static void sql_load_scripts( sqlite3 *db ) {
 			bug( "sql_load_scripts: calloc failed", 0 );
 			exit( 1 );
 		}
-		script->name    = str_dup( name );
-		script->trigger = trigger;
-		script->code    = str_dup( code );
-		script->pattern = pat ? str_dup( pat ) : NULL;
-		script->chance  = chance;
+		script->name         = str_dup( name );
+		script->trigger      = trigger;
+		script->code         = str_dup( code );
+		script->pattern      = pat ? str_dup( pat ) : NULL;
+		script->chance       = chance;
+		script->library_name = lib_name ? str_dup( lib_name ) : NULL;
 
 		list_push_back( list, &script->node );
 	}
@@ -1333,14 +1358,28 @@ static void sql_save_scripts_for_list( sqlite3_stmt *stmt,
 		sqlite3_reset( stmt );
 		sqlite3_bind_text( stmt, 1, owner_type, -1, SQLITE_STATIC );
 		sqlite3_bind_int( stmt, 2, vnum );
-		sqlite3_bind_int( stmt, 3, script->trigger );
-		sqlite3_bind_text( stmt, 4, script->name, -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, 5, script->code, -1, SQLITE_TRANSIENT );
-		if ( script->pattern )
-			sqlite3_bind_text( stmt, 6, script->pattern, -1, SQLITE_TRANSIENT );
-		else
+
+		if ( script->library_name ) {
+			/* Library reference — store name only, defaults for data fields */
+			sqlite3_bind_int( stmt, 3, 0 );
+			sqlite3_bind_text( stmt, 4, "", -1, SQLITE_STATIC );
+			sqlite3_bind_text( stmt, 5, "", -1, SQLITE_STATIC );
 			sqlite3_bind_null( stmt, 6 );
-		sqlite3_bind_int( stmt, 7, script->chance );
+			sqlite3_bind_int( stmt, 7, 0 );
+			sqlite3_bind_text( stmt, 9, script->library_name, -1, SQLITE_TRANSIENT );
+		} else {
+			/* Inline script — store all fields */
+			sqlite3_bind_int( stmt, 3, script->trigger );
+			sqlite3_bind_text( stmt, 4, script->name, -1, SQLITE_TRANSIENT );
+			sqlite3_bind_text( stmt, 5, script->code, -1, SQLITE_TRANSIENT );
+			if ( script->pattern )
+				sqlite3_bind_text( stmt, 6, script->pattern, -1, SQLITE_TRANSIENT );
+			else
+				sqlite3_bind_null( stmt, 6 );
+			sqlite3_bind_int( stmt, 7, script->chance );
+			sqlite3_bind_null( stmt, 9 );
+		}
+
 		sqlite3_bind_int( stmt, 8, order++ );
 		sqlite3_step( stmt );
 	}
@@ -1351,8 +1390,8 @@ static void sql_save_scripts( sqlite3 *db, AREA_DATA *pArea ) {
 	sqlite3_stmt *stmt;
 	const char *sql =
 		"INSERT INTO scripts (owner_type, owner_vnum, trigger, name,"
-		"  code, pattern, chance, sort_order)"
-		" VALUES (?,?,?,?,?,?,?,?)";
+		"  code, pattern, chance, sort_order, library_name)"
+		" VALUES (?,?,?,?,?,?,?,?,?)";
 	int vnum;
 
 	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )

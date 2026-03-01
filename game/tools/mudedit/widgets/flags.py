@@ -50,6 +50,7 @@ class FlagEditor(ttk.LabelFrame):
         # Sort flags by bit value
         sorted_flags = sorted(self.flags.items(), key=lambda x: x[0])
 
+        self._widgets = []
         row = 0
         col = 0
         for bit, name in sorted_flags:
@@ -63,6 +64,7 @@ class FlagEditor(ttk.LabelFrame):
                 command=self._on_checkbox_change
             )
             cb.grid(row=row, column=col, sticky=tk.W, padx=2, pady=1)
+            self._widgets.append(cb)
 
             col += 1
             if col >= self.columns:
@@ -100,6 +102,12 @@ class FlagEditor(ttk.LabelFrame):
         """Clear all flags."""
         for var in self._checkboxes.values():
             var.set(False)
+
+    def set_enabled(self, enabled: bool):
+        """Enable or disable all checkboxes."""
+        state = '!disabled' if enabled else 'disabled'
+        for cb in self._widgets:
+            cb.state([state])
 
     def get_flag_names(self) -> list:
         """Get a list of currently set flag names."""

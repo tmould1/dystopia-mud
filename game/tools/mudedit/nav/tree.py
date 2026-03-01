@@ -105,6 +105,7 @@ class NavigationTree(ttk.Frame):
                 ('rooms', 'Rooms'),
                 ('resets', 'Resets'),
                 ('shops', 'Shops'),
+                ('scripts', 'Scripts'),
             ]:
                 node_id = self.tree.insert(area_node, tk.END, text=label)
                 self._node_data[node_id] = ('area', db_path, entity_type)
@@ -151,6 +152,7 @@ class NavigationTree(ttk.Frame):
         tables_db = self.db_manager.get_tables_db_path()
         if tables_db.exists():
             for table_name, label in [
+                ('script_library', 'Script Library'),
                 ('socials', 'Socials'),
                 ('slays', 'Slays'),
                 ('liquids', 'Liquids'),

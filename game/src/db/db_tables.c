@@ -86,6 +86,75 @@ void db_tables_close( void ) {
 
 
 /***************************************************************************
+ * Script Library
+ ***************************************************************************/
+
+static SCRIPT_LIBRARY_ENTRY script_library[MAX_SCRIPT_LIBRARY];
+static int script_library_count = 0;
+
+void db_tables_load_script_library( void ) {
+	sqlite3_stmt *stmt;
+	int i;
+
+	if ( !tables_db )
+		return;
+
+	if ( sqlite3_prepare_v2( tables_db,
+			"SELECT name, trigger, code, pattern, chance"
+			" FROM script_library ORDER BY name",
+			-1, &stmt, NULL ) != SQLITE_OK ) {
+		/* Table may not exist yet — not fatal */
+		return;
+	}
+
+	i = 0;
+	while ( sqlite3_step( stmt ) == SQLITE_ROW && i < MAX_SCRIPT_LIBRARY ) {
+		script_library[i].name    = str_dup( (const char *) sqlite3_column_text( stmt, 0 ) );
+		script_library[i].trigger = (uint32_t) sqlite3_column_int( stmt, 1 );
+		script_library[i].code    = str_dup( (const char *) sqlite3_column_text( stmt, 2 ) );
+		script_library[i].pattern = ( sqlite3_column_type( stmt, 3 ) != SQLITE_NULL )
+			? str_dup( (const char *) sqlite3_column_text( stmt, 3 ) ) : NULL;
+		script_library[i].chance  = sqlite3_column_int( stmt, 4 );
+		i++;
+	}
+
+	sqlite3_finalize( stmt );
+	script_library_count = i;
+
+	{
+		char buf[MAX_STRING_LENGTH];
+		snprintf( buf, sizeof( buf ),
+			"  Loaded %d script library entries.", script_library_count );
+		log_string( buf );
+	}
+}
+
+const SCRIPT_LIBRARY_ENTRY *db_tables_get_script_library( const char *name ) {
+	int i;
+
+	if ( name == NULL )
+		return NULL;
+
+	for ( i = 0; i < script_library_count; i++ ) {
+		if ( !str_cmp( script_library[i].name, name ) )
+			return &script_library[i];
+	}
+
+	return NULL;
+}
+
+int db_tables_get_script_library_count( void ) {
+	return script_library_count;
+}
+
+const SCRIPT_LIBRARY_ENTRY *db_tables_get_script_library_by_index( int idx ) {
+	if ( idx < 0 || idx >= script_library_count )
+		return NULL;
+	return &script_library[idx];
+}
+
+
+/***************************************************************************
  * Socials
  ***************************************************************************/
 

@@ -19,6 +19,20 @@
 #include "../core/merc.h"
 
 /*--------------------------------------------------------------------------
+ * Script Library
+ *--------------------------------------------------------------------------*/
+
+#define MAX_SCRIPT_LIBRARY  64
+
+typedef struct script_library_entry {
+	char     *name;       /* Unique identifier (e.g. 'tick_cast_mage') */
+	uint32_t  trigger;    /* Trigger type bitmask */
+	char     *code;       /* Lua source code */
+	char     *pattern;    /* SPEECH pattern (NULL = any) */
+	int       chance;     /* Percent chance (0 = always) */
+} SCRIPT_LIBRARY_ENTRY;
+
+/*--------------------------------------------------------------------------
  * Cache Limits
  *--------------------------------------------------------------------------*/
 
@@ -42,6 +56,7 @@ void db_tables_close( void );
  * Loaders - call once during boot, after db_tables_init()
  *--------------------------------------------------------------------------*/
 
+void db_tables_load_script_library( void );
 void db_tables_load_socials( void );
 void db_tables_load_slays( void );
 void db_tables_load_liquids( void );
@@ -51,6 +66,11 @@ void db_tables_load_calendar( void );
 /*--------------------------------------------------------------------------
  * Accessors
  *--------------------------------------------------------------------------*/
+
+/* Script library - lookup shared Lua script templates by name */
+const SCRIPT_LIBRARY_ENTRY *db_tables_get_script_library( const char *name );
+int db_tables_get_script_library_count( void );
+const SCRIPT_LIBRARY_ENTRY *db_tables_get_script_library_by_index( int idx );
 
 /* Socials - returns count loaded; social_table[] is populated directly */
 int db_tables_get_social_count( void );

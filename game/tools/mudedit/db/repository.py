@@ -371,6 +371,96 @@ class ShopRepository(BaseRepository):
         return self.get_by_id(mob_vnum)
 
 
+class ScriptRepository(BaseRepository):
+    """Repository for Lua scripts attached to mobs, objects, and rooms."""
+
+    TRIG_GREET  = 1   # (1 << 0)
+    TRIG_SPEECH = 2   # (1 << 1)
+    TRIG_TICK   = 4   # (1 << 2)
+
+    TRIGGER_NAMES = {
+        TRIG_GREET:  'GREET',
+        TRIG_SPEECH: 'SPEECH',
+        TRIG_TICK:   'TICK',
+    }
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'scripts', 'id')
+        self._ensure_table()
+
+    def _ensure_table(self):
+        """Create the scripts table if it does not exist (for older area DBs)."""
+        self.conn.execute(
+            "CREATE TABLE IF NOT EXISTS scripts ("
+            "  id           INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  owner_type   TEXT NOT NULL,"
+            "  owner_vnum   INTEGER NOT NULL,"
+            "  trigger      INTEGER NOT NULL,"
+            "  name         TEXT NOT NULL DEFAULT '',"
+            "  code         TEXT NOT NULL DEFAULT '',"
+            "  pattern      TEXT DEFAULT NULL,"
+            "  chance       INTEGER DEFAULT 0,"
+            "  sort_order   INTEGER DEFAULT 0,"
+            "  library_name TEXT DEFAULT NULL"
+            ")"
+        )
+        # Add library_name column if table exists but lacks the column
+        cols = [r[1] for r in self.conn.execute('PRAGMA table_info(scripts)').fetchall()]
+        if 'library_name' not in cols:
+            self.conn.execute(
+                'ALTER TABLE scripts ADD COLUMN library_name TEXT DEFAULT NULL'
+            )
+        self.conn.commit()
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all scripts ordered by owner_type, owner_vnum, sort_order."""
+        return super().list_all(order_by or 'owner_type, owner_vnum, sort_order')
+
+    def get_by_owner(self, owner_type: str, owner_vnum: int) -> List[Dict]:
+        """Get all scripts for a specific owner."""
+        rows = self.conn.execute(
+            "SELECT * FROM scripts WHERE owner_type = ? AND owner_vnum = ? "
+            "ORDER BY sort_order",
+            (owner_type, owner_vnum)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_next_sort_order(self, owner_type: str, owner_vnum: int) -> int:
+        """Get the next sort_order value for an owner's scripts."""
+        row = self.conn.execute(
+            "SELECT COALESCE(MAX(sort_order), -1) + 1 FROM scripts "
+            "WHERE owner_type = ? AND owner_vnum = ?",
+            (owner_type, owner_vnum)
+        ).fetchone()
+        return row[0]
+
+    @classmethod
+    def trigger_display(cls, trigger: int) -> str:
+        """Convert trigger bitmask to human-readable string."""
+        names = []
+        for bit, name in sorted(cls.TRIGGER_NAMES.items()):
+            if trigger & bit:
+                names.append(name)
+        return '+'.join(names) if names else '(none)'
+
+
+class ScriptLibraryRepository(BaseRepository):
+    """Repository for script library entries in tables.db."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'script_library', 'name')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        return super().list_all(order_by or 'name')
+
+    def get_names(self) -> List[str]:
+        """Return sorted list of all library script names."""
+        rows = self.conn.execute(
+            "SELECT name FROM script_library ORDER BY name"
+        ).fetchall()
+        return [r[0] for r in rows]
+
+
 class AreaRepository(BaseRepository):
     """Repository for area metadata."""
 

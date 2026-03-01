@@ -17,12 +17,13 @@
 /* Script data — one Lua script attached to a mob/obj/room template.
  * Stored in an intrusive list on the owning index structure. */
 typedef struct script_data {
-	char         *name;       /* Builder-friendly name */
-	uint32_t      trigger;    /* Trigger type bitmask */
-	char         *code;       /* Lua source code */
-	char         *pattern;    /* Pattern match for SPEECH (NULL = any) */
-	int           chance;     /* Percent chance to fire (0 = always) */
-	list_node_t   node;       /* Intrusive list linkage */
+	char         *name;           /* Builder-friendly name */
+	uint32_t      trigger;        /* Trigger type bitmask */
+	char         *code;           /* Lua source code */
+	char         *pattern;        /* Pattern match for SPEECH (NULL = any) */
+	int           chance;         /* Percent chance to fire (0 = always) */
+	char         *library_name;   /* NULL = inline, set = library reference */
+	list_node_t   node;           /* Intrusive list linkage */
 } SCRIPT_DATA;
 
 /* Lifecycle — call from boot_db() and shutdown */

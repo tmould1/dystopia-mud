@@ -398,6 +398,7 @@ void boot_db( bool fCopyOver ) {
 	db_game_init();
 	db_class_init();
 	db_tables_init();
+	db_tables_load_script_library();
 	db_game_load_helps();
 	intro_load();
 	script_init();

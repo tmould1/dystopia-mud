@@ -14,7 +14,7 @@ import sys
 from .db.manager import DatabaseManager
 from .db.repository import (
     HelpRepository, MobileRepository, ObjectRepository, RoomRepository, ExitRepository,
-    ResetRepository, ShopRepository, AreaRepository,
+    ResetRepository, ShopRepository, ScriptRepository, AreaRepository,
     GameConfigRepository, BalanceConfigRepository, AbilityConfigRepository,
     AudioConfigRepository,
     KingdomsRepository, BansRepository, DisabledCommandsRepository,
@@ -25,18 +25,19 @@ from .db.repository import (
     ClassArmorConfigRepository, ClassArmorPiecesRepository, ClassStartingRepository,
     ClassScoreStatsRepository, ClassRegistryRepository,
     SocialsRepository, SlaysRepository, LiquidsRepository,
-    WearLocationsRepository, CalendarRepository,
+    WearLocationsRepository, ScriptLibraryRepository, CalendarRepository,
 )
 from .nav.tree import NavigationTree
 from .panels import (
     HelpEditorPanel, MobileEditorPanel, ObjectEditorPanel, RoomEditorPanel,
-    ResetEditorPanel, AreaInfoPanel, ShopEditorPanel, AreaMapPanel,
+    ResetEditorPanel, AreaInfoPanel, ShopEditorPanel, ScriptEditorPanel, AreaMapPanel,
     GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel, AudioConfigPanel,
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
     PlayerEditorPanel, ClassDisplayPanel, ClassAuraPanel, ClassEquipmentPanel,
     ClassStartingPanel, ClassScorePanel, ClassRegistryPanel,
-    SocialsPanel, SlaysPanel, LiquidsPanel, WearLocationsPanel, CalendarPanel,
+    SocialsPanel, SlaysPanel, LiquidsPanel, WearLocationsPanel,
+    ScriptLibraryPanel, CalendarPanel,
 )
 
 
@@ -324,6 +325,36 @@ class MudEditorApp:
                     on_status=self._set_status
                 )
 
+            elif entity_type == 'scripts':
+                script_repo = ScriptRepository(conn)
+                mob_repo = MobileRepository(conn)
+                obj_repo = ObjectRepository(conn)
+                room_repo = RoomRepository(conn)
+
+                # Load library names and data from tables.db
+                lib_names = []
+                lib_data = {}
+                try:
+                    tables_conn = self.db_manager.get_connection(
+                        self.db_manager.get_tables_db_path())
+                    lib_repo = ScriptLibraryRepository(tables_conn)
+                    lib_names = lib_repo.get_names()
+                    for entry in lib_repo.list_all():
+                        lib_data[entry['name']] = dict(entry)
+                except Exception:
+                    pass  # tables.db may not exist yet
+
+                return ScriptEditorPanel(
+                    self.notebook,
+                    script_repo,
+                    mob_repo,
+                    obj_repo,
+                    room_repo,
+                    library_names=lib_names,
+                    library_data=lib_data,
+                    on_status=self._set_status
+                )
+
             else:
                 return self._create_placeholder_panel(
                     f"Area Editor: {entity_type}",
@@ -534,6 +565,11 @@ class MudEditorApp:
             elif entity_type == 'calendar':
                 repository = CalendarRepository(conn)
                 return CalendarPanel(
+                    self.notebook, repository, on_status=self._set_status)
+
+            elif entity_type == 'script_library':
+                repository = ScriptLibraryRepository(conn)
+                return ScriptLibraryPanel(
                     self.notebook, repository, on_status=self._set_status)
 
             else:

@@ -3,7 +3,8 @@
 from .manager import DatabaseManager
 from .repository import (
     BaseRepository, HelpRepository, MobileRepository, ObjectRepository,
-    RoomRepository, ResetRepository, ShopRepository, AreaRepository, ExitRepository,
+    RoomRepository, ResetRepository, ShopRepository, ScriptRepository,
+    ScriptLibraryRepository, AreaRepository, ExitRepository,
     KeyValueRepository, GameConfigRepository, BalanceConfigRepository,
     AbilityConfigRepository, KingdomsRepository, BansRepository,
     DisabledCommandsRepository, TopBoardRepository, LeaderboardRepository,
@@ -21,6 +22,8 @@ __all__ = [
     'RoomRepository',
     'ResetRepository',
     'ShopRepository',
+    'ScriptRepository',
+    'ScriptLibraryRepository',
     'AreaRepository',
     'ExitRepository',
     'KeyValueRepository',

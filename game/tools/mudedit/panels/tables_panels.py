@@ -886,6 +886,308 @@ class WearLocationsPanel(ttk.Frame):
         return True
 
 
+class ScriptLibraryPanel(ttk.Frame):
+    """Editor panel for shared Lua script templates in the script library."""
+
+    TRIGGER_NAMES = {1: 'GREET', 2: 'SPEECH', 4: 'TICK'}
+
+    def __init__(
+        self,
+        parent,
+        repository,
+        on_status: Optional[Callable[[str], None]] = None,
+        **kwargs
+    ):
+        super().__init__(parent, **kwargs)
+
+        self.repository = repository
+        self.on_status = on_status or (lambda msg: None)
+
+        self.current_name: Optional[str] = None
+        self.unsaved = False
+
+        self._build_ui()
+        self._load_entries()
+
+    @classmethod
+    def trigger_display(cls, trigger: int) -> str:
+        names = []
+        for bit, name in sorted(cls.TRIGGER_NAMES.items()):
+            if trigger & bit:
+                names.append(name)
+        return '+'.join(names) if names else '(none)'
+
+    def _build_ui(self):
+        """Build the panel UI."""
+        paned = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        # Left: library entry list
+        left_frame = ttk.Frame(paned)
+        paned.add(left_frame, weight=1)
+
+        # Search
+        search_frame = ttk.Frame(left_frame)
+        search_frame.pack(fill=tk.X, padx=2, pady=2)
+        ttk.Label(search_frame, text="Filter:").pack(side=tk.LEFT)
+        self.search_var = tk.StringVar()
+        self.search_var.trace_add('write', lambda *_: self._filter_list())
+        ttk.Entry(search_frame, textvariable=self.search_var).pack(
+            side=tk.LEFT, fill=tk.X, expand=True, padx=(4, 0))
+
+        tree_frame = ttk.Frame(left_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=('name', 'trigger'),
+            show='headings',
+            selectmode='browse'
+        )
+        self.tree.heading('name', text='Name')
+        self.tree.heading('trigger', text='Trigger')
+        self.tree.column('name', width=180)
+        self.tree.column('trigger', width=80)
+
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.tree.bind('<<TreeviewSelect>>', self._on_select)
+
+        self.count_var = tk.StringVar(value="0 entries")
+        ttk.Label(left_frame, textvariable=self.count_var).pack(anchor=tk.W, padx=4)
+
+        # Right: editor
+        right_frame = ttk.LabelFrame(paned, text="Edit Library Script")
+        paned.add(right_frame, weight=2)
+
+        # Name
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Name:", width=12).pack(side=tk.LEFT)
+        self.name_label = ttk.Label(row, text="-", font=('Consolas', 10, 'bold'))
+        self.name_label.pack(side=tk.LEFT)
+
+        # Trigger
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Trigger:", width=12).pack(side=tk.LEFT)
+        self.trigger_vars = {}
+        for bit, name in sorted(self.TRIGGER_NAMES.items()):
+            var = tk.BooleanVar()
+            cb = ttk.Checkbutton(row, text=name, variable=var,
+                                 command=self._mark_unsaved)
+            cb.pack(side=tk.LEFT, padx=(0, 8))
+            self.trigger_vars[bit] = var
+
+        # Pattern
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Pattern:", width=12).pack(side=tk.LEFT)
+        self.pattern_var = tk.StringVar()
+        self.pattern_var.trace_add('write', lambda *_: self._mark_unsaved())
+        ttk.Entry(row, textvariable=self.pattern_var, width=30).pack(
+            side=tk.LEFT, padx=4, fill=tk.X, expand=True)
+        ttk.Label(row, text="(SPEECH only)", foreground='gray').pack(side=tk.LEFT, padx=4)
+
+        # Chance
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Chance:", width=12).pack(side=tk.LEFT)
+        self.chance_var = tk.IntVar(value=0)
+        ttk.Spinbox(row, from_=0, to=100, width=5, textvariable=self.chance_var,
+                     command=self._mark_unsaved).pack(side=tk.LEFT, padx=(2, 4))
+        ttk.Label(row, text="(0 = always)", foreground='gray').pack(side=tk.LEFT)
+
+        # Code editor
+        code_frame = ttk.LabelFrame(right_frame, text="Lua Code")
+        code_frame.pack(fill=tk.BOTH, expand=True, padx=8, pady=4)
+
+        code_inner = ttk.Frame(code_frame)
+        code_inner.pack(fill=tk.BOTH, expand=True)
+
+        self.code_text = tk.Text(
+            code_inner, font=('Consolas', 10), wrap=tk.NONE,
+            height=20, undo=True)
+        code_xscroll = ttk.Scrollbar(code_inner, orient=tk.HORIZONTAL, command=self.code_text.xview)
+        code_yscroll = ttk.Scrollbar(code_inner, orient=tk.VERTICAL, command=self.code_text.yview)
+        self.code_text.configure(xscrollcommand=code_xscroll.set, yscrollcommand=code_yscroll.set)
+
+        self.code_text.grid(row=0, column=0, sticky='nsew')
+        code_yscroll.grid(row=0, column=1, sticky='ns')
+        code_xscroll.grid(row=1, column=0, sticky='ew')
+        code_inner.grid_rowconfigure(0, weight=1)
+        code_inner.grid_columnconfigure(0, weight=1)
+
+        self.code_text.bind('<<Modified>>', self._on_code_modified)
+
+        # Buttons
+        btn_frame = ttk.Frame(right_frame)
+        btn_frame.pack(fill=tk.X, padx=8, pady=8)
+        ttk.Button(btn_frame, text="Save", command=self._save).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="New", command=self._new).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="Delete", command=self._delete).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="Reload", command=self._load_entries).pack(side=tk.LEFT)
+
+        self._all_entries = []
+
+    def _on_code_modified(self, event):
+        if self.code_text.edit_modified():
+            self._mark_unsaved()
+            self.code_text.edit_modified(False)
+
+    def _get_trigger_value(self) -> int:
+        value = 0
+        for bit, var in self.trigger_vars.items():
+            if var.get():
+                value |= bit
+        return value
+
+    def _set_trigger_value(self, value: int):
+        for bit, var in self.trigger_vars.items():
+            var.set(bool(value & bit))
+
+    def _load_entries(self):
+        """Load all library entries."""
+        self._all_entries = self.repository.list_all()
+        self._populate_tree(self._all_entries)
+        self.on_status(f"Loaded {len(self._all_entries)} library scripts")
+
+    def _populate_tree(self, entries):
+        self.tree.delete(*self.tree.get_children())
+        for e in entries:
+            self.tree.insert('', tk.END, iid=e['name'],
+                             values=(e['name'], self.trigger_display(e['trigger'])))
+        self.count_var.set(f"{len(entries)} entries")
+
+    def _filter_list(self):
+        term = self.search_var.get().lower()
+        if not term:
+            self._populate_tree(self._all_entries)
+        else:
+            filtered = [e for e in self._all_entries if term in e['name'].lower()]
+            self._populate_tree(filtered)
+
+    def _on_select(self, event):
+        if self.unsaved:
+            if not messagebox.askyesno("Unsaved", "Discard changes?"):
+                if self.current_name:
+                    self.tree.selection_set(self.current_name)
+                return
+
+        selection = self.tree.selection()
+        if selection:
+            self._load_entry(selection[0])
+
+    def _load_entry(self, name: str):
+        e = self.repository.get_by_id(name)
+        if not e:
+            return
+
+        self.current_name = name
+        self.name_label.configure(text=name)
+        self._set_trigger_value(e.get('trigger', 0))
+        self.pattern_var.set(e.get('pattern', '') or '')
+        self.chance_var.set(e.get('chance', 0))
+
+        self.code_text.delete('1.0', tk.END)
+        self.code_text.insert('1.0', e.get('code', ''))
+        self.code_text.edit_modified(False)
+
+        self.unsaved = False
+
+    def _mark_unsaved(self):
+        self.unsaved = True
+
+    def _save(self):
+        if self.current_name is None:
+            return
+
+        code = self.code_text.get('1.0', tk.END).rstrip('\n')
+        if not code.strip():
+            messagebox.showwarning("Warning", "Script code cannot be empty.")
+            return
+
+        trigger = self._get_trigger_value()
+        if trigger == 0:
+            messagebox.showwarning("Warning", "Select at least one trigger type.")
+            return
+
+        pattern = self.pattern_var.get().strip() or None
+
+        data = {
+            'trigger': trigger,
+            'code': code,
+            'pattern': pattern,
+            'chance': self.chance_var.get(),
+        }
+
+        self.repository.update(self.current_name, data)
+        self.unsaved = False
+        self._load_entries()
+        self.tree.selection_set(self.current_name)
+        self.on_status(f"Saved library script: {self.current_name}")
+
+    def _new(self):
+        from tkinter import simpledialog
+        name = simpledialog.askstring("New Library Script",
+                                       "Enter script name:", parent=self)
+        if not name:
+            return
+
+        name = name.strip().lower().replace(' ', '_')
+        if not name:
+            return
+
+        if self.repository.get_by_id(name):
+            messagebox.showinfo("Info", f"Script '{name}' already exists.")
+            return
+
+        self.repository.insert({
+            'name': name,
+            'trigger': 4,  # TRIG_TICK
+            'code': '-- New library script\nfunction on_tick(mob)\n    return false\nend\n',
+            'pattern': None,
+            'chance': 0,
+        })
+        self._load_entries()
+        self.tree.selection_set(name)
+        self._load_entry(name)
+        self.on_status(f"Created library script: {name}")
+
+    def _delete(self):
+        if self.current_name is None:
+            return
+
+        if not messagebox.askyesno("Confirm",
+                f"Delete library script '{self.current_name}'?\n\n"
+                "Area scripts referencing it will fail to load."):
+            return
+
+        self.repository.delete(self.current_name)
+        self.current_name = None
+        self._clear_editor()
+        self._load_entries()
+        self.on_status("Library script deleted")
+
+    def _clear_editor(self):
+        self.current_name = None
+        self.name_label.configure(text="-")
+        self._set_trigger_value(0)
+        self.pattern_var.set('')
+        self.chance_var.set(0)
+        self.code_text.delete('1.0', tk.END)
+        self.code_text.edit_modified(False)
+        self.unsaved = False
+
+    def check_unsaved(self) -> bool:
+        if self.unsaved:
+            return messagebox.askyesno("Unsaved", "Discard changes?")
+        return True
+
+
 class CalendarPanel(ttk.Frame):
     """Editor panel for in-game day and month names."""
 

@@ -7,6 +7,7 @@ from .room import RoomEditorPanel
 from .reset import ResetEditorPanel
 from .area import AreaInfoPanel
 from .shop import ShopEditorPanel
+from .scripts import ScriptEditorPanel
 from .gameconfig import GameConfigPanel, BalanceConfigPanel
 from .ability_config import AbilityConfigPanel
 from .audio_config import AudioConfigPanel
@@ -24,7 +25,8 @@ from .class_score import ClassScorePanel
 from .class_registry import ClassRegistryPanel
 from .area_map import AreaMapPanel
 from .tables_panels import (
-    SocialsPanel, SlaysPanel, LiquidsPanel, WearLocationsPanel, CalendarPanel
+    SocialsPanel, SlaysPanel, LiquidsPanel, WearLocationsPanel,
+    ScriptLibraryPanel, CalendarPanel
 )
 
 __all__ = [
@@ -35,6 +37,7 @@ __all__ = [
     'ResetEditorPanel',
     'AreaInfoPanel',
     'ShopEditorPanel',
+    'ScriptEditorPanel',
     'GameConfigPanel',
     'BalanceConfigPanel',
     'AbilityConfigPanel',
@@ -59,5 +62,6 @@ __all__ = [
     'SlaysPanel',
     'LiquidsPanel',
     'WearLocationsPanel',
+    'ScriptLibraryPanel',
     'CalendarPanel',
 ]
