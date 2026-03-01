@@ -75,3 +75,5 @@ gamedata/dystopia_new.ilk
 # Runtime game databases (preserved on server, not deployed)
 gamedata/db/game/game.db
 gamedata/db/game/live_help.db
+.vscode/c_cpp_properties.json
+game/docs/todo/thoughts.md
