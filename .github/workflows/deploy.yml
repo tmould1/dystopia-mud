@@ -148,6 +148,7 @@ jobs:
           # Copy game databases (deployed read-only each release)
           cp gamedata/db/game/base_help.db deploy-package/db/game/
           cp gamedata/db/game/class.db deploy-package/db/game/
+          cp gamedata/db/game/tables.db deploy-package/db/game/
 
           # Copy doc/license files if present
           if [ -d gamedata/doc ]; then
