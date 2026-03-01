@@ -719,12 +719,6 @@ void reset_room( ROOM_INDEX_DATA *pRoom ) {
 				continue;
 			}
 
-			/*
-			 * Some hard coding.
-			 */
-			/*            if ( ( pMobIndex->spec_fun == spec_lookup( "spec_cast_ghost" ) &&
-							 ( weather_info.sunlight != SUN_DARK ) ) ) continue;  */
-
 			if ( pMobIndex->count >= pReset->arg2 ) {
 				last = FALSE;
 				break;
@@ -983,8 +977,6 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA *pMobIndex ) {
 	mob->short_descr = str_dup( pMobIndex->short_descr ); /* OLC */
 	mob->long_descr = str_dup( pMobIndex->long_descr );	  /* OLC */
 	mob->description = str_dup( pMobIndex->description ); /* OLC */
-
-	mob->spec_fun = pMobIndex->spec_fun;
 
 	mob->home = 3001;
 	mob->form = 32767;

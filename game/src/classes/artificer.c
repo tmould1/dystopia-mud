@@ -302,8 +302,6 @@ void do_turret( CHAR_DATA *ch, char *argument ) {
 	/* Set turret flags */
 	SET_BIT( turret->act, ACT_SENTINEL );
 	SET_BIT( turret->act, ACT_NOEXP );
-	turret->spec_fun = NULL;
-
 	/* Link to owner */
 	free(turret->lord);
 	turret->lord = str_dup( ch->name );

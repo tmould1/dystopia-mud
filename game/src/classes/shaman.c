@@ -456,7 +456,6 @@ static CHAR_DATA *shaman_create_totem( CHAR_DATA *ch, int totem_type )
 
 	SET_BIT( totem->act, ACT_SENTINEL );
 	SET_BIT( totem->act, ACT_NOEXP );
-	totem->spec_fun = NULL;
 
 	free(totem->lord);
 	totem->lord = str_dup( ch->name );

@@ -83,15 +83,6 @@ struct area_data {
  *****************************************************************************/
 
 /*
- * This structure is used in special.c to lookup spec funcs and
- * also in olc_act.c to display listings of spec funcs.
- */
-struct spec_type {
-	char *spec_name;
-	SPEC_FUN *spec_fun;
-};
-
-/*
  * This structure is used in bit.c to lookup flags and stats.
  */
 struct flag_type {

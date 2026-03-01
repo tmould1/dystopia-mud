@@ -140,11 +140,6 @@ static const char *SCHEMA_SQL =
 	"  open_hour INTEGER, close_hour INTEGER"
 	");"
 
-	"CREATE TABLE IF NOT EXISTS specials ("
-	"  mob_vnum      INTEGER PRIMARY KEY,"
-	"  spec_fun_name TEXT NOT NULL"
-	");"
-
 	"CREATE TABLE IF NOT EXISTS scripts ("
 	"  id          INTEGER PRIMARY KEY AUTOINCREMENT,"
 	"  owner_type  TEXT NOT NULL,"
@@ -886,33 +881,6 @@ static void sql_load_shops( sqlite3 *db ) {
 }
 
 
-static void sql_load_specials( sqlite3 *db ) {
-	sqlite3_stmt *stmt;
-	const char *sql =
-		"SELECT mob_vnum, spec_fun_name FROM specials ORDER BY mob_vnum";
-
-	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
-		return;
-
-	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
-		MOB_INDEX_DATA *pMobIndex;
-		int vnum = sqlite3_column_int( stmt, 0 );
-		const char *name = col_text( stmt, 1 );
-
-		pMobIndex = get_mob_index( vnum );
-		if ( pMobIndex ) {
-			pMobIndex->spec_fun = spec_lookup( name );
-			if ( pMobIndex->spec_fun == 0 ) {
-				bug( "sql_load_specials: spec_fun for vnum %d not found.",
-					vnum );
-			}
-		}
-	}
-
-	sqlite3_finalize( stmt );
-}
-
-
 static void sql_load_scripts( sqlite3 *db ) {
 	sqlite3_stmt *stmt;
 	const char *sql =
@@ -1054,7 +1022,6 @@ void db_sql_link_area( const char *area_filename ) {
 
 	sql_load_resets( db );
 	sql_load_shops( db );
-	sql_load_specials( db );
 	sql_load_scripts( db );
 
 	sqlite3_close( db );
@@ -1357,32 +1324,6 @@ static void sql_save_shops( sqlite3 *db, AREA_DATA *pArea ) {
 }
 
 
-static void sql_save_specials( sqlite3 *db, AREA_DATA *pArea ) {
-	sqlite3_stmt *stmt;
-	const char *sql =
-		"INSERT INTO specials (mob_vnum, spec_fun_name) VALUES (?,?)";
-	int vnum;
-
-	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
-		return;
-
-	for ( vnum = pArea->lvnum; vnum <= pArea->uvnum; vnum++ ) {
-		MOB_INDEX_DATA *pMobIndex = get_mob_index( vnum );
-
-		if ( !pMobIndex || pMobIndex->area != pArea || !pMobIndex->spec_fun )
-			continue;
-
-		sqlite3_reset( stmt );
-		sqlite3_bind_int( stmt, 1, vnum );
-		sqlite3_bind_text( stmt, 2, spec_string( pMobIndex->spec_fun ), -1,
-			SQLITE_TRANSIENT );
-		sqlite3_step( stmt );
-	}
-
-	sqlite3_finalize( stmt );
-}
-
-
 static void sql_save_scripts_for_list( sqlite3_stmt *stmt,
 	const char *owner_type, int vnum, list_head_t *scripts ) {
 	SCRIPT_DATA *script;
@@ -1455,7 +1396,6 @@ void db_sql_save_area( AREA_DATA *pArea ) {
 
 	/* Delete all existing data */
 	sqlite3_exec( db, "DELETE FROM scripts", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM specials", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM shops", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM resets", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM exits", NULL, NULL, NULL );
@@ -1493,7 +1433,6 @@ void db_sql_save_area( AREA_DATA *pArea ) {
 	sql_save_rooms( db, pArea );
 	sql_save_resets( db, pArea );
 	sql_save_shops( db, pArea );
-	sql_save_specials( db, pArea );
 	sql_save_scripts( db, pArea );
 
 	/* Commit transaction */

@@ -1214,7 +1214,6 @@ void do_zombie( CHAR_DATA *ch, char *argument ) {
 	free(victim->long_descr);
 	victim->long_descr = str_dup( buf2 );
 	SET_BIT( victim->extra, EXTRA_ZOMBIE );
-	victim->spec_fun = NULL;
 	snprintf( buf, sizeof( buf ), "Rise corpse, and bow before me!" );
 	do_say( ch, buf );
 	snprintf( buf, sizeof( buf ), "%s clambers back up to its feet.\n\r", obj->short_descr );

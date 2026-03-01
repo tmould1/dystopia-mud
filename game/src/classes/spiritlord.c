@@ -660,7 +660,6 @@ void do_spiritarmy( CHAR_DATA *ch, char *argument )
 
 		SET_BIT( warrior->act, ACT_SENTINEL );
 		SET_BIT( warrior->act, ACT_NOEXP );
-		warrior->spec_fun = NULL;
 
 		free(warrior->lord);
 		warrior->lord = str_dup( ch->name );

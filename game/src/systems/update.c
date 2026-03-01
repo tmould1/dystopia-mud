@@ -27,6 +27,7 @@
 #include "mcmp.h"
 #include "profile.h"
 #include "../core/cfg.h"
+#include "../script/script.h"
 
 /*
  * Local functions.
@@ -548,18 +549,9 @@ void mobile_update( void ) {
 				PROFILE_END( "mob_npc_ai" );
 				continue;
 			}
-			if ( ch->spec_fun != 0 ) {
-				PROFILE_START( "mob_spec_fun" );
-				if ( ( *ch->spec_fun )( ch ) ) {
-					PROFILE_END( "mob_spec_fun" );
-					PROFILE_END( "mob_npc_ai" );
-					continue;
-				}
-				PROFILE_END( "mob_spec_fun" );
-				if ( ch == NULL ) {
-					PROFILE_END( "mob_npc_ai" );
-					continue;
-				}
+			if ( script_trigger_tick( ch ) ) {
+				PROFILE_END( "mob_npc_ai" );
+				continue;
 			}
 			if ( ch->position != POS_STANDING ) {
 				do_stand( ch, "" );

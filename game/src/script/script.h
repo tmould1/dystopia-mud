@@ -12,6 +12,7 @@
 /* Mob triggers */
 #define TRIG_GREET          (1 << 0)    /* Player enters room with this mob */
 #define TRIG_SPEECH         (1 << 1)    /* Player says something near mob */
+#define TRIG_TICK           (1 << 2)    /* Game tick (autonomous NPC behavior) */
 
 /* Script data — one Lua script attached to a mob/obj/room template.
  * Stored in an intrusive list on the owning index structure. */
@@ -31,6 +32,9 @@ void script_shutdown( void );
 /* Trigger dispatch — mob scripts (iterate NPCs in room) */
 void script_trigger_greet( CHAR_DATA *ch, ROOM_INDEX_DATA *room );
 void script_trigger_speech( CHAR_DATA *ch, const char *text );
+
+/* Trigger dispatch — mob tick (autonomous behavior, replaces spec_funs) */
+bool script_trigger_tick( CHAR_DATA *ch );
 
 /* Trigger dispatch — room scripts (iterate room's own scripts) */
 void script_trigger_room_enter( CHAR_DATA *ch, ROOM_INDEX_DATA *room );

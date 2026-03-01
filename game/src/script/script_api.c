@@ -225,6 +225,98 @@ static int api_char_teleport( lua_State *L ) {
 }
 
 
+/* ch:fighting() — returns the character's fighting target, or nil */
+static int api_char_fighting( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+
+	if ( ch->fighting == NULL ) {
+		lua_pushnil( L );
+		return 1;
+	}
+
+	push_char( L, ch->fighting );
+	return 1;
+}
+
+/* ch:is_awake() — returns true if the character is awake */
+static int api_char_is_awake( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	lua_pushboolean( L, IS_AWAKE( ch ) );
+	return 1;
+}
+
+/* ch:position() — returns the character's position (POS_*) */
+static int api_char_position( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	lua_pushinteger( L, ch->position );
+	return 1;
+}
+
+/* ch:class() — returns the character's class bitmask */
+static int api_char_class( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	lua_pushinteger( L, ch->class );
+	return 1;
+}
+
+/* ch:is_class(class_bit) — returns true if the character is that class */
+static int api_char_is_class( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	int cls = (int) luaL_checkinteger( L, 2 );
+	lua_pushboolean( L, IS_CLASS( ch, cls ) );
+	return 1;
+}
+
+/* ch:alignment() — returns the character's alignment value */
+static int api_char_alignment( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	lua_pushinteger( L, ch->alignment );
+	return 1;
+}
+
+/* ch:gold() — returns the character's gold */
+static int api_char_gold( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	lua_pushinteger( L, ch->gold );
+	return 1;
+}
+
+/* ch:set_gold(n) — set the character's gold */
+static int api_char_set_gold( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	int n = (int) luaL_checkinteger( L, 2 );
+	ch->gold = n;
+	return 0;
+}
+
+/* ch:attack(victim) — initiate combat (multi_hit) */
+static int api_char_attack( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	CHAR_DATA *victim = check_char( L, 2 );
+	multi_hit( ch, victim, TYPE_UNDEFINED );
+	return 0;
+}
+
+/* ch:do_command(cmd_with_args) — execute a game command */
+static int api_char_do_command( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	const char *cmd = luaL_checkstring( L, 2 );
+	char buf[MAX_INPUT_LENGTH];
+
+	snprintf( buf, sizeof( buf ), "%s", cmd );
+	interpret( ch, buf );
+	return 0;
+}
+
+/* ch:can_see(target) — returns true if ch can see target */
+static int api_char_can_see( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	CHAR_DATA *target = check_char( L, 2 );
+	lua_pushboolean( L, can_see( ch, target ) );
+	return 1;
+}
+
+
 static const luaL_Reg char_methods[] = {
 	{ "name",         api_char_name },
 	{ "level",        api_char_level },
@@ -237,6 +329,17 @@ static const luaL_Reg char_methods[] = {
 	{ "emote",        api_char_emote },
 	{ "room",         api_char_room },
 	{ "teleport",     api_char_teleport },
+	{ "fighting",     api_char_fighting },
+	{ "is_awake",     api_char_is_awake },
+	{ "position",     api_char_position },
+	{ "class",        api_char_class },
+	{ "is_class",     api_char_is_class },
+	{ "alignment",    api_char_alignment },
+	{ "gold",         api_char_gold },
+	{ "set_gold",     api_char_set_gold },
+	{ "attack",       api_char_attack },
+	{ "do_command",   api_char_do_command },
+	{ "can_see",      api_char_can_see },
 	{ NULL,           NULL }
 };
 
@@ -284,11 +387,67 @@ static int api_room_echo( lua_State *L ) {
 }
 
 
+/* room:find_fighting() — find a random character in the room who is fighting */
+static int api_room_find_fighting( lua_State *L ) {
+	ROOM_INDEX_DATA *room = check_room( L, 1 );
+	CHAR_DATA *vch;
+
+	LIST_FOR_EACH( vch, &room->characters, CHAR_DATA, room_node ) {
+		if ( vch->fighting != NULL && number_bits( 1 ) == 0 ) {
+			push_char( L, vch );
+			return 1;
+		}
+	}
+
+	lua_pushnil( L );
+	return 1;
+}
+
+/* room:find_corpse() — find the first NPC corpse in the room */
+static int api_room_find_corpse( lua_State *L ) {
+	ROOM_INDEX_DATA *room = check_room( L, 1 );
+	OBJ_DATA *obj;
+
+	LIST_FOR_EACH( obj, &room->objects, OBJ_DATA, room_node ) {
+		if ( obj->item_type == ITEM_CORPSE_NPC ) {
+			push_obj( L, obj );
+			return 1;
+		}
+	}
+
+	lua_pushnil( L );
+	return 1;
+}
+
+/* room:find_trash() — find the first trash/cheap item in the room */
+static int api_room_find_trash( lua_State *L ) {
+	ROOM_INDEX_DATA *room = check_room( L, 1 );
+	OBJ_DATA *obj;
+
+	LIST_FOR_EACH( obj, &room->objects, OBJ_DATA, room_node ) {
+		if ( !IS_SET( obj->wear_flags, ITEM_TAKE ) )
+			continue;
+		if ( obj->item_type == ITEM_DRINK_CON
+			|| obj->item_type == ITEM_TRASH
+			|| obj->cost < 10 ) {
+			push_obj( L, obj );
+			return 1;
+		}
+	}
+
+	lua_pushnil( L );
+	return 1;
+}
+
+
 static const luaL_Reg room_methods[] = {
-	{ "vnum",         api_room_vnum },
-	{ "find_mob",     api_room_find_mob },
-	{ "echo",         api_room_echo },
-	{ NULL,           NULL }
+	{ "vnum",            api_room_vnum },
+	{ "find_mob",        api_room_find_mob },
+	{ "echo",            api_room_echo },
+	{ "find_fighting",   api_room_find_fighting },
+	{ "find_corpse",     api_room_find_corpse },
+	{ "find_trash",      api_room_find_trash },
+	{ NULL,              NULL }
 };
 
 
@@ -328,12 +487,53 @@ static int api_obj_set_timer( lua_State *L ) {
 }
 
 
+/* obj:item_type() — returns the object's item type */
+static int api_obj_item_type( lua_State *L ) {
+	OBJ_DATA *obj = check_obj( L, 1 );
+	lua_pushinteger( L, obj->item_type );
+	return 1;
+}
+
+/* obj:cost() — returns the object's cost */
+static int api_obj_cost( lua_State *L ) {
+	OBJ_DATA *obj = check_obj( L, 1 );
+	lua_pushinteger( L, obj->cost );
+	return 1;
+}
+
+/* obj:extract() — remove the object from the game */
+static int api_obj_extract( lua_State *L ) {
+	OBJ_DATA *obj = check_obj( L, 1 );
+	extract_obj( obj );
+	return 0;
+}
+
+/* obj:contents_to_room(room) — move all contents of a container to a room */
+static int api_obj_contents_to_room( lua_State *L ) {
+	OBJ_DATA *obj = check_obj( L, 1 );
+	ROOM_INDEX_DATA *room = check_room( L, 2 );
+	OBJ_DATA *item;
+	OBJ_DATA *item_next;
+
+	LIST_FOR_EACH_SAFE( item, item_next, &obj->contents, OBJ_DATA, content_node ) {
+		obj_from_obj( item );
+		obj_to_room( item, room );
+	}
+
+	return 0;
+}
+
+
 static const luaL_Reg obj_methods[] = {
-	{ "name",         api_obj_name },
-	{ "to_char",      api_obj_to_char },
-	{ "to_room",      api_obj_to_room },
-	{ "set_timer",    api_obj_set_timer },
-	{ NULL,           NULL }
+	{ "name",             api_obj_name },
+	{ "to_char",          api_obj_to_char },
+	{ "to_room",          api_obj_to_room },
+	{ "set_timer",        api_obj_set_timer },
+	{ "item_type",        api_obj_item_type },
+	{ "cost",             api_obj_cost },
+	{ "extract",          api_obj_extract },
+	{ "contents_to_room", api_obj_contents_to_room },
+	{ NULL,               NULL }
 };
 
 
@@ -389,11 +589,35 @@ static int api_game_create_portal( lua_State *L ) {
 	return 1;
 }
 
-/* game.cast_spell(sn, level, ch) — cast a spell on a character */
+/*
+ * game.cast_spell(spell, level, caster [, target])
+ *
+ * spell  — skill number (int) or spell name (string)
+ * level  — caster level for the spell
+ * caster — the character casting
+ * target — optional target; defaults to caster (self-cast)
+ */
 static int api_game_cast_spell( lua_State *L ) {
-	int sn = (int) luaL_checkinteger( L, 1 );
-	int level = (int) luaL_checkinteger( L, 2 );
-	CHAR_DATA *ch = check_char( L, 3 );
+	int sn;
+	int level;
+	CHAR_DATA *ch;
+	CHAR_DATA *target;
+
+	/* Arg 1: spell number or name */
+	if ( lua_isinteger( L, 1 ) ) {
+		sn = (int) lua_tointeger( L, 1 );
+	} else {
+		const char *name = luaL_checkstring( L, 1 );
+		sn = skill_lookup( name );
+		if ( sn < 0 ) {
+			luaL_error( L, "cast_spell: unknown spell '%s'", name );
+			return 0;
+		}
+	}
+
+	level = (int) luaL_checkinteger( L, 2 );
+	ch = check_char( L, 3 );
+	target = lua_isuserdata( L, 4 ) ? check_char( L, 4 ) : ch;
 
 	if ( sn < 0 || sn >= MAX_SKILL ) {
 		luaL_error( L, "cast_spell: invalid skill number %d", sn );
@@ -405,8 +629,22 @@ static int api_game_cast_spell( lua_State *L ) {
 		return 0;
 	}
 
-	( *skill_table[sn].spell_fun )( sn, level, ch, ch );
+	( *skill_table[sn].spell_fun )( sn, level, ch, target );
 	return 0;
+}
+
+/* game.random(min, max) — returns a random number in [min, max] */
+static int api_game_random( lua_State *L ) {
+	int lo = (int) luaL_checkinteger( L, 1 );
+	int hi = (int) luaL_checkinteger( L, 2 );
+	lua_pushinteger( L, number_range( lo, hi ) );
+	return 1;
+}
+
+/* game.hour() — returns the current game hour (0-23) */
+static int api_game_hour( lua_State *L ) {
+	lua_pushinteger( L, time_info.hour );
+	return 1;
 }
 
 
@@ -414,6 +652,8 @@ static const luaL_Reg game_funcs[] = {
 	{ "create_object",  api_game_create_object },
 	{ "create_portal",  api_game_create_portal },
 	{ "cast_spell",     api_game_cast_spell },
+	{ "random",         api_game_random },
+	{ "hour",           api_game_hour },
 	{ NULL,             NULL }
 };
 

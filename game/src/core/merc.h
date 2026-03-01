@@ -1768,9 +1768,6 @@ void save_char_obj_backup ( CHAR_DATA * ch );
 bool load_char_obj ( DESCRIPTOR_DATA * d, char *name );
 bool load_char_short ( DESCRIPTOR_DATA * d, char *name );
 
-/* special.c */
-SPEC_FUN *spec_lookup ( const char *name );
-
 /* mccp.c */
 bool compressStart( DESCRIPTOR_DATA *desc, int version );
 bool compressEnd( DESCRIPTOR_DATA *desc );
@@ -2072,7 +2069,6 @@ DO_FUN do_lordarmor;
  */
 extern char *const dir_name[];
 extern const int rev_dir[];
-extern const struct spec_type spec_table[];
 
 /*
  * Global variables
@@ -2120,9 +2116,6 @@ void add_commas_to_number ( int number, char *buf, size_t buf_size );
 bool run_olc_editor ( DESCRIPTOR_DATA * d );
 char *olc_ed_name ( CHAR_DATA * ch );
 char *olc_ed_vnum ( CHAR_DATA * ch );
-
-/* special.c */
-char *spec_string ( SPEC_FUN * fun ); /* OLC */
 
 /* bit.c */
 

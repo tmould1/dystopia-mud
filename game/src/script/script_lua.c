@@ -180,6 +180,62 @@ void script_run( SCRIPT_DATA *script, const char *func,
 
 
 /*
+ * Execute a mob's tick script and return its boolean result.
+ * Lua callback: on_tick(mob) → true to skip remaining AI, false to continue.
+ * Used for autonomous NPC behaviors (replaces C spec_funs).
+ */
+bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob ) {
+	char buf[MAX_STRING_LENGTH];
+	int top;
+	bool result = FALSE;
+
+	if ( g_lua == NULL || script == NULL || script->code == NULL )
+		return FALSE;
+
+	top = lua_gettop( g_lua );
+
+	/* Load and execute the script code to define its functions */
+	if ( luaL_dostring( g_lua, script->code ) != LUA_OK ) {
+		const char *err = lua_tostring( g_lua, -1 );
+		snprintf( buf, sizeof( buf ),
+			"script_run_tick: load error in '%s'", script->name );
+		bug( buf, 0 );
+		if ( err )
+			log_string( err );
+		lua_settop( g_lua, top );
+		return FALSE;
+	}
+
+	/* Look up the callback function */
+	lua_getglobal( g_lua, "on_tick" );
+	if ( !lua_isfunction( g_lua, -1 ) ) {
+		lua_settop( g_lua, top );
+		return FALSE;
+	}
+
+	/* Push argument: mob */
+	lua_pushlightuserdata( g_lua, mob );
+	luaL_getmetatable( g_lua, "Char" );
+	lua_setmetatable( g_lua, -2 );
+
+	/* Call with 1 arg, 1 return value */
+	if ( lua_pcall( g_lua, 1, 1, 0 ) != LUA_OK ) {
+		const char *err = lua_tostring( g_lua, -1 );
+		snprintf( buf, sizeof( buf ),
+			"script_run_tick: runtime error in '%s'", script->name );
+		bug( buf, 0 );
+		if ( err )
+			log_string( err );
+	} else {
+		result = lua_toboolean( g_lua, -1 );
+	}
+
+	lua_settop( g_lua, top );
+	return result;
+}
+
+
+/*
  * Execute a room script's Lua code.
  * Pushes (ch, room, [text]) instead of (mob, ch, [text]).
  */

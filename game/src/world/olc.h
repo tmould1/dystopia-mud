@@ -187,7 +187,6 @@ OLC_FUN medit_shop;
 OLC_FUN medit_desc;
 OLC_FUN medit_level;
 OLC_FUN medit_align;
-OLC_FUN medit_spec;
 OLC_FUN medit_value0;
 OLC_FUN medit_value1;
 OLC_FUN medit_value2;

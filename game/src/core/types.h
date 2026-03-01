@@ -53,7 +53,6 @@ extern list_head_t disabled_list;
  * Function types.
  */
 typedef void DO_FUN ( CHAR_DATA * ch, char *argument );
-typedef bool SPEC_FUN ( CHAR_DATA * ch );
 typedef void SPELL_FUN ( int sn, int level, CHAR_DATA *ch, void *vo );
 
 /*

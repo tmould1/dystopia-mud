@@ -964,9 +964,6 @@ void do_mstat( CHAR_DATA *ch, char *argument ) {
 		victim->long_descr[0] != '\0' ? victim->long_descr : "(none).\n\r" );
 	send_to_char( buf, ch );
 
-	if ( IS_NPC( victim ) && victim->spec_fun != 0 )
-		send_to_char( "Mobile has spec fun.\n\r", ch );
-
 	LIST_FOR_EACH(paf, &victim->affects, AFFECT_DATA, node) {
 		snprintf( buf, sizeof( buf ),
 			"Spell: '%s' modifies %s by %d for %d hours with bits %s.\n\r",

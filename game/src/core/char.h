@@ -870,7 +870,6 @@ struct kill_data {
  */
 struct mob_index_data {
 	MOB_INDEX_DATA *next;
-	SPEC_FUN *spec_fun;
 	list_head_t scripts;      /* Lua scripts attached to this mob template */
 	SHOP_DATA *pShop;
 	CHAR_DATA *mount;
@@ -952,7 +951,6 @@ struct char_data {
 	CHAR_DATA *challenger; /*  person who challenged you */
 	CHAR_DATA *challenged; /*  person who you challenged */
 	CHAR_DATA *gladiator;  /*  ARENA player wagered on */
-	SPEC_FUN *spec_fun;
 	MOB_INDEX_DATA *pIndexData;
 	DESCRIPTOR_DATA *desc;
 	list_head_t affects;

@@ -302,7 +302,6 @@ const struct olc_cmd_type medit_table[] =
 		{ "shop", medit_shop },
 		{ "short", medit_short },
 		{ "show", medit_show },
-		{ "spec", medit_spec },
 		{ "v0", medit_value0 },
 		{ "v1", medit_value1 },
 		{ "v2", medit_value2 },

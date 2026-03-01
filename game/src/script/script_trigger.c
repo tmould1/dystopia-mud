@@ -15,6 +15,7 @@ void script_run( SCRIPT_DATA *script, const char *func,
 	CHAR_DATA *mob, CHAR_DATA *ch, const char *text );
 void script_run_room( SCRIPT_DATA *script, const char *func,
 	CHAR_DATA *ch, ROOM_INDEX_DATA *room, const char *text );
+bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob );
 
 
 /*
@@ -122,6 +123,35 @@ void script_trigger_speech( CHAR_DATA *ch, const char *text ) {
 			script_run( script, "on_speech", mob, ch, text );
 		}
 	}
+}
+
+
+/*
+ * TRIG_TICK — fired once per game tick for each NPC.
+ * Iterates the mob's template scripts and fires TRIG_TICK scripts.
+ * Returns TRUE if any script returned true (skip remaining mob AI).
+ *
+ * Lua callback: on_tick(mob) → true/false
+ *
+ * Called from mobile_update() in update.c.
+ */
+bool script_trigger_tick( CHAR_DATA *ch ) {
+	SCRIPT_DATA *script;
+
+	if ( ch == NULL || ch->pIndexData == NULL )
+		return FALSE;
+
+	LIST_FOR_EACH( script, &ch->pIndexData->scripts, SCRIPT_DATA, node ) {
+		if ( !IS_SET( script->trigger, TRIG_TICK ) )
+			continue;
+		if ( !script_chance_check( script ) )
+			continue;
+
+		if ( script_run_tick( script, ch ) )
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 

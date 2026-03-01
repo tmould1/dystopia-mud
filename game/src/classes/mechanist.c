@@ -228,8 +228,6 @@ void do_combatdrone( CHAR_DATA *ch, char *argument ) {
 
 	/* Set drone flags - NO ACT_SENTINEL so drones follow */
 	SET_BIT( drone->act, ACT_NOEXP );
-	drone->spec_fun = NULL;
-
 	/* Link to owner */
 	free(drone->lord);
 	drone->lord = str_dup( ch->name );
@@ -374,8 +372,6 @@ void do_bomberdrone( CHAR_DATA *ch, char *argument ) {
 
 	/* Set drone flags - follows owner, no combat */
 	SET_BIT( drone->act, ACT_NOEXP );
-	drone->spec_fun = NULL;
-
 	/* Link to owner */
 	free(drone->lord);
 	drone->lord = str_dup( ch->name );
@@ -553,7 +549,6 @@ void do_dronearmy( CHAR_DATA *ch, char *argument ) {
 		drone->name = str_dup( "drone combat-drone" );
 
 		SET_BIT( drone->act, ACT_NOEXP );
-		drone->spec_fun = NULL;
 
 		free(drone->lord);
 		drone->lord = str_dup( ch->name );

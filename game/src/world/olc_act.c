@@ -82,7 +82,6 @@ const struct olc_help_type help_table[] =
 		{ "type", type_flags, "Types of objects." },
 		{ "extra", extra_flags, "Object attributes." },
 		{ "wear", wear_flags, "Where to wear object." },
-		{ "spec", spec_table, "Available special programs." },
 		{ "sex", sex_flags, "Sexes." },
 		{ "act", act_flags, "Mobile attributes." },
 		{ "affect", affect_flags, "Mobile affects." },
@@ -162,34 +161,6 @@ void show_skill_cmds( CHAR_DATA *ch, int tar ) {
 }
 
 /*****************************************************************************
- Name:		show_spec_cmds
- Purpose:	Displays settable special functions.
- Called by:	show_help(olc_act.c).
- ****************************************************************************/
-void show_spec_cmds( CHAR_DATA *ch ) {
-	char buf[MAX_STRING_LENGTH];
-	char buf1[MAX_STRING_LENGTH];
-	int spec;
-	int col;
-
-	buf1[0] = '\0';
-	col = 0;
-	send_to_char( "Preceed special functions with 'spec_'\n\r\n\r", ch );
-	for ( spec = 0; spec_table[spec].spec_fun; spec++ ) {
-		snprintf( buf, sizeof( buf ), "%-19.18s", &spec_table[spec].spec_name[5] );
-		strcat( buf1, buf );
-		if ( ++col % 4 == 0 )
-			strcat( buf1, "\n\r" );
-	}
-
-	if ( col % 4 != 0 )
-		strcat( buf1, "\n\r" );
-
-	send_to_char( buf1, ch );
-	return;
-}
-
-/*****************************************************************************
  Name:		show_help
  Purpose:	Displays help for many tables used in OLC.
  Called by:	olc interpreters.
@@ -224,10 +195,7 @@ bool show_help( CHAR_DATA *ch, char *argument ) {
 	 */
 	for ( cnt = 0; *help_table[cnt].command; cnt++ ) {
 		if ( arg[0] == help_table[cnt].command[0] && !str_prefix( arg, help_table[cnt].command ) ) {
-			if ( help_table[cnt].structure == spec_table ) {
-				show_spec_cmds( ch );
-				return FALSE;
-			} else if ( help_table[cnt].structure == skill_table ) {
+			if ( help_table[cnt].structure == skill_table ) {
 
 				if ( spell[0] == '\0' ) {
 					send_to_char( "Syntax:  ? spells "
@@ -2656,11 +2624,6 @@ bool medit_show( CHAR_DATA *ch, char *argument ) {
 	snprintf( buf, sizeof( buf ), "v2: Attack bonus:     [%4d]\n\r", pMob->hitsizedice );
 	stc( buf, ch );
 
-	if ( pMob->spec_fun ) {
-		snprintf( buf, sizeof( buf ), "Spec fun:    [%s]\n\r", spec_string( pMob->spec_fun ) );
-		send_to_char( buf, ch );
-	}
-
 	snprintf( buf, sizeof( buf ), "Short descr: %s\n\rLong descr:\n\r%s",
 		pMob->short_descr,
 		pMob->long_descr );
@@ -2750,33 +2713,6 @@ bool medit_create( CHAR_DATA *ch, char *argument ) {
 
 	send_to_char( "Mobile Created.\n\r", ch );
 	return TRUE;
-}
-
-bool medit_spec( CHAR_DATA *ch, char *argument ) {
-	MOB_INDEX_DATA *pMob;
-
-	EDIT_MOB( ch, pMob );
-
-	if ( argument[0] == '\0' ) {
-		send_to_char( "Syntax:  spec [special function]\n\r", ch );
-		return FALSE;
-	}
-
-	if ( !str_cmp( argument, "none" ) ) {
-		pMob->spec_fun = NULL;
-
-		send_to_char( "Spec removed.\n\r", ch );
-		return TRUE;
-	}
-
-	if ( spec_lookup( argument ) ) {
-		pMob->spec_fun = spec_lookup( argument );
-		send_to_char( "Spec set.\n\r", ch );
-		return TRUE;
-	}
-
-	send_to_char( "MEdit: No such special function.\n\r", ch );
-	return FALSE;
 }
 
 bool medit_align( CHAR_DATA *ch, char *argument ) {
