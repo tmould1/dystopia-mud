@@ -4085,6 +4085,12 @@ void do_resetpassword( CHAR_DATA *ch, char *argument ) {
 
 extern int port, control; /* db.c */
 
+#if defined( WIN32 )
+/* Tracks suspended child process during copyover so crashrecov can clean it up */
+HANDLE copyover_child_process = NULL;
+HANDLE copyover_child_thread = NULL;
+#endif
+
 void do_copyover( CHAR_DATA *ch, char *argument ) {
 	FILE *fp;
 	CHAR_DATA *gch;
@@ -4196,6 +4202,8 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 		child_pid = pi.dwProcessId;
 		child_created = TRUE;
+		copyover_child_process = pi.hProcess;
+		copyover_child_thread = pi.hThread;
 		merc_logf( "do_copyover: child process created SUSPENDED, PID=%lu", child_pid );
 
 		/* Copy socket path to local buffer to avoid mud_path() rotating buffer issues */
@@ -4227,7 +4235,10 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 			fclose( fp );
 			return;
 		}
-		fwrite( &proto_info, sizeof( proto_info ), 1, socket_fp );
+		if ( fwrite( &proto_info, sizeof( proto_info ), 1, socket_fp ) != 1 ) {
+			merc_logf( "do_copyover: fwrite failed for control socket" );
+		}
+		fflush( socket_fp ); /* Flush immediately so data survives a crash */
 		merc_logf( "do_copyover: wrote control socket (target child PID=%lu)", child_pid );
 
 		/* For each playing descriptor, duplicate socket for child PID and save state */
@@ -4235,9 +4246,11 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 			CHAR_DATA *och = CH( d );
 
 			if ( !d->character || d->connected != 0 ) {
+				merc_logf( "do_copyover: closing non-playing descriptor (connected=%d)", d->connected );
 				write_to_descriptor_2( d->descriptor, "\n\rSorry, we are rebooting. Come back in 30 seconds.\n\r", 0 );
 				close_socket( d );
 			} else {
+				merc_logf( "do_copyover: duplicating socket for %s (desc=%d)", och->name, d->descriptor );
 				if ( WSADuplicateSocketW( (SOCKET) d->descriptor, child_pid, &proto_info ) == SOCKET_ERROR ) {
 					merc_logf( "do_copyover: WSADuplicateSocket failed for client %s: %d",
 						och->name, WSAGetLastError() );
@@ -4246,25 +4259,30 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 					continue;
 				}
 
-				/* Write the protocol info to binary file */
-				fwrite( &proto_info, sizeof( proto_info ), 1, socket_fp );
+				/* Write the protocol info to binary file and flush immediately */
+				if ( fwrite( &proto_info, sizeof( proto_info ), 1, socket_fp ) != 1 ) {
+					merc_logf( "do_copyover: fwrite failed for client %s", och->name );
+				}
+				fflush( socket_fp );
 
 				/* Write index (not raw descriptor) to text file */
 				fprintf( fp, "%d %s %s %d\n", socket_index, och->name, d->host, d->client_charset );
+				fflush( fp );
 				socket_index++;
+				merc_logf( "do_copyover: wrote socket entry %d for %s", socket_index - 1, och->name );
 
 				if ( och->level == 1 ) {
 					write_to_descriptor( d, "Since you are level one, and level one characters do not save, you gain a free level!\n\r", 0 );
 					och->level++;
 				}
 				save_char_obj( och );
+				merc_logf( "do_copyover: saved %s, sending table-flip", och->name );
 				write_to_descriptor( d, buf, 0 );
 			}
 		}
 
 		merc_logf( "do_copyover: wrote %d socket entries total (1 control + %d clients)",
 			socket_index, socket_index - 1 );
-		fflush( socket_fp );
 		fclose( socket_fp );
 		merc_logf( "do_copyover: socket file closed" );
 	}
@@ -4347,6 +4365,8 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 		CloseHandle( pi.hThread );
 		CloseHandle( pi.hProcess );
+		copyover_child_process = NULL;
+		copyover_child_thread = NULL;
 
 		merc_logf( "do_copyover: child resumed, parent exiting with code 99" );
 		fflush( NULL );

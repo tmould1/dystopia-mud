@@ -1856,6 +1856,7 @@ static void load_player_objects( sqlite3 *db, CHAR_DATA *ch ) {
 		list_node_init( &obj->content_node );
 		list_init( &obj->affects );
 		list_init( &obj->contents );
+		list_init( &obj->extra_descr );
 
 		col = 0;
 		obj_id = sqlite3_column_int64( obj_stmt, col++ );

@@ -487,8 +487,12 @@ int main( int argc, char **argv ) {
 			fclose( socket_fp );
 			unlink( COPYOVER_SOCKET_FILE );
 		} else {
-			/* Fallback for old-style copyover (shouldn't happen on Windows) */
-			control = atoi( argv[3] );
+			/* Old-style raw descriptor passing doesn't work on Windows.
+			 * Socket handles are not inheritable across CreateProcess.
+			 * Ignore the copyover flag and do a clean restart. */
+			fprintf( stderr, "Copyover recovery: argv[3]='%s' (not wsasocket), "
+				"doing clean restart\n", argv[3] ? argv[3] : "(null)" );
+			fCopyOver = FALSE;
 		}
 #else
 		control = atoi( argv[3] );
@@ -1677,9 +1681,10 @@ void crashrecov( int iSignal ) {
 	CHAR_DATA *gch;
 	FILE *fp;
 	DESCRIPTOR_DATA *d, *d_tmp;
-	char buf[200], buf2[100];
+	char buf[200];
 	int pid;
 #ifndef WIN32
+	char buf2[100];
 	/* Note: fork() return value intentionally unused - we only care about pid */
 #endif
 	FILE *fReturn;
@@ -1785,6 +1790,57 @@ void crashrecov( int iSignal ) {
 	/* exec - descriptors are inherited */
 
 	snprintf( buf, sizeof( buf ), "%d", port );
+
+#if defined( WIN32 )
+	/*
+	 * On Windows, socket handles cannot be inherited through CreateProcess/exec.
+	 * Start a clean new process without copyover — players will need to reconnect
+	 * but their characters are saved.
+	 */
+	{
+		char exe_path[MUD_PATH_MAX];
+		char cmdline[MUD_PATH_MAX + 128];
+		STARTUPINFOA si;
+		PROCESS_INFORMATION pi;
+
+		/* If do_copyover created a suspended child before crashing, terminate it */
+		{
+			extern HANDLE copyover_child_process;
+			extern HANDLE copyover_child_thread;
+			if ( copyover_child_process != NULL ) {
+				log_string( "crashrecov: terminating suspended copyover child" );
+				TerminateProcess( copyover_child_process, 1 );
+				CloseHandle( copyover_child_thread );
+				CloseHandle( copyover_child_process );
+				copyover_child_process = NULL;
+				copyover_child_thread = NULL;
+			}
+		}
+
+		strncpy( exe_path, EXE_FILE, sizeof( exe_path ) - 1 );
+		exe_path[sizeof( exe_path ) - 1] = '\0';
+
+		snprintf( cmdline, sizeof( cmdline ), "\"%s\" %s", exe_path, buf );
+
+		ZeroMemory( &si, sizeof( si ) );
+		si.cb = sizeof( si );
+		ZeroMemory( &pi, sizeof( pi ) );
+
+		log_string( "crashrecov: starting clean restart (no copyover on Windows)" );
+		fflush( NULL );
+
+		if ( CreateProcessA( exe_path, cmdline, NULL, NULL, FALSE,
+				0, NULL, NULL, &si, &pi ) ) {
+			CloseHandle( pi.hThread );
+			CloseHandle( pi.hProcess );
+			ExitProcess( 1 );
+		}
+
+		perror( "crashrecov: CreateProcess" );
+		log_string( "Crash recovery FAILED!\n\r" );
+		exit( 1 );
+	}
+#else
 	snprintf( buf2, sizeof( buf2 ), "%d", control );
 
 	execl( EXE_FILE, "dystopia", buf, "crashrecov", buf2, (char *) NULL );
@@ -1796,6 +1852,7 @@ void crashrecov( int iSignal ) {
 
 	/* The least we can do is exit gracefully :P */
 	exit( 1 );
+#endif
 }
 
 void retell_protocols( DESCRIPTOR_DATA *d ) {
