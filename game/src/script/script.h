@@ -9,10 +9,11 @@
  * can only fire on one entity type.
  */
 
-/* Mob triggers */
+/* Shared triggers (mob, obj, room) */
 #define TRIG_GREET          (1 << 0)    /* Player enters room with this mob */
 #define TRIG_SPEECH         (1 << 1)    /* Player says something near mob */
-#define TRIG_TICK           (1 << 2)    /* Game tick (autonomous NPC behavior) */
+#define TRIG_TICK           (1 << 2)    /* Periodic update (mob AI / obj effects) */
+#define TRIG_KILL           (1 << 3)    /* Object: owner killed an NPC */
 
 /* Lua registry reference sentinel (must match Lua's LUA_NOREF) */
 #define SCRIPT_LUA_NOREF    (-2)
@@ -44,6 +45,10 @@ bool script_trigger_tick( CHAR_DATA *ch );
 /* Trigger dispatch — room scripts (iterate room's own scripts) */
 void script_trigger_room_enter( CHAR_DATA *ch, ROOM_INDEX_DATA *room );
 void script_trigger_room_speech( CHAR_DATA *ch, const char *text );
+
+/* Trigger dispatch — object scripts */
+void script_trigger_obj_tick( void );
+void script_trigger_obj_kill( CHAR_DATA *ch, CHAR_DATA *victim );
 
 /* Cache management */
 void script_invalidate_cache( SCRIPT_DATA *script );

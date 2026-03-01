@@ -1,7 +1,7 @@
 /*
  * script_api.c — C functions exposed to Lua scripts.
  *
- * Three metatables are registered for lightuserdata:
+ * Three metatables are registered for full userdata (pointer boxes):
  *   "Char" — CHAR_DATA methods (name, say, send, etc.)
  *   "Room" — ROOM_INDEX_DATA methods (vnum, find_mob, echo)
  *   "Obj"  — OBJ_DATA methods (name, to_char, to_room)
@@ -22,77 +22,61 @@
 
 /* ================================================================
  * Helpers — extract typed pointers from Lua arguments
+ *
+ * We use full userdata (a pointer-sized box) rather than lightuserdata
+ * because Lua 5.4 lightuserdata all share a single metatable — setting
+ * one type's metatable overwrites the others.  Full userdata each have
+ * their own metatable, so Char/Room/Obj can coexist on the same stack.
  * ================================================================ */
 
 static CHAR_DATA *check_char( lua_State *L, int idx ) {
-	CHAR_DATA *ch;
-
-	if ( !lua_isuserdata( L, idx ) ) {
-		luaL_error( L, "expected character userdata at argument %d", idx );
-		return NULL;
-	}
-
-	ch = (CHAR_DATA *) lua_touserdata( L, idx );
-	if ( ch == NULL ) {
+	void **ud = (void **) luaL_checkudata( L, idx, "Char" );
+	if ( *ud == NULL ) {
 		luaL_error( L, "NULL character at argument %d", idx );
 		return NULL;
 	}
-
-	return ch;
+	return (CHAR_DATA *) *ud;
 }
 
 static ROOM_INDEX_DATA *check_room( lua_State *L, int idx ) {
-	ROOM_INDEX_DATA *room;
-
-	if ( !lua_isuserdata( L, idx ) ) {
-		luaL_error( L, "expected room userdata at argument %d", idx );
-		return NULL;
-	}
-
-	room = (ROOM_INDEX_DATA *) lua_touserdata( L, idx );
-	if ( room == NULL ) {
+	void **ud = (void **) luaL_checkudata( L, idx, "Room" );
+	if ( *ud == NULL ) {
 		luaL_error( L, "NULL room at argument %d", idx );
 		return NULL;
 	}
-
-	return room;
+	return (ROOM_INDEX_DATA *) *ud;
 }
 
 static OBJ_DATA *check_obj( lua_State *L, int idx ) {
-	OBJ_DATA *obj;
-
-	if ( !lua_isuserdata( L, idx ) ) {
-		luaL_error( L, "expected object userdata at argument %d", idx );
-		return NULL;
-	}
-
-	obj = (OBJ_DATA *) lua_touserdata( L, idx );
-	if ( obj == NULL ) {
+	void **ud = (void **) luaL_checkudata( L, idx, "Obj" );
+	if ( *ud == NULL ) {
 		luaL_error( L, "NULL object at argument %d", idx );
 		return NULL;
 	}
-
-	return obj;
+	return (OBJ_DATA *) *ud;
 }
 
 
-/* Helper: push a CHAR_DATA* as lightuserdata with Char metatable */
+/* Helper: push a CHAR_DATA* as full userdata with Char metatable */
 static void push_char( lua_State *L, CHAR_DATA *ch ) {
-	lua_pushlightuserdata( L, ch );
+	void **ud = (void **) lua_newuserdatauv( L, sizeof( void * ), 0 );
+	*ud = ch;
 	luaL_getmetatable( L, "Char" );
 	lua_setmetatable( L, -2 );
 }
 
-/* Helper: push a ROOM_INDEX_DATA* as lightuserdata with Room metatable */
+/* Helper: push a ROOM_INDEX_DATA* as full userdata with Room metatable */
 static void push_room( lua_State *L, ROOM_INDEX_DATA *room ) {
-	lua_pushlightuserdata( L, room );
+	void **ud = (void **) lua_newuserdatauv( L, sizeof( void * ), 0 );
+	*ud = room;
 	luaL_getmetatable( L, "Room" );
 	lua_setmetatable( L, -2 );
 }
 
-/* Helper: push an OBJ_DATA* as lightuserdata with Obj metatable */
+/* Helper: push an OBJ_DATA* as full userdata with Obj metatable */
 static void push_obj( lua_State *L, OBJ_DATA *obj ) {
-	lua_pushlightuserdata( L, obj );
+	void **ud = (void **) lua_newuserdatauv( L, sizeof( void * ), 0 );
+	*ud = obj;
 	luaL_getmetatable( L, "Obj" );
 	lua_setmetatable( L, -2 );
 }
@@ -524,6 +508,41 @@ static int api_obj_contents_to_room( lua_State *L ) {
 }
 
 
+/* obj:carried_by() — returns the character carrying/wearing this object */
+static int api_obj_carried_by( lua_State *L ) {
+	OBJ_DATA *obj = check_obj( L, 1 );
+
+	if ( obj->carried_by == NULL ) {
+		lua_pushnil( L );
+		return 1;
+	}
+
+	push_char( L, obj->carried_by );
+	return 1;
+}
+
+/* obj:is_worn() — returns true if the object is currently equipped */
+static int api_obj_is_worn( lua_State *L ) {
+	OBJ_DATA *obj = check_obj( L, 1 );
+	lua_pushboolean( L, obj->wear_loc != WEAR_NONE );
+	return 1;
+}
+
+/* obj:wear_loc() — returns the current wear location (-1 if not worn) */
+static int api_obj_wear_loc( lua_State *L ) {
+	OBJ_DATA *obj = check_obj( L, 1 );
+	lua_pushinteger( L, obj->wear_loc );
+	return 1;
+}
+
+/* obj:vnum() — returns the object template vnum */
+static int api_obj_vnum( lua_State *L ) {
+	OBJ_DATA *obj = check_obj( L, 1 );
+	lua_pushinteger( L, obj->pIndexData ? obj->pIndexData->vnum : 0 );
+	return 1;
+}
+
+
 static const luaL_Reg obj_methods[] = {
 	{ "name",             api_obj_name },
 	{ "to_char",          api_obj_to_char },
@@ -533,6 +552,10 @@ static const luaL_Reg obj_methods[] = {
 	{ "cost",             api_obj_cost },
 	{ "extract",          api_obj_extract },
 	{ "contents_to_room", api_obj_contents_to_room },
+	{ "carried_by",       api_obj_carried_by },
+	{ "is_worn",          api_obj_is_worn },
+	{ "wear_loc",         api_obj_wear_loc },
+	{ "vnum",             api_obj_vnum },
 	{ NULL,               NULL }
 };
 

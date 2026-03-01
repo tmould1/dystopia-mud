@@ -31,6 +31,7 @@
 #include "shaman.h"
 #include "../systems/mcmp.h"
 #include "../systems/profile.h"
+#include "../script/script.h"
 
 #define MONK_AUTODROP  12
 
@@ -2426,6 +2427,8 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 	 */
 	if ( victim->hit <= 0 && IS_NPC( victim ) ) {
 		group_gain( ch, victim );
+		if ( !IS_NPC( ch ) )
+			script_trigger_obj_kill( ch, victim );
 		victim->position = POS_DEAD;
 	}
 

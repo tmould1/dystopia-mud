@@ -15,6 +15,8 @@ void script_run( SCRIPT_DATA *script, const char *func,
 	CHAR_DATA *mob, CHAR_DATA *ch, const char *text );
 void script_run_room( SCRIPT_DATA *script, const char *func,
 	CHAR_DATA *ch, ROOM_INDEX_DATA *room, const char *text );
+void script_run_obj( SCRIPT_DATA *script, const char *func,
+	OBJ_DATA *obj, CHAR_DATA *ch, CHAR_DATA *victim );
 bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob );
 
 
@@ -210,5 +212,77 @@ void script_trigger_room_speech( CHAR_DATA *ch, const char *text ) {
 			continue;
 
 		script_run_room( script, "on_say", ch, room, text );
+	}
+}
+
+
+/*
+ * TRIG_TICK on objects — fired periodically for carried/worn objects.
+ * Iterates all objects in the game, fires TRIG_TICK scripts on objects
+ * that are carried by a character.
+ *
+ * Lua callback: on_tick(obj)
+ *
+ * Called from update_handler() on the pulse_point cycle.
+ */
+void script_trigger_obj_tick( void ) {
+	OBJ_DATA *obj;
+	OBJ_DATA *obj_next;
+	SCRIPT_DATA *script;
+	CHAR_DATA *carrier;
+
+	LIST_FOR_EACH_SAFE( obj, obj_next, &g_objects, OBJ_DATA, obj_node ) {
+		if ( obj->pIndexData == NULL )
+			continue;
+		if ( list_empty( &obj->pIndexData->scripts ) )
+			continue;
+
+		carrier = obj->carried_by;
+		if ( carrier == NULL )
+			continue;
+
+		LIST_FOR_EACH( script, &obj->pIndexData->scripts, SCRIPT_DATA, node ) {
+			if ( !IS_SET( script->trigger, TRIG_TICK ) )
+				continue;
+			if ( !script_chance_check( script ) )
+				continue;
+
+			script_run_obj( script, "on_tick", obj, carrier, NULL );
+		}
+	}
+}
+
+
+/*
+ * TRIG_KILL on objects — fired when the carrier kills an NPC.
+ * Iterates all objects carried/worn by the killer and fires TRIG_KILL
+ * scripts.
+ *
+ * Lua callback: on_kill(obj, killer, victim)
+ *
+ * Called from fight.c when a player kills an NPC.
+ */
+void script_trigger_obj_kill( CHAR_DATA *ch, CHAR_DATA *victim ) {
+	OBJ_DATA *obj;
+	OBJ_DATA *obj_next;
+	SCRIPT_DATA *script;
+
+	if ( ch == NULL || victim == NULL )
+		return;
+
+	LIST_FOR_EACH_SAFE( obj, obj_next, &ch->carrying, OBJ_DATA, content_node ) {
+		if ( obj->pIndexData == NULL )
+			continue;
+		if ( list_empty( &obj->pIndexData->scripts ) )
+			continue;
+
+		LIST_FOR_EACH( script, &obj->pIndexData->scripts, SCRIPT_DATA, node ) {
+			if ( !IS_SET( script->trigger, TRIG_KILL ) )
+				continue;
+			if ( !script_chance_check( script ) )
+				continue;
+
+			script_run_obj( script, "on_kill", obj, ch, victim );
+		}
 	}
 }

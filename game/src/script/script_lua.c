@@ -17,6 +17,19 @@
 /* Maximum Lua instructions before a script is killed */
 #define SCRIPT_MAX_INSTRUCTIONS  100000
 
+/*
+ * Push a C pointer as full userdata with a named metatable.
+ * Full userdata is required because Lua 5.4 lightuserdata all share
+ * a single metatable — using lightuserdata for multiple types (Char,
+ * Room, Obj) causes the last-set metatable to overwrite all others.
+ */
+#define PUSH_UD(L, ptr, mt) do { \
+	void **_ud = (void **) lua_newuserdatauv( (L), sizeof(void*), 0 ); \
+	*_ud = (ptr); \
+	luaL_getmetatable( (L), (mt) ); \
+	lua_setmetatable( (L), -2 ); \
+} while (0)
+
 /* Forward declarations for script_api.c */
 void script_register_char_api( lua_State *L );
 void script_register_room_api( lua_State *L );
@@ -157,13 +170,8 @@ void script_run( SCRIPT_DATA *script, const char *func,
 	}
 
 	/* Push arguments: mob, ch, [text] */
-	lua_pushlightuserdata( g_lua, mob );
-	luaL_getmetatable( g_lua, "Char" );
-	lua_setmetatable( g_lua, -2 );
-
-	lua_pushlightuserdata( g_lua, ch );
-	luaL_getmetatable( g_lua, "Char" );
-	lua_setmetatable( g_lua, -2 );
+	PUSH_UD( g_lua, mob, "Char" );
+	PUSH_UD( g_lua, ch, "Char" );
 
 	nargs = 2;
 
@@ -241,9 +249,7 @@ bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob ) {
 	lua_rawgeti( g_lua, LUA_REGISTRYINDEX, script->lua_ref );
 
 	/* Push argument: mob */
-	lua_pushlightuserdata( g_lua, mob );
-	luaL_getmetatable( g_lua, "Char" );
-	lua_setmetatable( g_lua, -2 );
+	PUSH_UD( g_lua, mob, "Char" );
 
 	/* Call with 1 arg, 1 return value */
 	if ( lua_pcall( g_lua, 1, 1, 0 ) != LUA_OK ) {
@@ -263,6 +269,82 @@ bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob ) {
 
 	lua_settop( g_lua, top );
 	return result;
+}
+
+
+/*
+ * Execute an object script's Lua code.
+ * Pushes (obj, ch, [victim]) for object triggers.
+ *
+ * Parameters:
+ *   script  - The script data (contains Lua source code)
+ *   func    - Name of the Lua function to call (e.g. "on_tick", "on_kill")
+ *   obj     - The scripted object (pushed as first arg with Obj metatable)
+ *   ch      - The character carrying/wearing the object (Char metatable)
+ *   victim  - Optional victim for kill triggers (NULL if none)
+ */
+void script_run_obj( SCRIPT_DATA *script, const char *func,
+	OBJ_DATA *obj, CHAR_DATA *ch, CHAR_DATA *victim ) {
+	char buf[MAX_STRING_LENGTH];
+	int nargs;
+	int top;
+
+	if ( g_lua == NULL || script == NULL || script->code == NULL )
+		return;
+
+	top = lua_gettop( g_lua );
+
+	/* Reset instruction counter so each script gets a full budget */
+	lua_sethook( g_lua, script_timeout_hook, LUA_MASKCOUNT,
+		SCRIPT_MAX_INSTRUCTIONS );
+
+	/* Load and execute the script code to define its functions */
+	PROFILE_START( "lua_compile" );
+	if ( luaL_dostring( g_lua, script->code ) != LUA_OK ) {
+		PROFILE_END( "lua_compile" );
+		const char *err = lua_tostring( g_lua, -1 );
+		snprintf( buf, sizeof( buf ),
+			"script_run_obj: load error in '%s'", script->name );
+		bug( buf, 0 );
+		if ( err )
+			log_string( err );
+		lua_settop( g_lua, top );
+		return;
+	}
+	PROFILE_END( "lua_compile" );
+
+	/* Look up the callback function */
+	lua_getglobal( g_lua, func );
+	if ( !lua_isfunction( g_lua, -1 ) ) {
+		lua_settop( g_lua, top );
+		return;
+	}
+
+	/* Push arguments: obj, ch, [victim] */
+	PUSH_UD( g_lua, obj, "Obj" );
+	PUSH_UD( g_lua, ch, "Char" );
+
+	nargs = 2;
+
+	if ( victim != NULL ) {
+		PUSH_UD( g_lua, victim, "Char" );
+		nargs = 3;
+	}
+
+	/* Call the function with error handling */
+	PROFILE_START( "lua_exec" );
+	if ( lua_pcall( g_lua, nargs, 0, 0 ) != LUA_OK ) {
+		const char *err = lua_tostring( g_lua, -1 );
+		snprintf( buf, sizeof( buf ),
+			"script_run_obj: runtime error in '%s.%s'", func, script->name );
+		bug( buf, 0 );
+		if ( err )
+			log_string( err );
+	}
+	PROFILE_END( "lua_exec" );
+
+	/* Clean up the stack */
+	lua_settop( g_lua, top );
 }
 
 
@@ -306,13 +388,8 @@ void script_run_room( SCRIPT_DATA *script, const char *func,
 	}
 
 	/* Push arguments: ch, room, [text] */
-	lua_pushlightuserdata( g_lua, ch );
-	luaL_getmetatable( g_lua, "Char" );
-	lua_setmetatable( g_lua, -2 );
-
-	lua_pushlightuserdata( g_lua, room );
-	luaL_getmetatable( g_lua, "Room" );
-	lua_setmetatable( g_lua, -2 );
+	PUSH_UD( g_lua, ch, "Char" );
+	PUSH_UD( g_lua, room, "Room" );
 
 	nargs = 2;
 

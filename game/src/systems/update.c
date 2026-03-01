@@ -1179,6 +1179,7 @@ void update_handler( void ) {
 		weather_update();
 		char_update();
 		obj_update();
+		script_trigger_obj_tick();
 		room_update();
 
 		/*
