@@ -4,14 +4,11 @@
 
 [x] Database backup to S3 - see [db-backup-s3.md](db-backup-s3.md)
 
+[x] 30) Scripting system research — see [scripting.md](../design/architecture/scripting.md). Recommendation: embed Lua 5.4. Current codebase has 37 spec_funs (mob AI) and RoomText (room triggers), but no general-purpose scripting.
+
 [INFLIGHT]
 
 
-[x] 27) Structural review and heritage assessment - see [architecture docs](../design/architecture/heritage.md).  Testing harness implemented in [game/tests/](../../tests/) with CI integration.
-
-30) What are good, modern approaches to room, object, and mob programs?  LUA seems to be well known.  But what does this codebase currently support?
-
-[x] 31) Merc.h seems like a monolith we should break apart.  Are there others?  Let's plan to phase these out into specifics.
 
 [SOON]
 
