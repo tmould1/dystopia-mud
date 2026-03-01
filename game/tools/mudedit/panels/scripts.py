@@ -177,9 +177,9 @@ class ScriptEditorPanel(ttk.Frame):
         # Trigger flags
         self.trigger_editor = FlagEditor(
             right_frame,
-            flags={1: 'GREET', 2: 'SPEECH', 4: 'TICK', 8: 'KILL'},
+            flags={1: 'GREET', 2: 'SPEECH', 4: 'TICK', 8: 'KILL', 16: 'DEATH'},
             label="Trigger",
-            columns=4,
+            columns=5,
             on_change=self._on_trigger_change
         )
         self.trigger_editor.pack(fill=tk.X, padx=8, pady=4)

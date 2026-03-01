@@ -14,6 +14,7 @@
 #define TRIG_SPEECH         (1 << 1)    /* Player says something near mob */
 #define TRIG_TICK           (1 << 2)    /* Periodic update (mob AI / obj effects) */
 #define TRIG_KILL           (1 << 3)    /* Object: owner killed an NPC */
+#define TRIG_DEATH          (1 << 4)    /* Mob was killed — fires on mob template */
 
 /* Lua registry reference sentinel (must match Lua's LUA_NOREF) */
 #define SCRIPT_LUA_NOREF    (-2)
@@ -49,6 +50,9 @@ void script_trigger_room_speech( CHAR_DATA *ch, const char *text );
 /* Trigger dispatch — object scripts */
 void script_trigger_obj_tick( void );
 void script_trigger_obj_kill( CHAR_DATA *ch, CHAR_DATA *victim );
+
+/* Trigger dispatch — mob death (fires on victim's template after extraction) */
+void script_trigger_mob_death( CHAR_DATA *killer, MOB_INDEX_DATA *victim_idx );
 
 /* Cache management */
 void script_invalidate_cache( SCRIPT_DATA *script );

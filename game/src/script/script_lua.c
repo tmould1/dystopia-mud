@@ -414,6 +414,70 @@ void script_run_room( SCRIPT_DATA *script, const char *func,
 
 
 /*
+ * Execute a mob death script.
+ * The victim mob has already been extracted by raw_kill(), so we push:
+ *   killer    — Char userdata (the player who killed the mob)
+ *   mob_vnum  — integer (victim template vnum)
+ *   area_low  — integer (area lower vnum bound)
+ *   area_high — integer (area upper vnum bound)
+ *
+ * Lua callback: on_death(killer, mob_vnum, area_low, area_high)
+ */
+void script_run_death( SCRIPT_DATA *script, const char *func,
+	CHAR_DATA *killer, int mob_vnum, int area_low, int area_high ) {
+	char buf[MAX_STRING_LENGTH];
+	int top;
+
+	if ( g_lua == NULL || script == NULL || script->code == NULL )
+		return;
+
+	top = lua_gettop( g_lua );
+
+	lua_sethook( g_lua, script_timeout_hook, LUA_MASKCOUNT,
+		SCRIPT_MAX_INSTRUCTIONS );
+
+	PROFILE_START( "lua_compile" );
+	if ( luaL_dostring( g_lua, script->code ) != LUA_OK ) {
+		PROFILE_END( "lua_compile" );
+		const char *err = lua_tostring( g_lua, -1 );
+		snprintf( buf, sizeof( buf ),
+			"script_run_death: load error in '%s'", script->name );
+		bug( buf, 0 );
+		if ( err )
+			log_string( err );
+		lua_settop( g_lua, top );
+		return;
+	}
+	PROFILE_END( "lua_compile" );
+
+	lua_getglobal( g_lua, func );
+	if ( !lua_isfunction( g_lua, -1 ) ) {
+		lua_settop( g_lua, top );
+		return;
+	}
+
+	/* Push arguments: killer, mob_vnum, area_low, area_high */
+	PUSH_UD( g_lua, killer, "Char" );
+	lua_pushinteger( g_lua, mob_vnum );
+	lua_pushinteger( g_lua, area_low );
+	lua_pushinteger( g_lua, area_high );
+
+	PROFILE_START( "lua_exec" );
+	if ( lua_pcall( g_lua, 4, 0, 0 ) != LUA_OK ) {
+		const char *err = lua_tostring( g_lua, -1 );
+		snprintf( buf, sizeof( buf ),
+			"script_run_death: runtime error in '%s.%s'", func, script->name );
+		bug( buf, 0 );
+		if ( err )
+			log_string( err );
+	}
+	PROFILE_END( "lua_exec" );
+
+	lua_settop( g_lua, top );
+}
+
+
+/*
  * Invalidate a script's cached Lua function.
  * Forces recompilation on the next tick.  Call when script code changes
  * (e.g., OLC editing or hot-reload).

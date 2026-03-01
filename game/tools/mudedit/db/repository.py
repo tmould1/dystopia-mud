@@ -378,12 +378,14 @@ class ScriptRepository(BaseRepository):
     TRIG_SPEECH = 2   # (1 << 1)
     TRIG_TICK   = 4   # (1 << 2)
     TRIG_KILL   = 8   # (1 << 3)
+    TRIG_DEATH  = 16  # (1 << 4)
 
     TRIGGER_NAMES = {
         TRIG_GREET:  'GREET',
         TRIG_SPEECH: 'SPEECH',
         TRIG_TICK:   'TICK',
         TRIG_KILL:   'KILL',
+        TRIG_DEATH:  'DEATH',
     }
 
     def __init__(self, conn: sqlite3.Connection):

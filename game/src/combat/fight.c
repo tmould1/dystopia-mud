@@ -38,8 +38,6 @@
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
 
-void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx );
-
 /*
  * Local functions.
  */
@@ -2477,11 +2475,9 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 				do_sacrifice( ch, "corpse" );
 		}
 
-		/* Death teleport: if mob had death_teleport_vnum, move the killer */
-		if ( victim_idx != NULL && victim_idx->death_teleport_vnum >= 0
-		  && !IS_NPC( ch ) ) {
-			death_teleport( ch, victim_idx );
-		}
+		/* Mob death scripts (TRIG_DEATH): teleport gauntlets, etc. */
+		if ( victim_idx != NULL && !IS_NPC( ch ) )
+			script_trigger_mob_death( ch, victim_idx );
 
 		/* Victory sound if no longer fighting */
 		if ( !IS_NPC( ch ) && ch->fighting == NULL )
@@ -2492,114 +2488,6 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 	if ( victim == ch ) return;
 	tail_chain();
 	return;
-}
-
-/*
- * Death teleport: when a mob with death_teleport_vnum >= 0 dies, teleport
- * the killer to another room.
- *   -1 = disabled (no teleport)
- *    0 = area random gauntlet (pick random room with living NPC, or
- *        force-spawn from resets if all dead)
- *   >0 = direct teleport to that specific vnum
- */
-void death_teleport( CHAR_DATA *ch, MOB_INDEX_DATA *victim_idx ) {
-	ROOM_INDEX_DATA *dest = NULL;
-	ROOM_INDEX_DATA *candidates[64];
-	AREA_DATA *area;
-	int mode;
-	int count = 0;
-	int vnum;
-
-	if ( !ch || !victim_idx || !ch->in_room )
-		return;
-
-	mode = victim_idx->death_teleport_vnum;
-
-	if ( mode < 0 )
-		return;
-
-	if ( mode > 0 ) {
-		/* Direct teleport to specified room */
-		dest = get_room_index( mode );
-	} else {
-		/* Area random gauntlet: gather rooms in area with living NPCs */
-		area = victim_idx->area;
-		if ( !area )
-			return;
-
-		for ( vnum = area->lvnum; vnum <= area->uvnum && count < 64; vnum++ ) {
-			ROOM_INDEX_DATA *room = get_room_index( vnum );
-			CHAR_DATA *rch;
-			bool has_mob = FALSE;
-			if ( room == NULL || room == ch->in_room )
-				continue;
-			LIST_FOR_EACH(rch, &room->characters, CHAR_DATA, room_node) {
-				if ( IS_NPC( rch ) && rch->position != POS_DEAD ) {
-					has_mob = TRUE;
-					break;
-				}
-			}
-			if ( has_mob )
-				candidates[count++] = room;
-		}
-
-		if ( count > 0 ) {
-			dest = candidates[number_range( 0, count - 1 )];
-		} else {
-			/* All mobs dead — check for rooms with mob resets and force-spawn */
-			ROOM_INDEX_DATA *spawn_candidates[64];
-			int spawn_count = 0;
-			for ( vnum = area->lvnum; vnum <= area->uvnum && spawn_count < 64; vnum++ ) {
-				ROOM_INDEX_DATA *room = get_room_index( vnum );
-				RESET_DATA *pReset;
-				if ( room == NULL || room == ch->in_room )
-					continue;
-				LIST_FOR_EACH( pReset, &room->resets, RESET_DATA, node ) {
-					if ( pReset->command == 'M' ) {
-						spawn_candidates[spawn_count++] = room;
-						break;
-					}
-				}
-			}
-			if ( spawn_count > 0 ) {
-				RESET_DATA *pReset;
-				dest = spawn_candidates[number_range( 0, spawn_count - 1 )];
-				/* Force-spawn the mob from this room's reset */
-				LIST_FOR_EACH( pReset, &dest->resets, RESET_DATA, node ) {
-					if ( pReset->command == 'M' ) {
-						MOB_INDEX_DATA *pMobIdx = get_mob_index( pReset->arg1 );
-						if ( pMobIdx ) {
-							CHAR_DATA *mob = create_mobile( pMobIdx );
-							if ( room_is_dark( dest ) )
-								SET_BIT( mob->affected_by, AFF_INFRARED );
-							char_to_room( mob, dest );
-						}
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	if ( dest == NULL || dest == ch->in_room )
-		return;
-
-	{
-		const char *msg_char = victim_idx->death_teleport_msg
-			? victim_idx->death_teleport_msg
-			: "A mysterious force pulls you away!\n\r";
-		const char *msg_room = victim_idx->death_teleport_msg_room
-			? victim_idx->death_teleport_msg_room
-			: "$n vanishes in a flash of light!";
-
-		send_to_char( "\n\r", ch );
-		act( msg_char, ch, NULL, NULL, TO_CHAR );
-		act( msg_room, ch, NULL, NULL, TO_ROOM );
-		char_from_room( ch );
-		char_to_room( ch, dest );
-		act( msg_room, ch, NULL, NULL, TO_ROOM );
-		do_look( ch, "auto" );
-	}
 }
 
 bool is_safe( CHAR_DATA *ch, CHAR_DATA *victim ) {

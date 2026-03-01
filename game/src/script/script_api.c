@@ -424,14 +424,49 @@ static int api_room_find_trash( lua_State *L ) {
 }
 
 
+/* room:has_mob() — returns true if any living NPC is in the room */
+static int api_room_has_mob( lua_State *L ) {
+	ROOM_INDEX_DATA *room = check_room( L, 1 );
+	CHAR_DATA *vch;
+
+	LIST_FOR_EACH( vch, &room->characters, CHAR_DATA, room_node ) {
+		if ( IS_NPC( vch ) && vch->position != POS_DEAD ) {
+			lua_pushboolean( L, 1 );
+			return 1;
+		}
+	}
+
+	lua_pushboolean( L, 0 );
+	return 1;
+}
+
+/* room:first_mob_reset_vnum() — vnum of first 'M' reset, or nil */
+static int api_room_first_mob_reset_vnum( lua_State *L ) {
+	ROOM_INDEX_DATA *room = check_room( L, 1 );
+	RESET_DATA *pReset;
+
+	LIST_FOR_EACH( pReset, &room->resets, RESET_DATA, node ) {
+		if ( pReset->command == 'M' ) {
+			lua_pushinteger( L, pReset->arg1 );
+			return 1;
+		}
+	}
+
+	lua_pushnil( L );
+	return 1;
+}
+
+
 static const luaL_Reg room_methods[] = {
-	{ "vnum",            api_room_vnum },
-	{ "find_mob",        api_room_find_mob },
-	{ "echo",            api_room_echo },
-	{ "find_fighting",   api_room_find_fighting },
-	{ "find_corpse",     api_room_find_corpse },
-	{ "find_trash",      api_room_find_trash },
-	{ NULL,              NULL }
+	{ "vnum",                 api_room_vnum },
+	{ "find_mob",             api_room_find_mob },
+	{ "echo",                 api_room_echo },
+	{ "find_fighting",        api_room_find_fighting },
+	{ "find_corpse",          api_room_find_corpse },
+	{ "find_trash",           api_room_find_trash },
+	{ "has_mob",              api_room_has_mob },
+	{ "first_mob_reset_vnum", api_room_first_mob_reset_vnum },
+	{ NULL,                   NULL }
 };
 
 
@@ -656,6 +691,42 @@ static int api_game_cast_spell( lua_State *L ) {
 	return 0;
 }
 
+/* game.get_room(vnum) — look up a room by vnum */
+static int api_game_get_room( lua_State *L ) {
+	int vnum = (int) luaL_checkinteger( L, 1 );
+	ROOM_INDEX_DATA *room = get_room_index( vnum );
+
+	if ( room == NULL ) {
+		lua_pushnil( L );
+		return 1;
+	}
+
+	push_room( L, room );
+	return 1;
+}
+
+/* game.create_mobile(vnum, room) — spawn a mobile and place in room */
+static int api_game_create_mobile( lua_State *L ) {
+	int vnum = (int) luaL_checkinteger( L, 1 );
+	ROOM_INDEX_DATA *room = check_room( L, 2 );
+	MOB_INDEX_DATA *pMobIndex;
+	CHAR_DATA *mob;
+
+	pMobIndex = get_mob_index( vnum );
+	if ( pMobIndex == NULL ) {
+		luaL_error( L, "create_mobile: invalid vnum %d", vnum );
+		return 0;
+	}
+
+	mob = create_mobile( pMobIndex );
+	if ( room_is_dark( room ) )
+		SET_BIT( mob->affected_by, AFF_INFRARED );
+	char_to_room( mob, room );
+
+	push_char( L, mob );
+	return 1;
+}
+
 /* game.random(min, max) — returns a random number in [min, max] */
 static int api_game_random( lua_State *L ) {
 	int lo = (int) luaL_checkinteger( L, 1 );
@@ -674,6 +745,8 @@ static int api_game_hour( lua_State *L ) {
 static const luaL_Reg game_funcs[] = {
 	{ "create_object",  api_game_create_object },
 	{ "create_portal",  api_game_create_portal },
+	{ "create_mobile",  api_game_create_mobile },
+	{ "get_room",       api_game_get_room },
 	{ "cast_spell",     api_game_cast_spell },
 	{ "random",         api_game_random },
 	{ "hour",           api_game_hour },

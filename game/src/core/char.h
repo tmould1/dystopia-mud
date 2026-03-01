@@ -921,9 +921,6 @@ struct mob_index_data {
 	int gold;		 /* Unused */
 					 /*int                 special;
 					  int                 class; */
-	int death_teleport_vnum;    /* Room vnum to teleport killer on death, 0=none */
-	char *death_teleport_msg;      /* Message to char on teleport (NULL=default) */
-	char *death_teleport_msg_room; /* Message to room on teleport (NULL=default) */
 };
 
 struct editor_data {

@@ -76,10 +76,7 @@ static const char *SCHEMA_SQL =
 	"  level       INTEGER, hitroll INTEGER, ac INTEGER,"
 	"  hitnodice   INTEGER, hitsizedice INTEGER, hitplus INTEGER,"
 	"  damnodice   INTEGER, damsizedice INTEGER, damplus INTEGER,"
-	"  gold        INTEGER, sex INTEGER,"
-	"  death_teleport_vnum INTEGER DEFAULT -1,"
-	"  death_teleport_msg TEXT DEFAULT NULL,"
-	"  death_teleport_msg_room TEXT DEFAULT NULL"
+	"  gold        INTEGER, sex INTEGER"
 	");"
 
 	"CREATE TABLE IF NOT EXISTS objects ("
@@ -367,17 +364,6 @@ static sqlite3 *db_sql_open_area( const char *area_filename ) {
 		return NULL;
 	}
 
-	/* Migrations for existing databases - ignore errors if columns exist */
-	sqlite3_exec( db,
-		"ALTER TABLE mobiles ADD COLUMN death_teleport_vnum INTEGER DEFAULT -1;",
-		NULL, NULL, NULL );
-	sqlite3_exec( db,
-		"ALTER TABLE mobiles ADD COLUMN death_teleport_msg TEXT DEFAULT NULL;",
-		NULL, NULL, NULL );
-	sqlite3_exec( db,
-		"ALTER TABLE mobiles ADD COLUMN death_teleport_msg_room TEXT DEFAULT NULL;",
-		NULL, NULL, NULL );
-
 	return db;
 }
 
@@ -395,8 +381,7 @@ static void sql_load_mobiles( sqlite3 *db, AREA_DATA *pArea ) {
 		"  act, affected_by, alignment, level, hitroll, ac,"
 		"  hitnodice, hitsizedice, hitplus,"
 		"  damnodice, damsizedice, damplus,"
-		"  gold, sex, death_teleport_vnum,"
-		"  death_teleport_msg, death_teleport_msg_room"
+		"  gold, sex"
 		" FROM mobiles ORDER BY vnum";
 
 	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
@@ -447,11 +432,6 @@ static void sql_load_mobiles( sqlite3 *db, AREA_DATA *pArea ) {
 		pMobIndex->damplus      = sqlite3_column_int( stmt, 16 );
 		pMobIndex->gold         = sqlite3_column_int( stmt, 17 );
 		pMobIndex->sex          = sqlite3_column_int( stmt, 18 );
-		pMobIndex->death_teleport_vnum = sqlite3_column_int( stmt, 19 );
-		pMobIndex->death_teleport_msg      = sqlite3_column_type( stmt, 20 ) != SQLITE_NULL
-			? str_dup( (const char *) sqlite3_column_text( stmt, 20 ) ) : NULL;
-		pMobIndex->death_teleport_msg_room = sqlite3_column_type( stmt, 21 ) != SQLITE_NULL
-			? str_dup( (const char *) sqlite3_column_text( stmt, 21 ) ) : NULL;
 
 		iHash = vnum % MAX_KEY_HASH;
 		pMobIndex->next = mob_index_hash[iHash];
@@ -1064,9 +1044,8 @@ static void sql_save_mobiles( sqlite3 *db, AREA_DATA *pArea ) {
 		"INSERT INTO mobiles (vnum, player_name, short_descr, long_descr,"
 		"  description, act, affected_by, alignment, level, hitroll, ac,"
 		"  hitnodice, hitsizedice, hitplus,"
-		"  damnodice, damsizedice, damplus, gold, sex, death_teleport_vnum,"
-		"  death_teleport_msg, death_teleport_msg_room)"
-		" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		"  damnodice, damsizedice, damplus, gold, sex)"
+		" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 	int vnum;
 
 	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
@@ -1097,15 +1076,6 @@ static void sql_save_mobiles( sqlite3 *db, AREA_DATA *pArea ) {
 		sqlite3_bind_int( stmt, 17, pMobIndex->damplus );
 		sqlite3_bind_int( stmt, 18, pMobIndex->gold );
 		sqlite3_bind_int( stmt, 19, pMobIndex->sex );
-		sqlite3_bind_int( stmt, 20, pMobIndex->death_teleport_vnum );
-		if ( pMobIndex->death_teleport_msg )
-			sqlite3_bind_text( stmt, 21, pMobIndex->death_teleport_msg, -1, SQLITE_TRANSIENT );
-		else
-			sqlite3_bind_null( stmt, 21 );
-		if ( pMobIndex->death_teleport_msg_room )
-			sqlite3_bind_text( stmt, 22, pMobIndex->death_teleport_msg_room, -1, SQLITE_TRANSIENT );
-		else
-			sqlite3_bind_null( stmt, 22 );
 
 		sqlite3_step( stmt );
 	}

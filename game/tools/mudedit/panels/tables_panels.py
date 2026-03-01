@@ -889,7 +889,7 @@ class WearLocationsPanel(ttk.Frame):
 class ScriptLibraryPanel(ttk.Frame):
     """Editor panel for shared Lua script templates in the script library."""
 
-    TRIGGER_NAMES = {1: 'GREET', 2: 'SPEECH', 4: 'TICK'}
+    TRIGGER_NAMES = {1: 'GREET', 2: 'SPEECH', 4: 'TICK', 8: 'KILL', 16: 'DEATH'}
 
     def __init__(
         self,

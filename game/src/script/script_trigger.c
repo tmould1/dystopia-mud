@@ -18,6 +18,8 @@ void script_run_room( SCRIPT_DATA *script, const char *func,
 void script_run_obj( SCRIPT_DATA *script, const char *func,
 	OBJ_DATA *obj, CHAR_DATA *ch, CHAR_DATA *victim );
 bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob );
+void script_run_death( SCRIPT_DATA *script, const char *func,
+	CHAR_DATA *killer, int mob_vnum, int area_low, int area_high );
 
 
 /*
@@ -284,5 +286,42 @@ void script_trigger_obj_kill( CHAR_DATA *ch, CHAR_DATA *victim ) {
 
 			script_run_obj( script, "on_kill", obj, ch, victim );
 		}
+	}
+}
+
+
+/*
+ * TRIG_DEATH — fired when a mob is killed.
+ * The victim CHAR_DATA has already been extracted by raw_kill().
+ * Iterates victim_idx->scripts for TRIG_DEATH scripts.
+ *
+ * Lua callback: on_death(killer, mob_vnum, area_low, area_high)
+ *
+ * Called from fight.c after raw_kill() and autoloot/autosac.
+ */
+void script_trigger_mob_death( CHAR_DATA *killer, MOB_INDEX_DATA *victim_idx ) {
+	SCRIPT_DATA *script;
+	int area_low = 0;
+	int area_high = 0;
+
+	if ( killer == NULL || victim_idx == NULL )
+		return;
+
+	if ( IS_NPC( killer ) )
+		return;
+
+	if ( victim_idx->area != NULL ) {
+		area_low  = victim_idx->area->lvnum;
+		area_high = victim_idx->area->uvnum;
+	}
+
+	LIST_FOR_EACH( script, &victim_idx->scripts, SCRIPT_DATA, node ) {
+		if ( !IS_SET( script->trigger, TRIG_DEATH ) )
+			continue;
+		if ( !script_chance_check( script ) )
+			continue;
+
+		script_run_death( script, "on_death", killer,
+			victim_idx->vnum, area_low, area_high );
 	}
 }
