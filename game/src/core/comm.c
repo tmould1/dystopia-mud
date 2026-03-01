@@ -925,7 +925,7 @@ void init_descriptor( DESCRIPTOR_DATA *dnew, int desc ) {
 }
 
 void new_descriptor( int control ) {
-	char buf[MAX_STRING_LENGTH];
+	char buf[64];
 	DESCRIPTOR_DATA *dnew;
 	struct sockaddr_in sock;
 	int desc;
