@@ -25,6 +25,7 @@
 #include "gmcp.h"
 #include "../systems/mcmp.h"
 #include "../db/db_game.h"
+#include "../script/script.h"
 #include "../db/db_player.h"
 
 extern GAMECONFIG_DATA game_config;
@@ -34,9 +35,6 @@ extern GAMECONFIG_DATA game_config;
  */
 void talk_channel ( CHAR_DATA * ch, char *argument,
 	int channel, const char *verb );
-bool is_in (char *, char *);
-bool all_in (char *, char *);
-
 /* Trace's Bounty code */
 void do_bounty( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_INPUT_LENGTH];
@@ -736,7 +734,8 @@ void do_say( CHAR_DATA *ch, char *argument ) {
 	snprintf( poly, sizeof( poly ), "$n %s '#3$T#n'.", speaks );
 	if ( ch->in_room->vnum != ROOM_VNUM_IN_OBJECT ) {
 		act( poly, ch, NULL, argument, TO_ROOM );
-		room_text( ch, strlower( argument ) );
+		script_trigger_speech( ch, strlower( argument ) );
+		script_trigger_room_speech( ch, strlower( argument ) );
 		return;
 	}
 
@@ -783,138 +782,8 @@ void do_say( CHAR_DATA *ch, char *argument ) {
 		send_to_char( poly, to );
 	}
 
-	room_text( ch, strlower( argument ) );
-	return;
-}
-
-void room_text( CHAR_DATA *ch, char *argument ) {
-	CHAR_DATA *vch;
-	CHAR_DATA *vch_next;
-	CHAR_DATA *mob;
-	OBJ_DATA *obj;
-	ROOMTEXT_DATA *rt;
-	bool mobfound;
-	bool hop;
-
-	char arg[MAX_INPUT_LENGTH];
-	char arg1[MAX_INPUT_LENGTH];
-	char arg2[MAX_INPUT_LENGTH];
-
-	LIST_FOR_EACH( rt, &ch->in_room->roomtext, ROOMTEXT_DATA, node ) {
-		if ( !strcmp( argument, rt->input ) || is_in( argument, rt->input ) || all_in( argument, rt->input ) ) {
-			if ( rt->name != NULL && rt->name[0] != '\0' && str_cmp( rt->name, "all" ) && str_cmp( rt->name, "|all*" ) )
-				if ( !is_in( ch->name, rt->name ) ) continue;
-			mobfound = TRUE;
-			if ( rt->mob != 0 ) {
-				mobfound = FALSE;
-				LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
-					if ( vch->in_room == NULL ) continue;
-					if ( !IS_NPC( vch ) ) continue;
-					if ( vch->in_room == ch->in_room && vch->pIndexData->vnum == rt->mob ) {
-						mobfound = TRUE;
-						break;
-					}
-				}
-			}
-			if ( !mobfound ) continue;
-			hop = FALSE;
-			switch ( rt->type % RT_RETURN ) {
-			case RT_SAY:
-				break;
-			case RT_LIGHTS:
-				do_changelight( ch, "" );
-				break;
-			case RT_LIGHT:
-				REMOVE_BIT( ch->in_room->room_flags, ROOM_DARK );
-				break;
-			case RT_DARK:
-				SET_BIT( ch->in_room->room_flags, ROOM_DARK );
-				break;
-			case RT_OBJECT:
-				if ( get_obj_index( rt->power ) == NULL ) return;
-				obj = create_object( get_obj_index( rt->power ), ch->level );
-				if ( IS_SET( rt->type, RT_TIMER ) ) obj->timer = 1;
-				if ( CAN_WEAR( obj, ITEM_TAKE ) )
-					obj_to_char( obj, ch );
-				else
-					obj_to_room( obj, ch->in_room );
-				if ( !str_cmp( rt->choutput, "copy" ) )
-					act( rt->output, ch, obj, NULL, TO_CHAR );
-				else
-					act( rt->choutput, ch, obj, NULL, TO_CHAR );
-				if ( !IS_SET( rt->type, RT_PERSONAL ) )
-					act( rt->output, ch, obj, NULL, TO_ROOM );
-				hop = TRUE;
-				break;
-			case RT_MOBILE:
-				if ( get_mob_index( rt->power ) == NULL ) return;
-				mob = create_mobile( get_mob_index( rt->power ) );
-				char_to_room( mob, ch->in_room );
-				if ( !str_cmp( rt->choutput, "copy" ) )
-					act( rt->output, ch, NULL, mob, TO_CHAR );
-				else
-					act( rt->choutput, ch, NULL, mob, TO_CHAR );
-				if ( !IS_SET( rt->type, RT_PERSONAL ) )
-					act( rt->output, ch, NULL, mob, TO_ROOM );
-				hop = TRUE;
-				break;
-			case RT_SPELL:
-				( *skill_table[rt->power].spell_fun )( rt->power, number_range( 20, 30 ), ch, ch );
-				break;
-			case RT_PORTAL:
-				if ( get_obj_index( OBJ_VNUM_PORTAL ) == NULL ) return;
-				obj = create_object( get_obj_index( OBJ_VNUM_PORTAL ), 0 );
-				obj->timer = 1;
-				obj->value[0] = rt->power;
-				obj->value[1] = 1;
-				obj_to_room( obj, ch->in_room );
-				break;
-			case RT_TELEPORT:
-				if ( get_room_index( rt->power ) == NULL ) return;
-				if ( !str_cmp( rt->choutput, "copy" ) )
-					act( rt->output, ch, NULL, NULL, TO_CHAR );
-				else
-					act( rt->choutput, ch, NULL, NULL, TO_CHAR );
-				if ( !IS_SET( rt->type, RT_PERSONAL ) )
-					act( rt->output, ch, NULL, NULL, TO_ROOM );
-				char_from_room( ch );
-				char_to_room( ch, get_room_index( rt->power ) );
-				act( "$n appears in the room.", ch, NULL, NULL, TO_ROOM );
-				do_look( ch, "auto" );
-				hop = TRUE;
-				break;
-			case RT_ACTION:
-				snprintf( arg, sizeof( arg ), "%s", argument );
-				argument = one_argument( arg, arg1 );
-				argument = one_argument( arg, arg2 );
-				if ( ( mob = get_char_room( ch, arg2 ) ) == NULL ) continue;
-				interpret( mob, rt->output );
-				break;
-			case RT_OPEN_LIFT:
-				open_lift( ch );
-				break;
-			case RT_CLOSE_LIFT:
-				close_lift( ch );
-				break;
-			case RT_MOVE_LIFT:
-				move_lift( ch, rt->power );
-				break;
-			default:
-				break;
-			}
-			if ( hop && IS_SET( rt->type, RT_RETURN ) )
-				return;
-			else if ( hop )
-				continue;
-			if ( !str_cmp( rt->choutput, "copy" ) && !IS_SET( rt->type, RT_ACTION ) )
-				act( rt->output, ch, NULL, NULL, TO_CHAR );
-			else if ( !IS_SET( rt->type, RT_ACTION ) )
-				act( rt->choutput, ch, NULL, NULL, TO_CHAR );
-			if ( !IS_SET( rt->type, RT_PERSONAL ) && !IS_SET( rt->type, RT_ACTION ) )
-				act( rt->output, ch, NULL, NULL, TO_ROOM );
-			if ( IS_SET( rt->type, RT_RETURN ) ) return;
-		}
-	}
+	script_trigger_speech( ch, strlower( argument ) );
+	script_trigger_room_speech( ch, strlower( argument ) );
 	return;
 }
 
@@ -927,44 +796,6 @@ char *strlower( char *ip ) {
 	}
 	buffer[pos] = '\0';
 	return buffer;
-}
-
-bool is_in( char *arg, char *ip ) {
-	char *lo_arg;
-	char cmp[MAX_INPUT_LENGTH];
-	int fitted;
-
-	if ( ip[0] != '|' )
-		return FALSE;
-	cmp[0] = '\0';
-	lo_arg = strlower( arg );
-	do {
-		ip += strlen( cmp ) + 1;
-		fitted = sscanf( ip, "%[^*]", cmp );
-		if ( strstr( lo_arg, cmp ) != NULL ) {
-			return TRUE;
-		}
-	} while ( fitted > 0 );
-	return FALSE;
-}
-
-bool all_in( char *arg, char *ip ) {
-	char *lo_arg;
-	char cmp[MAX_INPUT_LENGTH];
-	int fitted;
-
-	if ( ip[0] != '&' )
-		return FALSE;
-	cmp[0] = '\0';
-	lo_arg = strlower( arg );
-	do {
-		ip += strlen( cmp ) + 1;
-		fitted = sscanf( ip, "%[^*]", cmp );
-		if ( strstr( lo_arg, cmp ) == NULL ) {
-			return FALSE;
-		}
-	} while ( fitted > 0 );
-	return TRUE;
 }
 
 void do_tell( CHAR_DATA *ch, char *argument ) {
@@ -1749,155 +1580,6 @@ bool is_same_group( CHAR_DATA *ach, CHAR_DATA *bch ) {
 	if ( ach->leader != NULL ) ach = ach->leader;
 	if ( bch->leader != NULL ) bch = bch->leader;
 	return ach == bch;
-}
-
-void do_changelight( CHAR_DATA *ch, char *argument ) {
-	if ( IS_SET( ch->in_room->room_flags, ROOM_DARK ) ) {
-		REMOVE_BIT( ch->in_room->room_flags, ROOM_DARK );
-		act( "The room is suddenly filled with light!", ch, NULL, NULL, TO_CHAR );
-		act( "The room is suddenly filled with light!", ch, NULL, NULL, TO_ROOM );
-		return;
-	}
-	SET_BIT( ch->in_room->room_flags, ROOM_DARK );
-	act( "The lights in the room suddenly go out!", ch, NULL, NULL, TO_CHAR );
-	act( "The lights in the room suddenly go out!", ch, NULL, NULL, TO_ROOM );
-	return;
-}
-
-void open_lift( CHAR_DATA *ch ) {
-	ROOM_INDEX_DATA *location;
-	int in_room;
-
-	in_room = ch->in_room->vnum;
-	location = get_room_index( in_room );
-
-	if ( is_open( ch ) ) return;
-
-	act( "The doors open.", ch, NULL, NULL, TO_CHAR );
-	act( "The doors open.", ch, NULL, NULL, TO_ROOM );
-	move_door( ch );
-	if ( is_open( ch ) ) act( "The doors close.", ch, NULL, NULL, TO_ROOM );
-	if ( !same_floor( ch, in_room ) ) act( "The lift judders suddenly.", ch, NULL, NULL, TO_ROOM );
-	if ( is_open( ch ) ) act( "The doors open.", ch, NULL, NULL, TO_ROOM );
-	move_door( ch );
-	open_door( ch, FALSE );
-	char_from_room( ch );
-	char_to_room( ch, location );
-	open_door( ch, TRUE );
-	move_door( ch );
-	open_door( ch, TRUE );
-	thru_door( ch, in_room );
-	char_from_room( ch );
-	char_to_room( ch, location );
-	return;
-}
-
-void close_lift( CHAR_DATA *ch ) {
-	ROOM_INDEX_DATA *location;
-	int in_room;
-
-	in_room = ch->in_room->vnum;
-	location = get_room_index( in_room );
-
-	if ( !is_open( ch ) ) return;
-	act( "The doors close.", ch, NULL, NULL, TO_CHAR );
-	act( "The doors close.", ch, NULL, NULL, TO_ROOM );
-	open_door( ch, FALSE );
-	move_door( ch );
-	open_door( ch, FALSE );
-	char_from_room( ch );
-	char_to_room( ch, location );
-	return;
-}
-
-void move_lift( CHAR_DATA *ch, int to_room ) {
-	ROOM_INDEX_DATA *location;
-	int in_room;
-
-	in_room = ch->in_room->vnum;
-	location = get_room_index( in_room );
-
-	if ( is_open( ch ) ) act( "The doors close.", ch, NULL, NULL, TO_CHAR );
-	if ( is_open( ch ) ) act( "The doors close.", ch, NULL, NULL, TO_ROOM );
-	if ( !same_floor( ch, to_room ) ) act( "The lift judders suddenly.", ch, NULL, NULL, TO_CHAR );
-	if ( !same_floor( ch, to_room ) ) act( "The lift judders suddenly.", ch, NULL, NULL, TO_ROOM );
-	move_door( ch );
-	open_door( ch, FALSE );
-	char_from_room( ch );
-	char_to_room( ch, location );
-	open_door( ch, FALSE );
-	thru_door( ch, to_room );
-	return;
-}
-
-bool same_floor( CHAR_DATA *ch, int cmp_room ) {
-	OBJ_DATA *obj;
-
-	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
-		if ( obj->item_type != ITEM_PORTAL ) continue;
-		if ( obj->pIndexData->vnum == 30001 ) continue;
-		if ( obj->value[0] == cmp_room )
-			return TRUE;
-		else
-			return FALSE;
-	}
-	return FALSE;
-}
-
-bool is_open( CHAR_DATA *ch ) {
-	OBJ_DATA *obj;
-
-	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
-		if ( obj->item_type != ITEM_PORTAL ) continue;
-		if ( obj->pIndexData->vnum == 30001 ) continue;
-		if ( obj->value[2] == 0 )
-			return TRUE;
-		else
-			return FALSE;
-	}
-	return FALSE;
-}
-
-void move_door( CHAR_DATA *ch ) {
-	OBJ_DATA *obj;
-	ROOM_INDEX_DATA *pRoomIndex;
-
-	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
-		if ( obj->item_type != ITEM_PORTAL ) continue;
-		if ( obj->pIndexData->vnum == 30001 ) continue;
-		pRoomIndex = get_room_index( obj->value[0] );
-		char_from_room( ch );
-		char_to_room( ch, pRoomIndex );
-		return;
-	}
-	return;
-}
-
-void thru_door( CHAR_DATA *ch, int doorexit ) {
-	OBJ_DATA *obj;
-
-	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
-		if ( obj->item_type != ITEM_PORTAL ) continue;
-		if ( obj->pIndexData->vnum == 30001 ) continue;
-		obj->value[0] = doorexit;
-		return;
-	}
-	return;
-}
-
-void open_door( CHAR_DATA *ch, bool be_open ) {
-	OBJ_DATA *obj;
-
-	LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
-		if ( obj->item_type != ITEM_PORTAL ) continue;
-		if ( obj->pIndexData->vnum == 30001 ) continue;
-		if ( obj->value[2] == 0 && !be_open )
-			obj->value[2] = 3;
-		else if ( obj->value[2] == 3 && be_open )
-			obj->value[2] = 0;
-		return;
-	}
-	return;
 }
 
 void do_telepath( CHAR_DATA *ch, char *argument ) {

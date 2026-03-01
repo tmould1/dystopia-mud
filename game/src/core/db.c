@@ -30,6 +30,7 @@
 #include "../db/db_game.h"
 #include "../db/db_player.h"
 #include "../db/db_tables.h"
+#include "../script/script.h"
 
 /*
  * Path management - allows executable to run from any directory
@@ -267,7 +268,6 @@ list_head_t g_helps;
 
 int top_affect;
 int top_area;
-int top_rt;
 int top_ed;
 int top_exit;
 int top_help;
@@ -400,6 +400,7 @@ void boot_db( bool fCopyOver ) {
 	db_tables_init();
 	db_game_load_helps();
 	intro_load();
+	script_init();
 
 	/*
 	 * Load all areas from SQLite .db files in gamedata/db/areas/.
@@ -1651,8 +1652,6 @@ void do_memory( CHAR_DATA *ch, char *argument ) {
 	snprintf( buf, sizeof( buf ), "Affects %5d\n\r", top_affect );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ), "Areas   %5d\n\r", top_area );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "RmTxt   %5d\n\r", top_rt );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ), "ExDes   %5d\n\r", top_ed );
 	send_to_char( buf, ch );

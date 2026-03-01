@@ -155,7 +155,6 @@ ROOM_INDEX_DATA *new_room_index( void ) {
 	list_init( &pRoom->characters );
 	list_init( &pRoom->objects );
 	list_init( &pRoom->extra_descr );
-	list_init( &pRoom->roomtext );
 	list_init( &pRoom->resets );
 	pRoom->name = str_dup( "" );
 	pRoom->description = str_dup( "" );

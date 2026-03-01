@@ -6,6 +6,7 @@
 
 #include "merc.h"
 #include "utf8.h"
+#include "../script/script.h"
 #include "../db/db_player.h"
 #include "../db/db_game.h"
 #include "../systems/gmcp.h"
@@ -375,7 +376,8 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 	act( "$n has entered the game.", ch, NULL, NULL, TO_ROOM );
 
 	remove_illegal_items( ch, FALSE );
-	room_text( ch, ">ENTER<" );
+	script_trigger_greet( ch, ch->in_room );
+	script_trigger_room_enter( ch, ch->in_room );
 
 	for ( i = 0; i < MAX_DISCIPLINES; i++ ) {
 		if ( ch->power[i] > 10 && !IS_SET( ch->extra, EXTRA_FLASH ) && !IS_SET( ch->extra, EXTRA_BAAL ) )
@@ -774,8 +776,9 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 			} while ( equipped );
 		}
 
-		/* Room program greeting */
-		room_text( ch, ">ENTER<" );
+		/* Script triggers on room entry */
+		script_trigger_greet( ch, ch->in_room );
+		script_trigger_room_enter( ch, ch->in_room );
 
 		/* Experience-appropriate welcome hint */
 		if ( ch->pcdata->explevel == 0 )
@@ -815,7 +818,8 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 	clear_stats( ch );
 
 	remove_illegal_items( ch, TRUE );
-	room_text( ch, ">ENTER<" );
+	script_trigger_greet( ch, ch->in_room );
+	script_trigger_room_enter( ch, ch->in_room );
 
 	for ( i = 0; i < MAX_DISCIPLINES; i++ ) {
 		if ( ch->power[i] > 10 )

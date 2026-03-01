@@ -23,20 +23,18 @@
 #include "merc.h"
 #include "../systems/mcmp.h"
 #include "../classes/artificer.h"
+#include "../script/script.h"
 
 void horn ( CHAR_DATA * ch );
 
 char *const dir_name[] =
-	{
-		"north", "east", "south", "west", "up", "down" };
+	{ "north", "east", "south", "west", "up", "down" };
 
 const int rev_dir[] =
-	{
-		2, 3, 0, 1, 5, 4 };
+	{ 2, 3, 0, 1, 5, 4 };
 
 const int movement_loss[SECT_MAX] =
-	{
-		1, 2, 2, 3, 4, 6, 4, 1, 6, 10, 6 };
+	{ 1, 2, 2, 3, 4, 6, 4, 1, 6, 10, 6 };
 
 /*
  * Local functions.
@@ -472,7 +470,8 @@ void move_char( CHAR_DATA *ch, int door ) {
 			move_char( fch, door );
 		}
 	}
-	room_text( ch, ">ENTER<" );
+	script_trigger_greet( ch, ch->in_room );
+	script_trigger_room_enter( ch, ch->in_room );
 	return;
 }
 
@@ -1985,34 +1984,34 @@ const char *wwgift[MAX_GIFTS] =
 		"Wendigo" };
 
 const char *discipline[MAX_DISCIPLINES] =
-	{
-		"", "nature",
-		"celerity", "fortitude",
-		"obtenebration", "presence",
-		"quietus", "thaumaturgy",
-		"auspex", "dominate",
-		"obfuscate", "potence",
-		"protean", "serpentis",
-		"vicissitude", "daimoinon",
-		"animalism", "arcane",
+{
+	"", "nature",
+	"celerity", "fortitude",
+	"obtenebration", "presence",
+	"quietus", "thaumaturgy",
+	"auspex", "dominate",
+	"obfuscate", "potence",
+	"protean", "serpentis",
+	"vicissitude", "daimoinon",
+	"animalism", "arcane",
 
-		/* Werewolf */
+	/* Werewolf */
 
-		"bear", "lynx",
-		"boar", "owl",
-		"spider", "wolf",
-		"hawk", "mantis",
-		"raptor", "luna",
-		"pain", "congregation",
+	"bear", "lynx",
+	"boar", "owl",
+	"spider", "wolf",
+	"hawk", "mantis",
+	"raptor", "luna",
+	"pain", "congregation",
 
-		/* Daemon */
-		"hellfire", "attack",
-		"temptation", "morphosis",
-		"corruption", "geluge",
-		"discord", "nether",
-		"immunae", "chimerstry",
-		"thanatosis", "obeah",
-		"necromancy", "melpominee"
+	/* Daemon */
+	"hellfire", "attack",
+	"temptation", "morphosis",
+	"corruption", "geluge",
+	"discord", "nether",
+	"immunae", "chimerstry",
+	"thanatosis", "obeah",
+	"necromancy", "melpominee"
 
 };
 

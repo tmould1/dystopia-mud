@@ -748,7 +748,6 @@ DO_FUN do_call;
 DO_FUN do_calm;
 DO_FUN do_cast;
 DO_FUN do_change;
-DO_FUN do_changelight;
 DO_FUN do_channels;
 DO_FUN do_compress;
 DO_FUN do_compres;
@@ -1419,7 +1418,6 @@ void add_follower ( CHAR_DATA * ch, CHAR_DATA *master );
 void stop_follower ( CHAR_DATA * ch );
 void die_follower ( CHAR_DATA * ch );
 bool is_same_group ( CHAR_DATA * ach, CHAR_DATA *bch );
-void room_text ( CHAR_DATA * ch, char *argument );
 char *strlower ( char *ip );
 void excessive_cpu ( int blx );
 bool check_parse_name ( char *name );
@@ -1441,14 +1439,6 @@ void set_switchname ( CHAR_DATA * ch, char *title );
 
 /* act_move.c */
 void move_char ( CHAR_DATA * ch, int door );
-void open_lift ( CHAR_DATA * ch );
-void close_lift ( CHAR_DATA * ch );
-void move_lift ( CHAR_DATA * ch, int to_room );
-void move_door ( CHAR_DATA * ch );
-void thru_door ( CHAR_DATA * ch, int doorexit );
-void open_door ( CHAR_DATA * ch, bool be_open );
-bool is_open ( CHAR_DATA * ch );
-bool same_floor ( CHAR_DATA * ch, int cmp_room );
 void check_hunt ( CHAR_DATA * ch );
 
 int disc_points_needed ( CHAR_DATA * ch );

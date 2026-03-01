@@ -105,34 +105,6 @@ typedef enum {
 #define ROOM_NO_CHANT		8388608
 
 /*
- * Room text flags (KaVir).
- * Used in #ROOMS.
- */
-#define RT_LIGHTS	  1 /* Toggles lights on/off */
-#define RT_SAY		  2 /* Use this if no others powers */
-#define RT_ENTER	  4
-#define RT_CAST		  8
-#define RT_THROWOUT	  16	/* Erm...can't remember ;) */
-#define RT_OBJECT	  32	/* Creates an object */
-#define RT_MOBILE	  64	/* Creates a mobile */
-#define RT_LIGHT	  128	/* Lights on ONLY */
-#define RT_DARK		  256	/* Lights off ONLY */
-#define RT_OPEN_LIFT  512	/* Open lift */
-#define RT_CLOSE_LIFT 1024	/* Close lift */
-#define RT_MOVE_LIFT  2048	/* Move lift */
-#define RT_SPELL	  4096	/* Cast a spell */
-#define RT_PORTAL	  8192	/* Creates a one-way portal */
-#define RT_TELEPORT	  16384 /* Teleport player to room */
-
-#define RT_ACTION  32768
-#define RT_BLANK_1 65536
-#define RT_BLANK_2 131072
-
-#define RT_RETURN	1048576 /* Perform once */
-#define RT_PERSONAL 2097152 /* Only shows message to char */
-#define RT_TIMER	4194304 /* Sets object timer to 1 tick */
-
-/*
  * Directions.
  * Used in #ROOMS.
  */
@@ -204,19 +176,6 @@ struct exit_data {
 };
 
 /*
- * Room text checking data.
- */
-typedef struct roomtext_data {
-	int type;
-	int power;
-	int mob;
-	char *input;
-	char *output;
-	char *choutput;
-	char *name;
-	list_node_t node;
-} ROOMTEXT_DATA;
-/*
  * Room type.
  */
 struct room_index_data {
@@ -227,8 +186,8 @@ struct room_index_data {
 	list_head_t extra_descr;
 	AREA_DATA *area;
 	EXIT_DATA *exit[6];
-	list_head_t roomtext;
 	list_head_t resets;      /* OLC */
+	list_head_t scripts;     /* Lua scripts attached to this room */
 
 	char *track[5];
 	char *name;
