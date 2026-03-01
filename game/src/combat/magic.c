@@ -1863,18 +1863,9 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	char buf[MAX_STRING_LENGTH];
 	AFFECT_DATA *paf;
 	int itemtype;
-	bool fMxp = FALSE;
-
-	/* Check if MXP is enabled for popup frame support */
-	if ( ch->desc != NULL && ch->desc->mxp_enabled )
-		fMxp = TRUE;
 
 	act( "You examine $p carefully.", ch, obj, NULL, TO_CHAR );
 	act( "$n examines $p carefully.", ch, obj, NULL, TO_ROOM );
-
-	/* Open MXP frame for popup display if supported */
-	if ( fMxp )
-		send_to_char( MXP_SECURE_LINE MXP_FRAME_OPEN MXP_LOCK_LOCKED "\n\r", ch );
 
 	snprintf( buf, sizeof( buf ),
 		"Object '%s' is type %s, extra flags %s.\n\rWeight is %d, value is %d.\n\r",
@@ -2176,10 +2167,6 @@ void spell_identify( int sn, int level, CHAR_DATA *ch, void *vo ) {
 			send_to_char( buf, ch );
 		}
 	}
-
-	/* Close MXP frame if we opened one */
-	if ( fMxp )
-		send_to_char( MXP_SECURE_LINE MXP_FRAME_CLOSE MXP_LOCK_LOCKED "\n\r", ch );
 
 	return;
 }
