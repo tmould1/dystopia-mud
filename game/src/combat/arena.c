@@ -78,7 +78,7 @@ void open_arena() {
 }
 
 void close_arena() {
-	CHAR_DATA *gch;
+	CHAR_DATA *gch = NULL;
 	CHAR_DATA *vch;
 	int arenaplayers = 0;
 
