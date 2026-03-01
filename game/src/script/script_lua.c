@@ -8,6 +8,7 @@
 
 #include "merc.h"
 #include "script.h"
+#include "../systems/profile.h"
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -127,8 +128,14 @@ void script_run( SCRIPT_DATA *script, const char *func,
 
 	top = lua_gettop( g_lua );
 
+	/* Reset instruction counter so each script gets a full budget */
+	lua_sethook( g_lua, script_timeout_hook, LUA_MASKCOUNT,
+		SCRIPT_MAX_INSTRUCTIONS );
+
 	/* Load and execute the script code to define its functions */
+	PROFILE_START( "lua_compile" );
 	if ( luaL_dostring( g_lua, script->code ) != LUA_OK ) {
+		PROFILE_END( "lua_compile" );
 		const char *err = lua_tostring( g_lua, -1 );
 		snprintf( buf, sizeof( buf ),
 			"script_run: load error in '%s'", script->name );
@@ -138,6 +145,7 @@ void script_run( SCRIPT_DATA *script, const char *func,
 		lua_settop( g_lua, top );
 		return;
 	}
+	PROFILE_END( "lua_compile" );
 
 	/* Look up the callback function */
 	lua_getglobal( g_lua, func );
@@ -165,6 +173,7 @@ void script_run( SCRIPT_DATA *script, const char *func,
 	}
 
 	/* Call the function with error handling */
+	PROFILE_START( "lua_exec" );
 	if ( lua_pcall( g_lua, nargs, 0, 0 ) != LUA_OK ) {
 		const char *err = lua_tostring( g_lua, -1 );
 		snprintf( buf, sizeof( buf ),
@@ -173,6 +182,7 @@ void script_run( SCRIPT_DATA *script, const char *func,
 		if ( err )
 			log_string( err );
 	}
+	PROFILE_END( "lua_exec" );
 
 	/* Clean up the stack */
 	lua_settop( g_lua, top );
@@ -183,6 +193,9 @@ void script_run( SCRIPT_DATA *script, const char *func,
  * Execute a mob's tick script and return its boolean result.
  * Lua callback: on_tick(mob) → true to skip remaining AI, false to continue.
  * Used for autonomous NPC behaviors (replaces C spec_funs).
+ *
+ * The on_tick function is cached in the Lua registry after first compilation
+ * so subsequent calls skip parsing/compilation entirely.
  */
 bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob ) {
 	char buf[MAX_STRING_LENGTH];
@@ -194,24 +207,38 @@ bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob ) {
 
 	top = lua_gettop( g_lua );
 
-	/* Load and execute the script code to define its functions */
-	if ( luaL_dostring( g_lua, script->code ) != LUA_OK ) {
-		const char *err = lua_tostring( g_lua, -1 );
-		snprintf( buf, sizeof( buf ),
-			"script_run_tick: load error in '%s'", script->name );
-		bug( buf, 0 );
-		if ( err )
-			log_string( err );
-		lua_settop( g_lua, top );
-		return FALSE;
+	/* Reset instruction counter so each script gets a full budget */
+	lua_sethook( g_lua, script_timeout_hook, LUA_MASKCOUNT,
+		SCRIPT_MAX_INSTRUCTIONS );
+
+	/* Compile and cache on first use */
+	if ( script->lua_ref == LUA_NOREF ) {
+		PROFILE_START( "lua_compile" );
+		if ( luaL_dostring( g_lua, script->code ) != LUA_OK ) {
+			PROFILE_END( "lua_compile" );
+			const char *err = lua_tostring( g_lua, -1 );
+			snprintf( buf, sizeof( buf ),
+				"script_run_tick: load error in '%s'", script->name );
+			bug( buf, 0 );
+			if ( err )
+				log_string( err );
+			lua_settop( g_lua, top );
+			return FALSE;
+		}
+		PROFILE_END( "lua_compile" );
+
+		/* Grab on_tick and cache it in the registry */
+		lua_getglobal( g_lua, "on_tick" );
+		if ( !lua_isfunction( g_lua, -1 ) ) {
+			lua_settop( g_lua, top );
+			return FALSE;
+		}
+		script->lua_ref = luaL_ref( g_lua, LUA_REGISTRYINDEX );
 	}
 
-	/* Look up the callback function */
-	lua_getglobal( g_lua, "on_tick" );
-	if ( !lua_isfunction( g_lua, -1 ) ) {
-		lua_settop( g_lua, top );
-		return FALSE;
-	}
+	/* Retrieve cached on_tick function */
+	PROFILE_START( "lua_exec" );
+	lua_rawgeti( g_lua, LUA_REGISTRYINDEX, script->lua_ref );
 
 	/* Push argument: mob */
 	lua_pushlightuserdata( g_lua, mob );
@@ -226,9 +253,13 @@ bool script_run_tick( SCRIPT_DATA *script, CHAR_DATA *mob ) {
 		bug( buf, 0 );
 		if ( err )
 			log_string( err );
+		/* Invalidate cache so script is recompiled next tick */
+		luaL_unref( g_lua, LUA_REGISTRYINDEX, script->lua_ref );
+		script->lua_ref = LUA_NOREF;
 	} else {
 		result = lua_toboolean( g_lua, -1 );
 	}
+	PROFILE_END( "lua_exec" );
 
 	lua_settop( g_lua, top );
 	return result;
@@ -250,7 +281,13 @@ void script_run_room( SCRIPT_DATA *script, const char *func,
 
 	top = lua_gettop( g_lua );
 
+	/* Reset instruction counter so each script gets a full budget */
+	lua_sethook( g_lua, script_timeout_hook, LUA_MASKCOUNT,
+		SCRIPT_MAX_INSTRUCTIONS );
+
+	PROFILE_START( "lua_compile" );
 	if ( luaL_dostring( g_lua, script->code ) != LUA_OK ) {
+		PROFILE_END( "lua_compile" );
 		const char *err = lua_tostring( g_lua, -1 );
 		snprintf( buf, sizeof( buf ),
 			"script_run_room: load error in '%s'", script->name );
@@ -260,6 +297,7 @@ void script_run_room( SCRIPT_DATA *script, const char *func,
 		lua_settop( g_lua, top );
 		return;
 	}
+	PROFILE_END( "lua_compile" );
 
 	lua_getglobal( g_lua, func );
 	if ( !lua_isfunction( g_lua, -1 ) ) {
@@ -283,6 +321,7 @@ void script_run_room( SCRIPT_DATA *script, const char *func,
 		nargs = 3;
 	}
 
+	PROFILE_START( "lua_exec" );
 	if ( lua_pcall( g_lua, nargs, 0, 0 ) != LUA_OK ) {
 		const char *err = lua_tostring( g_lua, -1 );
 		snprintf( buf, sizeof( buf ),
@@ -291,6 +330,22 @@ void script_run_room( SCRIPT_DATA *script, const char *func,
 		if ( err )
 			log_string( err );
 	}
+	PROFILE_END( "lua_exec" );
 
 	lua_settop( g_lua, top );
+}
+
+
+/*
+ * Invalidate a script's cached Lua function.
+ * Forces recompilation on the next tick.  Call when script code changes
+ * (e.g., OLC editing or hot-reload).
+ */
+void script_invalidate_cache( SCRIPT_DATA *script ) {
+	if ( script == NULL )
+		return;
+	if ( g_lua != NULL && script->lua_ref != LUA_NOREF ) {
+		luaL_unref( g_lua, LUA_REGISTRYINDEX, script->lua_ref );
+	}
+	script->lua_ref = LUA_NOREF;
 }

@@ -549,10 +549,13 @@ void mobile_update( void ) {
 				PROFILE_END( "mob_npc_ai" );
 				continue;
 			}
+			PROFILE_START( "script_tick" );
 			if ( script_trigger_tick( ch ) ) {
+				PROFILE_END( "script_tick" );
 				PROFILE_END( "mob_npc_ai" );
 				continue;
 			}
+			PROFILE_END( "script_tick" );
 			if ( ch->position != POS_STANDING ) {
 				do_stand( ch, "" );
 				PROFILE_END( "mob_npc_ai" );

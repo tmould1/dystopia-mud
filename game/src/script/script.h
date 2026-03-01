@@ -14,6 +14,9 @@
 #define TRIG_SPEECH         (1 << 1)    /* Player says something near mob */
 #define TRIG_TICK           (1 << 2)    /* Game tick (autonomous NPC behavior) */
 
+/* Lua registry reference sentinel (must match Lua's LUA_NOREF) */
+#define SCRIPT_LUA_NOREF    (-2)
+
 /* Script data — one Lua script attached to a mob/obj/room template.
  * Stored in an intrusive list on the owning index structure. */
 typedef struct script_data {
@@ -23,6 +26,7 @@ typedef struct script_data {
 	char         *pattern;        /* Pattern match for SPEECH (NULL = any) */
 	int           chance;         /* Percent chance to fire (0 = always) */
 	char         *library_name;   /* NULL = inline, set = library reference */
+	int           lua_ref;        /* Lua registry ref for cached on_tick */
 	list_node_t   node;           /* Intrusive list linkage */
 } SCRIPT_DATA;
 
@@ -40,5 +44,8 @@ bool script_trigger_tick( CHAR_DATA *ch );
 /* Trigger dispatch — room scripts (iterate room's own scripts) */
 void script_trigger_room_enter( CHAR_DATA *ch, ROOM_INDEX_DATA *room );
 void script_trigger_room_speech( CHAR_DATA *ch, const char *text );
+
+/* Cache management */
+void script_invalidate_cache( SCRIPT_DATA *script );
 
 #endif /* SCRIPT_H */

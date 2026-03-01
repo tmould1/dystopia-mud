@@ -955,6 +955,7 @@ static void sql_load_scripts( sqlite3 *db ) {
 		script->pattern      = pat ? str_dup( pat ) : NULL;
 		script->chance       = chance;
 		script->library_name = lib_name ? str_dup( lib_name ) : NULL;
+		script->lua_ref      = SCRIPT_LUA_NOREF;
 
 		list_push_back( list, &script->node );
 	}
