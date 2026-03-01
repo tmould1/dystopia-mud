@@ -6,12 +6,18 @@
 
 [INFLIGHT]
 
-27) what other structural improvements.  How much is original diku/smaug/godwars/dystopia code vs dystopia+.  at what point has the code been ship of theseus'd into something new?  What more should change to support more modern approaches? How could we support a testing harness?
 
-24) MudEditor Design and QoL Pass
+[x] 27) Structural review and heritage assessment - see [architecture docs](../design/architecture/heritage.md).  Testing harness implemented in [game/tests/](../../tests/) with CI integration.
+
+30) What are good, modern approaches to room, object, and mob programs?  LUA seems to be well known.  But what does this codebase currently support?
+
+[x] 31) Merc.h seems like a monolith we should break apart.  Are there others?  Let's plan to phase these out into specifics.
 
 [SOON]
 
+32) Test review.. full high-level coverage,
+
+33) 
 
 [NMI]
 
