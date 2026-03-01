@@ -17,7 +17,7 @@ GAME_OBJ = $(BUILD_DIR)/linux/obj
 TEST_OBJ = obj
 
 # Include paths (same as game + test directory)
-INCLUDES = -I. -I$(SRC_DIR)/core -I$(SRC_DIR)/classes -I$(SRC_DIR)/world -I$(SRC_DIR)/systems -I$(SRC_DIR)/db
+INCLUDES = -I. -I$(SRC_DIR)/core -I$(SRC_DIR)/classes -I$(SRC_DIR)/world -I$(SRC_DIR)/systems -I$(SRC_DIR)/db -I$(SRC_DIR)/script -I$(SRC_DIR)/../lib/lua
 
 # Compiler flags: debug build for tests, plus TEST_BUILD to exclude game main()
 C_FLAGS = -Wall -g -O0 -DTEST_BUILD $(INCLUDES)
@@ -35,7 +35,8 @@ GAME_OBJS = $(filter-out %/comm.o, \
 	$(wildcard $(GAME_OBJ)/commands/*.o) \
 	$(wildcard $(GAME_OBJ)/world/*.o) \
 	$(wildcard $(GAME_OBJ)/systems/*.o) \
-	$(wildcard $(GAME_OBJ)/db/*.o))
+	$(wildcard $(GAME_OBJ)/db/*.o) \
+	$(wildcard $(GAME_OBJ)/script/*.o))
 
 # --- Test-specific objects ---
 # Recompile comm.c with TEST_BUILD to exclude main()

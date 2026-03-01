@@ -47,7 +47,7 @@ set GAME_OBJ=..\build\win64\obj\Release
 set TEST_OBJ=obj
 
 REM Include paths
-set INC=/I. /I%SRC_DIR%\core /I%SRC_DIR%\classes /I%SRC_DIR%\world /I%SRC_DIR%\systems /I%SRC_DIR%\db
+set INC=/I. /I%SRC_DIR%\core /I%SRC_DIR%\classes /I%SRC_DIR%\world /I%SRC_DIR%\systems /I%SRC_DIR%\db /I%SRC_DIR%\script /I..\lib\lua
 
 REM Compiler flags: match game Release config (/MD /GL) + TEST_BUILD
 REM Note: /GL requires matching game .obj flags; no /Zi to avoid PDB generation
