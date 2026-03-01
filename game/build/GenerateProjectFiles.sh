@@ -20,7 +20,7 @@ echo ""
 cd "$(dirname "$0")/.."
 
 # Source subdirectories
-SUBDIRS="core classes combat commands world systems db"
+SUBDIRS="core classes combat commands world systems db script"
 
 # ============================================================================
 # Step 1: Create backup of existing files
@@ -111,13 +111,15 @@ COMMANDS_DIR = $(SRC_DIR)/commands
 WORLD_DIR    = $(SRC_DIR)/world
 SYSTEMS_DIR  = $(SRC_DIR)/systems
 DB_DIR       = $(SRC_DIR)/db
+SCRIPT_DIR   = $(SRC_DIR)/script
 
 # Include paths (so #include "merc.h" works from any source file)
-INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR) -I$(DB_DIR)
+INCLUDES = -I$(CORE_DIR) -I$(CLASSES_DIR) -I$(WORLD_DIR) -I$(SYSTEMS_DIR) -I$(DB_DIR) -I$(SCRIPT_DIR) -I../lib/lua
 
 # Compiler and linker flags
 C_FLAGS = -Wall -O2 $(INCLUDES)
 SQLITE_FLAGS = -w -O2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DEFAULT_MEMSTATUS=0 $(INCLUDES)
+LUA_FLAGS = -w -O2 $(INCLUDES)
 L_FLAGS = -lz -lcrypt -lpthread -ldl
 
 MAKEFILE_HEADER
@@ -131,6 +133,7 @@ echo "COMMANDS_SRC = ${SRC_FILES[commands]}" >> build/Makefile
 echo "WORLD_SRC = ${SRC_FILES[world]}" >> build/Makefile
 echo "SYSTEMS_SRC = ${SRC_FILES[systems]}" >> build/Makefile
 echo "DB_SRC = ${SRC_FILES[db]}" >> build/Makefile
+echo "SCRIPT_SRC = ${SRC_FILES[script]}" >> build/Makefile
 
 cat >> build/Makefile << 'MAKEFILE_FOOTER'
 
@@ -142,12 +145,13 @@ COMMANDS_OBJ = $(addprefix $(OBJ_DIR)/commands/,$(COMMANDS_SRC:.c=.o))
 WORLD_OBJ    = $(addprefix $(OBJ_DIR)/world/,$(WORLD_SRC:.c=.o))
 SYSTEMS_OBJ  = $(addprefix $(OBJ_DIR)/systems/,$(SYSTEMS_SRC:.c=.o))
 DB_OBJ       = $(addprefix $(OBJ_DIR)/db/,$(DB_SRC:.c=.o))
+SCRIPT_OBJ   = $(addprefix $(OBJ_DIR)/script/,$(SCRIPT_SRC:.c=.o))
 
-O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ) $(DB_OBJ)
+O_FILES = $(CORE_OBJ) $(CLASSES_OBJ) $(COMBAT_OBJ) $(COMMANDS_OBJ) $(WORLD_OBJ) $(SYSTEMS_OBJ) $(DB_OBJ) $(SCRIPT_OBJ)
 
 # Object directory structure
 OBJ_DIRS = $(OBJ_DIR)/core $(OBJ_DIR)/classes $(OBJ_DIR)/combat \
-           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems $(OBJ_DIR)/db
+           $(OBJ_DIR)/commands $(OBJ_DIR)/world $(OBJ_DIR)/systems $(OBJ_DIR)/db $(OBJ_DIR)/script
 
 # Target executable (in gamedata/ for deployment)
 TARGET = ../../gamedata/dystopia
@@ -186,6 +190,13 @@ $(OBJ_DIR)/db/sqlite3.o: $(DB_DIR)/sqlite3.c
 	$(CC) -c $(SQLITE_FLAGS) $< -o $@
 
 $(OBJ_DIR)/db/%.o: $(DB_DIR)/%.c $(CORE_DIR)/merc.h $(DB_DIR)/db_sql.h
+	$(CC) -c $(C_FLAGS) $< -o $@
+
+# Lua amalgamation uses special flags (suppress warnings)
+$(OBJ_DIR)/script/lua_lib.o: $(SCRIPT_DIR)/lua_lib.c
+	$(CC) -c $(LUA_FLAGS) $< -o $@
+
+$(OBJ_DIR)/script/%.o: $(SCRIPT_DIR)/%.c $(CORE_DIR)/merc.h
 	$(CC) -c $(C_FLAGS) $< -o $@
 
 clean:

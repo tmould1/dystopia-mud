@@ -871,6 +871,7 @@ struct kill_data {
 struct mob_index_data {
 	MOB_INDEX_DATA *next;
 	SPEC_FUN *spec_fun;
+	list_head_t scripts;      /* Lua scripts attached to this mob template */
 	SHOP_DATA *pShop;
 	CHAR_DATA *mount;
 	CHAR_DATA *wizard;

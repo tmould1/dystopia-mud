@@ -381,6 +381,7 @@ struct obj_index_data {
 	OBJ_INDEX_DATA *next;
 	list_head_t extra_descr;
 	list_head_t affects;
+	list_head_t scripts;      /* Lua scripts (future use) */
 	AREA_DATA *area; /* OLC */
 	char *name;
 	char *short_descr;

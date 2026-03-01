@@ -8,6 +8,7 @@
 
 #include "db_util.h"
 #include "db_sql.h"
+#include "../script/script.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +37,6 @@ extern int top_obj_index;
 extern int top_reset;
 extern int top_room;
 extern int top_shop;
-extern int top_rt;
 extern int top_vnum_mob;
 extern int top_vnum_obj;
 extern int top_vnum_room;
@@ -125,14 +125,6 @@ static const char *SCHEMA_SQL =
 	"  to_vnum     INTEGER DEFAULT 0"
 	");"
 
-	"CREATE TABLE IF NOT EXISTS room_texts ("
-	"  id         INTEGER PRIMARY KEY AUTOINCREMENT,"
-	"  room_vnum  INTEGER NOT NULL REFERENCES rooms(vnum),"
-	"  input TEXT, output TEXT, choutput TEXT, name TEXT,"
-	"  type INTEGER, power INTEGER, mob INTEGER,"
-	"  sort_order INTEGER DEFAULT 0"
-	");"
-
 	"CREATE TABLE IF NOT EXISTS resets ("
 	"  id         INTEGER PRIMARY KEY AUTOINCREMENT,"
 	"  command    TEXT NOT NULL,"
@@ -151,6 +143,18 @@ static const char *SCHEMA_SQL =
 	"CREATE TABLE IF NOT EXISTS specials ("
 	"  mob_vnum      INTEGER PRIMARY KEY,"
 	"  spec_fun_name TEXT NOT NULL"
+	");"
+
+	"CREATE TABLE IF NOT EXISTS scripts ("
+	"  id          INTEGER PRIMARY KEY AUTOINCREMENT,"
+	"  owner_type  TEXT NOT NULL,"
+	"  owner_vnum  INTEGER NOT NULL,"
+	"  trigger     INTEGER NOT NULL,"
+	"  name        TEXT NOT NULL DEFAULT '',"
+	"  code        TEXT NOT NULL,"
+	"  pattern     TEXT DEFAULT NULL,"
+	"  chance      INTEGER DEFAULT 0,"
+	"  sort_order  INTEGER DEFAULT 0"
 	");";
 
 
@@ -419,6 +423,7 @@ static void sql_load_mobiles( sqlite3 *db, AREA_DATA *pArea ) {
 			bug( "load_mobiles: calloc failed", 0 );
 			exit( 1 );
 		}
+		list_init( &pMobIndex->scripts );
 		pMobIndex->vnum         = vnum;
 		pMobIndex->area         = pArea;
 		pMobIndex->player_name  = str_dup( col_text( stmt, 1 ) );
@@ -547,6 +552,7 @@ static void sql_load_objects( sqlite3 *db, AREA_DATA *pArea ) {
 
 		list_init( &pObjIndex->affects );
 		list_init( &pObjIndex->extra_descr );
+		list_init( &pObjIndex->scripts );
 
 		/* Load affects */
 		if ( af_stmt ) {
@@ -623,7 +629,6 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 	sqlite3_stmt *stmt;
 	sqlite3_stmt *exit_stmt;
 	sqlite3_stmt *ed_stmt;
-	sqlite3_stmt *rt_stmt;
 	const char *sql =
 		"SELECT vnum, name, description, room_flags, sector_type"
 		" FROM rooms ORDER BY vnum";
@@ -633,15 +638,10 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 	const char *ed_sql =
 		"SELECT keyword, description FROM extra_descriptions"
 		" WHERE owner_type = 'room' AND owner_vnum = ? ORDER BY sort_order";
-	const char *rt_sql =
-		"SELECT input, output, choutput, name, type, power, mob"
-		" FROM room_texts WHERE room_vnum = ? ORDER BY sort_order";
-
 	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 	sqlite3_prepare_v2( db, exit_sql, -1, &exit_stmt, NULL );
 	sqlite3_prepare_v2( db, ed_sql, -1, &ed_stmt, NULL );
-	sqlite3_prepare_v2( db, rt_sql, -1, &rt_stmt, NULL );
 
 	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
 		ROOM_INDEX_DATA *pRoomIndex;
@@ -674,7 +674,7 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		pRoomIndex->sector_type = sqlite3_column_int( stmt, 4 );
 		pRoomIndex->light       = 0;
 		pRoomIndex->blood       = 0;
-		list_init( &pRoomIndex->roomtext );
+		list_init( &pRoomIndex->scripts );
 
 		for ( door = 0; door <= 4; door++ ) {
 			pRoomIndex->track[door]     = str_dup( "" );
@@ -731,31 +731,6 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 			}
 		}
 
-		/* Load room texts */
-		if ( rt_stmt ) {
-			sqlite3_reset( rt_stmt );
-			sqlite3_bind_int( rt_stmt, 1, vnum );
-			while ( sqlite3_step( rt_stmt ) == SQLITE_ROW ) {
-				ROOMTEXT_DATA *rt;
-
-				rt = calloc( 1, sizeof( *rt ) );
-				if ( !rt ) {
-					bug( "load_rooms: calloc failed", 0 );
-					exit( 1 );
-				}
-				rt->input    = str_dup( col_text( rt_stmt, 0 ) );
-				rt->output   = str_dup( col_text( rt_stmt, 1 ) );
-				rt->choutput = str_dup( col_text( rt_stmt, 2 ) );
-				rt->name     = str_dup( col_text( rt_stmt, 3 ) );
-				rt->type     = sqlite3_column_int( rt_stmt, 4 );
-				rt->power    = sqlite3_column_int( rt_stmt, 5 );
-				rt->mob      = sqlite3_column_int( rt_stmt, 6 );
-
-				list_push_back( &pRoomIndex->roomtext, &rt->node );
-				top_rt++;
-			}
-		}
-
 		iHash = vnum % MAX_KEY_HASH;
 		pRoomIndex->next = room_index_hash[iHash];
 		room_index_hash[iHash] = pRoomIndex;
@@ -771,7 +746,6 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		assign_area_vnum( vnum );
 	}
 
-	if ( rt_stmt )   sqlite3_finalize( rt_stmt );
 	if ( ed_stmt )   sqlite3_finalize( ed_stmt );
 	if ( exit_stmt ) sqlite3_finalize( exit_stmt );
 	sqlite3_finalize( stmt );
@@ -939,6 +913,63 @@ static void sql_load_specials( sqlite3 *db ) {
 }
 
 
+static void sql_load_scripts( sqlite3 *db ) {
+	sqlite3_stmt *stmt;
+	const char *sql =
+		"SELECT owner_type, owner_vnum, trigger, name, code, pattern, chance"
+		" FROM scripts ORDER BY owner_vnum, sort_order";
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+		const char *owner_type = col_text( stmt, 0 );
+		int vnum        = sqlite3_column_int( stmt, 1 );
+		int trigger     = sqlite3_column_int( stmt, 2 );
+		const char *name = col_text( stmt, 3 );
+		const char *code = col_text( stmt, 4 );
+		const char *pat  = ( sqlite3_column_type( stmt, 5 ) != SQLITE_NULL )
+			? (const char *) sqlite3_column_text( stmt, 5 ) : NULL;
+		int chance      = sqlite3_column_int( stmt, 6 );
+		list_head_t *list = NULL;
+		SCRIPT_DATA *script;
+
+		if ( !strcmp( owner_type, "mob" ) ) {
+			MOB_INDEX_DATA *pMob = get_mob_index( vnum );
+			if ( pMob ) list = &pMob->scripts;
+		} else if ( !strcmp( owner_type, "obj" ) ) {
+			OBJ_INDEX_DATA *pObj = get_obj_index( vnum );
+			if ( pObj ) list = &pObj->scripts;
+		} else if ( !strcmp( owner_type, "room" ) ) {
+			ROOM_INDEX_DATA *pRoom = get_room_index( vnum );
+			if ( pRoom ) list = &pRoom->scripts;
+		}
+
+		if ( list == NULL ) {
+			char buf[MAX_STRING_LENGTH];
+			snprintf( buf, sizeof( buf ), "sql_load_scripts: cannot find %s vnum %d", owner_type, vnum );
+			bug( buf, 0 );
+			continue;
+		}
+
+		script = calloc( 1, sizeof( *script ) );
+		if ( !script ) {
+			bug( "sql_load_scripts: calloc failed", 0 );
+			exit( 1 );
+		}
+		script->name    = str_dup( name );
+		script->trigger = trigger;
+		script->code    = str_dup( code );
+		script->pattern = pat ? str_dup( pat ) : NULL;
+		script->chance  = chance;
+
+		list_push_back( list, &script->node );
+	}
+
+	sqlite3_finalize( stmt );
+}
+
+
 /*
  * Load one complete area from its SQLite database file.
  * This replaces the text-based loading sequence for a single area.
@@ -1024,6 +1055,7 @@ void db_sql_link_area( const char *area_filename ) {
 	sql_load_resets( db );
 	sql_load_shops( db );
 	sql_load_specials( db );
+	sql_load_scripts( db );
 
 	sqlite3_close( db );
 }
@@ -1182,7 +1214,6 @@ static void sql_save_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 	sqlite3_stmt *stmt;
 	sqlite3_stmt *exit_stmt;
 	sqlite3_stmt *ed_stmt;
-	sqlite3_stmt *rt_stmt;
 	const char *sql =
 		"INSERT INTO rooms (vnum, name, description, room_flags, sector_type)"
 		" VALUES (?,?,?,?,?)";
@@ -1194,22 +1225,16 @@ static void sql_save_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		"INSERT INTO extra_descriptions (owner_type, owner_vnum, keyword,"
 		"  description, sort_order)"
 		" VALUES ('room',?,?,?,?)";
-	const char *rt_sql =
-		"INSERT INTO room_texts (room_vnum, input, output, choutput,"
-		"  name, type, power, mob, sort_order)"
-		" VALUES (?,?,?,?,?,?,?,?,?)";
 	int vnum;
 
 	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
 		return;
 	sqlite3_prepare_v2( db, exit_sql, -1, &exit_stmt, NULL );
 	sqlite3_prepare_v2( db, ed_sql, -1, &ed_stmt, NULL );
-	sqlite3_prepare_v2( db, rt_sql, -1, &rt_stmt, NULL );
 
 	for ( vnum = pArea->lvnum; vnum <= pArea->uvnum; vnum++ ) {
 		ROOM_INDEX_DATA *pRoomIndex = get_room_index( vnum );
 		EXTRA_DESCR_DATA *ed;
-		ROOMTEXT_DATA *rt;
 		int door, order;
 
 		if ( !pRoomIndex || pRoomIndex->area != pArea )
@@ -1251,24 +1276,8 @@ static void sql_save_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 			sqlite3_step( ed_stmt );
 		}
 
-		/* Save room texts */
-		order = 0;
-		LIST_FOR_EACH( rt, &pRoomIndex->roomtext, ROOMTEXT_DATA, node ) {
-			sqlite3_reset( rt_stmt );
-			sqlite3_bind_int( rt_stmt, 1, vnum );
-			sqlite3_bind_text( rt_stmt, 2, rt->input, -1, SQLITE_TRANSIENT );
-			sqlite3_bind_text( rt_stmt, 3, rt->output, -1, SQLITE_TRANSIENT );
-			sqlite3_bind_text( rt_stmt, 4, rt->choutput, -1, SQLITE_TRANSIENT );
-			sqlite3_bind_text( rt_stmt, 5, rt->name, -1, SQLITE_TRANSIENT );
-			sqlite3_bind_int( rt_stmt, 6, rt->type );
-			sqlite3_bind_int( rt_stmt, 7, rt->power );
-			sqlite3_bind_int( rt_stmt, 8, rt->mob );
-			sqlite3_bind_int( rt_stmt, 9, order++ );
-			sqlite3_step( rt_stmt );
-		}
 	}
 
-	if ( rt_stmt )   sqlite3_finalize( rt_stmt );
 	if ( ed_stmt )   sqlite3_finalize( ed_stmt );
 	if ( exit_stmt ) sqlite3_finalize( exit_stmt );
 	sqlite3_finalize( stmt );
@@ -1374,6 +1383,58 @@ static void sql_save_specials( sqlite3 *db, AREA_DATA *pArea ) {
 }
 
 
+static void sql_save_scripts_for_list( sqlite3_stmt *stmt,
+	const char *owner_type, int vnum, list_head_t *scripts ) {
+	SCRIPT_DATA *script;
+	int order = 0;
+
+	LIST_FOR_EACH( script, scripts, SCRIPT_DATA, node ) {
+		sqlite3_reset( stmt );
+		sqlite3_bind_text( stmt, 1, owner_type, -1, SQLITE_STATIC );
+		sqlite3_bind_int( stmt, 2, vnum );
+		sqlite3_bind_int( stmt, 3, script->trigger );
+		sqlite3_bind_text( stmt, 4, script->name, -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, 5, script->code, -1, SQLITE_TRANSIENT );
+		if ( script->pattern )
+			sqlite3_bind_text( stmt, 6, script->pattern, -1, SQLITE_TRANSIENT );
+		else
+			sqlite3_bind_null( stmt, 6 );
+		sqlite3_bind_int( stmt, 7, script->chance );
+		sqlite3_bind_int( stmt, 8, order++ );
+		sqlite3_step( stmt );
+	}
+}
+
+
+static void sql_save_scripts( sqlite3 *db, AREA_DATA *pArea ) {
+	sqlite3_stmt *stmt;
+	const char *sql =
+		"INSERT INTO scripts (owner_type, owner_vnum, trigger, name,"
+		"  code, pattern, chance, sort_order)"
+		" VALUES (?,?,?,?,?,?,?,?)";
+	int vnum;
+
+	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
+		return;
+
+	for ( vnum = pArea->lvnum; vnum <= pArea->uvnum; vnum++ ) {
+		MOB_INDEX_DATA *pMob = get_mob_index( vnum );
+		if ( pMob && pMob->area == pArea && !list_empty( &pMob->scripts ) )
+			sql_save_scripts_for_list( stmt, "mob", vnum, &pMob->scripts );
+
+		OBJ_INDEX_DATA *pObj = get_obj_index( vnum );
+		if ( pObj && pObj->area == pArea && !list_empty( &pObj->scripts ) )
+			sql_save_scripts_for_list( stmt, "obj", vnum, &pObj->scripts );
+
+		ROOM_INDEX_DATA *pRoom = get_room_index( vnum );
+		if ( pRoom && pRoom->area == pArea && !list_empty( &pRoom->scripts ) )
+			sql_save_scripts_for_list( stmt, "room", vnum, &pRoom->scripts );
+	}
+
+	sqlite3_finalize( stmt );
+}
+
+
 /*
  * Save one area to its SQLite database file.
  * Deletes all existing data and re-inserts from in-memory structures.
@@ -1393,10 +1454,10 @@ void db_sql_save_area( AREA_DATA *pArea ) {
 	db_begin( db );
 
 	/* Delete all existing data */
+	sqlite3_exec( db, "DELETE FROM scripts", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM specials", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM shops", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM resets", NULL, NULL, NULL );
-	sqlite3_exec( db, "DELETE FROM room_texts", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM exits", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM extra_descriptions", NULL, NULL, NULL );
 	sqlite3_exec( db, "DELETE FROM object_affects", NULL, NULL, NULL );
@@ -1433,6 +1494,7 @@ void db_sql_save_area( AREA_DATA *pArea ) {
 	sql_save_resets( db, pArea );
 	sql_save_shops( db, pArea );
 	sql_save_specials( db, pArea );
+	sql_save_scripts( db, pArea );
 
 	/* Commit transaction */
 	db_commit( db );
