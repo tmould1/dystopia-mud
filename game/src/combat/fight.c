@@ -2377,7 +2377,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 	if ( !IS_NPC( victim ) && victim->level >= LEVEL_IMMORTAL && victim->hit < 1 )
 		victim->hit = 1;
 	if ( !IS_NPC( victim ) && IS_SET( victim->newbits, NEW_CLOAK ) && victim->hit < 1 ) {
-		heal_char( victim, (int) UMIN( ( victim->max_hit * .1 ), 4000 ) );
+		heal_char( victim, UMIN( victim->max_hit / 10, 4000 ) );
 		if ( IS_CLASS( victim, CLASS_MONK ) )
 			send_to_char( "your cloak of life saves your from certain death.\n\r", victim );
 		else
@@ -3860,8 +3860,8 @@ int xp_compute( CHAR_DATA *gch, CHAR_DATA *victim ) {
 	 */
 	xp -= xp * number_range( -2, 2 ) / 8;
 	xp = number_range( (int) ( xp * 3 / 4 ), (int) ( xp * 5 / 4 ) );
-	xp = UMAX( 0, xp );
-	xp = (int) ( xp * ( victim->level ) * 0.60 );
+	if ( xp < 0 ) xp = 0;
+	xp = xp * victim->level * 3 / 5;
 	if ( !IS_NPC( gch ) ) {
 		gch->pcdata->score[SCORE_TOTAL_LEVEL] += victim->level;
 		if ( victim->level > gch->pcdata->score[SCORE_HIGH_LEVEL] )

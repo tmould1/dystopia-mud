@@ -300,7 +300,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		ch->armor += cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_TIGER_ARMOR );
 		if ( ch->pcdata->powers[SHAPE_COUNTER] < 15 ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
-			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
+			heal_char( ch, UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit / 10 ) );
 		}
 		snprintf( buf, sizeof( buf ), "%s the huge phase tiger", ch->name );
 		free(ch->morph);
@@ -322,7 +322,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		ch->armor += cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HYDRA_ARMOR );
 		if ( ch->pcdata->powers[SHAPE_COUNTER] < 15 ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
-			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
+			heal_char( ch, UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit / 10 ) );
 		}
 		snprintf( buf, sizeof( buf ), "%s the horrific hydra", ch->name );
 		free(ch->morph);
@@ -344,7 +344,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		ch->armor += cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_BULL_ARMOR );
 		if ( ch->pcdata->powers[SHAPE_COUNTER] < 15 ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
-			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
+			heal_char( ch, UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit / 10 ) );
 		}
 		snprintf( buf, sizeof( buf ), "%s the black bull", ch->name );
 		free(ch->morph);
@@ -366,7 +366,7 @@ void do_shift( CHAR_DATA *ch, char *argument ) {
 		ch->armor += cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_FAERIE_ARMOR );
 		if ( ch->pcdata->powers[SHAPE_COUNTER] < 15 ) {
 			send_to_char( "#CYour wounds mend and close.\n\r#n", ch );
-			heal_char( ch, (int) UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit * 0.1 ) );
+			heal_char( ch, UMIN( cfg( CFG_ABILITY_SHAPESHIFTER_SHIFT_HEAL_CAP ), ch->max_hit / 10 ) );
 		}
 		snprintf( buf, sizeof( buf ), "%s the small pixie", ch->name );
 		free(ch->morph);

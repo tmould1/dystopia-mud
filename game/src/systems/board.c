@@ -432,7 +432,8 @@ static void do_nread( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "No such note.\n\r", ch );
 		else {
 			show_note_to_char( ch, p, count );
-			*last_note = UMAX( *last_note, p->date_stamp );
+			if ( p->date_stamp > *last_note )
+				*last_note = p->date_stamp;
 		}
 	} else /* just next one */
 	{
@@ -452,7 +453,8 @@ static void do_nread( CHAR_DATA *ch, char *argument ) {
 			if ( ( p->date_stamp > *last_note ) && is_note_to( ch, p ) ) {
 				show_note_to_char( ch, p, count );
 				/* Advance if new note is newer than the currently newest for that char */
-				*last_note = UMAX( *last_note, p->date_stamp );
+				if ( p->date_stamp > *last_note )
+					*last_note = p->date_stamp;
 				return;
 			}
 			count++;
