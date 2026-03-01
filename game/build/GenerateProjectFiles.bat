@@ -184,7 +184,7 @@ echo # Compiler and linker flags
 echo C_FLAGS = -Wall -O2 $^(INCLUDES^)
 echo SQLITE_FLAGS = -w -O2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DEFAULT_MEMSTATUS=0 $^(INCLUDES^)
 echo LUA_FLAGS = -w -O2 $^(INCLUDES^)
-echo L_FLAGS = -lz -lcrypt -lpthread -ldl
+echo L_FLAGS = -lz -lcrypt -lpthread -ldl -lm
 echo.
 echo # Source files by directory
 echo CORE_SRC = %CORE_SRC%

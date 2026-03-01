@@ -23,7 +23,7 @@ INCLUDES = -I. -I$(SRC_DIR)/core -I$(SRC_DIR)/classes -I$(SRC_DIR)/world -I$(SRC
 C_FLAGS = -Wall -g -O0 -DTEST_BUILD $(INCLUDES)
 
 # Linker flags (same as game)
-L_FLAGS = -lz -lcrypt -lpthread -ldl
+L_FLAGS = -lz -lcrypt -lpthread -ldl -lm
 
 # --- Game object files (auto-discovered from build output) ---
 # All .o files from game build EXCEPT comm.o (which has main()).
