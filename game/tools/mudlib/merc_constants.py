@@ -29,20 +29,6 @@ def _read_header(path: Path) -> str:
         return ''
 
 
-def _parse_letter_macros(text: str) -> Dict[str, int]:
-    """
-    Parse single/double letter macro definitions from merc.h.
-
-    Matches patterns like:
-        #define A    1
-        #define aa   67108864
-    """
-    macros = {}
-    for m in re.finditer(r'^#define\s+([A-Za-z]{1,2})\s+(\d+)', text, re.MULTILINE):
-        name, value = m.group(1), int(m.group(2))
-        macros[name] = value
-    return macros
-
 
 def _parse_numeric_defines(text: str, prefix: str,
                            skip_substrings: Optional[List[str]] = None,
@@ -79,26 +65,24 @@ def _parse_numeric_defines(text: str, prefix: str,
     return result
 
 
-def _parse_macro_defines(text: str, prefix: str,
-                         macros: Dict[str, int]) -> Dict[int, str]:
+def _parse_bitshift_defines(text: str, prefix: str) -> Dict[int, str]:
     """
-    Parse #define PREFIX_NAME ( X ) patterns where X is a letter macro.
+    Parse #define PREFIX_NAME (1 << N) patterns into {value: 'name'} dict.
 
     Args:
         text: Header file contents
-        prefix: Define prefix to match (e.g., 'ACT_')
-        macros: Letter macro lookup table from _parse_letter_macros()
+        prefix: Define prefix to match (e.g., 'ACT_', 'WEAPON_')
 
     Returns:
         Dict mapping numeric value to lowercase flag name.
     """
     result = {}
-    pattern = rf'^#define\s+{re.escape(prefix)}(\w+)\s+\(\s*(\w+)\s*\)'
+    pattern = rf'^#define\s+{re.escape(prefix)}(\w+)\s+\(\s*1\s*<<\s*(\d+)\s*\)'
     for m in re.finditer(pattern, text, re.MULTILINE):
         name = m.group(1)
-        macro = m.group(2)
-        if macro in macros:
-            result[macros[macro]] = name.lower()
+        value = 1 << int(m.group(2))
+        if value not in result:
+            result[value] = name.lower()
     return result
 
 
@@ -160,16 +144,20 @@ def _to_display_name(raw_name: str, prefix: str = '',
 # =============================================================================
 
 _root = _find_repo_root()
-_merc_path = _root / 'game' / 'src' / 'core' / 'merc.h'
+_core_dir = _root / 'game' / 'src' / 'core'
 _class_path = _root / 'game' / 'src' / 'classes' / 'class.h'
 _db_class_path = _root / 'game' / 'src' / 'db' / 'db_class.h'
 
-_merc_text = _read_header(_merc_path)
+# Read all core headers — merc.h was decomposed into sub-headers (Phase 3),
+# so we concatenate them all for regex parsing of #define constants.
+_merc_text = '\n'.join(
+    _read_header(_core_dir / h)
+    for h in ['merc.h', 'types.h', 'network.h', 'char.h',
+              'object.h', 'room.h', 'world.h', 'combat.h']
+)
 _class_text = _read_header(_class_path)
 _db_class_text = _read_header(_db_class_path)
 
-# Letter macros (A=1, B=2, ... ee=1073741824)
-_letter_macros = _parse_letter_macros(_merc_text)
 
 # --- Direction constants ---
 DIR_NORTH = 0
@@ -237,8 +225,8 @@ ITEM_WEAR_FLAGS = _parse_numeric_defines(
     include_substrings=['TAKE', 'WEAR_', 'WIELD', 'HOLD'],
 )
 
-# --- ACT flags (letter macro based) ---
-ACT_FLAGS = _parse_macro_defines(_merc_text, 'ACT_', _letter_macros)
+# --- ACT flags (bit-shift based) ---
+ACT_FLAGS = _parse_bitshift_defines(_merc_text, 'ACT_')
 
 # --- AFF flags (numeric) ---
 # merc.h has two sets of AFF_ defines - we want the numeric ones (AFF_BLIND=1, etc.)
@@ -265,8 +253,8 @@ APPLY_TYPES_RAW = _parse_numeric_defines(_merc_text, 'APPLY_')
 # --- Wear locations ---
 WEAR_LOCATIONS_RAW = _parse_numeric_defines(_merc_text, 'WEAR_')
 
-# --- Weapon types ---
-WEAPON_TYPES_RAW = _parse_numeric_defines(_merc_text, 'WEAPON_')
+# --- Weapon flags (bit-shift based) ---
+WEAPON_TYPES_RAW = _parse_bitshift_defines(_merc_text, 'WEAPON_')
 
 # --- Discipline indices ---
 DISC_DEFINES = _parse_numeric_defines(_merc_text, 'DISC_')

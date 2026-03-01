@@ -1,10 +1,125 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-/* Area/shop/reset structures and OLC helpers */
+/* Area/shop/reset/world structures and OLC helpers */
 /* Extracted from merc.h — Phase 3 struct decomposition */
 
 #include "types.h"
+
+/*
+ * Time and weather stuff.
+ */
+#define SUN_DARK  0
+#define SUN_RISE  1
+#define SUN_LIGHT 2
+#define SUN_SET	  3
+
+#define SKY_CLOUDLESS 0
+#define SKY_CLOUDY	  1
+#define SKY_RAINING	  2
+#define SKY_LIGHTNING 3
+
+struct time_info_data {
+	int hour;
+	int day;
+	int month;
+	int year;
+	int tick;	/* Sub-hour tick counter for time_scale */
+};
+
+struct weather_data {
+	int mmhg;
+	int change;
+	int sky;
+	int sunlight;
+};
+
+/*
+ * J.O.P.E.
+ */
+struct jope_type {
+	char *const name;
+	DO_FUN *do_fun;
+	int level;
+};
+
+struct bit_type {
+	char *const name;
+	int bit_value;
+};
+
+typedef struct kingdom_data {
+	char *whoname; // the name used in do_who().
+	char *name;	   // the keyword name.
+	char *leader;  // who runs the place.
+	char *general; // who's the right hand man.
+	int kills;	   // amount of pkills done by kingdom members.
+	int deaths;	   // amount of pkills done agains kingdom members.
+	int qps;	   // the size of the kingdoms wealth.
+	int req_hit;   // hps req to join.
+	int req_move;  // move req to join.
+	int req_mana;  // mana req to join.
+	int req_qps;   // qps cost to join (will be donated to the kingdom vault).
+} KINGDOM_DATA;
+
+typedef struct config_data {
+	int base_xp;
+	int max_xp_per_kill;
+	char *game_name;
+	char *gui_url;		/* URL to Mudlet mpackage for GMCP Client.GUI */
+	char *gui_version;	/* Version string for Client.GUI updates */
+	char *banner_left;	/* Left banner endcap, e.g. "#0<>#n" */
+	char *banner_right; /* Right banner endcap, e.g. "#0<>#n" */
+	char *banner_fill;	/* Banner fill pattern, e.g. "#0==#n" */
+	char *audio_url;	/* Base URL for MCMP audio files */
+} GAMECONFIG_DATA;
+
+/*
+ * Help table types.
+ */
+struct help_data {
+	list_node_t node;
+	AREA_DATA *area;
+	int level;
+	char *keyword;
+	char *text;
+};
+
+/*
+ * Data structure for notes.
+ */
+struct note_data {
+	list_node_t node;
+	char *sender;
+	char *date;
+	char *to_list;
+	char *subject;
+	char *text;
+	time_t date_stamp;
+	time_t expire;
+};
+
+struct top_board {
+	int pkscore;
+	char *name;
+};
+
+struct l_board {
+	char *pk_name;
+	int pk_number;
+	char *pd_name;
+	int pd_number;
+	char *tt_name;
+	int tt_number;
+	char *qc_name;
+	int qc_number;
+	char *mk_name;
+	int mk_number;
+	char *md_name;
+	int md_number;
+	char *bestpk_name;
+	int bestpk_number;
+};
 
 /*
  * Shop types.

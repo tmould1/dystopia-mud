@@ -1246,4 +1246,33 @@ static inline void WAIT_STATE( CHAR_DATA *ch, int npulse ) {
 																		: ( IS_AFFECTED( ( ch ), AFF_POLYMORPH ) ? ( ch )->morph : ( ch )->name ) ) \
 													   : "someone" )
 
+/*
+ * Channel bits.
+ */
+#define CHANNEL_KINGDOM 1
+#define CHANNEL_CHAT	2
+#define CHANNEL_ANGEL	4
+#define CHANNEL_IMMTALK 8
+#define CHANNEL_MUSIC	16
+
+#define CHANNEL_YELL		128
+#define CHANNEL_VAMPTALK	256
+#define CHANNEL_HOWL		512
+#define CHANNEL_LOG			1024
+#define CHANNEL_PRAY		2048
+#define CHANNEL_INFO		4096
+#define CHANNEL_FLAME		8192
+#define CHANNEL_TELL		16384
+#define CHANNEL_MAGETALK	32768
+#define CHANNEL_HIGHTALK	65536
+#define CHANNEL_NEWBIE		131072
+#define CHANNEL_SIGN		262144
+#define CHANNEL_MONK		524288
+#define CHANNEL_MIKTALK		1048576
+#define CHANNEL_TELEPATH	2097152
+#define CHANNEL_COMMUNICATE 4194304
+#define CHANNEL_KNIGHTTALK	8388608
+#define CHANNEL_LICHTALK	16777216
+#define CHANNEL_TANTALK		33554432
+
 #endif /* CHAR_H */
