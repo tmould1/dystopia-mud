@@ -8,6 +8,7 @@
  */
 
 #include "test_framework.h"
+#include "test_helpers.h"
 #include "merc.h"
 
 /* External globals we want to validate */
@@ -26,23 +27,6 @@ extern MOB_INDEX_DATA *mob_index_hash[MAX_KEY_HASH];
 extern OBJ_INDEX_DATA *obj_index_hash[MAX_KEY_HASH];
 extern ROOM_INDEX_DATA *room_index_hash[MAX_KEY_HASH];
 extern char *help_greeting;
-
-static bool booted = FALSE;
-
-/*
- * Boot the game engine once. Subsequent calls are no-ops.
- * Returns TRUE on success, FALSE on failure.
- */
-static bool ensure_booted( void ) {
-	if ( booted )
-		return TRUE;
-
-	/* boot_headless derives paths from the exe location.
-	 * The test exe runs from game/tests/, gamedata is at ../../gamedata/ */
-	boot_headless( "../../gamedata/dystopia.exe" );
-	booted = TRUE;
-	return TRUE;
-}
 
 /* --- Test cases --- */
 

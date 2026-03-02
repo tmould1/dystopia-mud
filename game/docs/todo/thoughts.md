@@ -12,7 +12,6 @@
 
 [SOON]
 
-32) Test review.. full high-level coverage,
 
 33) header file review
 
