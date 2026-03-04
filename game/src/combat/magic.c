@@ -4346,28 +4346,28 @@ void spell_mount( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	SET_BIT( victim->affected_by, AFF_FLYING );
 	SET_BIT( victim->act, ACT_NOEXP );
 	if ( IS_GOOD( ch ) ) {
-		free(victim->name);
+		mob_free_string(victim, victim->name);
 		victim->name = str_dup( "mount white horse pegasus" );
 		snprintf( buf, sizeof( buf ), "%s's white pegasus", ch->name );
-		free(victim->short_descr);
+		mob_free_string(victim, victim->short_descr);
 		victim->short_descr = str_dup( buf );
-		free(victim->long_descr);
+		mob_free_string(victim, victim->long_descr);
 		victim->long_descr = str_dup( "A beautiful white pegasus stands here.\n\r" );
 	} else if ( IS_NEUTRAL( ch ) ) {
-		free(victim->name);
+		mob_free_string(victim, victim->name);
 		victim->name = str_dup( "mount griffin" );
 		snprintf( buf, sizeof( buf ), "%s's griffin", ch->name );
-		free(victim->short_descr);
+		mob_free_string(victim, victim->short_descr);
 		victim->short_descr = str_dup( buf );
-		free(victim->long_descr);
+		mob_free_string(victim, victim->long_descr);
 		victim->long_descr = str_dup( "A vicious looking griffin stands here.\n\r" );
 	} else {
-		free(victim->name);
+		mob_free_string(victim, victim->name);
 		victim->name = str_dup( "mount black horse nightmare" );
 		snprintf( buf, sizeof( buf ), "%s's black nightmare", ch->name );
-		free(victim->short_descr);
+		mob_free_string(victim, victim->short_descr);
 		victim->short_descr = str_dup( buf );
-		free(victim->long_descr);
+		mob_free_string(victim, victim->long_descr);
 		victim->long_descr = str_dup( "A large black demonic horse stands here.\n\r" );
 	}
 	char_to_room( victim, ch->in_room );

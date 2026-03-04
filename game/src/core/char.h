@@ -1065,14 +1065,12 @@ struct char_data {
 	int armor;
 	int wimpy;
 	uint32_t deaf;
-	int paradox[3];
 	int damcap[2];
 	int monkstuff;
 	int monkcrap;
 	int monkab[4];
 	int chi[2];
 	char *clan;
-	int gifts[21];
 	int garou1;
 	int garou2;
 	int gnosis[2];
@@ -1177,7 +1175,23 @@ struct pc_data {
 	bool stats_dirty; /* TRUE when pkill/pdeath/etc changed, triggers leaderboard update */
 	int story_node;   /* Story quest progress: 0=not started, 1-18=current node */
 	char *story_clue; /* Last breadcrumb text from story quest NPC */
+	int gifts[21];    /* Werewolf breed/auspice/tribe gifts */
+	int paradox[3];   /* PK punishment: [0]=total [1]=current [2]=ticker */
 };
+/*
+ * Flyweight string helpers.
+ * NPCs share name/short_descr/long_descr/description pointers with their
+ * MOB_INDEX_DATA template.  Before freeing one of these fields, call
+ * mob_free_string() to skip the free when the pointer is still shared.
+ */
+static inline void mob_free_string( CHAR_DATA *ch, char *str ) {
+	MOB_INDEX_DATA *idx = ch->pIndexData;
+	if ( idx && ( str == idx->player_name || str == idx->short_descr
+			|| str == idx->long_descr || str == idx->description ) )
+		return;
+	free( str );
+}
+
 /*
  * Character macros.
  */

@@ -976,10 +976,10 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA *pMobIndex ) {
 	mob->prompt = str_dup( "" );
 	mob->cprompt = str_dup( "" );
 
-	mob->name = str_dup( pMobIndex->player_name );		  /* OLC */
-	mob->short_descr = str_dup( pMobIndex->short_descr ); /* OLC */
-	mob->long_descr = str_dup( pMobIndex->long_descr );	  /* OLC */
-	mob->description = str_dup( pMobIndex->description ); /* OLC */
+	mob->name = pMobIndex->player_name;			/* Flyweight: shared with template */
+	mob->short_descr = pMobIndex->short_descr;	/* Flyweight: shared with template */
+	mob->long_descr = pMobIndex->long_descr;	/* Flyweight: shared with template */
+	mob->description = pMobIndex->description;	/* Flyweight: shared with template */
 
 	mob->home = 3001;
 	mob->form = 32767;
@@ -1274,9 +1274,6 @@ void clear_char( CHAR_DATA *ch ) {
 	ch->fighting = NULL;
 	ch->mount = NULL;
 	ch->wizard = NULL;
-	ch->paradox[0] = 0;
-	ch->paradox[1] = 0;
-	ch->paradox[2] = 0;
 	ch->damcap[0] = 1000;
 	ch->damcap[1] = 0;
 	return;
@@ -1301,10 +1298,10 @@ void free_char( CHAR_DATA *ch ) {
 		affect_remove( ch, paf );
 	}
 
-	free(ch->name);
-	free(ch->short_descr);
-	free(ch->long_descr);
-	free(ch->description);
+	mob_free_string(ch, ch->name);
+	mob_free_string(ch, ch->short_descr);
+	mob_free_string(ch, ch->long_descr);
+	mob_free_string(ch, ch->description);
 	free(ch->lord);
 	free(ch->morph);
 	free(ch->createtime);

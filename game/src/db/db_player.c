@@ -443,8 +443,8 @@ static void save_all_arrays( sqlite3 *db, CHAR_DATA *ch ) {
 	/* Format all arrays to strings */
 	format_int_array( power, sizeof(power), ch->power, MAX_DISCIPLINES );
 	format_int_array( stance, sizeof(stance), ch->stance, 24 );
-	format_int_array( gifts, sizeof(gifts), ch->gifts, 21 );
-	format_int_array( paradox, sizeof(paradox), ch->paradox, 3 );
+	format_int_array( gifts, sizeof(gifts), ch->pcdata->gifts, 21 );
+	format_int_array( paradox, sizeof(paradox), ch->pcdata->paradox, 3 );
 	format_int_array( monkab, sizeof(monkab), ch->monkab, 4 );
 	format_int_array( damcap, sizeof(damcap), ch->damcap, 2 );
 
@@ -1312,9 +1312,9 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	ch->mounted = 0;
 	ch->home = ROOM_VNUM_SCHOOL;
 	ch->vampgen_a = 0;
-	ch->paradox[0] = 0;
-	ch->paradox[1] = 0;
-	ch->paradox[2] = 0;
+	ch->pcdata->paradox[0] = 0;
+	ch->pcdata->paradox[1] = 0;
+	ch->pcdata->paradox[2] = 0;
 	ch->damcap[0] = 1000;
 	ch->damcap[1] = 0;
 	ch->vampaff_a = 0;
@@ -1617,9 +1617,9 @@ static void load_player_arrays( sqlite3 *db, CHAR_DATA *ch ) {
 		else if ( !str_cmp( name, "stance" ) )
 			load_int_array( data, ch->stance, 24 );
 		else if ( !str_cmp( name, "gifts" ) )
-			load_int_array( data, ch->gifts, 21 );
+			load_int_array( data, ch->pcdata->gifts, 21 );
 		else if ( !str_cmp( name, "paradox" ) )
-			load_int_array( data, ch->paradox, 3 );
+			load_int_array( data, ch->pcdata->paradox, 3 );
 		else if ( !str_cmp( name, "monkab" ) )
 			load_int_array( data, ch->monkab, 4 );
 		else if ( !str_cmp( name, "damcap" ) )

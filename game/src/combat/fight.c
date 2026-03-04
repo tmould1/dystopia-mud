@@ -5371,7 +5371,7 @@ void crack_head( CHAR_DATA *ch, OBJ_DATA *obj, char *argument ) {
 		if ( ( pMobIndex = get_mob_index( 30002 ) ) == NULL ) return;
 		victim = create_mobile( pMobIndex );
 		snprintf( buf, sizeof( buf ), "%s", capitalize( arg2 ) );
-		free(victim->short_descr);
+		mob_free_string(victim, victim->short_descr);
 		victim->short_descr = str_dup( buf );
 		char_to_room( victim, ch->in_room );
 		make_part( victim, "cracked_head" );

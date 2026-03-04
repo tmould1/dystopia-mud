@@ -271,9 +271,9 @@ void clearshit( CHAR_DATA *ch ) {
 	ch->mounted = 0;
 	ch->home = ROOM_VNUM_SCHOOL;
 	ch->vampgen_a = 0;
-	ch->paradox[0] = 0; /* Total paradox */
-	ch->paradox[1] = 0; /* Current Paradox */
-	ch->paradox[2] = 0; /* Paradox Ticker */
+	ch->pcdata->paradox[0] = 0; /* Total paradox */
+	ch->pcdata->paradox[1] = 0; /* Current Paradox */
+	ch->pcdata->paradox[2] = 0; /* Paradox Ticker */
 	ch->damcap[0] = 1000;
 	ch->damcap[1] = 0;
 	ch->vampaff_a = 0;

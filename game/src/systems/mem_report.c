@@ -111,10 +111,25 @@ static mem_category_t mem_characters( int *out_npcs, int *out_players,
 #define FTRACK( idx, ptr ) do { s = str_mem( ptr ); r.string_bytes += s; \
 	if ( field_bytes && (idx) < field_count ) field_bytes[(idx)] += s; } while(0)
 
-		FTRACK( F_NAME, ch->name );
-		FTRACK( F_SHORT, ch->short_descr );
-		FTRACK( F_LONG, ch->long_descr );
-		FTRACK( F_DESC, ch->description );
+		/* Flyweight: NPC content strings shared with template aren't counted
+		 * here (they're already counted in the mob_index report).  Only
+		 * count if the pointer was replaced (summoned-pet customization). */
+		if ( IS_NPC( ch ) && ch->pIndexData ) {
+			MOB_INDEX_DATA *idx = ch->pIndexData;
+			if ( ch->name != idx->player_name )
+				FTRACK( F_NAME, ch->name );
+			if ( ch->short_descr != idx->short_descr )
+				FTRACK( F_SHORT, ch->short_descr );
+			if ( ch->long_descr != idx->long_descr )
+				FTRACK( F_LONG, ch->long_descr );
+			if ( ch->description != idx->description )
+				FTRACK( F_DESC, ch->description );
+		} else {
+			FTRACK( F_NAME, ch->name );
+			FTRACK( F_SHORT, ch->short_descr );
+			FTRACK( F_LONG, ch->long_descr );
+			FTRACK( F_DESC, ch->description );
+		}
 		FTRACK( F_LORD, ch->lord );
 		FTRACK( F_MORPH, ch->morph );
 		FTRACK( F_CREATETIME, ch->createtime );

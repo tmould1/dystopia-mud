@@ -1206,12 +1206,12 @@ void do_zombie( CHAR_DATA *ch, char *argument ) {
 	victim = create_mobile( get_mob_index( obj->value[2] ) );
 	snprintf( buf, sizeof( buf ), "the zombie of %s", victim->short_descr );
 	snprintf( buf2, sizeof( buf2 ), "the zombie of %s is here.\n\r", victim->short_descr );
-	free(victim->short_descr);
+	mob_free_string(victim, victim->short_descr);
 	victim->short_descr = str_dup( buf );
-	free(victim->name);
+	mob_free_string(victim, victim->name);
 	SET_BIT( victim->act, ACT_NOEXP );
 	victim->name = str_dup( buf );
-	free(victim->long_descr);
+	mob_free_string(victim, victim->long_descr);
 	victim->long_descr = str_dup( buf2 );
 	SET_BIT( victim->extra, EXTRA_ZOMBIE );
 	snprintf( buf, sizeof( buf ), "Rise corpse, and bow before me!" );
