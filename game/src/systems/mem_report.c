@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "merc.h"
 #include "../script/script.h"
 #include "../db/db_quest.h"
