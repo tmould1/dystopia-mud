@@ -1643,52 +1643,7 @@ void do_areas( CHAR_DATA *ch, char *argument ) {
 	free( arr );
 }
 
-void do_memory( CHAR_DATA *ch, char *argument ) {
-	char buf[MAX_STRING_LENGTH];
-
-	snprintf( buf, sizeof( buf ), "Affects %5d\n\r", top_affect );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "Areas   %5d\n\r", top_area );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "ExDes   %5d\n\r", top_ed );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "Exits   %5d\n\r", top_exit );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "Helps   %5d\n\r", top_help );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "Mobs    %5d\n\r", top_mob_index );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "Objs    %5d\n\r", top_obj_index );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "Resets  %5d\n\r", top_reset );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "Rooms   %5d\n\r", top_room );
-	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "Shops   %5d\n\r", top_shop );
-	send_to_char( buf, ch );
-
-	{
-		long total_bytes = 0;
-		total_bytes += (long) top_affect * sizeof( AFFECT_DATA );
-		total_bytes += (long) top_area * sizeof( AREA_DATA );
-		total_bytes += (long) top_ed * sizeof( EXTRA_DESCR_DATA );
-		total_bytes += (long) top_exit * sizeof( EXIT_DATA );
-		total_bytes += (long) top_help * sizeof( HELP_DATA );
-		total_bytes += (long) top_mob_index * sizeof( MOB_INDEX_DATA );
-		total_bytes += (long) top_obj_index * sizeof( OBJ_INDEX_DATA );
-		total_bytes += (long) top_reset * sizeof( RESET_DATA );
-		total_bytes += (long) top_room * sizeof( ROOM_INDEX_DATA );
-		total_bytes += (long) top_shop * sizeof( SHOP_DATA );
-
-		if ( total_bytes > 1048576 )
-			snprintf( buf, sizeof( buf ), "Estimated boot memory: %.1f MB\n\r", (double) total_bytes / 1048576.0 );
-		else
-			snprintf( buf, sizeof( buf ), "Estimated boot memory: %ld KB\n\r", total_bytes / 1024 );
-		send_to_char( buf, ch );
-	}
-
-	return;
-}
+/* do_memory moved to systems/mem_report.c */
 
 /*
  * Stick a little fuzz on a number.
