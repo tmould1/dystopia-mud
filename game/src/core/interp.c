@@ -27,6 +27,8 @@
 #include "merc.h"
 #include "garou.h"
 #include "../db/db_game.h"
+#include "../db/db_quest.h"
+#include "../systems/quest_new.h"
 #include "../systems/profile.h"
 
 bool check_social ( CHAR_DATA * ch, char *command,
@@ -440,7 +442,8 @@ const struct cmd_type cmd_table[] =
 		{ "note", do_note, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "board", do_board, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "pose", do_emote, POS_SITTING, 0, LOG_NORMAL, 0, 0, 0 },
-		{ "quest", do_quest, POS_SITTING, 0, LOG_NORMAL, 0, 0, 0 },
+		{ "quest", do_quest, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
+		{ "questcreate", do_questcreate, POS_SITTING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "say", do_say, POS_MEDITATING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "'", do_say, POS_MEDITATING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "yell", do_yell, POS_SITTING, 2, LOG_NORMAL, 0, 0, 0 },
@@ -1322,6 +1325,7 @@ const struct cmd_type cmd_table[] =
 		{ "marry", do_marry, POS_DEAD, 9, LOG_ALWAYS, 0, 0, 0 },
 		{ "paradox", do_paradox, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "bully", do_bully, POS_DEAD, 12, LOG_NORMAL, 0, 0, 0 },
+		{ "qadmin", do_qadmin, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
 		{ "qset", do_qset, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
 		{ "qstat", do_qstat, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
 		{ "qtrust", do_qtrust, POS_DEAD, 10, LOG_ALWAYS, 0, 0, 0 },
@@ -1739,6 +1743,12 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 		PROFILE_START("cmd_dispatch");
 		( *cmd_table[cmd].do_fun )( ch, argument );
 		PROFILE_END("cmd_dispatch");
+
+		/* Quest system: track command usage + milestone re-check */
+		if ( ch->desc ) {
+			quest_check_progress( ch, QOBJ_USE_COMMAND, cmd_table[cmd].name, 1 );
+			quest_check_milestones( ch );
+		}
 
 		/* Only check timing if profiling was enabled BEFORE command ran */
 		if ( was_profiling ) {

@@ -1213,7 +1213,7 @@ void do_divorce( CHAR_DATA *ch, char *argument )
 	return;
 }
 
-void do_quest( CHAR_DATA *ch, char *argument ) {
+void do_questcreate( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_STRING_LENGTH];
 	char arg2[MAX_STRING_LENGTH];
 	char arg3[MAX_STRING_LENGTH];
@@ -2459,7 +2459,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
 	if ( arg3[0] == '\0' )
 
 	{
-		do_quest( ch, "" );
+		do_questcreate( ch, "" );
 		return;
 	}
 

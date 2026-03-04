@@ -36,6 +36,7 @@ extern void suite_handler( void );
 extern void suite_create_obj( void );
 extern void suite_combat( void );
 extern void suite_scripting( void );
+extern void suite_quest( void );
 
 int main( int argc, char **argv ) {
 	(void) argc;
@@ -59,6 +60,7 @@ int main( int argc, char **argv ) {
 	RUN_SUITE( "Object Creation", suite_create_obj );
 	RUN_SUITE( "Combat Engagement", suite_combat );
 	RUN_SUITE( "Lua Scripting", suite_scripting );
+	RUN_SUITE( "Quest System", suite_quest );
 
 	return test_summary();
 }

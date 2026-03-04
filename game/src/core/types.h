@@ -36,6 +36,8 @@ typedef struct shop_data SHOP_DATA;
 typedef struct time_info_data TIME_INFO_DATA;
 typedef struct weather_data WEATHER_DATA;
 
+typedef struct quest_tracker QUEST_TRACKER;
+
 typedef struct script_data SCRIPT_DATA;
 
 typedef struct disabled_data DISABLED_DATA;

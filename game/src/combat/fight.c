@@ -30,7 +30,9 @@
 #include "chronomancer.h"
 #include "shaman.h"
 #include "../systems/mcmp.h"
+#include "../systems/quest_new.h"
 #include "../systems/profile.h"
+#include "../db/db_quest.h"
 #include "../script/script.h"
 
 #define MONK_AUTODROP  12
@@ -3416,6 +3418,7 @@ void make_part( CHAR_DATA *ch, char *argument ) {
 }
 
 void raw_kill( CHAR_DATA *victim ) {
+	CHAR_DATA *killer = victim->fighting;
 	CHAR_DATA *mount;
 	stop_fighting( victim, TRUE );
 	make_corpse( victim );
@@ -3475,11 +3478,20 @@ void raw_kill( CHAR_DATA *victim ) {
 			send_to_char( "One of your spirit warriors has been destroyed!\n\r", victim->wizard );
 		}
 
+		/* Quest: track mob kill for the attacker */
+		if ( killer && !IS_NPC( killer ) )
+			quest_check_progress( killer, QOBJ_KILL_MOB, "any", 1 );
+
 		victim->pIndexData->killed++;
 		kill_table[URANGE( 0, victim->level, MAX_LEVEL - 1 )].killed++;
 		extract_char( victim, TRUE );
 		return;
 	}
+
+	/* Quest: track player kill for the attacker */
+	if ( killer && !IS_NPC( killer ) && killer != victim )
+		quest_check_progress( killer, QOBJ_KILL_PLAYER, "any", 1 );
+
 	extract_char( victim, FALSE );
 	while ( !list_empty(&victim->affects) )
 		affect_remove( victim, LIST_ENTRY(victim->affects.sentinel.next, AFFECT_DATA, node) );

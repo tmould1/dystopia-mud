@@ -13,6 +13,7 @@
 #include "../systems/mcmp.h"
 #include "../systems/ttype.h"
 #include "../systems/charset.h"
+#include "../systems/quest_new.h"
 
 /* External variables from comm.c */
 extern char echo_off_str[];
@@ -301,6 +302,9 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 
 	/* MTTS auto-upgrade: apply detected terminal capabilities */
 	ttype_apply_mtts( d, ch );
+
+	/* Initialize quest tracker: evaluate availability and milestones */
+	quest_init_player( ch );
 
 	if ( IS_HERO( ch ) ) {
 		do_help( ch, "motd" );
@@ -605,6 +609,9 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 
 	/* MTTS auto-upgrade: apply detected terminal capabilities */
 	ttype_apply_mtts( d, ch );
+
+	/* Initialize quest tracker: evaluate availability and milestones */
+	quest_init_player( ch );
 
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 		ch->gnosis[GCURRENT] = ch->gnosis[GMAXIMUM] - 5;

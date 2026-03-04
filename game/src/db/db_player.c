@@ -8,6 +8,7 @@
 
 #include "db_util.h"
 #include "db_player.h"
+#include "db_quest.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1103,6 +1104,11 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 	PROFILE_END( "save_boards" );
 
 	/* ================================================================
+	 * Quest Progress
+	 * ================================================================ */
+	quest_progress_save( ch->pcdata->quest_tracker, db );
+
+	/* ================================================================
 	 * Objects (inventory + equipment)
 	 * ================================================================ */
 	if ( !list_empty( &ch->carrying ) )
@@ -1230,6 +1236,7 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	}
 	/* calloc already zeroes memory, no need for pcdata_zero */
 	list_init( &ch->pcdata->aliases );
+	ch->pcdata->quest_tracker = quest_tracker_new();
 
 	d->character = ch;
 	ch->desc = d;
@@ -1999,6 +2006,7 @@ static bool db_player_load_internal( DESCRIPTOR_DATA *d, char *name,
 	load_player_aliases( db, ch );
 	load_player_affects( db, ch );
 	load_player_boards( db, ch );
+	quest_progress_load( ch->pcdata->quest_tracker, db );
 
 	if ( load_objects )
 		load_player_objects( db, ch );

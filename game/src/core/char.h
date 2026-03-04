@@ -1133,6 +1133,7 @@ struct pc_data {
 	int questsrun;
 	int questtotal;
 	int quest;
+	QUEST_TRACKER *quest_tracker;
 	int kingdom;
 	int pagelen;
 	int sit_safe;

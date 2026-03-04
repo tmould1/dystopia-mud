@@ -30,6 +30,7 @@
 #include "../db/db_game.h"
 #include "../db/db_player.h"
 #include "../db/db_tables.h"
+#include "../db/db_quest.h"
 #include "../script/script.h"
 
 /*
@@ -398,6 +399,7 @@ void boot_db( bool fCopyOver ) {
 	db_game_init();
 	db_class_init();
 	db_tables_init();
+	db_quest_init();
 	db_tables_load_script_library();
 	db_game_load_helps();
 	intro_load();
@@ -1334,6 +1336,7 @@ void free_char( CHAR_DATA *ch ) {
 		free(ch->pcdata->parents);
 		free(ch->pcdata->cparents);
 		free(ch->pcdata->marriage);
+		quest_tracker_free( ch->pcdata->quest_tracker );
 		free( ch->pcdata );
 	}
 

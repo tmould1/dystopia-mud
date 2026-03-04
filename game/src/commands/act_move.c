@@ -22,6 +22,8 @@
 #include <time.h>
 #include "merc.h"
 #include "../systems/mcmp.h"
+#include "../systems/quest_new.h"
+#include "../db/db_quest.h"
 #include "../classes/artificer.h"
 #include "../script/script.h"
 
@@ -451,6 +453,15 @@ void move_char( CHAR_DATA *ch, int door ) {
 	if ( !IS_NPC( ch ) && IS_SET( ch->act, PLR_AUTOMAP )
 		&& !IS_SET( ch->act, PLR_SCREENREADER ) )
 		show_automap( ch );
+
+	/* Quest: track room and area visits */
+	if ( !IS_NPC( ch ) ) {
+		char vnum_str[20];
+		snprintf( vnum_str, sizeof( vnum_str ), "%d", to_room->vnum );
+		quest_check_progress( ch, QOBJ_VISIT_ROOM, vnum_str, 1 );
+		if ( in_room->area != to_room->area )
+			quest_check_progress( ch, QOBJ_VISIT_AREA, to_room->area->name, 1 );
+	}
 
 	/* Send GMCP Room.Info */
 	if ( !IS_NPC( ch ) && ch->desc != NULL && ch->desc->gmcp_enabled )
