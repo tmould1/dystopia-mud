@@ -14,7 +14,7 @@
 #include "../core/merc.h"
 
 /* Total number of story nodes (including branch endpoints) */
-#define STORY_NODE_MAX 18
+#define STORY_NODE_MAX 21
 
 /*
  * do_story — recall the last story quest breadcrumb.

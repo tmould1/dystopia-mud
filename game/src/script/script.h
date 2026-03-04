@@ -15,6 +15,7 @@
 #define TRIG_TICK           (1 << 2)    /* Periodic update (mob AI / obj effects) */
 #define TRIG_KILL           (1 << 3)    /* Object: owner killed an NPC */
 #define TRIG_DEATH          (1 << 4)    /* Mob was killed — fires on mob template */
+#define TRIG_EXAMINE        (1 << 5)    /* Player examines extra desc in room */
 
 /* Lua registry reference sentinel (must match Lua's LUA_NOREF) */
 #define SCRIPT_LUA_NOREF    (-2)
@@ -46,6 +47,7 @@ bool script_trigger_tick( CHAR_DATA *ch );
 /* Trigger dispatch — room scripts (iterate room's own scripts) */
 void script_trigger_room_enter( CHAR_DATA *ch, ROOM_INDEX_DATA *room );
 void script_trigger_room_speech( CHAR_DATA *ch, const char *text );
+void script_trigger_room_examine( CHAR_DATA *ch, const char *keyword );
 
 /* Trigger dispatch — object scripts */
 void script_trigger_obj_tick( void );

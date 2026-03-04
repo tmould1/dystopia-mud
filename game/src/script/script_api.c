@@ -337,6 +337,42 @@ static int api_char_set_story_clue( lua_State *L ) {
 }
 
 
+/* ch:has_object(vnum) — true if player carries object with this vnum */
+static int api_char_has_object( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	int vnum = (int) luaL_checkinteger( L, 2 );
+	OBJ_DATA *obj;
+
+	LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
+		if ( obj->pIndexData != NULL && obj->pIndexData->vnum == vnum ) {
+			lua_pushboolean( L, 1 );
+			return 1;
+		}
+	}
+
+	lua_pushboolean( L, 0 );
+	return 1;
+}
+
+/* ch:take_object(vnum) — remove first object with vnum from inventory */
+static int api_char_take_object( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	int vnum = (int) luaL_checkinteger( L, 2 );
+	OBJ_DATA *obj;
+
+	LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
+		if ( obj->pIndexData != NULL && obj->pIndexData->vnum == vnum ) {
+			extract_obj( obj );
+			lua_pushboolean( L, 1 );
+			return 1;
+		}
+	}
+
+	lua_pushboolean( L, 0 );
+	return 1;
+}
+
+
 static const luaL_Reg char_methods[] = {
 	{ "name",         api_char_name },
 	{ "level",        api_char_level },
@@ -363,6 +399,8 @@ static const luaL_Reg char_methods[] = {
 	{ "story_node",      api_char_story_node },
 	{ "set_story_node",  api_char_set_story_node },
 	{ "set_story_clue",  api_char_set_story_clue },
+	{ "has_object",      api_char_has_object },
+	{ "take_object",     api_char_take_object },
 	{ NULL,              NULL }
 };
 

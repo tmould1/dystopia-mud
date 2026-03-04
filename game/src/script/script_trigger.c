@@ -219,6 +219,39 @@ void script_trigger_room_speech( CHAR_DATA *ch, const char *text ) {
 
 
 /*
+ * TRIG_EXAMINE on rooms — fired when a player examines an extra description.
+ * Iterates the room's own scripts (not mob scripts).
+ *
+ * Lua callback: on_examine(ch, room, keyword)
+ */
+void script_trigger_room_examine( CHAR_DATA *ch, const char *keyword ) {
+	SCRIPT_DATA *script;
+	ROOM_INDEX_DATA *room;
+
+	if ( ch == NULL || keyword == NULL || keyword[0] == '\0' )
+		return;
+
+	if ( IS_NPC( ch ) )
+		return;
+
+	room = ch->in_room;
+	if ( room == NULL )
+		return;
+
+	LIST_FOR_EACH( script, &room->scripts, SCRIPT_DATA, node ) {
+		if ( !IS_SET( script->trigger, TRIG_EXAMINE ) )
+			continue;
+		if ( !script_pattern_match( script, keyword ) )
+			continue;
+		if ( !script_chance_check( script ) )
+			continue;
+
+		script_run_room( script, "on_examine", ch, room, keyword );
+	}
+}
+
+
+/*
  * TRIG_TICK on objects — fired periodically for carried/worn objects.
  * Iterates all objects in the game, fires TRIG_TICK scripts on objects
  * that are carried by a character.

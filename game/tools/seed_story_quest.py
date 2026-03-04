@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-seed_story_quest.py - Insert story quest dialogue scripts into area databases.
+seed_story_quest.py - Insert story quest data into area databases.
 
-"Echoes of the Sundering" — a breadcrumb-driven narrative quest.
-Each node is a TRIG_SPEECH script on a questgiver mob that checks the
-player's story_node and delivers dialogue + advances the node.
+"Echoes of the Sundering" — a breadcrumb-driven narrative quest with
+SPEECH, KILL, EXAMINE, and FETCH activities interspersed.
 
 Usage:
     python seed_story_quest.py [--db-dir PATH]
@@ -17,24 +16,38 @@ import os
 import sqlite3
 import sys
 
-# TRIG_SPEECH = (1 << 1) = 2
-TRIG_SPEECH = 2
+# Trigger bitmasks
+TRIG_SPEECH  = 2   # (1 << 1)
+TRIG_DEATH   = 16  # (1 << 4)
+TRIG_EXAMINE = 32  # (1 << 5)
 
-# Each story node: (area_db, mob_vnum, pattern, node_required, next_node, clue_text, dialogue_lua)
-# pattern: substring match on player's speech (case-insensitive)
-# node_required: player must have this story_node to trigger
-# next_node: what story_node gets set to after dialogue
+# Collectors for each type of data to seed
+SPEECH_NODES = []
+DEATH_NODES = []
+EXAMINE_NODES = []
+EXTRA_DESCS = []
+OBJECTS = []
+RESETS = []
 
-STORY_NODES = []
 
-def node(area, vnum, pattern, req_node, next_node, npc_label, clue, lines):
-    """Helper to build a story node entry."""
-    # Build the Lua on_speech function
-    # mob = the NPC, ch = the player who spoke, text = what they said
+# ============================================================
+# Helpers to build each type of entry
+# ============================================================
+
+def speech_node(area, vnum, pattern, req_node, next_node, npc_label, clue, lua_code):
+    """Register a TRIG_SPEECH script on a mob."""
+    SPEECH_NODES.append({
+        "area": area, "vnum": vnum, "pattern": pattern,
+        "lua_code": lua_code,
+        "name": f"story_node_{req_node}_{npc_label}",
+    })
+
+
+def talk(area, vnum, pattern, req_node, next_node, npc_label, clue, lines):
+    """Standard talk node — mob delivers dialogue and advances quest."""
     dialogue = "\\n\\r".join(lines)
     clue_escaped = clue.replace('"', '\\"')
     dialogue_escaped = dialogue.replace('"', '\\"')
-
     lua_code = f'''function on_speech(mob, ch, text)
   if ch:is_npc() then return end
   if ch:story_node() ~= {req_node} then return end
@@ -42,21 +55,100 @@ def node(area, vnum, pattern, req_node, next_node, npc_label, clue, lines):
   ch:set_story_node({next_node})
   ch:set_story_clue("{clue_escaped}")
 end'''
+    speech_node(area, vnum, pattern, req_node, next_node, npc_label, clue, lua_code)
 
-    STORY_NODES.append({
-        "area": area,
-        "vnum": vnum,
-        "pattern": pattern,
+
+def fetch_talk(area, vnum, pattern, req_node, next_node, npc_label, clue,
+               obj_vnum, missing_lines, has_lines):
+    """Fetch-receiving NPC — checks has_object, takes item, advances."""
+    missing_dia = "\\n\\r".join(missing_lines)
+    has_dia = "\\n\\r".join(has_lines)
+    clue_escaped = clue.replace('"', '\\"')
+    missing_escaped = missing_dia.replace('"', '\\"')
+    has_escaped = has_dia.replace('"', '\\"')
+    lua_code = f'''function on_speech(mob, ch, text)
+  if ch:is_npc() then return end
+  if ch:story_node() ~= {req_node} then return end
+  if not ch:has_object({obj_vnum}) then
+    ch:send("\\n\\r{missing_escaped}\\n\\r")
+    return
+  end
+  ch:take_object({obj_vnum})
+  ch:send("\\n\\r{has_escaped}\\n\\r")
+  ch:set_story_node({next_node})
+  ch:set_story_clue("{clue_escaped}")
+end'''
+    speech_node(area, vnum, pattern, req_node, next_node, npc_label, clue, lua_code)
+
+
+def kill_node(area, mob_vnum, req_node, next_node, npc_label, clue, lines):
+    """TRIG_DEATH on a mob template — fires when player kills it."""
+    dialogue = "\\n\\r".join(lines)
+    clue_escaped = clue.replace('"', '\\"')
+    dialogue_escaped = dialogue.replace('"', '\\"')
+    lua_code = f'''function on_death(killer, mob_vnum, area_low, area_high)
+  if killer:is_npc() then return end
+  if killer:story_node() ~= {req_node} then return end
+  killer:send("\\n\\r{dialogue_escaped}\\n\\r")
+  killer:set_story_node({next_node})
+  killer:set_story_clue("{clue_escaped}")
+end'''
+    DEATH_NODES.append({
+        "area": area, "vnum": mob_vnum,
         "lua_code": lua_code,
-        "name": f"story_node_{req_node}_{npc_label}",
+        "name": f"story_kill_{req_node}_{npc_label}",
+    })
+
+
+def examine_node(area, room_vnum, pattern, req_node, next_node, label, clue, lines):
+    """TRIG_EXAMINE on a room — fires when player examines keyword."""
+    dialogue = "\\n\\r".join(lines)
+    clue_escaped = clue.replace('"', '\\"')
+    dialogue_escaped = dialogue.replace('"', '\\"')
+    lua_code = f'''function on_examine(ch, room, keyword)
+  if ch:is_npc() then return end
+  if ch:story_node() ~= {req_node} then return end
+  ch:send("\\n\\r{dialogue_escaped}\\n\\r")
+  ch:set_story_node({next_node})
+  ch:set_story_clue("{clue_escaped}")
+end'''
+    EXAMINE_NODES.append({
+        "area": area, "room_vnum": room_vnum, "pattern": pattern,
+        "lua_code": lua_code,
+        "name": f"story_examine_{req_node}_{label}",
+    })
+
+
+def extra_desc(area, room_vnum, keyword, description):
+    """Register an extra description on a room."""
+    EXTRA_DESCS.append({
+        "area": area, "room_vnum": room_vnum,
+        "keyword": keyword, "description": description,
+    })
+
+
+def obj_template(area, vnum, name, short_descr, description):
+    """Register a new ITEM_TREASURE object template."""
+    OBJECTS.append({
+        "area": area, "vnum": vnum, "name": name,
+        "short_descr": short_descr, "description": description,
+    })
+
+
+def obj_reset(area, obj_vnum, room_vnum):
+    """Register an 'O' reset to place an object in a room."""
+    RESETS.append({
+        "area": area, "obj_vnum": obj_vnum, "room_vnum": room_vnum,
     })
 
 
 # ============================================================
-# Act 1: "The World As It Is" (Nodes 1-5)
+# Act 1: "The World As It Is" (Nodes 1-4)
+# Node 1: TALK (Executioner), Node 2: TALK (Henry),
+# Node 3: KILL (Skeleton), Node 4: FETCH deliver (Priest)
 # ============================================================
 
-node("midgaard", 3011, "darkness", 1, 2, "executioner",
+talk("midgaard", 3011, "darkness", 1, 2, "executioner",
     "#CThe Executioner in the Temple of Midgaard told you:#n "
     "\"Go south to the graveyard. Find Henry. The dead have started to stir.\"",
     [
@@ -71,9 +163,9 @@ node("midgaard", 3011, "darkness", 1, 2, "executioner",
         "#Cthe dead have started to stir. That's where it begins.\"#n",
     ])
 
-node("grave", 3600, "darkness", 2, 3, "henry",
+talk("grave", 3600, "darkness", 2, 3, "henry",
     "#CHenry the Gardener in the Graveyard told you:#n "
-    "\"The priest up at the chapel collects strange writings. Show him the marks.\"",
+    "\"Go into the tombs. Fight what stirs there. Bring back what you find on the bones.\"",
     [
         "#CHenry stops mid-dig and looks at you with tired, red-rimmed eyes.#n",
         "#C#n",
@@ -81,28 +173,60 @@ node("grave", 3600, "darkness", 2, 3, "henry",
         "#CEverything's gone wrong down here. They won't stay buried. Used to be#n",
         "#Ca quiet job, this. Now they claw up from the soil with marks on their#n",
         "#Cbones I've never seen -- symbols, like writing from somewhere else#n",
-        "#Centirely. I'm just a gardener, friend. This is beyond me. The priest#n",
-        "#Cup at the chapel, though -- he collects strange writings. Show him the#n",
-        "#Cmarks. He might know what they mean.\"#n",
+        "#Centirely. Go into the tombs. Fight what stirs there. And bring back#n",
+        "#Cwhat you find on the bones -- there's a priest up at the chapel who#n",
+        "#Ccollects strange writings. He'll want to see it.\"#n",
     ])
 
-node("chapel", 3405, "marks", 3, 4, "priest",
-    "#CThe Priest in the Chapel told you:#n "
-    "\"The druids in the Holy Grove keep the oldest memories. They might remember.\"",
+# Node 3: KILL — Dusty Skeleton (mob 3604, graveyard)
+kill_node("grave", 3604, 3, 4, "skeleton",
+    "#CYou killed the restless dead in the Graveyard.#n "
+    "\"Look for a marked bone fragment in the deeper tombs. Bring it to the Priest at the Chapel.\"",
     [
-        "#CThe Priest's hand freezes over the page he was reading.#n",
+        "#CThe skeleton crumbles to dust, and among the fragments you notice#n",
+        "#Cstrange symbols etched into the bones -- the same marks Henry described.#n",
+        "#CThe dead ARE restless here. Something is very wrong.#n",
         "#C#n",
-        "#C\"The marks? You've seen them too? Show me your hands -- no, it doesn't#n",
-        "#Cmatter. I already know what you'll describe. I've found the same symbols#n",
-        "#Con the oldest stones deep in these catacombs. They speak of something#n",
-        "#Ccalled 'the Sundering' -- a time when the walls of the world grew thin#n",
-        "#Cand things... bled through. I've studied them for years and I'm no#n",
-        "#Ccloser to understanding. But the druids in the Holy Grove -- they keep#n",
-        "#Cthe oldest memories. Living memories, held in the roots of ancient#n",
-        "#Ctrees. They might remember what the rest of us have forgotten.\"#n",
+        "#CYou should search the deeper tombs for a bone fragment covered in#n",
+        "#Cthose symbols. The Priest at the Chapel would want to see it.#n",
     ])
 
-node("grove", 8900, "sundering", 4, 5, "hierophant",
+# Fetch object: marked bone fragment
+obj_template("grave", 3699, "bone fragment marked symbols",
+    "a marked bone fragment",
+    "A small bone fragment covered in strange symbols lies here.")
+obj_reset("grave", 3699, 3607)
+
+# Node 4: FETCH deliver — Priest takes bone, tells about Sundering
+fetch_talk("chapel", 3405, "marks", 4, 5, "priest",
+    "#CThe Priest in the Chapel told you:#n "
+    "\"The druids in the Holy Grove keep the oldest memories. Ask about the Sundering.\"",
+    3699,
+    [
+        "#CThe Priest looks up from his reading.#n",
+        "#C#n",
+        "#C\"You've seen the marks? Then bring me proof -- a fragment from the#n",
+        "#Ctombs, something I can study. The bones down there carry symbols I've#n",
+        "#Cnever been able to decipher.\"#n",
+    ],
+    [
+        "#CThe Priest takes the bone fragment and holds it to the candlelight,#n",
+        "#Chis hands trembling.#n",
+        "#C#n",
+        "#C\"These marks... I knew it. The same symbols I found on the oldest#n",
+        "#Cstones in the catacombs. They speak of something called 'the Sundering'#n",
+        "#C-- a time when the walls of the world grew thin and things bled through.#n",
+        "#CI've studied them for years and I'm no closer to understanding. But the#n",
+        "#Cdruids in the Holy Grove -- they keep the oldest memories. Living#n",
+        "#Cmemories, held in the roots of ancient trees. They might remember what#n",
+        "#Cthe rest of us have forgotten.\"#n",
+    ])
+
+# ============================================================
+# Act 2: "What Came Before" (Nodes 5-12)
+# ============================================================
+
+talk("grove", 8900, "sundering", 5, 6, "hierophant",
     "#CThe Hierophant in the Holy Grove told you:#n "
     "\"Travel to the Elemental Canyon and see the discord for yourself.\"",
     [
@@ -119,9 +243,9 @@ node("grove", 8900, "sundering", 4, 5, "hierophant",
         "#CThey remember their true homes.\"#n",
     ])
 
-node("canyon", 9208, "sundering", 5, 6, "earth_ruler",
+talk("canyon", 9208, "sundering", 6, 7, "earth_ruler",
     "#CThe Earth Ruler in the Elemental Canyon told you:#n "
-    "\"The mines of Moria hold carvings older than anything on the surface.\"",
+    "\"Find the inscription in the deep tunnels of Moria. See them with your own eyes.\"",
     [
         "#CThe ground trembles. The Earth Ruler's voice grinds like stone on stone.#n",
         "#C#n",
@@ -130,19 +254,37 @@ node("canyon", 9208, "sundering", 5, 6, "earth_ruler",
         "#Cplace. We are not of this world. None of the elemental lords are. We#n",
         "#Cwere pulled here when the barriers shattered, torn from realms where we#n",
         "#Cwere whole. The elements rage because they remember what was taken from#n",
-        "#Cthem. If you would understand what broke the world, go deeper. The mines#n",
-        "#Cof Moria hold carvings older than anything on the surface -- older than#n",
-        "#Cus. Older than the breaking itself.\"#n",
+        "#Cthem. If you would understand what broke the world, go deeper. Find the#n",
+        "#Cinscription in the deep tunnels of Moria. See them with your own eyes#n",
+        "#C-- carvings older than us, older than the breaking itself.\"#n",
     ])
 
-# ============================================================
-# Act 2: "What Came Before" (Nodes 6-10)
-# ============================================================
+# Node 7: EXAMINE — Moria carvings (room 4160)
+extra_desc("moria", 4160, "carvings spirals ancient inscription",
+    "You trace the deep-cut spirals with your fingers. The carvings depict\n\r"
+    "a great city whose spires reached between worlds -- lines radiating\n\r"
+    "outward like cracks in glass. In the center, a single figure stands\n\r"
+    "with arms raised, and from its hands pour rivers of light connecting\n\r"
+    "dozens of spheres. Then, abruptly, the spirals shatter. The lines\n\r"
+    "become jagged. The spheres collapse inward. The final panel shows\n\r"
+    "everything tangled together -- worlds overlapping, boundaries gone.\n\r"
+    "The carving ends mid-stroke, as if the hand that made it simply\n\r"
+    "ceased to exist.\n\r")
 
-node("moria", 4100, "carvings", 6, 7, "the_mage",
+examine_node("moria", 4160, "carvings", 7, 8, "moria_carvings",
+    "#CYou examined the ancient carvings in Moria.#n "
+    "\"Find someone who studies these -- the Mage deeper in the mines.\"",
+    [
+        "#CAs you trace the carvings, a chill runs through you. These aren't#n",
+        "#Cdecorations -- they're a record. A warning. The spirals depict a city#n",
+        "#Cthat reached between worlds... and what happened when the reaching#n",
+        "#Cwent wrong. Someone who studies these tunnels might know more. You#n",
+        "#Cremember hearing about a Mage deeper in the mines.#n",
+    ])
+
+talk("moria", 4100, "carvings", 8, 9, "the_mage",
     "#CThe Mage in Moria told you:#n "
-    "\"There's a tower in the Shadow Grove where sorcerers named the force. "
-    "They called it 'the Unraveling.'\"",
+    "\"His journal is in the study down the hall. Take it to the Librarian in Thalos.\"",
     [
         "#CThe Mage's eyes glow faintly in the dark of the mines. He steps closer,#n",
         "#Csuddenly intense.#n",
@@ -152,53 +294,48 @@ node("moria", 4100, "carvings", 6, 7, "the_mage",
         "#Ca city -- a great city that existed before all of this. Its people#n",
         "#Clearned to walk between worlds. And then... the carvings stop. Mid-stroke,#n",
         "#Cas if the hand that carved them simply ceased to exist. Something went#n",
-        "#Cterribly wrong. There's a tower in the Shadow Grove where sorcerers#n",
-        "#Ctried to finish the story. They had a name for the force that did this.#n",
-        "#CThey called it 'the Unraveling.'\"#n",
+        "#Cterribly wrong. A sorcerer in the High Tower tried to finish the story.#n",
+        "#CHis journal is in the study down the hall. Take it to the Librarian in#n",
+        "#CThalos -- she'll know what to make of it.\"#n",
     ])
 
-node("hitower", 1301, "unraveling", 7, 8, "adventurer",
-    "#CThe Lost Adventurer in the High Tower told you:#n "
-    "\"There's a ruined city to the east, Thalos. Some say it fell because of what it saw.\"",
-    [
-        "#CThe Lost Adventurer flinches at the word, clutching a tattered journal#n",
-        "#Cto his chest.#n",
-        "#C#n",
-        "#C\"The Unraveling? Don't -- don't say it so loud. Not here. I came to#n",
-        "#Cthis tower looking for answers too. Found this journal instead -- a#n",
-        "#Csorcerer's notes. He wrote about experiments, trying to pierce the veil#n",
-        "#Cbetween worlds. Said he could see through to 'the other side.' The#n",
-        "#Centries get more frantic as they go. The last one just says: 'It sees#n",
-        "#Cus back.'\"#n",
-        "#C#n",
-        "#CThe adventurer shudders.#n",
-        "#C#n",
-        "#C\"There's a ruined city to the east -- Thalos. It fell before any of us#n",
-        "#Cwere born. Some say it fell because of what it saw through the veil.\"#n",
-    ])
+# Fetch object: sorcerer's journal (pickup at node 9)
+obj_template("hitower", 1499, "journal sorcerer notes leather",
+    "a sorcerer's journal",
+    "A leather-bound journal lies open on the desk.")
+obj_reset("hitower", 1499, 1367)
 
-node("mirror", 5315, "thalos", 8, 9, "librarian",
+# Node 9: FETCH deliver — Librarian takes journal
+fetch_talk("mirror", 5315, "thalos", 9, 10, "librarian",
     "#CThe Librarian in Old Thalos told you:#n "
     "\"The Drow were pulled underground from another world. "
-    "If anyone understands displacement, it's them.\"",
+    "Ask their Priestess about displacement.\"",
+    1499,
     [
         "#CThe Librarian carefully closes a crumbling tome and fixes you with a#n",
         "#Csharp look.#n",
         "#C#n",
-        "#C\"You came here asking about Thalos? Then you already know more than#n",
-        "#Cmost. Everyone assumes the ruins are ancient -- some old civilization#n",
-        "#Cthat crumbled naturally. They're wrong. Thalos wasn't destroyed by war#n",
-        "#Cor plague. It was... replaced. One morning the city was there, whole and#n",
-        "#Cliving. The next, this ruin stood in its place -- as if copied from a#n",
-        "#Cdream and set down wrong. I've preserved what records survived. They#n",
-        "#Cmention the Drow -- an entire civilization pulled underground from#n",
-        "#Canother world entirely. If anyone understands what it means to be#n",
-        "#Cdisplaced, it's them.\"#n",
+        "#C\"You came about Thalos? Then you'll need more than words. Show me the#n",
+        "#Csorcerer's journal from the tower -- I've heard rumors of it but never#n",
+        "#Cseen the pages myself.\"#n",
+    ],
+    [
+        "#CThe Librarian takes the journal and begins reading immediately, her#n",
+        "#Ceyes widening with every page.#n",
+        "#C#n",
+        "#C\"This confirms everything. Thalos wasn't destroyed by war or plague.#n",
+        "#CIt was replaced. One morning the city was there, whole and living. The#n",
+        "#Cnext, this ruin stood in its place -- as if copied from a dream and set#n",
+        "#Cdown wrong. The journal describes the same forces at work. I'll keep#n",
+        "#Cthis safe. You should speak to the Drow -- an entire civilization#n",
+        "#Cpulled underground from another world entirely. If anyone understands#n",
+        "#Cwhat it means to be displaced, it's them.\"#n",
     ])
 
-node("drow", 5104, "displacement", 9, 10, "priestess",
+talk("drow", 5104, "displacement", 10, 11, "priestess",
     "#CThe Drow Priestess told you:#n "
-    "\"The pyramid in the eastern desert holds warnings from those who saw it coming.\"",
+    "\"Find the warning tablets in the ancient hall of the pyramid. "
+    "Bring them to the Sphinx.\"",
     [
         "#CThe Drow Priestess regards you with cold, ancient eyes. A thin smile#n",
         "#Ccrosses her lips.#n",
@@ -206,25 +343,37 @@ node("drow", 5104, "displacement", 9, 10, "priestess",
         "#C\"Displacement. A surfacer's word for what happened to us. So clinical.#n",
         "#CSo tidy. Let me tell you what 'displacement' feels like: our entire#n",
         "#Ccity was torn from the Underdark of a world that no longer exists and#n",
-        "#Cdeposited beneath yours. Or what you call yours. The screaming lasted#n",
-        "#Cfor days. We adapted -- the Drow always adapt. Others were not so#n",
-        "#Cfortunate. You want to understand the scope of this? The pyramid in#n",
-        "#Cthe eastern desert holds writings far older than our arrival -- warnings#n",
-        "#Cfrom a civilization that saw the convergence coming and could do nothing#n",
-        "#Cto stop it.\"#n",
+        "#Cdeposited beneath yours. The screaming lasted for days. We adapted --#n",
+        "#Cthe Drow always adapt. You want to understand the scope of this? Find#n",
+        "#Cthe warning tablets in the ancient hall of the pyramid -- writings far#n",
+        "#Colder than our arrival. Bring them to the Sphinx. It has guarded those#n",
+        "#Cwarnings for eons.\"#n",
     ])
 
-node("pyramid", 2616, "cycle", 10, 11, "sphinx",
+# Fetch object: warning tablet (pickup at node 11)
+obj_template("pyramid", 2699, "tablet warning stone hieroglyphs",
+    "a stone warning tablet",
+    "A stone tablet covered in ancient hieroglyphs leans against the wall.")
+obj_reset("pyramid", 2699, 2630)
+
+# Node 11: FETCH deliver — Sphinx takes tablet
+fetch_talk("pyramid", 2616, "cycle", 11, 12, "sphinx",
     "#CThe Great Sphinx told you:#n "
     "\"Seek the place between -- the void where the dreamer waits.\"",
+    2699,
     [
-        "#CThe Great Sphinx's stone eyes focus on you, and something ancient stirs#n",
-        "#Cbehind them.#n",
+        "#CThe Great Sphinx's stone eyes focus on you.#n",
         "#C#n",
-        "#C\"You speak of the cycle. Good. Most who come here ask about treasure or#n",
-        "#Cpower. You ask the right question. The cycle is thus: a world reaches#n",
-        "#Cfar enough to touch another. The touch becomes a tear. The tear becomes#n",
-        "#Ca flood. All that was separate becomes one. I have guarded these warnings#n",
+        "#C\"You speak of the cycle. But where is the proof? The tablets from the#n",
+        "#Cancient hall -- bring them to me. Only then can I share what I guard.\"#n",
+    ],
+    [
+        "#CThe Great Sphinx takes the tablet in massive stone paws and reads the#n",
+        "#Chieroglyphs with ancient recognition.#n",
+        "#C#n",
+        "#C\"Yes. These are the warnings. The cycle is thus: a world reaches far#n",
+        "#Cenough to touch another. The touch becomes a tear. The tear becomes a#n",
+        "#Cflood. All that was separate becomes one. I have guarded these warnings#n",
         "#Cthrough more turnings than you can imagine, and the message is always#n",
         "#Cthe same: this is not the first Sundering, child. It will not be the#n",
         "#Clast. If you wish to see where the walls are thinnest -- where the#n",
@@ -233,10 +382,10 @@ node("pyramid", 2616, "cycle", 10, 11, "sphinx",
     ])
 
 # ============================================================
-# Act 3: "The Convergence" (Nodes 11-14)
+# Act 3: "The Convergence" (Nodes 12-16)
 # ============================================================
 
-node("dream", 8600, "between", 11, 12, "keeper",
+talk("dream", 8600, "between", 12, 13, "keeper",
     "#CThe Keeper in the Void told you:#n "
     "\"Seek the gods on Olympus, or the king beneath the waves. "
     "Ask about the convergence.\"",
@@ -248,8 +397,7 @@ node("dream", 8600, "between", 11, 12, "keeper",
         "#Cbetween what was and what will be -- between worlds that were once#n",
         "#Cseparate and are now tangled together. Through one tear, an ocean where#n",
         "#Ca king rules waters that aren't his. Through another, a mountain where#n",
-        "#Cgods sit in exile, pretending they still matter. Through another...#n",
-        "#Csomething that hasn't happened yet.\"#n",
+        "#Cgods sit in exile, pretending they still matter.\"#n",
         "#C#n",
         "#CA long silence.#n",
         "#C#n",
@@ -260,27 +408,24 @@ node("dream", 8600, "between", 11, 12, "keeper",
         "#Canother.\"#n",
     ])
 
-# Branch: Atlantis path (node 12 from either 12a or 12b -> 13)
-node("atlantis", 8103, "convergence", 12, 13, "neptune",
+# Branch: Atlantis (13a) or Olympus (13b) -> 14
+talk("atlantis", 8103, "convergence", 13, 14, "neptune",
     "#CKing Neptune in Atlantis told you:#n "
-    "\"Ask the judges in the city of iron and glass. They patrol streets "
-    "that shouldn't exist yet.\"",
+    "\"Ask the judges in the city of iron and glass about the future.\"",
     [
         "#CKing Neptune strokes his coral beard, his trident dimming at the word.#n",
         "#C#n",
         "#C\"The convergence. So you've learned its name. Most who swim these waters#n",
-        "#Cthink they were always here -- that this ocean has always sat beneath#n",
-        "#Cthis sky. It hasn't. My kingdom rests in waters that belong to another#n",
-        "#Cworld. We arrived when the barriers fell, and we have made our peace#n",
-        "#Cwith it. But the newcomers -- the ones from the strange metal cities --#n",
-        "#Cthey arrived later. And stranger. As if pulled from a time that hasn't#n",
-        "#Cfully happened yet. If you want to understand how deep this convergence#n",
-        "#Cgoes, ask the judges in the city of iron and glass. They patrol streets#n",
-        "#Cthat shouldn't exist yet -- and they don't even know it.\"#n",
+        "#Cthink they were always here. They weren't. My kingdom rests in waters#n",
+        "#Cthat belong to another world. We arrived when the barriers fell, and we#n",
+        "#Chave made our peace with it. But the newcomers -- the ones from the#n",
+        "#Cstrange metal cities -- they arrived later. And stranger. As if pulled#n",
+        "#Cfrom a time that hasn't fully happened yet. Ask the judges in the city#n",
+        "#Cof iron and glass. They patrol streets that shouldn't exist yet -- and#n",
+        "#Cthey don't even know it.\"#n",
     ])
 
-# Branch: Olympus path (node 12 -> 13)
-node("olympus", 901, "convergence", 12, 13, "zeus",
+talk("olympus", 901, "convergence", 13, 14, "zeus",
     "#CZeus on Olympus told you:#n "
     "\"Seek the metal city. Something there reeks of a future that was never meant to be.\"",
     [
@@ -291,37 +436,55 @@ node("olympus", 901, "convergence", 12, 13, "zeus",
         "#Cmortals think us gods. We were merely... from elsewhere. A world where#n",
         "#Cwe were powerful, yes. But that world is gone -- scattered across the#n",
         "#CSundering like all the rest. We are refugees wearing the faces of#n",
-        "#Clegends. The convergence that brought us here brought everything here,#n",
-        "#Cand the real power -- the force that did this -- threads through time#n",
-        "#Citself. Seek the metal city to the north. Something there reeks of a#n",
+        "#Clegends. Seek the metal city to the north. Something there reeks of a#n",
         "#Cfuture that was never meant to be.\"#n",
     ])
 
-node("mega1", 8010, "future", 13, 14, "judge",
+talk("mega1", 8010, "future", 14, 15, "judge",
     "#CJudge Eckersley in Mega-City One told you:#n "
-    "\"There's a ship in orbit. Aliens with instruments. "
-    "Docking bay's through the portal.\"",
+    "\"Go up to the bridge of the dome ship, look at the holo-display. "
+    "See where the threads lead.\"",
     [
         "#CJudge Eckersley adjusts his helmet and squints at you.#n",
         "#C#n",
-        "#C\"Future? The future? This IS the future, citizen. Mega-City One. The#n",
-        "#Claw. Always has been.\" He pauses. \"...hasn't it?\"#n",
+        "#C\"Future? The future? This IS the future, citizen.\" He pauses.#n",
+        "#C\"...isn't it?\"#n",
         "#C#n",
         "#CA flicker of confusion crosses his face.#n",
         "#C#n",
         "#C\"Sometimes I get these flashes -- like I remember a different sky.#n",
-        "#CDifferent laws. A world where none of this was real. Then it's gone and#n",
-        "#CI'm back on patrol. Look, I don't know what you're digging into, but#n",
-        "#Cthere's a ship in orbit. Aliens. They've got instruments up there --#n",
-        "#Csensors, scanners, things I don't understand. They say they can see#n",
-        "#Cwhere all the threads come from. Some kind of origin point. Docking#n",
-        "#Cbay's through the portal.\"#n",
+        "#CDifferent laws. Then it's gone and I'm back on patrol. Look, there's a#n",
+        "#Cship in orbit. Aliens with instruments -- sensors, scanners. They say#n",
+        "#Cthey can see where all the threads come from. Go up to the bridge, look#n",
+        "#Cat the holo-display. See for yourself where the threads lead.\"#n",
     ])
 
-node("domeship", 93006, "origin", 14, 15, "elfangor",
+# Node 15: EXAMINE — Dome Ship sensors (room 93045)
+extra_desc("domeship", 93045, "sensors display holo readings",
+    "The holographic display flickers to life as you approach. Thousands of\n\r"
+    "luminous threads radiate outward from a central point, each one a\n\r"
+    "connection between worlds. You trace them: one leads to an ocean\n\r"
+    "kingdom, another to a mountain of gods, another to tunnels of dark\n\r"
+    "elves. The threads pulse with different colors -- some ancient gold,\n\r"
+    "some fresh silver, some a sickly green that seems to eat the light\n\r"
+    "around it. But every single thread, no matter how far it reaches,\n\r"
+    "traces back to the same origin point: a city. An old city, at the\n\r"
+    "center of everything.\n\r")
+
+examine_node("domeship", 93045, "sensors", 15, 16, "domeship_sensors",
+    "#CYou examined the sensor display on the Dome Ship.#n "
+    "\"Every thread traces back to one origin -- an old city. Talk to Elfangor.\"",
+    [
+        "#CThe holographic threads pulse and converge before your eyes. Every#n",
+        "#Cfragment of this patchwork world -- every displaced civilization, every#n",
+        "#Ctorn reality -- traces back to a single point. An old city. The origin#n",
+        "#Cof everything. The Andalite commander Elfangor might know more about#n",
+        "#Cwhat these readings mean.#n",
+    ])
+
+talk("domeship", 93006, "origin", 16, 17, "elfangor",
     "#CElfangor on the Dome Ship told you:#n "
-    "\"Every fragment traces back to a single point -- an old city "
-    "at the center of everything.\"",
+    "\"The old city is at the center. But it is guarded. Fight your way through.\"",
     [
         "#CElfangor-Sirinial-Shamtul turns all four eyes toward you, and you sense#n",
         "#Ca vast, alien sadness.#n",
@@ -330,20 +493,33 @@ node("domeship", 93006, "origin", 14, 15, "elfangor",
         "#Ctrying to answer. Our sensors have mapped the convergence -- every#n",
         "#Cfragment of reality in this patchwork world traces back to a single#n",
         "#Cpoint. An old city, at the center of everything. But our readings show#n",
-        "#Csomething else, something that troubles us. The temporal distortions#n",
-        "#Caren't random. There is a pattern. Something -- or someone -- is#n",
-        "#Cthreading through the timelines, pulling them together. Whether to#n",
-        "#Cpreserve them or consume them, we cannot say. The old city may hold that#n",
-        "#Canswer. It held all the answers, once.\"#n",
+        "#Csomething else: the temporal distortions aren't random. There is a#n",
+        "#Cpattern. Something is threading through the timelines, pulling them#n",
+        "#Ctogether. The old city may hold that answer. But be warned -- it is#n",
+        "#Cguarded. The Royal Guard still patrols those ruins. You will need to#n",
+        "#Cfight your way through.\"#n",
     ])
 
 # ============================================================
-# Act 4: "The Old City" (Nodes 15-16)
+# Act 4: "The Old City" (Nodes 17-21)
 # ============================================================
 
-node("dystopia", 30508, "old city", 15, 16, "queen",
+# Node 17: KILL — Royal Guard (mob 30400, dystopia)
+kill_node("dystopia", 30400, 17, 18, "royal_guard",
+    "#CYou defeated a Royal Guard of Old Dystopia.#n "
+    "\"The Queen holds court deeper in the ruins. Seek her out.\"",
+    [
+        "#CThe Royal Guard falls, his ancient armor clattering on the stone. With#n",
+        "#Chis last breath he whispers:#n",
+        "#C#n",
+        "#C\"You... you've come to see the Queen? Then go. She's waited long enough#n",
+        "#Cfor someone to ask the right questions. Deeper in the ruins. She holds#n",
+        "#Ccourt still... after all this time...\"#n",
+    ])
+
+talk("dystopia", 30508, "old city", 18, 19, "queen",
     "#CThe Queen of Old Dystopia told you:#n "
-    "\"The King remembers more than I do. Ask him about the Unraveling.\"",
+    "\"Go to the library. Read the records. See what we did.\"",
     [
         "#CThe Queen of Dystopia looks at you with eyes that have seen too much.#n",
         "#CA sad smile crosses her face.#n",
@@ -352,17 +528,43 @@ node("dystopia", 30508, "old city", 15, 16, "queen",
         "#Cit home. So you've come at last. They all do, eventually -- the ones#n",
         "#Cwho ask questions instead of swinging swords. This was the first city.#n",
         "#CThe great city. We learned to reach between worlds, and for a time, it#n",
-        "#Cwas glorious -- we saw wonders you cannot imagine. And then we reached#n",
-        "#Ctoo far, and everything came pouring in. The barriers shattered. The#n",
-        "#Cworlds collapsed together. And here we remain -- ruins among the#n",
-        "#Cfragments of everything we touched. The King remembers more than I do.#n",
-        "#CHe sits with it every day. Ask him about the Unraveling.\"#n",
+        "#Cwas glorious. And then we reached too far, and everything came pouring#n",
+        "#Cin. Before you speak to the King, go to the library. Read the records.#n",
+        "#CSee what we did -- in our own words.\"#n",
     ])
 
-node("dystopia", 30509, "unraveling", 16, 17, "king",
+# Node 19: EXAMINE — Library records (room 30460)
+extra_desc("dystopia", 30460, "records scrolls writings library",
+    "You pull a crumbling scroll from the shelf and unroll it carefully.\n\r"
+    "The handwriting is precise, scientific -- lab notes from a civilization\n\r"
+    "that treated reality itself as an experiment. 'Day 1,247: Successfully\n\r"
+    "opened a stable conduit to Realm-7 (oceanic). Sustained contact for\n\r"
+    "14 hours. Inhabitants observed but unaware of our presence.' The entries\n\r"
+    "grow bolder. 'Day 2,891: Twelve simultaneous conduits. We can see them\n\r"
+    "all. A mountain realm of tremendous beings. A fungal forest of small\n\r"
+    "blue creatures. An underground civilization of exquisite cruelty.' Then\n\r"
+    "the tone changes. 'Day 3,002: The conduits will not close. Realm-7\n\r"
+    "inhabitants are appearing in our streets. Day 3,003: Reality is\n\r"
+    "merging. Day 3,004: The barriers are gone. All of them. What have\n\r"
+    "we done.'\n\r")
+
+examine_node("dystopia", 30460, "records", 19, 20, "dystopia_records",
+    "#CYou read the records in the library of Old Dystopia.#n "
+    "\"They opened the doors between worlds and couldn't close them. "
+    "The King carries the weight of it. Ask him about the Unraveling.\"",
+    [
+        "#CThe records tell the whole terrible story. They opened the doors between#n",
+        "#Cworlds -- carefully at first, then recklessly. They saw wonders. And#n",
+        "#Cthen the doors wouldn't close. Reality merged. The barriers fell. Every#n",
+        "#Cworld they'd touched came flooding in. The graveyard's restless dead,#n",
+        "#Cthe displaced Drow, the exiled gods -- all of it traces back to this#n",
+        "#Ccity and its experiments. The King still rules here. He carries the#n",
+        "#Cweight of it. Ask him about the Unraveling.#n",
+    ])
+
+talk("dystopia", 30509, "unraveling", 20, 21, "king",
     "#CThe King of Old Dystopia told you:#n "
-    "\"The world didn't end. It changed. That's just what people do. "
-    "Seek Heaven or Hell for the last word.\"",
+    "\"The world didn't end. It changed. Seek Heaven or Hell for the last word.\"",
     [
         "#CThe King of Dystopia stares out over the ruins of his city. When he#n",
         "#Cspeaks, his voice is quiet.#n",
@@ -379,19 +581,18 @@ node("dystopia", 30509, "unraveling", 16, 17, "king",
         "#C#n",
         "#C\"But you know what I've learned, standing in these ruins? The world#n",
         "#Cdidn't end. It changed. The people -- the ones who were pulled here,#n",
-        "#Cthe ones who were born here, the ones who chose to stay -- they built#n",
-        "#Cnew lives in the wreckage. That's not a tragedy. That's just... what#n",
-        "#Cpeople do.\"#n",
+        "#Cthe ones who were born here -- they built new lives in the wreckage.#n",
+        "#CThat's not a tragedy. That's just... what people do.\"#n",
         "#C#n",
         "#C\"If you want the last word on all of this, seek Heaven or Hell. The#n",
         "#Cangels and demons have their own opinions on what comes next.\"#n",
     ])
 
 # ============================================================
-# Epilogue: "What Remains" (Nodes 17a/17b -> 18+)
+# Epilogue: "What Remains" (Nodes 21a/21b -> 99)
 # ============================================================
 
-node("heaven", 99004, "what now", 17, 99, "overseer",
+talk("heaven", 99004, "what now", 21, 99, "overseer",
     "#CYou have completed 'Echoes of the Sundering.'#n",
     [
         "#CThe Overseer gazes down from a throne of light, and for a moment,#n",
@@ -415,7 +616,7 @@ node("heaven", 99004, "what now", 17, 99, "overseer",
         "#G[Quest Complete: Echoes of the Sundering]#n",
     ])
 
-node("hell", 30101, "what now", 17, 99, "pitlord",
+talk("hell", 30101, "what now", 21, 99, "pitlord",
     "#CYou have completed 'Echoes of the Sundering.'#n",
     [
         "#CThe Pit Lord laughs, a sound like breaking stone.#n",
@@ -423,11 +624,11 @@ node("hell", 30101, "what now", 17, 99, "pitlord",
         "#C\"What now, it asks! Ha! You walk through a shattered world, piece#n",
         "#Ctogether its sorry history, and your question is 'what now?' I like#n",
         "#Cyou.\" The laughter dies. \"The demons don't want to fix anything. They#n",
-        "#Cwant to pull more through. More worlds, more chaos, more power. They#n",
-        "#Csay the Unraveling is opportunity. And maybe they're right. But the#n",
-        "#Cforce that threads through time -- the dark current beneath all of this#n",
-        "#C-- it doesn't care what angels or demons want. It just... is. Like a#n",
-        "#Criver. You can swim in it. You can drown in it. But you can't stop it.\"#n",
+        "#Cwant to pull more through. More worlds, more chaos, more power. And#n",
+        "#Cmaybe they're right. But the force that threads through time -- the#n",
+        "#Cdark current beneath all of this -- it doesn't care what angels or#n",
+        "#Cdemons want. It just... is. Like a river. You can swim in it. You can#n",
+        "#Cdrown in it. But you can't stop it.\"#n",
         "#C#n",
         "#CYou stand in Hell, at the edge of understanding. The Sundering broke#n",
         "#Cthe world -- or made it. The Unraveling continues -- or always has.#n",
@@ -439,13 +640,17 @@ node("hell", 30101, "what now", 17, 99, "pitlord",
     ])
 
 
-def seed_scripts(db_dir):
-    """Insert story quest scripts into area databases."""
-    # Group nodes by area
+# ============================================================
+# Seeding functions
+# ============================================================
+
+def seed_speech_scripts(db_dir):
+    """Insert TRIG_SPEECH story scripts on mobs."""
     by_area = {}
-    for n in STORY_NODES:
+    for n in SPEECH_NODES:
         by_area.setdefault(n["area"], []).append(n)
 
+    count = 0
     for area, nodes in by_area.items():
         db_path = os.path.join(db_dir, f"{area}.db")
         if not os.path.exists(db_path):
@@ -456,29 +661,210 @@ def seed_scripts(db_dir):
         cursor = db.cursor()
 
         for n in nodes:
-            # Remove any existing story script for this mob
             cursor.execute(
                 "DELETE FROM scripts WHERE owner_type='mob' AND owner_vnum=? "
-                "AND name LIKE 'story_node_%'",
-                (n["vnum"],)
-            )
+                "AND name LIKE 'story_%'",
+                (n["vnum"],))
 
-            # Insert the new script
             cursor.execute(
                 "INSERT INTO scripts (owner_type, owner_vnum, trigger, name, "
                 "code, pattern, chance, sort_order) "
                 "VALUES ('mob', ?, ?, ?, ?, ?, 0, 99)",
-                (n["vnum"], TRIG_SPEECH, n["name"], n["lua_code"], n["pattern"])
-            )
+                (n["vnum"], TRIG_SPEECH, n["name"], n["lua_code"], n["pattern"]))
             print(f"  {area}.db: mob {n['vnum']} <- {n['name']}")
+            count += 1
 
         db.commit()
         db.close()
+    return count
+
+
+def seed_death_scripts(db_dir):
+    """Insert TRIG_DEATH story scripts on mob templates."""
+    by_area = {}
+    for n in DEATH_NODES:
+        by_area.setdefault(n["area"], []).append(n)
+
+    count = 0
+    for area, nodes in by_area.items():
+        db_path = os.path.join(db_dir, f"{area}.db")
+        if not os.path.exists(db_path):
+            print(f"  WARNING: {db_path} not found, skipping {area}")
+            continue
+
+        db = sqlite3.connect(db_path)
+        cursor = db.cursor()
+
+        for n in nodes:
+            cursor.execute(
+                "DELETE FROM scripts WHERE owner_type='mob' AND owner_vnum=? "
+                "AND name LIKE 'story_kill_%'",
+                (n["vnum"],))
+
+            cursor.execute(
+                "INSERT INTO scripts (owner_type, owner_vnum, trigger, name, "
+                "code, pattern, chance, sort_order) "
+                "VALUES ('mob', ?, ?, ?, ?, NULL, 0, 99)",
+                (n["vnum"], TRIG_DEATH, n["name"], n["lua_code"]))
+            print(f"  {area}.db: mob {n['vnum']} <- {n['name']} (DEATH)")
+            count += 1
+
+        db.commit()
+        db.close()
+    return count
+
+
+def seed_examine_scripts(db_dir):
+    """Insert TRIG_EXAMINE story scripts on rooms."""
+    by_area = {}
+    for n in EXAMINE_NODES:
+        by_area.setdefault(n["area"], []).append(n)
+
+    count = 0
+    for area, nodes in by_area.items():
+        db_path = os.path.join(db_dir, f"{area}.db")
+        if not os.path.exists(db_path):
+            print(f"  WARNING: {db_path} not found, skipping {area}")
+            continue
+
+        db = sqlite3.connect(db_path)
+        cursor = db.cursor()
+
+        for n in nodes:
+            cursor.execute(
+                "DELETE FROM scripts WHERE owner_type='room' AND owner_vnum=? "
+                "AND name LIKE 'story_examine_%'",
+                (n["room_vnum"],))
+
+            cursor.execute(
+                "INSERT INTO scripts (owner_type, owner_vnum, trigger, name, "
+                "code, pattern, chance, sort_order) "
+                "VALUES ('room', ?, ?, ?, ?, ?, 0, 99)",
+                (n["room_vnum"], TRIG_EXAMINE, n["name"], n["lua_code"],
+                 n["pattern"]))
+            print(f"  {area}.db: room {n['room_vnum']} <- {n['name']} (EXAMINE)")
+            count += 1
+
+        db.commit()
+        db.close()
+    return count
+
+
+def seed_extra_descs(db_dir):
+    """Insert extra descriptions on rooms for examine nodes."""
+    by_area = {}
+    for ed in EXTRA_DESCS:
+        by_area.setdefault(ed["area"], []).append(ed)
+
+    count = 0
+    for area, descs in by_area.items():
+        db_path = os.path.join(db_dir, f"{area}.db")
+        if not os.path.exists(db_path):
+            print(f"  WARNING: {db_path} not found, skipping {area}")
+            continue
+
+        db = sqlite3.connect(db_path)
+        cursor = db.cursor()
+
+        for ed in descs:
+            cursor.execute(
+                "DELETE FROM extra_descriptions WHERE owner_type='room' "
+                "AND owner_vnum=? AND keyword=?",
+                (ed["room_vnum"], ed["keyword"]))
+
+            cursor.execute(
+                "INSERT INTO extra_descriptions "
+                "(owner_type, owner_vnum, keyword, description, sort_order) "
+                "VALUES ('room', ?, ?, ?, 99)",
+                (ed["room_vnum"], ed["keyword"], ed["description"]))
+            print(f"  {area}.db: room {ed['room_vnum']} <- extra_desc '{ed['keyword']}'")
+            count += 1
+
+        db.commit()
+        db.close()
+    return count
+
+
+def seed_objects(db_dir):
+    """Insert ITEM_TREASURE object templates for fetch quests."""
+    by_area = {}
+    for o in OBJECTS:
+        by_area.setdefault(o["area"], []).append(o)
+
+    count = 0
+    for area, objs in by_area.items():
+        db_path = os.path.join(db_dir, f"{area}.db")
+        if not os.path.exists(db_path):
+            print(f"  WARNING: {db_path} not found, skipping {area}")
+            continue
+
+        db = sqlite3.connect(db_path)
+        cursor = db.cursor()
+
+        for o in objs:
+            cursor.execute("DELETE FROM objects WHERE vnum=?", (o["vnum"],))
+
+            cursor.execute(
+                "INSERT INTO objects (vnum, name, short_descr, description, "
+                "item_type, extra_flags, wear_flags, "
+                "value0, value1, value2, value3, weight, cost, "
+                "chpoweron, chpoweroff, chpoweruse, "
+                "victpoweron, victpoweroff, victpoweruse, "
+                "spectype, specpower) "
+                "VALUES (?, ?, ?, ?, 8, 0, 1, "
+                "0, 0, 0, 0, 1, 0, "
+                "'(null)', '(null)', '(null)', "
+                "'(null)', '(null)', '(null)', "
+                "0, 0)",
+                (o["vnum"], o["name"], o["short_descr"], o["description"]))
+            print(f"  {area}.db: obj {o['vnum']} <- '{o['short_descr']}'")
+            count += 1
+
+        db.commit()
+        db.close()
+    return count
+
+
+def seed_resets(db_dir):
+    """Insert 'O' resets to place fetch quest objects in rooms."""
+    by_area = {}
+    for r in RESETS:
+        by_area.setdefault(r["area"], []).append(r)
+
+    count = 0
+    for area, resets in by_area.items():
+        db_path = os.path.join(db_dir, f"{area}.db")
+        if not os.path.exists(db_path):
+            print(f"  WARNING: {db_path} not found, skipping {area}")
+            continue
+
+        db = sqlite3.connect(db_path)
+        cursor = db.cursor()
+
+        for r in resets:
+            cursor.execute(
+                "DELETE FROM resets WHERE command='O' AND arg1=?",
+                (r["obj_vnum"],))
+
+            # Get max sort_order for this area's resets
+            cursor.execute("SELECT COALESCE(MAX(sort_order), 0) FROM resets")
+            max_sort = cursor.fetchone()[0]
+
+            cursor.execute(
+                "INSERT INTO resets (command, arg1, arg2, arg3, sort_order) "
+                "VALUES ('O', ?, 0, ?, ?)",
+                (r["obj_vnum"], r["room_vnum"], max_sort + 1))
+            print(f"  {area}.db: reset O {r['obj_vnum']} -> room {r['room_vnum']}")
+            count += 1
+
+        db.commit()
+        db.close()
+    return count
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Seed story quest dialogue scripts into area databases.")
+        description="Seed story quest data into area databases.")
     parser.add_argument("--db-dir", default=None,
         help="Path to area database directory (default: gamedata/db/areas/)")
     args = parser.parse_args()
@@ -486,7 +872,6 @@ def main():
     if args.db_dir:
         db_dir = args.db_dir
     else:
-        # Auto-detect: script is in game/tools/, db is in gamedata/db/areas/
         script_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(script_dir))
         db_dir = os.path.join(project_root, "gamedata", "db", "areas")
@@ -495,13 +880,39 @@ def main():
         print(f"ERROR: Database directory not found: {db_dir}")
         sys.exit(1)
 
-    print(f"Seeding story quest scripts into: {db_dir}")
-    print(f"Total nodes: {len(STORY_NODES)}")
+    print(f"Seeding story quest into: {db_dir}")
     print()
-    seed_scripts(db_dir)
+
+    print("--- Speech scripts (TRIG_SPEECH on mobs) ---")
+    n_speech = seed_speech_scripts(db_dir)
     print()
-    print("Done. Story quest scripts seeded successfully.")
-    print("Restart the MUD server to load the new scripts.")
+
+    print("--- Death scripts (TRIG_DEATH on mobs) ---")
+    n_death = seed_death_scripts(db_dir)
+    print()
+
+    print("--- Examine scripts (TRIG_EXAMINE on rooms) ---")
+    n_examine = seed_examine_scripts(db_dir)
+    print()
+
+    print("--- Extra descriptions (room examine targets) ---")
+    n_ed = seed_extra_descs(db_dir)
+    print()
+
+    print("--- Object templates (fetch quest items) ---")
+    n_obj = seed_objects(db_dir)
+    print()
+
+    print("--- Object resets (place items in rooms) ---")
+    n_reset = seed_resets(db_dir)
+    print()
+
+    total = n_speech + n_death + n_examine + n_ed + n_obj + n_reset
+    print(f"Done. {total} entries seeded:")
+    print(f"  {n_speech} speech scripts, {n_death} death scripts, "
+          f"{n_examine} examine scripts")
+    print(f"  {n_ed} extra descriptions, {n_obj} objects, {n_reset} resets")
+    print("Restart the MUD server to load the new data.")
 
 
 if __name__ == "__main__":
