@@ -444,6 +444,7 @@ const struct cmd_type cmd_table[] =
 		{ "pose", do_emote, POS_SITTING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "quest", do_quest, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "questcreate", do_questcreate, POS_SITTING, 0, LOG_NORMAL, 0, 0, 0 },
+		{ "story", do_story, POS_DEAD, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "say", do_say, POS_MEDITATING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "'", do_say, POS_MEDITATING, 0, LOG_NORMAL, 0, 0, 0 },
 		{ "yell", do_yell, POS_SITTING, 2, LOG_NORMAL, 0, 0, 0 },

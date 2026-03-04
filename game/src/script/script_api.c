@@ -300,6 +300,42 @@ static int api_char_can_see( lua_State *L ) {
 	return 1;
 }
 
+/* ch:story_node() — returns the player's story quest progress (0 = not started) */
+static int api_char_story_node( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	if ( IS_NPC( ch ) ) {
+		lua_pushinteger( L, 0 );
+		return 1;
+	}
+	lua_pushinteger( L, ch->pcdata->story_node );
+	return 1;
+}
+
+/* ch:set_story_node(n) — advance the player's story quest progress */
+static int api_char_set_story_node( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	int n = (int) luaL_checkinteger( L, 2 );
+	if ( IS_NPC( ch ) ) {
+		luaL_error( L, "set_story_node() cannot be called on NPCs" );
+		return 0;
+	}
+	ch->pcdata->story_node = n;
+	return 0;
+}
+
+/* ch:set_story_clue(text) — set the recallable breadcrumb text */
+static int api_char_set_story_clue( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	const char *text = luaL_checkstring( L, 2 );
+	if ( IS_NPC( ch ) ) {
+		luaL_error( L, "set_story_clue() cannot be called on NPCs" );
+		return 0;
+	}
+	free( ch->pcdata->story_clue );
+	ch->pcdata->story_clue = str_dup( text );
+	return 0;
+}
+
 
 static const luaL_Reg char_methods[] = {
 	{ "name",         api_char_name },
@@ -322,9 +358,12 @@ static const luaL_Reg char_methods[] = {
 	{ "gold",         api_char_gold },
 	{ "set_gold",     api_char_set_gold },
 	{ "attack",       api_char_attack },
-	{ "do_command",   api_char_do_command },
-	{ "can_see",      api_char_can_see },
-	{ NULL,           NULL }
+	{ "do_command",      api_char_do_command },
+	{ "can_see",         api_char_can_see },
+	{ "story_node",      api_char_story_node },
+	{ "set_story_node",  api_char_set_story_node },
+	{ "set_story_clue",  api_char_set_story_clue },
+	{ NULL,              NULL }
 };
 
 

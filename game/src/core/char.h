@@ -1175,6 +1175,8 @@ struct pc_data {
 	int bounty;
 	int explevel; /* FTUE: 0=never MUD, 1=MUD not Dystopia, 2=veteran */
 	bool stats_dirty; /* TRUE when pkill/pdeath/etc changed, triggers leaderboard update */
+	int story_node;   /* Story quest progress: 0=not started, 1-18=current node */
+	char *story_clue; /* Last breadcrumb text from story quest NPC */
 };
 /*
  * Character macros.

@@ -3004,6 +3004,18 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		}
 		if ( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_MORTAL ) )
 			do_mortalvamp( ch, "" );
+		/* Start story quest for new avatars */
+		if ( ch->pcdata->story_node == 0 ) {
+			ch->pcdata->story_node = 1;
+			free( ch->pcdata->story_clue );
+			ch->pcdata->story_clue = str_dup(
+				"#CA whisper echoes in your mind: \"Seek the one who stands "
+				"in judgment at the Temple of Midgaard. Ask about the darkness "
+				"that spreads through these lands.\"#n" );
+			send_to_char( "\n\r", ch );
+			send_to_char( ch->pcdata->story_clue, ch );
+			send_to_char( "\n\r", ch );
+		}
 		return;
 	}
 

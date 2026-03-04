@@ -166,7 +166,9 @@ static const char *PLAYER_SCHEMA_SQL =
 	"  obj_vnum       INTEGER NOT NULL DEFAULT 0,"
 	"  exhaustion     INTEGER NOT NULL DEFAULT 0,"
 	"  questsrun      INTEGER NOT NULL DEFAULT 0,"
-	"  questtotal     INTEGER NOT NULL DEFAULT 0"
+	"  questtotal     INTEGER NOT NULL DEFAULT 0,"
+	"  story_node     INTEGER NOT NULL DEFAULT 0,"
+	"  story_clue     TEXT NOT NULL DEFAULT ''"
 	");"
 
 	"CREATE TABLE IF NOT EXISTS player_arrays ("
@@ -345,6 +347,10 @@ static sqlite3 *db_player_open( const char *name ) {
 		sqlite3_close( db );
 		return NULL;
 	}
+
+	/* Migrate schema for existing player databases (errors ignored if columns exist) */
+	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_node INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
+	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_clue TEXT NOT NULL DEFAULT ''", NULL, NULL, NULL );
 
 	/* WAL mode: eliminates journal file create/delete per transaction.
 	 * synchronous=NORMAL: fsync only at WAL checkpoints, not every commit.
@@ -855,7 +861,8 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 			"rage, generation, cur_form, flag2, flag3, flag4, siltol, gnosis_max,"
 			"kingdom, quest, rank, bounty, security, jflags, souls,"
 			"upgrade_level, mean_paradox, relrank, rune_count, revision,"
-			"disc_research, disc_points, obj_vnum, exhaustion, questsrun, questtotal"
+			"disc_research, disc_points, obj_vnum, exhaustion, questsrun, questtotal,"
+			"story_node, story_clue"
 			") VALUES ("
 			"?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"  /* 16: strings 1 */
 			"?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"    /* 15: strings 2 */
@@ -870,7 +877,8 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 			"?,?,?,?,?,?,?,?,"                  /* 8: rage..gnosis */
 			"?,?,?,?,?,?,?,"                    /* 7: kingdom..souls */
 			"?,?,?,?,?,"                        /* 5: upgrade..revision */
-			"?,?,?,?,?,?"                       /* 6: disc..questtotal */
+			"?,?,?,?,?,?,"                      /* 6: disc..questtotal */
+			"?,?"                               /* 2: story */
 			")";
 		int col = 1;
 		int room_vnum;
@@ -1009,6 +1017,8 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_bind_int( stmt, col++, ch->pcdata->exhaustion );
 		sqlite3_bind_int( stmt, col++, ch->pcdata->questsrun );
 		sqlite3_bind_int( stmt, col++, ch->pcdata->questtotal );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->story_node );
+		sqlite3_bind_text( stmt, col++, ch->pcdata->story_clue ? ch->pcdata->story_clue : "", -1, SQLITE_STATIC );
 
 		sqlite3_step( stmt );
 		sqlite3_finalize( stmt );
@@ -1275,6 +1285,8 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	ch->pcdata->title = str_dup( "" );
 	ch->pcdata->bounty = 0;
 	ch->pcdata->stats_dirty = FALSE;
+	ch->pcdata->story_node = 0;
+	ch->pcdata->story_clue = str_dup( "" );
 	ch->pcdata->conception = str_dup( "" );
 	ch->pcdata->parents = str_dup( "" );
 	ch->pcdata->cparents = str_dup( "" );
@@ -1407,7 +1419,8 @@ static void load_player_row( sqlite3 *db, CHAR_DATA *ch ) {
 		"rage, generation, cur_form, flag2, flag3, flag4, siltol, gnosis_max,"
 		"kingdom, quest, rank, bounty, security, jflags, souls,"
 		"upgrade_level, mean_paradox, relrank, rune_count, revision,"
-		"disc_research, disc_points, obj_vnum, exhaustion, questsrun, questtotal"
+		"disc_research, disc_points, obj_vnum, exhaustion, questsrun, questtotal,"
+		"story_node, story_clue"
 		" FROM player LIMIT 1";
 
 	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
@@ -1573,6 +1586,12 @@ static void load_player_row( sqlite3 *db, CHAR_DATA *ch ) {
 		ch->pcdata->exhaustion = sqlite3_column_int( stmt, col++ );
 		ch->pcdata->questsrun = sqlite3_column_int( stmt, col++ );
 		ch->pcdata->questtotal = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->story_node = sqlite3_column_int( stmt, col++ );
+		{
+			const char *clue = (const char *) sqlite3_column_text( stmt, col++ );
+			free( ch->pcdata->story_clue );
+			ch->pcdata->story_clue = str_dup( clue ? clue : "" );
+		}
 	}
 
 	sqlite3_finalize( stmt );
