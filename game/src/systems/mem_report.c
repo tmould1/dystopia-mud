@@ -276,12 +276,13 @@ static mem_category_t mem_objects( int *out_affects, int *out_ed,
 }
 
 static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
-	int *out_scripts )
+	int *out_scripts, int *out_dynamic )
 {
 	mem_category_t r = { "Rooms", 0, 0, 0, 0 };
 	AREA_DATA *pArea;
 	ROOM_INDEX_DATA *pRoom;
 	int exit_count = 0, ed_count = 0, reset_count = 0, script_count = 0;
+	int dynamic_count = 0;
 	int door, i;
 
 	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
@@ -294,8 +295,12 @@ static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
 		r.struct_bytes += sizeof( ROOM_INDEX_DATA );
 		r.string_bytes += str_mem( pRoom->name );
 		r.string_bytes += str_mem( pRoom->description );
-		for ( i = 0; i < 5; i++ )
-			r.string_bytes += str_mem( pRoom->track[i] );
+		if ( pRoom->dynamic ) {
+			dynamic_count++;
+			r.child_bytes += sizeof( ROOM_DYNAMIC_DATA );
+			for ( i = 0; i < 5; i++ )
+				r.string_bytes += str_mem( pRoom->dynamic->track[i] );
+		}
 
 		for ( door = 0; door < 6; door++ ) {
 			EXIT_DATA *pexit = pRoom->exit[door];
@@ -334,6 +339,7 @@ static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
 	if ( out_ed )      *out_ed      = ed_count;
 	if ( out_resets )  *out_resets  = reset_count;
 	if ( out_scripts ) *out_scripts = script_count;
+	if ( out_dynamic ) *out_dynamic = dynamic_count;
 	return r;
 }
 
@@ -508,7 +514,7 @@ static void mem_show_summary( CHAR_DATA *ch ) {
 
 	cats[0] = mem_characters( NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 );
 	cats[1] = mem_objects( NULL, NULL, NULL, 0 );
-	cats[2] = mem_rooms( NULL, NULL, NULL, NULL );
+	cats[2] = mem_rooms( NULL, NULL, NULL, NULL, NULL );
 	cats[3] = mem_mob_index( NULL, NULL );
 	cats[4] = mem_obj_index( NULL, NULL, NULL );
 	cats[5] = mem_descriptors( NULL, NULL );
@@ -662,11 +668,11 @@ static void mem_show_objects( CHAR_DATA *ch ) {
 }
 
 static void mem_show_rooms( CHAR_DATA *ch ) {
-	int exit_count, ed_count, reset_count, script_count;
+	int exit_count, ed_count, reset_count, script_count, dynamic_count;
 	char buf[32];
 	mem_category_t r;
 
-	r = mem_rooms( &exit_count, &ed_count, &reset_count, &script_count );
+	r = mem_rooms( &exit_count, &ed_count, &reset_count, &script_count, &dynamic_count );
 
 	send_to_char( "\n\r#R===== #yMemory Detail: Rooms #R=====#n\n\r\n\r", ch );
 	send_line( ch, "Instances:     %6d\n\r", r.count );
@@ -684,6 +690,8 @@ static void mem_show_rooms( CHAR_DATA *ch ) {
 		(size_t) ed_count * sizeof( EXTRA_DESCR_DATA ), ed_count );
 	send_line( ch, "  Resets:          %10zu  (%d instances)\n\r",
 		(size_t) reset_count * sizeof( RESET_DATA ), reset_count );
+	send_line( ch, "  Dynamic:         %10zu  (%d of %d rooms)\n\r",
+		(size_t) dynamic_count * sizeof( ROOM_DYNAMIC_DATA ), dynamic_count, r.count );
 	send_line( ch, "  Scripts:         %10zu  (%d instances)\n\r",
 		(size_t) script_count * sizeof( SCRIPT_DATA ), script_count );
 
@@ -843,6 +851,11 @@ static void mem_show_areas( CHAR_DATA *ch ) {
 			area_bytes += sizeof( ROOM_INDEX_DATA );
 			area_bytes += str_mem( pRoom->name );
 			area_bytes += str_mem( pRoom->description );
+			if ( pRoom->dynamic ) {
+				area_bytes += sizeof( ROOM_DYNAMIC_DATA );
+				for ( door = 0; door < 5; door++ )
+					area_bytes += str_mem( pRoom->dynamic->track[door] );
+			}
 
 			for ( door = 0; door < 6; door++ ) {
 				if ( pRoom->exit[door] ) {

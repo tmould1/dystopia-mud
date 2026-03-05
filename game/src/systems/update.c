@@ -347,8 +347,8 @@ void char_update( void ) {
 			ch->hit = ch->hit - dam;
 			if ( ch->hit < 1 ) ch->hit = 1;
 			update_pos( ch );
-			ch->in_room->blood += dam;
-			if ( ch->in_room->blood > 1000 ) ch->in_room->blood = 1000;
+			room_dynamic( ch->in_room )->blood += dam;
+			if ( ch->in_room->dynamic->blood > 1000 ) ch->in_room->dynamic->blood = 1000;
 		}
 		if ( IS_EXTRA( ch, EXTRA_ROT ) && !is_obj ) {
 			int dam;
@@ -550,11 +550,6 @@ void mobile_update( void ) {
 
 		if ( ch->in_room == NULL ) continue;
 
-		if ( ch->hunting != NULL && ch->hunting[0] != '\0' && strlen( ch->hunting ) > 1 ) {
-			check_hunt( ch );
-			continue;
-		}
-
 		PROFILE_START( "mob_npc_ai" );
 		if ( IS_AFFECTED( ch, AFF_CHARM ) ) {
 			PROFILE_END( "mob_npc_ai" );
@@ -572,6 +567,7 @@ void mobile_update( void ) {
 			PROFILE_END( "mob_npc_ai" );
 			continue;
 		}
+		PROFILE_START( "mob_npc_scavenge" );
 		if ( IS_SET( ch->act, ACT_SCAVENGER ) && !list_empty( &ch->in_room->objects ) && number_bits( 2 ) == 0 ) {
 			OBJ_DATA *obj;
 			OBJ_DATA *obj_best = 0;
@@ -592,7 +588,9 @@ void mobile_update( void ) {
 				}
 			}
 		}
+		PROFILE_END( "mob_npc_scavenge" );
 		/* Random movement */
+		PROFILE_START( "mob_npc_move" );
 		if ( !IS_SET( ch->act, ACT_SENTINEL ) && ( door = number_bits( 5 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) && ( ch->hunting == NULL || strlen( ch->hunting ) < 2 ) && ( ( !IS_SET( ch->act, ACT_STAY_AREA ) && ch->level < 900 ) || pexit->to_room->area == ch->in_room->area ) ) {
 			move_char( ch, door );
 		}
@@ -609,6 +607,7 @@ void mobile_update( void ) {
 			if ( !found )
 				move_char( ch, door );
 		}
+		PROFILE_END( "mob_npc_move" );
 		PROFILE_END( "mob_npc_ai" );
 	}
 
@@ -906,12 +905,14 @@ void room_update( void ) {
 		if ( RTIMER( room, RTIMER_SWARM_RATS ) == 1 )
 			room_message( room, "The rats scurry away into the floorboards." );
 
-		if ( RTIMER( room, RTIMER_SILENCE ) < 0 ) room->tick_timer[RTIMER_SILENCE] = UMAX( room->tick_timer[RTIMER_SILENCE], 0 );
+		if ( RTIMER( room, RTIMER_SILENCE ) < 0 ) SET_RTIMER( room, RTIMER_SILENCE, 0 );
 		if ( RTIMER( room, RTIMER_SILENCE ) == 1 )
 			room_message( room, "The silence disappates." );
 
-		for ( i = 0; i < MAX_RTIMER; i++ )
-			room->tick_timer[i] = UMAX( room->tick_timer[i] - 1, 0 );
+		if ( room->dynamic ) {
+			for ( i = 0; i < MAX_RTIMER; i++ )
+				room->dynamic->tick_timer[i] = UMAX( room->dynamic->tick_timer[i] - 1, 0 );
+		}
 	}
 	}
 
@@ -1192,7 +1193,9 @@ void update_handler( void ) {
 		weather_update();
 		char_update();
 		obj_update();
+		PROFILE_START( "obj_script_tick" );
 		script_trigger_obj_tick();
+		PROFILE_END( "obj_script_tick" );
 		room_update();
 
 		/*

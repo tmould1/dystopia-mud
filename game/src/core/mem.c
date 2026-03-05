@@ -174,6 +174,12 @@ void free_room_index( ROOM_INDEX_DATA *pRoom ) {
 	free(pRoom->name);
 	free(pRoom->description);
 
+	if ( pRoom->dynamic ) {
+		for ( door = 0; door < 5; door++ )
+			free( pRoom->dynamic->track[door] );
+		free( pRoom->dynamic );
+	}
+
 	for ( door = 0; door < MAX_DIR; door++ ) {
 		if ( pRoom->exit[door] )
 			free_exit( pRoom->exit[door] );

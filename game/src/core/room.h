@@ -29,11 +29,17 @@ typedef enum {
 #define SUB_NW	  DIR_NORTHWEST
 #define SUB_SE	  DIR_SOUTHEAST
 #define SUB_SW	  DIR_SOUTHWEST
-#define RTIMER( room, rtmr )		  ( ( room )->tick_timer[( rtmr )] )
-#define SET_RTIMER( room, rtmr, rtm ) ( ( room )->tick_timer[( rtmr )] = ( rtm ) )
-#define ADD_RTIMER( room, rtmr, rtm ) ( ( room )->tick_timer[( rtmr )] += ( rtm ) )
-#define SUB_RTIMER( room, rtmr, rtm ) ( ( room )->tick_timer[( rtmr )] -= ( rtm ) )
-#define RTIME_UP( room, rtmr )		  ( ( room )->tick_timer[( rtmr )] == 0 ? TRUE : FALSE )
+/* Lazy-allocate room dynamic data on first write */
+static inline ROOM_DYNAMIC_DATA *room_dynamic( ROOM_INDEX_DATA *room );
+
+/* Read: return 0 if no dynamic data (no active effects) */
+#define RTIMER( room, rtmr )		  ( ( room )->dynamic ? ( room )->dynamic->tick_timer[( rtmr )] : 0 )
+#define RTIME_UP( room, rtmr )		  ( RTIMER( room, rtmr ) == 0 ? TRUE : FALSE )
+
+/* Write: lazy-allocate on first mutation */
+#define SET_RTIMER( room, rtmr, rtm ) ( room_dynamic( room )->tick_timer[( rtmr )] = ( rtm ) )
+#define ADD_RTIMER( room, rtmr, rtm ) ( room_dynamic( room )->tick_timer[( rtmr )] += ( rtm ) )
+#define SUB_RTIMER( room, rtmr, rtm ) ( room_dynamic( room )->tick_timer[( rtmr )] -= ( rtm ) )
 #define RTIMER_STINKING_CLOUD	0
 #define RTIMER_LIFE_VORTEX		1
 #define RTIMER_DEATH_VORTEX		2
@@ -176,11 +182,21 @@ struct exit_data {
 };
 
 /*
+ * Optional room data — lazily allocated for rooms with active effects,
+ * tracking, or blood.  Mirrors the CHAR_DATA/PC_DATA split pattern.
+ */
+struct room_dynamic_data {
+	int   tick_timer[MAX_RTIMER];	/* Room effect timers (30 slots) */
+	char *track[5];					/* Player tracking names (FIFO)  */
+	int   track_dir[5];				/* Direction for each track       */
+	int   blood;					/* Blood splatter level (0-1000) */
+};
+
+/*
  * Room type.
  */
 struct room_index_data {
 	ROOM_INDEX_DATA *next;
-	ROOM_INDEX_DATA *next_room;
 	list_head_t characters;
 	list_head_t objects;
 	list_head_t extra_descr;
@@ -189,19 +205,24 @@ struct room_index_data {
 	list_head_t resets;      /* OLC */
 	list_head_t scripts;     /* Lua scripts attached to this room */
 
-	char *track[5];
+	ROOM_DYNAMIC_DATA *dynamic;  /* Lazily allocated: timers, track, blood */
 	char *name;
 	char *description;
 	int vnum;
 	uint32_t room_flags;
 	int light;
-	int blood;
-	int track_dir[5];
 	int sector_type;
-	int tick_timer[MAX_RTIMER];
 
 	/* Area room list linkage for efficient reset iteration */
 	ROOM_INDEX_DATA *next_in_area;  /* Next room in same area */
 };
+
+static inline ROOM_DYNAMIC_DATA *room_dynamic( ROOM_INDEX_DATA *room ) {
+	if ( !room->dynamic ) {
+		room->dynamic = calloc( 1, sizeof( ROOM_DYNAMIC_DATA ) );
+		/* calloc zeros tick_timer, track_dir, blood; track[] are NULL */
+	}
+	return room->dynamic;
+}
 
 #endif /* ROOM_H */

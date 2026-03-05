@@ -1343,25 +1343,26 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 				get_room_tint_color( ch->in_room ),
 				ch->in_room->description ? ch->in_room->description : "" );
 			send_to_char( buf, ch );
-			if ( ch->in_room->blood == 1000 )
-				snprintf( buf, sizeof( buf ), "#1You notice that the room is completely drenched in blood.#n\n\r" );
-			else if ( ch->in_room->blood > 750 )
-				snprintf( buf, sizeof( buf ), "#1You notice that there is a very large amount of blood around the room.#n\n\r" );
-			else if ( ch->in_room->blood > 500 )
-				snprintf( buf, sizeof( buf ), "#RYou notice that there is a large quantity of blood around the room.#n\n\r" );
-			else if ( ch->in_room->blood > 250 )
-				snprintf( buf, sizeof( buf ), "#RYou notice a fair amount of blood on the floor.#n\n\r" );
-			else if ( ch->in_room->blood > 100 )
-				snprintf( buf, sizeof( buf ), "#RYou notice several blood stains on the floor.#n\n\r" );
-			else if ( ch->in_room->blood > 50 )
-				snprintf( buf, sizeof( buf ), "#RYou notice a few blood stains on the floor.#n\n\r" );
-			else if ( ch->in_room->blood > 25 )
-				snprintf( buf, sizeof( buf ), "#RYou notice a couple of blood stains on the floor.#n\n\r" );
-			else if ( ch->in_room->blood > 0 )
-				snprintf( buf, sizeof( buf ), "#RYou notice a few drops of blood on the floor.#n\n\r" );
-			else
-				snprintf( buf, sizeof( buf ), "#RYou notice nothing special in the room.#n\n\r" );
-			if ( ch->in_room->blood > 0 ) send_to_char( buf, ch );
+			if ( ch->in_room->dynamic && ch->in_room->dynamic->blood > 0 ) {
+				int blood = ch->in_room->dynamic->blood;
+				if ( blood == 1000 )
+					snprintf( buf, sizeof( buf ), "#1You notice that the room is completely drenched in blood.#n\n\r" );
+				else if ( blood > 750 )
+					snprintf( buf, sizeof( buf ), "#1You notice that there is a very large amount of blood around the room.#n\n\r" );
+				else if ( blood > 500 )
+					snprintf( buf, sizeof( buf ), "#RYou notice that there is a large quantity of blood around the room.#n\n\r" );
+				else if ( blood > 250 )
+					snprintf( buf, sizeof( buf ), "#RYou notice a fair amount of blood on the floor.#n\n\r" );
+				else if ( blood > 100 )
+					snprintf( buf, sizeof( buf ), "#RYou notice several blood stains on the floor.#n\n\r" );
+				else if ( blood > 50 )
+					snprintf( buf, sizeof( buf ), "#RYou notice a few blood stains on the floor.#n\n\r" );
+				else if ( blood > 25 )
+					snprintf( buf, sizeof( buf ), "#RYou notice a couple of blood stains on the floor.#n\n\r" );
+				else
+					snprintf( buf, sizeof( buf ), "#RYou notice a few drops of blood on the floor.#n\n\r" );
+				send_to_char( buf, ch );
+			}
 		}
 		if ( IS_SET( ch->in_room->room_flags, ROOM_FLAMING ) )
 			send_to_char( "..This room is engulfed in flames!\n\r", ch );

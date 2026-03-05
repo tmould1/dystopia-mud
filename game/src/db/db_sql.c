@@ -649,14 +649,7 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		pRoomIndex->description = str_dup( col_text( stmt, 2 ) );
 		pRoomIndex->room_flags  = sqlite3_column_int( stmt, 3 );
 		pRoomIndex->sector_type = sqlite3_column_int( stmt, 4 );
-		pRoomIndex->light       = 0;
-		pRoomIndex->blood       = 0;
 		list_init( &pRoomIndex->scripts );
-
-		for ( door = 0; door <= 4; door++ ) {
-			pRoomIndex->track[door]     = str_dup( "" );
-			pRoomIndex->track_dir[door] = 0;
-		}
 		for ( door = 0; door <= 5; door++ )
 			pRoomIndex->exit[door] = NULL;
 
@@ -908,7 +901,11 @@ static void sql_load_scripts( sqlite3 *db ) {
 
 		if ( !strcmp( owner_type, "mob" ) ) {
 			MOB_INDEX_DATA *pMob = get_mob_index( vnum );
-			if ( pMob ) list = &pMob->scripts;
+			if ( pMob ) {
+				list = &pMob->scripts;
+				if ( IS_SET( trigger, TRIG_TICK ) )
+					pMob->has_tick_scripts = TRUE;
+			}
 		} else if ( !strcmp( owner_type, "obj" ) ) {
 			OBJ_INDEX_DATA *pObj = get_obj_index( vnum );
 			if ( pObj ) list = &pObj->scripts;

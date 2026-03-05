@@ -1449,10 +1449,6 @@ bool redit_create( CHAR_DATA *ch, char *argument ) {
 	pRoom->next = room_index_hash[iHash];
 	room_index_hash[iHash] = pRoom;
 	ch->desc->pEdit = (void *) pRoom;
-	for ( door = 0; door <= 4; door++ ) {
-		pRoom->track[door] = str_dup( "" );
-		pRoom->track_dir[door] = 0;
-	}
 	for ( door = 0; door <= 5; door++ )
 		pRoom->exit[door] = NULL;
 

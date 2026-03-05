@@ -775,7 +775,10 @@ void char_to_room( CHAR_DATA *ch, ROOM_INDEX_DATA *pRoomIndex ) {
 	else if ( ( obj = get_eq_char( ch, WEAR_HOLD ) ) != NULL && obj->item_type == ITEM_LIGHT && obj->value[2] != 0 )
 		++ch->in_room->light;
 
-	if ( ch_loc_hp(ch)[6] > 0 && ch->in_room->blood < 1000 ) ch->in_room->blood += 1;
+	if ( ch_loc_hp(ch)[6] > 0 ) {
+		int blood = ch->in_room->dynamic ? ch->in_room->dynamic->blood : 0;
+		if ( blood < 1000 ) room_dynamic( ch->in_room )->blood = blood + 1;
+	}
 
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_DARKNESS ) )
 		SET_BIT( ch->in_room->room_flags, ROOM_TOTAL_DARKNESS );

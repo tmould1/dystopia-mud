@@ -4067,19 +4067,19 @@ void check_hunt( CHAR_DATA *ch ) {
 	}
 	if ( check_track( ch, 0 ) ) {
 		found = TRUE;
-		direction = ch->in_room->track_dir[0];
+		direction = ch->in_room->dynamic->track_dir[0];
 	} else if ( check_track( ch, 1 ) ) {
 		found = TRUE;
-		direction = ch->in_room->track_dir[1];
+		direction = ch->in_room->dynamic->track_dir[1];
 	} else if ( check_track( ch, 2 ) ) {
 		found = TRUE;
-		direction = ch->in_room->track_dir[2];
+		direction = ch->in_room->dynamic->track_dir[2];
 	} else if ( check_track( ch, 3 ) ) {
 		found = TRUE;
-		direction = ch->in_room->track_dir[3];
+		direction = ch->in_room->dynamic->track_dir[3];
 	} else if ( check_track( ch, 4 ) ) {
 		found = TRUE;
-		direction = ch->in_room->track_dir[4];
+		direction = ch->in_room->dynamic->track_dir[4];
 	} else if ( ( victim = get_char_room( ch, ch->hunting ) ) == NULL ) {
 		send_to_char( "You cannot sense any trails from this room.\n\r", ch );
 		free(ch->hunting);
@@ -4098,6 +4098,7 @@ void check_hunt( CHAR_DATA *ch ) {
 }
 
 void add_tracks( CHAR_DATA *ch, int direction ) {
+	ROOM_DYNAMIC_DATA *dyn;
 	int loop;
 
 	if ( IS_NPC( ch ) ) return;
@@ -4106,48 +4107,51 @@ void add_tracks( CHAR_DATA *ch, int direction ) {
 	if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_SORA] >= 4 )
 		return;
 	if ( IS_ITEMAFF( ch, ITEMA_STALKER ) ) return;
+
+	dyn = room_dynamic( ch->in_room );
+
 	for ( loop = 0; loop <= 4; loop++ ) {
-		if ( ch->in_room->track[loop] != NULL && !str_cmp( ch->in_room->track[loop], ch->name ) ) {
-			free(ch->in_room->track[loop]);
-			ch->in_room->track[loop] = str_dup( "" );
+		if ( dyn->track[loop] != NULL && !str_cmp( dyn->track[loop], ch->name ) ) {
+			free( dyn->track[loop] );
+			dyn->track[loop] = NULL;
 		}
 	}
-	if ( ch->in_room->track[0] != NULL && strlen( ch->in_room->track[0] ) < 2 ) {
-		free(ch->in_room->track[0]);
-		ch->in_room->track[0] = str_dup( ch->pcdata->switchname );
-		ch->in_room->track_dir[0] = direction;
-	} else if ( ch->in_room->track[1] != NULL && strlen( ch->in_room->track[1] ) < 2 ) {
-		free(ch->in_room->track[1]);
-		ch->in_room->track[1] = str_dup( ch->pcdata->switchname );
-		ch->in_room->track_dir[1] = direction;
-	} else if ( ch->in_room->track[2] != NULL && strlen( ch->in_room->track[2] ) < 2 ) {
-		free(ch->in_room->track[2]);
-		ch->in_room->track[2] = str_dup( ch->pcdata->switchname );
-		ch->in_room->track_dir[2] = direction;
-	} else if ( ch->in_room->track[3] != NULL && strlen( ch->in_room->track[3] ) < 2 ) {
-		free(ch->in_room->track[3]);
-		ch->in_room->track[3] = str_dup( ch->pcdata->switchname );
-		ch->in_room->track_dir[3] = direction;
-	} else if ( ch->in_room->track[4] != NULL && strlen( ch->in_room->track[4] ) < 2 ) {
-		free(ch->in_room->track[4]);
-		ch->in_room->track[4] = str_dup( ch->pcdata->switchname );
-		ch->in_room->track_dir[4] = direction;
+	if ( !dyn->track[0] || strlen( dyn->track[0] ) < 2 ) {
+		free( dyn->track[0] );
+		dyn->track[0] = str_dup( ch->pcdata->switchname );
+		dyn->track_dir[0] = direction;
+	} else if ( !dyn->track[1] || strlen( dyn->track[1] ) < 2 ) {
+		free( dyn->track[1] );
+		dyn->track[1] = str_dup( ch->pcdata->switchname );
+		dyn->track_dir[1] = direction;
+	} else if ( !dyn->track[2] || strlen( dyn->track[2] ) < 2 ) {
+		free( dyn->track[2] );
+		dyn->track[2] = str_dup( ch->pcdata->switchname );
+		dyn->track_dir[2] = direction;
+	} else if ( !dyn->track[3] || strlen( dyn->track[3] ) < 2 ) {
+		free( dyn->track[3] );
+		dyn->track[3] = str_dup( ch->pcdata->switchname );
+		dyn->track_dir[3] = direction;
+	} else if ( !dyn->track[4] || strlen( dyn->track[4] ) < 2 ) {
+		free( dyn->track[4] );
+		dyn->track[4] = str_dup( ch->pcdata->switchname );
+		dyn->track_dir[4] = direction;
 	} else {
-		free(ch->in_room->track[0]);
-		ch->in_room->track[0] = str_dup( ch->in_room->track[1] );
-		ch->in_room->track_dir[0] = ch->in_room->track_dir[1];
-		free(ch->in_room->track[1]);
-		ch->in_room->track[1] = str_dup( ch->in_room->track[2] );
-		ch->in_room->track_dir[1] = ch->in_room->track_dir[2];
-		free(ch->in_room->track[2]);
-		ch->in_room->track[2] = str_dup( ch->in_room->track[3] );
-		ch->in_room->track_dir[2] = ch->in_room->track_dir[3];
-		free(ch->in_room->track[3]);
-		ch->in_room->track[3] = str_dup( ch->in_room->track[4] );
-		ch->in_room->track_dir[3] = ch->in_room->track_dir[4];
-		free(ch->in_room->track[4]);
-		ch->in_room->track[4] = str_dup( ch->name );
-		ch->in_room->track_dir[4] = direction;
+		free( dyn->track[0] );
+		dyn->track[0] = str_dup( dyn->track[1] );
+		dyn->track_dir[0] = dyn->track_dir[1];
+		free( dyn->track[1] );
+		dyn->track[1] = str_dup( dyn->track[2] );
+		dyn->track_dir[1] = dyn->track_dir[2];
+		free( dyn->track[2] );
+		dyn->track[2] = str_dup( dyn->track[3] );
+		dyn->track_dir[2] = dyn->track_dir[3];
+		free( dyn->track[3] );
+		dyn->track[3] = str_dup( dyn->track[4] );
+		dyn->track_dir[3] = dyn->track_dir[4];
+		free( dyn->track[4] );
+		dyn->track[4] = str_dup( ch->name );
+		dyn->track_dir[4] = direction;
 	}
 	return;
 }
@@ -4157,6 +4161,7 @@ bool check_track( CHAR_DATA *ch, int direction ) {
 	char buf[MAX_INPUT_LENGTH];
 	char vict[MAX_INPUT_LENGTH];
 	int door;
+	ROOM_DYNAMIC_DATA *dyn;
 
 	if ( ch->hunting != NULL )
 		strcpy( vict, ch->hunting );
@@ -4170,11 +4175,12 @@ bool check_track( CHAR_DATA *ch, int direction ) {
 			return TRUE;
 		}
 	}
-	if ( strlen( ch->in_room->track[direction] ) < 2 ) return FALSE;
-	if ( !str_cmp( ch->in_room->track[direction], ch->name ) ) return FALSE;
-	if ( strlen( ch->hunting ) > 1 && str_cmp( ch->in_room->track[direction], ch->hunting ) ) return FALSE;
-	door = ch->in_room->track_dir[direction];
-	snprintf( buf, sizeof( buf ), "You sense the trail of %s leading $T from here.", ch->in_room->track[direction] );
+	dyn = ch->in_room->dynamic;
+	if ( !dyn || !dyn->track[direction] || strlen( dyn->track[direction] ) < 2 ) return FALSE;
+	if ( !str_cmp( dyn->track[direction], ch->name ) ) return FALSE;
+	if ( strlen( ch->hunting ) > 1 && str_cmp( dyn->track[direction], ch->hunting ) ) return FALSE;
+	door = dyn->track_dir[direction];
+	snprintf( buf, sizeof( buf ), "You sense the trail of %s leading $T from here.", dyn->track[direction] );
 	act( buf, ch, NULL, dir_name[door], TO_CHAR );
 	return TRUE;
 }
