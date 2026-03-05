@@ -244,7 +244,7 @@ void do_chaosblast( CHAR_DATA *ch, char *argument ) {
 
 	if ( ( sn = skill_lookup( "chaos blast" ) ) < 0 ) return;
 	spelltype = skill_table[sn].target;
-	level = ch->spl[spelltype] / 3;
+	level = ch_spl(ch)[spelltype] / 3;
 	act( "You concentrate your power on $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n concentrates $s power on you.", ch, NULL, victim, TO_VICT );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
@@ -362,7 +362,7 @@ void do_drowfire( CHAR_DATA *ch, char *argument ) {
 
 	if ( ( sn = skill_lookup( "drowfire" ) ) < 0 ) return;
 	spelltype = skill_table[sn].target;
-	level = (int) ( ch->spl[spelltype] * 1.5 );
+	level = (int) ( ch_spl(ch)[spelltype] * 1.5 );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_DROW_DROWFIRE_COOLDOWN ) );
 	use_mana( ch, cfg( CFG_ABILITY_DROW_DROWFIRE_MANA_COST ) );
@@ -382,7 +382,7 @@ void do_heal( CHAR_DATA *ch, char *argument ) {
 	}
 
 	use_mana( ch, cfg( CFG_ABILITY_DROW_HEAL_MANA_COST ) );
-	heal_char( ch, ch->spl[BLUE_MAGIC] * 3 );
+	heal_char( ch, ch_spl(ch)[BLUE_MAGIC] * 3 );
 	send_to_char( "Lloth heals you.\n\r", ch );
 	act( "$n is healed by Lloth.", ch, NULL, NULL, TO_ROOM );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_DROW_HEAL_COOLDOWN ) );
@@ -874,7 +874,7 @@ void do_earthshatter( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	level = ch->spl[PURPLE_MAGIC];
+	level = ch_spl(ch)[PURPLE_MAGIC];
 	use_mana( ch, cfg( CFG_ABILITY_DROW_EARTHSHATTER_MANA_COST ) );
 
 	send_to_char( "You summon the power of the underworld, shattering the earth.\n\r", ch );

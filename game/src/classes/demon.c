@@ -488,7 +488,7 @@ void do_horns( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->power[DISC_DAEM_ATTA] < cfg( CFG_ABILITY_DEMON_HORNS_LEVEL_REQ ) ) {
+	if ( IS_CLASS( ch, CLASS_DEMON ) && ch_power(ch)[DISC_DAEM_ATTA] < cfg( CFG_ABILITY_DEMON_HORNS_LEVEL_REQ ) ) {
 		if ( !IS_DEMPOWER( ch, DEM_HORNS ) && IS_CLASS( ch, CLASS_DEMON ) ) {
 			send_to_char( "You haven't been granted the gift of horns or attack is below level 4.\n\r", ch );
 			return;
@@ -579,7 +579,7 @@ void do_wings( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( !IS_DEMPOWER( ch, DEM_WINGS ) && ch->power[DISC_DAEM_ATTA] < cfg( CFG_ABILITY_DEMON_WINGS_LEVEL_REQ ) && IS_CLASS( ch, CLASS_DEMON ) ) {
+	if ( !IS_DEMPOWER( ch, DEM_WINGS ) && ch_power(ch)[DISC_DAEM_ATTA] < cfg( CFG_ABILITY_DEMON_WINGS_LEVEL_REQ ) && IS_CLASS( ch, CLASS_DEMON ) ) {
 		send_to_char( "You haven't been granted the gift of wings.\n\r", ch );
 		return;
 	}
@@ -847,7 +847,7 @@ void do_cone( CHAR_DATA *ch, char *argument ) {
 
 	if ( ( sn = skill_lookup( "cone" ) ) < 0 ) return;
 	spelltype = skill_table[sn].target;
-	level = (int) ( ch->spl[spelltype] * 1.0 );
+	level = (int) ( ch_spl(ch)[spelltype] * 1.0 );
 	level = (int) ( level * 1.0 );
 	act( "You Blast $N with a cone of fire.", ch, NULL, victim, TO_CHAR );
 	act( "$n Blasts you with a cone of fire.", ch, NULL, victim, TO_VICT );

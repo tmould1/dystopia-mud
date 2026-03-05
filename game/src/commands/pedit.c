@@ -366,10 +366,10 @@ void pedit_show( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
     snprintf( buf, sizeof( buf ), "\n\r#7[Statistics]#n\n\r" );
     send_to_char( buf, ch );
     snprintf( buf, sizeof( buf ), "  Player Kills: %d  Player Deaths: %d\n\r",
-             victim->pkill, victim->pdeath );
+             victim->pcdata->pkill, victim->pcdata->pdeath );
     send_to_char( buf, ch );
     snprintf( buf, sizeof( buf ), "  Mob Kills: %d  Mob Deaths: %d\n\r",
-             victim->mkill, victim->mdeath );
+             victim->pcdata->mkill, victim->pcdata->mdeath );
     send_to_char( buf, ch );
 
     send_to_char( "\n\r", ch );
@@ -684,11 +684,11 @@ void pedit_proficiency( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
         }
         value = atoi( arg2 );
         for ( index = 0; index < 13; index++ )
-            victim->wpn[index] = value;
+            ch_wpn(victim)[index] = value;
         for ( index = 0; index < 5; index++ )
-            victim->spl[index] = value;
+            ch_spl(victim)[index] = value;
         for ( index = 0; index < 8; index++ )
-            victim->cmbt[index] = value;
+            ch_cmbt(victim)[index] = value;
         send_to_char( "All proficiencies set.\n\r", ch );
         return;
     }
@@ -705,21 +705,21 @@ void pedit_proficiency( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
             send_to_char( "Weapon index must be 0-12.\n\r", ch );
             return;
         }
-        victim->wpn[index] = value;
+        ch_wpn(victim)[index] = value;
         send_to_char( "Weapon proficiency set.\n\r", ch );
     } else if ( !str_cmp( arg1, "spl" ) ) {
         if ( index < 0 || index > 4 ) {
             send_to_char( "Spell index must be 0-4.\n\r", ch );
             return;
         }
-        victim->spl[index] = value;
+        ch_spl(victim)[index] = value;
         send_to_char( "Spell proficiency set.\n\r", ch );
     } else if ( !str_cmp( arg1, "cmbt" ) ) {
         if ( index < 0 || index > 7 ) {
             send_to_char( "Combat index must be 0-7.\n\r", ch );
             return;
         }
-        victim->cmbt[index] = value;
+        ch_cmbt(victim)[index] = value;
         send_to_char( "Combat proficiency set.\n\r", ch );
     } else {
         send_to_char( "Unknown proficiency type. Use: wpn, spl, cmbt, all\n\r", ch );
@@ -751,7 +751,7 @@ void pedit_stance( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
         }
         value = atoi( arg2 );
         for ( index = 0; index < 24; index++ )
-            victim->stance[index] = value;
+            ch_stance(victim)[index] = value;
         send_to_char( "All stances set.\n\r", ch );
         return;
     }
@@ -768,7 +768,7 @@ void pedit_stance( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
         return;
     }
 
-    victim->stance[index] = value;
+    ch_stance(victim)[index] = value;
     send_to_char( "Stance set.\n\r", ch );
 }
 
@@ -847,7 +847,7 @@ void pedit_powers( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
         return;
     }
 
-    victim->power[index] = value;
+    ch_power(victim)[index] = value;
     send_to_char( "Power set.\n\r", ch );
 }
 
@@ -1008,16 +1008,16 @@ void pedit_statistics( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
     value = atoi( arg2 );
 
     if ( !str_cmp( arg1, "pkill" ) ) {
-        victim->pkill = value;
+        victim->pcdata->pkill = value;
         send_to_char( "Player kills set.\n\r", ch );
     } else if ( !str_cmp( arg1, "pdeath" ) ) {
-        victim->pdeath = value;
+        victim->pcdata->pdeath = value;
         send_to_char( "Player deaths set.\n\r", ch );
     } else if ( !str_cmp( arg1, "mkill" ) ) {
-        victim->mkill = value;
+        victim->pcdata->mkill = value;
         send_to_char( "Mob kills set.\n\r", ch );
     } else if ( !str_cmp( arg1, "mdeath" ) ) {
-        victim->mdeath = value;
+        victim->pcdata->mdeath = value;
         send_to_char( "Mob deaths set.\n\r", ch );
     } else if ( !str_cmp( arg1, "awins" ) ) {
         if ( IS_NPC( victim ) || !victim->pcdata ) {

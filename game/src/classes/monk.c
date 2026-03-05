@@ -38,7 +38,7 @@ void do_deathtouch( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->monkab[SPIRIT] < cfg( CFG_ABILITY_MONK_DEATHTOUCH_LEVEL_REQ ) ) {
+	if ( ch_monkab(ch)[SPIRIT] < cfg( CFG_ABILITY_MONK_DEATHTOUCH_LEVEL_REQ ) ) {
 		stc( "You need to obtain level 4 spirit to use Death touch.\n\r", ch );
 		return;
 	}
@@ -59,7 +59,7 @@ void do_deathtouch( CHAR_DATA *ch, char *argument ) {
 	act( "You place your hands on $N's head and channel negative energy into $m.", ch, NULL, victim, TO_CHAR );
 	act( "$n places $s hands on your head, and you scream in utter pain.", ch, NULL, victim, TO_VICT );
 	act( "$n places $s hands on $N's head and $N screams in pain.", ch, NULL, victim, TO_ROOM );
-	SET_BIT( victim->monkstuff, MONK_DEATH );
+	SET_BIT( victim->pcdata->monkstuff, MONK_DEATH );
 	return;
 }
 
@@ -74,7 +74,7 @@ void do_healingtouch( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->monkab[SPIRIT] < cfg( CFG_ABILITY_MONK_HEALINGTOUCH_LEVEL_REQ ) ) {
+	if ( ch_monkab(ch)[SPIRIT] < cfg( CFG_ABILITY_MONK_HEALINGTOUCH_LEVEL_REQ ) ) {
 		stc( "You need to obtain level 3 spirit to use Healing touch.\n\r", ch );
 		return;
 	}
@@ -91,19 +91,19 @@ void do_healingtouch( CHAR_DATA *ch, char *argument ) {
 	if ( victim == ch ) {
 		stc( "You focus your energy, and magical sparks leap out of your body.\n\r", ch );
 		act( "$n concentrates, and magical sparks leap out of $s body.", ch, NULL, NULL, TO_ROOM );
-		SET_BIT( ch->monkstuff, MONK_HEAL );
+		SET_BIT( ch->pcdata->monkstuff, MONK_HEAL );
 		return;
 	}
 	act( "You place your hands on $N's head and focus your energy on $M.", ch, NULL, victim, TO_CHAR );
 	act( "$n places $s hands on your head and you feel warmer.", ch, NULL, victim, TO_VICT );
 	act( "$n places $s hands on $N's head and concentrates.", ch, NULL, victim, TO_ROOM );
-	SET_BIT( victim->monkstuff, MONK_HEAL );
+	SET_BIT( victim->pcdata->monkstuff, MONK_HEAL );
 	return;
 }
 
 void do_spiritpower( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
-	if ( !IS_CLASS( ch, CLASS_MONK ) || ch->monkab[BODY] < cfg( CFG_ABILITY_MONK_SPIRITPOWER_LEVEL_REQ ) ) {
+	if ( !IS_CLASS( ch, CLASS_MONK ) || ch_monkab(ch)[BODY] < cfg( CFG_ABILITY_MONK_SPIRITPOWER_LEVEL_REQ ) ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
@@ -132,7 +132,7 @@ void do_relax( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->chi[CURRENT] < 1 ) {
+	if ( ch_chi(ch)[CURRENT] < 1 ) {
 		stc( "You are already totally relaxed.\n\r", ch );
 		return;
 	}
@@ -140,7 +140,7 @@ void do_relax( CHAR_DATA *ch, char *argument ) {
 		stc( "You cannot relax your ch'i while fighting!\n\r", ch );
 		return;
 	}
-	ch->chi[CURRENT]--;
+	ch_chi(ch)[CURRENT]--;
 	WAIT_STATE( ch, cfg( CFG_ABILITY_MONK_RELAX_COOLDOWN ) );
 	stc( "You breathe deeply and relax your focus.\n\r", ch );
 	act( "$n looks more relaxed.", ch, NULL, NULL, TO_ROOM );
@@ -160,46 +160,46 @@ void do_chi( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->chi[CURRENT] >= ch->chi[MAXIMUM] ) {
-		if ( ch->chi[MAXIMUM] == 0 )
+	if ( ch_chi(ch)[CURRENT] >= ch_chi(ch)[MAXIMUM] ) {
+		if ( ch_chi(ch)[MAXIMUM] == 0 )
 			stc( "You have not gained any control of your ch'i.\n\r", ch );
 		else {
-			snprintf( buf, sizeof( buf ), "You cannot focus your ch'i past a level of %d.", ch->chi[MAXIMUM] );
+			snprintf( buf, sizeof( buf ), "You cannot focus your ch'i past a level of %d.", ch_chi(ch)[MAXIMUM] );
 			stc( buf, ch );
 		}
 		return;
 	}
-	if ( ch->move < cfg( CFG_ABILITY_MONK_CHI_MOVE_COST_BASE ) + ( ( ch->chi[CURRENT] + 1 ) * cfg( CFG_ABILITY_MONK_CHI_MOVE_COST_PER_LEVEL ) ) ) {
+	if ( ch->move < cfg( CFG_ABILITY_MONK_CHI_MOVE_COST_BASE ) + ( ( ch_chi(ch)[CURRENT] + 1 ) * cfg( CFG_ABILITY_MONK_CHI_MOVE_COST_PER_LEVEL ) ) ) {
 		stc( "You are too exhausted.\n\r", ch );
 		return;
 	}
-	if ( ch->chi[CURRENT] == 0 ) {
+	if ( ch_chi(ch)[CURRENT] == 0 ) {
 		stc( "Your body flickers with energy.\n\r", ch );
 		act( "$n's body flickers with energy.", ch, NULL, NULL, TO_ROOM );
 	}
-	if ( ch->chi[CURRENT] == 1 ) {
+	if ( ch_chi(ch)[CURRENT] == 1 ) {
 		stc( "Your body pulses with energy.\n\r", ch );
 		act( "$n's body pulses with energy.", ch, NULL, NULL, TO_ROOM );
 	}
-	if ( ch->chi[CURRENT] == 2 ) {
+	if ( ch_chi(ch)[CURRENT] == 2 ) {
 		stc( "Your body glows with blue energy.\n\r", ch );
 		act( "$n's body glows with blue energy.", ch, NULL, NULL, TO_ROOM );
 	}
-	if ( ch->chi[CURRENT] == 3 ) {
+	if ( ch_chi(ch)[CURRENT] == 3 ) {
 		stc( "Your body glows bright red.\n\r", ch );
 		act( "$n's body glows bright red.", ch, NULL, NULL, TO_ROOM );
 	}
-	if ( ch->chi[CURRENT] == 4 ) {
+	if ( ch_chi(ch)[CURRENT] == 4 ) {
 		stc( "Your body flashes with power.\n\r", ch );
 		act( "$n's body flashes with power.", ch, NULL, NULL, TO_ROOM );
 	}
-	if ( ch->chi[CURRENT] == 5 ) {
+	if ( ch_chi(ch)[CURRENT] == 5 ) {
 		stc( "Your body emits sparks of energy as you fully focus your ch'i.\n\r", ch );
 		act( "$n's body emits sparks of energy.", ch, NULL, NULL, TO_ROOM );
 	}
 	WAIT_STATE( ch, cfg( CFG_ABILITY_MONK_CHI_COOLDOWN ) );
-	ch->chi[CURRENT]++;
-	use_move( ch, ch->chi[CURRENT] * cfg( CFG_ABILITY_MONK_CHI_MOVE_COST_PER_LEVEL ) );
+	ch_chi(ch)[CURRENT]++;
+	use_move( ch, ch_chi(ch)[CURRENT] * cfg( CFG_ABILITY_MONK_CHI_MOVE_COST_PER_LEVEL ) );
 	return;
 }
 
@@ -531,7 +531,7 @@ void do_adamantium( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->monkab[BODY] < cfg( CFG_ABILITY_MONK_ADAMANTIUM_LEVEL_REQ ) ) {
+	if ( ch_monkab(ch)[BODY] < cfg( CFG_ABILITY_MONK_ADAMANTIUM_LEVEL_REQ ) ) {
 		send_to_char( "You have not learned this ability yet.\n\r", ch );
 		return;
 	}

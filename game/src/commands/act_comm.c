@@ -575,13 +575,13 @@ void do_pray( CHAR_DATA *ch, char *argument ) {
 		ch->hit = ch->max_hit;
 		ch->mana = ch->max_mana;
 		ch->move = ch->max_move;
-		ch->loc_hp[0] = 0;
-		ch->loc_hp[1] = 0;
-		ch->loc_hp[2] = 0;
-		ch->loc_hp[3] = 0;
-		ch->loc_hp[4] = 0;
-		ch->loc_hp[5] = 0;
-		ch->loc_hp[6] = 0;
+		ch_loc_hp(ch)[0] = 0;
+		ch_loc_hp(ch)[1] = 0;
+		ch_loc_hp(ch)[2] = 0;
+		ch_loc_hp(ch)[3] = 0;
+		ch_loc_hp(ch)[4] = 0;
+		ch_loc_hp(ch)[5] = 0;
+		ch_loc_hp(ch)[6] = 0;
 		update_pos( ch );
 	}
 	if ( IS_NPC( ch ) || ( !IS_CLASS( ch, CLASS_DEMON ) && !IS_IMMORTAL( ch ) ) )
@@ -853,7 +853,7 @@ void do_tell( CHAR_DATA *ch, char *argument ) {
 	act( poly, ch, argument, victim, TO_VICT );
 
 	victim->position = position;
-	victim->reply = ch;
+	victim->pcdata->reply = ch;
 	mcmp_channel_notify( victim, CHANNEL_TELL );
 
 	return;
@@ -907,7 +907,7 @@ void do_reply( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ( victim = ch->reply ) == NULL ) {
+	if ( ( victim = ch->pcdata->reply ) == NULL ) {
 		send_to_char( "They aren't here.\n\r", ch );
 		return;
 	}
@@ -933,7 +933,7 @@ void do_reply( CHAR_DATA *ch, char *argument ) {
 	act( poly, ch, argument, victim, TO_VICT );
 
 	victim->position = position;
-	victim->reply = ch;
+	victim->pcdata->reply = ch;
 
 	return;
 }
@@ -1380,7 +1380,7 @@ void do_command( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DOMI] < 1 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+	if ( ch_power(ch)[DISC_VAMP_DOMI] < 1 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 		send_to_char( "You must obtain at least level 1 in Dominate to use Command.\n\r", ch );
 		return;
 	}
@@ -1388,7 +1388,7 @@ void do_command( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You need level 4 necromancry to use command.\n\r", ch );
 		return;
 	}
-	if ( ch->spl[RED_MAGIC] < 1 ) {
+	if ( ch_spl(ch)[RED_MAGIC] < 1 ) {
 		send_to_char( "Your mind is too weak.\n\r", ch );
 		return;
 	}
@@ -1413,11 +1413,11 @@ void do_command( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DOMI] > 2 )
+	if ( ch_power(ch)[DISC_VAMP_DOMI] > 2 )
 		awe = 50;
-	else if ( ch->power[DISC_VAMP_DOMI] > 3 )
+	else if ( ch_power(ch)[DISC_VAMP_DOMI] > 3 )
 		awe = 75;
-	else if ( ch->power[DISC_VAMP_DOMI] > 4 )
+	else if ( ch_power(ch)[DISC_VAMP_DOMI] > 4 )
 		awe = 100;
 	else
 		awe = 25;
@@ -1431,7 +1431,7 @@ void do_command( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DOMI] > 1 ) {
+	if ( ch_power(ch)[DISC_VAMP_DOMI] > 1 ) {
 		snprintf( buffy, sizeof( buffy ), "%s %s", arg2, argument );
 		if ( IS_NPC( victim ) )
 			snprintf( buf, sizeof( buf ), "I think %s wants to %s", victim->short_descr, buffy );
@@ -1450,7 +1450,7 @@ void do_command( CHAR_DATA *ch, char *argument ) {
 		do_say( ch, buf );
 	}
 
-	if ( IS_NPC( victim ) && ( victim->level >= awe * ch->spl[RED_MAGIC] * 2 || victim->level > 500 ) ) {
+	if ( IS_NPC( victim ) && ( victim->level >= awe * ch_spl(ch)[RED_MAGIC] * 2 || victim->level > 500 ) ) {
 		act( "You shake off $N's suggestion.", victim, NULL, ch, TO_CHAR );
 		act( "$n shakes off $N's suggestion.", victim, NULL, ch, TO_NOTVICT );
 		act( "$n shakes off your suggestion.", victim, NULL, ch, TO_VICT );
@@ -1458,7 +1458,7 @@ void do_command( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	else if ( victim->spl[BLUE_MAGIC] >= ( ch->spl[RED_MAGIC] / 2 ) ) {
+	else if ( ch_spl(victim)[BLUE_MAGIC] >= ( ch_spl(ch)[RED_MAGIC] / 2 ) ) {
 		act( "You shake off $N's suggestion.", victim, NULL, ch, TO_CHAR );
 		act( "$n shakes off $N's suggestion.", victim, NULL, ch, TO_NOTVICT );
 		act( "$n shakes off your suggestion.", victim, NULL, ch, TO_VICT );
@@ -1470,7 +1470,7 @@ void do_command( CHAR_DATA *ch, char *argument ) {
 	act( "$n blinks in confusion.", victim, NULL, NULL, TO_ROOM );
 	strcpy( buf, "Yes, you're right, I do..." );
 	do_say( victim, buf );
-	if ( ch->power[DISC_VAMP_DOMI] > 1 )
+	if ( ch_power(ch)[DISC_VAMP_DOMI] > 1 )
 		interpret( victim, buffy );
 	else
 		interpret( victim, arg2 );

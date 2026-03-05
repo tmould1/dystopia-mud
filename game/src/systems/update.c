@@ -197,11 +197,11 @@ void char_update( void ) {
 		 * Tick Timers and other PC only stuff
 		 */
 		if ( !IS_NPC( ch ) ) {
-			if ( ch->tick_timer[TIMER_ENTOMB] == 1 )
+			if ( ch->pcdata->tick_timer[TIMER_ENTOMB] == 1 )
 				send_to_char( "You can use entomb again.\n\r", ch );
 
 			for ( i = 0; i < MAX_TIMER; i++ )
-				if ( ch->tick_timer[i] > 0 ) ch->tick_timer[i]--;
+				if ( ch->pcdata->tick_timer[i] > 0 ) ch->pcdata->tick_timer[i]--;
 
 			/*
 			 * void, autosave, time bonus, etc
@@ -247,12 +247,12 @@ void char_update( void ) {
 		 * Update class stuff
 		 */
 		if ( ch->fighting == NULL && !IS_NPC( ch ) ) {
-			if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch->gnosis[GMAXIMUM] > ch->gnosis[GCURRENT] ) {
+			if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch_gnosis(ch)[GMAXIMUM] > ch_gnosis(ch)[GCURRENT] ) {
 				if ( ch->position <= POS_SLEEPING )
-					ch->gnosis[GCURRENT] += number_range( 2, 3 );
+					ch_gnosis(ch)[GCURRENT] += number_range( 2, 3 );
 				else if ( ch->position <= POS_RESTING )
-					ch->gnosis[GCURRENT] += number_range( 1, 3 );
-				if ( ch->gnosis[GCURRENT] > ch->gnosis[GMAXIMUM] ) ch->gnosis[GCURRENT] = ch->gnosis[GMAXIMUM];
+					ch_gnosis(ch)[GCURRENT] += number_range( 1, 3 );
+				if ( ch_gnosis(ch)[GCURRENT] > ch_gnosis(ch)[GMAXIMUM] ) ch_gnosis(ch)[GCURRENT] = ch_gnosis(ch)[GMAXIMUM];
 			}
 			if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->beast > 0 && ch->pcdata->condition[COND_THIRST] <= 15 ) {
 				act( "You bare your fangs and scream in rage from lack of blood.", ch, NULL, NULL, TO_CHAR );
@@ -295,7 +295,7 @@ void char_update( void ) {
 		/*
 		 * Dealing damage due to missling limbs, etc.
 		 */
-		if ( ch->loc_hp[6] > 0 && !is_obj && ch->in_room != NULL ) {
+		if ( ch_loc_hp(ch)[6] > 0 && !is_obj && ch->in_room != NULL ) {
 			int dam = 0;
 
 			if ( IS_BLEEDING( ch, BLEEDING_HEAD ) ) {
@@ -451,13 +451,102 @@ void char_update( void ) {
 void mobile_update( void ) {
 	CHAR_DATA *ch;
 	CHAR_DATA *ch_next;
+	DESCRIPTOR_DATA *d;
 	EXIT_DATA *pexit;
 	int door;
 
 	PROFILE_START( "mobile_update" );
 
-	/* Examine all mobs. */
-	LIST_FOR_EACH_SAFE( ch, ch_next, &g_characters, CHAR_DATA, char_node ) {
+	/* --- Player updates (iterate connected descriptors only) --- */
+	PROFILE_START( "mob_player_upd" );
+	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
+		ch = d->character;
+		if ( !ch || !ch->in_room || IS_NPC( ch ) ) continue;
+
+		if ( ch->hunting != NULL && ch->hunting[0] != '\0' && strlen( ch->hunting ) > 1 ) {
+			check_hunt( ch );
+			continue;
+		}
+
+		update_morted_timer( ch );
+		update_sit_safe_counter( ch );
+		update_drunks( ch );
+		if ( ch->level < 7 && IS_HERO( ch ) ) update_safe_powers( ch );
+		if ( IS_HERO( ch ) && ch->hit > 0 && !IS_SET( ch->extra, EXTRA_AFK ) ) {
+			if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+				if ( ch->rage > 0 )
+					update_vampire_regen( ch );
+				else if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) )
+					update_arti_regen( ch );
+				update_vampire( ch );
+			}
+			if ( IS_CLASS( ch, CLASS_DROID ) ) {
+				update_drider( ch );
+				if ( ch->pcdata->powers[CYBORG_BODY] > 5 )
+					update_cyborg( ch );
+				else if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) )
+					update_arti_regen( ch );
+			}
+			if ( IS_CLASS( ch, CLASS_ANGEL ) ) {
+				if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
+				update_angel( ch );
+			}
+			if ( IS_CLASS( ch, CLASS_TANARRI ) ) {
+				if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
+				update_tanarri( ch );
+			}
+			if ( IS_CLASS( ch, CLASS_LICH ) ) {
+				if ( ch->pcdata->powers[LIFE_LORE] > 0 )
+					update_lich_regen( ch );
+				else if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) )
+					update_arti_regen( ch );
+				update_lich( ch );
+			}
+			if ( IS_CLASS( ch, CLASS_MONK ) ) update_monk( ch );
+			if ( IS_CLASS( ch, CLASS_NINJA ) ) update_ninja( ch );
+			if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) ) update_knight( ch );
+			if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) update_werewolf( ch );
+			if ( IS_CLASS( ch, CLASS_DEMON ) ) {
+				update_demon( ch );
+				if ( IS_SET( ch->warp, WARP_REGENERATE ) )
+					update_demon_regen( ch );
+				else if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) )
+					update_arti_regen( ch );
+			}
+			if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) update_shapeshifter( ch );
+			if ( IS_CLASS( ch, CLASS_DROW ) ) {
+				update_drow( ch );
+				if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
+			}
+			if ( IS_CLASS( ch, CLASS_SAMURAI ) ) update_highlander( ch );
+			if ( IS_CLASS( ch, CLASS_MAGE ) ) {
+				update_mage( ch );
+				if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
+			}
+			if ( IS_CLASS( ch, CLASS_DIRGESINGER ) ) update_dirgesinger( ch );
+			if ( IS_CLASS( ch, CLASS_SIREN ) ) update_siren( ch );
+			if ( IS_CLASS( ch, CLASS_PSION ) ) update_psion( ch );
+			if ( IS_CLASS( ch, CLASS_MINDFLAYER ) ) update_mindflayer( ch );
+			if ( IS_CLASS( ch, CLASS_ARTIFICER ) ) update_artificer( ch );
+			if ( IS_CLASS( ch, CLASS_MECHANIST ) ) update_mechanist( ch );
+			if ( IS_CLASS( ch, CLASS_CULTIST ) ) update_cultist( ch );
+			if ( IS_CLASS( ch, CLASS_VOIDBORN ) ) update_voidborn( ch );
+			if ( IS_CLASS( ch, CLASS_CHRONOMANCER ) ) update_chronomancer( ch );
+			if ( IS_CLASS( ch, CLASS_PARADOX ) ) update_paradox( ch );
+			if ( IS_CLASS( ch, CLASS_SHAMAN ) ) update_shaman( ch );
+			if ( IS_CLASS( ch, CLASS_SPIRITLORD ) ) update_spiritlord( ch );
+			if ( ch->class == 0 && IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
+		} else {
+			heal_char( ch, number_range( 1, 5 ) );
+			update_pos( ch );
+			if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) && ch->hit > 0 )
+				update_arti_regen( ch );
+		}
+	}
+	PROFILE_END( "mob_player_upd" );
+
+	/* --- NPC AI updates (iterate NPC list only) --- */
+	LIST_FOR_EACH_SAFE( ch, ch_next, &g_npcs, CHAR_DATA, npc_node ) {
 
 		if ( ch->in_room == NULL ) continue;
 
@@ -465,141 +554,62 @@ void mobile_update( void ) {
 			check_hunt( ch );
 			continue;
 		}
-		if ( !IS_NPC( ch ) ) {
-			PROFILE_START( "mob_player_upd" );
-			update_morted_timer( ch );
-			update_sit_safe_counter( ch );
-			update_drunks( ch );
-			if ( ch->level < 7 && IS_HERO( ch ) ) update_safe_powers( ch );
-			if ( IS_HERO( ch ) && ch->hit > 0 && !IS_SET( ch->extra, EXTRA_AFK ) ) {
-				if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-					if ( ch->rage > 0 )
-						update_vampire_regen( ch );
-					else if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) )
-						update_arti_regen( ch );
-					update_vampire( ch );
-				}
-				if ( IS_CLASS( ch, CLASS_DROID ) ) {
-					update_drider( ch );
-					if ( ch->pcdata->powers[CYBORG_BODY] > 5 )
-						update_cyborg( ch );
-					else if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) )
-						update_arti_regen( ch );
-				}
-				if ( IS_CLASS( ch, CLASS_ANGEL ) ) {
-					if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
-					update_angel( ch );
-				}
-				if ( IS_CLASS( ch, CLASS_TANARRI ) ) {
-					if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
-					update_tanarri( ch );
-				}
-				if ( IS_CLASS( ch, CLASS_LICH ) ) {
-					if ( ch->pcdata->powers[LIFE_LORE] > 0 )
-						update_lich_regen( ch );
-					else if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) )
-						update_arti_regen( ch );
-					update_lich( ch );
-				}
-				if ( IS_CLASS( ch, CLASS_MONK ) ) update_monk( ch );
-				if ( IS_CLASS( ch, CLASS_NINJA ) ) update_ninja( ch );
-				if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) ) update_knight( ch );
-				if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) update_werewolf( ch );
-				if ( IS_CLASS( ch, CLASS_DEMON ) ) {
-					update_demon( ch );
-					if ( IS_SET( ch->warp, WARP_REGENERATE ) )
-						update_demon_regen( ch );
-					else if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) )
-						update_arti_regen( ch );
-				}
-				if ( IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) update_shapeshifter( ch );
-				if ( IS_CLASS( ch, CLASS_DROW ) ) {
-					update_drow( ch );
-					if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
-				}
-				if ( IS_CLASS( ch, CLASS_SAMURAI ) ) update_highlander( ch );
-				if ( IS_CLASS( ch, CLASS_MAGE ) ) {
-					update_mage( ch );
-					if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
-				}
-				if ( IS_CLASS( ch, CLASS_DIRGESINGER ) ) update_dirgesinger( ch );
-				if ( IS_CLASS( ch, CLASS_SIREN ) ) update_siren( ch );
-				if ( IS_CLASS( ch, CLASS_PSION ) ) update_psion( ch );
-				if ( IS_CLASS( ch, CLASS_MINDFLAYER ) ) update_mindflayer( ch );
-				if ( IS_CLASS( ch, CLASS_ARTIFICER ) ) update_artificer( ch );
-				if ( IS_CLASS( ch, CLASS_MECHANIST ) ) update_mechanist( ch );
-				if ( IS_CLASS( ch, CLASS_CULTIST ) ) update_cultist( ch );
-				if ( IS_CLASS( ch, CLASS_VOIDBORN ) ) update_voidborn( ch );
-				if ( IS_CLASS( ch, CLASS_CHRONOMANCER ) ) update_chronomancer( ch );
-				if ( IS_CLASS( ch, CLASS_PARADOX ) ) update_paradox( ch );
-				if ( IS_CLASS( ch, CLASS_SHAMAN ) ) update_shaman( ch );
-				if ( IS_CLASS( ch, CLASS_SPIRITLORD ) ) update_spiritlord( ch );
-				if ( ch->class == 0 && IS_ITEMAFF( ch, ITEMA_REGENERATE ) ) update_arti_regen( ch );
-			} else {
-				heal_char( ch, number_range( 1, 5 ) );
-				update_pos( ch );
-				if ( IS_ITEMAFF( ch, ITEMA_REGENERATE ) && ch->hit > 0 )
-					update_arti_regen( ch );
-			}
-			PROFILE_END( "mob_player_upd" );
-		} else // This is for the mobs
-		{
-			PROFILE_START( "mob_npc_ai" );
-			if ( IS_AFFECTED( ch, AFF_CHARM ) ) {
-				PROFILE_END( "mob_npc_ai" );
-				continue;
-			}
-			PROFILE_START( "script_tick" );
-			if ( script_trigger_tick( ch ) ) {
-				PROFILE_END( "script_tick" );
-				PROFILE_END( "mob_npc_ai" );
-				continue;
-			}
-			PROFILE_END( "script_tick" );
-			if ( ch->position != POS_STANDING ) {
-				do_stand( ch, "" );
-				PROFILE_END( "mob_npc_ai" );
-				continue;
-			}
-			if ( IS_SET( ch->act, ACT_SCAVENGER ) && !list_empty( &ch->in_room->objects ) && number_bits( 2 ) == 0 ) {
-				OBJ_DATA *obj;
-				OBJ_DATA *obj_best = 0;
-				int max = 1;
-				LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
-					if ( CAN_WEAR( obj, ITEM_TAKE ) && obj->cost > max ) {
-						obj_best = obj;
-						max = obj->cost;
-					}
-				}
-				if ( obj_best ) {
-					obj_from_room( obj_best );
-					obj_to_char( obj_best, ch );
-					/* Only show messages if players can see */
-					if ( ch->in_room->area->nplayer > 0 ) {
-						act( "$n picks $p up.", ch, obj_best, NULL, TO_ROOM );
-						act( "You pick $p up.", ch, obj_best, NULL, TO_CHAR );
-					}
-				}
-			}
-			/* Random movement */
-			if ( !IS_SET( ch->act, ACT_SENTINEL ) && ( door = number_bits( 5 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) && ( ch->hunting == NULL || strlen( ch->hunting ) < 2 ) && ( ( !IS_SET( ch->act, ACT_STAY_AREA ) && ch->level < 900 ) || pexit->to_room->area == ch->in_room->area ) ) {
-				move_char( ch, door );
-			}
-			if ( ch->hit < ch->max_hit / 2 && ( door = number_bits( 3 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_AFFECTED( ch, AFF_WEBBED ) && ch->level < 900 && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) ) {
-				CHAR_DATA *rch;
-				bool found;
-				found = FALSE;
-				LIST_FOR_EACH( rch, &pexit->to_room->characters, CHAR_DATA, room_node ) {
-					if ( !IS_NPC( rch ) ) {
-						found = TRUE;
-						break;
-					}
-				}
-				if ( !found )
-					move_char( ch, door );
-			}
+
+		PROFILE_START( "mob_npc_ai" );
+		if ( IS_AFFECTED( ch, AFF_CHARM ) ) {
 			PROFILE_END( "mob_npc_ai" );
+			continue;
 		}
+		PROFILE_START( "script_tick" );
+		if ( script_trigger_tick( ch ) ) {
+			PROFILE_END( "script_tick" );
+			PROFILE_END( "mob_npc_ai" );
+			continue;
+		}
+		PROFILE_END( "script_tick" );
+		if ( ch->position != POS_STANDING ) {
+			do_stand( ch, "" );
+			PROFILE_END( "mob_npc_ai" );
+			continue;
+		}
+		if ( IS_SET( ch->act, ACT_SCAVENGER ) && !list_empty( &ch->in_room->objects ) && number_bits( 2 ) == 0 ) {
+			OBJ_DATA *obj;
+			OBJ_DATA *obj_best = 0;
+			int max = 1;
+			LIST_FOR_EACH( obj, &ch->in_room->objects, OBJ_DATA, room_node ) {
+				if ( CAN_WEAR( obj, ITEM_TAKE ) && obj->cost > max ) {
+					obj_best = obj;
+					max = obj->cost;
+				}
+			}
+			if ( obj_best ) {
+				obj_from_room( obj_best );
+				obj_to_char( obj_best, ch );
+				/* Only show messages if players can see */
+				if ( ch->in_room->area->nplayer > 0 ) {
+					act( "$n picks $p up.", ch, obj_best, NULL, TO_ROOM );
+					act( "You pick $p up.", ch, obj_best, NULL, TO_CHAR );
+				}
+			}
+		}
+		/* Random movement */
+		if ( !IS_SET( ch->act, ACT_SENTINEL ) && ( door = number_bits( 5 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) && ( ch->hunting == NULL || strlen( ch->hunting ) < 2 ) && ( ( !IS_SET( ch->act, ACT_STAY_AREA ) && ch->level < 900 ) || pexit->to_room->area == ch->in_room->area ) ) {
+			move_char( ch, door );
+		}
+		if ( ch->hit < ch->max_hit / 2 && ( door = number_bits( 3 ) ) <= 5 && ( pexit = ch->in_room->exit[door] ) != NULL && pexit->to_room != NULL && !IS_AFFECTED( ch, AFF_WEBBED ) && ch->level < 900 && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) ) {
+			CHAR_DATA *rch;
+			bool found;
+			found = FALSE;
+			LIST_FOR_EACH( rch, &pexit->to_room->characters, CHAR_DATA, room_node ) {
+				if ( !IS_NPC( rch ) ) {
+					found = TRUE;
+					break;
+				}
+			}
+			if ( !found )
+				move_char( ch, door );
+		}
+		PROFILE_END( "mob_npc_ai" );
 	}
 
 	PROFILE_END( "mobile_update" );
@@ -650,7 +660,7 @@ void weather_update( void ) {
 		LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 			char_up = FALSE;
 			if ( ( d->connected == CON_PLAYING || d->connected == CON_EDITING ) && ( ch = d->character ) != NULL && !IS_NPC( ch ) ) {
-				if ( ch->fighting == NULL && !IS_SET( ch->newbits, NEW_NATURAL ) && ch->monkab[SPIRIT] >= 2 )
+				if ( ch->fighting == NULL && !IS_SET( ch->newbits, NEW_NATURAL ) && ch_monkab(ch)[SPIRIT] >= 2 )
 					SET_BIT( ch->newbits, NEW_NATURAL );
 
 				if ( profile_stats.tick_multiplier <= 1 ) {
@@ -696,15 +706,15 @@ void weather_update( void ) {
 
 					if ( IS_SET( ch->extra, EXTRA_BAAL ) ) {
 						send_to_char( "The spirit of Baal escapes you.\n\r", ch );
-						ch->power[DISC_VAMP_POTE] -= 2;
-						ch->power[DISC_VAMP_CELE] -= 2;
-						ch->power[DISC_VAMP_FORT] -= 2;
+						ch_power(ch)[DISC_VAMP_POTE] -= 2;
+						ch_power(ch)[DISC_VAMP_CELE] -= 2;
+						ch_power(ch)[DISC_VAMP_FORT] -= 2;
 						REMOVE_BIT( ch->extra, EXTRA_BAAL );
 					}
 
 					if ( IS_EXTRA( ch, EXTRA_FLASH ) ) {
 						send_to_char( "Your speed slows.\n\r", ch );
-						ch->power[DISC_VAMP_CELE] -= 2;
+						ch_power(ch)[DISC_VAMP_CELE] -= 2;
 						REMOVE_BIT( ch->extra, EXTRA_FLASH );
 					}
 				}
@@ -824,9 +834,11 @@ const char *wall[MAX_WALL + 1] =
 void room_update( void ) {
 	int i;
 	char buf[MAX_STRING_LENGTH];
+	AREA_DATA *area;
 	ROOM_INDEX_DATA *room;
 
-	for ( room = room_list; room != NULL; room = room->next_room ) {
+	LIST_FOR_EACH( area, &g_areas, AREA_DATA, node ) {
+	for ( room = area->room_first; room != NULL; room = room->next_in_area ) {
 
 		if ( RTIMER( room, RTIMER_WALL_NORTH ) == 1 && room->exit[DIR_NORTH] != NULL && is_wall( room->exit[DIR_NORTH] ) != 0 ) {
 			snprintf( buf, sizeof( buf ), "The %s slowly fades away.", wall[is_wall( room->exit[DIR_NORTH] )] );
@@ -900,6 +912,7 @@ void room_update( void ) {
 
 		for ( i = 0; i < MAX_RTIMER; i++ )
 			room->tick_timer[i] = UMAX( room->tick_timer[i] - 1, 0 );
+	}
 	}
 
 	return;
@@ -1016,7 +1029,7 @@ void embrace_update( void ) {
 		/* Fix for embracing mobs by Shakti.					*/
 
 		if ( IS_NPC( victim ) ) {
-			if ( victim->level > 75 * ch->spl[2] ) {
+			if ( victim->level > 75 * ch_spl(ch)[2] ) {
 				stop_embrace( ch, victim );
 				send_to_char( "You cannot embrace someone so powerful!\n\r", ch );
 				return;
@@ -1486,8 +1499,8 @@ void update_monk( CHAR_DATA *ch ) {
 			werewolf_regen( ch, 1 );
 	}
 	if ( !IS_ITEMAFF( ch, ITEMA_MONKCHI ) ) {
-		if ( ch->position != POS_FIGHTING && ch->chi[CURRENT] > 0 && number_range( 1, 4 ) == 2 ) {
-			ch->chi[CURRENT]--;
+		if ( ch->position != POS_FIGHTING && ch_chi(ch)[CURRENT] > 0 && number_range( 1, 4 ) == 2 ) {
+			ch_chi(ch)[CURRENT]--;
 			stc( "You feel more relaxed.\n\r", ch );
 			act( "$n looks more relaxed.", ch, NULL, NULL, TO_ROOM );
 		}
@@ -1529,7 +1542,7 @@ void update_werewolf( CHAR_DATA *ch ) {
 	if ( !IS_ITEMAFF( ch, ITEMA_RAGER ) ) {
 		if ( ch->position == POS_FIGHTING ) {
 			if ( ch->rage < 200 ) ch->rage += number_range( 5, 10 );
-			if ( ch->rage < 200 && ch->power[DISC_WERE_WOLF] > 3 ) ch->rage += number_range( 5, 10 );
+			if ( ch->rage < 200 && ch_power(ch)[DISC_WERE_WOLF] > 3 ) ch->rage += number_range( 5, 10 );
 			if ( !IS_SET( ch->special, SPC_WOLFMAN ) && ch->rage >= 100 ) do_werewolf( ch, "" );
 		} else if ( ch->rage > 0 ) {
 			ch->rage -= 1;
@@ -1571,7 +1584,7 @@ void update_highlander( CHAR_DATA *ch ) {
 			werewolf_regen( ch, 1 );
 	}
 	if ( get_eq_char( ch, WEAR_WIELD ) != NULL ) {
-		int wpn = ( ch->wpn[1] / 3 );
+		int wpn = ( ch_wpn(ch)[1] / 3 );
 		modify_vitals( ch, wpn, wpn, wpn );
 	}
 	if ( ch->fighting == NULL && ch->pcdata->powers[SAMURAI_FOCUS] > 0 )
@@ -1602,10 +1615,10 @@ void update_arti_regen( CHAR_DATA *ch ) {
 }
 
 void regen_limb( CHAR_DATA *ch ) {
-	if ( ch->loc_hp[6] > 0 ) {
+	if ( ch_loc_hp(ch)[6] > 0 ) {
 		int sn = skill_lookup( "clot" );
 		( *skill_table[sn].spell_fun )( sn, ch->level, ch, ch );
-	} else if ( ( ch->loc_hp[0] + ch->loc_hp[1] + ch->loc_hp[2] + ch->loc_hp[3] + ch->loc_hp[4] + ch->loc_hp[5] ) != 0 )
+	} else if ( ( ch_loc_hp(ch)[0] + ch_loc_hp(ch)[1] + ch_loc_hp(ch)[2] + ch_loc_hp(ch)[3] + ch_loc_hp(ch)[4] + ch_loc_hp(ch)[5] ) != 0 )
 		reg_mend( ch );
 	return;
 }
@@ -1620,13 +1633,13 @@ void werewolf_regen( CHAR_DATA *ch, int multiplier ) {
 	if ( IS_NPC( ch ) )
 		return;
 	else if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ( ch->position == POS_SLEEPING || ch->position == POS_FIGHTING ) ) {
-		if ( ch->position == POS_SLEEPING && ch->power[DISC_WERE_BEAR] > 3 ) {
+		if ( ch->position == POS_SLEEPING && ch_power(ch)[DISC_WERE_BEAR] > 3 ) {
 			min += 1200;
 			max += 1700;
 			hit_gain += number_range( min, max );
 			mana_gain += number_range( min / 2, max / 2 );
 			move_gain += number_range( min, max );
-		} else if ( ch->position == POS_FIGHTING && ch->power[DISC_WERE_BEAR] > 3 ) {
+		} else if ( ch->position == POS_FIGHTING && ch_power(ch)[DISC_WERE_BEAR] > 3 ) {
 			min += 275;
 			max += 475;
 			hit_gain += number_range( min, max );

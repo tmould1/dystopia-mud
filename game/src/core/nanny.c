@@ -40,51 +40,51 @@ static void clear_foreign_disciplines( CHAR_DATA *ch ) {
 		return;
 
 	if ( !IS_CLASS( ch, CLASS_DEMON ) ) {
-		ch->power[DISC_DAEM_ATTA] = -2;
-		ch->power[DISC_DAEM_IMMU] = -2;
-		ch->power[DISC_DAEM_TEMP] = -2;
-		ch->power[DISC_DAEM_CORR] = -2;
-		ch->power[DISC_DAEM_HELL] = -2;
-		ch->power[DISC_DAEM_GELU] = -2;
-		ch->power[DISC_DAEM_MORP] = -2;
-		ch->power[DISC_DAEM_NETH] = -2;
-		ch->power[DISC_DAEM_DISC] = -2;
+		ch_power(ch)[DISC_DAEM_ATTA] = -2;
+		ch_power(ch)[DISC_DAEM_IMMU] = -2;
+		ch_power(ch)[DISC_DAEM_TEMP] = -2;
+		ch_power(ch)[DISC_DAEM_CORR] = -2;
+		ch_power(ch)[DISC_DAEM_HELL] = -2;
+		ch_power(ch)[DISC_DAEM_GELU] = -2;
+		ch_power(ch)[DISC_DAEM_MORP] = -2;
+		ch_power(ch)[DISC_DAEM_NETH] = -2;
+		ch_power(ch)[DISC_DAEM_DISC] = -2;
 	}
 	if ( !IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		ch->power[DISC_WERE_BEAR] = -2;
-		ch->power[DISC_WERE_LYNX] = -2;
-		ch->power[DISC_WERE_BOAR] = -2;
-		ch->power[DISC_WERE_OWL] = -2;
-		ch->power[DISC_WERE_SPID] = -2;
-		ch->power[DISC_WERE_WOLF] = -2;
-		ch->power[DISC_WERE_HAWK] = -2;
-		ch->power[DISC_WERE_MANT] = -2;
-		ch->power[DISC_WERE_RAPT] = -2;
-		ch->power[DISC_WERE_LUNA] = -2;
-		ch->power[DISC_WERE_PAIN] = -2;
-		ch->power[DISC_WERE_CONG] = -2;
+		ch_power(ch)[DISC_WERE_BEAR] = -2;
+		ch_power(ch)[DISC_WERE_LYNX] = -2;
+		ch_power(ch)[DISC_WERE_BOAR] = -2;
+		ch_power(ch)[DISC_WERE_OWL] = -2;
+		ch_power(ch)[DISC_WERE_SPID] = -2;
+		ch_power(ch)[DISC_WERE_WOLF] = -2;
+		ch_power(ch)[DISC_WERE_HAWK] = -2;
+		ch_power(ch)[DISC_WERE_MANT] = -2;
+		ch_power(ch)[DISC_WERE_RAPT] = -2;
+		ch_power(ch)[DISC_WERE_LUNA] = -2;
+		ch_power(ch)[DISC_WERE_PAIN] = -2;
+		ch_power(ch)[DISC_WERE_CONG] = -2;
 	}
 	if ( !IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-		ch->power[DISC_VAMP_FORT] = -2;
-		ch->power[DISC_VAMP_CELE] = -2;
-		ch->power[DISC_VAMP_OBTE] = -2;
-		ch->power[DISC_VAMP_PRES] = -2;
-		ch->power[DISC_VAMP_QUIE] = -2;
-		ch->power[DISC_VAMP_THAU] = -2;
-		ch->power[DISC_VAMP_AUSP] = -2;
-		ch->power[DISC_VAMP_DOMI] = -2;
-		ch->power[DISC_VAMP_OBFU] = -2;
-		ch->power[DISC_VAMP_POTE] = -2;
-		ch->power[DISC_VAMP_PROT] = -2;
-		ch->power[DISC_VAMP_SERP] = -2;
-		ch->power[DISC_VAMP_VICI] = -2;
-		ch->power[DISC_VAMP_DAIM] = -2;
-		ch->power[DISC_VAMP_ANIM] = -2;
-		ch->power[DISC_VAMP_CHIM] = -2;
-		ch->power[DISC_VAMP_MELP] = -2;
-		ch->power[DISC_VAMP_NECR] = -2;
-		ch->power[DISC_VAMP_THAN] = -2;
-		ch->power[DISC_VAMP_OBEA] = -2;
+		ch_power(ch)[DISC_VAMP_FORT] = -2;
+		ch_power(ch)[DISC_VAMP_CELE] = -2;
+		ch_power(ch)[DISC_VAMP_OBTE] = -2;
+		ch_power(ch)[DISC_VAMP_PRES] = -2;
+		ch_power(ch)[DISC_VAMP_QUIE] = -2;
+		ch_power(ch)[DISC_VAMP_THAU] = -2;
+		ch_power(ch)[DISC_VAMP_AUSP] = -2;
+		ch_power(ch)[DISC_VAMP_DOMI] = -2;
+		ch_power(ch)[DISC_VAMP_OBFU] = -2;
+		ch_power(ch)[DISC_VAMP_POTE] = -2;
+		ch_power(ch)[DISC_VAMP_PROT] = -2;
+		ch_power(ch)[DISC_VAMP_SERP] = -2;
+		ch_power(ch)[DISC_VAMP_VICI] = -2;
+		ch_power(ch)[DISC_VAMP_DAIM] = -2;
+		ch_power(ch)[DISC_VAMP_ANIM] = -2;
+		ch_power(ch)[DISC_VAMP_CHIM] = -2;
+		ch_power(ch)[DISC_VAMP_MELP] = -2;
+		ch_power(ch)[DISC_VAMP_NECR] = -2;
+		ch_power(ch)[DISC_VAMP_THAN] = -2;
+		ch_power(ch)[DISC_VAMP_OBEA] = -2;
 	}
 }
 
@@ -173,7 +173,7 @@ static void nanny_get_name( DESCRIPTOR_DATA *d, char *argument ) {
 
 	char_age = years_old( ch );
 	if ( IS_SET( ch->act, PLR_DENY ) ) {
-		snprintf( log_buf, MAX_STRING_LENGTH, "Denying access to %s@%s.", argument, ch->lasthost );
+		snprintf( log_buf, MAX_STRING_LENGTH, "Denying access to %s@%s.", argument, ch->pcdata->lasthost );
 		log_string( log_buf );
 		write_to_buffer( d, " You are denied access.\n\r", 0 );
 		close_socket( d );
@@ -264,17 +264,17 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 		do_password( ch, kav );
 	}
 
-	if ( ch->lasthost != NULL ) free(ch->lasthost);
+	if ( ch->pcdata->lasthost != NULL ) free(ch->pcdata->lasthost);
 	if ( ch->desc != NULL && ch->desc->host != NULL ) {
-		ch->lasthost = str_dup( ch->desc->host );
+		ch->pcdata->lasthost = str_dup( ch->desc->host );
 	} else {
-		ch->lasthost = str_dup( "(unknown)" );
+		ch->pcdata->lasthost = str_dup( "(unknown)" );
 	}
 	strtime = ctime( &current_time );
 	strtime[strlen( strtime ) - 1] = '\0';
-	free(ch->lasttime);
-	ch->lasttime = str_dup( strtime );
-	snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s has connected.", ch->name, mask_ip( ch->lasthost ) );
+	free(ch->pcdata->lasttime);
+	ch->pcdata->lasttime = str_dup( strtime );
+	snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s has connected.", ch->name, mask_ip( ch->pcdata->lasthost ) );
 	log_string( log_buf );
 
 	/* In case we have level 4+ players from another merc mud, or
@@ -312,8 +312,8 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 	}
 
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		ch->gnosis[GCURRENT] = ch->gnosis[GMAXIMUM] - 5;
-		if ( ch->gnosis[GCURRENT] < 0 ) ch->gnosis[GCURRENT] = 0;
+		ch_gnosis(ch)[GCURRENT] = ch_gnosis(ch)[GMAXIMUM] - 5;
+		if ( ch_gnosis(ch)[GCURRENT] < 0 ) ch_gnosis(ch)[GCURRENT] = 0;
 	}
 
 	if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
@@ -383,8 +383,8 @@ static void nanny_get_old_password( DESCRIPTOR_DATA *d, char *argument ) {
 	script_trigger_room_enter( ch, ch->in_room );
 
 	for ( i = 0; i < MAX_DISCIPLINES; i++ ) {
-		if ( ch->power[i] > 10 && !IS_SET( ch->extra, EXTRA_FLASH ) && !IS_SET( ch->extra, EXTRA_BAAL ) )
-			ch->power[i] = 10;
+		if ( ch_power(ch)[i] > 10 && !IS_SET( ch->extra, EXTRA_FLASH ) && !IS_SET( ch->extra, EXTRA_BAAL ) )
+			ch_power(ch)[i] = 10;
 	}
 
 	if ( ch->level > 2 )
@@ -504,13 +504,13 @@ static void nanny_get_new_explevel( DESCRIPTOR_DATA *d, char *argument ) {
 
 	switch ( argument[0] ) {
 	case '1':
-		ch->pcdata->explevel = 0;
+		ch->explevel = 0;
 		break; /* Never MUD'd */
 	case '2':
-		ch->pcdata->explevel = 1;
+		ch->explevel = 1;
 		break; /* MUD experience */
 	case '3':
-		ch->pcdata->explevel = 2;
+		ch->explevel = 2;
 		break; /* Dystopia veteran */
 	default:
 		write_to_buffer( d, " Please choose 1, 2, or 3: ", 0 );
@@ -614,8 +614,8 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 	quest_init_player( ch );
 
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		ch->gnosis[GCURRENT] = ch->gnosis[GMAXIMUM] - 5;
-		if ( ch->gnosis[GCURRENT] < 0 ) ch->gnosis[GCURRENT] = 0;
+		ch_gnosis(ch)[GCURRENT] = ch_gnosis(ch)[GMAXIMUM] - 5;
+		if ( ch_gnosis(ch)[GCURRENT] < 0 ) ch_gnosis(ch)[GCURRENT] = 0;
 	}
 
 	if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
@@ -637,11 +637,11 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 		SET_BIT( ch->act, PLR_AUTOLOOT );
 		SET_BIT( ch->act, PLR_AUTOSAC );
 		SET_BIT( ch->act, PLR_TELNET_GA );
-		ch->stance[19] = -1;
-		ch->stance[20] = -1;
-		ch->stance[21] = -1;
-		ch->stance[22] = -1;
-		ch->stance[23] = -1;
+		ch_stance(ch)[19] = -1;
+		ch_stance(ch)[20] = -1;
+		ch_stance(ch)[21] = -1;
+		ch_stance(ch)[22] = -1;
+		ch_stance(ch)[23] = -1;
 		ch->exp = 0;
 		ch->hit = ch->max_hit;
 		ch->mana = ch->max_mana;
@@ -650,9 +650,9 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 		set_switchname( ch, ch->name );
 		ch->home = ROOM_VNUM_SCHOOL; /* Set recall point to school entrance */
 		/* Starting room based on experience level */
-		if ( ch->pcdata->explevel == 0 )
+		if ( ch->explevel == 0 )
 			char_to_room( ch, get_room_index( ROOM_VNUM_SCHOOL_SEC1 ) );
-		else if ( ch->pcdata->explevel == 1 )
+		else if ( ch->explevel == 1 )
 			char_to_room( ch, get_room_index( ROOM_VNUM_SCHOOL_SEC2 ) );
 		else
 			char_to_room( ch, get_room_index( ROOM_VNUM_SCHOOL ) );
@@ -787,9 +787,9 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 		script_trigger_room_enter( ch, ch->in_room );
 
 		/* Experience-appropriate welcome hint */
-		if ( ch->pcdata->explevel == 0 )
+		if ( ch->explevel == 0 )
 			send_to_char( "\n\r#GTip:#n Type '#Rhelp tutorial#n' for a beginner's guide!\n\r", ch );
-		else if ( ch->pcdata->explevel == 1 )
+		else if ( ch->explevel == 1 )
 			send_to_char( "\n\r#GTip:#n Type '#Rhelp dystopiaplus#n' for Dystopia-specific features!\n\r", ch );
 
 		/* Send initial GMCP data */
@@ -828,8 +828,8 @@ static void nanny_read_motd( DESCRIPTOR_DATA *d, char *argument ) {
 	script_trigger_room_enter( ch, ch->in_room );
 
 	for ( i = 0; i < MAX_DISCIPLINES; i++ ) {
-		if ( ch->power[i] > 10 )
-			ch->power[i] = 10;
+		if ( ch_power(ch)[i] > 10 )
+			ch_power(ch)[i] = 10;
 	}
 
 	clear_foreign_disciplines( ch );
@@ -1057,7 +1057,7 @@ bool check_reconnect( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 				send_to_char( "Reconnecting.\n\r", ch );
 				if ( IS_NPC( ch ) || ch->pcdata->obj_vnum == 0 )
 					act( "$n has reconnected.", ch, NULL, NULL, TO_ROOM );
-				snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s reconnected.", ch->name, ch->lasthost );
+				snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s reconnected.", ch->name, ch->pcdata->lasthost );
 				log_string( log_buf );
 				d->connected = CON_PLAYING;
 				/* Send GMCP data on reconnect */
@@ -1094,7 +1094,7 @@ bool check_kickoff( DESCRIPTOR_DATA *d, char *name, bool fConn ) {
 				ch->timer = 0;
 				send_to_char( "You take over your body, which was already in use.\n\r", ch );
 				act( "...$n's body has been taken over by another spirit!", ch, NULL, NULL, TO_ROOM );
-				snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s kicking off old link.", ch->name, ch->lasthost );
+				snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s kicking off old link.", ch->name, ch->pcdata->lasthost );
 				log_string( log_buf );
 				d->connected = CON_PLAYING;
 				/* MTTS auto-upgrade on kickoff */

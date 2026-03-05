@@ -196,26 +196,26 @@ void check_leaderboard( CHAR_DATA *ch ) {
 		leader_board.bestpk_name = str_dup( ch->name );
 		changed = TRUE;
 	}
-	if ( ch->mdeath > leader_board.md_number ) {
-		leader_board.md_number = ch->mdeath;
+	if ( ch->pcdata->mdeath > leader_board.md_number ) {
+		leader_board.md_number = ch->pcdata->mdeath;
 		free(leader_board.md_name);
 		leader_board.md_name = str_dup( ch->name );
 		changed = TRUE;
 	}
-	if ( ch->mkill > leader_board.mk_number ) {
-		leader_board.mk_number = ch->mkill;
+	if ( ch->pcdata->mkill > leader_board.mk_number ) {
+		leader_board.mk_number = ch->pcdata->mkill;
 		free(leader_board.mk_name);
 		leader_board.mk_name = str_dup( ch->name );
 		changed = TRUE;
 	}
-	if ( ch->pkill > leader_board.pk_number ) {
-		leader_board.pk_number = ch->pkill;
+	if ( ch->pcdata->pkill > leader_board.pk_number ) {
+		leader_board.pk_number = ch->pcdata->pkill;
 		free(leader_board.pk_name);
 		leader_board.pk_name = str_dup( ch->name );
 		changed = TRUE;
 	}
-	if ( ch->pdeath > leader_board.pd_number ) {
-		leader_board.pd_number = ch->pdeath;
+	if ( ch->pcdata->pdeath > leader_board.pd_number ) {
+		leader_board.pd_number = ch->pcdata->pdeath;
 		free(leader_board.pd_name);
 		leader_board.pd_name = str_dup( ch->name );
 		changed = TRUE;

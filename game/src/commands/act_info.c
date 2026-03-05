@@ -430,10 +430,10 @@ int char_damroll( CHAR_DATA *ch ) {
 			value += 50;
 
 	if ( IS_CLASS( ch, CLASS_SAMURAI ) && ( get_eq_char( ch, WEAR_WIELD ) != NULL ) && !IS_NPC( ch ) ) {
-		int wpn = ch->wpn[1];
-		int total = ch->wpn[0] + ch->wpn[2] + ch->wpn[3] + ch->wpn[4] + ch->wpn[5] +
-			ch->wpn[6] + ch->wpn[7] + ch->wpn[8] + ch->wpn[9] + ch->wpn[10] +
-			ch->wpn[11] + ch->wpn[12];
+		int wpn = ch_wpn(ch)[1];
+		int total = ch_wpn(ch)[0] + ch_wpn(ch)[2] + ch_wpn(ch)[3] + ch_wpn(ch)[4] + ch_wpn(ch)[5] +
+			ch_wpn(ch)[6] + ch_wpn(ch)[7] + ch_wpn(ch)[8] + ch_wpn(ch)[9] + ch_wpn(ch)[10] +
+			ch_wpn(ch)[11] + ch_wpn(ch)[12];
 
 		if ( wpn >= 500 )
 			value += 500;
@@ -500,10 +500,10 @@ int char_hitroll( CHAR_DATA *ch ) {
 
 	/* Highlander */
 	if ( IS_CLASS( ch, CLASS_SAMURAI ) && ( get_eq_char( ch, WEAR_WIELD ) != NULL ) && !IS_NPC( ch ) ) {
-		int wpn = ch->wpn[1];
-		int total = ch->wpn[0] + ch->wpn[2] + ch->wpn[3] + ch->wpn[4] + ch->wpn[5] +
-			ch->wpn[6] + ch->wpn[7] + ch->wpn[8] + ch->wpn[9] + ch->wpn[10] +
-			ch->wpn[11] + ch->wpn[12];
+		int wpn = ch_wpn(ch)[1];
+		int total = ch_wpn(ch)[0] + ch_wpn(ch)[2] + ch_wpn(ch)[3] + ch_wpn(ch)[4] + ch_wpn(ch)[5] +
+			ch_wpn(ch)[6] + ch_wpn(ch)[7] + ch_wpn(ch)[8] + ch_wpn(ch)[9] + ch_wpn(ch)[10] +
+			ch_wpn(ch)[11] + ch_wpn(ch)[12];
 
 		if ( wpn >= 500 )
 			value += 500;
@@ -526,7 +526,7 @@ int char_ac( CHAR_DATA *ch ) {
 
 	/* Highlander */
 	if ( IS_CLASS( ch, CLASS_SAMURAI ) && ( get_eq_char( ch, WEAR_WIELD ) != NULL ) ) {
-		int wpn = ch->wpn[1];
+		int wpn = ch_wpn(ch)[1];
 		value -= wpn;
 	}
 
@@ -796,7 +796,7 @@ void show_char_to_char_0( CHAR_DATA *victim, CHAR_DATA *ch ) {
 
 	if ( !IS_NPC( victim ) && IS_SET( victim->flag2, VAMP_OBJMASK ) ) {
 		char buf[MAX_STRING_LENGTH];
-		snprintf( buf, sizeof( buf ), "     %s\n\r", victim->objdesc );
+		snprintf( buf, sizeof( buf ), "     %s\n\r", victim->pcdata->objdesc );
 		stc( buf, ch );
 		return;
 	}
@@ -1010,27 +1010,27 @@ pfx_done:
 			strcat( desc_buf, " is sitting here." );
 			break;
 		case POS_STANDING:
-			if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_NORMAL )
+			if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_NORMAL )
 				strcat( desc_buf, " is here, crouched in a fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_VIPER )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_VIPER )
 				strcat( desc_buf, " is here, crouched in a viper fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_CRANE )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_CRANE )
 				strcat( desc_buf, " is here, crouched in a crane fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_CRAB )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_CRAB )
 				strcat( desc_buf, " is here, crouched in a crab fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_MONGOOSE )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_MONGOOSE )
 				strcat( desc_buf, " is here, crouched in a mongoose fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_BULL )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_BULL )
 				strcat( desc_buf, " is here, crouched in a bull fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_MANTIS )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_MANTIS )
 				strcat( desc_buf, " is here, crouched in a mantis fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_DRAGON )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_DRAGON )
 				strcat( desc_buf, " is here, crouched in a dragon fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_TIGER )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_TIGER )
 				strcat( desc_buf, " is here, crouched in a tiger fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_MONKEY )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_MONKEY )
 				strcat( desc_buf, " is here, crouched in a monkey fighting stance." );
-			else if ( !IS_NPC( victim ) && victim->stance[0] == STANCE_SWALLOW )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] == STANCE_SWALLOW )
 				strcat( desc_buf, " is here, crouched in a swallow fighting stance." );
 			else
 				strcat( desc_buf, " is here." );
@@ -1067,24 +1067,24 @@ void evil_eye( CHAR_DATA *victim, CHAR_DATA *ch ) {
 	if ( ch->level > 6 ) return;
 	if ( !IS_CLASS( victim, CLASS_DEMON ) ) return;
 	if ( ch->level < 3 || victim->level < 3 ) return;
-	if ( IS_CLASS( victim, CLASS_DEMON ) && victim->power[DISC_DAEM_DISC] < 2 ) return;
-	if ( IS_CLASS( victim, CLASS_DEMON ) && victim->power[DISC_DAEM_DISC] < dice( 1, 10 ) ) return;
+	if ( IS_CLASS( victim, CLASS_DEMON ) && ch_power(victim)[DISC_DAEM_DISC] < 2 ) return;
+	if ( IS_CLASS( victim, CLASS_DEMON ) && ch_power(victim)[DISC_DAEM_DISC] < dice( 1, 10 ) ) return;
 	if ( is_safe( ch, victim ) ) return;
 
-	if ( victim->powertype != NULL && strlen( victim->powertype ) > 1 ) {
-		snprintf( buf, sizeof( buf ), "\n\r%s\n\r", victim->powertype );
+	if ( victim->pcdata->powertype != NULL && strlen( victim->pcdata->powertype ) > 1 ) {
+		snprintf( buf, sizeof( buf ), "\n\r%s\n\r", victim->pcdata->powertype );
 		send_to_char( buf, ch );
 	}
-	if ( IS_SET( victim->spectype, EYE_SELFACTION ) && victim->poweraction != NULL )
-		interpret( victim, victim->poweraction );
-	if ( IS_SET( victim->spectype, EYE_ACTION ) && victim->poweraction != NULL ) {
-		interpret( ch, victim->poweraction );
-		snprintf( buf, sizeof( buf ), "Evileye : %s forces %s to %s", victim->name, ch->name, victim->poweraction );
+	if ( IS_SET( victim->spectype, EYE_SELFACTION ) && victim->pcdata->poweraction != NULL )
+		interpret( victim, victim->pcdata->poweraction );
+	if ( IS_SET( victim->spectype, EYE_ACTION ) && victim->pcdata->poweraction != NULL ) {
+		interpret( ch, victim->pcdata->poweraction );
+		snprintf( buf, sizeof( buf ), "Evileye : %s forces %s to %s", victim->name, ch->name, victim->pcdata->poweraction );
 		log_string( buf );
 	}
 	if ( IS_SET( victim->spectype, EYE_SPELL ) && victim->specpower > 0 ) {
 		tabletype = skill_table[victim->specpower].target;
-		( *skill_table[victim->specpower].spell_fun )( victim->specpower, victim->spl[tabletype], victim, ch );
+		( *skill_table[victim->specpower].spell_fun )( victim->specpower, ch_spl(victim)[tabletype], victim, ch );
 	}
 	return;
 }
@@ -1833,21 +1833,21 @@ void do_weaplist( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Weapon, Stance, and Spell Skill\n\r\n\r", ch );
 		send_to_char( "Weapons:\n\r", ch );
 		snprintf( buf, sizeof( buf ), "Unarmed: %d. Slice: %d. Stab: %d. Slash: %d. Whip: %d. Claw: %d. Blast: %d.\n\r",
-			ch->wpn[0], ch->wpn[1], ch->wpn[2], ch->wpn[3], ch->wpn[4], ch->wpn[5], ch->wpn[6] );
+			ch_wpn(ch)[0], ch_wpn(ch)[1], ch_wpn(ch)[2], ch_wpn(ch)[3], ch_wpn(ch)[4], ch_wpn(ch)[5], ch_wpn(ch)[6] );
 		send_to_char( buf, ch );
 		snprintf( buf, sizeof( buf ), "Pound: %d. Crush: %d. Grep: %d. Bite: %d. Pierce: %d. Suck: %d.\n\r",
-			ch->wpn[7], ch->wpn[8], ch->wpn[9], ch->wpn[10], ch->wpn[11], ch->wpn[12] );
+			ch_wpn(ch)[7], ch_wpn(ch)[8], ch_wpn(ch)[9], ch_wpn(ch)[10], ch_wpn(ch)[11], ch_wpn(ch)[12] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rStances:\n\r", ch );
 		snprintf( buf, sizeof( buf ), "Viper: %d. Crane: %d. Crab: %d. Mongoose: %d. Bull: %d. Mantis: %d.\n\r",
-			ch->stance[1], ch->stance[2], ch->stance[3], ch->stance[4], ch->stance[5], ch->stance[6] );
+			ch_stance(ch)[1], ch_stance(ch)[2], ch_stance(ch)[3], ch_stance(ch)[4], ch_stance(ch)[5], ch_stance(ch)[6] );
 		send_to_char( buf, ch );
 		snprintf( buf, sizeof( buf ), "Dragon: %d. Tiger: %d. Monkey: %d. Swallow: %d. Leopard: %d.\n\r",
-			ch->stance[7], ch->stance[8], ch->stance[9], ch->stance[10], ch->stance[11] );
+			ch_stance(ch)[7], ch_stance(ch)[8], ch_stance(ch)[9], ch_stance(ch)[10], ch_stance(ch)[11] );
 		send_to_char( buf, ch );
 		send_to_char( "\n\rMagic:\n\r", ch );
 		snprintf( buf, sizeof( buf ), "Purple: %d. Red: %d. Blue: %d. Green: %d. Yellow: %d.\n\r",
-			ch->spl[0], ch->spl[1], ch->spl[2], ch->spl[3], ch->spl[4] );
+			ch_spl(ch)[0], ch_spl(ch)[1], ch_spl(ch)[2], ch_spl(ch)[3], ch_spl(ch)[4] );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -1864,11 +1864,11 @@ void do_weaplist( CHAR_DATA *ch, char *argument ) {
 		"                            Weapon\n\r", ch );
 	snprintf( buf, sizeof( buf ),
 		"Unarm:%-4d Slice:%-4d Stab:%-4d Slash:%-4d Whip:%-4d Claw:%-4d Blast:%-4d\n\r",
-		ch->wpn[0], ch->wpn[1], ch->wpn[2], ch->wpn[3], ch->wpn[4], ch->wpn[5], ch->wpn[6] );
+		ch_wpn(ch)[0], ch_wpn(ch)[1], ch_wpn(ch)[2], ch_wpn(ch)[3], ch_wpn(ch)[4], ch_wpn(ch)[5], ch_wpn(ch)[6] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Pound  :%-4d Crush  :%-4d Grep   :%-4d Bite    :%-4d Pierce:%-4d Suck   :%-4d\n\r",
-		ch->wpn[7], ch->wpn[8], ch->wpn[9], ch->wpn[10], ch->wpn[11], ch->wpn[12] );
+		ch_wpn(ch)[7], ch_wpn(ch)[8], ch_wpn(ch)[9], ch_wpn(ch)[10], ch_wpn(ch)[11], ch_wpn(ch)[12] );
 	send_to_char( buf, ch );
 	send_to_char(
 
@@ -1877,11 +1877,11 @@ void do_weaplist( CHAR_DATA *ch, char *argument ) {
 		"                            Stances\n\r", ch );
 	snprintf( buf, sizeof( buf ),
 		"Viper : %-4d Crane: %-4d Crab  : %-4d Mongoose: %-4d Bull: %-4d Mantis: %-4d\n\r",
-		ch->stance[1], ch->stance[2], ch->stance[3], ch->stance[4], ch->stance[5], ch->stance[6] );
+		ch_stance(ch)[1], ch_stance(ch)[2], ch_stance(ch)[3], ch_stance(ch)[4], ch_stance(ch)[5], ch_stance(ch)[6] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Dragon: %-4d Tiger: %-4d Monkey: %-4d Swallow: %-4d Leopard: %-4d\n\r",
-		ch->stance[7], ch->stance[8], ch->stance[9], ch->stance[10], ch->stance[11] );
+		ch_stance(ch)[7], ch_stance(ch)[8], ch_stance(ch)[9], ch_stance(ch)[10], ch_stance(ch)[11] );
 	send_to_char( buf, ch );
 	send_to_char(
 
@@ -1889,7 +1889,7 @@ void do_weaplist( CHAR_DATA *ch, char *argument ) {
 	send_to_char(
 		"                            Magic\n\r", ch );
 	snprintf( buf, sizeof( buf ),
-		"Purple: %-4d  Red: %-4d  Blue: %-4d  Green: %-4d  Yellow: %-4d\n\r", ch->spl[0], ch->spl[1], ch->spl[2], ch->spl[3], ch->spl[4] );
+		"Purple: %-4d  Red: %-4d  Blue: %-4d  Green: %-4d  Yellow: %-4d\n\r", ch_spl(ch)[0], ch_spl(ch)[1], ch_spl(ch)[2], ch_spl(ch)[3], ch_spl(ch)[4] );
 	send_to_char( buf, ch );
 	send_to_char(
 
@@ -1931,7 +1931,7 @@ void do_far( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_PRES] < 9 ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_PRES] < 9 ) {
 		send_to_char( "You need level 9 Presence to use this power.\n\r", ch );
 		return;
 	}
@@ -2014,36 +2014,36 @@ void do_stat( CHAR_DATA *ch, char *argument ) {
 	send_to_char( lin, ch );
 	snprintf( buf, sizeof( buf ),
 		"Animalism:    [%d]             Celerity:   [%d]             Fortitude: [%d]\n\r",
-		ch->power[DISC_VAMP_ANIM], ch->power[DISC_VAMP_CELE],
-		ch->power[DISC_VAMP_FORT] );
+		ch_power(ch)[DISC_VAMP_ANIM], ch_power(ch)[DISC_VAMP_CELE],
+		ch_power(ch)[DISC_VAMP_FORT] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Obtenebration:[%d]             Presence:   [%d]             Quietus:   [%d]\n\r",
-		ch->power[DISC_VAMP_OBTE], ch->power[DISC_VAMP_PRES],
-		ch->power[DISC_VAMP_QUIE] );
+		ch_power(ch)[DISC_VAMP_OBTE], ch_power(ch)[DISC_VAMP_PRES],
+		ch_power(ch)[DISC_VAMP_QUIE] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Thaumaturgy:  [%d]             Auspex:     [%d]             Dominate:  [%d]\n\r",
-		ch->power[DISC_VAMP_THAU], ch->power[DISC_VAMP_AUSP],
-		ch->power[DISC_VAMP_DOMI] );
+		ch_power(ch)[DISC_VAMP_THAU], ch_power(ch)[DISC_VAMP_AUSP],
+		ch_power(ch)[DISC_VAMP_DOMI] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Obfuscate:    [%d]             Potence:    [%d]             Protean:   [%d]\n\r",
-		ch->power[DISC_VAMP_OBFU], ch->power[DISC_VAMP_POTE],
-		ch->power[DISC_VAMP_PROT] );
+		ch_power(ch)[DISC_VAMP_OBFU], ch_power(ch)[DISC_VAMP_POTE],
+		ch_power(ch)[DISC_VAMP_PROT] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Serpentis:    [%d]             Vicissitude:[%d]             Daimoinon: [%d]\n\r",
-		ch->power[DISC_VAMP_SERP], ch->power[DISC_VAMP_VICI],
-		ch->power[DISC_VAMP_DAIM] );
+		ch_power(ch)[DISC_VAMP_SERP], ch_power(ch)[DISC_VAMP_VICI],
+		ch_power(ch)[DISC_VAMP_DAIM] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Chimerstry:   [%d]             Obeah:      [%d]             Melpominee:[%d]\n\r",
-		ch->power[DISC_VAMP_CHIM], ch->power[DISC_VAMP_OBEA], ch->power[DISC_VAMP_MELP] );
+		ch_power(ch)[DISC_VAMP_CHIM], ch_power(ch)[DISC_VAMP_OBEA], ch_power(ch)[DISC_VAMP_MELP] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Necromancy:   [%d]                                         Thanatosis:[%d]\n\r",
-		ch->power[DISC_VAMP_NECR], ch->power[DISC_VAMP_THAN] );
+		ch_power(ch)[DISC_VAMP_NECR], ch_power(ch)[DISC_VAMP_THAN] );
 	stc( buf, ch );
 	send_to_char( lin, ch );
 
@@ -2084,7 +2084,7 @@ static void show_class_score_stats( CHAR_DATA *ch ) {
 				continue;
 
 			/* Skip gnosis stats if gnosis maximum is 0 */
-			if ( ch->gnosis[GMAXIMUM] == 0 &&
+			if ( ch_gnosis(ch)[GMAXIMUM] == 0 &&
 			     ( stats[i].stat_source == STAT_GNOSIS_CURRENT ||
 			       stats[i].stat_source == STAT_GNOSIS_MAXIMUM ) )
 				continue;
@@ -2163,7 +2163,7 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 			ch->pcdata->awins, ch->pcdata->alosses );
 		send_to_char( buf, ch );
 		snprintf( buf, sizeof( buf ), "Player kills: %d. Player deaths: %d. Mob kills: %d. Mob deaths: %d.\n\r",
-			ch->pkill, ch->pdeath, ch->mkill, ch->mdeath );
+			ch->pcdata->pkill, ch->pcdata->pdeath, ch->pcdata->mkill, ch->pcdata->mdeath );
 		send_to_char( buf, ch );
 		snprintf( buf, sizeof( buf ), "Quests: %d completed for %d points. Quest points: %d.\n\r",
 			ch->pcdata->questsrun, ch->pcdata->questtotal, ch->pcdata->quest );
@@ -2303,15 +2303,15 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MONK ) ) {
 		snprintf( buf, sizeof( buf ), "#R[#nYour block counter is currently: #C%d#R]\n\r", ch->monkblock );
 		stc( buf, ch );
-		snprintf( buf, sizeof( buf ), "#R[#nYour current level of chi:       #C%d#R]\n\r", ch->chi[CURRENT] );
+		snprintf( buf, sizeof( buf ), "#R[#nYour current level of chi:       #C%d#R]\n\r", ch_chi(ch)[CURRENT] );
 		stc( buf, ch );
-		snprintf( buf, sizeof( buf ), "#R[#nYour maximum level of chi:       #C%d#R]\n\r", ch->chi[MAXIMUM] );
+		snprintf( buf, sizeof( buf ), "#R[#nYour maximum level of chi:       #C%d#R]\n\r", ch_chi(ch)[MAXIMUM] );
 		stc( buf, ch );
 	}
-	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch->gnosis[GMAXIMUM] > 0 ) {
-		snprintf( buf, sizeof( buf ), "#R[#nCurrent Gnosis:            #C%d#R]\n\r", ch->gnosis[GCURRENT] );
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch_gnosis(ch)[GMAXIMUM] > 0 ) {
+		snprintf( buf, sizeof( buf ), "#R[#nCurrent Gnosis:            #C%d#R]\n\r", ch_gnosis(ch)[GCURRENT] );
 		stc( buf, ch );
-		snprintf( buf, sizeof( buf ), "#R[#nMaximum gnosis:            #C%d#R]\n\r", ch->gnosis[GMAXIMUM] );
+		snprintf( buf, sizeof( buf ), "#R[#nMaximum gnosis:            #C%d#R]\n\r", ch_gnosis(ch)[GMAXIMUM] );
 		stc( buf, ch );
 	}
 #endif
@@ -2458,32 +2458,32 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "a Bugged Character!\n\r", ch );
 
 	if ( !IS_NPC( ch ) ) {
-		if ( ch->pkill == 0 )
+		if ( ch->pcdata->pkill == 0 )
 			snprintf( ss1, sizeof( ss1 ), "#Cno#n players" );
-		else if ( ch->pkill == 1 )
-			snprintf( ss1, sizeof( ss1 ), "#C%d#n player", ch->pkill );
+		else if ( ch->pcdata->pkill == 1 )
+			snprintf( ss1, sizeof( ss1 ), "#C%d#n player", ch->pcdata->pkill );
 		else
-			snprintf( ss1, sizeof( ss1 ), "#C%d#n players", ch->pkill );
-		if ( ch->pdeath == 0 )
+			snprintf( ss1, sizeof( ss1 ), "#C%d#n players", ch->pcdata->pkill );
+		if ( ch->pcdata->pdeath == 0 )
 			snprintf( ss2, sizeof( ss2 ), "#Cno#n players" );
-		else if ( ch->pdeath == 1 )
-			snprintf( ss2, sizeof( ss2 ), "#C%d#n player", ch->pdeath );
+		else if ( ch->pcdata->pdeath == 1 )
+			snprintf( ss2, sizeof( ss2 ), "#C%d#n player", ch->pcdata->pdeath );
 		else
-			snprintf( ss2, sizeof( ss2 ), "#C%d#n players", ch->pdeath );
+			snprintf( ss2, sizeof( ss2 ), "#C%d#n players", ch->pcdata->pdeath );
 		snprintf( buf, sizeof( buf ), "#R[#nYou have killed %s and have been killed by %s#R]\n\r", ss1, ss2 );
 		send_to_char( buf, ch );
-		if ( ch->mkill == 0 )
+		if ( ch->pcdata->mkill == 0 )
 			snprintf( ss1, sizeof( ss1 ), "#Cno#n mobs" );
-		else if ( ch->mkill == 1 )
-			snprintf( ss1, sizeof( ss1 ), "#C%d#n mob", ch->mkill );
+		else if ( ch->pcdata->mkill == 1 )
+			snprintf( ss1, sizeof( ss1 ), "#C%d#n mob", ch->pcdata->mkill );
 		else
-			snprintf( ss1, sizeof( ss1 ), "#C%d#n mobs", ch->mkill );
-		if ( ch->mdeath == 0 )
+			snprintf( ss1, sizeof( ss1 ), "#C%d#n mobs", ch->pcdata->mkill );
+		if ( ch->pcdata->mdeath == 0 )
 			snprintf( ss2, sizeof( ss2 ), "#Cno#n mobs" );
-		else if ( ch->mdeath == 1 )
-			snprintf( ss2, sizeof( ss2 ), "#C%d#n mob", ch->mdeath );
+		else if ( ch->pcdata->mdeath == 1 )
+			snprintf( ss2, sizeof( ss2 ), "#C%d#n mob", ch->pcdata->mdeath );
 		else
-			snprintf( ss2, sizeof( ss2 ), "#C%d#n mobs", ch->mdeath );
+			snprintf( ss2, sizeof( ss2 ), "#C%d#n mobs", ch->pcdata->mdeath );
 		snprintf( buf, sizeof( buf ), "#R[#nYou have killed %s and have been killed by %s#R]\n\r", ss1, ss2 );
 		send_to_char( buf, ch );
 	}
@@ -2723,25 +2723,25 @@ void do_who( CHAR_DATA *ch, char *argument ) {
 		/*
 		 * Let's calculate the pkratio and the color of the symbols for players to be guided by.
 		 */
-		if ( gch->pkill > 0 ) {
-			if ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) < 100 && 100 * gch->pkill / ( gch->pkill + gch->pdeath ) > 9 ) {
+		if ( gch->pcdata->pkill > 0 ) {
+			if ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) < 100 && 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) > 9 ) {
 				if ( canDecap && canKillYou )
-					snprintf( pkratio, sizeof( pkratio ), "#R(#G0.%-2d#R)#n", ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) ) );
+					snprintf( pkratio, sizeof( pkratio ), "#R(#G0.%-2d#R)#n", ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) ) );
 				else if ( canKillYou )
-					snprintf( pkratio, sizeof( pkratio ), "#0(#G0.%-2d#0)#n", ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) ) );
+					snprintf( pkratio, sizeof( pkratio ), "#0(#G0.%-2d#0)#n", ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) ) );
 				else if ( canDecap )
-					snprintf( pkratio, sizeof( pkratio ), "#y(#G0.%-2d#y)#n", ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) ) );
+					snprintf( pkratio, sizeof( pkratio ), "#y(#G0.%-2d#y)#n", ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) ) );
 				else
-					snprintf( pkratio, sizeof( pkratio ), "#L(#G0.%-2d#L)#n", ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) ) );
-			} else if ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) < 10 ) {
+					snprintf( pkratio, sizeof( pkratio ), "#L(#G0.%-2d#L)#n", ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) ) );
+			} else if ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) < 10 ) {
 				if ( canDecap && canKillYou )
-					snprintf( pkratio, sizeof( pkratio ), "#R(#G0.0%-1d#R)#n", ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) ) );
+					snprintf( pkratio, sizeof( pkratio ), "#R(#G0.0%-1d#R)#n", ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) ) );
 				else if ( canKillYou )
-					snprintf( pkratio, sizeof( pkratio ), "#0(#G0.0%-1d#0)#n", ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) ) );
+					snprintf( pkratio, sizeof( pkratio ), "#0(#G0.0%-1d#0)#n", ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) ) );
 				else if ( canDecap )
-					snprintf( pkratio, sizeof( pkratio ), "#y(#G0.0%-1d#y)#n", ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) ) );
+					snprintf( pkratio, sizeof( pkratio ), "#y(#G0.0%-1d#y)#n", ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) ) );
 				else
-					snprintf( pkratio, sizeof( pkratio ), "#L(#G0.0%-1d#L)#n", ( 100 * gch->pkill / ( gch->pkill + gch->pdeath ) ) );
+					snprintf( pkratio, sizeof( pkratio ), "#L(#G0.0%-1d#L)#n", ( 100 * gch->pcdata->pkill / ( gch->pcdata->pkill + gch->pcdata->pdeath ) ) );
 			} else {
 				if ( canDecap && canKillYou )
 					snprintf( pkratio, sizeof( pkratio ), "#R(#G1.00#R)#n" );
@@ -4576,9 +4576,9 @@ void do_diagnose( CHAR_DATA *ch, char *argument ) {
 	act( "$n examines you carefully, diagnosing your injuries.", ch, NULL, victim, TO_VICT );
 	act( "Your diagnoses of $N reveals the following...", ch, NULL, victim, TO_CHAR );
 	send_to_char( "----------------------------------------------------------------------------\n\r", ch );
-	if ( ( victim->loc_hp[0] + victim->loc_hp[1] + victim->loc_hp[2] +
-			 victim->loc_hp[3] + victim->loc_hp[4] + victim->loc_hp[5] +
-			 victim->loc_hp[6] ) == 0 ) {
+	if ( ( ch_loc_hp(victim)[0] + ch_loc_hp(victim)[1] + ch_loc_hp(victim)[2] +
+			 ch_loc_hp(victim)[3] + ch_loc_hp(victim)[4] + ch_loc_hp(victim)[5] +
+			 ch_loc_hp(victim)[6] ) == 0 ) {
 		act( "$N has no apparent injuries.", ch, NULL, victim, TO_CHAR );
 		send_to_char( "----------------------------------------------------------------------------\n\r", ch );
 		return;
@@ -5240,8 +5240,8 @@ void do_prompt( CHAR_DATA *ch, char *argument ) {
 		}
 		return;
 	} else if ( !strcmp( argument, "clear" ) ) {
-		free(ch->prompt);
-		ch->prompt = str_dup( "" );
+		free(ch->pcdata->prompt);
+		ch->pcdata->prompt = str_dup( "" );
 		return;
 	} else {
 		if ( strlen( argument ) > 50 )
@@ -5250,8 +5250,8 @@ void do_prompt( CHAR_DATA *ch, char *argument ) {
 		strcat( buf, argument );
 	}
 
-	free(ch->prompt);
-	ch->prompt = str_dup( buf );
+	free(ch->pcdata->prompt);
+	ch->pcdata->prompt = str_dup( buf );
 	send_to_char( "Ok.\n\r", ch );
 	return;
 }
@@ -5269,8 +5269,8 @@ void do_cprompt( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !strcmp( argument, "clear" ) ) {
-		free(ch->cprompt);
-		ch->cprompt = str_dup( "" );
+		free(ch->pcdata->cprompt);
+		ch->pcdata->cprompt = str_dup( "" );
 		return;
 	} else {
 		if ( strlen( argument ) > 50 )
@@ -5279,8 +5279,8 @@ void do_cprompt( CHAR_DATA *ch, char *argument ) {
 		strcat( buf, argument );
 	}
 
-	free(ch->cprompt);
-	ch->cprompt = str_dup( buf );
+	free(ch->pcdata->cprompt);
+	ch->pcdata->cprompt = str_dup( buf );
 	send_to_char( "Ok.\n\r", ch );
 	return;
 }
@@ -5323,7 +5323,7 @@ void do_finger( CHAR_DATA *ch, char *argument ) {
 	/* Last connected */
 	send_to_char( "\n\r#0==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==#n\n\r", ch );
 	send_to_char( "Last connected at ", ch );
-	send_to_char( victim->lasttime, ch );
+	send_to_char( victim->pcdata->lasttime, ch );
 	send_to_char( ".\n\r", ch );
 	send_to_char( "#0==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==<>==#n\n\r", ch );
 
@@ -5334,11 +5334,11 @@ void do_finger( CHAR_DATA *ch, char *argument ) {
 	else if ( victim->sex == SEX_FEMALE ) {
 		send_to_char( "Female. ", ch );
 		if ( IS_SET( victim->extra, EXTRA_PREGNANT ) )
-			other_age( ch, victim->extra, TRUE, victim->createtime );
+			other_age( ch, victim->extra, TRUE, victim->pcdata->createtime );
 	} else
 		send_to_char( "None. ", ch );
 
-	other_age( ch, victim->extra, FALSE, victim->createtime );
+	other_age( ch, victim->extra, FALSE, victim->pcdata->createtime );
 
 	/* Level */
 	switch ( victim->level ) {
@@ -5374,13 +5374,13 @@ void do_finger( CHAR_DATA *ch, char *argument ) {
 
 	/* Kill stats */
 	snprintf( buf, sizeof( buf ), "Player kills: %d, Player Deaths: %d.\n\r",
-		victim->pkill, victim->pdeath );
+		victim->pcdata->pkill, victim->pcdata->pdeath );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ), "Arena kills: %d, Arena Deaths: %d.\n\r",
 		victim->pcdata->awins, victim->pcdata->alosses );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ), "Mob Kills: %d, Mob Deaths: %d.\n\r",
-		victim->mkill, victim->mdeath );
+		victim->pcdata->mkill, victim->pcdata->mdeath );
 	send_to_char( buf, ch );
 
 	/* Footer */

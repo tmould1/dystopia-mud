@@ -1168,9 +1168,7 @@ void artificer_despawn_turrets( CHAR_DATA *ch ) {
 	CHAR_DATA *turret_next;
 	bool found = FALSE;
 
-	LIST_FOR_EACH_SAFE( turret, turret_next, &g_characters, CHAR_DATA, char_node ) {
-
-		if ( !IS_NPC( turret ) ) continue;
+	LIST_FOR_EACH_SAFE( turret, turret_next, &g_npcs, CHAR_DATA, npc_node ) {
 		if ( turret->pIndexData == NULL ) continue;
 		if ( turret->pIndexData->vnum != VNUM_ART_TURRET ) continue;
 		if ( turret->wizard != ch ) continue;

@@ -147,27 +147,27 @@ void skillstance( CHAR_DATA *ch, CHAR_DATA *victim ) {
 
 	if ( IS_NPC( victim ) ) return;
 
-	stance = victim->stance[0];
+	stance = ch_stance(victim)[0];
 	if ( stance < 1 || stance > 11 ) return;
-	if ( victim->stance[stance] <= 0 )
+	if ( ch_stance(victim)[stance] <= 0 )
 		snprintf( bufskill, sizeof( bufskill ), "completely unskilled in" );
-	else if ( victim->stance[stance] <= 25 )
+	else if ( ch_stance(victim)[stance] <= 25 )
 		snprintf( bufskill, sizeof( bufskill ), "an apprentice of" );
-	else if ( victim->stance[stance] <= 50 )
+	else if ( ch_stance(victim)[stance] <= 50 )
 		snprintf( bufskill, sizeof( bufskill ), "a trainee of" );
-	else if ( victim->stance[stance] <= 75 )
+	else if ( ch_stance(victim)[stance] <= 75 )
 		snprintf( bufskill, sizeof( bufskill ), "a student of" );
-	else if ( victim->stance[stance] <= 100 )
+	else if ( ch_stance(victim)[stance] <= 100 )
 		snprintf( bufskill, sizeof( bufskill ), "fairly experienced in" );
-	else if ( victim->stance[stance] <= 125 )
+	else if ( ch_stance(victim)[stance] <= 125 )
 		snprintf( bufskill, sizeof( bufskill ), "well trained in" );
-	else if ( victim->stance[stance] <= 150 )
+	else if ( ch_stance(victim)[stance] <= 150 )
 		snprintf( bufskill, sizeof( bufskill ), "highly skilled in" );
-	else if ( victim->stance[stance] <= 175 )
+	else if ( ch_stance(victim)[stance] <= 175 )
 		snprintf( bufskill, sizeof( bufskill ), "an expert of" );
-	else if ( victim->stance[stance] <= 199 )
+	else if ( ch_stance(victim)[stance] <= 199 )
 		snprintf( bufskill, sizeof( bufskill ), "a master of" );
-	else if ( victim->stance[stance] >= 200 )
+	else if ( ch_stance(victim)[stance] >= 200 )
 		snprintf( bufskill, sizeof( bufskill ), "a grand master of" );
 	else
 		return;
@@ -235,29 +235,29 @@ void show_spell( CHAR_DATA *ch, int dtype ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( ch->spl[dtype] == 00 )
+	if ( ch_spl(ch)[dtype] == 00 )
 		snprintf( bufskill, sizeof( bufskill ), "untrained at" );
-	else if ( ch->spl[dtype] <= 25 )
+	else if ( ch_spl(ch)[dtype] <= 25 )
 		snprintf( bufskill, sizeof( bufskill ), "an apprentice at" );
-	else if ( ch->spl[dtype] <= 50 )
+	else if ( ch_spl(ch)[dtype] <= 50 )
 		snprintf( bufskill, sizeof( bufskill ), "a student at" );
-	else if ( ch->spl[dtype] <= 75 )
+	else if ( ch_spl(ch)[dtype] <= 75 )
 		snprintf( bufskill, sizeof( bufskill ), "a scholar at" );
-	else if ( ch->spl[dtype] <= 100 )
+	else if ( ch_spl(ch)[dtype] <= 100 )
 		snprintf( bufskill, sizeof( bufskill ), "a magus at" );
-	else if ( ch->spl[dtype] <= 125 )
+	else if ( ch_spl(ch)[dtype] <= 125 )
 		snprintf( bufskill, sizeof( bufskill ), "an adept at" );
-	else if ( ch->spl[dtype] <= 150 )
+	else if ( ch_spl(ch)[dtype] <= 150 )
 		snprintf( bufskill, sizeof( bufskill ), "a mage at" );
-	else if ( ch->spl[dtype] <= 175 )
+	else if ( ch_spl(ch)[dtype] <= 175 )
 		snprintf( bufskill, sizeof( bufskill ), "a warlock at" );
-	else if ( ch->spl[dtype] <= 199 )
+	else if ( ch_spl(ch)[dtype] <= 199 )
 		snprintf( bufskill, sizeof( bufskill ), "a master wizard at" );
-	else if ( ch->spl[dtype] >= 300 )
+	else if ( ch_spl(ch)[dtype] >= 300 )
 		snprintf( bufskill, sizeof( bufskill ), "a lich master of" );
-	else if ( ch->spl[dtype] >= 240 )
+	else if ( ch_spl(ch)[dtype] >= 240 )
 		snprintf( bufskill, sizeof( bufskill ), "the complete master of" );
-	else if ( ch->spl[dtype] >= 200 )
+	else if ( ch_spl(ch)[dtype] >= 200 )
 		snprintf( bufskill, sizeof( bufskill ), "a grand sorcerer at" );
 
 	else
@@ -474,7 +474,7 @@ void birth_date( CHAR_DATA *ch, bool is_self ) {
 	bool c_month = FALSE;
 
 	if ( is_self )
-		strcpy( buf, ch->createtime );
+		strcpy( buf, ch->pcdata->createtime );
 	else
 		strcpy( buf, ch->pcdata->conception );
 	if ( strlen( buf ) < 24 ) return;
@@ -949,7 +949,7 @@ int years_old( CHAR_DATA *ch ) {
 
 	if ( IS_NPC( ch ) ) return 0;
 
-	strcpy( buf, ch->createtime );
+	strcpy( buf, ch->pcdata->createtime );
 	if ( strlen( buf ) < 24 ) return 0;
 	strtime = ctime( &current_time );
 	strtime[strlen( strtime ) - 1] = '\0';

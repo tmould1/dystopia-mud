@@ -151,6 +151,7 @@ list_head_t g_dns_lookups;
 
 char bug_buf[MAX_STRING_LENGTH];
 list_head_t g_characters;
+list_head_t g_npcs;
 char *help_greeting;
 char log_buf[MAX_STRING_LENGTH];
 KILL_DATA kill_table[MAX_LEVEL];
@@ -263,8 +264,6 @@ ROOM_INDEX_DATA *room_index_hash[MAX_KEY_HASH];
 list_head_t g_areas;
 AREA_DATA *area_last;
 
-ROOM_INDEX_DATA *room_list;
-
 list_head_t g_helps;
 
 int top_affect;
@@ -316,6 +315,7 @@ void boot_db( bool fCopyOver ) {
 	 * Init global entity lists.
 	 */
 	list_init( &g_characters );
+	list_init( &g_npcs );
 	list_init( &g_objects );
 	list_init( &g_areas );
 	list_init( &g_helps );
@@ -967,14 +967,6 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA *pMobIndex ) {
 	mob->hunting = str_dup( "" );
 	mob->lord = str_dup( "" );
 	mob->morph = str_dup( "" );
-	mob->createtime = str_dup( "" );
-	mob->lasttime = str_dup( "" );
-	mob->lasthost = str_dup( "" );
-	mob->powertype = str_dup( "" );
-	mob->poweraction = str_dup( "" );
-	mob->pload = str_dup( "" );
-	mob->prompt = str_dup( "" );
-	mob->cprompt = str_dup( "" );
 
 	mob->name = pMobIndex->player_name;			/* Flyweight: shared with template */
 	mob->short_descr = pMobIndex->short_descr;	/* Flyweight: shared with template */
@@ -1031,6 +1023,7 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA *pMobIndex ) {
 	 * Insert in list.
 	 */
 	list_push_back( &g_characters, &mob->char_node );
+	list_push_back( &g_npcs, &mob->npc_node );
 	pMobIndex->count++;
 	return mob;
 }
@@ -1245,17 +1238,10 @@ void clear_char( CHAR_DATA *ch ) {
 	ch->description = str_dup( "" );
 	ch->lord = str_dup( "" );
 	ch->morph = str_dup( "" );
-	ch->createtime = str_dup( "" );
-	ch->lasthost = str_dup( "" );
-	ch->lasttime = str_dup( "" );
-	ch->powertype = str_dup( "" );
-	ch->poweraction = str_dup( "" );
-	ch->pload = str_dup( "" );
-	ch->prompt = str_dup( "" );
-	ch->cprompt = str_dup( "" );
 	ch->hunting = str_dup( "" );
 
 	list_node_init( &ch->char_node );
+	list_node_init( &ch->npc_node );
 	list_node_init( &ch->room_node );
 	list_init( &ch->affects );
 	list_init( &ch->carrying );
@@ -1304,14 +1290,6 @@ void free_char( CHAR_DATA *ch ) {
 	mob_free_string(ch, ch->description);
 	free(ch->lord);
 	free(ch->morph);
-	free(ch->createtime);
-	free(ch->lasttime);
-	free(ch->lasthost);
-	free(ch->powertype);
-	free(ch->poweraction);
-	free(ch->pload);
-	free(ch->prompt);
-	free(ch->cprompt);
 	free(ch->hunting);
 
 	if ( ch->pcdata != NULL ) {
@@ -1319,6 +1297,14 @@ void free_char( CHAR_DATA *ch ) {
 			alias_remove( ch, ali );
 		}
 
+		free(ch->pcdata->createtime);
+		free(ch->pcdata->lasttime);
+		free(ch->pcdata->lasthost);
+		free(ch->pcdata->pload);
+		free(ch->pcdata->poweraction);
+		free(ch->pcdata->powertype);
+		free(ch->pcdata->prompt);
+		free(ch->pcdata->cprompt);
 		free(ch->pcdata->switchname);
 		free(ch->pcdata->logoutmessage);
 		free(ch->pcdata->avatarmessage);

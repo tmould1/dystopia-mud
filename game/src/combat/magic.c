@@ -62,39 +62,39 @@ void improve_spl( CHAR_DATA *ch, int dtype, int sn ) {
 	else
 		return;
 
-	if ( ch->spl[dtype] >= 240 && ch->class != CLASS_LICH )
+	if ( ch_spl(ch)[dtype] >= 240 && ch->class != CLASS_LICH )
 		return;
-	else if ( ch->spl[dtype] >= 200 && !IS_CLASS( ch, CLASS_MAGE ) && ch->class != CLASS_LICH &&
+	else if ( ch_spl(ch)[dtype] >= 200 && !IS_CLASS( ch, CLASS_MAGE ) && ch->class != CLASS_LICH &&
 		!( IS_CLASS( ch, CLASS_DROW ) && IS_SET( ch->special, SPC_DROW_MAG ) && ( dtype == 0 || dtype == 1 ) ) && !( IS_CLASS( ch, CLASS_DROW ) && IS_SET( ch->special, SPC_DROW_CLE ) && ( dtype == 2 || dtype == 3 ) ) )
 		return;
-	if ( ch->spl[dtype] >= 300 )
+	if ( ch_spl(ch)[dtype] >= 300 )
 		return;
-	if ( ( dice1 > ch->spl[dtype] || dice2 > ch->spl[dtype] ) || ( dice1 == 100 || dice2 == 100 ) )
-		ch->spl[dtype] += 1;
+	if ( ( dice1 > ch_spl(ch)[dtype] || dice2 > ch_spl(ch)[dtype] ) || ( dice1 == 100 || dice2 == 100 ) )
+		ch_spl(ch)[dtype] += 1;
 	else
 		return;
 
-	if ( ch->spl[dtype] == 1 )
+	if ( ch_spl(ch)[dtype] == 1 )
 		snprintf( bufskill, sizeof( bufskill ), "an apprentice of" );
-	else if ( ch->spl[dtype] == 26 )
+	else if ( ch_spl(ch)[dtype] == 26 )
 		snprintf( bufskill, sizeof( bufskill ), "a student at" );
-	else if ( ch->spl[dtype] == 51 )
+	else if ( ch_spl(ch)[dtype] == 51 )
 		snprintf( bufskill, sizeof( bufskill ), "a scholar at" );
-	else if ( ch->spl[dtype] == 76 )
+	else if ( ch_spl(ch)[dtype] == 76 )
 		snprintf( bufskill, sizeof( bufskill ), "a magus at" );
-	else if ( ch->spl[dtype] == 101 )
+	else if ( ch_spl(ch)[dtype] == 101 )
 		snprintf( bufskill, sizeof( bufskill ), "an adept at" );
-	else if ( ch->spl[dtype] == 126 )
+	else if ( ch_spl(ch)[dtype] == 126 )
 		snprintf( bufskill, sizeof( bufskill ), "a mage at" );
-	else if ( ch->spl[dtype] == 151 )
+	else if ( ch_spl(ch)[dtype] == 151 )
 		snprintf( bufskill, sizeof( bufskill ), "a warlock at" );
-	else if ( ch->spl[dtype] == 176 )
+	else if ( ch_spl(ch)[dtype] == 176 )
 		snprintf( bufskill, sizeof( bufskill ), "a master wizard at" );
-	else if ( ch->spl[dtype] == 200 )
+	else if ( ch_spl(ch)[dtype] == 200 )
 		snprintf( bufskill, sizeof( bufskill ), "a grand sorcerer at" );
-	else if ( ch->spl[dtype] == 240 )
+	else if ( ch_spl(ch)[dtype] == 240 )
 		snprintf( bufskill, sizeof( bufskill ), "the complete master of" );
-	else if ( ch->spl[dtype] == 300 )
+	else if ( ch_spl(ch)[dtype] == 300 )
 		snprintf( bufskill, sizeof( bufskill ), "possesing lich knowledge of" );
 	else
 		return;
@@ -258,8 +258,8 @@ bool saves_spell( int level, CHAR_DATA *victim ) {
 	int tsave;
 
 	if ( !IS_NPC( victim ) ) {
-		tsave = (int) ( ( victim->spl[0] + victim->spl[1] + victim->spl[2] +
-							victim->spl[3] + victim->spl[4] ) *
+		tsave = (int) ( ( ch_spl(victim)[0] + ch_spl(victim)[1] + ch_spl(victim)[2] +
+							ch_spl(victim)[3] + ch_spl(victim)[4] ) *
 			0.05 );
 		save = 50 + ( tsave - level - victim->saving_throw ) * 5;
 	} else
@@ -290,7 +290,7 @@ void do_cast( CHAR_DATA *ch, char *argument ) {
 
 	/* Polymorphed players cannot cast spells */
 	if ( !IS_NPC( ch ) && IS_AFFECTED( ch, AFF_POLYMORPH ) && !IS_CLASS( ch, CLASS_ANGEL ) &&
-		!IS_VAMPAFF( ch, VAM_DISGUISED ) && !IS_POLYAFF( ch, POLY_SPIDER ) && ch->power[DISC_VAMP_OBEA] < 10 && !IS_SET( ch->flag2, VAMP_OBJMASK ) && !IS_CLASS( ch, CLASS_DEMON ) && !IS_CLASS( ch, CLASS_MAGE ) &&
+		!IS_VAMPAFF( ch, VAM_DISGUISED ) && !IS_POLYAFF( ch, POLY_SPIDER ) && ch_power(ch)[DISC_VAMP_OBEA] < 10 && !IS_SET( ch->flag2, VAMP_OBJMASK ) && !IS_CLASS( ch, CLASS_DEMON ) && !IS_CLASS( ch, CLASS_MAGE ) &&
 		!IS_CLASS( ch, CLASS_DROID ) && !( IS_CLASS( ch, CLASS_SHAPESHIFTER ) && ch->pcdata->powers[FAERIE_LEVEL] > 1 ) ) {
 		if ( !is_obj( ch ) ) {
 			send_to_char( "You cannot cast spells in this form.\n\r", ch );
@@ -303,7 +303,7 @@ void do_cast( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && IS_AFFECTED( ch, AFF_POLYMORPH ) && ch->power[DISC_VAMP_OBEA] > 9 ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && IS_AFFECTED( ch, AFF_POLYMORPH ) && ch_power(ch)[DISC_VAMP_OBEA] > 9 ) {
 		stc( "#7Your movement of pure magic guides you#n.\n\r", ch );
 	}
 
@@ -344,7 +344,7 @@ void do_cast( CHAR_DATA *ch, char *argument ) {
 	mana = IS_NPC( ch ) ? 0 : UMAX( skill_table[sn].min_mana, 100 / ( 2 + ( ch->level * 12 ) - skill_table[sn].skill_level ) );
 
 	if ( !IS_NPC( ch ) && IS_SET( ch->special, SPC_WOLFMAN ) ) {
-		if ( ch->power[DISC_WERE_OWL] < 4 ) mana *= 2;
+		if ( ch_power(ch)[DISC_WERE_OWL] < 4 ) mana *= 2;
 	}
 
 	/*
@@ -492,10 +492,10 @@ void do_cast( CHAR_DATA *ch, char *argument ) {
 		if ( IS_NPC( ch ) )
 			( *skill_table[sn].spell_fun )( sn, ch->level, ch, vo );
 		else if ( !IS_CLASS( ch, CLASS_MAGE ) && !IS_CLASS( ch, CLASS_LICH ) ) {
-			( *skill_table[sn].spell_fun )( sn, (int) ( ( ch->spl[skill_table[sn].target] * 0.25 ) + tempentro ), ch, vo );
+			( *skill_table[sn].spell_fun )( sn, (int) ( ( ch_spl(ch)[skill_table[sn].target] * 0.25 ) + tempentro ), ch, vo );
 			improve_spl( ch, skill_table[sn].target, sn );
 		} else {
-			( *skill_table[sn].spell_fun )( sn, (int) ( ch->spl[skill_table[sn].target] * .5 + tempentro ), ch, vo );
+			( *skill_table[sn].spell_fun )( sn, (int) ( ch_spl(ch)[skill_table[sn].target] * .5 + tempentro ), ch, vo );
 			improve_spl( ch, skill_table[sn].target, sn );
 		}
 	}
@@ -2384,7 +2384,7 @@ void spell_poison( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		IS_VAMPAFF( victim, VAM_SERPENTIS ) )
 		return;
 	else if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) &&
-		victim->power[DISC_WERE_SPID] > 2 )
+		ch_power(victim)[DISC_WERE_SPID] > 2 )
 		return;
 	else if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_DROW ) &&
 		IS_SET( victim->pcdata->powers[1], DPOWER_DROWPOISON ) )
@@ -2916,47 +2916,47 @@ void spell_soulblade( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	obj = create_object( get_obj_index( OBJ_VNUM_SOULBLADE ), 0 );
 
-	if ( ch->wpn[1] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[1] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 1;
 		snprintf( wpnname, sizeof( wpnname ), "blade" );
 	}
-	if ( ch->wpn[2] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[2] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 2;
 		snprintf( wpnname, sizeof( wpnname ), "blade" );
 	}
-	if ( ch->wpn[4] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[4] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 4;
 		snprintf( wpnname, sizeof( wpnname ), "whip" );
 	}
-	if ( ch->wpn[5] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[5] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 5;
 		snprintf( wpnname, sizeof( wpnname ), "claw" );
 	}
-	if ( ch->wpn[6] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[6] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 6;
 		snprintf( wpnname, sizeof( wpnname ), "blaster" );
 	}
-	if ( ch->wpn[7] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[7] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 7;
 		snprintf( wpnname, sizeof( wpnname ), "mace" );
 	}
-	if ( ch->wpn[8] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[8] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 8;
 		snprintf( wpnname, sizeof( wpnname ), "mace" );
 	}
-	if ( ch->wpn[9] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[9] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 9;
 		snprintf( wpnname, sizeof( wpnname ), "grepper" );
 	}
-	if ( ch->wpn[10] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[10] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 10;
 		snprintf( wpnname, sizeof( wpnname ), "fang" );
 	}
-	if ( ch->wpn[11] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[11] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 11;
 		snprintf( wpnname, sizeof( wpnname ), "blade" );
 	}
-	if ( ch->wpn[12] > ch->wpn[weapontype] ) {
+	if ( ch_wpn(ch)[12] > ch_wpn(ch)[weapontype] ) {
 		weapontype = 12;
 		snprintf( wpnname, sizeof( wpnname ), "sucker" );
 	}
@@ -2982,8 +2982,8 @@ void spell_soulblade( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	if ( IS_NPC( ch ) )
 		obj->level = ch->level;
-	else if ( ch->spl[2] > 4 )
-		obj->level = ch->spl[2] / 4;
+	else if ( ch_spl(ch)[2] > 4 )
+		obj->level = ch_spl(ch)[2] / 4;
 	else
 		obj->level = 1;
 	if ( obj->level > 60 ) obj->level = 60;
@@ -3391,7 +3391,7 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 
-	if ( victim->loc_hp[6] > 0 ) {
+	if ( ch_loc_hp(victim)[6] > 0 ) {
 		send_to_char( "You cannot regenerate someone who is still bleeding.\n\r", ch );
 		return;
 	}
@@ -3413,9 +3413,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 			return;
 		}
 		if ( IS_ARM_L( victim, LOST_ARM ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_L], LOST_ARM );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], LOST_ARM );
 		else if ( IS_ARM_R( victim, LOST_ARM ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_R], LOST_ARM );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], LOST_ARM );
 		act( "You press $p onto the stump of $N's shoulder.", ch, obj, victim, TO_CHAR );
 		act( "$n presses $p onto the stump of $N's shoulder.", ch, obj, victim, TO_NOTVICT );
 		act( "$n presses $p onto the stump of your shoulder.", ch, obj, victim, TO_VICT );
@@ -3427,9 +3427,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 			return;
 		}
 		if ( IS_LEG_L( victim, LOST_LEG ) )
-			REMOVE_BIT( victim->loc_hp[LOC_LEG_L], LOST_LEG );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_LEG_L], LOST_LEG );
 		else if ( IS_LEG_R( victim, LOST_LEG ) )
-			REMOVE_BIT( victim->loc_hp[LOC_LEG_R], LOST_LEG );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_LEG_R], LOST_LEG );
 		act( "You press $p onto the stump of $N's hip.", ch, obj, victim, TO_CHAR );
 		act( "$n presses $p onto the stump of $N's hip.", ch, obj, victim, TO_NOTVICT );
 		act( "$n presses $p onto the stump of your hip.", ch, obj, victim, TO_VICT );
@@ -3441,9 +3441,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 			return;
 		}
 		if ( IS_HEAD( victim, LOST_EYE_L ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_EYE_L );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_EYE_L );
 		else if ( IS_HEAD( victim, LOST_EYE_R ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_EYE_R );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_EYE_R );
 		act( "You press $p into $N's empty eye socket.", ch, obj, victim, TO_CHAR );
 		act( "$n presses $p into $N's empty eye socket.", ch, obj, victim, TO_NOTVICT );
 		act( "$n presses $p into your empty eye socket.", ch, obj, victim, TO_VICT );
@@ -3455,9 +3455,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 			return;
 		}
 		if ( IS_HEAD( victim, LOST_EAR_L ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_EAR_L );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_EAR_L );
 		else if ( IS_HEAD( victim, LOST_EAR_R ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_EAR_R );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_EAR_R );
 		act( "You press $p onto the side of $N's head.", ch, obj, victim, TO_CHAR );
 		act( "$n presses $p onto the side of $N's head.", ch, obj, victim, TO_NOTVICT );
 		act( "$n presses $p onto the side of your head.", ch, obj, victim, TO_VICT );
@@ -3468,7 +3468,7 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 			send_to_char( "They don't need a nose.\n\r", ch );
 			return;
 		}
-		REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_NOSE );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_NOSE );
 		act( "You press $p onto the front of $N's face.", ch, obj, victim, TO_CHAR );
 		act( "$n presses $p onto the front of $N's face.", ch, obj, victim, TO_NOTVICT );
 		act( "$n presses $p onto the front of your face.", ch, obj, victim, TO_VICT );
@@ -3476,9 +3476,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	} else if ( obj->pIndexData->vnum == OBJ_VNUM_SEVERED_HAND ) {
 		if ( !IS_ARM_L( victim, LOST_ARM ) && IS_ARM_L( victim, LOST_HAND ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_L], LOST_HAND );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], LOST_HAND );
 		else if ( !IS_ARM_R( victim, LOST_ARM ) && IS_ARM_R( victim, LOST_HAND ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_R], LOST_HAND );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], LOST_HAND );
 		else {
 			send_to_char( "They don't need a hand.\n\r", ch );
 			return;
@@ -3490,9 +3490,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	} else if ( obj->pIndexData->vnum == OBJ_VNUM_SEVERED_FOOT ) {
 		if ( !IS_LEG_L( victim, LOST_LEG ) && IS_LEG_L( victim, LOST_FOOT ) )
-			REMOVE_BIT( victim->loc_hp[LOC_LEG_L], LOST_FOOT );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_LEG_L], LOST_FOOT );
 		else if ( !IS_LEG_R( victim, LOST_LEG ) && IS_LEG_R( victim, LOST_FOOT ) )
-			REMOVE_BIT( victim->loc_hp[LOC_LEG_R], LOST_FOOT );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_LEG_R], LOST_FOOT );
 		else {
 			send_to_char( "They don't need a foot.\n\r", ch );
 			return;
@@ -3504,9 +3504,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	} else if ( obj->pIndexData->vnum == OBJ_VNUM_SEVERED_THUMB ) {
 		if ( !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && IS_ARM_L( victim, LOST_THUMB ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_L], LOST_THUMB );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], LOST_THUMB );
 		else if ( !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && IS_ARM_R( victim, LOST_THUMB ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_R], LOST_THUMB );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], LOST_THUMB );
 		else {
 			send_to_char( "They don't need a thumb.\n\r", ch );
 			return;
@@ -3518,9 +3518,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	} else if ( obj->pIndexData->vnum == OBJ_VNUM_SEVERED_INDEX ) {
 		if ( !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && IS_ARM_L( victim, LOST_FINGER_I ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_L], LOST_FINGER_I );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], LOST_FINGER_I );
 		else if ( !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && IS_ARM_R( victim, LOST_FINGER_I ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_R], LOST_FINGER_I );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], LOST_FINGER_I );
 		else {
 			send_to_char( "They don't need an index finger.\n\r", ch );
 			return;
@@ -3532,9 +3532,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	} else if ( obj->pIndexData->vnum == OBJ_VNUM_SEVERED_MIDDLE ) {
 		if ( !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && IS_ARM_L( victim, LOST_FINGER_M ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_L], LOST_FINGER_M );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], LOST_FINGER_M );
 		else if ( !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && IS_ARM_R( victim, LOST_FINGER_M ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_R], LOST_FINGER_M );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], LOST_FINGER_M );
 		else {
 			send_to_char( "They don't need a middle finger.\n\r", ch );
 			return;
@@ -3546,9 +3546,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	} else if ( obj->pIndexData->vnum == OBJ_VNUM_SEVERED_RING ) {
 		if ( !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && IS_ARM_L( victim, LOST_FINGER_R ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_L], LOST_FINGER_R );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], LOST_FINGER_R );
 		else if ( !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && IS_ARM_R( victim, LOST_FINGER_R ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_R], LOST_FINGER_R );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], LOST_FINGER_R );
 		else {
 			send_to_char( "They don't need a ring finger.\n\r", ch );
 			return;
@@ -3560,9 +3560,9 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	} else if ( obj->pIndexData->vnum == OBJ_VNUM_SEVERED_LITTLE ) {
 		if ( !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && IS_ARM_L( victim, LOST_FINGER_L ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_L], LOST_FINGER_L );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], LOST_FINGER_L );
 		else if ( !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && IS_ARM_R( victim, LOST_FINGER_L ) )
-			REMOVE_BIT( victim->loc_hp[LOC_ARM_R], LOST_FINGER_L );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], LOST_FINGER_L );
 		else {
 			send_to_char( "They don't need a little finger.\n\r", ch );
 			return;
@@ -3574,35 +3574,35 @@ void spell_regenerate( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	} else if ( teeth > 0 ) {
 		if ( IS_HEAD( victim, LOST_TOOTH_1 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_1 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_1 );
 		if ( IS_HEAD( victim, LOST_TOOTH_2 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_2 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_2 );
 		if ( IS_HEAD( victim, LOST_TOOTH_4 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_4 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_4 );
 		if ( IS_HEAD( victim, LOST_TOOTH_8 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_8 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_8 );
 		if ( IS_HEAD( victim, LOST_TOOTH_16 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_16 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_16 );
 		teeth -= 1;
 		if ( teeth >= 16 ) {
 			teeth -= 16;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_16 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_16 );
 		}
 		if ( teeth >= 8 ) {
 			teeth -= 8;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_8 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_8 );
 		}
 		if ( teeth >= 4 ) {
 			teeth -= 4;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_4 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_4 );
 		}
 		if ( teeth >= 2 ) {
 			teeth -= 2;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_2 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_2 );
 		}
 		if ( teeth >= 1 ) {
 			teeth -= 1;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_1 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_1 );
 		}
 		act( "You press $p into $N's mouth.", ch, obj, victim, TO_CHAR );
 		act( "$n presses $p into $N's mouth.", ch, obj, victim, TO_NOTVICT );
@@ -3620,43 +3620,43 @@ void spell_clot( int sn, int level, CHAR_DATA *ch, void *vo ) {
 	if ( IS_BLEEDING( victim, BLEEDING_HEAD ) ) {
 		act( "$n's head stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "Your head stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_HEAD );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HEAD );
 	} else if ( IS_BLEEDING( victim, BLEEDING_THROAT ) ) {
 		act( "$n's throat stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "Your throat stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_THROAT );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_THROAT );
 	} else if ( IS_BLEEDING( victim, BLEEDING_ARM_L ) ) {
 		act( "The stump of $n's left arm stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "The stump of your left arm stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_ARM_L );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_L );
 	} else if ( IS_BLEEDING( victim, BLEEDING_ARM_R ) ) {
 		act( "The stump of $n's right arm stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "The stump of your right arm stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_ARM_R );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_R );
 	} else if ( IS_BLEEDING( victim, BLEEDING_LEG_L ) ) {
 		act( "The stump of $n's left leg stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "The stump of your left leg stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_LEG_L );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_LEG_L );
 	} else if ( IS_BLEEDING( victim, BLEEDING_LEG_R ) ) {
 		act( "The stump of $n's right leg stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "The stump of your right leg stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_LEG_R );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_LEG_R );
 	} else if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) ) {
 		act( "The stump of $n's left wrist stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "The stump of your left wrist stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_L );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_L );
 	} else if ( IS_BLEEDING( victim, BLEEDING_HAND_R ) ) {
 		act( "The stump of $n's right wrist stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "The stump of your right wrist stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_R );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_R );
 	} else if ( IS_BLEEDING( victim, BLEEDING_FOOT_L ) ) {
 		act( "The stump of $n's left ankle stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "The stump of your left ankle stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_FOOT_L );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_FOOT_L );
 	} else if ( IS_BLEEDING( victim, BLEEDING_FOOT_R ) ) {
 		act( "The stump of $n's right ankle stops bleeding.", victim, NULL, NULL, TO_ROOM );
 		act( "The stump of your right ankle stops bleeding.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[6], BLEEDING_FOOT_R );
+		REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_FOOT_R );
 	} else
 		send_to_char( "They have no wounds to clot.\n\r", ch );
 	if ( !IS_NPC( ch ) && ch != victim ) do_humanity( ch, "" );
@@ -3675,122 +3675,122 @@ void spell_mend( int sn, int level, CHAR_DATA *ch, void *vo ) {
 
 	if ( ribs > 0 ) {
 		if ( IS_BODY( victim, BROKEN_RIBS_1 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_1 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_1 );
 		if ( IS_BODY( victim, BROKEN_RIBS_2 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_2 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_2 );
 		if ( IS_BODY( victim, BROKEN_RIBS_4 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_4 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_4 );
 		if ( IS_BODY( victim, BROKEN_RIBS_8 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_8 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_8 );
 		if ( IS_BODY( victim, BROKEN_RIBS_16 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_16 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_16 );
 		ribs -= 1;
 		if ( ribs >= 16 ) {
 			ribs -= 16;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_16 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_16 );
 		}
 		if ( ribs >= 8 ) {
 			ribs -= 8;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_8 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_8 );
 		}
 		if ( ribs >= 4 ) {
 			ribs -= 4;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_4 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_4 );
 		}
 		if ( ribs >= 2 ) {
 			ribs -= 2;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_2 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_2 );
 		}
 		if ( ribs >= 1 ) {
 			ribs -= 1;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_1 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_1 );
 		}
 		act( "One of $n's ribs snap back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "One of your ribs snap back into place.", victim, NULL, NULL, TO_CHAR );
 	} else if ( IS_HEAD( victim, BROKEN_NOSE ) && !IS_HEAD( victim, LOST_NOSE ) ) {
 		act( "$n's nose snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your nose snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_HEAD], BROKEN_NOSE );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_NOSE );
 	} else if ( IS_HEAD( victim, BROKEN_JAW ) ) {
 		act( "$n's jaw snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your jaw snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_HEAD], BROKEN_JAW );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_JAW );
 	} else if ( IS_HEAD( victim, BROKEN_SKULL ) ) {
 		act( "$n's skull knits itself back together.", victim, NULL, NULL, TO_ROOM );
 		act( "Your skull knits itself back together.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_HEAD], BROKEN_SKULL );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_SKULL );
 	} else if ( IS_BODY( victim, BROKEN_SPINE ) ) {
 		act( "$n's spine knits itself back together.", victim, NULL, NULL, TO_ROOM );
 		act( "Your spine knits itself back together.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_BODY], BROKEN_SPINE );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_BODY], BROKEN_SPINE );
 	} else if ( IS_BODY( victim, BROKEN_NECK ) ) {
 		act( "$n's neck snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your neck snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_BODY], BROKEN_NECK );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_BODY], BROKEN_NECK );
 	} else if ( IS_ARM_L( victim, BROKEN_ARM ) && !IS_ARM_L( victim, LOST_ARM ) ) {
 		act( "$n's left arm snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your left arm snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_L], BROKEN_ARM );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], BROKEN_ARM );
 	} else if ( IS_ARM_R( victim, BROKEN_ARM ) && !IS_ARM_R( victim, LOST_ARM ) ) {
 		act( "$n's right arm snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your right arm snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_R], BROKEN_ARM );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], BROKEN_ARM );
 	} else if ( IS_LEG_L( victim, BROKEN_LEG ) && !IS_LEG_L( victim, LOST_LEG ) ) {
 		act( "$n's left leg snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your left leg snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_LEG_L], BROKEN_LEG );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_LEG_L], BROKEN_LEG );
 	} else if ( IS_LEG_R( victim, BROKEN_LEG ) && !IS_LEG_R( victim, LOST_LEG ) ) {
 		act( "$n's right leg snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your right leg snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_LEG_R], BROKEN_LEG );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_LEG_R], BROKEN_LEG );
 	} else if ( IS_ARM_L( victim, BROKEN_THUMB ) && !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && !IS_ARM_L( victim, LOST_THUMB ) ) {
 		act( "$n's left thumb snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your left thumb snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_L], BROKEN_THUMB );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], BROKEN_THUMB );
 	} else if ( IS_ARM_L( victim, BROKEN_FINGER_I ) && !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && !IS_ARM_L( victim, LOST_FINGER_I ) ) {
 		act( "$n's left index finger snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your left index finger snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_L], BROKEN_FINGER_I );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], BROKEN_FINGER_I );
 	} else if ( IS_ARM_L( victim, BROKEN_FINGER_M ) && !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && !IS_ARM_L( victim, LOST_FINGER_M ) ) {
 		act( "$n's left middle finger snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your left middle finger snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_L], BROKEN_FINGER_M );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], BROKEN_FINGER_M );
 	} else if ( IS_ARM_L( victim, BROKEN_FINGER_R ) && !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && !IS_ARM_L( victim, LOST_FINGER_R ) ) {
 		act( "$n's left ring finger snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your left ring finger snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_L], BROKEN_FINGER_R );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], BROKEN_FINGER_R );
 	} else if ( IS_ARM_L( victim, BROKEN_FINGER_L ) && !IS_ARM_L( victim, LOST_ARM ) && !IS_ARM_L( victim, LOST_HAND ) && !IS_ARM_L( victim, LOST_FINGER_L ) ) {
 		act( "$n's left little finger snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your left little finger snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_L], BROKEN_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_L], BROKEN_FINGER_L );
 	} else if ( IS_ARM_R( victim, BROKEN_THUMB ) && !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && !IS_ARM_R( victim, LOST_THUMB ) ) {
 		act( "$n's right thumb snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your right thumb snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_R], BROKEN_THUMB );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], BROKEN_THUMB );
 	} else if ( IS_ARM_R( victim, BROKEN_FINGER_I ) && !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && !IS_ARM_R( victim, LOST_FINGER_I ) ) {
 		act( "$n's right index finger snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your right index finger snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_R], BROKEN_FINGER_I );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], BROKEN_FINGER_I );
 	} else if ( IS_ARM_R( victim, BROKEN_FINGER_M ) && !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && !IS_ARM_R( victim, LOST_FINGER_M ) ) {
 		act( "$n's right middle finger snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your right middle finger snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_R], BROKEN_FINGER_M );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], BROKEN_FINGER_M );
 	} else if ( IS_ARM_R( victim, BROKEN_FINGER_R ) && !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && !IS_ARM_R( victim, LOST_FINGER_R ) ) {
 		act( "$n's right ring finger snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your right ring finger snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_R], BROKEN_FINGER_R );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], BROKEN_FINGER_R );
 	} else if ( IS_ARM_R( victim, BROKEN_FINGER_L ) && !IS_ARM_R( victim, LOST_ARM ) && !IS_ARM_R( victim, LOST_HAND ) && !IS_ARM_R( victim, LOST_FINGER_L ) ) {
 		act( "$n's right little finger snaps back into place.", victim, NULL, NULL, TO_ROOM );
 		act( "Your right little finger snaps back into place.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_ARM_R], BROKEN_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_ARM_R], BROKEN_FINGER_L );
 	} else if ( IS_BODY( victim, CUT_THROAT ) ) {
-		if ( IS_SET( victim->loc_hp[6], BLEEDING_THROAT ) ) {
+		if ( IS_SET( ch_loc_hp(victim)[6], BLEEDING_THROAT ) ) {
 			send_to_char( "But their throat is still bleeding!\n\r", ch );
 			return;
 		}
 		act( "The wound in $n's throat closes up.", victim, NULL, NULL, TO_ROOM );
 		act( "The wound in your throat closes up.", victim, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( victim->loc_hp[LOC_BODY], CUT_THROAT );
+		REMOVE_BIT( ch_loc_hp(victim)[LOC_BODY], CUT_THROAT );
 	} else
 		send_to_char( "They have no bones to mend.\n\r", ch );
 	if ( !IS_NPC( ch ) && ch != victim ) do_humanity( ch, "" );
@@ -3924,19 +3924,19 @@ void spell_brew( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 	if ( skill_table[sn].target == 0 ) {
-		obj->value[0] = ch->spl[0] / 4;
+		obj->value[0] = ch_spl(ch)[0] / 4;
 		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
-		obj->value[0] = ch->spl[1] / 4;
+		obj->value[0] = ch_spl(ch)[1] / 4;
 		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
-		obj->value[0] = ch->spl[2] / 4;
+		obj->value[0] = ch_spl(ch)[2] / 4;
 		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
-		obj->value[0] = ch->spl[3] / 4;
+		obj->value[0] = ch_spl(ch)[3] / 4;
 		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
-		obj->value[0] = ch->spl[4] / 4;
+		obj->value[0] = ch_spl(ch)[4] / 4;
 		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
@@ -4009,19 +4009,19 @@ void spell_scribe( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 	if ( skill_table[sn].target == 0 ) {
-		obj->value[0] = ch->spl[0] / 4;
+		obj->value[0] = ch_spl(ch)[0] / 4;
 		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
-		obj->value[0] = ch->spl[1] / 4;
+		obj->value[0] = ch_spl(ch)[1] / 4;
 		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
-		obj->value[0] = ch->spl[2] / 4;
+		obj->value[0] = ch_spl(ch)[2] / 4;
 		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
-		obj->value[0] = ch->spl[3] / 4;
+		obj->value[0] = ch_spl(ch)[3] / 4;
 		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
-		obj->value[0] = ch->spl[4] / 4;
+		obj->value[0] = ch_spl(ch)[4] / 4;
 		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
@@ -4092,19 +4092,19 @@ void spell_carve( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 	if ( skill_table[sn].target == 0 ) {
-		obj->value[0] = ch->spl[0] / 4;
+		obj->value[0] = ch_spl(ch)[0] / 4;
 		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
-		obj->value[0] = ch->spl[1] / 4;
+		obj->value[0] = ch_spl(ch)[1] / 4;
 		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
-		obj->value[0] = ch->spl[2] / 4;
+		obj->value[0] = ch_spl(ch)[2] / 4;
 		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
-		obj->value[0] = ch->spl[3] / 4;
+		obj->value[0] = ch_spl(ch)[3] / 4;
 		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
-		obj->value[0] = ch->spl[4] / 4;
+		obj->value[0] = ch_spl(ch)[4] / 4;
 		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
@@ -4170,19 +4170,19 @@ void spell_engrave( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 	if ( skill_table[sn].target == 0 ) {
-		obj->value[0] = ( ch->spl[0] + 1 ) / 4;
+		obj->value[0] = ( ch_spl(ch)[0] + 1 ) / 4;
 		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
-		obj->value[0] = ( ch->spl[1] + 1 ) / 4;
+		obj->value[0] = ( ch_spl(ch)[1] + 1 ) / 4;
 		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
-		obj->value[0] = ( ch->spl[2] + 1 ) / 4;
+		obj->value[0] = ( ch_spl(ch)[2] + 1 ) / 4;
 		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
-		obj->value[0] = ( ch->spl[3] + 1 ) / 4;
+		obj->value[0] = ( ch_spl(ch)[3] + 1 ) / 4;
 		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
-		obj->value[0] = ( ch->spl[4] + 1 ) / 4;
+		obj->value[0] = ( ch_spl(ch)[4] + 1 ) / 4;
 		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
@@ -4248,19 +4248,19 @@ void spell_bake( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 	}
 	if ( skill_table[sn].target == 0 ) {
-		obj->value[0] = ch->spl[0] / 4;
+		obj->value[0] = ch_spl(ch)[0] / 4;
 		snprintf( col, sizeof( col ), "purple" );
 	} else if ( skill_table[sn].target == 1 ) {
-		obj->value[0] = ch->spl[1] / 4;
+		obj->value[0] = ch_spl(ch)[1] / 4;
 		snprintf( col, sizeof( col ), "red" );
 	} else if ( skill_table[sn].target == 2 ) {
-		obj->value[0] = ch->spl[2] / 4;
+		obj->value[0] = ch_spl(ch)[2] / 4;
 		snprintf( col, sizeof( col ), "blue" );
 	} else if ( skill_table[sn].target == 3 ) {
-		obj->value[0] = ch->spl[3] / 4;
+		obj->value[0] = ch_spl(ch)[3] / 4;
 		snprintf( col, sizeof( col ), "green" );
 	} else if ( skill_table[sn].target == 4 ) {
-		obj->value[0] = ch->spl[4] / 4;
+		obj->value[0] = ch_spl(ch)[4] / 4;
 		snprintf( col, sizeof( col ), "yellow" );
 	} else {
 		send_to_char( "Oh dear...big bug...please inform KaVir.\n\r", ch );
@@ -4688,7 +4688,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		return;
 
 	if ( !str_cmp( target_name, "frog" ) ) {
-		if ( !IS_NPC( ch ) && ch->stance[0] != -1 ) do_stance( ch, "" );
+		if ( !IS_NPC( ch ) && ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 		if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 		act( "$n polymorphs into a frog!", ch, NULL, NULL, TO_ROOM );
 		send_to_char( "You polymorph into a frog!\n\r", ch );
@@ -4703,7 +4703,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( target_name, "fish" ) ) {
-		if ( !IS_NPC( ch ) && ch->stance[0] != -1 ) do_stance( ch, "" );
+		if ( !IS_NPC( ch ) && ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 		if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 		act( "$n polymorphs into a fish!", ch, NULL, NULL, TO_ROOM );
 		send_to_char( "You polymorph into a fish!\n\r", ch );
@@ -4718,7 +4718,7 @@ void spell_polymorph( int sn, int level, CHAR_DATA *ch, void *vo ) {
 		ch->morph = str_dup( buf );
 		return;
 	} else if ( !str_cmp( target_name, "raven" ) ) {
-		if ( !IS_NPC( ch ) && ch->stance[0] != -1 ) do_stance( ch, "" );
+		if ( !IS_NPC( ch ) && ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 		if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 		act( "$n polymorphs into a raven!", ch, NULL, NULL, TO_ROOM );
 		send_to_char( "You polymorph into a raven!\n\r", ch );

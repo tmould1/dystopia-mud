@@ -166,11 +166,11 @@ void test_interp_discipline_restricted_cmd( void ) {
 		ch->class = cmd_table[disc_cmd].race;
 
 		/* Insufficient discipline level */
-		ch->power[cmd_table[disc_cmd].discipline] = cmd_table[disc_cmd].disclevel - 1;
+		ch->pcdata->power[cmd_table[disc_cmd].discipline] = cmd_table[disc_cmd].disclevel - 1;
 		TEST_ASSERT_EQ( can_interpret( ch, disc_cmd ), 0 );
 
 		/* Sufficient discipline level */
-		ch->power[cmd_table[disc_cmd].discipline] = cmd_table[disc_cmd].disclevel;
+		ch->pcdata->power[cmd_table[disc_cmd].discipline] = cmd_table[disc_cmd].disclevel;
 		TEST_ASSERT_EQ( can_interpret( ch, disc_cmd ), 1 );
 		free_test_char( ch );
 	}

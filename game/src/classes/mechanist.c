@@ -423,8 +423,7 @@ void do_artdetonate( CHAR_DATA *ch, char *argument ) {
 
 	/* Find the bomber drone */
 	drone = NULL;
-	LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
-		if ( !IS_NPC( vch ) ) continue;
+	LIST_FOR_EACH( vch, &g_npcs, CHAR_DATA, npc_node ) {
 		if ( vch->pIndexData == NULL ) continue;
 		if ( vch->pIndexData->vnum != VNUM_MECH_BOMBER_DRONE ) continue;
 		if ( vch->wizard != ch ) continue;
@@ -572,8 +571,7 @@ void do_dronearmy( CHAR_DATA *ch, char *argument ) {
 	/* Also grant HP bonus to existing drones */
 	if ( spawned < MECH_MAX_DRONES ) {
 		CHAR_DATA *vch;
-		LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
-			if ( !IS_NPC( vch ) ) continue;
+		LIST_FOR_EACH( vch, &g_npcs, CHAR_DATA, npc_node ) {
 			if ( vch->pIndexData == NULL ) continue;
 			if ( vch->pIndexData->vnum != VNUM_MECH_COMBAT_DRONE ) continue;
 			if ( vch->wizard != ch ) continue;
@@ -1101,8 +1099,7 @@ void do_dronestatus( CHAR_DATA *ch, char *argument ) {
 	send_to_char( buf, ch );
 
 	/* Show individual combat drone HP */
-	LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
-		if ( !IS_NPC( vch ) ) continue;
+	LIST_FOR_EACH( vch, &g_npcs, CHAR_DATA, npc_node ) {
 		if ( vch->pIndexData == NULL ) continue;
 		if ( vch->wizard != ch ) continue;
 		if ( vch->pIndexData->vnum == VNUM_MECH_COMBAT_DRONE ) {
@@ -1116,8 +1113,7 @@ void do_dronestatus( CHAR_DATA *ch, char *argument ) {
 
 	/* Show bomber drone */
 	if ( ch->pcdata->powers[MECH_BOMBER_ACTIVE] ) {
-		LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
-			if ( !IS_NPC( vch ) ) continue;
+		LIST_FOR_EACH( vch, &g_npcs, CHAR_DATA, npc_node ) {
 			if ( vch->pIndexData == NULL ) continue;
 			if ( vch->pIndexData->vnum != VNUM_MECH_BOMBER_DRONE ) continue;
 			if ( vch->wizard != ch ) continue;
@@ -1165,9 +1161,7 @@ void do_dronerecall( CHAR_DATA *ch, char *argument ) {
 	}
 
 	/* Find and extract all drone mobs */
-	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
-
-		if ( !IS_NPC( vch ) ) continue;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_npcs, CHAR_DATA, npc_node ) {
 		if ( vch->pIndexData == NULL ) continue;
 		if ( vch->wizard != ch ) continue;
 		if ( vch->pIndexData->vnum != VNUM_MECH_COMBAT_DRONE &&
@@ -1252,8 +1246,7 @@ void update_mechanist( CHAR_DATA *ch ) {
 		if ( ch->pcdata->powers[MECH_DRONE_COUNT] > 0 || ch->pcdata->powers[MECH_BOMBER_ACTIVE] ) {
 			CHAR_DATA *vch;
 			int dheal = cfg( CFG_ABILITY_MECHANIST_REPAIRSWARM_DRONE_HEAL );
-			LIST_FOR_EACH( vch, &g_characters, CHAR_DATA, char_node ) {
-				if ( !IS_NPC( vch ) ) continue;
+			LIST_FOR_EACH( vch, &g_npcs, CHAR_DATA, npc_node ) {
 				if ( vch->pIndexData == NULL ) continue;
 				if ( vch->wizard != ch ) continue;
 				if ( vch->pIndexData->vnum != VNUM_MECH_COMBAT_DRONE &&
@@ -1374,9 +1367,7 @@ void mechanist_move_drones( CHAR_DATA *ch, ROOM_INDEX_DATA *to_room ) {
 
 	if ( to_room == NULL ) return;
 
-	LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
-
-		if ( !IS_NPC( vch ) ) continue;
+	LIST_FOR_EACH_SAFE( vch, vch_next, &g_npcs, CHAR_DATA, npc_node ) {
 		if ( vch->pIndexData == NULL ) continue;
 		if ( vch->wizard != ch ) continue;
 		if ( vch->pIndexData->vnum != VNUM_MECH_COMBAT_DRONE &&

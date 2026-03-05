@@ -960,14 +960,14 @@ char *mxp_player_link( CHAR_DATA *victim, CHAR_DATA *ch, char *display_text ) {
 		return display_text;
 
 	/* Calculate PK ratio for tooltip */
-	if ( victim->pkill > 0 && ( victim->pkill + victim->pdeath ) > 0 )
-		pk_ratio = ( 100 * victim->pkill ) / ( victim->pkill + victim->pdeath );
+	if ( victim->pcdata->pkill > 0 && ( victim->pcdata->pkill + victim->pcdata->pdeath ) > 0 )
+		pk_ratio = ( 100 * victim->pcdata->pkill ) / ( victim->pcdata->pkill + victim->pcdata->pdeath );
 	else
 		pk_ratio = 0;
 
 	/* Build the tooltip hint - PK stats */
 	snprintf( hint, sizeof( hint ), "Kills: %d, Deaths: %d (%.2f ratio)",
-		victim->pkill, victim->pdeath, pk_ratio / 100.0 );
+		victim->pcdata->pkill, victim->pcdata->pdeath, pk_ratio / 100.0 );
 
 	/* Escape for MXP */
 	mxp_escape_string( escaped_name, name, sizeof( escaped_name ) );

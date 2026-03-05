@@ -36,17 +36,17 @@ int find_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam, bool foot ) {
 		dam = dam / 2;
 	if ( !IS_AWAKE( victim ) )
 		dam *= 2;
-	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_POTE] > 0 )
-		dam = (int) ( dam * ( ch->power[DISC_VAMP_POTE] * .4 ) );
-	else if ( ch->power[DISC_DAEM_ATTA] > 0 )
-		dam = (int) ( dam * ch->power[DISC_DAEM_ATTA] * .5 );
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_POTE] > 0 )
+		dam = (int) ( dam * ( ch_power(ch)[DISC_VAMP_POTE] * .4 ) );
+	else if ( ch_power(ch)[DISC_DAEM_ATTA] > 0 )
+		dam = (int) ( dam * ch_power(ch)[DISC_DAEM_ATTA] * .5 );
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MONK ) ) {
-		if ( ch->chi[CURRENT] > 0 && ch->chi[CURRENT] < 3 ) dam = (int) ( dam * 1.2 );
-		if ( ch->chi[CURRENT] > 2 ) dam *= ( ch->chi[CURRENT] / 2 );
+		if ( ch_chi(ch)[CURRENT] > 0 && ch_chi(ch)[CURRENT] < 3 ) dam = (int) ( dam * 1.2 );
+		if ( ch_chi(ch)[CURRENT] > 2 ) dam *= ( ch_chi(ch)[CURRENT] / 2 );
 	}
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) ) {
 		if ( IS_SET( victim->special, SPC_WOLFMAN ) ) dam = (int) ( dam * 0.3 );
-		if ( victim->power[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.3 );
+		if ( ch_power(victim)[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.3 );
 		if ( foot == TRUE ) {
 			if ( ( boots = get_eq_char( ch, WEAR_FEET ) ) != NULL && IS_SET( boots->spectype, SITEM_SILVER ) )
 				dam *= 2;
@@ -57,7 +57,7 @@ int find_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam, bool foot ) {
 		}
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		if ( ch->power[DISC_WERE_LUNA] > 6 ) {
+		if ( ch_power(ch)[DISC_WERE_LUNA] > 6 ) {
 			if ( weather_info.sunlight == SUN_DARK )
 				dam = (int) ( dam * 1.6 );
 		}
@@ -68,9 +68,9 @@ int find_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam, bool foot ) {
 		else if ( weather_info.sunlight == SUN_DARK )
 			dam = (int) ( dam * 1.5 );
 	}
-	if ( !IS_NPC( ch ) ) dam = dam + ( dam * ( ( ch->wpn[0] + 1 ) / 100 ) );
+	if ( !IS_NPC( ch ) ) dam = dam + ( dam * ( ( ch_wpn(ch)[0] + 1 ) / 100 ) );
 	if ( !IS_NPC( ch ) ) {
-		stance = ch->stance[0];
+		stance = ch_stance(ch)[0];
 		if ( IS_STANCE( ch, STANCE_NORMAL ) )
 			dam = (int) ( dam * 1.25 );
 		else
@@ -100,14 +100,14 @@ void do_shinkick( CHAR_DATA *ch, char *argument ) {
 	dam = number_range( 1, 6 );
 	dam = find_dam( ch, victim, dam, foot );
 
-	if ( ch->monkcrap == 0 ) {
+	if ( ch->pcdata->monkcrap == 0 ) {
 		stc( "Your aura glows light blue for a moment.\n\r", ch );
 		act( "$n's aura glows a light blue for a moment.", ch, NULL, victim, TO_VICT );
-		SET_BIT( ch->monkcrap, COMB_SHIN );
-	} else if ( ch->monkcrap > 0 ) {
+		SET_BIT( ch->pcdata->monkcrap, COMB_SHIN );
+	} else if ( ch->pcdata->monkcrap > 0 ) {
 		stc( "Your aura fades away.\n\r", ch );
 		act( "$n's aura fades away.", ch, NULL, victim, TO_VICT );
-		ch->monkcrap = 0;
+		ch->pcdata->monkcrap = 0;
 	}
 	act( "You deliver a powerful blow to $N's shin.", ch, NULL, victim, TO_CHAR );
 	act( "$n delivers a powerful blow to your shin.", ch, NULL, victim, TO_VICT );
@@ -188,17 +188,17 @@ void do_knee( CHAR_DATA *ch, char *argument ) {
 	dam = number_range( 1, 6 );
 	dam = find_dam( ch, victim, dam, foot );
 
-	if ( IS_SET( ch->monkcrap, COMB_SHIN ) && !IS_SET( ch->monkcrap, COMB_KNEE ) ) {
+	if ( IS_SET( ch->pcdata->monkcrap, COMB_SHIN ) && !IS_SET( ch->pcdata->monkcrap, COMB_KNEE ) ) {
 		stc( "Your aura glows dark blue.\n\r", ch );
 		act( "$n's aura glows dark blue.", ch, NULL, victim, TO_VICT );
-		SET_BIT( ch->monkcrap, COMB_KNEE );
-	} else if ( IS_SET( ch->monkcrap, COMB_REV1 ) ) {
+		SET_BIT( ch->pcdata->monkcrap, COMB_KNEE );
+	} else if ( IS_SET( ch->pcdata->monkcrap, COMB_REV1 ) ) {
 		stc( "Your aura glows a dark green for a moment.\n\r", ch );
-		SET_BIT( ch->monkcrap, COMB_KNEE );
-	} else if ( ch->monkcrap > 0 ) {
+		SET_BIT( ch->pcdata->monkcrap, COMB_KNEE );
+	} else if ( ch->pcdata->monkcrap > 0 ) {
 		stc( "Your aura slowly fades away.\n\r", ch );
 		act( "$n's aura slowly fades away.\n\r", ch, NULL, victim, TO_VICT );
-		ch->monkcrap = 0;
+		ch->pcdata->monkcrap = 0;
 	}
 	act( "You leap up and slam your knee into $N's chin.", ch, NULL, victim, TO_CHAR );
 	act( "$n leaps up and slams $s knee into your chin.", ch, NULL, victim, TO_VICT );
@@ -226,10 +226,10 @@ void do_reverse( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	WAIT_STATE( ch, skill_table[gsn_monksweep].beats );
-	if ( ch->monkcrap == 0 ) {
+	if ( ch->pcdata->monkcrap == 0 ) {
 		stc( "Your aura glows a light blue for a moment.\n\r", ch );
-		SET_BIT( ch->monkcrap, COMB_REV1 );
-	} else if ( IS_SET( ch->monkcrap, COMB_REV1 ) && IS_SET( ch->monkcrap, COMB_SWEEP ) ) {
+		SET_BIT( ch->pcdata->monkcrap, COMB_REV1 );
+	} else if ( IS_SET( ch->pcdata->monkcrap, COMB_REV1 ) && IS_SET( ch->pcdata->monkcrap, COMB_SWEEP ) ) {
 		act( "You spin around and kick $N viciously in the head.", ch, NULL, victim, TO_CHAR );
 		act( "You place your hands on $N's head.", ch, NULL, victim, TO_CHAR );
 		act( "You feel revitalized.", ch, NULL, victim, TO_CHAR );
@@ -239,7 +239,7 @@ void do_reverse( CHAR_DATA *ch, char *argument ) {
 		use_move( victim, move );
 		move = UMIN( 10000, move );
 		modify_vitals( ch, move, move, move );
-		ch->monkcrap = 0;
+		ch->pcdata->monkcrap = 0;
 		return;
 	}
 
@@ -275,9 +275,9 @@ void do_sweep( CHAR_DATA *ch, char *argument ) {
 	dam = number_range( 1, 4 );
 	dam = find_dam( ch, victim, dam, foot );
 
-	if ( IS_SET( ch->monkcrap, COMB_REV1 ) ) {
+	if ( IS_SET( ch->pcdata->monkcrap, COMB_REV1 ) ) {
 		stc( "Your aura glows a light blue for a moment.\n\r", ch );
-		SET_BIT( ch->monkcrap, COMB_SWEEP );
+		SET_BIT( ch->pcdata->monkcrap, COMB_SWEEP );
 	}
 	if ( IS_COMB( ch, COMB_THRUST1 ) && IS_COMB( ch, COMB_THRUST2 ) ) {
 		act( "You sweep around and kick $N viciously in the stomach.", ch, NULL, victim, TO_CHAR );
@@ -289,7 +289,7 @@ void do_sweep( CHAR_DATA *ch, char *argument ) {
 		use_mana( victim, mana );
 		mana = UMIN( 10000, mana );
 		modify_vitals( ch, mana, mana, mana );
-		ch->monkcrap = 0;
+		ch->pcdata->monkcrap = 0;
 		return;
 	}
 	if ( IS_COMB( ch, COMB_REV1 ) && IS_COMB( ch, COMB_KNEE ) ) {
@@ -300,7 +300,7 @@ void do_sweep( CHAR_DATA *ch, char *argument ) {
 		act( "$n's neck pinch #G**- PARALYSES -**#n you!", ch, NULL, victim, TO_VICT );
 		act( "$n's neck pinch #G**- PARALYSES -**#n $N!", ch, NULL, victim, TO_NOTVICT );
 		WAIT_STATE( victim, 30 );
-		ch->monkcrap = 0;
+		ch->pcdata->monkcrap = 0;
 		return;
 	}
 	act( "You crouch down and sweep $N's legs out from under $M.", ch, NULL, victim, TO_CHAR );
@@ -362,21 +362,21 @@ void do_thrustkick( CHAR_DATA *ch, char *argument ) {
 	dam = number_range( 1, 5 );
 	dam = find_dam( ch, victim, dam, foot );
 
-	if ( ch->monkcrap == 0 && !IS_SET( ch->monkcrap, COMB_THRUST1 ) ) {
+	if ( ch->pcdata->monkcrap == 0 && !IS_SET( ch->pcdata->monkcrap, COMB_THRUST1 ) ) {
 		stc( "Your aura glows dark blue for a moment.\n\r", ch );
 		act( "$n's aura glows dark blue for a moment.", ch, NULL, victim, TO_VICT );
 		act( "$n's aura glows dark blue for a moment.", ch, NULL, victim, TO_NOTVICT );
-		SET_BIT( ch->monkcrap, COMB_THRUST1 );
-	} else if ( IS_SET( ch->monkcrap, COMB_THRUST1 ) && !IS_SET( ch->monkcrap, COMB_THRUST2 ) ) {
+		SET_BIT( ch->pcdata->monkcrap, COMB_THRUST1 );
+	} else if ( IS_SET( ch->pcdata->monkcrap, COMB_THRUST1 ) && !IS_SET( ch->pcdata->monkcrap, COMB_THRUST2 ) ) {
 		stc( "Your aura flashes bright blue.\n\r", ch );
 		act( "$n's aura flashes bright blue.", ch, NULL, victim, TO_VICT );
 		act( "$n's aura flashes bright blue.", ch, NULL, victim, TO_NOTVICT );
-		SET_BIT( ch->monkcrap, COMB_THRUST2 );
-	} else if ( ch->monkcrap != 0 ) {
+		SET_BIT( ch->pcdata->monkcrap, COMB_THRUST2 );
+	} else if ( ch->pcdata->monkcrap != 0 ) {
 		stc( "Your aura fades.\n\r", ch );
 		act( "$n's aura fades.", ch, NULL, victim, TO_VICT );
 		act( "$n's aura fades.", ch, NULL, victim, TO_NOTVICT );
-		ch->monkcrap = 0;
+		ch->pcdata->monkcrap = 0;
 	}
 
 	act( "You deliver a thrust kick to $N's chest.", ch, NULL, victim, TO_CHAR );
@@ -414,41 +414,41 @@ void do_spinkick( CHAR_DATA *ch, char *argument ) {
 		act( "Your aura pulsates and channels energy into your attack.", ch, NULL, NULL, TO_CHAR );
 		act( "$n's aura pulsates and channels energy into $s attack.", ch, NULL, victim, TO_VICT );
 		act( "$n's aura pulsates and channels energy into $s attack.", ch, NULL, victim, TO_NOTVICT );
-		ch->monkcrap = 0;
+		ch->pcdata->monkcrap = 0;
 		dam = (int) ( dam / 1.2 );
 		damage( ch, victim, dam, gsn_lightningkick );
-		if ( ch->chi[CURRENT] > 1 ) {
+		if ( ch_chi(ch)[CURRENT] > 1 ) {
 			dam = (int) ( dam / 1.2 );
 			damage( ch, victim, dam, gsn_lightningkick );
 		}
-		if ( ch->chi[CURRENT] > 2 ) {
+		if ( ch_chi(ch)[CURRENT] > 2 ) {
 			dam = (int) ( dam / 1.2 );
 			damage( ch, victim, dam, gsn_lightningkick );
 		}
-		if ( ch->chi[CURRENT] > 3 ) {
+		if ( ch_chi(ch)[CURRENT] > 3 ) {
 			dam = (int) ( dam / 1.2 );
 			damage( ch, victim, dam, gsn_lightningkick );
 		}
-		if ( ch->chi[CURRENT] > 4 ) {
+		if ( ch_chi(ch)[CURRENT] > 4 ) {
 			dam = (int) ( dam / 1.2 );
 			damage( ch, victim, dam, gsn_lightningkick );
 		}
-		if ( ch->chi[CURRENT] > 5 ) {
+		if ( ch_chi(ch)[CURRENT] > 5 ) {
 			dam = (int) ( dam / 1.2 );
 			damage( ch, victim, dam, gsn_lightningkick );
 		}
 		return;
-	} else if ( IS_SET( ch->monkcrap, COMB_SHIN ) && IS_SET( ch->monkcrap, COMB_KNEE ) ) {
+	} else if ( IS_SET( ch->pcdata->monkcrap, COMB_SHIN ) && IS_SET( ch->pcdata->monkcrap, COMB_KNEE ) ) {
 		CHAR_DATA *vch;
 		CHAR_DATA *vch_next;
 		CHAR_DATA *mount;
 		int number_hit = 0;
 
-		ch->monkcrap = 0;
+		ch->pcdata->monkcrap = 0;
 		stc( "You spin around and around, going berserk.\n\r", ch );
 		act( "$n body speeds up, and $e spins around rapidly.", ch, NULL, victim, TO_ROOM );
 		LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node ) {
-			if ( number_hit > ( ch->chi[CURRENT] + 1 ) ) continue;
+			if ( number_hit > ( ch_chi(ch)[CURRENT] + 1 ) ) continue;
 			if ( vch->in_room == NULL )
 				continue;
 			if ( !IS_NPC( vch ) && vch->pcdata->chobj != NULL )
@@ -572,32 +572,32 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 		stc( "                                   Abilities                                   \n\r", ch );
 		stc( lin, ch );
 		snprintf( buf, sizeof( buf ), "                 Awareness [%s%s%s%s]               Body     [%s%s%s%s]\n\r",
-			ch->monkab[AWARE] > 0 ? "*" : " ",
-			ch->monkab[AWARE] > 1 ? "*" : " ",
-			ch->monkab[AWARE] > 2 ? "*" : " ",
-			ch->monkab[AWARE] > 3 ? "*" : " ",
-			ch->monkab[BODY] > 0 ? "*" : " ",
-			ch->monkab[BODY] > 1 ? "*" : " ",
-			ch->monkab[BODY] > 2 ? "*" : " ",
-			ch->monkab[BODY] > 3 ? "*" : " " );
+			ch_monkab(ch)[AWARE] > 0 ? "*" : " ",
+			ch_monkab(ch)[AWARE] > 1 ? "*" : " ",
+			ch_monkab(ch)[AWARE] > 2 ? "*" : " ",
+			ch_monkab(ch)[AWARE] > 3 ? "*" : " ",
+			ch_monkab(ch)[BODY] > 0 ? "*" : " ",
+			ch_monkab(ch)[BODY] > 1 ? "*" : " ",
+			ch_monkab(ch)[BODY] > 2 ? "*" : " ",
+			ch_monkab(ch)[BODY] > 3 ? "*" : " " );
 		stc( buf, ch );
 		snprintf( buf, sizeof( buf ), "     Combat   [%s%s%s%s]              Spirit    [%s%s%s%s]\n\r",
-			ch->monkab[COMBAT] > 0 ? "*" : " ",
-			ch->monkab[COMBAT] > 1 ? "*" : " ",
-			ch->monkab[COMBAT] > 2 ? "*" : " ",
-			ch->monkab[COMBAT] > 3 ? "*" : " ",
-			ch->monkab[SPIRIT] > 0 ? "*" : " ",
-			ch->monkab[SPIRIT] > 1 ? "*" : " ",
-			ch->monkab[SPIRIT] > 2 ? "*" : " ",
-			ch->monkab[SPIRIT] > 3 ? "*" : " " );
+			ch_monkab(ch)[COMBAT] > 0 ? "*" : " ",
+			ch_monkab(ch)[COMBAT] > 1 ? "*" : " ",
+			ch_monkab(ch)[COMBAT] > 2 ? "*" : " ",
+			ch_monkab(ch)[COMBAT] > 3 ? "*" : " ",
+			ch_monkab(ch)[SPIRIT] > 0 ? "*" : " ",
+			ch_monkab(ch)[SPIRIT] > 1 ? "*" : " ",
+			ch_monkab(ch)[SPIRIT] > 2 ? "*" : " ",
+			ch_monkab(ch)[SPIRIT] > 3 ? "*" : " " );
 		stc( buf, ch );
 		stc( lin, ch );
 		stc( "                                      Chi\n\r", ch );
 		stc( lin, ch );
-		snprintf( buf, sizeof( buf ), "                 You have attained a level %d mastery of your Ch'i.\n\r", ch->chi[MAXIMUM] );
+		snprintf( buf, sizeof( buf ), "                 You have attained a level %d mastery of your Ch'i.\n\r", ch_chi(ch)[MAXIMUM] );
 		stc( buf, ch );
-		if ( ch->chi[CURRENT] > 0 ) {
-			snprintf( buf, sizeof( buf ), "                     Your ch'i is currently active at level %d\n\r", ch->chi[CURRENT] );
+		if ( ch_chi(ch)[CURRENT] > 0 ) {
+			snprintf( buf, sizeof( buf ), "                     Your ch'i is currently active at level %d\n\r", ch_chi(ch)[CURRENT] );
 			stc( buf, ch );
 		} else
 			stc( "         You are currently not focusing your ch'i\n\r", ch );
@@ -697,13 +697,13 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 		}
 	} else if ( !str_cmp( arg1, "chi" ) ) {
 		inpart = MAXIMUM;
-		cost = ( ch->chi[inpart] + 1 ) * 1000000;
+		cost = ( ch_chi(ch)[inpart] + 1 ) * 1000000;
 	} else {
 		do_learn( ch, "" );
 		return;
 	}
 	if ( !str_cmp( arg1, "abilities" ) ) {
-		if ( ch->monkab[inpart] >= 4 ) {
+		if ( ch_monkab(ch)[inpart] >= 4 ) {
 			stc( "You have already learned all you can in this ability.\n\r", ch );
 			return;
 		}
@@ -711,13 +711,13 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You do not have enough experience to learn that power.\n\r", ch );
 			return;
 		}
-		ch->monkab[inpart]++;
+		ch_monkab(ch)[inpart]++;
 		ch->exp -= cost;
 		send_to_char( "Ok.\n\r", ch );
 		save_char_obj( ch );
 		return;
 	} else if ( !str_cmp( arg1, "chi" ) ) {
-		if ( ch->chi[MAXIMUM] >= 6 ) {
+		if ( ch_chi(ch)[MAXIMUM] >= 6 ) {
 			stc( "You have already mastered your ch'i.\n\r", ch );
 			return;
 		}
@@ -726,7 +726,7 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		ch->exp -= cost;
-		ch->chi[MAXIMUM]++;
+		ch_chi(ch)[MAXIMUM]++;
 		save_char_obj( ch );
 		stc( "You gain more control over your ch'i.\n\r", ch );
 		return;
@@ -739,7 +739,7 @@ void do_learn( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You do not have enough experience to learn that power.\n\r", ch );
 			return;
 		}
-		SET_BIT( ch->monkstuff, inpart );
+		SET_BIT( ch->pcdata->monkstuff, inpart );
 		ch->exp -= cost;
 		send_to_char( "Ok.\n\r", ch );
 		save_char_obj( ch );

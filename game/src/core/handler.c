@@ -487,97 +487,97 @@ void set_learnable_disciplines( CHAR_DATA *ch ) {
 	/* this bit clears all the disciplines, just in case */
 
 	for ( i = 0; i < MAX_DISCIPLINES; i++ )
-		ch->power[i] = -2;
+		ch_power(ch)[i] = -2;
 
 	/* Put the extra disciplines in here, by race */
 	if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-		if ( ch->power[DISC_VAMP_FORT] < 0 )
-			ch->power[DISC_VAMP_FORT] = 0;
-		if ( ch->power[DISC_VAMP_CELE] < 0 )
-			ch->power[DISC_VAMP_CELE] = 0;
-		if ( ch->power[DISC_VAMP_OBTE] < 0 )
-			ch->power[DISC_VAMP_OBTE] = 0;
-		if ( ch->power[DISC_VAMP_PRES] < 0 )
-			ch->power[DISC_VAMP_PRES] = 0;
-		if ( ch->power[DISC_VAMP_QUIE] < 0 )
-			ch->power[DISC_VAMP_QUIE] = 0;
-		if ( ch->power[DISC_VAMP_THAU] < 0 )
-			ch->power[DISC_VAMP_THAU] = 0;
-		if ( ch->power[DISC_VAMP_AUSP] < 0 )
-			ch->power[DISC_VAMP_AUSP] = 0;
-		if ( ch->power[DISC_VAMP_DOMI] < 0 )
-			ch->power[DISC_VAMP_DOMI] = 0;
-		if ( ch->power[DISC_VAMP_OBFU] < 0 )
-			ch->power[DISC_VAMP_OBFU] = 0;
-		if ( ch->power[DISC_VAMP_POTE] < 0 )
-			ch->power[DISC_VAMP_POTE] = 0;
-		if ( ch->power[DISC_VAMP_PROT] < 0 )
-			ch->power[DISC_VAMP_PROT] = 0;
-		if ( ch->power[DISC_VAMP_SERP] < 0 )
-			ch->power[DISC_VAMP_SERP] = 0;
-		if ( ch->power[DISC_VAMP_VICI] < 0 )
-			ch->power[DISC_VAMP_VICI] = 0;
-		if ( ch->power[DISC_VAMP_DAIM] < 0 )
-			ch->power[DISC_VAMP_DAIM] = 0;
-		if ( ch->power[DISC_VAMP_ANIM] < 0 )
-			ch->power[DISC_VAMP_ANIM] = 0;
-		if ( ch->power[DISC_VAMP_CHIM] < 0 )
-			ch->power[DISC_VAMP_CHIM] = 0;
-		if ( ch->power[DISC_VAMP_MELP] < 0 )
-			ch->power[DISC_VAMP_MELP] = 0;
-		if ( ch->power[DISC_VAMP_NECR] < 0 )
-			ch->power[DISC_VAMP_NECR] = 0;
-		if ( ch->power[DISC_VAMP_THAN] < 0 )
-			ch->power[DISC_VAMP_THAN] = 0;
-		if ( ch->power[DISC_VAMP_OBEA] < 0 )
-			ch->power[DISC_VAMP_OBEA] = 0;
+		if ( ch_power(ch)[DISC_VAMP_FORT] < 0 )
+			ch_power(ch)[DISC_VAMP_FORT] = 0;
+		if ( ch_power(ch)[DISC_VAMP_CELE] < 0 )
+			ch_power(ch)[DISC_VAMP_CELE] = 0;
+		if ( ch_power(ch)[DISC_VAMP_OBTE] < 0 )
+			ch_power(ch)[DISC_VAMP_OBTE] = 0;
+		if ( ch_power(ch)[DISC_VAMP_PRES] < 0 )
+			ch_power(ch)[DISC_VAMP_PRES] = 0;
+		if ( ch_power(ch)[DISC_VAMP_QUIE] < 0 )
+			ch_power(ch)[DISC_VAMP_QUIE] = 0;
+		if ( ch_power(ch)[DISC_VAMP_THAU] < 0 )
+			ch_power(ch)[DISC_VAMP_THAU] = 0;
+		if ( ch_power(ch)[DISC_VAMP_AUSP] < 0 )
+			ch_power(ch)[DISC_VAMP_AUSP] = 0;
+		if ( ch_power(ch)[DISC_VAMP_DOMI] < 0 )
+			ch_power(ch)[DISC_VAMP_DOMI] = 0;
+		if ( ch_power(ch)[DISC_VAMP_OBFU] < 0 )
+			ch_power(ch)[DISC_VAMP_OBFU] = 0;
+		if ( ch_power(ch)[DISC_VAMP_POTE] < 0 )
+			ch_power(ch)[DISC_VAMP_POTE] = 0;
+		if ( ch_power(ch)[DISC_VAMP_PROT] < 0 )
+			ch_power(ch)[DISC_VAMP_PROT] = 0;
+		if ( ch_power(ch)[DISC_VAMP_SERP] < 0 )
+			ch_power(ch)[DISC_VAMP_SERP] = 0;
+		if ( ch_power(ch)[DISC_VAMP_VICI] < 0 )
+			ch_power(ch)[DISC_VAMP_VICI] = 0;
+		if ( ch_power(ch)[DISC_VAMP_DAIM] < 0 )
+			ch_power(ch)[DISC_VAMP_DAIM] = 0;
+		if ( ch_power(ch)[DISC_VAMP_ANIM] < 0 )
+			ch_power(ch)[DISC_VAMP_ANIM] = 0;
+		if ( ch_power(ch)[DISC_VAMP_CHIM] < 0 )
+			ch_power(ch)[DISC_VAMP_CHIM] = 0;
+		if ( ch_power(ch)[DISC_VAMP_MELP] < 0 )
+			ch_power(ch)[DISC_VAMP_MELP] = 0;
+		if ( ch_power(ch)[DISC_VAMP_NECR] < 0 )
+			ch_power(ch)[DISC_VAMP_NECR] = 0;
+		if ( ch_power(ch)[DISC_VAMP_THAN] < 0 )
+			ch_power(ch)[DISC_VAMP_THAN] = 0;
+		if ( ch_power(ch)[DISC_VAMP_OBEA] < 0 )
+			ch_power(ch)[DISC_VAMP_OBEA] = 0;
 	}
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		if ( ch->power[DISC_WERE_BEAR] < 0 )
-			ch->power[DISC_WERE_BEAR] = 0;
-		if ( ch->power[DISC_WERE_LYNX] < 0 )
-			ch->power[DISC_WERE_LYNX] = 0;
-		if ( ch->power[DISC_WERE_BOAR] < 0 )
-			ch->power[DISC_WERE_BOAR] = 0;
-		if ( ch->power[DISC_WERE_OWL] < 0 )
-			ch->power[DISC_WERE_OWL] = 0;
-		if ( ch->power[DISC_WERE_SPID] < 0 )
-			ch->power[DISC_WERE_SPID] = 0;
-		if ( ch->power[DISC_WERE_WOLF] < 0 )
-			ch->power[DISC_WERE_WOLF] = 0;
-		if ( ch->power[DISC_WERE_HAWK] < 0 )
-			ch->power[DISC_WERE_HAWK] = 0;
-		if ( ch->power[DISC_WERE_MANT] < 0 )
-			ch->power[DISC_WERE_MANT] = 0;
-		if ( ch->power[DISC_WERE_RAPT] < 0 )
-			ch->power[DISC_WERE_RAPT] = 0;
-		if ( ch->power[DISC_WERE_LUNA] < 0 )
-			ch->power[DISC_WERE_LUNA] = 0;
-		if ( ch->power[DISC_WERE_PAIN] < 0 )
-			ch->power[DISC_WERE_PAIN] = 0;
-		if ( ch->power[DISC_WERE_CONG] < 0 )
-			ch->power[DISC_WERE_CONG] = 0;
+		if ( ch_power(ch)[DISC_WERE_BEAR] < 0 )
+			ch_power(ch)[DISC_WERE_BEAR] = 0;
+		if ( ch_power(ch)[DISC_WERE_LYNX] < 0 )
+			ch_power(ch)[DISC_WERE_LYNX] = 0;
+		if ( ch_power(ch)[DISC_WERE_BOAR] < 0 )
+			ch_power(ch)[DISC_WERE_BOAR] = 0;
+		if ( ch_power(ch)[DISC_WERE_OWL] < 0 )
+			ch_power(ch)[DISC_WERE_OWL] = 0;
+		if ( ch_power(ch)[DISC_WERE_SPID] < 0 )
+			ch_power(ch)[DISC_WERE_SPID] = 0;
+		if ( ch_power(ch)[DISC_WERE_WOLF] < 0 )
+			ch_power(ch)[DISC_WERE_WOLF] = 0;
+		if ( ch_power(ch)[DISC_WERE_HAWK] < 0 )
+			ch_power(ch)[DISC_WERE_HAWK] = 0;
+		if ( ch_power(ch)[DISC_WERE_MANT] < 0 )
+			ch_power(ch)[DISC_WERE_MANT] = 0;
+		if ( ch_power(ch)[DISC_WERE_RAPT] < 0 )
+			ch_power(ch)[DISC_WERE_RAPT] = 0;
+		if ( ch_power(ch)[DISC_WERE_LUNA] < 0 )
+			ch_power(ch)[DISC_WERE_LUNA] = 0;
+		if ( ch_power(ch)[DISC_WERE_PAIN] < 0 )
+			ch_power(ch)[DISC_WERE_PAIN] = 0;
+		if ( ch_power(ch)[DISC_WERE_CONG] < 0 )
+			ch_power(ch)[DISC_WERE_CONG] = 0;
 	}
 
 	if ( IS_CLASS( ch, CLASS_DEMON ) ) {
-		if ( ch->power[DISC_DAEM_ATTA] < 0 )
-			ch->power[DISC_DAEM_ATTA] = 0;
-		if ( ch->power[DISC_DAEM_IMMU] < 0 )
-			ch->power[DISC_DAEM_IMMU] = 0;
-		if ( ch->power[DISC_DAEM_TEMP] < 0 )
-			ch->power[DISC_DAEM_TEMP] = 0;
-		if ( ch->power[DISC_DAEM_CORR] < 0 )
-			ch->power[DISC_DAEM_CORR] = 0;
-		if ( ch->power[DISC_DAEM_HELL] < 0 )
-			ch->power[DISC_DAEM_HELL] = 0;
-		if ( ch->power[DISC_DAEM_GELU] < 0 )
-			ch->power[DISC_DAEM_GELU] = 0;
-		if ( ch->power[DISC_DAEM_MORP] < 0 )
-			ch->power[DISC_DAEM_MORP] = 0;
-		if ( ch->power[DISC_DAEM_NETH] < 0 )
-			ch->power[DISC_DAEM_NETH] = 0;
-		if ( ch->power[DISC_DAEM_DISC] < 0 )
-			ch->power[DISC_DAEM_DISC] = 0;
+		if ( ch_power(ch)[DISC_DAEM_ATTA] < 0 )
+			ch_power(ch)[DISC_DAEM_ATTA] = 0;
+		if ( ch_power(ch)[DISC_DAEM_IMMU] < 0 )
+			ch_power(ch)[DISC_DAEM_IMMU] = 0;
+		if ( ch_power(ch)[DISC_DAEM_TEMP] < 0 )
+			ch_power(ch)[DISC_DAEM_TEMP] = 0;
+		if ( ch_power(ch)[DISC_DAEM_CORR] < 0 )
+			ch_power(ch)[DISC_DAEM_CORR] = 0;
+		if ( ch_power(ch)[DISC_DAEM_HELL] < 0 )
+			ch_power(ch)[DISC_DAEM_HELL] = 0;
+		if ( ch_power(ch)[DISC_DAEM_GELU] < 0 )
+			ch_power(ch)[DISC_DAEM_GELU] = 0;
+		if ( ch_power(ch)[DISC_DAEM_MORP] < 0 )
+			ch_power(ch)[DISC_DAEM_MORP] = 0;
+		if ( ch_power(ch)[DISC_DAEM_NETH] < 0 )
+			ch_power(ch)[DISC_DAEM_NETH] = 0;
+		if ( ch_power(ch)[DISC_DAEM_DISC] < 0 )
+			ch_power(ch)[DISC_DAEM_DISC] = 0;
 	}
 
 	save_char_obj( ch );
@@ -775,7 +775,7 @@ void char_to_room( CHAR_DATA *ch, ROOM_INDEX_DATA *pRoomIndex ) {
 	else if ( ( obj = get_eq_char( ch, WEAR_HOLD ) ) != NULL && obj->item_type == ITEM_LIGHT && obj->value[2] != 0 )
 		++ch->in_room->light;
 
-	if ( ch->loc_hp[6] > 0 && ch->in_room->blood < 1000 ) ch->in_room->blood += 1;
+	if ( ch_loc_hp(ch)[6] > 0 && ch->in_room->blood < 1000 ) ch->in_room->blood += 1;
 
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_DARKNESS ) )
 		SET_BIT( ch->in_room->room_flags, ROOM_TOTAL_DARKNESS );
@@ -1569,7 +1569,7 @@ void extract_obj( OBJ_DATA *obj ) {
 		obj_from_obj( obj );
 
 	if ( ( ch = obj->chobj ) != NULL && !IS_NPC( ch ) && ch->pcdata->chobj == obj && IS_HEAD( ch, LOST_HEAD ) ) {
-		REMOVE_BIT( ch->loc_hp[0], LOST_HEAD );
+		REMOVE_BIT( ch_loc_hp(ch)[0], LOST_HEAD );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 		free(ch->morph);
 		ch->morph = str_dup( "" );
@@ -1704,6 +1704,8 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 		return;
 	}
 	list_remove( &g_characters, &ch->char_node );
+	if ( IS_NPC( ch ) && list_node_is_linked( &ch->npc_node ) )
+		list_remove( &g_npcs, &ch->npc_node );
 
 	{
 		bool is_npc_ch       = IS_NPC( ch );
@@ -1711,17 +1713,19 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 		bool check_followers = is_npc_ch && strlen( ch->lord ) > 1;
 
 		LIST_FOR_EACH( wch, &g_characters, CHAR_DATA, char_node ) {
-			if ( wch->reply == ch )
-				wch->reply = NULL;
+			if ( IS_NPC( wch ) ) continue;
 
-			if ( check_propose && !IS_NPC( wch ) ) {
+			if ( wch->pcdata->reply == ch )
+				wch->pcdata->reply = NULL;
+
+			if ( check_propose ) {
 				if ( wch->pcdata->propose != NULL && wch->pcdata->propose == ch )
 					wch->pcdata->propose = NULL;
 				if ( wch->pcdata->partner != NULL && wch->pcdata->partner == ch )
 					wch->pcdata->partner = NULL;
 			}
 
-			if ( check_followers && !IS_NPC( wch ) ) {
+			if ( check_followers ) {
 				if ( !str_cmp( wch->name, ch->lord ) && wch->pcdata->followers > 0 )
 					wch->pcdata->followers--;
 			}
@@ -2444,8 +2448,8 @@ CHAR_DATA *get_char_world2( CHAR_DATA *ch, char *argument ) {
 
 	if ( argument[0] == '\0' ) return NULL;
 
-	LIST_FOR_EACH( wch, &g_characters, CHAR_DATA, char_node ) {
-		if ( IS_NPC( wch ) && !str_cmp( argument, wch->short_descr ) ) return wch;
+	LIST_FOR_EACH( wch, &g_npcs, CHAR_DATA, npc_node ) {
+		if ( !str_cmp( argument, wch->short_descr ) ) return wch;
 	}
 
 	return NULL;

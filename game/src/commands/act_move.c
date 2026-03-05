@@ -94,7 +94,7 @@ void move_char( CHAR_DATA *ch, int door ) {
 
 	if ( IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_AFFECTED( ch, AFF_PASS_DOOR ) && !IS_AFFECTED( ch, AFF_ETHEREAL ) && !IS_AFFECTED( ch, AFF_SHADOWPLANE ) ) {
 		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) &&
-			ch->power[DISC_WERE_BOAR] > 0 && !IS_SET( pexit->exit_info, EX_PRISMATIC_WALL ) ) {
+			ch_power(ch)[DISC_WERE_BOAR] > 0 && !IS_SET( pexit->exit_info, EX_PRISMATIC_WALL ) ) {
 			act( "You smash open the $d.", ch, NULL, pexit->keyword, TO_CHAR );
 			act( "$n smashes open the $d.", ch, NULL, pexit->keyword, TO_ROOM );
 			REMOVE_BIT( pexit->exit_info, EX_CLOSED );
@@ -236,7 +236,7 @@ void move_char( CHAR_DATA *ch, int door ) {
 			return;
 		}
 
-		if ( IS_SET( pexit->exit_info, EX_ICE_WALL ) && ch->power[DISC_DAEM_GELU] < 5 ) {
+		if ( IS_SET( pexit->exit_info, EX_ICE_WALL ) && ch_power(ch)[DISC_DAEM_GELU] < 5 ) {
 			send_to_char( "A huge wall of ice blocks your way.\n\r", ch );
 			return;
 		}
@@ -340,7 +340,7 @@ void move_char( CHAR_DATA *ch, int door ) {
 	} else
 		snprintf( leave, sizeof( leave ), "walks" );
 
-	if ( !IS_NPC( ch ) && ch->stance[0] != -1 ) do_stance( ch, "" );
+	if ( !IS_NPC( ch ) && ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 	LIST_FOR_EACH( d, &g_descriptors, DESCRIPTOR_DATA, node ) {
 		CHAR_DATA *victim;
 
@@ -1563,7 +1563,7 @@ void do_meditate( CHAR_DATA *ch, char *argument ) {
 }
 
 void do_healing( CHAR_DATA *ch, char *argument ) {
-	if ( IS_NPC( ch ) || ( !IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_PROT] < 8 ) ) {
+	if ( IS_NPC( ch ) || ( !IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_PROT] < 8 ) ) {
 		send_to_char( "You are unable to assume a state of healing.\n\r", ch );
 		return;
 	}
@@ -1883,7 +1883,7 @@ int disc_points_needed( CHAR_DATA *ch ) {
 
 	if ( IS_NPC( ch ) ) return 1;
 
-	return ( ch->power[ch->pcdata->disc_research] + 1 ) * 10;
+	return ( ch_power(ch)[ch->pcdata->disc_research] + 1 ) * 10;
 }
 
 void gain_disc_points( CHAR_DATA *ch, int points ) {
@@ -1954,16 +1954,16 @@ void do_research( CHAR_DATA *ch, char *argument ) {
 
 	for ( i = 1; i < MAX_DISCIPLINES; i++ ) {
 		if ( discipline[i][0] != '\0' && !str_prefix( argument, discipline[i] ) ) {
-			if ( ch->power[i] < 0 ) {
+			if ( ch_power(ch)[i] < 0 ) {
 				stc( "You don't know any disciplines of that name.\n\r", ch );
 				return;
 			}
 
-			if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[i] >= maxlevel ) {
+			if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[i] >= maxlevel ) {
 				stc( "You need to age more before progressing in this discipline.\n\r", ch );
 				return;
 			}
-			if ( ch->power[i] >= 10 ) {
+			if ( ch_power(ch)[i] >= 10 ) {
 				stc( "You have reached full mastery of this discipline.\n\r", ch );
 				return;
 			}
@@ -2049,13 +2049,13 @@ void do_disciplines( CHAR_DATA *ch, char *argument ) {
 	send_to_char( "\n\r", ch );
 
 	for ( loop = 1; loop < MAX_DISCIPLINES; loop++ ) {
-		if ( discipline[loop][0] != '\0' && strlen( discipline[loop] ) != 0 && ch->power[loop] >= 0 ) {
+		if ( discipline[loop][0] != '\0' && strlen( discipline[loop] ) != 0 && ch_power(ch)[loop] >= 0 ) {
 			snprintf( buf2, sizeof( buf2 ), "%s", discipline[loop] );
 			buf2[0] = toupper( buf2[0] );
 
 			snprintf( buf, sizeof( buf ), "     %-14s: %-2d",
 				buf2,
-				ch->power[loop] );
+				ch_power(ch)[loop] );
 			send_to_char( buf, ch );
 			indent++;
 			if ( indent == 3 ) {
@@ -2073,7 +2073,7 @@ void do_disciplines( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[ch->pcdata->disc_research] < 0 ) {
+	if ( ch_power(ch)[ch->pcdata->disc_research] < 0 ) {
 		send_to_char( "\n\r", ch );
 		divide6_to_char( ch );
 		return;
@@ -2593,7 +2593,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		int amount = 0;
 		int urin = 0;
 		int urin_counter = 0;
-		int statcap = UMIN( 120000, 20000 + 4000 * ch->pkill );
+		int statcap = UMIN( 120000, 20000 + 4000 * ch->pcdata->pkill );
 
 		if ( ch->max_hit >= statcap ) {
 			send_to_char( "You've reached the statcap.\n\r", ch );
@@ -2632,7 +2632,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		int amount = 0;
 		int urin = 0;
 		int urin_counter = 0;
-		int statcap = UMIN( 120000, 20000 + 4000 * ch->pkill );
+		int statcap = UMIN( 120000, 20000 + 4000 * ch->pcdata->pkill );
 
 		if ( ch->max_move >= statcap ) {
 			send_to_char( "You've reached the statcap.\n\r", ch );
@@ -2671,7 +2671,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		int amount = 0;
 		int urin = 0;
 		int urin_counter = 0;
-		int statcap = UMIN( 120000, 20000 + 4000 * ch->pkill );
+		int statcap = UMIN( 120000, 20000 + 4000 * ch->pcdata->pkill );
 
 		if ( ch->max_mana >= statcap ) {
 			send_to_char( "You've reached the statcap.\n\r", ch );
@@ -2839,7 +2839,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		is_ok = TRUE;
 
 	for ( loop = 1; loop < MAX_DISCIPLINES; loop++ ) {
-		if ( !str_prefix( arg1, discipline[loop] ) && ch->power[loop] > -1 && str_cmp( arg1, "con" ) ) {
+		if ( !str_prefix( arg1, discipline[loop] ) && ch_power(ch)[loop] > -1 && str_cmp( arg1, "con" ) ) {
 
 			if ( !IS_CREATOR( ch ) ) {
 
@@ -2859,18 +2859,18 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 				}
 			}
 
-			ch->power[loop] += 1;
+			ch_power(ch)[loop] += 1;
 			ch->pcdata->disc_research = -1;
 			ch->pcdata->disc_points = 0;
 
 			if ( loop == DISC_DAEM_GELU ) {
-				if ( ch->power[DISC_DAEM_GELU] == 5 )
+				if ( ch_power(ch)[DISC_DAEM_GELU] == 5 )
 					stc( "Your skin takes on an icy hardness.\n\r", ch );
 			}
 
 			/* DAEMONIC ATTACK LEVELS 1 to 10 */
 			if ( loop == DISC_DAEM_ATTA ) {
-				pow = ch->power[DISC_DAEM_ATTA];
+				pow = ch_power(ch)[DISC_DAEM_ATTA];
 
 				if ( pow == 2 ) {
 					SET_BIT( ch->pcdata->stats[UNI_AFF], VAM_CLAWS );
@@ -2904,7 +2904,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 
 				abilities[0] = '\0';
 				for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {
-					if ( cmd_table[cmd].discipline == loop && cmd_table[cmd].disclevel == ch->power[loop] && IS_CLASS( ch, cmd_table[cmd].race ) ) {
+					if ( cmd_table[cmd].discipline == loop && cmd_table[cmd].disclevel == ch_power(ch)[loop] && IS_CLASS( ch, cmd_table[cmd].race ) ) {
 						if ( !first_ability )
 							strcat( abilities, ", " );
 						strcat( abilities, cmd_table[cmd].name );
@@ -2941,7 +2941,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 	primal = ( 1 + ch->practice ) * 500;
 	magic = ( 1 + ch->pcdata->stats[DROW_MAGIC] ) * 100;
 	silver = ( 1 + ch->siltol ) * 2500;
-	gnosis = ( 1 + ch->gnosis[GMAXIMUM] ) * 250000;
+	gnosis = ( 1 + ch_gnosis(ch)[GMAXIMUM] ) * 250000;
 	if ( ch->beast > 25 )
 		beast = 5;
 	else if ( ch->beast > 15 )
@@ -3032,7 +3032,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 		pAbility = &quiet_pointer;
 		pOutput = "tolerance to silver";
 	} else if ( !str_cmp( arg1, "gnosis" ) && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		quiet_pointer = ch->gnosis[GMAXIMUM];
+		quiet_pointer = ch_gnosis(ch)[GMAXIMUM];
 		cost = gnosis;
 		pAbility = &quiet_pointer;
 		pOutput = "gnosis points";
@@ -3548,7 +3548,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			snprintf( buf, sizeof( buf ), "Silver tolerance - %d exp per point of tolerance.\n\r", silver );
 			send_to_char( buf, ch );
 		}
-		if ( ch->gnosis[GMAXIMUM] < 20 && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
+		if ( ch_gnosis(ch)[GMAXIMUM] < 20 && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 			snprintf( buf, sizeof( buf ), "Gnosis Points - %d exp per point of Gnosis.\n\r", gnosis );
 			stc( buf, ch );
 		}
@@ -3693,8 +3693,8 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 	if ( !str_cmp( arg1, "silver" ) )
 		ch->siltol += 1;
 	else if ( !str_cmp( arg1, "gnosis" ) ) {
-		ch->gnosis[GCURRENT]++;
-		ch->gnosis[GMAXIMUM]++;
+		ch_gnosis(ch)[GCURRENT]++;
+		ch_gnosis(ch)[GMAXIMUM]++;
 	}
 
 	else if ( !str_cmp( arg1, "control" ) ) {
@@ -3772,7 +3772,7 @@ void do_mount( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( !IS_NPC( ch ) && ch->stance[0] != -1 ) do_stance( ch, "" );
+	if ( !IS_NPC( ch ) && ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 
 	ch->mounted = IS_RIDING;
 	victim->mounted = IS_MOUNT;
@@ -4101,7 +4101,7 @@ void add_tracks( CHAR_DATA *ch, int direction ) {
 	int loop;
 
 	if ( IS_NPC( ch ) ) return;
-	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_LYNX] > 0 )
+	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_LYNX] > 0 )
 		return;
 	if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_SORA] >= 4 )
 		return;

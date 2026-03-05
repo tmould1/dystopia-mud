@@ -273,9 +273,9 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 
 	/* Special requirements check for mage */
 	if ( reg->class_id == CLASS_MAGE ) {
-		if ( ch->max_mana < 5000 || ch->spl[RED_MAGIC] < 100 ||
-		     ch->spl[BLUE_MAGIC] < 100 || ch->spl[YELLOW_MAGIC] < 100 ||
-		     ch->spl[GREEN_MAGIC] < 100 || ch->spl[PURPLE_MAGIC] < 100 ) {
+		if ( ch->max_mana < 5000 || ch_spl(ch)[RED_MAGIC] < 100 ||
+		     ch_spl(ch)[BLUE_MAGIC] < 100 || ch_spl(ch)[YELLOW_MAGIC] < 100 ||
+		     ch_spl(ch)[GREEN_MAGIC] < 100 || ch_spl(ch)[PURPLE_MAGIC] < 100 ) {
 			send_to_char( "You need 5K mana and 100 in all your spellcolors.\n\r", ch );
 			return;
 		}
@@ -291,7 +291,7 @@ void do_classself( CHAR_DATA *ch, char *argument ) {
 		ch->warp = 0;
 		ch->rage = 0;
 		ch->generation = 0;
-		ch->cclan = 0;
+		ch->pcdata->cclan = 0;
 
 		/* Clear pcdata powers and stats arrays (used by dragonkin, angel, samurai, etc.) */
 		for ( i = 0; i < 20; i++ )
@@ -343,8 +343,8 @@ void do_reimb( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Please specify XP or QP.\n\r", ch );
 		return;
 	}
-	if ( vch->mkill < 5 ) {
-		vch->mkill = 5;
+	if ( vch->pcdata->mkill < 5 ) {
+		vch->pcdata->mkill = 5;
 		do_autosave( ch, "" );
 	}
 	snprintf( buf, sizeof( buf ), "%s reimbursed %d %s.\n\r", vch->name, v, arg );
@@ -570,10 +570,10 @@ void do_pstat( CHAR_DATA *ch, char *argument ) {
 	send_to_char( buf, ch );
 
 	snprintf( buf, sizeof( buf ), "Pkill : %d. Pdeath : %d. Mkill : %d. Mdeath : %d.\n\r",
-		IS_NPC( victim ) ? 0 : victim->pkill,
-		IS_NPC( victim ) ? 0 : victim->pdeath,
-		IS_NPC( victim ) ? 0 : victim->mkill,
-		IS_NPC( victim ) ? 0 : victim->mdeath );
+		IS_NPC( victim ) ? 0 : victim->pcdata->pkill,
+		IS_NPC( victim ) ? 0 : victim->pcdata->pdeath,
+		IS_NPC( victim ) ? 0 : victim->pcdata->mkill,
+		IS_NPC( victim ) ? 0 : victim->pcdata->mdeath );
 	send_to_char( buf, ch );
 
 	snprintf( buf, sizeof( buf ), "TotExp  : %12d. TotMobLev  : %10d. TotQuestPoints : %10d.\n\r",
@@ -589,62 +589,62 @@ void do_pstat( CHAR_DATA *ch, char *argument ) {
 	send_to_char( buf, ch );
 
 	if ( !IS_NPC( victim ) ) {
-		snprintf( buf, sizeof( buf ), "Unarmed : %4d.", victim->wpn[0] );
+		snprintf( buf, sizeof( buf ), "Unarmed : %4d.", ch_wpn(victim)[0] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Slice   : %4d.", victim->wpn[1] );
+		snprintf( buf, sizeof( buf ), " Slice   : %4d.", ch_wpn(victim)[1] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Stab    : %4d.", victim->wpn[2] );
+		snprintf( buf, sizeof( buf ), " Stab    : %4d.", ch_wpn(victim)[2] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Slash   : %4d.", victim->wpn[3] );
+		snprintf( buf, sizeof( buf ), " Slash   : %4d.", ch_wpn(victim)[3] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Whip    : %4d.\n\r", victim->wpn[4] );
+		snprintf( buf, sizeof( buf ), " Whip    : %4d.\n\r", ch_wpn(victim)[4] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), "Claw    : %4d.", victim->wpn[5] );
+		snprintf( buf, sizeof( buf ), "Claw    : %4d.", ch_wpn(victim)[5] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Blast   : %4d.", victim->wpn[6] );
+		snprintf( buf, sizeof( buf ), " Blast   : %4d.", ch_wpn(victim)[6] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Pound   : %4d.", victim->wpn[7] );
+		snprintf( buf, sizeof( buf ), " Pound   : %4d.", ch_wpn(victim)[7] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Crush   : %4d.", victim->wpn[8] );
+		snprintf( buf, sizeof( buf ), " Crush   : %4d.", ch_wpn(victim)[8] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Grep    : %4d.\n\r", victim->wpn[9] );
+		snprintf( buf, sizeof( buf ), " Grep    : %4d.\n\r", ch_wpn(victim)[9] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), "Bite    : %4d.", victim->wpn[10] );
+		snprintf( buf, sizeof( buf ), "Bite    : %4d.", ch_wpn(victim)[10] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Pierce  : %4d.", victim->wpn[11] );
+		snprintf( buf, sizeof( buf ), " Pierce  : %4d.", ch_wpn(victim)[11] );
 		send_to_char( buf, ch );
-		snprintf( buf, sizeof( buf ), " Suck    : %4d.\n\r", victim->wpn[12] );
+		snprintf( buf, sizeof( buf ), " Suck    : %4d.\n\r", ch_wpn(victim)[12] );
 		send_to_char( buf, ch );
 
 		snprintf( buf, sizeof( buf ), "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
-			"Purple", victim->spl[PURPLE_MAGIC],
-			"Red", victim->spl[RED_MAGIC],
-			"Blue", victim->spl[BLUE_MAGIC],
-			"Green", victim->spl[GREEN_MAGIC],
-			"Yellow", victim->spl[YELLOW_MAGIC] );
+			"Purple", ch_spl(victim)[PURPLE_MAGIC],
+			"Red", ch_spl(victim)[RED_MAGIC],
+			"Blue", ch_spl(victim)[BLUE_MAGIC],
+			"Green", ch_spl(victim)[GREEN_MAGIC],
+			"Yellow", ch_spl(victim)[YELLOW_MAGIC] );
 		send_to_char( buf, ch );
 		snprintf( buf, sizeof( buf ), "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
-			"Viper", victim->stance[STANCE_VIPER],
-			"Crane", victim->stance[STANCE_CRANE],
-			"Crab", victim->stance[STANCE_CRAB],
-			"Mongoose", victim->stance[STANCE_MONGOOSE],
-			"Bull", victim->stance[STANCE_BULL] );
+			"Viper", ch_stance(victim)[STANCE_VIPER],
+			"Crane", ch_stance(victim)[STANCE_CRANE],
+			"Crab", ch_stance(victim)[STANCE_CRAB],
+			"Mongoose", ch_stance(victim)[STANCE_MONGOOSE],
+			"Bull", ch_stance(victim)[STANCE_BULL] );
 		send_to_char( buf, ch );
 
 		snprintf( buf, sizeof( buf ), "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %-3d. %-8s : %3d.\n\r",
-			"Mantis", victim->stance[STANCE_MANTIS],
-			"Dragon", victim->stance[STANCE_DRAGON],
-			"Tiger", victim->stance[STANCE_TIGER],
-			"Monkey", victim->stance[STANCE_MONKEY],
-			"Swallow", victim->stance[STANCE_SWALLOW] );
+			"Mantis", ch_stance(victim)[STANCE_MANTIS],
+			"Dragon", ch_stance(victim)[STANCE_DRAGON],
+			"Tiger", ch_stance(victim)[STANCE_TIGER],
+			"Monkey", ch_stance(victim)[STANCE_MONKEY],
+			"Swallow", ch_stance(victim)[STANCE_SWALLOW] );
 
 		send_to_char( buf, ch );
 		snprintf( buf, sizeof( buf ), "%-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d. %-8s : %3d.\n\r",
-			"ss1", victim->stance[STANCE_SS1],
-			"ss2", victim->stance[STANCE_SS2],
-			"ss3", victim->stance[STANCE_SS3],
-			"ss4", victim->stance[STANCE_SS4],
-			"ss5", victim->stance[STANCE_SS5] );
+			"ss1", ch_stance(victim)[STANCE_SS1],
+			"ss2", ch_stance(victim)[STANCE_SS2],
+			"ss3", ch_stance(victim)[STANCE_SS3],
+			"ss4", ch_stance(victim)[STANCE_SS4],
+			"ss5", ch_stance(victim)[STANCE_SS5] );
 		send_to_char( buf, ch );
 
 		snprintf( buf, sizeof( buf ), "Act         : %s\n\r", plr_bit_name( victim->act ) );

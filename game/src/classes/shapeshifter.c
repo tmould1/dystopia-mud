@@ -56,18 +56,18 @@ void do_stomp( CHAR_DATA *ch, char *argument ) {
 	limb = number_range( 1, 4 );
 	if ( number_range( 1, 100 ) > 60 && !IS_NPC( victim ) ) {
 		if ( limb < 3 ) {
-			if ( !IS_ARM_R( victim, LOST_ARM ) ) SET_BIT( victim->loc_hp[3], LOST_ARM );
-			if ( !IS_BLEEDING( victim, BLEEDING_ARM_R ) ) SET_BIT( victim->loc_hp[6], BLEEDING_ARM_R );
-			if ( IS_BLEEDING( victim, BLEEDING_HAND_R ) ) REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_R );
+			if ( !IS_ARM_R( victim, LOST_ARM ) ) SET_BIT( ch_loc_hp(victim)[3], LOST_ARM );
+			if ( !IS_BLEEDING( victim, BLEEDING_ARM_R ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_R );
+			if ( IS_BLEEDING( victim, BLEEDING_HAND_R ) ) REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_R );
 			if ( ( obj = get_eq_char( victim, WEAR_ARMS ) ) != NULL ) take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_WIELD ) ) != NULL ) take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_HANDS ) ) != NULL ) take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_WRIST_R ) ) != NULL ) take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_FINGER_R ) ) != NULL ) take_item( victim, obj );
 		} else {
-			if ( !IS_ARM_L( victim, LOST_ARM ) ) SET_BIT( victim->loc_hp[2], LOST_ARM );
-			if ( !IS_BLEEDING( victim, BLEEDING_ARM_L ) ) SET_BIT( victim->loc_hp[6], BLEEDING_ARM_L );
-			if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) ) REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_L );
+			if ( !IS_ARM_L( victim, LOST_ARM ) ) SET_BIT( ch_loc_hp(victim)[2], LOST_ARM );
+			if ( !IS_BLEEDING( victim, BLEEDING_ARM_L ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_L );
+			if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) ) REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_L );
 			if ( ( obj = get_eq_char( victim, WEAR_ARMS ) ) != NULL ) take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL ) take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_HANDS ) ) != NULL ) take_item( victim, obj );

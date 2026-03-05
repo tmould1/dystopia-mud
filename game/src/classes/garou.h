@@ -38,7 +38,7 @@ The Breed, Auspice and Tribe defines are for ch->gifts[ ], replacing Totems.
 #define WENDIGO		   21
 
 /* Garou Macros */
-#define IS_GAR1( ch, gift ) ( IS_SET( ( ch )->garou1, ( gift ) ) )
+#define IS_GAR1( ch, gift ) ( !IS_NPC( ch ) && IS_SET( ( ch )->pcdata->garou1, ( gift ) ) )
 
 /* Gnosis */
 #define GCURRENT 0

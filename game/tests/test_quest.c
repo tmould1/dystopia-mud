@@ -477,7 +477,7 @@ static void test_evaluate_availability_unlocks( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 0;
+	ch->explevel = 0;
 
 	/* T01 has no prereqs - should be unlocked for explevel 0 */
 	quest_evaluate_availability( ch );
@@ -512,7 +512,7 @@ static void test_ftue_visibility_explevel0( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 0;
+	ch->explevel = 0;
 
 	quest_evaluate_availability( ch );
 
@@ -541,7 +541,7 @@ static void test_ftue_visibility_explevel1( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 1;
+	ch->explevel = 1;
 
 	quest_evaluate_availability( ch );
 
@@ -569,7 +569,7 @@ static void test_ftue_visibility_veteran( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 2;
+	ch->explevel = 2;
 
 	quest_evaluate_availability( ch );
 
@@ -606,7 +606,7 @@ static void test_prereqs_block_locked_quest( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 0;
+	ch->explevel = 0;
 
 	quest_evaluate_availability( ch );
 
@@ -626,7 +626,7 @@ static void test_prereqs_unlock_after_completion( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 0;
+	ch->explevel = 0;
 
 	/* Complete T01 */
 	int qi_t01 = quest_def_index_by_id( "T01" );
@@ -658,7 +658,7 @@ static void test_init_player_auto_grant_explevel0( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 0;
+	ch->explevel = 0;
 
 	quest_init_player( ch );
 
@@ -679,7 +679,7 @@ static void test_init_player_auto_grant_explevel1( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 1;
+	ch->explevel = 1;
 
 	quest_init_player( ch );
 
@@ -699,7 +699,7 @@ static void test_init_player_auto_grant_veteran( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 2;
+	ch->explevel = 2;
 
 	quest_init_player( ch );
 
@@ -719,7 +719,7 @@ static void test_init_player_no_double_grant( void ) {
 	CHAR_DATA *ch = make_test_player();
 	QUEST_TRACKER *t = quest_tracker_new();
 	ch->pcdata->quest_tracker = t;
-	ch->pcdata->explevel = 0;
+	ch->explevel = 0;
 
 	/* Pre-existing progress (not a new player) */
 	int qi_t01 = quest_def_index_by_id( "T01" );

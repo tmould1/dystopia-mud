@@ -441,19 +441,19 @@ static void save_all_arrays( sqlite3 *db, CHAR_DATA *ch ) {
 	}
 
 	/* Format all arrays to strings */
-	format_int_array( power, sizeof(power), ch->power, MAX_DISCIPLINES );
-	format_int_array( stance, sizeof(stance), ch->stance, 24 );
+	format_int_array( power, sizeof(power), ch->pcdata->power, MAX_DISCIPLINES );
+	format_int_array( stance, sizeof(stance), ch->pcdata->stance, 24 );
 	format_int_array( gifts, sizeof(gifts), ch->pcdata->gifts, 21 );
 	format_int_array( paradox, sizeof(paradox), ch->pcdata->paradox, 3 );
-	format_int_array( monkab, sizeof(monkab), ch->monkab, 4 );
+	format_int_array( monkab, sizeof(monkab), ch->pcdata->monkab, 4 );
 	format_int_array( damcap, sizeof(damcap), ch->damcap, 2 );
 
-	format_short_array( wpn, sizeof(wpn), ch->wpn, 13 );
-	format_short_array( spl, sizeof(spl), ch->spl, 5 );
-	format_short_array( cmbt, sizeof(cmbt), ch->cmbt, 8 );
-	format_short_array( loc_hp, sizeof(loc_hp), ch->loc_hp, 7 );
-	format_short_array( chi_buf, sizeof(chi_buf), ch->chi, 2 );
-	format_short_array( focus_buf, sizeof(focus_buf), ch->focus, 2 );
+	format_short_array( wpn, sizeof(wpn), ch->pcdata->wpn, 13 );
+	format_short_array( spl, sizeof(spl), ch->pcdata->spl, 5 );
+	format_short_array( cmbt, sizeof(cmbt), ch->pcdata->cmbt, 8 );
+	format_short_array( loc_hp, sizeof(loc_hp), ch->pcdata->loc_hp, 7 );
+	format_short_array( chi_buf, sizeof(chi_buf), ch->pcdata->chi, 2 );
+	format_short_array( focus_buf, sizeof(focus_buf), ch->pcdata->focus, 2 );
 
 	format_int_array( attr_perm, sizeof(attr_perm), t_attr_perm, 5 );
 	format_int_array( attr_mod, sizeof(attr_mod), t_attr_mod, 5 );
@@ -894,18 +894,18 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->switchname ), -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, col++, safe_str( ch->short_descr ), -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, col++, safe_str( ch->long_descr ), -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, col++, safe_str( ch->objdesc ), -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->objdesc ), -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, col++, safe_str( ch->description ), -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, col++, safe_str( ch->lord ), -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, col++, safe_str( ch->clan ), -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, col++, safe_str( ch->morph ), -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, col++, safe_str( ch->createtime ), -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, col++, safe_str( ch->lasttime ), -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, col++, safe_str( ch->lasthost ), -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, col++, safe_str( ch->poweraction ), -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, col++, safe_str( ch->powertype ), -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, col++, safe_str( ch->prompt ), -1, SQLITE_TRANSIENT );
-		sqlite3_bind_text( stmt, col++, safe_str( ch->cprompt ), -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->createtime ), -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->lasttime ), -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->lasthost ), -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->poweraction ), -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->powertype ), -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->prompt ), -1, SQLITE_TRANSIENT );
+		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->cprompt ), -1, SQLITE_TRANSIENT );
 		/* PC-only strings */
 		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->pwd ), -1, SQLITE_TRANSIENT );
 		sqlite3_bind_text( stmt, col++, safe_str( ch->pcdata->bamfin ), -1, SQLITE_TRANSIENT );
@@ -977,27 +977,27 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_bind_int( stmt, col++, ch->move );
 		sqlite3_bind_int( stmt, col++, ch->max_move );
 		/* PK/PD/MK/MD/Arena */
-		sqlite3_bind_int( stmt, col++, ch->pkill );
-		sqlite3_bind_int( stmt, col++, ch->pdeath );
-		sqlite3_bind_int( stmt, col++, ch->mkill );
-		sqlite3_bind_int( stmt, col++, ch->mdeath );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->pkill );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->pdeath );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->mkill );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->mdeath );
 		sqlite3_bind_int( stmt, col++, ch->pcdata->awins );
 		sqlite3_bind_int( stmt, col++, ch->pcdata->alosses );
 		/* Class-specific */
 		sqlite3_bind_int( stmt, col++, ch->warp );
 		sqlite3_bind_int( stmt, col++, ch->warpcount );
-		sqlite3_bind_int( stmt, col++, ch->monkstuff );
-		sqlite3_bind_int( stmt, col++, ch->monkcrap );
-		sqlite3_bind_int( stmt, col++, ch->garou1 );
-		sqlite3_bind_int( stmt, col++, ch->garou2 );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->monkstuff );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->monkcrap );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->garou1 );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->garou2 );
 		sqlite3_bind_int( stmt, col++, ch->rage );
 		sqlite3_bind_int( stmt, col++, ch->generation );
-		sqlite3_bind_int( stmt, col++, ch->cur_form );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->cur_form );
 		sqlite3_bind_int( stmt, col++, ch->flag2 );
 		sqlite3_bind_int( stmt, col++, ch->flag3 );
 		sqlite3_bind_int( stmt, col++, ch->flag4 );
 		sqlite3_bind_int( stmt, col++, ch->siltol );
-		sqlite3_bind_int( stmt, col++, ch->gnosis[GMAXIMUM] );
+		sqlite3_bind_int( stmt, col++, ch_gnosis(ch)[GMAXIMUM] );
 		/* PC_DATA ints */
 		sqlite3_bind_int( stmt, col++, ch->pcdata->kingdom );
 		sqlite3_bind_int( stmt, col++, ch->pcdata->quest );
@@ -1294,24 +1294,24 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	ch->pcdata->disc_research = -1;
 	ch->lord = str_dup( "" );
 	ch->morph = str_dup( "" );
-	ch->pload = str_dup( "" );
-	ch->prompt = str_dup( "" );
-	ch->cprompt = str_dup( "" );
+	ch->pcdata->pload = str_dup( "" );
+	ch->pcdata->prompt = str_dup( "" );
+	ch->pcdata->cprompt = str_dup( "" );
 	strtime = ctime( &current_time );
 	strtime[strlen( strtime ) - 1] = '\0';
-	free(ch->lasttime);
-	ch->createtime = str_dup( strtime );
-	ch->lasttime = str_dup( "" );
-	ch->lasthost = str_dup( "" );
-	ch->poweraction = str_dup( "" );
-	ch->powertype = str_dup( "" );
+	free(ch->pcdata->lasttime);
+	ch->pcdata->createtime = str_dup( strtime );
+	ch->pcdata->lasttime = str_dup( "" );
+	ch->pcdata->lasthost = str_dup( "" );
+	ch->pcdata->poweraction = str_dup( "" );
+	ch->pcdata->powertype = str_dup( "" );
 	ch->hunting = str_dup( "" );
 	ch->pcdata->followers = 0;
 	ch->spectype = 0;
 	ch->specpower = 0;
 	ch->mounted = 0;
 	ch->home = ROOM_VNUM_SCHOOL;
-	ch->vampgen_a = 0;
+	ch->pcdata->vampgen_a = 0;
 	ch->pcdata->paradox[0] = 0;
 	ch->pcdata->paradox[1] = 0;
 	ch->pcdata->paradox[2] = 0;
@@ -1324,17 +1324,17 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	ch->form = 1048575;
 	ch->beast = 15;
 	for ( sn = 0; sn < 7; sn++ )
-		ch->loc_hp[sn] = 0;
+		ch_loc_hp(ch)[sn] = 0;
 	for ( sn = 0; sn < 13; sn++ )
-		ch->wpn[sn] = 0;
+		ch_wpn(ch)[sn] = 0;
 	for ( sn = 0; sn < 5; sn++ )
-		ch->spl[sn] = 0;
+		ch_spl(ch)[sn] = 0;
 	for ( sn = 0; sn < 8; sn++ )
-		ch->cmbt[sn] = 0;
-	ch->pkill = 0;
-	ch->pdeath = 0;
-	ch->mkill = 0;
-	ch->mdeath = 0;
+		ch_cmbt(ch)[sn] = 0;
+	ch->pcdata->pkill = 0;
+	ch->pcdata->pdeath = 0;
+	ch->pcdata->mkill = 0;
+	ch->pcdata->mdeath = 0;
 	ch->pcdata->followers = 0;
 	ch->pcdata->perm_str = 13;
 	ch->pcdata->perm_int = 13;
@@ -1439,8 +1439,8 @@ static void load_player_row( sqlite3 *db, CHAR_DATA *ch ) {
 		ch->short_descr = str_dup( col_text( stmt, col++ ) );
 		free(ch->long_descr);
 		ch->long_descr = str_dup( col_text( stmt, col++ ) );
-		free(ch->objdesc);
-		ch->objdesc = str_dup( col_text( stmt, col++ ) );
+		free(ch->pcdata->objdesc);
+		ch->pcdata->objdesc = str_dup( col_text( stmt, col++ ) );
 		free(ch->description);
 		ch->description = str_dup( col_text( stmt, col++ ) );
 		free(ch->lord);
@@ -1449,20 +1449,20 @@ static void load_player_row( sqlite3 *db, CHAR_DATA *ch ) {
 		ch->clan = str_dup( col_text( stmt, col++ ) );
 		free(ch->morph);
 		ch->morph = str_dup( col_text( stmt, col++ ) );
-		free(ch->createtime);
-		ch->createtime = str_dup( col_text( stmt, col++ ) );
-		free(ch->lasttime);
-		ch->lasttime = str_dup( col_text( stmt, col++ ) );
-		free(ch->lasthost);
-		ch->lasthost = str_dup( col_text( stmt, col++ ) );
-		free(ch->poweraction);
-		ch->poweraction = str_dup( col_text( stmt, col++ ) );
-		free(ch->powertype);
-		ch->powertype = str_dup( col_text( stmt, col++ ) );
-		free(ch->prompt);
-		ch->prompt = str_dup( col_text( stmt, col++ ) );
-		free(ch->cprompt);
-		ch->cprompt = str_dup( col_text( stmt, col++ ) );
+		free(ch->pcdata->createtime);
+		ch->pcdata->createtime = str_dup( col_text( stmt, col++ ) );
+		free(ch->pcdata->lasttime);
+		ch->pcdata->lasttime = str_dup( col_text( stmt, col++ ) );
+		free(ch->pcdata->lasthost);
+		ch->pcdata->lasthost = str_dup( col_text( stmt, col++ ) );
+		free(ch->pcdata->poweraction);
+		ch->pcdata->poweraction = str_dup( col_text( stmt, col++ ) );
+		free(ch->pcdata->powertype);
+		ch->pcdata->powertype = str_dup( col_text( stmt, col++ ) );
+		free(ch->pcdata->prompt);
+		ch->pcdata->prompt = str_dup( col_text( stmt, col++ ) );
+		free(ch->pcdata->cprompt);
+		ch->pcdata->cprompt = str_dup( col_text( stmt, col++ ) );
 		/* PC-only strings */
 		free(ch->pcdata->pwd);
 		ch->pcdata->pwd = str_dup( col_text( stmt, col++ ) );
@@ -1546,27 +1546,27 @@ static void load_player_row( sqlite3 *db, CHAR_DATA *ch ) {
 		ch->move = sqlite3_column_int( stmt, col++ );
 		ch->max_move = sqlite3_column_int( stmt, col++ );
 		/* PK/PD/MK/MD/Arena */
-		ch->pkill = sqlite3_column_int( stmt, col++ );
-		ch->pdeath = sqlite3_column_int( stmt, col++ );
-		ch->mkill = sqlite3_column_int( stmt, col++ );
-		ch->mdeath = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->pkill = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->pdeath = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->mkill = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->mdeath = sqlite3_column_int( stmt, col++ );
 		ch->pcdata->awins = sqlite3_column_int( stmt, col++ );
 		ch->pcdata->alosses = sqlite3_column_int( stmt, col++ );
 		/* Class-specific */
 		ch->warp = sqlite3_column_int( stmt, col++ );
 		ch->warpcount = sqlite3_column_int( stmt, col++ );
-		ch->monkstuff = sqlite3_column_int( stmt, col++ );
-		ch->monkcrap = sqlite3_column_int( stmt, col++ );
-		ch->garou1 = sqlite3_column_int( stmt, col++ );
-		ch->garou2 = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->monkstuff = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->monkcrap = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->garou1 = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->garou2 = sqlite3_column_int( stmt, col++ );
 		ch->rage = sqlite3_column_int( stmt, col++ );
 		ch->generation = sqlite3_column_int( stmt, col++ );
-		ch->cur_form = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->cur_form = sqlite3_column_int( stmt, col++ );
 		ch->flag2 = sqlite3_column_int( stmt, col++ );
 		ch->flag3 = sqlite3_column_int( stmt, col++ );
 		ch->flag4 = sqlite3_column_int( stmt, col++ );
 		ch->siltol = sqlite3_column_int( stmt, col++ );
-		ch->gnosis[GMAXIMUM] = sqlite3_column_int( stmt, col++ );
+		ch_gnosis(ch)[GMAXIMUM] = sqlite3_column_int( stmt, col++ );
 		/* PC_DATA ints */
 		ch->pcdata->kingdom = sqlite3_column_int( stmt, col++ );
 		ch->pcdata->quest = sqlite3_column_int( stmt, col++ );
@@ -1613,29 +1613,29 @@ static void load_player_arrays( sqlite3 *db, CHAR_DATA *ch ) {
 		const char *data = col_text( stmt, 1 );
 
 		if ( !str_cmp( name, "power" ) )
-			load_int_array( data, ch->power, MAX_DISCIPLINES );
+			load_int_array( data, ch->pcdata->power, MAX_DISCIPLINES );
 		else if ( !str_cmp( name, "stance" ) )
-			load_int_array( data, ch->stance, 24 );
+			load_int_array( data, ch->pcdata->stance, 24 );
 		else if ( !str_cmp( name, "gifts" ) )
 			load_int_array( data, ch->pcdata->gifts, 21 );
 		else if ( !str_cmp( name, "paradox" ) )
 			load_int_array( data, ch->pcdata->paradox, 3 );
 		else if ( !str_cmp( name, "monkab" ) )
-			load_int_array( data, ch->monkab, 4 );
+			load_int_array( data, ch->pcdata->monkab, 4 );
 		else if ( !str_cmp( name, "damcap" ) )
 			load_int_array( data, ch->damcap, 2 );
 		else if ( !str_cmp( name, "wpn" ) )
-			load_short_array( data, ch->wpn, 13 );
+			load_short_array( data, ch->pcdata->wpn, 13 );
 		else if ( !str_cmp( name, "spl" ) )
-			load_short_array( data, ch->spl, 5 );
+			load_short_array( data, ch->pcdata->spl, 5 );
 		else if ( !str_cmp( name, "cmbt" ) )
-			load_short_array( data, ch->cmbt, 8 );
+			load_short_array( data, ch->pcdata->cmbt, 8 );
 		else if ( !str_cmp( name, "loc_hp" ) )
-			load_short_array( data, ch->loc_hp, 7 );
+			load_short_array( data, ch->pcdata->loc_hp, 7 );
 		else if ( !str_cmp( name, "chi" ) )
-			load_short_array( data, ch->chi, 2 );
+			load_short_array( data, ch->pcdata->chi, 2 );
 		else if ( !str_cmp( name, "focus" ) )
-			load_short_array( data, ch->focus, 2 );
+			load_short_array( data, ch->pcdata->focus, 2 );
 		else if ( !str_cmp( name, "attr_perm" ) ) {
 			int v[5];
 			load_int_array( data, v, 5 );

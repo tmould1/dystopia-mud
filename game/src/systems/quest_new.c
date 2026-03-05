@@ -114,9 +114,9 @@ static bool quest_is_visible( CHAR_DATA *ch, const QUEST_DEF *q ) {
         return FALSE;
 
     /* FTUE level restriction */
-    if ( ch->pcdata->explevel < q->min_explevel )
+    if ( ch->explevel < q->min_explevel )
         return FALSE;
-    if ( ch->pcdata->explevel > q->max_explevel )
+    if ( ch->explevel > q->max_explevel )
         return FALSE;
 
     return TRUE;
@@ -215,7 +215,7 @@ void quest_init_player( CHAR_DATA *ch ) {
 
         if ( !has_progress && quest_def_count() > 0 ) {
             /* Pick entry quest based on FTUE experience level */
-            switch ( ch->pcdata->explevel ) {
+            switch ( ch->explevel ) {
                 case 0:  entry_id = "T01"; break;  /* complete newbie */
                 case 1:  entry_id = "T06"; break;  /* MUD experience, not Dystopia */
                 default: entry_id = "M01"; break;  /* veteran */

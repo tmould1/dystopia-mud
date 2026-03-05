@@ -97,7 +97,7 @@ void upgrade2( CHAR_DATA *ch ) {
 		return;
 	}
 	for ( i = 19; i <= 23; i++ ) {
-		if ( ch->stance[i] == -1 ) {
+		if ( ch_stance(ch)[i] == -1 ) {
 			send_to_char( "You need all your superstances to upgrade.\n\r", ch );
 			return;
 		}
@@ -261,16 +261,16 @@ void clearshit( CHAR_DATA *ch ) {
 	ch->pcdata->relrank = 0;
 	ch->lord = str_dup( "" );
 	ch->morph = str_dup( "" );
-	ch->pload = str_dup( "" );
-	ch->poweraction = str_dup( "" );
-	ch->powertype = str_dup( "" );
+	ch->pcdata->pload = str_dup( "" );
+	ch->pcdata->poweraction = str_dup( "" );
+	ch->pcdata->powertype = str_dup( "" );
 	ch->hunting = str_dup( "" );
 	ch->pcdata->followers = 0;
 	ch->spectype = 0;
 	ch->specpower = 0;
 	ch->mounted = 0;
 	ch->home = ROOM_VNUM_SCHOOL;
-	ch->vampgen_a = 0;
+	ch->pcdata->vampgen_a = 0;
 	ch->pcdata->paradox[0] = 0; /* Total paradox */
 	ch->pcdata->paradox[1] = 0; /* Current Paradox */
 	ch->pcdata->paradox[2] = 0; /* Paradox Ticker */
@@ -283,13 +283,13 @@ void clearshit( CHAR_DATA *ch ) {
 	ch->form = 1048575;
 	ch->beast = 15;
 	for ( sn = 0; sn < 7; sn++ )
-		ch->loc_hp[sn] = 0;
+		ch_loc_hp(ch)[sn] = 0;
 	for ( sn = 0; sn < 13; sn++ )
-		ch->wpn[sn] = 0;
+		ch_wpn(ch)[sn] = 0;
 	for ( sn = 0; sn < 5; sn++ )
-		ch->spl[sn] = 4;
+		ch_spl(ch)[sn] = 4;
 	for ( sn = 0; sn < 8; sn++ )
-		ch->cmbt[sn] = 0;
+		ch_cmbt(ch)[sn] = 0;
 	ch->pcdata->followers = 0;
 	ch->pcdata->perm_str = 13;
 	ch->pcdata->perm_int = 13;
@@ -320,11 +320,11 @@ void clearshit( CHAR_DATA *ch ) {
 	for ( sn = 0; sn < 12; sn++ )
 		ch->pcdata->stats[sn] = 0;
 	for ( sn = 0; sn < 19; sn++ )
-		ch->stance[sn] = 0;
+		ch_stance(ch)[sn] = 0;
 	for ( sn = 19; sn < 24; sn++ )
-		ch->stance[sn] = -1;
+		ch_stance(ch)[sn] = -1;
 	for ( sn = 0; sn < 44; sn++ )
-		ch->power[sn] = -2;
+		ch_power(ch)[sn] = -2;
 	ch->pcdata->fake_skill = 0;
 	ch->pcdata->fake_stance = 0;
 	ch->pcdata->fake_hit = 0;

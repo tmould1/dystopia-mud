@@ -30,7 +30,7 @@ DO_FUN do_stance;
 
 void do_deathsense( CHAR_DATA *ch, char *argument ) {
 
-	if ( ch->power[DISC_DAEM_NETH] < 2 ) {
+	if ( ch_power(ch)[DISC_DAEM_NETH] < 2 ) {
 		stc( "You need level 2 Nether to use DeathSense.\n\r", ch );
 		return;
 	}
@@ -52,7 +52,7 @@ void do_leech( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim = NULL;
 	char buf[MAX_STRING_LENGTH];
 
-	if ( ch->power[DISC_DAEM_NETH] < 4 ) {
+	if ( ch_power(ch)[DISC_DAEM_NETH] < 4 ) {
 		if ( !IS_DEMPOWER( ch, DEM_LEECH ) ) {
 
 			stc( "You do not have that power.\n\r", ch );
@@ -100,7 +100,7 @@ void do_entomb( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj = NULL;
 	OBJ_DATA *objc;
 
-	if ( !IS_DEMPOWER( ch, DEM_ENTOMB ) && ch->power[DISC_DAEM_GELU] < 6 ) {
+	if ( !IS_DEMPOWER( ch, DEM_ENTOMB ) && ch_power(ch)[DISC_DAEM_GELU] < 6 ) {
 		stc( "You have not been granted that power.\n\r", ch );
 		return;
 	}
@@ -187,7 +187,7 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 	argument = one_argument( argument, arg1 );
 	argument = one_argument( argument, arg2 );
 
-	if ( ch->power[DISC_DAEM_GELU] < 7 ) {
+	if ( ch_power(ch)[DISC_DAEM_GELU] < 7 ) {
 		stc( "You must achieve a level seven mastery of Geluge to use Gust.\n\r", ch );
 		return;
 	}
@@ -220,7 +220,7 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 	}
 
 	WAIT_STATE( ch, 12 );
-	if ( !IS_NPC( ch ) && number_percent() / 2 > ch->power[DISC_DAEM_GELU] + ch->generation ) {
+	if ( !IS_NPC( ch ) && number_percent() / 2 > ch_power(ch)[DISC_DAEM_GELU] + ch->generation ) {
 		send_to_char( "You huff and puff but they do not budge.\n\r", ch );
 		act( "$n blows a gust of cold air into the room.", ch, NULL, NULL, TO_ROOM );
 		return;
@@ -272,7 +272,7 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 		act( buf, ch, NULL, victim, TO_CHAR );
 		snprintf( buf, sizeof( buf ), "You smash into the %s wall.", direction );
 		act( buf, ch, NULL, victim, TO_VICT );
-		dam = dice( victim->size * 3 + 1, ch->power[DISC_DAEM_GELU] * 3 );
+		dam = dice( victim->size * 3 + 1, ch_power(ch)[DISC_DAEM_GELU] * 3 );
 		damage( ch, victim, dam, 0 );
 		return;
 	}
@@ -305,7 +305,7 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 			char_to_room( victim, to_room );
 			snprintf( buf, sizeof( buf ), "$n comes smashing in through the %s $d.", direction );
 			act( buf, victim, NULL, pexit->keyword, TO_ROOM );
-			dam = dice( victim->size * 3 + 1, ch->power[DISC_DAEM_GELU] * 7 );
+			dam = dice( victim->size * 3 + 1, ch_power(ch)[DISC_DAEM_GELU] * 7 );
 			damage( ch, victim, dam, 0 );
 		}
 	} else {
@@ -323,7 +323,7 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 		char_to_room( victim, pexit->to_room );
 		snprintf( buf, sizeof( buf ), "$n comes flying in from the %s.", direction );
 		act( buf, victim, NULL, NULL, TO_ROOM );
-		dam = dice( victim->size * 3 + 1, ch->power[DISC_DAEM_GELU] * 5 );
+		dam = dice( victim->size * 3 + 1, ch_power(ch)[DISC_DAEM_GELU] * 5 );
 		damage( ch, victim, dam, 0 );
 	}
 	return;
@@ -332,7 +332,7 @@ void do_gust( CHAR_DATA *ch, char *argument ) {
 void do_caust( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 
-	if ( !IS_DEMPOWER( ch, DEM_CAUST ) && ch->power[DISC_DAEM_CORR] < 4 ) {
+	if ( !IS_DEMPOWER( ch, DEM_CAUST ) && ch_power(ch)[DISC_DAEM_CORR] < 4 ) {
 		stc( "You have not been granted that power.\n\r", ch );
 		return;
 	}
@@ -379,7 +379,7 @@ void do_chaosport( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_DAEM_DISC] < 4 ) {
+	if ( ch_power(ch)[DISC_DAEM_DISC] < 4 ) {
 		stc( "You need at least level 4 in Discord to use Chaos Portal\n\r", ch );
 		return;
 	}
@@ -427,7 +427,7 @@ void do_unnerve( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( !IS_DEMPOWER( ch, DEM_UNNERVE ) && ch->power[DISC_DAEM_DISC] < 1 ) {
+	if ( !IS_DEMPOWER( ch, DEM_UNNERVE ) && ch_power(ch)[DISC_DAEM_DISC] < 1 ) {
 		stc( "You have not been granted that power.\n\r", ch );
 		return;
 	}
@@ -450,7 +450,7 @@ void do_unnerve( CHAR_DATA *ch, char *argument ) {
 void do_wfreeze( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 
-	if ( !IS_DEMPOWER( ch, DEM_FREEZEWEAPON ) && ch->power[DISC_DAEM_GELU] < 1 ) {
+	if ( !IS_DEMPOWER( ch, DEM_FREEZEWEAPON ) && ch_power(ch)[DISC_DAEM_GELU] < 1 ) {
 		stc( "You have not been granted that power.\n\r", ch );
 		return;
 	}
@@ -491,7 +491,7 @@ void do_wfreeze( CHAR_DATA *ch, char *argument ) {
 
 int get_polymorph_power( CHAR_DATA *ch ) {
 	if ( ch->class == CLASS_DEMON )
-		return ch->power[DISC_DAEM_MORP] - 1;
+		return ch_power(ch)[DISC_DAEM_MORP] - 1;
 
 	if ( ch->level == 12 )
 		return 100;
@@ -502,7 +502,7 @@ int get_polymorph_power( CHAR_DATA *ch ) {
 void do_hellfire( CHAR_DATA *ch, char *argument ) {
 	int door;
 
-	if ( ch->power[DISC_DAEM_HELL] < 8 )
+	if ( ch_power(ch)[DISC_DAEM_HELL] < 8 )
 		return;
 
 	if ( ch->in_room->sector_type == SECT_AIR ) {
@@ -623,7 +623,7 @@ ROOM_INDEX_DATA *locate_obj( OBJ_DATA *obj ) {
 void do_seed( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 
-	if ( ch->power[DISC_DAEM_HELL] < 7 ) {
+	if ( ch_power(ch)[DISC_DAEM_HELL] < 7 ) {
 		stc( "You must obtain a level seven Mastery of the Hellfire Discipline.\n\r", ch );
 		return;
 	}
@@ -669,7 +669,7 @@ void do_seed( CHAR_DATA *ch, char *argument ) {
 void do_immolate( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 
-	if ( ch->power[DISC_DAEM_HELL] < 2 ) {
+	if ( ch_power(ch)[DISC_DAEM_HELL] < 2 ) {
 		if ( !IS_DEMPOWER( ch, DEM_IMMOLATE ) ) {
 			stc( "You have not been granted that power.\n\r", ch );
 			return;
@@ -716,13 +716,13 @@ void do_dinferno( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *vch_next;
 	char buf[MAX_STRING_LENGTH];
 
-	if ( !IS_DEMPOWER( ch, DEM_INFERNO ) && ch->power[DISC_DAEM_HELL] < 3 ) {
+	if ( !IS_DEMPOWER( ch, DEM_INFERNO ) && ch_power(ch)[DISC_DAEM_HELL] < 3 ) {
 		send_to_char( "You have not been granted that power.\n\r", ch );
 		return;
 	}
 
 	if ( !TIME_UP( ch, TIMER_INFERNO ) ) {
-		snprintf( buf, sizeof( buf ), "You cannot use Inferno for another %d hours.\n\r", ch->tick_timer[TIMER_INFERNO] );
+		snprintf( buf, sizeof( buf ), "You cannot use Inferno for another %d hours.\n\r", ch->pcdata->tick_timer[TIMER_INFERNO] );
 		stc( buf, ch );
 		return;
 	}
@@ -1047,7 +1047,7 @@ void do_blink( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_DAEM_ATTA] < 7 ) {
+	if ( ch_power(ch)[DISC_DAEM_ATTA] < 7 ) {
 		if ( !IS_DEMPOWER( ch, DEM_BLINK ) && IS_CLASS( ch, CLASS_DEMON ) ) {
 			stc( "You need to get blink first.\n\r", ch );
 			return;
@@ -1100,7 +1100,7 @@ void do_graft( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_DAEM_ATTA] < 5 ) {
+	if ( ch_power(ch)[DISC_DAEM_ATTA] < 5 ) {
 		if ( !IS_DEMPOWER( ch, DEM_GRAFT ) && IS_CLASS( ch, CLASS_DEMON ) ) {
 			stc( "You need to get graft first.\n\r", ch );
 			return;
@@ -1236,7 +1236,7 @@ void do_frostbreath( CHAR_DATA *ch, char *argument ) {
 
 	argument = one_argument( argument, arg );
 
-	if ( ch->power[DISC_DAEM_GELU] < 2 ) {
+	if ( ch_power(ch)[DISC_DAEM_GELU] < 2 ) {
 		stc( "You must obtain level two in Geluge to use Frostbreath.\n\r", ch );
 		return;
 	}
@@ -1370,7 +1370,7 @@ void frost_breath( CHAR_DATA *ch, CHAR_DATA *victim, bool all ) {
 	int power;
 
 	if ( IS_CLASS( ch, CLASS_DEMON ) )
-		power = ch->power[DISC_DAEM_GELU];
+		power = ch_power(ch)[DISC_DAEM_GELU];
 	else
 		power = 0;
 

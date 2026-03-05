@@ -44,7 +44,7 @@ void do_preserve( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_NECR] < cfg( CFG_ABILITY_VAMPIRE_PRESERVE_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_NECR] < cfg( CFG_ABILITY_VAMPIRE_PRESERVE_LEVEL_REQ ) ) {
 		stc( "You must obtain level 2 Necromancy to use Preserve.\n\r", ch );
 		return;
 	}
@@ -79,7 +79,7 @@ void do_spiritguard( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_NECR] < cfg( CFG_ABILITY_VAMPIRE_SPIRITGUARD_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_NECR] < cfg( CFG_ABILITY_VAMPIRE_SPIRITGUARD_LEVEL_REQ ) ) {
 		stc( "You must obtain level 4 Necromancy to use Spirit Guardian.\n\r", ch );
 		return;
 	}
@@ -111,7 +111,7 @@ void do_spiritgate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_NECR] < cfg( CFG_ABILITY_VAMPIRE_SPIRITGATE_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_NECR] < cfg( CFG_ABILITY_VAMPIRE_SPIRITGATE_LEVEL_REQ ) ) {
 		stc( "You must obtain level 3 Necromancy to use SpiritGate.\n\r", ch );
 		return;
 	}
@@ -163,7 +163,7 @@ void do_purification( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( !IS_CLASS( ch, CLASS_VAMPIRE ) || ch->power[DISC_VAMP_OBEA] < cfg( CFG_ABILITY_VAMPIRE_PURIFICATION_LEVEL_REQ ) ) {
+	if ( !IS_CLASS( ch, CLASS_VAMPIRE ) || ch_power(ch)[DISC_VAMP_OBEA] < cfg( CFG_ABILITY_VAMPIRE_PURIFICATION_LEVEL_REQ ) ) {
 		stc( "Only the pure in heart can use purification!\n\r", ch );
 		return;
 	}
@@ -199,7 +199,7 @@ void do_purification( CHAR_DATA *ch, char *argument ) {
 	act( "A bright halo glows above $n's head.", ch, NULL, NULL, TO_ROOM );
 	send_to_char( "You purify your mind.\n\r", ch );
 
-	WAIT_STATE( ch, cfg( CFG_ABILITY_VAMPIRE_PURIFICATION_COOLDOWN_BASE ) - ch->power[DISC_VAMP_OBEA] );
+	WAIT_STATE( ch, cfg( CFG_ABILITY_VAMPIRE_PURIFICATION_COOLDOWN_BASE ) - ch_power(ch)[DISC_VAMP_OBEA] );
 	use_move( ch, cfg( CFG_ABILITY_VAMPIRE_PURIFICATION_MOVE_COST ) );
 	heal_char( ch, hps );
 	return;
@@ -220,7 +220,7 @@ void do_scream( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_MELP] < cfg( CFG_ABILITY_VAMPIRE_SCREAM_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_MELP] < cfg( CFG_ABILITY_VAMPIRE_SCREAM_LEVEL_REQ ) ) {
 		stc( "You must obtain level 1 Melpominee to use Scream.\n\r", ch );
 		return;
 	}
@@ -249,7 +249,7 @@ void do_scream( CHAR_DATA *ch, char *argument ) {
 					continue;
 			}
 			if ( can_see( ch, vch ) ) {
-				if ( number_range( 1, ( 12 - ch->power[DISC_VAMP_MELP] ) ) == 2 ) {
+				if ( number_range( 1, ( 12 - ch_power(ch)[DISC_VAMP_MELP] ) ) == 2 ) {
 					act( "$n lets out an ear-popping scream!", ch, NULL, vch, TO_ROOM );
 					stc( "You fall to the ground, clutching your ears.\n\r", vch );
 					vch->position = POS_STUNNED;
@@ -338,7 +338,7 @@ void do_conceal( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBFU] < cfg( CFG_ABILITY_VAMPIRE_CONCEAL_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_OBFU] < cfg( CFG_ABILITY_VAMPIRE_CONCEAL_LEVEL_REQ ) ) {
 		send_to_char( "You need obfuscate 5 to conceal items.\n\r", ch );
 		return;
 	}
@@ -382,7 +382,7 @@ void do_fear( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DAIM] < cfg( CFG_ABILITY_VAMPIRE_FEAR_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_DAIM] < cfg( CFG_ABILITY_VAMPIRE_FEAR_LEVEL_REQ ) ) {
 		stc( "You must obtain level 2 Daimoinon to use Fear.\n\r", ch );
 		return;
 	}
@@ -416,7 +416,7 @@ void do_fear( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !IS_NPC( victim ) ) {
-		if ( ch->power[DISC_VAMP_DAIM] < cfg( CFG_ABILITY_VAMPIRE_FEAR_PC_LEVEL_REQ ) ) {
+		if ( ch_power(ch)[DISC_VAMP_DAIM] < cfg( CFG_ABILITY_VAMPIRE_FEAR_PC_LEVEL_REQ ) ) {
 			if ( number_range( 1, cfg( CFG_ABILITY_VAMPIRE_FEAR_PC_FAIL_RANGE ) ) != 2 ) {
 				act( "You bare your fangs and growl at $N, but nothing happens.", ch, NULL, victim, TO_CHAR );
 				act( "$n bares $s fangs and growls at you.", ch, NULL, victim, TO_VICT );
@@ -452,7 +452,7 @@ void do_vtwist( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DAIM] < cfg( CFG_ABILITY_VAMPIRE_VTWIST_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_DAIM] < cfg( CFG_ABILITY_VAMPIRE_VTWIST_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain level 5 Daimoinon to use Twist.\n\r", ch );
 		return;
 	}
@@ -509,7 +509,7 @@ void do_dub( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBFU] < cfg( CFG_ABILITY_VAMPIRE_DUB_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_OBFU] < cfg( CFG_ABILITY_VAMPIRE_DUB_LEVEL_REQ ) ) {
 		send_to_char( "You need obfuscate 4 to dub items.\n\r", ch );
 		return;
 	}
@@ -545,7 +545,7 @@ void do_sharpen( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_VAMPIRE_SHARPEN_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_VAMPIRE_SHARPEN_LEVEL_REQ ) ) {
 		send_to_char( "You need Quetius 7 to sharpen.\n\r", ch );
 		return;
 	}
@@ -599,7 +599,7 @@ void do_gourge( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_THAU] < cfg( CFG_ABILITY_VAMPIRE_GOURGE_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_THAU] < cfg( CFG_ABILITY_VAMPIRE_GOURGE_LEVEL_REQ ) ) {
 		send_to_char( "You need Thaumaturgy 8 to Gourge.\n\r", ch );
 		return;
 	}
@@ -669,7 +669,7 @@ void do_bloodwater( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_NECR] < cfg( CFG_ABILITY_VAMPIRE_BLOODWATER_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_NECR] < cfg( CFG_ABILITY_VAMPIRE_BLOODWATER_LEVEL_REQ ) ) {
 		send_to_char(
 			"You need at least level 5 Necromancy to use Blood Water.\n\r", ch );
 		return;
@@ -722,7 +722,7 @@ void do_spew( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( IS_CLASS( ch, CLASS_VAMPIRE ) &&
-		ch->power[DISC_VAMP_THAU] < cfg( CFG_ABILITY_VAMPIRE_SPEW_LEVEL_REQ ) ) {
+		ch_power(ch)[DISC_VAMP_THAU] < cfg( CFG_ABILITY_VAMPIRE_SPEW_LEVEL_REQ ) ) {
 		send_to_char(
 			"You need level 6 Thaumaturgy to use this power.\n\r", ch );
 		return;
@@ -743,7 +743,7 @@ void do_spew( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	level = ch->power[DISC_VAMP_THAU];
+	level = ch_power(ch)[DISC_VAMP_THAU];
 	( *skill_table[sn].spell_fun )( sn, level, ch, NULL );
 	WAIT_STATE( ch, cfg( CFG_ABILITY_VAMPIRE_SPEW_COOLDOWN ) );
 	return;
@@ -760,7 +760,7 @@ void do_vampdarkness( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_VAMPIRE_VAMPDARKNESS_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_VAMPIRE_VAMPDARKNESS_LEVEL_REQ ) ) {
 		send_to_char( "You require level 6 Quietus to use Darkness of Death.\n\r", ch );
 		return;
 	}
@@ -793,7 +793,7 @@ void do_dragonform( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_VICI] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_VICI] < 4 ) {
 		send_to_char( "You must obtain at least level 4 in Vicissitude to use Dragonform\n\r", ch );
 		return;
 	}
@@ -848,7 +848,7 @@ void do_obj( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_VICI] < 10 ) {
+	if ( ch_power(ch)[DISC_VAMP_VICI] < 10 ) {
 		send_to_char( "You require Vicissitude 10 to Object.\n\r", ch );
 		return;
 	}
@@ -919,7 +919,7 @@ void do_baal( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DOMI] < 5 ) {
+	if ( ch_power(ch)[DISC_VAMP_DOMI] < 5 ) {
 		send_to_char( "You need Dominate 5 to summon the spirit of Baal.\n\r", ch );
 		return;
 	}
@@ -938,9 +938,9 @@ void do_baal( CHAR_DATA *ch, char *argument ) {
 	WAIT_STATE( ch, 20 );
 
 	SET_BIT( ch->extra, EXTRA_BAAL );
-	ch->power[DISC_VAMP_POTE] += 2;
-	ch->power[DISC_VAMP_CELE] += 2;
-	ch->power[DISC_VAMP_FORT] += 2;
+	ch_power(ch)[DISC_VAMP_POTE] += 2;
+	ch_power(ch)[DISC_VAMP_CELE] += 2;
+	ch_power(ch)[DISC_VAMP_FORT] += 2;
 	send_to_char( "You now carry the spirit of Baal.\n\r", ch );
 	return;
 }
@@ -963,7 +963,7 @@ void do_facade( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_PRES] < 6 ) {
+	if ( ch_power(ch)[DISC_VAMP_PRES] < 6 ) {
 		send_to_char( "You need presence 6 to facade.\n\r", ch );
 		return;
 	}
@@ -1081,7 +1081,7 @@ void do_wall( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DAIM] < 7 ) {
+	if ( ch_power(ch)[DISC_VAMP_DAIM] < 7 ) {
 		send_to_char( "You need Daimionon 7 to call Walls of Water.\n\r", ch );
 		return;
 	}
@@ -1134,7 +1134,7 @@ void do_inferno( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DAIM] < 6 ) {
+	if ( ch_power(ch)[DISC_VAMP_DAIM] < 6 ) {
 		send_to_char( "You need Daimionon 6 to use Inferno.\n\r", ch );
 		return;
 	}
@@ -1180,7 +1180,7 @@ void do_zombie( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Zombie what corpse?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_NECR] < 5 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+	if ( ch_power(ch)[DISC_VAMP_NECR] < 5 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 		send_to_char( "You require level 5 Necromancy to create a zombie.\n\r", ch );
 		return;
 	}
@@ -1251,7 +1251,7 @@ void do_fleshcraft( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_VICI] < 2 ) {
+	if ( ch_power(ch)[DISC_VAMP_VICI] < 2 ) {
 		send_to_char( "You need Vicissitude 2 to fleshcraft.\n\r", ch );
 		return;
 	}
@@ -1337,7 +1337,7 @@ void do_entrance( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_PRES] < 3 ) {
+	if ( ch_power(ch)[DISC_VAMP_PRES] < 3 ) {
 		send_to_char( "You need presence 3 to entrance.\n\r", ch );
 		return;
 	}
@@ -1363,7 +1363,7 @@ void do_entrance( CHAR_DATA *ch, char *argument ) {
 	act( buf, ch, NULL, victim, TO_ROOM );
 
 	if ( ( sn = skill_lookup( "charm" ) ) < 0 ) return;
-	level = ch->power[DISC_VAMP_PRES] * 40;
+	level = ch_power(ch)[DISC_VAMP_PRES] * 40;
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
 	WAIT_STATE( ch, 12 );
 	return;
@@ -1385,7 +1385,7 @@ void do_tendrils( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_SERP] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_SERP] < 4 ) {
 		send_to_char( "you need level 4 serpentis to use Arms of the Abyss.\n\r", ch );
 		return;
 	}
@@ -1407,7 +1407,7 @@ void do_tendrils( CHAR_DATA *ch, char *argument ) {
 	if ( is_safe( ch, victim ) == TRUE ) return;
 	if ( ( sn = skill_lookup( "web" ) ) < 0 ) return;
 	spelltype = skill_table[sn].target;
-	level = (int) ( ch->spl[spelltype] * 0.25 );
+	level = (int) ( ch_spl(ch)[spelltype] * 0.25 );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
 	WAIT_STATE( ch, 12 );
 	return;
@@ -1433,7 +1433,7 @@ void do_lamprey( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBTE] < 5 ) {
+	if ( ch_power(ch)[DISC_VAMP_OBTE] < 5 ) {
 		send_to_char( "You need level 5 Obtenebration to Lamprey.\n\r", ch );
 		return;
 
@@ -1448,12 +1448,12 @@ void do_lamprey( CHAR_DATA *ch, char *argument ) {
 	WAIT_STATE( ch, 5 );
 
 	if ( !IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_OBTE] * 20;
+		dam = ch_power(ch)[DISC_VAMP_OBTE] * 20;
 	} else if ( IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_OBTE] * 100;
+		dam = ch_power(ch)[DISC_VAMP_OBTE] * 100;
 	}
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) ) {
-		if ( victim->power[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.5 );
+		if ( ch_power(victim)[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.5 );
 	}
 	if ( is_safe( ch, victim ) == TRUE ) return;
 	dam += number_range( 1, 30 );
@@ -1489,7 +1489,7 @@ void do_assassinate( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_QUIE] < 4 ) {
 		send_to_char( "You need Quietus level 4 to Assassinate.\n\r", ch );
 		return;
 	}
@@ -1572,8 +1572,8 @@ void do_assassinate( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	if ( !IS_NPC( victim ) ) dam = ch->power[DISC_VAMP_QUIE] * 200;
-	if ( IS_NPC( victim ) ) dam = ch->power[DISC_VAMP_QUIE] * 400;
+	if ( !IS_NPC( victim ) ) dam = ch_power(ch)[DISC_VAMP_QUIE] * 200;
+	if ( IS_NPC( victim ) ) dam = ch_power(ch)[DISC_VAMP_QUIE] * 400;
 	dam += number_range( 1, 20 );
 	set_fighting( ch, victim );
 
@@ -1602,7 +1602,7 @@ void do_mindblast( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_PRES] < 2 ) {
+	if ( ch_power(ch)[DISC_VAMP_PRES] < 2 ) {
 		send_to_char( "You require presence 2 to Mindblast.\n\r", ch );
 		return;
 	}
@@ -1664,7 +1664,7 @@ void do_tongue( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_SERP] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_SERP] < 4 ) {
 		send_to_char( "You need level 4 Serpentis to tongue.\n\r", ch );
 		return;
 
@@ -1679,12 +1679,12 @@ void do_tongue( CHAR_DATA *ch, char *argument ) {
 	WAIT_STATE( ch, 5 );
 
 	if ( !IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_SERP] * 25;
+		dam = ch_power(ch)[DISC_VAMP_SERP] * 25;
 	} else if ( IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_SERP] * 125;
+		dam = ch_power(ch)[DISC_VAMP_SERP] * 125;
 	}
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) ) {
-		if ( victim->power[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.5 );
+		if ( ch_power(victim)[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.5 );
 	}
 	if ( is_safe( ch, victim ) == TRUE ) return;
 	dam += number_range( 1, 30 );
@@ -1717,7 +1717,7 @@ void do_objmask( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_CHIM] < 5 ) {
+	if ( ch_power(ch)[DISC_VAMP_CHIM] < 5 ) {
 		stc( "You must obtain level 5 Chimerstry to Mask an Object.\n\r", ch );
 		return;
 	}
@@ -1727,7 +1727,7 @@ void do_objmask( CHAR_DATA *ch, char *argument ) {
 		snprintf( buf, sizeof( buf ), "%s transforms back into %s.\n\r", ch->morph, ch->name );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		ch->morph = str_dup( "" );
-		ch->objdesc = str_dup( "" );
+		ch->pcdata->objdesc = str_dup( "" );
 		ch->long_descr = str_dup( "" );
 		ch->short_descr = str_dup( ch->name );
 		REMOVE_BIT( ch->flag2, VAMP_OBJMASK );
@@ -1760,8 +1760,8 @@ void do_objmask( CHAR_DATA *ch, char *argument ) {
 	act( "$n masks $mself as $p.", ch, obj, NULL, TO_ROOM );
 	free(ch->morph);
 	ch->morph = str_dup( obj->short_descr );
-	free(ch->objdesc);
-	ch->objdesc = str_dup( obj->description );
+	free(ch->pcdata->objdesc);
+	ch->pcdata->objdesc = str_dup( obj->description );
 	ch->long_descr = str_dup( "" );
 	return;
 }
@@ -1777,7 +1777,7 @@ void do_mirror( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_CHIM] < 1 ) {
+	if ( ch_power(ch)[DISC_VAMP_CHIM] < 1 ) {
 		stc( "You must obtain level 1 Chimersty to use Mirror Image.\n\r", ch );
 		return;
 	}
@@ -1827,7 +1827,7 @@ void do_control( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_CHIM] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_CHIM] < 4 ) {
 		stc( "You must obtain level 4 Chimerstry to use Control the Clone.\n\r", ch );
 		return;
 	}
@@ -1878,7 +1878,7 @@ void do_formillusion( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_CHIM] < 2 ) {
+	if ( ch_power(ch)[DISC_VAMP_CHIM] < 2 ) {
 		stc( "You must obtain level 2 Chimersty to Form an Illusion of yourself.\n\r", ch );
 		return;
 	}
@@ -1932,7 +1932,7 @@ void do_ashes( CHAR_DATA *ch, char *argument )
 	return;
 	}
 
-	if (ch->power[DISC_VAMP_THAN] < 3)
+	if (ch_power(ch)[DISC_VAMP_THAN] < 3)
 	{
 	   send_to_char("You must obtain level 3 in Thanatosis to use Body of Ashes.\n\r", ch);
 	   return;
@@ -1995,7 +1995,7 @@ void do_unveil( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_AUSP] < 3 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+	if ( ch_power(ch)[DISC_VAMP_AUSP] < 3 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 		stc( "You must obtain level 3 Auspex to use Unveil the Shrouded Mind.\n\r", ch );
 		return;
 	}
@@ -2020,12 +2020,12 @@ void do_unveil( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( victim->spl[BLUE_MAGIC] > ch->spl[BLUE_MAGIC] / 2 ) {
+	if ( ch_spl(victim)[BLUE_MAGIC] > ch_spl(ch)[BLUE_MAGIC] / 2 ) {
 		stc( "Their mind is far too powerful for you to Unveil.\n\r", ch );
 		return;
 	}
 
-	victim->unveil = ch;
+	victim->pcdata->unveil = ch;
 	act( "You gaze deeply into $N's eyes.\n\rYou have unveiled $S mind.\n\r", ch, NULL, victim, TO_CHAR );
 	return;
 }
@@ -2044,7 +2044,7 @@ void do_astralwalk( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_AUSP] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_AUSP] < 4 ) {
 		send_to_char( "You must obtain level 4 Auspex to use Astral Walk.\n\r", ch );
 		return;
 	}
@@ -2105,7 +2105,7 @@ void do_hagswrinkles( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_THAN] < 1 ) {
+	if ( ch_power(ch)[DISC_VAMP_THAN] < 1 ) {
 		send_to_char( "You must obtain at least level 1 in Thanatosis to use Hagswrinkles.\n\r", ch );
 		return;
 	}
@@ -2194,7 +2194,7 @@ void do_gate( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DAIM] < 3 ) {
+	if ( ch_power(ch)[DISC_VAMP_DAIM] < 3 ) {
 		send_to_char( "You require Daimoinon level 3 to gate.\n\r", ch );
 		return;
 	}
@@ -2257,7 +2257,7 @@ void do_pigeon( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_ANIM] < 3 ) {
+	if ( ch_power(ch)[DISC_VAMP_ANIM] < 3 ) {
 		send_to_char( "You require Aimalism level 3 to pigeon.\n\r", ch );
 		return;
 	}
@@ -2319,7 +2319,7 @@ void do_bloodagony( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	value = ch->power[DISC_VAMP_QUIE];
+	value = ch_power(ch)[DISC_VAMP_QUIE];
 
 	if ( arg[0] == '\0' ) {
 		send_to_char( "Bloodagony what?\n\r", ch );
@@ -2332,7 +2332,7 @@ void do_bloodagony( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_QUIE] < 3 ) {
+	if ( ch_power(ch)[DISC_VAMP_QUIE] < 3 ) {
 		send_to_char( "You need level 3 Quietus to use bloodagony.\n\r", ch );
 		return;
 	}
@@ -2445,7 +2445,7 @@ void do_embrace( CHAR_DATA *ch, char *argument ) {
 
 	/* Shaktis check for level */
 
-	if ( victim->level > 75 * ch->spl[RED_MAGIC] ) {
+	if ( victim->level > 75 * ch_spl(ch)[RED_MAGIC] ) {
 		send_to_char( "They are too powerful to embrace!\n\r", ch );
 		return;
 	}
@@ -2505,7 +2505,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_THAN] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_THAN] < 4 ) {
 		send_to_char( "You must obtain level 4 Thanatosis to use Withering.\n\r", ch );
 		return;
 	}
@@ -2538,7 +2538,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( number_percent() < 15 ) {
 		if ( !IS_ARM_R( victim, LOST_ARM ) ) {
-			SET_BIT( victim->loc_hp[3], LOST_ARM );
+			SET_BIT( ch_loc_hp(victim)[3], LOST_ARM );
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL )
 				take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_HANDS ) ) != NULL )
@@ -2555,7 +2555,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( !IS_ARM_L( victim, LOST_ARM ) ) {
-			SET_BIT( victim->loc_hp[2], LOST_ARM );
+			SET_BIT( ch_loc_hp(victim)[2], LOST_ARM );
 			if ( ( obj = get_eq_char( victim, WEAR_HOLD ) ) != NULL )
 				take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_HANDS ) ) != NULL )
@@ -2572,7 +2572,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( !IS_LEG_R( victim, LOST_LEG ) ) {
-			SET_BIT( victim->loc_hp[5], LOST_LEG );
+			SET_BIT( ch_loc_hp(victim)[5], LOST_LEG );
 			if ( ( obj = get_eq_char( victim, WEAR_FEET ) ) != NULL )
 				take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_LEGS ) ) != NULL )
@@ -2585,7 +2585,7 @@ void do_withering( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( !IS_LEG_L( victim, LOST_LEG ) ) {
-			SET_BIT( victim->loc_hp[4], LOST_LEG );
+			SET_BIT( ch_loc_hp(victim)[4], LOST_LEG );
 			if ( ( obj = get_eq_char( victim, WEAR_FEET ) ) != NULL )
 				take_item( victim, obj );
 			if ( ( obj = get_eq_char( victim, WEAR_LEGS ) ) != NULL )
@@ -2620,7 +2620,7 @@ void do_infirmity( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_QUIE] < 2 ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_QUIE] < 2 ) {
 		send_to_char( "You need level 2 Quietus to use this power.\n\r", ch );
 		return;
 	}
@@ -2640,7 +2640,7 @@ void do_infirmity( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	level = ch->power[DISC_VAMP_QUIE];
+	level = ch_power(ch)[DISC_VAMP_QUIE];
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
 	WAIT_STATE( ch, 12 );
 	return;
@@ -2657,7 +2657,7 @@ void do_guardian( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DAIM] < 1 ) {
+	if ( ch_power(ch)[DISC_VAMP_DAIM] < 1 ) {
 		send_to_char( "You require level 1 Daimoinon to create a guardian.\n\r", ch );
 		return;
 	}
@@ -2705,7 +2705,7 @@ void do_servant( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DAIM] < 8 ) {
+	if ( ch_power(ch)[DISC_VAMP_DAIM] < 8 ) {
 		send_to_char( "You require level 8 Daimoinon to create a servant.\n\r", ch );
 		return;
 	}
@@ -2752,7 +2752,7 @@ void do_beckon( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_ANIM] < 1 ) {
+	if ( ch_power(ch)[DISC_VAMP_ANIM] < 1 ) {
 		send_to_char( "You require level 1 animalism to beckon the wild.\n\r", ch );
 		return;
 	}
@@ -2813,7 +2813,7 @@ void do_spit( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < 1 ) {
+	if ( ch_power(ch)[DISC_VAMP_QUIE] < 1 ) {
 		send_to_char( "You need level 1 Quietus to spit.\n\r", ch );
 		return;
 	}
@@ -2828,13 +2828,13 @@ void do_spit( CHAR_DATA *ch, char *argument ) {
 	}
 	WAIT_STATE( ch, 12 );
 	if ( !IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_QUIE] * 50;
+		dam = ch_power(ch)[DISC_VAMP_QUIE] * 50;
 	} else if ( IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_QUIE] * 250;
+		dam = ch_power(ch)[DISC_VAMP_QUIE] * 250;
 	}
 	ch->pcdata->condition[COND_THIRST] -= 5;
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) ) {
-		if ( victim->power[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.5 );
+		if ( ch_power(victim)[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.5 );
 	}
 
 	dam += number_range( 1, 30 );
@@ -2860,7 +2860,7 @@ void do_scales( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_SERP] < 5 ) {
+	if ( ch_power(ch)[DISC_VAMP_SERP] < 5 ) {
 		send_to_char( "You need Serpentis 6 to get scales.\n\r", ch );
 		return;
 	}
@@ -2888,7 +2888,7 @@ void do_cserpent( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_SERP] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_SERP] < 4 ) {
 		send_to_char( "You require level 5 serpentis to call a serpent.\n\r", ch );
 		return;
 	}
@@ -2930,7 +2930,7 @@ void do_illusion( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_CHIM] < 1 ) {
+	if ( ch_power(ch)[DISC_VAMP_CHIM] < 1 ) {
 		send_to_char( "You require level 1 chim to make an illusion.\n\r", ch );
 		return;
 	}
@@ -2972,7 +2972,7 @@ void do_bloodwall( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DAIM] < 2 ) {
+	if ( ch_power(ch)[DISC_VAMP_DAIM] < 2 ) {
 		send_to_char( "You need Daiminion 2 to call Blood Walls.\n\r", ch );
 		return;
 	}
@@ -3070,7 +3070,7 @@ void do_bloodrod( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_THAU] < 2 ) {
+	if ( ch_power(ch)[DISC_VAMP_THAU] < 2 ) {
 		send_to_char( "You need to obtain level 2 Thaumaturgy to create a Blood Rod.\n\r", ch );
 		return;
 	}
@@ -3098,7 +3098,7 @@ void do_shadowgaze( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBTE] < 10 ) {
+	if ( ch_power(ch)[DISC_VAMP_OBTE] < 10 ) {
 		send_to_char( "You need level 10 Obtenebration to use Shadow Gaze.\n\r", ch );
 		return;
 	}
@@ -3154,7 +3154,7 @@ void do_grab( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBTE] < 8 ) {
+	if ( ch_power(ch)[DISC_VAMP_OBTE] < 8 ) {
 		send_to_char( "You need level 8 Obtenebration to use Grab.\n\r", ch );
 		return;
 	}
@@ -3217,7 +3217,7 @@ void do_share( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_ANIM] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_ANIM] < 4 ) {
 		send_to_char( "You must obtain at least level 4 in Animalism to use Share Spirits.\n\r", ch );
 		return;
 	}
@@ -3255,7 +3255,7 @@ void do_share( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( victim->level > ( ch->spl[RED_MAGIC] * 0.25 ) ) {
+	if ( victim->level > ( ch_spl(ch)[RED_MAGIC] * 0.25 ) ) {
 		send_to_char( "They are too powerful.\n\r", ch );
 		return;
 	}
@@ -3285,7 +3285,7 @@ void do_frenzy( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) )
 		return;
 
-	if ( ch->power[DISC_VAMP_ANIM] < 5 ) {
+	if ( ch_power(ch)[DISC_VAMP_ANIM] < 5 ) {
 		send_to_char( "You need level 5 Animalism to use Frenzy.\n\r", ch );
 		return;
 	}
@@ -3389,7 +3389,7 @@ void do_shroud( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ( ch->power[DISC_VAMP_OBTE] < 1 ) ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ( ch_power(ch)[DISC_VAMP_OBTE] < 1 ) ) {
 		send_to_char( "You need level 1 Obtenebration to use this power.\n\r", ch );
 		return;
 	}
@@ -3440,7 +3440,7 @@ void do_summon( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_PRES] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_PRES] < 4 ) {
 		send_to_char( "You need level 4 in Presence to use this.\n\r", ch );
 		return;
 	}
@@ -3473,7 +3473,7 @@ void do_drain( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_THAN] < 5 ) {
+	if ( ch_power(ch)[DISC_VAMP_THAN] < 5 ) {
 		send_to_char( "You must obtain level 5 Thanatosis to use Drain Life.\n\r", ch );
 		return;
 	}
@@ -3502,7 +3502,7 @@ void do_drain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_THAN] * 10;
+		dam = ch_power(ch)[DISC_VAMP_THAN] * 10;
 		victim->hit = ( victim->hit - dam );
 		if ( dam > 500 ) dam = number_range( 450, 550 );
 		ch->hit = ( ch->hit + dam );
@@ -3516,7 +3516,7 @@ void do_drain( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_THAN] * 50;
+		dam = ch_power(ch)[DISC_VAMP_THAN] * 50;
 		victim->hit = ( victim->hit - dam );
 		if ( dam > 400 ) dam = number_range( 350, 450 );
 		ch->hit = ( ch->hit + dam );
@@ -3539,7 +3539,7 @@ void do_flamehands( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_PROT] < 5 ) {
+	if ( ch_power(ch)[DISC_VAMP_PROT] < 5 ) {
 		send_to_char( "You need level 5 Protean to use flaming hands.\n\r", ch );
 		return;
 	}
@@ -3578,7 +3578,7 @@ void do_cauldron( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_THAU] < 2 ) {
+	if ( ch_power(ch)[DISC_VAMP_THAU] < 2 ) {
 		send_to_char( "You need at least level 2 Thaumaturgy to use this power.\n\r", ch );
 		return;
 	}
@@ -3647,7 +3647,7 @@ void do_bonemod( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_VICI] < 3 ) {
+	if ( ch_power(ch)[DISC_VAMP_VICI] < 3 ) {
 		send_to_char( "You need level 3 Vicissitude to use this power.\n\r", ch );
 		return;
 	}

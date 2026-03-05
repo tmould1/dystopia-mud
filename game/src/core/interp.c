@@ -47,7 +47,7 @@ int can_interpret( CHAR_DATA *ch, int cmd ) {
 	if ( cmd_table[cmd].race > 0 && cmd_table[cmd].discipline == 0 && ch->class == cmd_table[cmd].race )
 		cando = TRUE;
 
-	if ( cmd_table[cmd].discipline > 0 && ch->power[cmd_table[cmd].discipline] >= cmd_table[cmd].disclevel )
+	if ( cmd_table[cmd].discipline > 0 && ch_power(ch)[cmd_table[cmd].discipline] >= cmd_table[cmd].disclevel )
 		cando = TRUE;
 
 	if ( !cando ) return 0;
@@ -71,11 +71,11 @@ void do_racecommands( CHAR_DATA *ch, char *argument ) {
 
 	for ( i = 0; i < MAX_DISCIPLINES; i++ ) {
 		displayed = FALSE;
-		if ( ch->power[i] > 0 && strlen( discipline[i] ) > 0 && ( ch->level < 7 || argument[0] == '\0' || !str_prefix( argument, discipline[i] ) ) ) {
+		if ( ch_power(ch)[i] > 0 && strlen( discipline[i] ) > 0 && ( ch->level < 7 || argument[0] == '\0' || !str_prefix( argument, discipline[i] ) ) ) {
 			foundpower = 1;
 
 			for ( cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++ ) {
-				if ( cmd_table[cmd].discipline == i && ch->power[i] >= cmd_table[cmd].disclevel && IS_CLASS( ch, cmd_table[cmd].race ) ) {
+				if ( cmd_table[cmd].discipline == i && ch_power(ch)[i] >= cmd_table[cmd].disclevel && IS_CLASS( ch, cmd_table[cmd].race ) ) {
 					if ( !displayed ) {
 						displayed = TRUE;
 						snprintf( buf, sizeof( buf ), " %15s : ", discipline[i] );
@@ -92,20 +92,20 @@ void do_racecommands( CHAR_DATA *ch, char *argument ) {
 	/* OBEAH CRAP HAVE TO ADD MANUAL......ANYONE HAVE ANOTHER WAY.....PLEASE BY ALL MEANS CHANGE IT */
 
 	if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 1 ) {
+		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBEA] > 1 ) {
 			snprintf( buf, sizeof( buf ), "           obeah :" );
 			send_to_char( buf, ch );
 		}
-		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 6 ) {
+		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBEA] > 6 ) {
 			snprintf( buf, sizeof( buf ), " (#Gpurify#n)" );
 			send_to_char( buf, ch );
 		}
-		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 8 ) {
+		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBEA] > 8 ) {
 			snprintf( buf, sizeof( buf ), " (#rBeast control#n)" );
 			send_to_char( buf, ch );
 		}
 
-		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 9 ) {
+		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBEA] > 9 ) {
 			snprintf( buf, sizeof( buf ), " (#7Movement of pure magic#n)" );
 			send_to_char( buf, ch );
 		}
@@ -1583,7 +1583,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 			     && ch->class != cmd_table[cmd].race )
 				continue;
 			if ( cmd_table[cmd].discipline > 0
-			     && ch->power[cmd_table[cmd].discipline] < cmd_table[cmd].disclevel )
+			     && ch_power(ch)[cmd_table[cmd].discipline] < cmd_table[cmd].disclevel )
 				continue;
 			/* State-based command restrictions using binary search O(log n) instead of 100+ str_cmp() calls */
 			if ( IS_HEAD( ch, LOST_HEAD ) || IS_EXTRA( ch, EXTRA_OSWITCH ) ) {
@@ -1649,8 +1649,8 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 		write_to_buffer( ch->desc->snoop_by, "\n\r", 2 );
 	}
 
-	if ( ch != NULL && ch->unveil != NULL ) {
-		unveil = ch->unveil;
+	if ( ch != NULL && !IS_NPC( ch ) && ch->pcdata->unveil != NULL ) {
+		unveil = ch->pcdata->unveil;
 		if ( unveil->in_room != NULL ) {
 			if ( unveil->in_room->vnum != ch->in_room->vnum ) {
 				snprintf( buf, sizeof( buf ), "You lose your mental link with %s.\n\r", ch->name );
@@ -1661,7 +1661,7 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 				stc( "\n\r", unveil );
 			}
 		} else
-			ch->unveil = NULL;
+			ch->pcdata->unveil = NULL;
 	}
 
 	if ( ch->desc != NULL )

@@ -57,7 +57,7 @@ void do_bladespin( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->wpn[3] < cfg( CFG_ABILITY_SAMURAI_BLADESPIN_WPN_SKILL_REQ ) || ch->wpn[0] < cfg( CFG_ABILITY_SAMURAI_BLADESPIN_WPN_SKILL_REQ ) || ch->wpn[1] < cfg( CFG_ABILITY_SAMURAI_BLADESPIN_WPN_SKILL_REQ ) ) {
+	if ( ch_wpn(ch)[3] < cfg( CFG_ABILITY_SAMURAI_BLADESPIN_WPN_SKILL_REQ ) || ch_wpn(ch)[0] < cfg( CFG_ABILITY_SAMURAI_BLADESPIN_WPN_SKILL_REQ ) || ch_wpn(ch)[1] < cfg( CFG_ABILITY_SAMURAI_BLADESPIN_WPN_SKILL_REQ ) ) {
 		stc( "You are not a true samurai yet.\n\r", ch );
 		return;
 	}

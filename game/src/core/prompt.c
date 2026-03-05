@@ -29,22 +29,22 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 		send_to_char( "\n\r\n\r", ch );
 		return;
 	}
-	if ( ch->position == POS_FIGHTING && ch->cprompt[0] == '\0' ) {
-		if ( ch->prompt[0] == '\0' ) {
+	if ( ch->position == POS_FIGHTING && ch->pcdata->cprompt[0] == '\0' ) {
+		if ( ch->pcdata->prompt[0] == '\0' ) {
 			send_to_char( "\n\r\n\r", ch );
 			return;
 		}
 		is_fighting = FALSE;
-	} else if ( ch->position != POS_FIGHTING && ch->prompt[0] == '\0' ) {
+	} else if ( ch->position != POS_FIGHTING && ch->pcdata->prompt[0] == '\0' ) {
 		send_to_char( "\n\r\n\r", ch );
 		return;
 	}
 
 	point = buf;
 	if ( ch->position == POS_FIGHTING && is_fighting )
-		str = d->original ? d->original->cprompt : d->character->cprompt;
+		str = d->original ? d->original->pcdata->cprompt : d->character->pcdata->cprompt;
 	else
-		str = d->original ? d->original->prompt : d->character->prompt;
+		str = d->original ? d->original->pcdata->prompt : d->character->pcdata->prompt;
 	while ( *str != '\0' ) {
 		if ( point >= buf + sizeof( buf ) - 10 )
 			break;
@@ -219,22 +219,22 @@ void bust_a_prompt( DESCRIPTOR_DATA *d ) {
 			i = buf2;
 			break;
 		case 'G':
-			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch->gnosis[GMAXIMUM] > 0 ) {
-				snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( ch->gnosis[GCURRENT], ch->gnosis[GMAXIMUM] ), ch->gnosis[GCURRENT] );
+			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch_gnosis(ch)[GMAXIMUM] > 0 ) {
+				snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( ch_gnosis(ch)[GCURRENT], ch_gnosis(ch)[GMAXIMUM] ), ch_gnosis(ch)[GCURRENT] );
 			} else
 				snprintf( buf2, sizeof( buf2 ), "0" );
 			i = buf2;
 			break;
 		case 'i':
-			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MONK ) && ch->chi[MAXIMUM] > 0 ) {
-				snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( ch->chi[CURRENT], ch->chi[MAXIMUM] ), ch->chi[CURRENT] );
+			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MONK ) && ch_chi(ch)[MAXIMUM] > 0 ) {
+				snprintf( buf2, sizeof( buf2 ), "%s%d#n", col_scale_code( ch_chi(ch)[CURRENT], ch_chi(ch)[MAXIMUM] ), ch_chi(ch)[CURRENT] );
 			} else
 				snprintf( buf2, sizeof( buf2 ), "0" );
 			i = buf2;
 			break;
 		case 'I':
 			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MONK ) ) {
-				snprintf( buf2, sizeof( buf2 ), "#C%d#n", ch->chi[MAXIMUM] );
+				snprintf( buf2, sizeof( buf2 ), "#C%d#n", ch_chi(ch)[MAXIMUM] );
 			} else
 				snprintf( buf2, sizeof( buf2 ), "0" );
 			i = buf2;

@@ -1614,17 +1614,17 @@ void do_wear( CHAR_DATA *ch, char *argument ) {
 
 	one_argument( argument, arg );
 
-	if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_ZULOFORM ) && IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] < 9 ) {
+	if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_ZULOFORM ) && IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBEA] < 9 ) {
 		send_to_char( "You are too mad to decide what you want to wear!\n\r", ch );
 		return;
 	}
-	if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_ZULOFORM ) && IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 8 ) {
+	if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_ZULOFORM ) && IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBEA] > 8 ) {
 		send_to_char( "#rYou force down yer beast#n.\n\r", ch );
 	}
 
 	if ( IS_AFFECTED( ch, AFF_POLYMORPH ) && !IS_NPC( ch ) && !IS_CLASS( ch, CLASS_ANGEL ) &&
 		!IS_VAMPAFF( ch, VAM_DISGUISED ) && !IS_CLASS( ch, CLASS_WEREWOLF ) &&
-		!IS_CLASS( ch, CLASS_DEMON ) && ch->power[DISC_VAMP_OBEA] < 9 && !IS_CLASS( ch, CLASS_DROID ) ) {
+		!IS_CLASS( ch, CLASS_DEMON ) && ch_power(ch)[DISC_VAMP_OBEA] < 9 && !IS_CLASS( ch, CLASS_DROID ) ) {
 		send_to_char( "You cannot wear anything in this form.\n\r", ch );
 		return;
 	}
@@ -1672,11 +1672,11 @@ void do_remove( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VAMPIRE ) && IS_POLYAFF( ch, POLY_ZULOFORM ) && ch->generation > 1 &&
-		ch->power[DISC_VAMP_OBEA] < 9 ) {
+		ch_power(ch)[DISC_VAMP_OBEA] < 9 ) {
 		stc( "You are too mad to remove anything!\n\r", ch );
 		return;
 	}
-	if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_ZULOFORM ) && IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBEA] > 8 ) {
+	if ( !IS_NPC( ch ) && IS_POLYAFF( ch, POLY_ZULOFORM ) && IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBEA] > 8 ) {
 		send_to_char( "#rYou force down yer beast#n.\n\r", ch );
 	}
 

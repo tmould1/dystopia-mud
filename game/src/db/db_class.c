@@ -429,10 +429,10 @@ int get_stat_value( CHAR_DATA *ch, int stat_source ) {
 	switch ( stat_source ) {
 		case STAT_BEAST:          return ch->beast;
 		case STAT_RAGE:           return ch->rage;
-		case STAT_CHI_CURRENT:    return ch->chi[CURRENT];
-		case STAT_CHI_MAXIMUM:    return ch->chi[MAXIMUM];
-		case STAT_GNOSIS_CURRENT: return ch->gnosis[GCURRENT];
-		case STAT_GNOSIS_MAXIMUM: return ch->gnosis[GMAXIMUM];
+		case STAT_CHI_CURRENT:    return ch_chi(ch)[CURRENT];
+		case STAT_CHI_MAXIMUM:    return ch_chi(ch)[MAXIMUM];
+		case STAT_GNOSIS_CURRENT: return ch_gnosis(ch)[GCURRENT];
+		case STAT_GNOSIS_MAXIMUM: return ch_gnosis(ch)[GMAXIMUM];
 		case STAT_MONKBLOCK:      return ch->monkblock;
 		case STAT_SILTOL:         return ch->siltol;
 		case STAT_SOULS:          return ch->pcdata->souls;

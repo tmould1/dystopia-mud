@@ -1142,11 +1142,9 @@ void update_spiritlord( CHAR_DATA *ch )
 			CHAR_DATA *vch_next;
 
 			/* Despawn all spirit warriors */
-			LIST_FOR_EACH_SAFE( vch, vch_next, &g_characters, CHAR_DATA, char_node )
+			LIST_FOR_EACH_SAFE( vch, vch_next, &g_npcs, CHAR_DATA, npc_node )
 			{
-
-				if ( IS_NPC( vch )
-				&&   vch->wizard == ch
+				if ( vch->wizard == ch
 				&&   vch->pIndexData
 				&&   vch->pIndexData->vnum == VNUM_SL_SPIRIT_WARRIOR )
 				{

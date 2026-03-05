@@ -81,35 +81,35 @@ void improve_wpn( CHAR_DATA *ch, int dtype, int right_hand ) {
 	if ( max_skl > cfg( CFG_COMBAT_WPN_CAP_HARD_CAP ) ) max_skl = cfg( CFG_COMBAT_WPN_CAP_HARD_CAP );
 
 	if ( ch->level < 3 && ch->class != CLASS_MONK && ch->class != CLASS_WEREWOLF ) max_skl = cfg( CFG_COMBAT_WPN_CAP_LOW_LEVEL );
-	if ( ch->wpn[dtype] >= max_skl ) return;
-	trapper = ch->wpn[dtype];
-	if ( ( dice1 > ch->wpn[dtype] || dice2 > ch->wpn[dtype] ) || ( dice1 >= 99 || dice2 >= 99 ) )
-		ch->wpn[dtype] += 1;
+	if ( ch_wpn(ch)[dtype] >= max_skl ) return;
+	trapper = ch_wpn(ch)[dtype];
+	if ( ( dice1 > ch_wpn(ch)[dtype] || dice2 > ch_wpn(ch)[dtype] ) || ( dice1 >= 99 || dice2 >= 99 ) )
+		ch_wpn(ch)[dtype] += 1;
 	else
 		return;
-	if ( trapper == ch->wpn[dtype] ) return;
+	if ( trapper == ch_wpn(ch)[dtype] ) return;
 
-	if ( ch->wpn[dtype] == 1 )
+	if ( ch_wpn(ch)[dtype] == 1 )
 		snprintf( bufskill, sizeof( bufskill ),"slightly skilled" );
-	else if ( ch->wpn[dtype] == 26 )
+	else if ( ch_wpn(ch)[dtype] == 26 )
 		snprintf( bufskill, sizeof( bufskill ),"reasonable" );
-	else if ( ch->wpn[dtype] == 51 )
+	else if ( ch_wpn(ch)[dtype] == 51 )
 		snprintf( bufskill, sizeof( bufskill ),"fairly competent" );
-	else if ( ch->wpn[dtype] == 76 )
+	else if ( ch_wpn(ch)[dtype] == 76 )
 		snprintf( bufskill, sizeof( bufskill ),"highly skilled" );
-	else if ( ch->wpn[dtype] == 101 )
+	else if ( ch_wpn(ch)[dtype] == 101 )
 		snprintf( bufskill, sizeof( bufskill ),"very dangerous" );
-	else if ( ch->wpn[dtype] == 126 )
+	else if ( ch_wpn(ch)[dtype] == 126 )
 		snprintf( bufskill, sizeof( bufskill ),"extremely deadly" );
-	else if ( ch->wpn[dtype] == 151 )
+	else if ( ch_wpn(ch)[dtype] == 151 )
 		snprintf( bufskill, sizeof( bufskill ),"an expert" );
-	else if ( ch->wpn[dtype] == 176 )
+	else if ( ch_wpn(ch)[dtype] == 176 )
 		snprintf( bufskill, sizeof( bufskill ),"a master" );
-	else if ( ch->wpn[dtype] == 200 )
+	else if ( ch_wpn(ch)[dtype] == 200 )
 		snprintf( bufskill, sizeof( bufskill ),"a grand master" );
-	else if ( ch->wpn[dtype] == 201 )
+	else if ( ch_wpn(ch)[dtype] == 201 )
 		snprintf( bufskill, sizeof( bufskill ),"supremely skilled" );
-	else if ( ch->wpn[dtype] == 1000 )
+	else if ( ch_wpn(ch)[dtype] == 1000 )
 		snprintf( bufskill, sizeof( bufskill ),"divinely skilled" );
 	else
 		return;
@@ -133,35 +133,35 @@ void improve_stance( CHAR_DATA *ch ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	stance = ch->stance[0];
+	stance = ch_stance(ch)[0];
 	if ( stance < 1 || stance > 17 ) return;
-	if ( ch->stance[stance] >= 200 ) {
-		ch->stance[stance] = 200;
+	if ( ch_stance(ch)[stance] >= 200 ) {
+		ch_stance(ch)[stance] = 200;
 		return;
 	}
-	if ( ( dice1 > ch->stance[stance] && dice2 > ch->stance[stance] ) || ( dice1 >= 98 || dice2 >= 99 ) )
-		ch->stance[stance] += 1;
+	if ( ( dice1 > ch_stance(ch)[stance] && dice2 > ch_stance(ch)[stance] ) || ( dice1 >= 98 || dice2 >= 99 ) )
+		ch_stance(ch)[stance] += 1;
 	else
 		return;
-	if ( stance == ch->stance[stance] ) return;
+	if ( stance == ch_stance(ch)[stance] ) return;
 
-	if ( ch->stance[stance] == 1 )
+	if ( ch_stance(ch)[stance] == 1 )
 		snprintf( bufskill, sizeof( bufskill ),"an apprentice of" );
-	else if ( ch->stance[stance] == 26 )
+	else if ( ch_stance(ch)[stance] == 26 )
 		snprintf( bufskill, sizeof( bufskill ),"a trainee of" );
-	else if ( ch->stance[stance] == 51 )
+	else if ( ch_stance(ch)[stance] == 51 )
 		snprintf( bufskill, sizeof( bufskill ),"a student of" );
-	else if ( ch->stance[stance] == 76 )
+	else if ( ch_stance(ch)[stance] == 76 )
 		snprintf( bufskill, sizeof( bufskill ),"fairly experienced in" );
-	else if ( ch->stance[stance] == 101 )
+	else if ( ch_stance(ch)[stance] == 101 )
 		snprintf( bufskill, sizeof( bufskill ),"well trained in" );
-	else if ( ch->stance[stance] == 126 )
+	else if ( ch_stance(ch)[stance] == 126 )
 		snprintf( bufskill, sizeof( bufskill ),"highly skilled in" );
-	else if ( ch->stance[stance] == 151 )
+	else if ( ch_stance(ch)[stance] == 151 )
 		snprintf( bufskill, sizeof( bufskill ),"an expert of" );
-	else if ( ch->stance[stance] == 176 )
+	else if ( ch_stance(ch)[stance] == 176 )
 		snprintf( bufskill, sizeof( bufskill ),"a master of" );
-	else if ( ch->stance[stance] == 200 )
+	else if ( ch_stance(ch)[stance] == 200 )
 		snprintf( bufskill, sizeof( bufskill ),"a grand master of" );
 	else
 		return;
@@ -332,56 +332,56 @@ void do_skill( CHAR_DATA *ch, char *argument ) {
 	dtype -= 1000;
 	dtype2 -= 1000;
 
-	if ( victim->wpn[dtype] == 0 )
+	if ( ch_wpn(victim)[dtype] == 0 )
 		snprintf( bufskill, sizeof( bufskill ),"totally unskilled" );
-	else if ( victim->wpn[dtype] <= 25 )
+	else if ( ch_wpn(victim)[dtype] <= 25 )
 		snprintf( bufskill, sizeof( bufskill ),"slightly skilled" );
-	else if ( victim->wpn[dtype] <= 50 )
+	else if ( ch_wpn(victim)[dtype] <= 50 )
 		snprintf( bufskill, sizeof( bufskill ),"reasonable" );
-	else if ( victim->wpn[dtype] <= 75 )
+	else if ( ch_wpn(victim)[dtype] <= 75 )
 		snprintf( bufskill, sizeof( bufskill ),"fairly competent" );
-	else if ( victim->wpn[dtype] <= 100 )
+	else if ( ch_wpn(victim)[dtype] <= 100 )
 		snprintf( bufskill, sizeof( bufskill ),"highly skilled" );
-	else if ( victim->wpn[dtype] <= 125 )
+	else if ( ch_wpn(victim)[dtype] <= 125 )
 		snprintf( bufskill, sizeof( bufskill ),"very dangerous" );
-	else if ( victim->wpn[dtype] <= 150 )
+	else if ( ch_wpn(victim)[dtype] <= 150 )
 		snprintf( bufskill, sizeof( bufskill ),"extremely deadly" );
-	else if ( victim->wpn[dtype] <= 175 )
+	else if ( ch_wpn(victim)[dtype] <= 175 )
 		snprintf( bufskill, sizeof( bufskill ),"an expert" );
-	else if ( victim->wpn[dtype] <= 199 )
+	else if ( ch_wpn(victim)[dtype] <= 199 )
 		snprintf( bufskill, sizeof( bufskill ),"a master" );
-	else if ( victim->wpn[dtype] == 200 )
+	else if ( ch_wpn(victim)[dtype] == 200 )
 		snprintf( bufskill, sizeof( bufskill ),"a grand master" );
-	else if ( victim->wpn[dtype] <= 999 )
+	else if ( ch_wpn(victim)[dtype] <= 999 )
 		snprintf( bufskill, sizeof( bufskill ),"supremely skilled" );
-	else if ( victim->wpn[dtype] == 1000 )
+	else if ( ch_wpn(victim)[dtype] == 1000 )
 		snprintf( bufskill, sizeof( bufskill ),"divinely skilled" );
 	else
 		return;
 
-	if ( victim->wpn[dtype2] == 0 )
+	if ( ch_wpn(victim)[dtype2] == 0 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"totally unskilled" );
-	else if ( victim->wpn[dtype2] <= 25 )
+	else if ( ch_wpn(victim)[dtype2] <= 25 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"slightly skilled" );
-	else if ( victim->wpn[dtype2] <= 50 )
+	else if ( ch_wpn(victim)[dtype2] <= 50 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"reasonable" );
-	else if ( victim->wpn[dtype2] <= 75 )
+	else if ( ch_wpn(victim)[dtype2] <= 75 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"fairly competent" );
-	else if ( victim->wpn[dtype2] <= 100 )
+	else if ( ch_wpn(victim)[dtype2] <= 100 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"highly skilled" );
-	else if ( victim->wpn[dtype2] <= 125 )
+	else if ( ch_wpn(victim)[dtype2] <= 125 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"very dangerous" );
-	else if ( victim->wpn[dtype2] <= 150 )
+	else if ( ch_wpn(victim)[dtype2] <= 150 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"extremely deadly" );
-	else if ( victim->wpn[dtype2] <= 175 )
+	else if ( ch_wpn(victim)[dtype2] <= 175 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"an expert" );
-	else if ( victim->wpn[dtype2] <= 199 )
+	else if ( ch_wpn(victim)[dtype2] <= 199 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"a master" );
-	else if ( victim->wpn[dtype2] == 200 )
+	else if ( ch_wpn(victim)[dtype2] == 200 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"a grand master" );
-	else if ( victim->wpn[dtype2] <= 999 )
+	else if ( ch_wpn(victim)[dtype2] <= 999 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"supremely skilled" );
-	else if ( victim->wpn[dtype2] == 1000 )
+	else if ( ch_wpn(victim)[dtype2] == 1000 )
 		snprintf( bufskill2, sizeof( bufskill2 ),"divinely skilled" );
 	else
 		return;
@@ -625,18 +625,18 @@ void do_stance( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( arg[0] == '\0' ) {
-		if ( ch->stance[0] == -1 ) {
-			ch->stance[0] = 0;
+		if ( ch_stance(ch)[0] == -1 ) {
+			ch_stance(ch)[0] = 0;
 			send_to_char( "You drop into a fighting stance.\n\r", ch );
 			act( "$n drops into a fighting stance.", ch, NULL, NULL, TO_ROOM );
 		} else {
-			ch->stance[0] = -1;
+			ch_stance(ch)[0] = -1;
 			send_to_char( "You relax from your fighting stance.\n\r", ch );
 			act( "$n relaxes from $s fighting stance.", ch, NULL, NULL, TO_ROOM );
 		}
 		return;
 	}
-	if ( ch->stance[0] > 0 ) {
+	if ( ch_stance(ch)[0] > 0 ) {
 		send_to_char( "You cannot change stances until you come up from the one you are currently in.\n\r", ch );
 		return;
 	}
@@ -665,56 +665,56 @@ void do_stance( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You hunch down into the bull fighting stance.\n\r", ch );
 		act( "$n hunches down into the bull fighting stance. ", ch, NULL, NULL, TO_ROOM );
 	} else {
-		if ( !str_cmp( arg, "mantis" ) && ch->stance[STANCE_CRANE] >= 200 &&
-			ch->stance[STANCE_VIPER] >= 200 ) {
+		if ( !str_cmp( arg, "mantis" ) && ch_stance(ch)[STANCE_CRANE] >= 200 &&
+			ch_stance(ch)[STANCE_VIPER] >= 200 ) {
 			selection = STANCE_MANTIS;
 			send_to_char( "You spin your body into the mantis fighting stance.\n\r", ch );
 			act( "$n spins $s body into the mantis fighting stance.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "dragon" ) && ch->stance[STANCE_BULL] >= 200 &&
-			ch->stance[STANCE_CRAB] >= 200 ) {
+		} else if ( !str_cmp( arg, "dragon" ) && ch_stance(ch)[STANCE_BULL] >= 200 &&
+			ch_stance(ch)[STANCE_CRAB] >= 200 ) {
 			selection = STANCE_DRAGON;
 			send_to_char( "You coil your body into the dragon fighting stance.\n\r", ch );
 			act( "$n coils $s body into the dragon fighting stance.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "tiger" ) && ch->stance[STANCE_BULL] >= 200 &&
-			ch->stance[STANCE_VIPER] >= 200 ) {
+		} else if ( !str_cmp( arg, "tiger" ) && ch_stance(ch)[STANCE_BULL] >= 200 &&
+			ch_stance(ch)[STANCE_VIPER] >= 200 ) {
 			selection = STANCE_TIGER;
 			send_to_char( "You lunge into the tiger fighting stance.\n\r", ch );
 			act( "$n lunges into the tiger fighting stance.", ch, NULL, NULL, TO_ROOM );
 		}
 
-		else if ( !str_cmp( arg, "monkey" ) && ch->stance[STANCE_CRANE] >= 200 &&
-			ch->stance[STANCE_MONGOOSE] >= 200 ) {
+		else if ( !str_cmp( arg, "monkey" ) && ch_stance(ch)[STANCE_CRANE] >= 200 &&
+			ch_stance(ch)[STANCE_MONGOOSE] >= 200 ) {
 			selection = STANCE_MONKEY;
 			send_to_char( "You rotate your body into the monkey fighting stance.\n\r", ch );
 			act( "$n rotates $s body into the monkey fighting stance.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "swallow" ) && ch->stance[STANCE_CRAB] >= 200 &&
-			ch->stance[STANCE_MONGOOSE] >= 200 ) {
+		} else if ( !str_cmp( arg, "swallow" ) && ch_stance(ch)[STANCE_CRAB] >= 200 &&
+			ch_stance(ch)[STANCE_MONGOOSE] >= 200 ) {
 			selection = STANCE_SWALLOW;
 			send_to_char( "You slide into the swallow fighting stance.\n\r", ch );
 			act( "$n slides into the swallow fighting stance.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "ss1" ) && ch->stance[19] != -1 ) {
+		} else if ( !str_cmp( arg, "ss1" ) && ch_stance(ch)[19] != -1 ) {
 			selection = STANCE_SS1;
 			send_to_char( "You sneak into a supreme fighting position.\n\r", ch );
 			act( "$n sneaks into a supreme fighting position.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "ss2" ) && ch->stance[20] != -1 ) {
+		} else if ( !str_cmp( arg, "ss2" ) && ch_stance(ch)[20] != -1 ) {
 			selection = STANCE_SS2;
 			send_to_char( "You sneak into a supreme fighting position.\n\r", ch );
 			act( "$n sneaks into a supreme fighting position.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "ss3" ) && ch->stance[21] != -1 ) {
+		} else if ( !str_cmp( arg, "ss3" ) && ch_stance(ch)[21] != -1 ) {
 			selection = STANCE_SS3;
 			send_to_char( "You sneak into a supreme fighting position.\n\r", ch );
 			act( "$n sneaks into a supreme fighting position.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "ss4" ) && ch->stance[22] != -1 ) {
+		} else if ( !str_cmp( arg, "ss4" ) && ch_stance(ch)[22] != -1 ) {
 			selection = STANCE_SS4;
 			send_to_char( "You sneak into a supreme fighting position.\n\r", ch );
 			act( "$n sneaks into a supreme fighting position.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "ss5" ) && ch->stance[23] != -1 ) {
+		} else if ( !str_cmp( arg, "ss5" ) && ch_stance(ch)[23] != -1 ) {
 			selection = STANCE_SS5;
 			send_to_char( "You sneak into a supreme fighting position.\n\r", ch );
 			act( "$n sneaks into a supreme fighting position.", ch, NULL, NULL, TO_ROOM );
-		} else if ( !str_cmp( arg, "wolf" ) && ch->stance[STANCE_SWALLOW] >= 200 && ch->stance[STANCE_TIGER] >= 200 && ch->stance[STANCE_MANTIS] >= 200 &&
-			ch->stance[STANCE_DRAGON] >= 200 && ch->stance[STANCE_MONKEY] >= 200 &&
-			ch->power[DISC_WERE_WOLF] > 4 ) {
+		} else if ( !str_cmp( arg, "wolf" ) && ch_stance(ch)[STANCE_SWALLOW] >= 200 && ch_stance(ch)[STANCE_TIGER] >= 200 && ch_stance(ch)[STANCE_MANTIS] >= 200 &&
+			ch_stance(ch)[STANCE_DRAGON] >= 200 && ch_stance(ch)[STANCE_MONKEY] >= 200 &&
+			ch_power(ch)[DISC_WERE_WOLF] > 4 ) {
 			selection = STANCE_WOLF;
 			send_to_char( "You fling into the wolf fighting stance.\n\r", ch );
 			act( "$n flings into the wolf fighting stance.", ch, NULL, NULL, TO_ROOM );
@@ -726,7 +726,7 @@ void do_stance( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	}
-	ch->stance[0] = selection;
+	ch_stance(ch)[0] = selection;
 	WAIT_STATE( ch, 12 );
 	return;
 }
@@ -757,8 +757,8 @@ void do_fightstyle( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "[11] Punch     [12] Gouge     [13] Rip       [14] Stamp [15] Backfist\n\r", ch );
 		send_to_char( "[16] Jumpkick  [17] Spinkick  [18] Hurl      [19] Sweep [20] Charge\n\r", ch );
 		send_to_char( "==================================================================\n\r", ch );
-		snprintf( buf, sizeof( buf ), "Selected options: 1:[%d] 2:[%d] 3:[%d] 4:[%d] 5:[%d] 6:[%d] 7:[%d] 8:[%d].\n\r", ch->cmbt[0], ch->cmbt[1],
-			ch->cmbt[2], ch->cmbt[3], ch->cmbt[4], ch->cmbt[5], ch->cmbt[6], ch->cmbt[7] );
+		snprintf( buf, sizeof( buf ), "Selected options: 1:[%d] 2:[%d] 3:[%d] 4:[%d] 5:[%d] 6:[%d] 7:[%d] 8:[%d].\n\r", ch_cmbt(ch)[0], ch_cmbt(ch)[1],
+			ch_cmbt(ch)[2], ch_cmbt(ch)[3], ch_cmbt(ch)[4], ch_cmbt(ch)[5], ch_cmbt(ch)[6], ch_cmbt(ch)[7] );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -863,13 +863,13 @@ void do_fightstyle( CHAR_DATA *ch, char *argument ) {
 	}
 
 	for ( i = 0; i < 8; i++ ) {
-		if ( ch->cmbt[i] == selection && selection != 0 && !( value - 1 == i ) ) {
+		if ( ch_cmbt(ch)[i] == selection && selection != 0 && !( value - 1 == i ) ) {
 			stc( "No doubling of attacks.\n\r", ch );
 			return;
 		}
 	}
-	ch->cmbt[( value - 1 )] = selection;
-	snprintf( buf, sizeof( buf ),"Combat option %d now set to %s (%d).\n\r", value, arg2, ch->cmbt[0] );
+	ch_cmbt(ch)[( value - 1 )] = selection;
+	snprintf( buf, sizeof( buf ),"Combat option %d now set to %s (%d).\n\r", value, arg2, ch_cmbt(ch)[0] );
 	send_to_char( buf, ch );
 	return;
 }
@@ -885,11 +885,11 @@ void fightaction( CHAR_DATA *ch, CHAR_DATA *victim, int actype, int dtype, int w
 	if ( is_safe( ch, victim ) ) return;
 	/* Trip */
 	if ( actype == 1 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			trip( ch, victim );
 		return;
 	} else if ( actype == 2 && number_percent() < 75 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			do_kick( ch, "" );
 		return;
 	} else if ( actype == 3 ) {
@@ -904,26 +904,26 @@ void fightaction( CHAR_DATA *ch, CHAR_DATA *victim, int actype, int dtype, int w
 		if ( !IS_NPC( victim ) )
 			act( "$n spins around and rams his elbow into your forehead.", ch, NULL, victim, TO_VICT );
 		act( "$n spins around and rams $s elbow into $N's face.", ch, NULL, victim, TO_NOTVICT );
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			one_hit( ch, victim, gsn_elbow, wpntype );
 		return;
 	} else if ( actype == 5 ) {
 		act( "You slam your knee into $N's stomach.", ch, NULL, victim, TO_CHAR );
 		act( "$n slams $s knee into your stomach.", ch, NULL, victim, TO_VICT );
 		act( "$n slams $s knee into $N's stomach.", ch, NULL, victim, TO_NOTVICT );
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			one_hit( ch, victim, gsn_knee, wpntype );
 		return;
 	} else if ( actype == 6 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			one_hit( ch, victim, gsn_headbutt, wpntype );
 		return;
 	} else if ( actype == 7 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			disarm( ch, victim );
 		return;
 	} else if ( actype == 8 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			multi_hit( ch, victim, gsn_fangs );
 		return;
 	} else if ( actype == 9 ) {
@@ -952,7 +952,7 @@ void fightaction( CHAR_DATA *ch, CHAR_DATA *victim, int actype, int dtype, int w
 		act( "$n gouges $s fingers into your eyes.", ch, NULL, victim, TO_VICT );
 		act( "$n gouges $s fingers into $N's eyes.", ch, NULL, victim, TO_NOTVICT );
 		if ( IS_AFFECTED( victim, AFF_BLIND ) || number_percent() < 75 ) {
-			if ( number_percent() * 4.5 <= ch->wpn[0] )
+			if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 				one_hit( ch, victim, dtype, wpntype );
 			return;
 		}
@@ -968,13 +968,13 @@ void fightaction( CHAR_DATA *ch, CHAR_DATA *victim, int actype, int dtype, int w
 	} else if ( actype == 13 ) {
 		if ( number_percent() > 85 ) {
 			if ( !IS_ARM_L( victim, LOST_ARM ) )
-				SET_BIT( victim->loc_hp[2], LOST_ARM );
+				SET_BIT( ch_loc_hp(victim)[2], LOST_ARM );
 			else
 				return;
 			if ( !IS_BLEEDING( victim, BLEEDING_ARM_L ) )
-				SET_BIT( victim->loc_hp[6], BLEEDING_ARM_L );
+				SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_L );
 			if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) )
-				REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_L );
+				REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_L );
 			act( "You dodge $N's attack, grab $S arm and rip it from it's socket.", ch, NULL, victim, TO_CHAR );
 			act( "$n dodges your attack, grabs your arm and rips it from its socket.", ch, NULL, victim, TO_VICT );
 			act( "$n dodges $N's attack, grabs $N's arm and rips it from its socket.", ch, NULL, victim, TO_NOTVICT );
@@ -1001,15 +1001,15 @@ void fightaction( CHAR_DATA *ch, CHAR_DATA *victim, int actype, int dtype, int w
 		use_move( victim, number_range( 25, 50 ) );
 		return;
 	} else if ( actype == 15 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			one_hit( ch, victim, gsn_backfist, wpntype );
 		return;
 	} else if ( actype == 16 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			one_hit( ch, victim, gsn_jumpkick, wpntype );
 		return;
 	} else if ( actype == 17 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			one_hit( ch, victim, gsn_spinkick, wpntype );
 		return;
 	} else if ( actype == 18 ) {
@@ -1020,7 +1020,7 @@ void fightaction( CHAR_DATA *ch, CHAR_DATA *victim, int actype, int dtype, int w
 			return;
 		}
 	} else if ( actype == 19 ) {
-		if ( number_percent() * 4.5 <= ch->wpn[0] )
+		if ( number_percent() * 4.5 <= ch_wpn(ch)[0] )
 			one_hit( ch, victim, gsn_monksweep, wpntype );
 		return;
 	} else if ( actype == 20 ) {
@@ -1048,7 +1048,7 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 	dtype = dt - 1000;
 	if ( dtype < 0 || dtype > 12 ) return;
 	if ( IS_NPC( ch ) ) critical += ( ( ch->level + 1 ) / 5 );
-	if ( !IS_NPC( ch ) ) critical += ( ( ch->wpn[dtype] + 1 ) / 10 );
+	if ( !IS_NPC( ch ) ) critical += ( ( ch_wpn(ch)[dtype] + 1 ) / 10 );
 	if ( IS_NPC( victim ) ) critical -= ( ( victim->level + 1 ) / 5 );
 	if ( !IS_NPC( victim ) ) {
 		obj = get_eq_char( victim, WEAR_WIELD );
@@ -1064,10 +1064,10 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		wpn2 = dtype - 1000;
 		if ( wpn2 < 0 || wpn2 > 12 ) wpn2 = 0;
 
-		if ( victim->wpn[wpn] > victim->wpn[wpn2] )
-			critical -= ( ( victim->wpn[wpn] + 1 ) / 10 );
+		if ( ch_wpn(victim)[wpn] > ch_wpn(victim)[wpn2] )
+			critical -= ( ( ch_wpn(victim)[wpn] + 1 ) / 10 );
 		else
-			critical -= ( ( victim->wpn[wpn2] + 1 ) / 10 );
+			critical -= ( ( ch_wpn(victim)[wpn2] + 1 ) / 10 );
 	}
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_REND ) && number_range( 1, 25 ) == 1 )
 		critical = 100;
@@ -1107,11 +1107,11 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_HEAD( victim, LOST_EYE_L ) && number_percent() < 50 )
-			SET_BIT( victim->loc_hp[0], LOST_EYE_L );
+			SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_L );
 		else if ( !IS_HEAD( victim, LOST_EYE_R ) )
-			SET_BIT( victim->loc_hp[0], LOST_EYE_R );
+			SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_R );
 		else if ( !IS_HEAD( victim, LOST_EYE_L ) )
-			SET_BIT( victim->loc_hp[0], LOST_EYE_L );
+			SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_L );
 		else
 			return;
 		act( "Your skillful blow takes out $N's eye!", ch, NULL, victim, TO_CHAR );
@@ -1146,11 +1146,11 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_HEAD( victim, LOST_EAR_L ) && number_percent() < 50 )
-			SET_BIT( victim->loc_hp[0], LOST_EAR_L );
+			SET_BIT( ch_loc_hp(victim)[0], LOST_EAR_L );
 		else if ( !IS_HEAD( victim, LOST_EAR_R ) )
-			SET_BIT( victim->loc_hp[0], LOST_EAR_R );
+			SET_BIT( ch_loc_hp(victim)[0], LOST_EAR_R );
 		else if ( !IS_HEAD( victim, LOST_EAR_L ) )
-			SET_BIT( victim->loc_hp[0], LOST_EAR_L );
+			SET_BIT( ch_loc_hp(victim)[0], LOST_EAR_L );
 		else
 			return;
 		act( "Your skillful blow cuts off $N's ear!", ch, NULL, victim, TO_CHAR );
@@ -1184,7 +1184,7 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
-		SET_BIT( victim->loc_hp[0], LOST_NOSE );
+		SET_BIT( ch_loc_hp(victim)[0], LOST_NOSE );
 		act( "Your skillful blow cuts off $N's nose!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's nose!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your nose!", ch, NULL, victim, TO_VICT );
@@ -1217,7 +1217,7 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_HEAD( victim, LOST_NOSE ) && !IS_HEAD( victim, BROKEN_NOSE ) )
-			SET_BIT( victim->loc_hp[0], BROKEN_NOSE );
+			SET_BIT( ch_loc_hp(victim)[0], BROKEN_NOSE );
 		else
 			return;
 		act( "Your skillful blow breaks $N's nose!", ch, NULL, victim, TO_CHAR );
@@ -1251,7 +1251,7 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_HEAD( victim, BROKEN_JAW ) )
-			SET_BIT( victim->loc_hp[0], BROKEN_JAW );
+			SET_BIT( ch_loc_hp(victim)[0], BROKEN_JAW );
 		else
 			return;
 		act( "Your skillful blow breaks $N's jaw!", ch, NULL, victim, TO_CHAR );
@@ -1286,13 +1286,13 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_ARM_L( victim, LOST_ARM ) )
-			SET_BIT( victim->loc_hp[2], LOST_ARM );
+			SET_BIT( ch_loc_hp(victim)[2], LOST_ARM );
 		else
 			return;
 		if ( !IS_BLEEDING( victim, BLEEDING_ARM_L ) )
-			SET_BIT( victim->loc_hp[6], BLEEDING_ARM_L );
+			SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_L );
 		if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) )
-			REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_L );
+			REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_L );
 		act( "Your skillful blow cuts off $N's left arm!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's left arm!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your left arm!", ch, NULL, victim, TO_VICT );
@@ -1338,13 +1338,13 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_ARM_R( victim, LOST_ARM ) )
-			SET_BIT( victim->loc_hp[3], LOST_ARM );
+			SET_BIT( ch_loc_hp(victim)[3], LOST_ARM );
 		else
 			return;
 		if ( !IS_BLEEDING( victim, BLEEDING_ARM_R ) )
-			SET_BIT( victim->loc_hp[6], BLEEDING_ARM_R );
+			SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_R );
 		if ( IS_BLEEDING( victim, BLEEDING_HAND_R ) )
-			REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_R );
+			REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_R );
 		act( "Your skillful blow cuts off $N's right arm!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's right arm!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your right arm!", ch, NULL, victim, TO_VICT );
@@ -1390,7 +1390,7 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_ARM_L( victim, BROKEN_ARM ) && !IS_ARM_L( victim, LOST_ARM ) )
-			SET_BIT( victim->loc_hp[2], BROKEN_ARM );
+			SET_BIT( ch_loc_hp(victim)[2], BROKEN_ARM );
 		else
 			return;
 		act( "Your skillful blow breaks $N's left arm!", ch, NULL, victim, TO_CHAR );
@@ -1427,7 +1427,7 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_ARM_R( victim, BROKEN_ARM ) && !IS_ARM_R( victim, LOST_ARM ) )
-			SET_BIT( victim->loc_hp[3], BROKEN_ARM );
+			SET_BIT( ch_loc_hp(victim)[3], BROKEN_ARM );
 		else
 			return;
 		act( "Your skillful blow breaks $N's right arm!", ch, NULL, victim, TO_CHAR );
@@ -1464,13 +1464,13 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_ARM_L( victim, LOST_HAND ) && !IS_ARM_L( victim, LOST_ARM ) )
-			SET_BIT( victim->loc_hp[2], LOST_HAND );
+			SET_BIT( ch_loc_hp(victim)[2], LOST_HAND );
 		else
 			return;
 		if ( IS_BLEEDING( victim, BLEEDING_ARM_L ) )
-			REMOVE_BIT( victim->loc_hp[6], BLEEDING_ARM_L );
+			REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_L );
 		if ( !IS_BLEEDING( victim, BLEEDING_HAND_L ) )
-			SET_BIT( victim->loc_hp[6], BLEEDING_HAND_L );
+			SET_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_L );
 		act( "Your skillful blow cuts off $N's left hand!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's left hand!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your left hand!", ch, NULL, victim, TO_VICT );
@@ -1512,13 +1512,13 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_ARM_R( victim, LOST_HAND ) && !IS_ARM_R( victim, LOST_ARM ) )
-			SET_BIT( victim->loc_hp[3], LOST_HAND );
+			SET_BIT( ch_loc_hp(victim)[3], LOST_HAND );
 		else
 			return;
 		if ( IS_BLEEDING( victim, BLEEDING_ARM_R ) )
-			REMOVE_BIT( victim->loc_hp[6], BLEEDING_ARM_R );
+			REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_R );
 		if ( !IS_BLEEDING( victim, BLEEDING_HAND_R ) )
-			SET_BIT( victim->loc_hp[6], BLEEDING_HAND_R );
+			SET_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_R );
 		act( "Your skillful blow cuts off $N's right hand!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's right hand!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your right hand!", ch, NULL, victim, TO_VICT );
@@ -1565,29 +1565,29 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		count = 0;
 		count2 = 0;
 		if ( !IS_ARM_L( victim, LOST_THUMB ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], LOST_THUMB );
+			SET_BIT( ch_loc_hp(victim)[2], LOST_THUMB );
 			count2 += 1;
 			make_part( victim, "thumb" );
 		}
 		if ( !IS_ARM_L( victim, LOST_FINGER_I ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], LOST_FINGER_I );
+			SET_BIT( ch_loc_hp(victim)[2], LOST_FINGER_I );
 			count += 1;
 			make_part( victim, "index" );
 		}
 		if ( !IS_ARM_L( victim, LOST_FINGER_M ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], LOST_FINGER_M );
+			SET_BIT( ch_loc_hp(victim)[2], LOST_FINGER_M );
 			count += 1;
 			make_part( victim, "middle" );
 		}
 		if ( !IS_ARM_L( victim, LOST_FINGER_R ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], LOST_FINGER_R );
+			SET_BIT( ch_loc_hp(victim)[2], LOST_FINGER_R );
 			count += 1;
 			make_part( victim, "ring" );
 			if ( ( obj = get_eq_char( victim, WEAR_FINGER_L ) ) != NULL )
 				take_item( victim, obj );
 		}
 		if ( !IS_ARM_L( victim, LOST_FINGER_L ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], LOST_FINGER_L );
+			SET_BIT( ch_loc_hp(victim)[2], LOST_FINGER_L );
 			count += 1;
 			make_part( victim, "little" );
 		}
@@ -1669,23 +1669,23 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_ARM_L( victim, LOST_HAND ) ) return;
 
 		if ( !IS_ARM_L( victim, BROKEN_THUMB ) && !IS_ARM_L( victim, LOST_THUMB ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], BROKEN_THUMB );
+			SET_BIT( ch_loc_hp(victim)[2], BROKEN_THUMB );
 			count2 += 1;
 		}
 		if ( !IS_ARM_L( victim, BROKEN_FINGER_I ) && !IS_ARM_L( victim, LOST_FINGER_I ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], BROKEN_FINGER_I );
+			SET_BIT( ch_loc_hp(victim)[2], BROKEN_FINGER_I );
 			count += 1;
 		}
 		if ( !IS_ARM_L( victim, BROKEN_FINGER_M ) && !IS_ARM_L( victim, LOST_FINGER_M ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], BROKEN_FINGER_M );
+			SET_BIT( ch_loc_hp(victim)[2], BROKEN_FINGER_M );
 			count += 1;
 		}
 		if ( !IS_ARM_L( victim, BROKEN_FINGER_R ) && !IS_ARM_L( victim, LOST_FINGER_R ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], BROKEN_FINGER_R );
+			SET_BIT( ch_loc_hp(victim)[2], BROKEN_FINGER_R );
 			count += 1;
 		}
 		if ( !IS_ARM_L( victim, BROKEN_FINGER_L ) && !IS_ARM_L( victim, LOST_FINGER_L ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[2], BROKEN_FINGER_L );
+			SET_BIT( ch_loc_hp(victim)[2], BROKEN_FINGER_L );
 			count += 1;
 		}
 		if ( count == 1 )
@@ -1763,29 +1763,29 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_ARM_R( victim, LOST_HAND ) ) return;
 
 		if ( !IS_ARM_R( victim, LOST_THUMB ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], LOST_THUMB );
+			SET_BIT( ch_loc_hp(victim)[3], LOST_THUMB );
 			count2 += 1;
 			make_part( victim, "thumb" );
 		}
 		if ( !IS_ARM_R( victim, LOST_FINGER_I ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], LOST_FINGER_I );
+			SET_BIT( ch_loc_hp(victim)[3], LOST_FINGER_I );
 			count += 1;
 			make_part( victim, "index" );
 		}
 		if ( !IS_ARM_R( victim, LOST_FINGER_M ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], LOST_FINGER_M );
+			SET_BIT( ch_loc_hp(victim)[3], LOST_FINGER_M );
 			count += 1;
 			make_part( victim, "middle" );
 		}
 		if ( !IS_ARM_R( victim, LOST_FINGER_R ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], LOST_FINGER_R );
+			SET_BIT( ch_loc_hp(victim)[3], LOST_FINGER_R );
 			count += 1;
 			make_part( victim, "ring" );
 			if ( ( obj = get_eq_char( victim, WEAR_FINGER_R ) ) != NULL )
 				take_item( victim, obj );
 		}
 		if ( !IS_ARM_R( victim, LOST_FINGER_L ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], LOST_FINGER_L );
+			SET_BIT( ch_loc_hp(victim)[3], LOST_FINGER_L );
 			count += 1;
 			make_part( victim, "little" );
 		}
@@ -1867,23 +1867,23 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_ARM_R( victim, LOST_HAND ) ) return;
 
 		if ( !IS_ARM_R( victim, BROKEN_THUMB ) && !IS_ARM_R( victim, LOST_THUMB ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], BROKEN_THUMB );
+			SET_BIT( ch_loc_hp(victim)[3], BROKEN_THUMB );
 			count2 += 1;
 		}
 		if ( !IS_ARM_R( victim, BROKEN_FINGER_I ) && !IS_ARM_R( victim, LOST_FINGER_I ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], BROKEN_FINGER_I );
+			SET_BIT( ch_loc_hp(victim)[3], BROKEN_FINGER_I );
 			count += 1;
 		}
 		if ( !IS_ARM_R( victim, BROKEN_FINGER_M ) && !IS_ARM_R( victim, LOST_FINGER_M ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], BROKEN_FINGER_M );
+			SET_BIT( ch_loc_hp(victim)[3], BROKEN_FINGER_M );
 			count += 1;
 		}
 		if ( !IS_ARM_R( victim, BROKEN_FINGER_R ) && !IS_ARM_R( victim, LOST_FINGER_R ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], BROKEN_FINGER_R );
+			SET_BIT( ch_loc_hp(victim)[3], BROKEN_FINGER_R );
 			count += 1;
 		}
 		if ( !IS_ARM_R( victim, BROKEN_FINGER_L ) && !IS_ARM_R( victim, LOST_FINGER_L ) && number_percent() < 25 ) {
-			SET_BIT( victim->loc_hp[3], BROKEN_FINGER_L );
+			SET_BIT( ch_loc_hp(victim)[3], BROKEN_FINGER_L );
 			count += 1;
 		}
 		if ( count == 1 )
@@ -1952,13 +1952,13 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_LEG_L( victim, LOST_LEG ) )
-			SET_BIT( victim->loc_hp[4], LOST_LEG );
+			SET_BIT( ch_loc_hp(victim)[4], LOST_LEG );
 		else
 			return;
 		if ( !IS_BLEEDING( victim, BLEEDING_LEG_L ) )
-			SET_BIT( victim->loc_hp[6], BLEEDING_LEG_L );
+			SET_BIT( ch_loc_hp(victim)[6], BLEEDING_LEG_L );
 		if ( IS_BLEEDING( victim, BLEEDING_FOOT_L ) )
-			REMOVE_BIT( victim->loc_hp[6], BLEEDING_FOOT_L );
+			REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_FOOT_L );
 		act( "Your skillful blow cuts off $N's left leg!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's left leg!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your left leg!", ch, NULL, victim, TO_VICT );
@@ -1998,13 +1998,13 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_LEG_R( victim, LOST_LEG ) )
-			SET_BIT( victim->loc_hp[5], LOST_LEG );
+			SET_BIT( ch_loc_hp(victim)[5], LOST_LEG );
 		else
 			return;
 		if ( !IS_BLEEDING( victim, BLEEDING_LEG_R ) )
-			SET_BIT( victim->loc_hp[6], BLEEDING_LEG_R );
+			SET_BIT( ch_loc_hp(victim)[6], BLEEDING_LEG_R );
 		if ( IS_BLEEDING( victim, BLEEDING_FOOT_R ) )
-			REMOVE_BIT( victim->loc_hp[6], BLEEDING_FOOT_R );
+			REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_FOOT_R );
 		act( "Your skillful blow cuts off $N's right leg!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's right leg!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your right leg!", ch, NULL, victim, TO_VICT );
@@ -2044,7 +2044,7 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_LEG_L( victim, BROKEN_LEG ) && !IS_LEG_L( victim, LOST_LEG ) )
-			SET_BIT( victim->loc_hp[4], BROKEN_LEG );
+			SET_BIT( ch_loc_hp(victim)[4], BROKEN_LEG );
 		else
 			return;
 		act( "Your skillful blow breaks $N's left leg!", ch, NULL, victim, TO_CHAR );
@@ -2078,7 +2078,7 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_LEG_R( victim, BROKEN_LEG ) && !IS_LEG_R( victim, LOST_LEG ) )
-			SET_BIT( victim->loc_hp[5], BROKEN_LEG );
+			SET_BIT( ch_loc_hp(victim)[5], BROKEN_LEG );
 		else
 			return;
 		act( "Your skillful blow breaks $N's right leg!", ch, NULL, victim, TO_CHAR );
@@ -2112,13 +2112,13 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_LEG_L( victim, LOST_LEG ) && !IS_LEG_L( victim, LOST_FOOT ) )
-			SET_BIT( victim->loc_hp[4], LOST_FOOT );
+			SET_BIT( ch_loc_hp(victim)[4], LOST_FOOT );
 		else
 			return;
 		if ( IS_BLEEDING( victim, BLEEDING_LEG_L ) )
-			REMOVE_BIT( victim->loc_hp[6], BLEEDING_LEG_L );
+			REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_LEG_L );
 		if ( !IS_BLEEDING( victim, BLEEDING_FOOT_L ) )
-			SET_BIT( victim->loc_hp[6], BLEEDING_FOOT_L );
+			SET_BIT( ch_loc_hp(victim)[6], BLEEDING_FOOT_L );
 		act( "Your skillful blow cuts off $N's left foot!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's left foot!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your left foot!", ch, NULL, victim, TO_VICT );
@@ -2153,13 +2153,13 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( !IS_LEG_R( victim, LOST_LEG ) && !IS_LEG_R( victim, LOST_FOOT ) )
-			SET_BIT( victim->loc_hp[5], LOST_FOOT );
+			SET_BIT( ch_loc_hp(victim)[5], LOST_FOOT );
 		else
 			return;
 		if ( IS_BLEEDING( victim, BLEEDING_LEG_R ) )
-			REMOVE_BIT( victim->loc_hp[6], BLEEDING_LEG_R );
+			REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_LEG_R );
 		if ( !IS_BLEEDING( victim, BLEEDING_FOOT_R ) )
-			SET_BIT( victim->loc_hp[6], BLEEDING_FOOT_R );
+			SET_BIT( ch_loc_hp(victim)[6], BLEEDING_FOOT_R );
 		act( "Your skillful blow cuts off $N's right foot!", ch, NULL, victim, TO_CHAR );
 		act( "$n's skillful blow cuts off $N's right foot!", ch, NULL, victim, TO_NOTVICT );
 		act( "$n's skillful blow cuts off your right foot!", ch, NULL, victim, TO_VICT );
@@ -2202,37 +2202,37 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( IS_BODY( victim, BROKEN_RIBS_1 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_1 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_1 );
 		if ( IS_BODY( victim, BROKEN_RIBS_2 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_2 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_2 );
 		if ( IS_BODY( victim, BROKEN_RIBS_4 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_4 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_4 );
 		if ( IS_BODY( victim, BROKEN_RIBS_8 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_8 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_8 );
 		if ( IS_BODY( victim, BROKEN_RIBS_16 ) )
-			REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_16 );
+			REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_16 );
 		if ( bodyloc + broken > 24 ) broken -= 1;
 		if ( bodyloc + broken > 24 ) broken -= 1;
 		bodyloc += broken;
 		if ( bodyloc >= 16 ) {
 			bodyloc -= 16;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_16 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_16 );
 		}
 		if ( bodyloc >= 8 ) {
 			bodyloc -= 8;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_8 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_8 );
 		}
 		if ( bodyloc >= 4 ) {
 			bodyloc -= 4;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_4 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_4 );
 		}
 		if ( bodyloc >= 2 ) {
 			bodyloc -= 2;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_2 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_2 );
 		}
 		if ( bodyloc >= 1 ) {
 			bodyloc -= 1;
-			SET_BIT( victim->loc_hp[1], BROKEN_RIBS_1 );
+			SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_1 );
 		}
 		snprintf( buf, sizeof( buf ),"Your skillful blow breaks %d of $N's ribs!", broken );
 		act( buf, ch, NULL, victim, TO_CHAR );
@@ -2276,37 +2276,37 @@ void critical_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int dam ) {
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && number_range( 1, 3 ) == 2 ) return;
 
 		if ( IS_HEAD( victim, LOST_TOOTH_1 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_1 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_1 );
 		if ( IS_HEAD( victim, LOST_TOOTH_2 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_2 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_2 );
 		if ( IS_HEAD( victim, LOST_TOOTH_4 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_4 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_4 );
 		if ( IS_HEAD( victim, LOST_TOOTH_8 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_8 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_8 );
 		if ( IS_HEAD( victim, LOST_TOOTH_16 ) )
-			REMOVE_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_16 );
+			REMOVE_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_16 );
 		if ( bodyloc + broken > 28 ) broken -= 1;
 		if ( bodyloc + broken > 28 ) broken -= 1;
 		bodyloc += broken;
 		if ( bodyloc >= 16 ) {
 			bodyloc -= 16;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_16 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_16 );
 		}
 		if ( bodyloc >= 8 ) {
 			bodyloc -= 8;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_8 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_8 );
 		}
 		if ( bodyloc >= 4 ) {
 			bodyloc -= 4;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_4 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_4 );
 		}
 		if ( bodyloc >= 2 ) {
 			bodyloc -= 2;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_2 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_2 );
 		}
 		if ( bodyloc >= 1 ) {
 			bodyloc -= 1;
-			SET_BIT( victim->loc_hp[LOC_HEAD], LOST_TOOTH_1 );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], LOST_TOOTH_1 );
 		}
 		snprintf( buf, sizeof( buf ),"Your skillful blow knocks out %d of $N's teeth!", broken );
 		act( buf, ch, NULL, victim, TO_CHAR );
@@ -2350,11 +2350,11 @@ void special_move( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( number_percent() <= 25 && !IS_LEG_L( victim, BROKEN_LEG ) && !IS_LEG_L( victim, LOST_LEG ) ) {
 			act( "Your left leg shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's left leg shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_LEG_L], BROKEN_LEG );
+			SET_BIT( ch_loc_hp(victim)[LOC_LEG_L], BROKEN_LEG );
 		} else if ( number_percent() <= 25 && !IS_LEG_R( victim, BROKEN_LEG ) && !IS_LEG_R( victim, LOST_LEG ) ) {
 			act( "Your right leg shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's right leg shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_LEG_R], BROKEN_LEG );
+			SET_BIT( ch_loc_hp(victim)[LOC_LEG_R], BROKEN_LEG );
 		}
 		act( "You crash to the ground, stunned.", victim, NULL, NULL, TO_CHAR );
 		act( "$n crashes to the ground, stunned.", victim, NULL, NULL, TO_ROOM );
@@ -2387,7 +2387,7 @@ void special_move( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( number_percent() <= 25 && !IS_BODY( victim, BROKEN_SPINE ) ) {
 			act( "Your spine shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's spine shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_BODY], BROKEN_SPINE );
+			SET_BIT( ch_loc_hp(victim)[LOC_BODY], BROKEN_SPINE );
 		}
 		act( "You fall to the ground, stunned.", victim, NULL, NULL, TO_CHAR );
 		act( "$n falls to the ground, stunned.", victim, NULL, NULL, TO_ROOM );
@@ -2405,15 +2405,15 @@ void special_move( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_NOSE ) && !IS_HEAD( victim, LOST_NOSE ) ) {
 			act( "Your nose shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's nose shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_NOSE );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_NOSE );
 		} else if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_JAW ) ) {
 			act( "Your jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_JAW );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_JAW );
 		} else if ( number_percent() <= 25 && !IS_BODY( victim, BROKEN_NECK ) ) {
 			act( "Your neck shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's neck shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_BODY], BROKEN_NECK );
+			SET_BIT( ch_loc_hp(victim)[LOC_BODY], BROKEN_NECK );
 		}
 		act( "You grab $N by the waist and hoist $M above your head.", ch, NULL, victim, TO_CHAR );
 		act( "$n grabs $N by the waist and hoists $M above $s head.", ch, NULL, victim, TO_NOTVICT );
@@ -2438,15 +2438,15 @@ void special_move( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_NOSE ) && !IS_HEAD( victim, LOST_NOSE ) ) {
 			act( "Your nose shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's nose shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_NOSE );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_NOSE );
 		} else if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_JAW ) ) {
 			act( "Your jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_JAW );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_JAW );
 		} else if ( number_percent() <= 25 && !IS_BODY( victim, BROKEN_NECK ) ) {
 			act( "Your neck shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's neck shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_BODY], BROKEN_NECK );
+			SET_BIT( ch_loc_hp(victim)[LOC_BODY], BROKEN_NECK );
 		}
 		act( "You roll onto your back and smash your feet into $N's chest.", ch, NULL, victim, TO_CHAR );
 		act( "$n rolls onto $s back and smashes $s feet into your chest.", ch, NULL, victim, TO_VICT );
@@ -2477,15 +2477,15 @@ void special_move( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_NOSE ) && !IS_HEAD( victim, LOST_NOSE ) ) {
 			act( "Your nose shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's nose shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_NOSE );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_NOSE );
 		} else if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_JAW ) ) {
 			act( "Your jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_JAW );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_JAW );
 		} else if ( number_percent() <= 25 && !IS_BODY( victim, BROKEN_NECK ) ) {
 			act( "Your neck shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's neck shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_BODY], BROKEN_NECK );
+			SET_BIT( ch_loc_hp(victim)[LOC_BODY], BROKEN_NECK );
 		}
 
 		act( "You stamp on the back of $N's leg, forcing $M to drop to one knee.", ch, NULL, victim, TO_CHAR );
@@ -2504,15 +2504,15 @@ void special_move( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_NOSE ) && !IS_HEAD( victim, LOST_NOSE ) ) {
 			act( "Your nose shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's nose shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_NOSE );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_NOSE );
 		} else if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_JAW ) ) {
 			act( "Your jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_JAW );
+			SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_JAW );
 		} else if ( number_percent() <= 25 && !IS_BODY( victim, BROKEN_NECK ) ) {
 			act( "Your neck shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 			act( "$n's neck shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-			SET_BIT( victim->loc_hp[LOC_BODY], BROKEN_NECK );
+			SET_BIT( ch_loc_hp(victim)[LOC_BODY], BROKEN_NECK );
 		}
 		act( "You crash to the ground, stunned.", victim, NULL, NULL, TO_CHAR );
 		act( "$n crashes to the ground, stunned.", victim, NULL, NULL, TO_ROOM );
@@ -2566,8 +2566,8 @@ void special_hurl( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		dam = number_range( ch->level, ( ch->level * 4 ) );
 		victim->hit = victim->hit - dam;
 		update_pos( victim );
-		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->mkill = ch->mkill + 1;
-		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->mdeath = victim->mdeath + 1;
+		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->pcdata->mkill = ch->pcdata->mkill + 1;
+		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 		if ( victim->position == POS_DEAD ) {
 			raw_kill( victim );
 			return;
@@ -2611,8 +2611,8 @@ void special_hurl( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			dam = number_range( ch->level, ( ch->level * 6 ) );
 			victim->hit = victim->hit - dam;
 			update_pos( victim );
-			if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->mkill = ch->mkill + 1;
-			if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->mdeath = victim->mdeath + 1;
+			if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->pcdata->mkill = ch->pcdata->mkill + 1;
+			if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 			if ( victim->position == POS_DEAD ) {
 				raw_kill( victim );
 				return;
@@ -2636,8 +2636,8 @@ void special_hurl( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		dam = number_range( ch->level, ( ch->level * 2 ) );
 		victim->hit = victim->hit - dam;
 		update_pos( victim );
-		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->mkill = ch->mkill + 1;
-		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->mdeath = victim->mdeath + 1;
+		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->pcdata->mkill = ch->pcdata->mkill + 1;
+		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 		if ( victim->position == POS_DEAD ) {
 			raw_kill( victim );
 			return;

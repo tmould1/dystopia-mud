@@ -77,7 +77,7 @@ void do_sclaws( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_SCLAWS_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_SCLAWS_LEVEL_REQ ) ) {
 		send_to_char( "You need level 5 in Luna to use Silver Claws.\n\r", ch );
 		return;
 	}
@@ -111,7 +111,7 @@ void do_moonbeam( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_MOONBEAM_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_MOONBEAM_LEVEL_REQ ) ) {
 		send_to_char( "You need to obtain level 8 in Luna to use Moonbeam.\n\r", ch );
 		return;
 	}
@@ -163,7 +163,7 @@ void do_moongate( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_MOONGATE_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_MOONGATE_LEVEL_REQ ) ) {
 		send_to_char( "You need to obtain level 6 Luna to use moongate.\n\r", ch );
 		return;
 	}
@@ -230,7 +230,7 @@ void do_gmotherstouch( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_GMOTHERSTOUCH_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_GMOTHERSTOUCH_LEVEL_REQ ) ) {
 		send_to_char( "You need to obtain level 4 in Luna to use Grandmother's Touch.\n\r", ch );
 		return;
 	}
@@ -287,7 +287,7 @@ void do_motherstouch( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) )
 		return;
 
-	if ( ch->power[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_MOTHERSTOUCH_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_MOTHERSTOUCH_LEVEL_REQ ) ) {
 		send_to_char( "You need to obtain level 3 in Luna to use Mother's Touch.\n\r", ch );
 		return;
 	}
@@ -344,7 +344,7 @@ void do_flameclaws( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "What?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_FLAMECLAWS_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_FLAMECLAWS_LEVEL_REQ ) ) {
 		send_to_char( "You need to obtain level 1 in luna to use flame claws.\n\r", ch );
 		return;
 	}
@@ -379,7 +379,7 @@ void do_moonarmour( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_MOONARMOUR_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_LUNA] < cfg( CFG_ABILITY_WEREWOLF_MOONARMOUR_LEVEL_REQ ) ) {
 		send_to_char( "You must attain level 2 in Luna before you can create moon armour.\n\r", ch );
 		return;
 	}
@@ -441,7 +441,7 @@ void do_rend( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_BOAR] < cfg( CFG_ABILITY_WEREWOLF_REND_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_BOAR] < cfg( CFG_ABILITY_WEREWOLF_REND_LEVEL_REQ ) ) {
 		send_to_char( "You need Boar 7 to Rend equipment.\n\r", ch );
 		return;
 	}
@@ -463,7 +463,7 @@ void do_skin( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_BEAR] < cfg( CFG_ABILITY_WEREWOLF_SKIN_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_BEAR] < cfg( CFG_ABILITY_WEREWOLF_SKIN_LEVEL_REQ ) ) {
 		send_to_char( "You need Bear 7 to toughen your skin.\n\r", ch );
 		return;
 	}
@@ -487,7 +487,7 @@ void do_jawlock( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < cfg( CFG_ABILITY_WEREWOLF_JAWLOCK_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_RAPT] < cfg( CFG_ABILITY_WEREWOLF_JAWLOCK_LEVEL_REQ ) ) {
 		send_to_char( "You need Raptor 8 to use locked jaw.\n\r", ch );
 		return;
 	}
@@ -509,7 +509,7 @@ void do_perception( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < cfg( CFG_ABILITY_WEREWOLF_PERCEPTION_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_RAPT] < cfg( CFG_ABILITY_WEREWOLF_PERCEPTION_LEVEL_REQ ) ) {
 		send_to_char( "You need Raptor 3 to heighten your Perception.\n\r", ch );
 		return;
 	}
@@ -533,7 +533,7 @@ void do_roar( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You let out an insane BeeF-powered ROAR!!!!!!!!\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_BEAR] < cfg( CFG_ABILITY_WEREWOLF_ROAR_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_BEAR] < cfg( CFG_ABILITY_WEREWOLF_ROAR_LEVEL_REQ ) ) {
 		send_to_char( "You need bear 6 to roar.\n\r", ch );
 		return;
 	}
@@ -570,7 +570,7 @@ void do_quills(CHAR_DATA *ch,char *argument)
   send_to_char("Huh?\n\r",ch);
   return;
   }
-  if (ch->power[DISC_WERE_BEAR] < 5)
+  if (ch_power(ch)[DISC_WERE_BEAR] < 5)
   {
   send_to_char("You need Bear 5 to extend your quills.\n\r",ch);
   return;
@@ -597,7 +597,7 @@ void do_slam( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_BEAR] < cfg( CFG_ABILITY_WEREWOLF_SLAM_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_BEAR] < cfg( CFG_ABILITY_WEREWOLF_SLAM_LEVEL_REQ ) ) {
 		send_to_char( "You need Bear 8 to attempt to shoulder slam.\n\r", ch );
 		return;
 	}
@@ -622,7 +622,7 @@ void do_shred( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < cfg( CFG_ABILITY_WEREWOLF_SHRED_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_WERE_RAPT] < cfg( CFG_ABILITY_WEREWOLF_SHRED_LEVEL_REQ ) ) {
 		send_to_char( "You need Raptor 7 to Shred.\n\r", ch );
 		return;
 	}
@@ -664,11 +664,11 @@ void do_shred( CHAR_DATA *ch, char *argument ) {
 	one_hit( ch, victim, gsn_shred, 1 );
 	one_hit( ch, victim, gsn_shred, 1 );
 
-	if ( ch->power[DISC_WERE_RAPT] > 6 )
+	if ( ch_power(ch)[DISC_WERE_RAPT] > 6 )
 		one_hit( ch, victim, gsn_shred, 1 );
-	if ( ch->power[DISC_WERE_RAPT] > 7 )
+	if ( ch_power(ch)[DISC_WERE_RAPT] > 7 )
 		one_hit( ch, victim, gsn_shred, 1 );
-	if ( ch->power[DISC_WERE_RAPT] > 9 )
+	if ( ch_power(ch)[DISC_WERE_RAPT] > 9 )
 		one_hit( ch, victim, gsn_shred, 1 );
 	return;
 }
@@ -684,7 +684,7 @@ void do_talons( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < cfg( CFG_ABILITY_WEREWOLF_TALONS_LEVEL_REQ ) && !IS_SET( ch->itemaffect, ITEMA_TALON ) ) {
+	if ( ch_power(ch)[DISC_WERE_RAPT] < cfg( CFG_ABILITY_WEREWOLF_TALONS_LEVEL_REQ ) && !IS_SET( ch->itemaffect, ITEMA_TALON ) ) {
 		send_to_char( "You need level 10 Raptor to use talons.\n\r", ch );
 		return;
 	}
@@ -720,7 +720,7 @@ void do_devour( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_RAPT] < 5 ) {
+	if ( ch_power(ch)[DISC_WERE_RAPT] < 5 ) {
 		send_to_char( "You require Raptor 5 to devour.\n\r", ch );
 		return;
 	}
@@ -763,7 +763,7 @@ void do_staredown( CHAR_DATA *ch, char *argument ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_WERE_OWL] < 5 ) {
+	if ( ch_power(ch)[DISC_WERE_OWL] < 5 ) {
 		stc( "Your power in owl is not great enough.\n\r", ch );
 		return;
 	}
@@ -783,7 +783,7 @@ void do_staredown( CHAR_DATA *ch, char *argument ) {
 	}
 	WAIT_STATE( ch, 16 );
 	if ( IS_NPC( victim ) ) {
-		if ( ch->power[DISC_WERE_OWL] < 6 ) {
+		if ( ch_power(ch)[DISC_WERE_OWL] < 6 ) {
 			if ( number_range( 1, 3 ) != 1 ) {
 				act( "You stare deeply into $N's eyes, but nothing happens.", ch, NULL, victim, TO_CHAR );
 				act( "$n stares deeply into your eyes.", ch, NULL, victim, TO_VICT );
@@ -797,7 +797,7 @@ void do_staredown( CHAR_DATA *ch, char *argument ) {
 		do_flee( victim, "" );
 		return;
 	} else {
-		if ( ch->power[DISC_WERE_OWL] < 7 ) {
+		if ( ch_power(ch)[DISC_WERE_OWL] < 7 ) {
 			if ( number_range( 1, 4 ) != 2 ) {
 				act( "You stare deeply into $N's eyes, but nothing happens.", ch, NULL, victim, TO_CHAR );
 				act( "$n stares deeply into your eyes.", ch, NULL, victim, TO_VICT );
@@ -828,7 +828,7 @@ void do_disquiet( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_OWL] < 6 ) {
+	if ( ch_power(ch)[DISC_WERE_OWL] < 6 ) {
 		stc( "Your power in owl is not great enough.\n\r", ch );
 		return;
 	}
@@ -840,26 +840,26 @@ void do_disquiet( CHAR_DATA *ch, char *argument ) {
 
 	if ( is_safe( ch, victim ) ) return;
 
-	if ( ch->gnosis[GCURRENT] < 1 ) {
+	if ( ch_gnosis(ch)[GCURRENT] < 1 ) {
 		stc( "You need one point of gnosis power to use the gift of Disquiet.\n\r", ch );
 		return;
 	}
 
 	af.type = skill_lookup( "reserved" );
-	af.duration = ch->power[DISC_WERE_OWL];
+	af.duration = ch_power(ch)[DISC_WERE_OWL];
 	af.location = APPLY_DAMROLL;
-	af.modifier = -( ch->power[DISC_WERE_OWL] * 5 );
+	af.modifier = -( ch_power(ch)[DISC_WERE_OWL] * 5 );
 	af.bitvector = 0;
 	affect_to_char( victim, &af );
 
 	af.type = skill_lookup( "reserved" );
-	af.duration = ch->power[DISC_WERE_OWL];
+	af.duration = ch_power(ch)[DISC_WERE_OWL];
 	af.location = APPLY_HITROLL;
-	af.modifier = -( ch->power[DISC_WERE_OWL] * 5 );
+	af.modifier = -( ch_power(ch)[DISC_WERE_OWL] * 5 );
 	af.bitvector = 0;
 	affect_to_char( victim, &af );
 
-	ch->gnosis[CURRENT]--;
+	ch_gnosis(ch)[CURRENT]--;
 	act( "Your eyes glow a sinister red as you glare at $N.", ch, NULL, victim, TO_CHAR );
 	act( "$n's eyes glow a sinister red as $e glares at you.\n\rYou feel odd.", ch, NULL, victim, TO_VICT );
 	act( "$n's eyes glow a sinister red as $e glares at $N.", ch, NULL, victim, TO_NOTVICT );
@@ -884,7 +884,7 @@ void do_reshape( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_OWL] < 7 ) {
+	if ( ch_power(ch)[DISC_WERE_OWL] < 7 ) {
 		stc( "Your power in owl is not great enough.\n\r", ch );
 		return;
 	}
@@ -935,7 +935,7 @@ void do_cocoon( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_OWL] < 8 ) {
+	if ( ch_power(ch)[DISC_WERE_OWL] < 8 ) {
 		stc( "Your power in owl is not great enough.\n\r", ch );
 		return;
 	}
@@ -943,11 +943,11 @@ void do_cocoon( CHAR_DATA *ch, char *argument ) {
 	if ( IS_GAR1( ch, WOLF_COCOON ) ) {
 		stc( "Your cocoon breaks and falls to the ground.\n\r", ch );
 		act( "$n's cocoon breaks and falls to the ground.", ch, NULL, NULL, TO_ROOM );
-		REMOVE_BIT( ch->garou1, WOLF_COCOON );
+		REMOVE_BIT( ch->pcdata->garou1, WOLF_COCOON );
 		return;
 	}
 
-	if ( ch->gnosis[GCURRENT] < 2 ) {
+	if ( ch_gnosis(ch)[GCURRENT] < 2 ) {
 		stc( "You do not have enough gnosis to use Cocoon.\n\r", ch );
 		return;
 	}
@@ -955,8 +955,8 @@ void do_cocoon( CHAR_DATA *ch, char *argument ) {
 	else {
 		stc( "Your body is surrounded by a thick, opaque epidermis.\n\r", ch );
 		act( "$n's body is surrounded by a thick, opaque epidermis.", ch, NULL, NULL, TO_ROOM );
-		SET_BIT( ch->garou1, WOLF_COCOON );
-		ch->gnosis[GCURRENT]--;
+		SET_BIT( ch->pcdata->garou1, WOLF_COCOON );
+		ch_gnosis(ch)[GCURRENT]--;
 		return;
 	}
 	return;
@@ -979,7 +979,7 @@ void do_quills( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_HAWK] < 5 ) {
+	if ( ch_power(ch)[DISC_WERE_HAWK] < 5 ) {
 		stc( "Your power in hawk is not great enough.\n\r", ch );
 		return;
 	}
@@ -1013,7 +1013,7 @@ void do_burrow( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_HAWK] < 6 ) {
+	if ( ch_power(ch)[DISC_WERE_HAWK] < 6 ) {
 		stc( "Your power in hawk is not great enough.\n\r", ch );
 		return;
 	}
@@ -1089,12 +1089,12 @@ void do_wither( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_WERE_HAWK] < 7 ) {
+	if ( ch_power(ch)[DISC_WERE_HAWK] < 7 ) {
 		stc( "Your power in hawk is not great enough.\n\r", ch );
 		return;
 	}
 
-	if ( ch->gnosis[GCURRENT] < 3 ) {
+	if ( ch_gnosis(ch)[GCURRENT] < 3 ) {
 		stc( "You do not have enough gnosis power stored to use the gift of Wither Limb.\n\r", ch );
 		return;
 	}
@@ -1115,7 +1115,7 @@ void do_wither( CHAR_DATA *ch, char *argument ) {
 	}
 
 	WAIT_STATE( ch, 18 );
-	ch->gnosis[CURRENT] -= 3;
+	ch_gnosis(ch)[CURRENT] -= 3;
 	if ( IS_NPC( victim ) ) {
 		chance = number_range( 45, 55 );
 
@@ -1131,11 +1131,11 @@ void do_wither( CHAR_DATA *ch, char *argument ) {
 
 		if ( !blah ) {
 			if ( !IS_ARM_R( victim, LOST_ARM ) )
-				SET_BIT( victim->loc_hp[3], LOST_ARM );
+				SET_BIT( ch_loc_hp(victim)[3], LOST_ARM );
 			if ( !IS_BLEEDING( victim, BLEEDING_ARM_R ) )
-				SET_BIT( victim->loc_hp[6], BLEEDING_ARM_R );
+				SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_R );
 			if ( IS_BLEEDING( victim, BLEEDING_HAND_R ) )
-				REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_R );
+				REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_R );
 			act( "You concentrate deeply and $N's arm starts to wither!", ch, NULL, victim, TO_CHAR );
 			act( "$n's eyes glow dark red as $e gazes at you, and your arm begins withering!", ch, NULL, victim, TO_NOTVICT );
 			act( "$n gazes evilly at $N, and $S arm begins withering!", ch, NULL, victim, TO_VICT );
@@ -1157,13 +1157,13 @@ void do_wither( CHAR_DATA *ch, char *argument ) {
 
 		else if ( blah ) {
 			if ( !IS_ARM_L( victim, LOST_ARM ) )
-				SET_BIT( victim->loc_hp[2], LOST_ARM );
+				SET_BIT( ch_loc_hp(victim)[2], LOST_ARM );
 			else
 				blah = TRUE;
 			if ( !IS_BLEEDING( victim, BLEEDING_ARM_L ) )
-				SET_BIT( victim->loc_hp[6], BLEEDING_ARM_L );
+				SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_L );
 			if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) )
-				REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_L );
+				REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_L );
 			act( "You concentrate deeply and $N's arm starts to wither!", ch, NULL, victim, TO_CHAR );
 			act( "$n's eyes glow dark red as $e gazes at you, and your arm begins withering!", ch, NULL, victim, TO_NOTVICT );
 			act( "$n gazes evilly at $N, and $S arm begins withering!", ch, NULL, victim, TO_VICT );
@@ -1200,11 +1200,11 @@ void do_wither( CHAR_DATA *ch, char *argument ) {
 
 		if ( !blah ) {
 			if ( !IS_ARM_R( victim, LOST_ARM ) )
-				SET_BIT( victim->loc_hp[3], LOST_ARM );
+				SET_BIT( ch_loc_hp(victim)[3], LOST_ARM );
 			if ( !IS_BLEEDING( victim, BLEEDING_ARM_R ) )
-				SET_BIT( victim->loc_hp[6], BLEEDING_ARM_R );
+				SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_R );
 			if ( IS_BLEEDING( victim, BLEEDING_HAND_R ) )
-				REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_R );
+				REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_R );
 			act( "You concentrate deeply and $N's arm starts to wither!", ch, NULL, victim, TO_CHAR );
 			act( "$n's eyes glow dark red as $e gazes at you, and your arm begins withering!", ch, NULL, victim, TO_NOTVICT );
 			act( "$n gazes evilly at $N, and $S arm begins withering!", ch, NULL, victim, TO_VICT );
@@ -1226,13 +1226,13 @@ void do_wither( CHAR_DATA *ch, char *argument ) {
 
 		else if ( blah ) {
 			if ( !IS_ARM_L( victim, LOST_ARM ) )
-				SET_BIT( victim->loc_hp[2], LOST_ARM );
+				SET_BIT( ch_loc_hp(victim)[2], LOST_ARM );
 			else
 				blah = TRUE;
 			if ( !IS_BLEEDING( victim, BLEEDING_ARM_L ) )
-				SET_BIT( victim->loc_hp[6], BLEEDING_ARM_L );
+				SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_L );
 			if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) )
-				REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_L );
+				REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_L );
 			act( "You concentrate deeply and $N's arm starts to wither!", ch, NULL, victim, TO_CHAR );
 			act( "$n's eyes glow dark red as $e gazes at you, and your arm begins withering!", ch, NULL, victim, TO_NOTVICT );
 			act( "$n gazes evilly at $N, and $S arm begins withering!", ch, NULL, victim, TO_VICT );
@@ -1261,7 +1261,7 @@ void do_wither( CHAR_DATA *ch, char *argument ) {
 
 void do_razorclaws( CHAR_DATA *ch, char *argument ) {
 
-	if ( ch->power[DISC_WERE_WOLF] < 4 ) {
+	if ( ch_power(ch)[DISC_WERE_WOLF] < 4 ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
@@ -1274,11 +1274,11 @@ void do_razorclaws( CHAR_DATA *ch, char *argument ) {
 	if ( IS_GAR1( ch, WOLF_RAZORCLAWS ) ) {
 		stc( "Your claws lose their razor-sharp edge.\n\r", ch );
 		act( "$n's claws lose their razor-sharp edge.", ch, NULL, NULL, TO_ROOM );
-		REMOVE_BIT( ch->garou1, WOLF_RAZORCLAWS );
+		REMOVE_BIT( ch->pcdata->garou1, WOLF_RAZORCLAWS );
 	} else {
 		send_to_char( "You hone your claws to a razor sharpness.\n\r", ch );
 		act( "$n hones $s claws to a razor sharpness.", ch, NULL, NULL, TO_ROOM );
-		SET_BIT( ch->garou1, WOLF_RAZORCLAWS );
+		SET_BIT( ch->pcdata->garou1, WOLF_RAZORCLAWS );
 	}
 	return;
 }

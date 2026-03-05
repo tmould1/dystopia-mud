@@ -133,21 +133,21 @@ static mem_category_t mem_characters( int *out_npcs, int *out_players,
 		}
 		FTRACK( F_LORD, ch->lord );
 		FTRACK( F_MORPH, ch->morph );
-		FTRACK( F_CREATETIME, ch->createtime );
-		FTRACK( F_LASTTIME, ch->lasttime );
-		FTRACK( F_LASTHOST, ch->lasthost );
 		FTRACK( F_HUNTING, ch->hunting );
-		FTRACK( F_PLOAD, ch->pload );
-		FTRACK( F_POWERACTION, ch->poweraction );
-		FTRACK( F_POWERTYPE, ch->powertype );
-		FTRACK( F_PROMPT, ch->prompt );
-		FTRACK( F_CPROMPT, ch->cprompt );
 		FTRACK( F_PREFIX, ch->prefix );
 		FTRACK( F_CLAN, ch->clan );
-		FTRACK( F_OBJDESC, ch->objdesc );
-		FTRACK( F_INTER_EDITING, ch->inter_editing );
 
 		if ( ch->pcdata ) {
+			FTRACK( F_INTER_EDITING, ch->pcdata->inter_editing );
+			FTRACK( F_OBJDESC, ch->pcdata->objdesc );
+			FTRACK( F_CREATETIME, ch->pcdata->createtime );
+			FTRACK( F_LASTTIME, ch->pcdata->lasttime );
+			FTRACK( F_LASTHOST, ch->pcdata->lasthost );
+			FTRACK( F_PLOAD, ch->pcdata->pload );
+			FTRACK( F_POWERACTION, ch->pcdata->poweraction );
+			FTRACK( F_POWERTYPE, ch->pcdata->powertype );
+			FTRACK( F_PROMPT, ch->pcdata->prompt );
+			FTRACK( F_CPROMPT, ch->pcdata->cprompt );
 			pc_count++;
 			r.child_bytes += sizeof( PC_DATA );
 
@@ -185,11 +185,11 @@ static mem_category_t mem_characters( int *out_npcs, int *out_players,
 				r.child_bytes += (size_t) ch->pcdata->quest_tracker->capacity
 					* sizeof( QUEST_PROGRESS );
 			}
-		}
 
-		if ( ch->editor ) {
-			editor_count++;
-			r.child_bytes += sizeof( EDITOR_DATA );
+			if ( ch->pcdata->editor ) {
+				editor_count++;
+				r.child_bytes += sizeof( EDITOR_DATA );
+			}
 		}
 
 		{
@@ -279,11 +279,13 @@ static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
 	int *out_scripts )
 {
 	mem_category_t r = { "Rooms", 0, 0, 0, 0 };
+	AREA_DATA *pArea;
 	ROOM_INDEX_DATA *pRoom;
 	int exit_count = 0, ed_count = 0, reset_count = 0, script_count = 0;
 	int door, i;
 
-	for ( pRoom = room_list; pRoom; pRoom = pRoom->next_room ) {
+	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
+	for ( pRoom = pArea->room_first; pRoom; pRoom = pRoom->next_in_area ) {
 		EXTRA_DESCR_DATA *ed;
 		RESET_DATA *rst;
 		SCRIPT_DATA *scr;
@@ -325,6 +327,7 @@ static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
 			r.string_bytes += str_mem( scr->pattern );
 			r.string_bytes += str_mem( scr->library_name );
 		}
+	}
 	}
 
 	if ( out_exits )   *out_exits   = exit_count;
@@ -960,16 +963,21 @@ static void mem_show_scripts( CHAR_DATA *ch ) {
 		}
 	}
 
-	for ( pRoom = room_list; pRoom; pRoom = pRoom->next_room ) {
-		SCRIPT_DATA *scr;
-		LIST_FOR_EACH( scr, &pRoom->scripts, SCRIPT_DATA, node ) {
-			room_scripts++;
-			room_bytes += sizeof( SCRIPT_DATA );
-			room_bytes += str_mem( scr->name );
-			room_bytes += str_mem( scr->code );
-			room_bytes += str_mem( scr->pattern );
-			room_bytes += str_mem( scr->library_name );
-			code_bytes += str_mem( scr->code );
+	{
+		AREA_DATA *pArea;
+		LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
+		for ( pRoom = pArea->room_first; pRoom; pRoom = pRoom->next_in_area ) {
+			SCRIPT_DATA *scr;
+			LIST_FOR_EACH( scr, &pRoom->scripts, SCRIPT_DATA, node ) {
+				room_scripts++;
+				room_bytes += sizeof( SCRIPT_DATA );
+				room_bytes += str_mem( scr->name );
+				room_bytes += str_mem( scr->code );
+				room_bytes += str_mem( scr->pattern );
+				room_bytes += str_mem( scr->library_name );
+				code_bytes += str_mem( scr->code );
+			}
+		}
 		}
 	}
 

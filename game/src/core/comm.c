@@ -1199,7 +1199,7 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
 	iStart = (int) strlen( d->inbuf );
 	if ( iStart >= (int) sizeof( d->inbuf ) - 10 ) {
 		if ( d != NULL && d->character != NULL ) {
-			snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->character->lasthost ) );
+			snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->character->pcdata->lasthost ) );
 			log_string( log_buf );
 		} else if ( d->lookup_status != STATUS_LOOKUP ) {
 			snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->host ) );
@@ -1640,7 +1640,7 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 		} else {
 			if ( ++d->repeat >= 40 ) {
 				if ( d != NULL && d->character != NULL ) {
-					snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->character->lasthost ) );
+					snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->character->pcdata->lasthost ) );
 					log_string( log_buf );
 				} else if ( d->lookup_status != STATUS_LOOKUP ) {
 					snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->host ) );
@@ -1735,7 +1735,7 @@ void crashrecov( int iSignal ) {
 
 		/* Fix any possibly head/object forms */
 		if ( IS_HEAD( gch, LOST_HEAD ) || IS_SET( gch->extra, EXTRA_OSWITCH ) ) {
-			REMOVE_BIT( gch->loc_hp[0], LOST_HEAD );
+			REMOVE_BIT( ch_loc_hp(gch)[0], LOST_HEAD );
 			REMOVE_BIT( gch->affected_by, AFF_POLYMORPH );
 			REMOVE_BIT( gch->extra, EXTRA_OSWITCH );
 			gch->morph = str_dup( "" );
@@ -1928,9 +1928,9 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 			resource_str[0] = '\0';
 			if ( !IS_NPC( ch ) && ch->pcdata != NULL ) {
 				if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-					if ( ch->gnosis[GMAXIMUM] > 0 ) {
+					if ( ch_gnosis(ch)[GMAXIMUM] > 0 ) {
 						snprintf( resource_str, sizeof( resource_str ), " [#rR:%d#n #CG:%d#n]",
-							ch->rage, ch->gnosis[GCURRENT] );
+							ch->rage, ch_gnosis(ch)[GCURRENT] );
 					} else {
 						snprintf( resource_str, sizeof( resource_str ), " [#rR:%d#n]", ch->rage );
 					}
@@ -1943,7 +1943,7 @@ bool process_output( DESCRIPTOR_DATA *d, bool fPrompt ) {
 					snprintf( resource_str, sizeof( resource_str ), " [#rRes:%d#n]", ch->rage );
 				} else if ( IS_CLASS( ch, CLASS_MONK ) ) {
 					snprintf( resource_str, sizeof( resource_str ), " [#CC:%d/%d#n]",
-						ch->chi[CURRENT], ch->chi[MAXIMUM] );
+						ch_chi(ch)[CURRENT], ch_chi(ch)[MAXIMUM] );
 				} else if ( IS_CLASS( ch, CLASS_DEMON ) || IS_CLASS( ch, CLASS_DROW ) ) {
 					snprintf( resource_str, sizeof( resource_str ), " [#CP:%d/%d#n]",
 						ch->pcdata->stats[8], ch->pcdata->stats[9] );

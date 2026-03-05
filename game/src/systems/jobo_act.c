@@ -170,13 +170,13 @@ void do_healme( CHAR_DATA *ch, char *argument ) {
 	ch->hit = ch->max_hit;
 	ch->mana = ch->max_mana;
 	ch->move = ch->max_move;
-	ch->loc_hp[0] = 0;
-	ch->loc_hp[1] = 0;
-	ch->loc_hp[2] = 0;
-	ch->loc_hp[3] = 0;
-	ch->loc_hp[4] = 0;
-	ch->loc_hp[5] = 0;
-	ch->loc_hp[6] = 0;
+	ch_loc_hp(ch)[0] = 0;
+	ch_loc_hp(ch)[1] = 0;
+	ch_loc_hp(ch)[2] = 0;
+	ch_loc_hp(ch)[3] = 0;
+	ch_loc_hp(ch)[4] = 0;
+	ch_loc_hp(ch)[5] = 0;
+	ch_loc_hp(ch)[6] = 0;
 	send_to_char( "The healer heals your wounds and takes 300 qps as payment.\n\r", ch );
 	ch->pcdata->quest -= 300;
 	WAIT_STATE( ch, 36 );
@@ -585,15 +585,15 @@ void do_mastery( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You've already gotten your mastery. If you lost it, tough luck!\n\r", ch );
 		return;
 	}
-	if ( ch->wpn[0] < 200 || ch->wpn[1] < 200 || ch->wpn[2] < 200 || ch->wpn[3] < 200 || ch->wpn[4] < 200 || ch->wpn[5] < 200 || ch->wpn[6] < 200 || ch->wpn[7] < 200 || ch->wpn[8] < 200 || ch->wpn[9] < 200 || ch->wpn[10] < 200 || ch->wpn[11] < 200 || ch->wpn[12] < 200 ) {
+	if ( ch_wpn(ch)[0] < 200 || ch_wpn(ch)[1] < 200 || ch_wpn(ch)[2] < 200 || ch_wpn(ch)[3] < 200 || ch_wpn(ch)[4] < 200 || ch_wpn(ch)[5] < 200 || ch_wpn(ch)[6] < 200 || ch_wpn(ch)[7] < 200 || ch_wpn(ch)[8] < 200 || ch_wpn(ch)[9] < 200 || ch_wpn(ch)[10] < 200 || ch_wpn(ch)[11] < 200 || ch_wpn(ch)[12] < 200 ) {
 		send_to_char( "Maybe you should grandmaster your weapons first.\n\r", ch );
 		return;
 	}
-	if ( ch->spl[0] < 200 || ch->spl[1] < 200 || ch->spl[2] < 200 || ch->spl[3] < 200 || ch->spl[4] < 200 ) {
+	if ( ch_spl(ch)[0] < 200 || ch_spl(ch)[1] < 200 || ch_spl(ch)[2] < 200 || ch_spl(ch)[3] < 200 || ch_spl(ch)[4] < 200 ) {
 		send_to_char( "Maybe you should be grand sorcerer in all spell colors first.\n\r", ch );
 		return;
 	}
-	if ( ch->stance[1] < 200 || ch->stance[2] < 200 || ch->stance[3] < 200 || ch->stance[4] < 200 || ch->stance[5] < 200 || ch->stance[6] < 200 || ch->stance[7] < 200 || ch->stance[8] < 200 || ch->stance[9] < 200 || ch->stance[10] < 200 ) {
+	if ( ch_stance(ch)[1] < 200 || ch_stance(ch)[2] < 200 || ch_stance(ch)[3] < 200 || ch_stance(ch)[4] < 200 || ch_stance(ch)[5] < 200 || ch_stance(ch)[6] < 200 || ch_stance(ch)[7] < 200 || ch_stance(ch)[8] < 200 || ch_stance(ch)[9] < 200 || ch_stance(ch)[10] < 200 ) {
 		send_to_char( "Maybe you should grandmaster your stances first.\n\r", ch );
 		return;
 	}
@@ -641,35 +641,35 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 	argument = one_argument( argument, arg2 );
 	strcpy( arg3, argument );
 
-	if ( ch->stance[STANCE_TIGER] < 200 || ch->stance[STANCE_SWALLOW] < 200 || ch->stance[STANCE_MONKEY] < 200 || ch->stance[STANCE_MANTIS] < 200 || ch->stance[STANCE_DRAGON] < 200 ) {
+	if ( ch_stance(ch)[STANCE_TIGER] < 200 || ch_stance(ch)[STANCE_SWALLOW] < 200 || ch_stance(ch)[STANCE_MONKEY] < 200 || ch_stance(ch)[STANCE_MANTIS] < 200 || ch_stance(ch)[STANCE_DRAGON] < 200 ) {
 		send_to_char( "You need to max your normal stances first.\n\r", ch );
 		return;
 	}
-	if ( ch->stance[19] == -1 ) {
+	if ( ch_stance(ch)[19] == -1 ) {
 		max_lesser = 3;
 		currentstance = 19;
 		min_cost = 40;
 		max_cost = 240;
-	} else if ( ch->stance[20] == -1 ) {
+	} else if ( ch_stance(ch)[20] == -1 ) {
 		max_lesser = 4;
 		max_greater = 1;
 		currentstance = 20;
 		min_cost = 80;
 		max_cost = 280;
-	} else if ( ch->stance[21] == -1 ) {
+	} else if ( ch_stance(ch)[21] == -1 ) {
 		max_lesser = 4;
 		max_greater = 2;
 		currentstance = 21;
 		min_cost = 120;
 		max_cost = 300;
-	} else if ( ch->stance[22] == -1 ) {
+	} else if ( ch_stance(ch)[22] == -1 ) {
 		currentstance = 22;
 		max_lesser = 4;
 		max_greater = 4;
 		max_supreme = 1;
 		min_cost = 160;
 		max_cost = 360;
-	} else if ( ch->stance[23] == -1 ) {
+	} else if ( ch_stance(ch)[23] == -1 ) {
 		currentstance = 23;
 		max_lesser = 4;
 		max_greater = 4;
@@ -688,72 +688,72 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "type 'setstance clear all stances'. WARNING, this will remove ALL your superstances!\n\r", ch );
 		return;
 	}
-	if ( currentstance > 19 && ch->stance[currentstance - 7] < 200 ) {
+	if ( currentstance > 19 && ch_stance(ch)[currentstance - 7] < 200 ) {
 		send_to_char( "Maybe you should max your current superstance first.\n\r", ch );
 		return;
 	}
 
-	if ( IS_SET( ch->stance[18], STANCEPOWER_DODGE ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DODGE ) ) {
 		count++;
 		cost += count * 20;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_PARRY ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_PARRY ) ) {
 		count++;
 		cost += count * 20;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_SPEED ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_SPEED ) ) {
 		count++;
 		cost += count * 20;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_BYPASS ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_BYPASS ) ) {
 		count++;
 		cost += count * 20;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_1 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_1 ) ) {
 		current_lesser++;
 		cost += 20;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_2 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_2 ) ) {
 		current_greater++;
 		cost += 40;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_3 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_3 ) ) {
 		current_supreme++;
 		cost += 60;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_1 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_1 ) ) {
 		current_lesser++;
 		cost += 20;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_2 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_2 ) ) {
 		current_greater++;
 		cost += 40;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_3 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_3 ) ) {
 		current_supreme++;
 		cost += 60;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_1 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_1 ) ) {
 		current_lesser++;
 		cost += 20;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_2 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_2 ) ) {
 		current_greater++;
 		cost += 40;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_3 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_3 ) ) {
 		current_supreme++;
 		cost += 60;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_1 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_1 ) ) {
 		current_lesser++;
 		cost += 20;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_2 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_2 ) ) {
 		current_greater++;
 		cost += 40;
 	}
-	if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
+	if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
 		current_supreme++;
 		cost += 60;
 	}
@@ -784,40 +784,40 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 			send_to_char( " #r*#n There are no maximum on powers of lower level than that.                              #r*#n\n\r", ch );
 		send_to_char( " #r*---------------------------------------------------------------------------------------*#n\n\r", ch );
 		send_to_char( " #r*#n Currently you have chosen the following for your next superstance :                   #r*#n\n\r", ch );
-		if ( ch->stance[18] == 0 )
+		if ( ch_stance(ch)[18] == 0 )
 			send_to_char( " #r*#n None.                                                                                 #r*#n\n\r", ch );
 		else {
-			if ( IS_SET( ch->stance[18], STANCEPOWER_DODGE ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DODGE ) )
 				send_to_char( " #r*#n Advanced dodge.                                                                       #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_PARRY ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_PARRY ) )
 				send_to_char( " #r*#n Advanced parry.                                                                       #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_SPEED ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_SPEED ) )
 				send_to_char( " #r*#n Superior Speed.                                                                       #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_BYPASS ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_BYPASS ) )
 				send_to_char( " #r*#n Bypass Parry and Dodge.                                                               #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_1 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_1 ) )
 				send_to_char( " #r*#n Increased damage (lesser)                                                             #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_2 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_2 ) )
 				send_to_char( " #r*#n Increased damage (greater)                                                            #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_3 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_3 ) )
 				send_to_char( " #r*#n Increased damage (supreme)                                                            #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_1 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_1 ) )
 				send_to_char( " #r*#n Increased damage resistance (lesser)                                                  #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_2 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_2 ) )
 				send_to_char( " #r*#n Increased damage resistance (greater)                                                 #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_3 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_3 ) )
 				send_to_char( " #r*#n Increased damage resistance (supreme)                                                 #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_1 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_1 ) )
 				send_to_char( " #r*#n Increased damcap (lesser)                                                             #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_2 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_2 ) )
 				send_to_char( " #r*#n Increased damcap (greater)                                                            #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_3 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_3 ) )
 				send_to_char( " #r*#n Increased damcap (supreme)                                                            #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_1 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_1 ) )
 				send_to_char( " #r*#n Damcap reduction for opponent (lesser)                                                #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_2 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_2 ) )
 				send_to_char( " #r*#n Damcap reduction for opponent (greater)                                               #r*#n\n\r", ch );
-			if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_3 ) )
+			if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_3 ) )
 				send_to_char( " #r*#n Damcap reduction for opponent (supreme)                                               #r*#n\n\r", ch );
 		}
 		send_to_char( " #r*---------------------------------------------------------------------------------------*#n\n\r", ch );
@@ -855,27 +855,27 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "No stance by that name.\n\r", ch );
 			return;
 		}
-		if ( ch->stance[currentstance] == -1 ) {
+		if ( ch_stance(ch)[currentstance] == -1 ) {
 			send_to_char( "No, you don't have that stance yet, SILLY!\n\r", ch );
 			return;
 		}
 		send_to_char( "This stance has the following powers :\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_DODGE ) ) send_to_char( "Advanced Dodge.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_PARRY ) ) send_to_char( "Advanced Parry.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_SPEED ) ) send_to_char( "Superior Speed.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_BYPASS ) ) send_to_char( "The Bypassing ability.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_DAMAGE_1 ) ) send_to_char( "Lesser Damage.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_DAMAGE_2 ) ) send_to_char( "Greater Damage.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_DAMAGE_3 ) ) send_to_char( "Superior Damage.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_RESIST_1 ) ) send_to_char( "Lesser Resistance.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_RESIST_2 ) ) send_to_char( "Greater Resistance.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_RESIST_3 ) ) send_to_char( "Supreme Resistance.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_DAMCAP_1 ) ) send_to_char( "Lesser Damcap.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_DAMCAP_2 ) ) send_to_char( "Greater Damcap.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_DAMCAP_3 ) ) send_to_char( "Supreme Damcap.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_REV_DAMCAP_1 ) ) send_to_char( "Lesser reverse Damcap.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_REV_DAMCAP_2 ) ) send_to_char( "Greater reverse Damcap.\n\r", ch );
-		if ( IS_SET( ch->stance[currentstance], STANCEPOWER_REV_DAMCAP_3 ) ) send_to_char( "Supreme reverse Damcap.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_DODGE ) ) send_to_char( "Advanced Dodge.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_PARRY ) ) send_to_char( "Advanced Parry.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_SPEED ) ) send_to_char( "Superior Speed.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_BYPASS ) ) send_to_char( "The Bypassing ability.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_DAMAGE_1 ) ) send_to_char( "Lesser Damage.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_DAMAGE_2 ) ) send_to_char( "Greater Damage.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_DAMAGE_3 ) ) send_to_char( "Superior Damage.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_RESIST_1 ) ) send_to_char( "Lesser Resistance.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_RESIST_2 ) ) send_to_char( "Greater Resistance.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_RESIST_3 ) ) send_to_char( "Supreme Resistance.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_DAMCAP_1 ) ) send_to_char( "Lesser Damcap.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_DAMCAP_2 ) ) send_to_char( "Greater Damcap.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_DAMCAP_3 ) ) send_to_char( "Supreme Damcap.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_REV_DAMCAP_1 ) ) send_to_char( "Lesser reverse Damcap.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_REV_DAMCAP_2 ) ) send_to_char( "Greater reverse Damcap.\n\r", ch );
+		if ( IS_SET( ch_stance(ch)[currentstance], STANCEPOWER_REV_DAMCAP_3 ) ) send_to_char( "Supreme reverse Damcap.\n\r", ch );
 		return;
 	} else if ( !str_cmp( arg1, "done" ) ) {
 		if ( ch->exp < cost * 1000000 ) {
@@ -892,14 +892,14 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 			send_to_char( buf, ch );
 			return;
 		}
-		ch->stance[currentstance] = ch->stance[18];
-		ch->stance[18] = 0;
+		ch_stance(ch)[currentstance] = ch_stance(ch)[18];
+		ch_stance(ch)[18] = 0;
 		ch->exp -= cost * 1000000;
 		send_to_char( "ok.\n\r", ch );
 		return;
 	} else if ( !str_cmp( arg1, "clear" ) ) {
 		if ( arg2[0] == '\0' ) {
-			ch->stance[18] = 0;
+			ch_stance(ch)[18] = 0;
 			send_to_char( "Stance cleared.\n\r", ch );
 			return;
 		}
@@ -908,46 +908,46 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				send_to_char( "To clear ALL your superstance, you must be at the Temple Altar of Midgaard.\n\r", ch );
 				return;
 			}
-			ch->stance[0] = 0;
-			ch->stance[13] = 0;
-			ch->stance[14] = 0;
-			ch->stance[15] = 0;
-			ch->stance[16] = 0;
-			ch->stance[17] = 0;
-			ch->stance[18] = 0;
-			ch->stance[19] = -1;
-			ch->stance[20] = -1;
-			ch->stance[21] = -1;
-			ch->stance[22] = -1;
-			ch->stance[23] = -1;
+			ch_stance(ch)[0] = 0;
+			ch_stance(ch)[13] = 0;
+			ch_stance(ch)[14] = 0;
+			ch_stance(ch)[15] = 0;
+			ch_stance(ch)[16] = 0;
+			ch_stance(ch)[17] = 0;
+			ch_stance(ch)[18] = 0;
+			ch_stance(ch)[19] = -1;
+			ch_stance(ch)[20] = -1;
+			ch_stance(ch)[21] = -1;
+			ch_stance(ch)[22] = -1;
+			ch_stance(ch)[23] = -1;
 			send_to_char( "Ok.\n\r", ch );
 		}
 	} else if ( !str_cmp( arg1, "dodge" ) ) {
-		if ( IS_SET( ch->stance[18], STANCEPOWER_DODGE ) )
-			REMOVE_BIT( ch->stance[18], STANCEPOWER_DODGE );
+		if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DODGE ) )
+			REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_DODGE );
 		else
-			SET_BIT( ch->stance[18], STANCEPOWER_DODGE );
+			SET_BIT( ch_stance(ch)[18], STANCEPOWER_DODGE );
 		send_to_char( "Ok.\n\r", ch );
 		return;
 	} else if ( !str_cmp( arg1, "parry" ) ) {
-		if ( IS_SET( ch->stance[18], STANCEPOWER_PARRY ) )
-			REMOVE_BIT( ch->stance[18], STANCEPOWER_PARRY );
+		if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_PARRY ) )
+			REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_PARRY );
 		else
-			SET_BIT( ch->stance[18], STANCEPOWER_PARRY );
+			SET_BIT( ch_stance(ch)[18], STANCEPOWER_PARRY );
 		send_to_char( "Ok.\n\r", ch );
 		return;
 	} else if ( !str_cmp( arg1, "speed" ) ) {
-		if ( IS_SET( ch->stance[18], STANCEPOWER_SPEED ) )
-			REMOVE_BIT( ch->stance[18], STANCEPOWER_SPEED );
+		if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_SPEED ) )
+			REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_SPEED );
 		else
-			SET_BIT( ch->stance[18], STANCEPOWER_SPEED );
+			SET_BIT( ch_stance(ch)[18], STANCEPOWER_SPEED );
 		send_to_char( "Ok.\n\r", ch );
 		return;
 	} else if ( !str_cmp( arg1, "bypass" ) ) {
-		if ( IS_SET( ch->stance[18], STANCEPOWER_BYPASS ) )
-			REMOVE_BIT( ch->stance[18], STANCEPOWER_BYPASS );
+		if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_BYPASS ) )
+			REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_BYPASS );
 		else
-			SET_BIT( ch->stance[18], STANCEPOWER_BYPASS );
+			SET_BIT( ch_stance(ch)[18], STANCEPOWER_BYPASS );
 		send_to_char( "Ok.\n\r", ch );
 		return;
 	} else if ( arg2[0] == '\0' ) {
@@ -955,17 +955,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 		return;
 	} else if ( !str_cmp( arg1, "damage" ) ) {
 		if ( !str_cmp( arg2, "lesser" ) ) {
-			if ( max_lesser > current_lesser || IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_1 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_2 ) || IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_3 ) ) {
+			if ( max_lesser > current_lesser || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_1 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_2 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_3 ) ) {
 					send_to_char( "You allready have the damage power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_1 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_1 ) ) {
 					current_lesser--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_DAMAGE_1 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_DAMAGE_1 );
 				} else {
 					current_lesser++;
-					SET_BIT( ch->stance[18], STANCEPOWER_DAMAGE_1 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_DAMAGE_1 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -974,17 +974,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 		} else if ( !str_cmp( arg2, "greater" ) ) {
-			if ( max_greater > current_greater || IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_2 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_1 ) || IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_3 ) ) {
+			if ( max_greater > current_greater || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_2 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_1 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_3 ) ) {
 					send_to_char( "You allready have the damage power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_2 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_2 ) ) {
 					current_greater--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_DAMAGE_2 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_DAMAGE_2 );
 				} else {
 					current_greater++;
-					SET_BIT( ch->stance[18], STANCEPOWER_DAMAGE_2 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_DAMAGE_2 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -993,17 +993,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 		} else if ( !str_cmp( arg2, "supreme" ) ) {
-			if ( max_supreme > current_supreme || IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_3 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_1 ) || IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_2 ) ) {
+			if ( max_supreme > current_supreme || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_3 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_1 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_2 ) ) {
 					send_to_char( "You allready have the damage power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMAGE_3 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMAGE_3 ) ) {
 					current_supreme--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_DAMAGE_3 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_DAMAGE_3 );
 				} else {
 					current_supreme++;
-					SET_BIT( ch->stance[18], STANCEPOWER_DAMAGE_3 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_DAMAGE_3 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1017,17 +1017,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 		}
 	} else if ( !str_cmp( arg1, "damcap" ) ) {
 		if ( !str_cmp( arg2, "lesser" ) ) {
-			if ( max_lesser > current_lesser || IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_1 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_2 ) || IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_3 ) ) {
+			if ( max_lesser > current_lesser || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_1 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_2 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_3 ) ) {
 					send_to_char( "You allready have the damcap power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_1 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_1 ) ) {
 					current_lesser--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_DAMCAP_1 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_DAMCAP_1 );
 				} else {
 					current_lesser++;
-					SET_BIT( ch->stance[18], STANCEPOWER_DAMCAP_1 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_DAMCAP_1 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1036,17 +1036,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 		} else if ( !str_cmp( arg2, "greater" ) ) {
-			if ( max_greater > current_greater || IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_2 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_1 ) || IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_3 ) ) {
+			if ( max_greater > current_greater || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_2 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_1 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_3 ) ) {
 					send_to_char( "You allready have the damcap power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_2 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_2 ) ) {
 					current_greater--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_DAMCAP_2 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_DAMCAP_2 );
 				} else {
 					current_greater++;
-					SET_BIT( ch->stance[18], STANCEPOWER_DAMCAP_2 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_DAMCAP_2 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1055,17 +1055,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 		} else if ( !str_cmp( arg2, "supreme" ) ) {
-			if ( max_supreme > current_supreme || IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_3 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_1 ) || IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_2 ) ) {
+			if ( max_supreme > current_supreme || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_3 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_1 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_2 ) ) {
 					send_to_char( "You allready have the damcap power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_DAMCAP_3 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_DAMCAP_3 ) ) {
 					current_supreme--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_DAMCAP_3 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_DAMCAP_3 );
 				} else {
 					current_supreme++;
-					SET_BIT( ch->stance[18], STANCEPOWER_DAMCAP_3 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_DAMCAP_3 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1079,17 +1079,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 		}
 	} else if ( !str_cmp( arg1, "resist" ) ) {
 		if ( !str_cmp( arg2, "lesser" ) ) {
-			if ( max_lesser > current_lesser || IS_SET( ch->stance[18], STANCEPOWER_RESIST_1 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_2 ) || IS_SET( ch->stance[18], STANCEPOWER_RESIST_3 ) ) {
+			if ( max_lesser > current_lesser || IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_1 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_2 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_3 ) ) {
 					send_to_char( "You allready have the resist power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_1 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_1 ) ) {
 					current_lesser--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_RESIST_1 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_RESIST_1 );
 				} else {
 					current_lesser++;
-					SET_BIT( ch->stance[18], STANCEPOWER_RESIST_1 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_RESIST_1 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1098,17 +1098,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 		} else if ( !str_cmp( arg2, "greater" ) ) {
-			if ( max_greater > current_greater || IS_SET( ch->stance[18], STANCEPOWER_RESIST_2 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_1 ) || IS_SET( ch->stance[18], STANCEPOWER_RESIST_3 ) ) {
+			if ( max_greater > current_greater || IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_2 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_1 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_3 ) ) {
 					send_to_char( "You allready have the resist power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_2 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_2 ) ) {
 					current_greater--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_RESIST_2 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_RESIST_2 );
 				} else {
 					current_greater++;
-					SET_BIT( ch->stance[18], STANCEPOWER_RESIST_2 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_RESIST_2 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1117,17 +1117,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 		} else if ( !str_cmp( arg2, "supreme" ) ) {
-			if ( max_supreme > current_supreme || IS_SET( ch->stance[18], STANCEPOWER_RESIST_3 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_1 ) || IS_SET( ch->stance[18], STANCEPOWER_RESIST_2 ) ) {
+			if ( max_supreme > current_supreme || IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_3 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_1 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_2 ) ) {
 					send_to_char( "You allready have the resist power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_RESIST_3 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_RESIST_3 ) ) {
 					current_supreme--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_RESIST_3 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_RESIST_3 );
 				} else {
 					current_supreme++;
-					SET_BIT( ch->stance[18], STANCEPOWER_RESIST_3 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_RESIST_3 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1141,17 +1141,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 		}
 	} else if ( !str_cmp( arg1, "rev_dc" ) ) {
 		if ( !str_cmp( arg2, "lesser" ) ) {
-			if ( max_lesser > current_lesser || IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_1 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_2 ) || IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
+			if ( max_lesser > current_lesser || IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_1 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_2 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
 					send_to_char( "You allready have the reverse damcap power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_1 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_1 ) ) {
 					current_lesser--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_REV_DAMCAP_1 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_1 );
 				} else {
 					current_lesser++;
-					SET_BIT( ch->stance[18], STANCEPOWER_REV_DAMCAP_1 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_1 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1160,17 +1160,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 		} else if ( !str_cmp( arg2, "greater" ) ) {
-			if ( max_greater > current_greater || IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_2 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_1 ) || IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
+			if ( max_greater > current_greater || IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_2 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_1 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
 					send_to_char( "You allready have the reverse damcap power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_2 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_2 ) ) {
 					current_greater--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_REV_DAMCAP_2 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_2 );
 				} else {
 					current_greater++;
-					SET_BIT( ch->stance[18], STANCEPOWER_REV_DAMCAP_2 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_2 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;
@@ -1179,17 +1179,17 @@ void do_setstance( CHAR_DATA *ch, char *argument ) {
 				return;
 			}
 		} else if ( !str_cmp( arg2, "supreme" ) ) {
-			if ( max_supreme > current_supreme || IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
-				if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_1 ) || IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_2 ) ) {
+			if ( max_supreme > current_supreme || IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_1 ) || IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_2 ) ) {
 					send_to_char( "You allready have the reverse damcap power set.\n\r", ch );
 					return;
 				}
-				if ( IS_SET( ch->stance[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
+				if ( IS_SET( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_3 ) ) {
 					current_supreme--;
-					REMOVE_BIT( ch->stance[18], STANCEPOWER_REV_DAMCAP_3 );
+					REMOVE_BIT( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_3 );
 				} else {
 					current_supreme++;
-					SET_BIT( ch->stance[18], STANCEPOWER_REV_DAMCAP_3 );
+					SET_BIT( ch_stance(ch)[18], STANCEPOWER_REV_DAMCAP_3 );
 				}
 				send_to_char( "Ok.\n\r", ch );
 				return;

@@ -77,7 +77,7 @@ void do_chaosmagic( CHAR_DATA *ch, char *argument ) {
 	int sn, random, level;
 
 	argument = one_argument( argument, arg );
-	level = ch->spl[RED_MAGIC] / 4;
+	level = ch_spl(ch)[RED_MAGIC] / 4;
 
 	if ( IS_NPC( ch ) ) return;
 	if ( !IS_CLASS( ch, CLASS_MAGE ) && !IS_CLASS( ch, CLASS_LICH ) ) {
@@ -149,12 +149,12 @@ void do_chant( CHAR_DATA *ch, char *argument ) {
 	CHAR_DATA *victim;
 	AFFECT_DATA af;
 	int i, dam, count, sn;
-	int red_magic = ch->spl[RED_MAGIC];
-	int blue_magic = ch->spl[BLUE_MAGIC];
-	int green_magic = ch->spl[GREEN_MAGIC];
-	int purple_magic = ch->spl[PURPLE_MAGIC];
-	int yellow_magic = ch->spl[YELLOW_MAGIC];
-	int magic_power = ch->spl[RED_MAGIC] + ch->spl[BLUE_MAGIC] + ch->spl[GREEN_MAGIC] + ch->spl[PURPLE_MAGIC] + ch->spl[YELLOW_MAGIC];
+	int red_magic = ch_spl(ch)[RED_MAGIC];
+	int blue_magic = ch_spl(ch)[BLUE_MAGIC];
+	int green_magic = ch_spl(ch)[GREEN_MAGIC];
+	int purple_magic = ch_spl(ch)[PURPLE_MAGIC];
+	int yellow_magic = ch_spl(ch)[YELLOW_MAGIC];
+	int magic_power = ch_spl(ch)[RED_MAGIC] + ch_spl(ch)[BLUE_MAGIC] + ch_spl(ch)[GREEN_MAGIC] + ch_spl(ch)[PURPLE_MAGIC] + ch_spl(ch)[YELLOW_MAGIC];
 
 	argument = one_argument( argument, arg1 );
 	strcpy( arg2, argument );
@@ -680,7 +680,7 @@ void do_discharge( CHAR_DATA *ch, char *argument ) {
 	char buf1[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];
 	char buf3[MAX_STRING_LENGTH];
-	int magic_power = ch->spl[RED_MAGIC] + ch->spl[BLUE_MAGIC] + ch->spl[GREEN_MAGIC] + ch->spl[PURPLE_MAGIC] + ch->spl[YELLOW_MAGIC];
+	int magic_power = ch_spl(ch)[RED_MAGIC] + ch_spl(ch)[BLUE_MAGIC] + ch_spl(ch)[GREEN_MAGIC] + ch_spl(ch)[PURPLE_MAGIC] + ch_spl(ch)[YELLOW_MAGIC];
 	int dam;
 
 	if ( IS_NPC( ch ) ) return;

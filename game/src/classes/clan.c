@@ -37,92 +37,92 @@ void do_level( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
 
 	send_to_char( "---------------------------=[#6Weapon Levels#n]=--------------------------------\n\r", ch );
-	snprintf( skill, sizeof( skill ), "Slice  : %-4d", ch->wpn[1] );
+	snprintf( skill, sizeof( skill ), "Slice  : %-4d", ch_wpn(ch)[1] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Stab   : %-4d", ch->wpn[2] );
+	snprintf( skill, sizeof( skill ), " Stab   : %-4d", ch_wpn(ch)[2] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Slash  : %-4d", ch->wpn[3] );
+	snprintf( skill, sizeof( skill ), " Slash  : %-4d", ch_wpn(ch)[3] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Whip   : %-4d", ch->wpn[4] );
+	snprintf( skill, sizeof( skill ), " Whip   : %-4d", ch_wpn(ch)[4] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Claw   : %-4d\n\r", ch->wpn[5] );
+	snprintf( skill, sizeof( skill ), " Claw   : %-4d\n\r", ch_wpn(ch)[5] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Blast  : %-4d", ch->wpn[6] );
+	snprintf( skill, sizeof( skill ), "Blast  : %-4d", ch_wpn(ch)[6] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Pound  : %-4d", ch->wpn[7] );
+	snprintf( skill, sizeof( skill ), " Pound  : %-4d", ch_wpn(ch)[7] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Crush  : %-4d", ch->wpn[8] );
+	snprintf( skill, sizeof( skill ), " Crush  : %-4d", ch_wpn(ch)[8] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Grep   : %-4d", ch->wpn[9] );
+	snprintf( skill, sizeof( skill ), " Grep   : %-4d", ch_wpn(ch)[9] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Bite   : %-4d\n\r", ch->wpn[10] );
+	snprintf( skill, sizeof( skill ), " Bite   : %-4d\n\r", ch_wpn(ch)[10] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Pierce : %-4d", ch->wpn[11] );
+	snprintf( skill, sizeof( skill ), "Pierce : %-4d", ch_wpn(ch)[11] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Suck   : %-4d", ch->wpn[12] );
+	snprintf( skill, sizeof( skill ), " Suck   : %-4d", ch_wpn(ch)[12] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), " Unarmed: %-4d\n\r\n", ch->wpn[0] );
+	snprintf( skill, sizeof( skill ), " Unarmed: %-4d\n\r\n", ch_wpn(ch)[0] );
 	send_to_char( skill, ch );
 
 	send_to_char( "---------------------------=[#6Stance Levels#n]=--------------------------------\n\r", ch );
-	snprintf( skill, sizeof( skill ), "Viper    : %-4d", ch->stance[1] );
+	snprintf( skill, sizeof( skill ), "Viper    : %-4d", ch_stance(ch)[1] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Crane   : %-4d", ch->stance[2] );
+	snprintf( skill, sizeof( skill ), "Crane   : %-4d", ch_stance(ch)[2] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Crab   : %-4d", ch->stance[3] );
+	snprintf( skill, sizeof( skill ), "Crab   : %-4d", ch_stance(ch)[3] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Mongoose : %-4d", ch->stance[4] );
+	snprintf( skill, sizeof( skill ), "Mongoose : %-4d", ch_stance(ch)[4] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Bull     : %-4d\n\r", ch->stance[5] );
+	snprintf( skill, sizeof( skill ), "Bull     : %-4d\n\r", ch_stance(ch)[5] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Mantis   : %-4d", ch->stance[6] );
+	snprintf( skill, sizeof( skill ), "Mantis   : %-4d", ch_stance(ch)[6] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Dragon  : %-4d", ch->stance[7] );
+	snprintf( skill, sizeof( skill ), "Dragon  : %-4d", ch_stance(ch)[7] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Tiger  : %-4d", ch->stance[8] );
+	snprintf( skill, sizeof( skill ), "Tiger  : %-4d", ch_stance(ch)[8] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Monkey   : %-4d", ch->stance[9] );
+	snprintf( skill, sizeof( skill ), "Monkey   : %-4d", ch_stance(ch)[9] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "Swallow  : %-4d\n\r", ch->stance[10] );
+	snprintf( skill, sizeof( skill ), "Swallow  : %-4d\n\r", ch_stance(ch)[10] );
 	send_to_char( skill, ch );
 
 	send_to_char( "\n\r---------------------------=[#6Super Stances#n]=--------------------------------\n\r", ch );
-	snprintf( skill, sizeof( skill ), "SS1      : %-4d", ch->stance[13] );
+	snprintf( skill, sizeof( skill ), "SS1      : %-4d", ch_stance(ch)[13] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "SS2     : %-4d", ch->stance[14] );
+	snprintf( skill, sizeof( skill ), "SS2     : %-4d", ch_stance(ch)[14] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "SS3    : %-4d", ch->stance[15] );
+	snprintf( skill, sizeof( skill ), "SS3    : %-4d", ch_stance(ch)[15] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "SS4      : %-4d", ch->stance[16] );
+	snprintf( skill, sizeof( skill ), "SS4      : %-4d", ch_stance(ch)[16] );
 	send_to_char( skill, ch );
-	snprintf( skill, sizeof( skill ), "SS5      : %-4d\n\r", ch->stance[17] );
+	snprintf( skill, sizeof( skill ), "SS5      : %-4d\n\r", ch_stance(ch)[17] );
 	send_to_char( skill, ch );
 
 	send_to_char( "\n\r---------------------------=[#6Spell Levels#n]=---------------------------------\n\r", ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		snprintf( skill, sizeof( skill ), "#5Purple#n : %-4d", ch->spl[0] + 20 );
+		snprintf( skill, sizeof( skill ), "#5Purple#n : %-4d", ch_spl(ch)[0] + 20 );
 	else
-		snprintf( skill, sizeof( skill ), "#5Purple#n : %-4d", ch->spl[0] );
+		snprintf( skill, sizeof( skill ), "#5Purple#n : %-4d", ch_spl(ch)[0] );
 	send_to_char( skill, ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		snprintf( skill, sizeof( skill ), "#4Blue#n : %-4d", ch->spl[2] + 20 );
+		snprintf( skill, sizeof( skill ), "#4Blue#n : %-4d", ch_spl(ch)[2] + 20 );
 	else
-		snprintf( skill, sizeof( skill ), "#4Blue#n : %-4d", ch->spl[2] );
+		snprintf( skill, sizeof( skill ), "#4Blue#n : %-4d", ch_spl(ch)[2] );
 	send_to_char( skill, ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		snprintf( skill, sizeof( skill ), "#1Red#n : %-4d", ch->spl[1] + 20 );
+		snprintf( skill, sizeof( skill ), "#1Red#n : %-4d", ch_spl(ch)[1] + 20 );
 	else
-		snprintf( skill, sizeof( skill ), "#1Red#n : %-4d", ch->spl[1] );
+		snprintf( skill, sizeof( skill ), "#1Red#n : %-4d", ch_spl(ch)[1] );
 	send_to_char( skill, ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		snprintf( skill, sizeof( skill ), "#2Green#n : %-4d", ch->spl[3] + 20 );
+		snprintf( skill, sizeof( skill ), "#2Green#n : %-4d", ch_spl(ch)[3] + 20 );
 	else
-		snprintf( skill, sizeof( skill ), "#2Green#n : %-4d", ch->spl[3] );
+		snprintf( skill, sizeof( skill ), "#2Green#n : %-4d", ch_spl(ch)[3] );
 	send_to_char( skill, ch );
 	if ( IS_ITEMAFF( ch, ITEMA_AFFENTROPY ) )
-		snprintf( skill, sizeof( skill ), "#3Yellow#n : %-4d\n\r\n", ch->spl[4] + 20 );
+		snprintf( skill, sizeof( skill ), "#3Yellow#n : %-4d\n\r\n", ch_spl(ch)[4] + 20 );
 	else
-		snprintf( skill, sizeof( skill ), "#3Yellow#n : %-4d\n\r\n", ch->spl[4] );
+		snprintf( skill, sizeof( skill ), "#3Yellow#n : %-4d\n\r\n", ch_spl(ch)[4] );
 	send_to_char( skill, ch );
 
 	send_to_char( "---------------------------=[#6Misc. Things#n]=---------------------------------\n\r", ch );
@@ -290,7 +290,7 @@ void do_coil( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_SERP] < cfg( CFG_ABILITY_CLAN_COIL_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_SERP] < cfg( CFG_ABILITY_CLAN_COIL_LEVEL_REQ ) ) {
 		send_to_char( "You require level 8 Serpentis to use Body Coil.\n\r", ch );
 		return;
 	}
@@ -312,7 +312,7 @@ void do_tide( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_THAU] < cfg( CFG_ABILITY_CLAN_TIDE_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_THAU] < cfg( CFG_ABILITY_CLAN_TIDE_LEVEL_REQ ) ) {
 		send_to_char( "You require level 5 Thaumaturgy to use Tide of Vitae.\n\r", ch );
 		return;
 	}
@@ -339,7 +339,7 @@ void do_flash( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_CLAN_FLASH_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_CLAN_FLASH_LEVEL_REQ ) ) {
 		send_to_char( "You require level 9 Quietus to use Flashing Speed.\n\r", ch );
 		return;
 	}
@@ -352,7 +352,7 @@ void do_flash( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	SET_BIT( ch->extra, EXTRA_FLASH );
-	ch->power[DISC_VAMP_CELE] += cfg( CFG_ABILITY_CLAN_FLASH_CELE_BONUS );
+	ch_power(ch)[DISC_VAMP_CELE] += cfg( CFG_ABILITY_CLAN_FLASH_CELE_BONUS );
 	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_CLAN_FLASH_BLOOD_COST );
 	snprintf( buf, sizeof( buf ), "%s starts moving with lightening speed.", ch->name );
 	act( buf, ch, NULL, NULL, TO_ROOM );
@@ -369,7 +369,7 @@ void do_death( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_CLAN_DEATH_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_QUIE] < cfg( CFG_ABILITY_CLAN_DEATH_LEVEL_REQ ) ) {
 		send_to_char( "You require level 5 Quietus to use Silence of Death.\n\r", ch );
 		return;
 	}
@@ -405,7 +405,7 @@ void do_acid( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_DOMI] < cfg( CFG_ABILITY_CLAN_ACID_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_DOMI] < cfg( CFG_ABILITY_CLAN_ACID_LEVEL_REQ ) ) {
 		send_to_char( "You require level 9 Vicissitude to use Acid Blood.\n\r", ch );
 		return;
 	}
@@ -438,7 +438,7 @@ void do_forget( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_DOMI] < cfg( CFG_ABILITY_CLAN_FORGET_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_DOMI] < cfg( CFG_ABILITY_CLAN_FORGET_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 8 in Dominate to use Forgetful Mind.\n\r", ch );
 		return;
 	}
@@ -487,85 +487,85 @@ void do_forget( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !str_cmp( arg2, "animalism" ) ) {
-		victim->power[DISC_VAMP_ANIM] -= 1;
+		ch_power(victim)[DISC_VAMP_ANIM] -= 1;
 		act( "Your mind becomes hazy about Animalism.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "celerity" ) ) {
-		victim->power[DISC_VAMP_CELE] -= 1;
+		ch_power(victim)[DISC_VAMP_CELE] -= 1;
 		act( "Your mind becomes hazy about Celerity.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "dominate" ) ) {
-		victim->power[DISC_VAMP_DOMI] -= 1;
+		ch_power(victim)[DISC_VAMP_DOMI] -= 1;
 		act( "Your mind becomes hazy about Dominate.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "fortitude" ) ) {
-		victim->power[DISC_VAMP_FORT] -= 1;
+		ch_power(victim)[DISC_VAMP_FORT] -= 1;
 		act( "Your mind becomes hazy about Fortitude.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "auspex" ) ) {
-		victim->power[DISC_VAMP_AUSP] -= 1;
+		ch_power(victim)[DISC_VAMP_AUSP] -= 1;
 		act( "Your mind becomes hazy about Auspex.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "obfuscate" ) ) {
-		victim->power[DISC_VAMP_OBFU] -= 1;
+		ch_power(victim)[DISC_VAMP_OBFU] -= 1;
 		act( "Your mind becomes hazy about Obfuscate.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "obtenebration" ) ) {
-		victim->power[DISC_VAMP_OBTE] -= 1;
+		ch_power(victim)[DISC_VAMP_OBTE] -= 1;
 		act( "Your mind becomes hazy about Obtenebration.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "presence" ) ) {
-		victim->power[DISC_VAMP_PRES] -= 1;
+		ch_power(victim)[DISC_VAMP_PRES] -= 1;
 		act( "Your mind becomes hazy about Presence.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "potence" ) ) {
-		victim->power[DISC_VAMP_POTE] -= 1;
+		ch_power(victim)[DISC_VAMP_POTE] -= 1;
 		act( "Your mind becomes hazy about Potence.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "protean" ) ) {
-		victim->power[DISC_VAMP_PROT] -= 1;
+		ch_power(victim)[DISC_VAMP_PROT] -= 1;
 		act( "Your mind becomes hazy about Protean.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "quietus" ) ) {
-		victim->power[DISC_VAMP_QUIE] -= 1;
+		ch_power(victim)[DISC_VAMP_QUIE] -= 1;
 		act( "Your mind becomes hazy about Quietus.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "serpentis" ) ) {
-		victim->power[DISC_VAMP_SERP] -= 1;
+		ch_power(victim)[DISC_VAMP_SERP] -= 1;
 		act( "Your mind becomes hazy about Serpentis.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "thaumaturgy" ) ) {
-		victim->power[DISC_VAMP_THAU] -= 1;
+		ch_power(victim)[DISC_VAMP_THAU] -= 1;
 		act( "Your mind becomes hazy about Thaumaturgy.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
 	}
 	if ( !str_cmp( arg2, "vicissitude" ) ) {
-		victim->power[DISC_VAMP_VICI] -= 1;
+		ch_power(victim)[DISC_VAMP_VICI] -= 1;
 		act( "Your mind becomes hazy about Vicissitude.", victim, NULL, NULL, TO_CHAR );
 		act( "$n blinks $s eyes for a moment.", victim, NULL, NULL, TO_ROOM );
 		return;
@@ -587,7 +587,7 @@ void do_rot( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_ROT_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_ROT_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at level 2 in Thanatosis to use Putrefaction.\n\r", ch );
 		return;
 	}
@@ -643,7 +643,7 @@ void do_dragon( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_DRAGON_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_DRAGON_LEVEL_REQ ) ) {
 		send_to_char( "You must have at least level 8 Vicissitude to use Dragon Breath.\n\r", ch );
 		return;
 	}
@@ -661,17 +661,17 @@ void do_dragon( CHAR_DATA *ch, char *argument ) {
 	}
 	WAIT_STATE( ch, cfg( CFG_ABILITY_CLAN_DRAGON_COOLDOWN ) );
 	if ( !IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_VICI] * 50;
+		dam = ch_power(ch)[DISC_VAMP_VICI] * 50;
 	}
 	if ( IS_NPC( victim ) ) {
-		dam = ch->power[DISC_VAMP_VICI] * 200;
+		dam = ch_power(ch)[DISC_VAMP_VICI] * 200;
 	}
 	ch->pcdata->condition[COND_THIRST] -= cfg( CFG_ABILITY_CLAN_DRAGON_BLOOD_COST );
 	if ( ( !IS_NPC( victim ) ) && IS_CLASS( victim, CLASS_VAMPIRE ) ) {
 		dam = (int) ( dam * 1.5 );
 	}
 	if ( ( !IS_NPC( victim ) ) && IS_CLASS( victim, CLASS_WEREWOLF ) ) {
-		if ( ch->power[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 1.5 );
+		if ( ch_power(ch)[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 1.5 );
 	}
 
 	if ( dam <= 0 )
@@ -695,7 +695,7 @@ void do_awe( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_PRES] < cfg( CFG_ABILITY_CLAN_AWE_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_PRES] < cfg( CFG_ABILITY_CLAN_AWE_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 1 in Presence to you Awe.\n\r", ch );
 		return;
 	}
@@ -722,7 +722,7 @@ void do_plasma( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_PLASMA_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_VICI] < cfg( CFG_ABILITY_CLAN_PLASMA_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 5 in Vicissitude to use Plasma Form.\n\r", ch );
 		return;
 	}
@@ -775,7 +775,7 @@ void do_taste( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_THAU] < cfg( CFG_ABILITY_CLAN_TASTE_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_THAU] < cfg( CFG_ABILITY_CLAN_TASTE_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 1 in Thaumaturgy to use Taste of Blood.\n\r", ch );
 		return;
 	}
@@ -840,33 +840,33 @@ void do_taste( CHAR_DATA *ch, char *argument ) {
 	send_to_char( lin, ch );
 	snprintf( buf, sizeof( buf ),
 		"Animalism:    [%d]             Celerity:   [%d]             Fortitude: [%d]\n\r",
-		victim->power[DISC_VAMP_ANIM],
-		victim->power[DISC_VAMP_CELE],
-		victim->power[DISC_VAMP_FORT] );
+		ch_power(victim)[DISC_VAMP_ANIM],
+		ch_power(victim)[DISC_VAMP_CELE],
+		ch_power(victim)[DISC_VAMP_FORT] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Obtenebration:[%d]             Presence:   [%d]             Quietus:   [%d]\n\r",
-		victim->power[DISC_VAMP_OBTE],
-		victim->power[DISC_VAMP_PRES],
-		victim->power[DISC_VAMP_QUIE] );
+		ch_power(victim)[DISC_VAMP_OBTE],
+		ch_power(victim)[DISC_VAMP_PRES],
+		ch_power(victim)[DISC_VAMP_QUIE] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Thaumaturgy:  [%d]             Auspex:     [%d]             Dominate:  [%d]\n\r",
-		victim->power[DISC_VAMP_THAU],
-		victim->power[DISC_VAMP_AUSP],
-		victim->power[DISC_VAMP_DOMI] );
+		ch_power(victim)[DISC_VAMP_THAU],
+		ch_power(victim)[DISC_VAMP_AUSP],
+		ch_power(victim)[DISC_VAMP_DOMI] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Obfuscate:    [%d]             Potence:    [%d]             Protean:   [%d]\n\r",
-		victim->power[DISC_VAMP_OBFU],
-		victim->power[DISC_VAMP_POTE],
-		victim->power[DISC_VAMP_PROT] );
+		ch_power(victim)[DISC_VAMP_OBFU],
+		ch_power(victim)[DISC_VAMP_POTE],
+		ch_power(victim)[DISC_VAMP_PROT] );
 	send_to_char( buf, ch );
 	snprintf( buf, sizeof( buf ),
 		"Serpentis:    [%d]             Vicissitude:[%d]             Daimoinon: [%d]\n\r",
-		victim->power[DISC_VAMP_SERP],
-		victim->power[DISC_VAMP_VICI],
-		victim->power[DISC_VAMP_DAIM] );
+		ch_power(victim)[DISC_VAMP_SERP],
+		ch_power(victim)[DISC_VAMP_VICI],
+		ch_power(victim)[DISC_VAMP_DAIM] );
 	send_to_char( buf, ch );
 	send_to_char( lin, ch );
 
@@ -887,7 +887,7 @@ void do_shadowstep( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_OBTE] < cfg( CFG_ABILITY_CLAN_SHADOWSTEP_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_OBTE] < cfg( CFG_ABILITY_CLAN_SHADOWSTEP_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 4 in Obtenebration to use this power.\n\r", ch );
 		return;
 	}
@@ -959,7 +959,7 @@ void do_earthmeld( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_PROT] < cfg( CFG_ABILITY_CLAN_EARTHMELD_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_PROT] < cfg( CFG_ABILITY_CLAN_EARTHMELD_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 4 Protean to use Earthmeld.\n\r", ch );
 		return;
 	}
@@ -975,7 +975,7 @@ void do_earthmeld( CHAR_DATA *ch, char *argument ) {
 		REMOVE_BIT( ch->affected_by, AFF_SHIFT );
 		REMOVE_BIT( ch->extra, EXTRA_EARTHMELD );
 		REMOVE_BIT( ch->act, PLR_WIZINVIS );
-		if ( IS_HEAD( ch, LOST_HEAD ) ) REMOVE_BIT( ch->loc_hp[0], LOST_HEAD );
+		if ( IS_HEAD( ch, LOST_HEAD ) ) REMOVE_BIT( ch_loc_hp(ch)[0], LOST_HEAD );
 		free(ch->morph);
 		ch->morph = str_dup( "" );
 		send_to_char( "You rise up from the ground.\n\r", ch );
@@ -1004,7 +1004,7 @@ void do_serenity( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "huh?.\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_ANIM] < cfg( CFG_ABILITY_CLAN_SERENITY_LEVEL_REQ ) ) {
+	if ( ch_power(ch)[DISC_VAMP_ANIM] < cfg( CFG_ABILITY_CLAN_SERENITY_LEVEL_REQ ) ) {
 		send_to_char( "You must obtain at least level 2 in Animalism to use Song of Serenity.\n\r", ch );
 		return;
 	}
@@ -1054,7 +1054,7 @@ void do_theft( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_THAU] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_THAU] < 4 ) {
 		send_to_char( "You must obtain at least level 4 in Thaumaturgy to use Theft of Vitae.\n\r", ch );
 		return;
 	}
@@ -1182,7 +1182,7 @@ void do_demonform( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->stance[0] != -1 ) do_stance( ch, "" );
+	if ( ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 	if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 	act( "You transform into a huge demon.", ch, NULL, NULL, TO_CHAR );
 	act( "$n's body grows and distorts into a huge demon.", ch, NULL, NULL, TO_ROOM );
@@ -1206,7 +1206,7 @@ void do_zuloform( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( ch->power[DISC_VAMP_VICI] < 2 ) {
+	if ( ch_power(ch)[DISC_VAMP_VICI] < 2 ) {
 		send_to_char( "You must obtain at least level 2 in Vicissitude to use Zuloform.\n\r", ch );
 		return;
 	}
@@ -1241,7 +1241,7 @@ void do_zuloform( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->stance[0] != -1 ) do_stance( ch, "" );
+	if ( ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 	if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 	ch->pcdata->condition[COND_THIRST] -= number_range( 100, 200 );
 	act( "You transform into large beast.", ch, NULL, NULL, TO_CHAR );
@@ -1284,7 +1284,7 @@ void horn( CHAR_DATA *ch ) {
 	if ( IS_VAMPAFF( ch, VAM_HORNS ) ) return;
 
 	/* Only certain demons may use their horns */
-	if ( ch->power[DISC_DAEM_ATTA] < 4 ) return;
+	if ( ch_power(ch)[DISC_DAEM_ATTA] < 4 ) return;
 
 	send_to_char( "Sharp horns grow out of your skull.\n\r", ch );
 	act( "Sharp horns grow out of $n's skull.", ch, NULL, NULL, TO_ROOM );
@@ -1308,17 +1308,17 @@ void defang( CHAR_DATA *ch ) {
 
 void do_claws( CHAR_DATA *ch, char *argument ) {
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		if ( ch->power[DISC_WERE_WOLF] < 1 ) {
+		if ( ch_power(ch)[DISC_WERE_WOLF] < 1 ) {
 			stc( "Huh?\n\r", ch );
 			return;
 		}
 	} else if ( IS_CLASS( ch, CLASS_DEMON ) ) {
-		if ( !IS_DEMPOWER( ch, DEM_CLAWS ) && ch->power[DISC_DAEM_ATTA] < 1 ) {
+		if ( !IS_DEMPOWER( ch, DEM_CLAWS ) && ch_power(ch)[DISC_DAEM_ATTA] < 1 ) {
 			send_to_char( "You haven't been granted the gift of claws or attack is below level 1.\n\r", ch );
 			return;
 		}
 	} else if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-		if ( ch->power[DISC_VAMP_PROT] < 2 ) {
+		if ( ch_power(ch)[DISC_VAMP_PROT] < 2 ) {
 			stc( "Huh?\n\r", ch );
 			return;
 		}
@@ -1355,14 +1355,14 @@ void do_claws( CHAR_DATA *ch, char *argument ) {
 
 void do_fangs( CHAR_DATA *ch, char *argument ) {
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		if ( ch->power[DISC_WERE_WOLF] < 2 ) {
+		if ( ch_power(ch)[DISC_WERE_WOLF] < 2 ) {
 			stc( "Huh?\n\r", ch );
 			return;
 		}
 	}
 
 	else if ( IS_CLASS( ch, CLASS_DEMON ) ) {
-		if ( !IS_DEMPOWER( ch, DEM_FANGS ) && ch->power[DISC_DAEM_ATTA] < 2 ) {
+		if ( !IS_DEMPOWER( ch, DEM_FANGS ) && ch_power(ch)[DISC_DAEM_ATTA] < 2 ) {
 			send_to_char( "You haven't been granted the gift of fangs.\n\r", ch );
 			return;
 		}
@@ -1398,7 +1398,7 @@ void do_nightsight( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
 
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) { /*supposed to be < but changedd while gifts are out */
-		if ( ch->power[DISC_WERE_HAWK] < 1 ) {
+		if ( ch_power(ch)[DISC_WERE_HAWK] < 1 ) {
 			send_to_char( "Your power in hawk is not great enough yet.\n\r", ch );
 			return;
 		}
@@ -1408,7 +1408,7 @@ void do_nightsight( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 	} else if ( IS_CLASS( ch, CLASS_MONK ) ) {
-		if ( ch->monkab[AWARE] < 1 ) {
+		if ( ch_monkab(ch)[AWARE] < 1 ) {
 			stc( "You must obtain level one in Awareness to use Nightsight.\n\r", ch );
 			return;
 		}
@@ -1416,8 +1416,8 @@ void do_nightsight( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_PROT] < 1 &&
-		ch->power[DISC_VAMP_OBTE] < 3 ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_PROT] < 1 &&
+		ch_power(ch)[DISC_VAMP_OBTE] < 3 ) {
 		send_to_char( "You must obtain at least level 1 in Protean or 3 in Obtenebration.\n\r", ch );
 		return;
 	}
@@ -1481,17 +1481,17 @@ void do_shadowsight( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_HAWK] < 2 ) {
+	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_HAWK] < 2 ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
 
-	else if ( IS_CLASS( ch, CLASS_MONK ) && ch->monkab[AWARE] < 2 ) {
+	else if ( IS_CLASS( ch, CLASS_MONK ) && ch_monkab(ch)[AWARE] < 2 ) {
 		stc( "Huh?\n\r", ch );
 		return;
 	}
 
-	else if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBTE] < 2 ) {
+	else if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBTE] < 2 ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
@@ -1519,14 +1519,14 @@ static void clear_class_state( CHAR_DATA *victim ) {
 
 	/* Clear all disciplines (mark as unavailable) */
 	for ( i = 0; i < MAX_DISCIPLINES; i++ )
-		victim->power[i] = -2;
+		ch_power(victim)[i] = -2;
 
 	/* Clear class-specific fields */
 	victim->beast = 15;
 	victim->warp = 0;
 	victim->rage = 0;
 	victim->generation = 6;
-	victim->cclan = 0;
+	victim->pcdata->cclan = 0;
 
 	/* Clear PC-specific class data */
 	if ( victim->pcdata != NULL ) {
@@ -1710,14 +1710,14 @@ void do_generation( CHAR_DATA *ch, char *argument ) {
 }
 
 void reset_weapon( CHAR_DATA *ch, int dtype ) {
-	if ( ch->wpn[dtype] > 200 )
-		ch->wpn[dtype] = 200;
+	if ( ch_wpn(ch)[dtype] > 200 )
+		ch_wpn(ch)[dtype] = 200;
 	return;
 }
 
 void reset_spell( CHAR_DATA *ch, int dtype ) {
-	if ( ch->spl[dtype] > 200 )
-		ch->spl[dtype] = 200;
+	if ( ch_spl(ch)[dtype] > 200 )
+		ch_spl(ch)[dtype] = 200;
 	return;
 }
 
@@ -1814,7 +1814,7 @@ void do_mask( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBFU] < 2 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+	if ( ch_power(ch)[DISC_VAMP_OBFU] < 2 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 		send_to_char( "You must obtain at least level 2 in Obfuscate to use Mask.\n\r", ch );
 		return;
 	}
@@ -1905,7 +1905,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_PROT] < 3 ) {
+	if ( ch_power(ch)[DISC_VAMP_PROT] < 3 ) {
 		send_to_char( "You must obtain at least level 3 in Protean to use Minor Change.\n\r", ch );
 		return;
 	}
@@ -1924,7 +1924,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You have insufficient blood.\n\r", ch );
 			return;
 		}
-		if ( ch->stance[0] != -1 ) do_stance( ch, "" );
+		if ( ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 		if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 		ch->pcdata->condition[COND_THIRST] -= number_range( 40, 50 );
 		clear_stats( ch );
@@ -1949,16 +1949,16 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You have insufficient blood.\n\r", ch );
 			return;
 		}
-		if ( ch->stance[0] != -1 ) do_stance( ch, "" );
+		if ( ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 		if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 		ch->pcdata->condition[COND_THIRST] -= number_range( 40, 50 );
 		act( "You transform into wolf form.", ch, NULL, NULL, TO_CHAR );
 		act( "$n transforms into a dire wolf.", ch, NULL, NULL, TO_ROOM );
 		clear_stats( ch );
-		if ( ch->wpn[0] > 0 ) {
-			ch->hitroll += ( ch->wpn[0] );
-			ch->damroll += ( ch->wpn[0] );
-			ch->armor -= ( ch->wpn[0] * 3 );
+		if ( ch_wpn(ch)[0] > 0 ) {
+			ch->hitroll += ( ch_wpn(ch)[0] );
+			ch->damroll += ( ch_wpn(ch)[0] );
+			ch->armor -= ( ch_wpn(ch)[0] * 3 );
 		}
 		ch->pcdata->mod_str = 10;
 		/*	SET_BIT(ch->pcdata->powers[WOLF_POLYAFF], POLY_WOLF);*/
@@ -1983,7 +1983,7 @@ void do_change( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 
-		if ( ch->stance[0] != -1 ) do_stance( ch, "" );
+		if ( ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 		if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 		ch->pcdata->condition[COND_THIRST] -= number_range( 40, 50 );
 		act( "You transform into mist form.", ch, NULL, NULL, TO_CHAR );
@@ -2068,20 +2068,20 @@ void do_clandisc( CHAR_DATA *ch, char *argument ) {
 	if ( arg2[0] == '\0' ) {
 		if ( !str_cmp( arg1, "animalism" ) ) {
 			send_to_char( "Animalism: The discipline of nature control.\n\r", ch );
-			if ( ch->power[DISC_VAMP_ANIM] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_ANIM] < 1 )
 				send_to_char( "You have none of the Animalism powers.\n\r", ch );
-			if ( ch->power[DISC_VAMP_ANIM] > 0 )
+			if ( ch_power(ch)[DISC_VAMP_ANIM] > 0 )
 				send_to_char( "Serenity: You can sooth the most aggressive soul (Golconda Required).\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "auspex" ) ) {
 			send_to_char( "Auspex: The discipline of extrasensory awareness.\n\r", ch );
-			if ( ch->power[DISC_VAMP_AUSP] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_AUSP] < 1 )
 				send_to_char( "You have none of the Auspex discipline powers.\n\r", ch );
-			if ( ch->power[DISC_VAMP_AUSP] > 0 )
+			if ( ch_power(ch)[DISC_VAMP_AUSP] > 0 )
 				send_to_char( "Truesight: The user can see everything, including invis.\n\r", ch );
-			if ( ch->power[DISC_VAMP_AUSP] > 1 )
+			if ( ch_power(ch)[DISC_VAMP_AUSP] > 1 )
 				send_to_char( "Scry: Allows you to view the room the specified target is in.\n\r", ch );
-			if ( ch->power[DISC_VAMP_AUSP] > 2 )
+			if ( ch_power(ch)[DISC_VAMP_AUSP] > 2 )
 				send_to_char( "Readaura: Gives you detained information about a creature or object.\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "celerity" ) ) {
@@ -2092,35 +2092,35 @@ void do_clandisc( CHAR_DATA *ch, char *argument ) {
 			return;
 		} else if ( !str_cmp( arg1, "daimoinon" ) ) {
 			send_to_char( "Daimoinon: The discipline of dark corruption.\n\r", ch );
-			if ( ch->power[DISC_VAMP_DAIM] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_DAIM] < 1 )
 				send_to_char( "You have none of the Daimoinon discipline powers.\n\r", ch );
 			return;
 		}
 
 		else if ( !str_cmp( arg1, "dominate" ) ) {
 			send_to_char( "Dominate: The discipline of control.\n\r", ch );
-			if ( ch->power[DISC_VAMP_DOMI] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_DOMI] < 1 )
 				send_to_char( "You have none of the Dominate discipline powers.\n\r", ch );
-			if ( ch->power[DISC_VAMP_DOMI] > 0 )
+			if ( ch_power(ch)[DISC_VAMP_DOMI] > 0 )
 				send_to_char( "Command: You can plant suggestions in the mind of others.\n\r", ch );
-			if ( ch->power[DISC_VAMP_DOMI] > 1 )
+			if ( ch_power(ch)[DISC_VAMP_DOMI] > 1 )
 				send_to_char( "Shield: You are able to shield your mind from scrying and aura-reading.\n\r", ch );
-			if ( ch->power[DISC_VAMP_DOMI] > 3 )
+			if ( ch_power(ch)[DISC_VAMP_DOMI] > 3 )
 				send_to_char( "Possession: You can take control of mobs by feeding them blood.\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "fortitude" ) ) {
 			send_to_char( "Fortitude: The discipline of supernatural toughness and vigor.\n\r", ch );
-			if ( ch->power[DISC_VAMP_FORT] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_FORT] < 1 )
 				send_to_char( "You have no fortitude.\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "obfuscate" ) ) {
 			send_to_char( "Obfuscate: The discipline of stealth.\n\r", ch );
-			if ( ch->power[DISC_VAMP_OBFU] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_OBFU] < 1 )
 				send_to_char( "You have none of the Obfuscate discipline powers.\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "obtenebration" ) ) {
 			send_to_char( "Obtenebration: The discipline of darkness manipulation.\n\r", ch );
-			if ( ch->power[DISC_VAMP_OBTE] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_OBTE] < 1 )
 				send_to_char( "You have none of the Obtenebration discipline powers.\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "potence" ) ) {
@@ -2128,39 +2128,39 @@ void do_clandisc( CHAR_DATA *ch, char *argument ) {
 			return;
 		} else if ( !str_cmp( arg1, "presence" ) ) {
 			send_to_char( "Presence: The discipline of appeal and attractiveness.\n\r", ch );
-			if ( ch->power[DISC_VAMP_PRES] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_PRES] < 1 )
 				send_to_char( "You have none of the Presence discipline powers.\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "protean" ) ) {
 			send_to_char( "Protean: The discipline of neutral transformation.\n\r", ch );
-			if ( ch->power[DISC_VAMP_PROT] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_PROT] < 1 )
 				send_to_char( "You have none of the Protean discipline powers.\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "quietus" ) ) {
 			send_to_char( "Quietus: The discipline of death.\n\r", ch );
-			if ( ch->power[DISC_VAMP_QUIE] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_QUIE] < 1 )
 				send_to_char( "You have none of the Quietus discipline powers.\n\r", ch );
-			if ( ch->power[DISC_VAMP_QUIE] > 3 )
+			if ( ch_power(ch)[DISC_VAMP_QUIE] > 3 )
 				send_to_char( "Spit: You can project your deadly spit at a foe\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "serpentis" ) ) {
 			send_to_char( "Serpentis: The discipline of temptation and corruption.\n\r", ch );
-			if ( ch->power[DISC_VAMP_SERP] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_SERP] < 1 )
 				send_to_char( "You have none of the Serpentis discipline powers.\n\r", ch );
 			return;
 		} else if ( !str_cmp( arg1, "thaumaturgy" ) ) {
 			send_to_char( "Thaumaturgy: The discipline of blood magic.\n\r", ch );
-			if ( ch->power[DISC_VAMP_THAU] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_THAU] < 1 )
 				send_to_char( "You have none of the Thaumaturgy discipline powers.\n\r", ch );
-			if ( ch->power[DISC_VAMP_THAU] > 0 )
+			if ( ch_power(ch)[DISC_VAMP_THAU] > 0 )
 				send_to_char( "Theft: You can take from the blood pool of other players.\n\r", ch );
 
 			return;
 		} else if ( !str_cmp( arg1, "vicissitude" ) ) {
 			send_to_char( "Vicissitude: The discipline of evil body control.\n\r", ch );
-			if ( ch->power[DISC_VAMP_VICI] < 1 )
+			if ( ch_power(ch)[DISC_VAMP_VICI] < 1 )
 				send_to_char( "You have none of the Vicissitude discipline powers.\n\r", ch );
-			if ( ch->power[DISC_VAMP_VICI] > 3 )
+			if ( ch_power(ch)[DISC_VAMP_VICI] > 3 )
 				send_to_char( "Zuloform: Transformation into a powerful being.\n\r", ch );
 
 			return;
@@ -2246,14 +2246,14 @@ void do_clandisc( CHAR_DATA *ch, char *argument ) {
 			send_to_char( "You can improve: Animalism, Auspex, Celerity, Dominate, Fortitude, Obfuscate,\n\r Obtenebration, Potence, Presence, Protean, Quietus, Serpentis,\n\r Thaumaturgy or Vicissitude.\n\r", ch );
 			return;
 		}
-		cost = ( ch->power[improve] + 1 ) * 10;
+		cost = ( ch_power(ch)[improve] + 1 ) * 10;
 		arg1[0] = toupper( arg1[0] );
-		if ( ch->power[improve] >= max && ch->pcdata->rank == AGE_METHUSELAH ) {
+		if ( ch_power(ch)[improve] >= max && ch->pcdata->rank == AGE_METHUSELAH ) {
 			snprintf( buf, sizeof( buf ), "You have already gained all the powers of the %s discipline.\n\r", arg1 );
 			send_to_char( buf, ch );
 			return;
 		}
-		if ( ch->power[improve] >= max ) {
+		if ( ch_power(ch)[improve] >= max ) {
 			snprintf( buf, sizeof( buf ), "You have already maxed %s.\n\r", arg1 );
 			send_to_char( buf, ch );
 			return;
@@ -2263,7 +2263,7 @@ void do_clandisc( CHAR_DATA *ch, char *argument ) {
 			send_to_char( buf, ch );
 			return;
 		}
-		ch->power[improve] += 1;
+		ch_power(ch)[improve] += 1;
 		ch->practice -= cost;
 		snprintf( buf, sizeof( buf ), "You improve your ability in the %s discipline.\n\r", arg1 );
 		send_to_char( buf, ch );
@@ -2295,12 +2295,12 @@ void do_shadowplane( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( !IS_CLASS( ch, CLASS_WEREWOLF ) || ch->power[DISC_WERE_OWL] < 3 ) {
+	if ( !IS_CLASS( ch, CLASS_WEREWOLF ) || ch_power(ch)[DISC_WERE_OWL] < 3 ) {
 		if ( !IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 			send_to_char( "Huh?\n\r", ch );
 			return;
 		}
-		if ( ch->power[DISC_VAMP_OBTE] < 3 ) {
+		if ( ch_power(ch)[DISC_VAMP_OBTE] < 3 ) {
 			send_to_char( "You must obtain at least level 3 in Obtenebration to use Shadowplane .\n\r", ch );
 			return;
 		}
@@ -2353,7 +2353,7 @@ void do_darkheart( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_SERP] < 1 ) {
+	if ( ch_power(ch)[DISC_VAMP_SERP] < 1 ) {
 		send_to_char( "You must obtain at least level 1 in Serpentis to use Darkheart.\n\r", ch );
 		return;
 	}
@@ -2396,7 +2396,7 @@ void do_truesight( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You don't have that power yet", ch );
 		return;
 	}
-	if ( ( ch->power[DISC_VAMP_AUSP] < 1 ) && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+	if ( ( ch_power(ch)[DISC_VAMP_AUSP] < 1 ) && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 		send_to_char( "You must obtain at least level 1 in Auspex to use Truesight.\n\r", ch );
 		return;
 	}
@@ -2404,7 +2404,7 @@ void do_truesight( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "You must obtain at least level 1 in shiftpowers to use Truesight.\n\r", ch );
 		return;
 	}
-	if ( ( ch->power[DISC_WERE_HAWK] < 3 ) && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
+	if ( ( ch_power(ch)[DISC_WERE_HAWK] < 3 ) && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 		send_to_char( "You must obtain level 3 in the Hawk totem to use Truesight.\n\r", ch );
 		return;
 	}
@@ -2414,7 +2414,7 @@ void do_truesight( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_MONK ) && ch->monkab[AWARE] < 3 ) {
+	if ( IS_CLASS( ch, CLASS_MONK ) && ch_monkab(ch)[AWARE] < 3 ) {
 		stc( "You must obtain level 4 in Awareness first.\n\r", ch );
 		return;
 	}
@@ -2445,7 +2445,7 @@ void do_majesty( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_PRES] < 5 ) {
+	if ( ch_power(ch)[DISC_VAMP_PRES] < 5 ) {
 		send_to_char( "You must obtain at least level 5 in Presence to use Majesty.\n\r", ch );
 		return;
 	}
@@ -2490,7 +2490,7 @@ void do_scry( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( !IS_ITEMAFF( ch, ITEMA_VISION ) && !ragnarok ) {
-		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_AUSP] < 2 ) {
+		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_AUSP] < 2 ) {
 			send_to_char( "You must obtain at least level 2 Auspex to use Scry.\n\r", ch );
 			return;
 		}
@@ -2596,7 +2596,7 @@ void do_readaura( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_AUSP] < 3 && !IS_ITEMAFF( ch, ITEMA_VISION ) ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_AUSP] < 3 && !IS_ITEMAFF( ch, ITEMA_VISION ) ) {
 		send_to_char( "You must obtain at least level 3 in Auspex to use Readaura.\n\r", ch );
 		return;
 	}
@@ -2722,7 +2722,7 @@ void do_mortal( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( ch->power[DISC_VAMP_OBFU] < 4 ) {
+	if ( ch_power(ch)[DISC_VAMP_OBFU] < 4 ) {
 		send_to_char( "You must obtain at least level 4 in Obfuscate to use Mortal Facade.\n\r", ch );
 		return;
 	}
@@ -2809,7 +2809,7 @@ void do_shield( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_OWL] < 2 ) {
+	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_OWL] < 2 ) {
 		send_to_char( "Sorry, you don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -2829,7 +2829,7 @@ void do_shield( CHAR_DATA *ch, char *argument ) {
 		stc( "You must have 4 implants before using shield.\n\r", ch );
 		return;
 	}
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBFU] < 3 && ch->power[DISC_VAMP_DOMI] < 2 ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBFU] < 3 && ch_power(ch)[DISC_VAMP_DOMI] < 2 ) {
 		send_to_char( "You must obtain at least level 3 in Obfuscate or level 2 in Dominate.\n\r", ch );
 		return;
 	}
@@ -2855,7 +2855,7 @@ void do_serpent( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_SERP] < 2 ) {
+	if ( ch_power(ch)[DISC_VAMP_SERP] < 2 ) {
 		send_to_char( "You must obtain at least level 2 in Serpentis to use Serpent Form.\n\r", ch );
 		return;
 	}
@@ -2880,12 +2880,12 @@ void do_serpent( CHAR_DATA *ch, char *argument ) {
 	}
 	ch->pcdata->condition[COND_THIRST] -= number_range( 40, 50 );
 	clear_stats( ch );
-	if ( ch->wpn[0] > 0 ) {
-		ch->hitroll += (int) ( ch->wpn[0] * 0.75 );
-		ch->damroll += (int) ( ch->wpn[0] * 0.75 );
-		ch->armor -= ch->wpn[0] * 3;
+	if ( ch_wpn(ch)[0] > 0 ) {
+		ch->hitroll += (int) ( ch_wpn(ch)[0] * 0.75 );
+		ch->damroll += (int) ( ch_wpn(ch)[0] * 0.75 );
+		ch->armor -= ch_wpn(ch)[0] * 3;
 	}
-	if ( ch->stance[0] != -1 ) do_stance( ch, "" );
+	if ( ch_stance(ch)[0] != -1 ) do_stance( ch, "" );
 	if ( ch->mounted == IS_RIDING ) do_dismount( ch, "" );
 	ch->pcdata->mod_str = 10;
 	act( "You transform into a huge serpent.", ch, NULL, NULL, TO_CHAR );
@@ -2911,7 +2911,7 @@ void do_poison( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->power[DISC_VAMP_SERP] < 3 ) {
+	if ( ch_power(ch)[DISC_VAMP_SERP] < 3 ) {
 		send_to_char( "You must obtain at least level 3 in Serpentis to use Poison.\n\r", ch );
 		return;
 	}
@@ -3006,274 +3006,274 @@ void reg_mend( CHAR_DATA *ch ) {
 
 	if ( ribs > 0 ) {
 		if ( IS_BODY( ch, BROKEN_RIBS_1 ) )
-			REMOVE_BIT( ch->loc_hp[1], BROKEN_RIBS_1 );
+			REMOVE_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_1 );
 		if ( IS_BODY( ch, BROKEN_RIBS_2 ) )
-			REMOVE_BIT( ch->loc_hp[1], BROKEN_RIBS_2 );
+			REMOVE_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_2 );
 		if ( IS_BODY( ch, BROKEN_RIBS_4 ) )
-			REMOVE_BIT( ch->loc_hp[1], BROKEN_RIBS_4 );
+			REMOVE_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_4 );
 		if ( IS_BODY( ch, BROKEN_RIBS_8 ) )
-			REMOVE_BIT( ch->loc_hp[1], BROKEN_RIBS_8 );
+			REMOVE_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_8 );
 		if ( IS_BODY( ch, BROKEN_RIBS_16 ) )
-			REMOVE_BIT( ch->loc_hp[1], BROKEN_RIBS_16 );
+			REMOVE_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_16 );
 		ribs -= 1;
 		if ( ribs >= 16 ) {
 			ribs -= 16;
-			SET_BIT( ch->loc_hp[1], BROKEN_RIBS_16 );
+			SET_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_16 );
 		}
 		if ( ribs >= 8 ) {
 			ribs -= 8;
-			SET_BIT( ch->loc_hp[1], BROKEN_RIBS_8 );
+			SET_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_8 );
 		}
 		if ( ribs >= 4 ) {
 			ribs -= 4;
-			SET_BIT( ch->loc_hp[1], BROKEN_RIBS_4 );
+			SET_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_4 );
 		}
 		if ( ribs >= 2 ) {
 			ribs -= 2;
-			SET_BIT( ch->loc_hp[1], BROKEN_RIBS_2 );
+			SET_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_2 );
 		}
 		if ( ribs >= 1 ) {
 			ribs -= 1;
-			SET_BIT( ch->loc_hp[1], BROKEN_RIBS_1 );
+			SET_BIT( ch_loc_hp(ch)[1], BROKEN_RIBS_1 );
 		}
 		act( "One of $n's ribs snap back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "One of your ribs snap back into place.", ch, NULL, NULL, TO_CHAR );
 	} else if ( IS_HEAD( ch, LOST_EYE_L ) ) {
 		act( "An eyeball appears in $n's left eye socket.", ch, NULL, NULL, TO_ROOM );
 		act( "An eyeball appears in your left eye socket.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_EYE_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_EYE_L );
 	} else if ( IS_HEAD( ch, LOST_EYE_R ) ) {
 		act( "An eyeball appears in $n's right eye socket.", ch, NULL, NULL, TO_ROOM );
 		act( "An eyeball appears in your right eye socket.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_EYE_R );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_EYE_R );
 	} else if ( IS_HEAD( ch, LOST_EAR_L ) ) {
 		act( "An ear grows on the left side of $n's head.", ch, NULL, NULL, TO_ROOM );
 		act( "An ear grows on the left side of your head.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_EAR_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_EAR_L );
 	} else if ( IS_HEAD( ch, LOST_EAR_R ) ) {
 		act( "An ear grows on the right side of $n's head.", ch, NULL, NULL, TO_ROOM );
 		act( "An ear grows on the right side of your head.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_EAR_R );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_EAR_R );
 	} else if ( IS_HEAD( ch, LOST_NOSE ) ) {
 		act( "A nose grows on the front of $n's face.", ch, NULL, NULL, TO_ROOM );
 		act( "A nose grows on the front of your face.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_NOSE );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], BROKEN_NOSE );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_NOSE );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], BROKEN_NOSE );
 	} else if ( teeth > 0 ) {
 		if ( IS_HEAD( ch, LOST_TOOTH_1 ) )
-			REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_1 );
+			REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_1 );
 		if ( IS_HEAD( ch, LOST_TOOTH_2 ) )
-			REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_2 );
+			REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_2 );
 		if ( IS_HEAD( ch, LOST_TOOTH_4 ) )
-			REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_4 );
+			REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_4 );
 		if ( IS_HEAD( ch, LOST_TOOTH_8 ) )
-			REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_8 );
+			REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_8 );
 		if ( IS_HEAD( ch, LOST_TOOTH_16 ) )
-			REMOVE_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_16 );
+			REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_16 );
 		teeth -= 1;
 		if ( teeth >= 16 ) {
 			teeth -= 16;
-			SET_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_16 );
+			SET_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_16 );
 		}
 		if ( teeth >= 8 ) {
 			teeth -= 8;
-			SET_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_8 );
+			SET_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_8 );
 		}
 		if ( teeth >= 4 ) {
 			teeth -= 4;
-			SET_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_4 );
+			SET_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_4 );
 		}
 		if ( teeth >= 2 ) {
 			teeth -= 2;
-			SET_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_2 );
+			SET_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_2 );
 		}
 		if ( teeth >= 1 ) {
 			teeth -= 1;
-			SET_BIT( ch->loc_hp[LOC_HEAD], LOST_TOOTH_1 );
+			SET_BIT( ch_loc_hp(ch)[LOC_HEAD], LOST_TOOTH_1 );
 		}
 		act( "A missing tooth grows in your mouth.", ch, NULL, NULL, TO_CHAR );
 		act( "A missing tooth grows in $n's mouth.", ch, NULL, NULL, TO_ROOM );
 	} else if ( IS_HEAD( ch, BROKEN_NOSE ) ) {
 		act( "$n's nose snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your nose snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], BROKEN_NOSE );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], BROKEN_NOSE );
 	} else if ( IS_HEAD( ch, BROKEN_JAW ) ) {
 		act( "$n's jaw snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your jaw snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], BROKEN_JAW );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], BROKEN_JAW );
 	} else if ( IS_HEAD( ch, BROKEN_SKULL ) ) {
 		act( "$n's skull knits itself back together.", ch, NULL, NULL, TO_ROOM );
 		act( "Your skull knits itself back together.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_HEAD], BROKEN_SKULL );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_HEAD], BROKEN_SKULL );
 	} else if ( IS_BODY( ch, BROKEN_SPINE ) ) {
 		act( "$n's spine knits itself back together.", ch, NULL, NULL, TO_ROOM );
 		act( "Your spine knits itself back together.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_BODY], BROKEN_SPINE );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_BODY], BROKEN_SPINE );
 	} else if ( IS_BODY( ch, BROKEN_NECK ) ) {
 		act( "$n's neck snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your neck snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_BODY], BROKEN_NECK );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_BODY], BROKEN_NECK );
 	} else if ( IS_ARM_L( ch, LOST_ARM ) ) {
 		act( "An arm grows from the stump of $n's left shoulder.", ch, NULL, NULL, TO_ROOM );
 		act( "An arm grows from the stump of your left shoulder.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], LOST_ARM );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_ARM );
-		SET_BIT( ch->loc_hp[LOC_ARM_L], LOST_HAND );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_ARM );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_ARM );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_HAND );
 	} else if ( IS_ARM_R( ch, LOST_ARM ) ) {
 		act( "An arm grows from the stump of $n's right shoulder.", ch, NULL, NULL, TO_ROOM );
 		act( "An arm grows from the stump of your right shoulder.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], LOST_ARM );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_ARM );
-		SET_BIT( ch->loc_hp[LOC_ARM_R], LOST_HAND );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_ARM );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_ARM );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_HAND );
 	} else if ( IS_LEG_L( ch, LOST_LEG ) ) {
 		act( "A leg grows from the stump of $n's left hip.", ch, NULL, NULL, TO_ROOM );
 		act( "A leg grows from the stump of your left hip.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_LEG_L], LOST_LEG );
-		REMOVE_BIT( ch->loc_hp[LOC_LEG_L], BROKEN_LEG );
-		SET_BIT( ch->loc_hp[LOC_LEG_L], LOST_FOOT );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_LEG_L], LOST_LEG );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_LEG_L], BROKEN_LEG );
+		SET_BIT( ch_loc_hp(ch)[LOC_LEG_L], LOST_FOOT );
 	} else if ( IS_LEG_R( ch, LOST_LEG ) ) {
 		act( "A leg grows from the stump of $n's right hip.", ch, NULL, NULL, TO_ROOM );
 		act( "A leg grows from the stump of your right hip.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_LEG_R], LOST_LEG );
-		REMOVE_BIT( ch->loc_hp[LOC_LEG_R], BROKEN_LEG );
-		SET_BIT( ch->loc_hp[LOC_LEG_R], LOST_FOOT );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_LEG_R], LOST_LEG );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_LEG_R], BROKEN_LEG );
+		SET_BIT( ch_loc_hp(ch)[LOC_LEG_R], LOST_FOOT );
 	} else if ( IS_ARM_L( ch, BROKEN_ARM ) ) {
 		act( "$n's left arm snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your left arm snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_ARM );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_ARM );
 	} else if ( IS_ARM_R( ch, BROKEN_ARM ) ) {
 		act( "$n's right arm snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your right arm snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_ARM );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_ARM );
 	} else if ( IS_LEG_L( ch, BROKEN_LEG ) ) {
 		act( "$n's left leg snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your left leg snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_LEG_L], BROKEN_LEG );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_LEG_L], BROKEN_LEG );
 	} else if ( IS_LEG_R( ch, BROKEN_LEG ) ) {
 		act( "$n's right leg snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your right leg snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_LEG_R], BROKEN_LEG );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_LEG_R], BROKEN_LEG );
 	} else if ( IS_ARM_L( ch, LOST_HAND ) ) {
 		act( "A hand grows from the stump of $n's left wrist.", ch, NULL, NULL, TO_ROOM );
 		act( "A hand grows from the stump of your left wrist.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], LOST_HAND );
-		SET_BIT( ch->loc_hp[LOC_ARM_L], LOST_THUMB );
-		SET_BIT( ch->loc_hp[LOC_ARM_L], LOST_FINGER_I );
-		SET_BIT( ch->loc_hp[LOC_ARM_L], LOST_FINGER_M );
-		SET_BIT( ch->loc_hp[LOC_ARM_L], LOST_FINGER_R );
-		SET_BIT( ch->loc_hp[LOC_ARM_L], LOST_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_HAND );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_THUMB );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_FINGER_I );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_FINGER_M );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_FINGER_R );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_FINGER_L );
 	} else if ( IS_ARM_R( ch, LOST_HAND ) ) {
 		act( "A hand grows from the stump of $n's right wrist.", ch, NULL, NULL, TO_ROOM );
 		act( "A hand grows from the stump of your right wrist.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], LOST_HAND );
-		SET_BIT( ch->loc_hp[LOC_ARM_R], LOST_THUMB );
-		SET_BIT( ch->loc_hp[LOC_ARM_R], LOST_FINGER_I );
-		SET_BIT( ch->loc_hp[LOC_ARM_R], LOST_FINGER_M );
-		SET_BIT( ch->loc_hp[LOC_ARM_R], LOST_FINGER_R );
-		SET_BIT( ch->loc_hp[LOC_ARM_R], LOST_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_HAND );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_THUMB );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_FINGER_I );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_FINGER_M );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_FINGER_R );
+		SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_FINGER_L );
 	} else if ( IS_LEG_L( ch, LOST_FOOT ) ) {
 		act( "A foot grows from the stump of $n's left ankle.", ch, NULL, NULL, TO_ROOM );
 		act( "A foot grows from the stump of your left ankle.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_LEG_L], LOST_FOOT );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_LEG_L], LOST_FOOT );
 	} else if ( IS_LEG_R( ch, LOST_FOOT ) ) {
 		act( "A foot grows from the stump of $n's right ankle.", ch, NULL, NULL, TO_ROOM );
 		act( "A foot grows from the stump of your right ankle.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_LEG_R], LOST_FOOT );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_LEG_R], LOST_FOOT );
 	} else if ( IS_ARM_L( ch, LOST_THUMB ) ) {
 		act( "A thumb slides out of $n's left hand.", ch, NULL, NULL, TO_ROOM );
 		act( "A thumb slides out of your left hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], LOST_THUMB );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_THUMB );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_THUMB );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_THUMB );
 	} else if ( IS_ARM_L( ch, BROKEN_THUMB ) ) {
 		act( "$n's left thumb snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your left thumb snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_THUMB );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_THUMB );
 	} else if ( IS_ARM_L( ch, LOST_FINGER_I ) ) {
 		act( "An index finger slides out of $n's left hand.", ch, NULL, NULL, TO_ROOM );
 		act( "An index finger slides out of your left hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], LOST_FINGER_I );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_I );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_FINGER_I );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_I );
 	} else if ( IS_ARM_L( ch, BROKEN_FINGER_I ) ) {
 		act( "$n's left index finger snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your left index finger snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_I );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_I );
 	} else if ( IS_ARM_L( ch, LOST_FINGER_M ) ) {
 		act( "A middle finger slides out of $n's left hand.", ch, NULL, NULL, TO_ROOM );
 		act( "A middle finger slides out of your left hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], LOST_FINGER_M );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_M );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_FINGER_M );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_M );
 	} else if ( IS_ARM_L( ch, BROKEN_FINGER_M ) ) {
 		act( "$n's left middle finger snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your left middle finger snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_M );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_M );
 	} else if ( IS_ARM_L( ch, LOST_FINGER_R ) ) {
 		act( "A ring finger slides out of $n's left hand.", ch, NULL, NULL, TO_ROOM );
 		act( "A ring finger slides out of your left hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], LOST_FINGER_R );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_R );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_FINGER_R );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_R );
 	} else if ( IS_ARM_L( ch, BROKEN_FINGER_R ) ) {
 		act( "$n's left ring finger snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your left ring finger snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_R );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_R );
 	} else if ( IS_ARM_L( ch, LOST_FINGER_L ) ) {
 		act( "A little finger slides out of $n's left hand.", ch, NULL, NULL, TO_ROOM );
 		act( "A little finger slides out of your left hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], LOST_FINGER_L );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], LOST_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_L );
 	} else if ( IS_ARM_L( ch, BROKEN_FINGER_L ) ) {
 		act( "$n's left little finger snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your left little finger snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_L );
 	} else if ( IS_ARM_R( ch, LOST_THUMB ) ) {
 		act( "A thumb slides out of $n's right hand.", ch, NULL, NULL, TO_ROOM );
 		act( "A thumb slides out of your right hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], LOST_THUMB );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_THUMB );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_THUMB );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_THUMB );
 	} else if ( IS_ARM_R( ch, BROKEN_THUMB ) ) {
 		act( "$n's right thumb snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your right thumb snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_THUMB );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_THUMB );
 	} else if ( IS_ARM_R( ch, LOST_FINGER_I ) ) {
 		act( "An index finger slides out of $n's right hand.", ch, NULL, NULL, TO_ROOM );
 		act( "An index finger slides out of your right hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], LOST_FINGER_I );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_I );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_FINGER_I );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_I );
 	} else if ( IS_ARM_R( ch, BROKEN_FINGER_I ) ) {
 		act( "$n's right index finger snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your right index finger snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_I );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_I );
 	} else if ( IS_ARM_R( ch, LOST_FINGER_M ) ) {
 		act( "A middle finger slides out of $n's right hand.", ch, NULL, NULL, TO_ROOM );
 		act( "A middle finger slides out of your right hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], LOST_FINGER_M );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_M );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_FINGER_M );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_M );
 	} else if ( IS_ARM_R( ch, BROKEN_FINGER_M ) ) {
 		act( "$n's right middle finger snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your right middle finger snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_M );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_M );
 	} else if ( IS_ARM_R( ch, LOST_FINGER_R ) ) {
 		act( "A ring finger slides out of $n's right hand.", ch, NULL, NULL, TO_ROOM );
 		act( "A ring finger slides out of your right hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], LOST_FINGER_R );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_R );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_FINGER_R );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_R );
 	} else if ( IS_ARM_R( ch, BROKEN_FINGER_R ) ) {
 		act( "$n's right ring finger snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your right ring finger snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_R );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_R );
 	} else if ( IS_ARM_R( ch, LOST_FINGER_L ) ) {
 		act( "A little finger slides out of $n's right hand.", ch, NULL, NULL, TO_ROOM );
 		act( "A little finger slides out of your right hand.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], LOST_FINGER_L );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], LOST_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_L );
 	} else if ( IS_ARM_R( ch, BROKEN_FINGER_L ) ) {
 		act( "$n's right little finger snaps back into place.", ch, NULL, NULL, TO_ROOM );
 		act( "Your right little finger snaps back into place.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_L );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_L );
 	} else if ( IS_BODY( ch, CUT_THROAT ) ) {
-		if ( IS_SET( ch->loc_hp[6], BLEEDING_THROAT ) ) return;
+		if ( IS_SET( ch_loc_hp(ch)[6], BLEEDING_THROAT ) ) return;
 		act( "The wound in $n's throat closes up.", ch, NULL, NULL, TO_ROOM );
 		act( "The wound in your throat closes up.", ch, NULL, NULL, TO_CHAR );
-		REMOVE_BIT( ch->loc_hp[LOC_BODY], CUT_THROAT );
+		REMOVE_BIT( ch_loc_hp(ch)[LOC_BODY], CUT_THROAT );
 	}
 	return;
 }
@@ -3386,7 +3386,7 @@ void do_werewolf( CHAR_DATA *ch, char *argument ) {
 	ch->rage += 25;
 	ch->hitroll += 50;
 	ch->damroll += 50;
-	if ( ch->power[DISC_WERE_WOLF] > 3 ) ch->rage += 100;
+	if ( ch_power(ch)[DISC_WERE_WOLF] > 3 ) ch->rage += 100;
 	if ( ch->rage > 300 )
 		ch->rage = 300;
 
@@ -3468,12 +3468,12 @@ void do_possession( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_DOMI] < 3 ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_DOMI] < 3 ) {
 		send_to_char( "You must obtain at least level 3 in Dominate to use Possession.\n\r", ch );
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_DEMON ) && ch->power[DISC_DAEM_TEMP] < 10 ) {
+	if ( IS_CLASS( ch, CLASS_DEMON ) && ch_power(ch)[DISC_DAEM_TEMP] < 10 ) {
 		send_to_char( "You must obtain at least level 10 in Temptation to dominate others.\n\r", ch );
 		return;
 	}
@@ -3511,7 +3511,7 @@ void do_possession( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( victim->level > ( ch->spl[RED_MAGIC] * 0.25 ) ) {
+	if ( victim->level > ( ch_spl(ch)[RED_MAGIC] * 0.25 ) ) {
 		send_to_char( "They are too powerful.\n\r", ch );
 		return;
 	}
@@ -3589,7 +3589,7 @@ void do_fcommand( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_NPC( ch ) ) return;
 
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ( ch->power[DISC_VAMP_DOMI] < 3 ) ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ( ch_power(ch)[DISC_VAMP_DOMI] < 3 ) ) {
 		send_to_char( "You are not trained in the Dominate discipline.\n\r", ch );
 		return;
 	}
@@ -3616,12 +3616,12 @@ void do_vanish( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_OWL] < 1 ) {
+	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_OWL] < 1 ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_OBFU] < 1 ) {
+	if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_OBFU] < 1 ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
@@ -3691,7 +3691,7 @@ void do_rage( CHAR_DATA *ch, char *argument ) {
 	}
 
 	if ( IS_CLASS( ch, CLASS_DEMON ) ) {
-		if ( ch->power[DISC_DAEM_ATTA] < 3 ) {
+		if ( ch_power(ch)[DISC_DAEM_ATTA] < 3 ) {
 			stc( "You try, but cannot summon your beast.\n\r", ch );
 			return;
 		}
@@ -3730,7 +3730,7 @@ void do_calm( CHAR_DATA *ch, char *argument ) {
 
 	if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 
-		if ( ch->power[DISC_WERE_WOLF] < 3 ) {
+		if ( ch_power(ch)[DISC_WERE_WOLF] < 3 ) {
 			stc( "You need level three in the Wolf totem to Calm.\n\r", ch );
 			return;
 		}
@@ -3755,7 +3755,7 @@ void do_calm( CHAR_DATA *ch, char *argument ) {
 	}
 	if ( IS_CLASS( ch, CLASS_DEMON ) ) {
 
-		if ( ch->power[DISC_DAEM_ATTA] < 4 ) {
+		if ( ch_power(ch)[DISC_DAEM_ATTA] < 4 ) {
 			stc( "You need level four in Attack to calm your frenzy.\n\r", ch );
 			return;
 		}
@@ -3800,7 +3800,7 @@ void do_web( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_SPID] < 2 ) {
+	if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_SPID] < 2 ) {
 		send_to_char( "You don't have that power yet.\n\r", ch );
 		return;
 	}
@@ -3832,7 +3832,7 @@ void do_web( CHAR_DATA *ch, char *argument ) {
 
 	if ( ( sn = skill_lookup( "web" ) ) < 0 ) return;
 	spelltype = skill_table[sn].target;
-	level = (int) ( ch->spl[spelltype] * 0.25 );
+	level = (int) ( ch_spl(ch)[spelltype] * 0.25 );
 	( *skill_table[sn].spell_fun )( sn, level, ch, victim );
 	WAIT_STATE( ch, 12 );
 	return;

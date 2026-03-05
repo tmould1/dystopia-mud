@@ -115,8 +115,8 @@ int count_thralls( CHAR_DATA *ch ) {
 	CHAR_DATA *fch;
 	int count = 0;
 
-	LIST_FOR_EACH( fch, &g_characters, CHAR_DATA, char_node ) {
-		if ( IS_NPC( fch ) && IS_AFFECTED( fch, AFF_CHARM ) && fch->master == ch )
+	LIST_FOR_EACH( fch, &g_npcs, CHAR_DATA, npc_node ) {
+		if ( IS_AFFECTED( fch, AFF_CHARM ) && fch->master == ch )
 			count++;
 	}
 	return count;

@@ -266,12 +266,12 @@ int get_ratio( CHAR_DATA *ch ) {
 	int ratio;
 
 	if ( IS_NPC( ch ) ) return 0;
-	if ( ( ch->pkill + ch->pdeath ) == 0 )
+	if ( ( ch->pcdata->pkill + ch->pcdata->pdeath ) == 0 )
 		ratio = 0; // to avoid divide by zero.
-	else if ( ch->pkill > 0 )
-		ratio = ch->pkill * 100 * ( ( ch->pkill * ch->pkill ) - ( ch->pdeath * ch->pdeath ) ) / ( ( ch->pkill + ch->pdeath ) * ( ch->pkill + ch->pdeath ) );
+	else if ( ch->pcdata->pkill > 0 )
+		ratio = ch->pcdata->pkill * 100 * ( ( ch->pcdata->pkill * ch->pcdata->pkill ) - ( ch->pcdata->pdeath * ch->pcdata->pdeath ) ) / ( ( ch->pcdata->pkill + ch->pcdata->pdeath ) * ( ch->pcdata->pkill + ch->pcdata->pdeath ) );
 	else
-		ratio = 100 * ( ( ch->pkill * ch->pkill ) - ( ch->pdeath * ch->pdeath ) ) / ( ( ch->pkill + ch->pdeath ) * ( ch->pkill + ch->pdeath ) );
+		ratio = 100 * ( ( ch->pcdata->pkill * ch->pcdata->pkill ) - ( ch->pcdata->pdeath * ch->pcdata->pdeath ) ) / ( ( ch->pcdata->pkill + ch->pcdata->pdeath ) * ( ch->pcdata->pkill + ch->pcdata->pdeath ) );
 	return ratio;
 }
 
@@ -282,14 +282,14 @@ bool multicheck( CHAR_DATA *ch ) {
 	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( IS_NPC( gch ) ) continue;
 		if ( gch == ch ) continue;
-		if ( strlen( gch->lasthost ) > 2 ) {
+		if ( strlen( gch->pcdata->lasthost ) > 2 ) {
 			if ( gch->desc ) {
 				if ( !str_cmp( gch->desc->host, ch->desc->host ) ) {
 					snprintf( buf, sizeof( buf ), "%s has connected from the same IP as %s", ch->name, gch->name );
 					log_string( buf );
 					return TRUE;
 				}
-			} else if ( !str_cmp( gch->lasthost, ch->desc->host ) ) {
+			} else if ( !str_cmp( gch->pcdata->lasthost, ch->desc->host ) ) {
 				snprintf( buf, sizeof( buf ), "%s has connected from the same IP as %s", ch->name, gch->name );
 				log_string( buf );
 				return TRUE;
@@ -359,9 +359,9 @@ bool reachedDecapLimit( CHAR_DATA *ch ) {
 	/*
 	 * For those with no skill
 	 */
-	limit += ch->pdeath;
+	limit += ch->pcdata->pdeath;
 
-	if ( limit > ch->pkill )
+	if ( limit > ch->pcdata->pkill )
 		return FALSE;
 	else
 		return TRUE;
@@ -456,19 +456,19 @@ int getMight( CHAR_DATA *ch ) {
 
 	might = ( ch->max_hit - ( spellhps + objhps ) ) / 100;
 
-	for ( i = 0; i < 5; i++ ) might += UMIN( 2, ch->spl[i] / 100 );
-	for ( i = 0; i < 13; i++ ) might += UMIN( 4, ch->wpn[i] / 50 );
-	for ( i = 1; i < 11; i++ ) might += UMIN( 4, ch->stance[i] / 50 );
+	for ( i = 0; i < 5; i++ ) might += UMIN( 2, ch_spl(ch)[i] / 100 );
+	for ( i = 0; i < 13; i++ ) might += UMIN( 4, ch_wpn(ch)[i] / 50 );
+	for ( i = 1; i < 11; i++ ) might += UMIN( 4, ch_stance(ch)[i] / 50 );
 	if ( IS_SET( ch->newbits, NEW_MASTERY ) ) might += 2;
-	if ( ch->stance[23] != -1 )
+	if ( ch_stance(ch)[23] != -1 )
 		might += 250;
-	else if ( ch->stance[22] != -1 )
+	else if ( ch_stance(ch)[22] != -1 )
 		might += 200;
-	else if ( ch->stance[21] != -1 )
+	else if ( ch_stance(ch)[21] != -1 )
 		might += 150;
-	else if ( ch->stance[20] != -1 )
+	else if ( ch_stance(ch)[20] != -1 )
 		might += 100;
-	else if ( ch->stance[19] != -1 )
+	else if ( ch_stance(ch)[19] != -1 )
 		might += 50;
 	if ( might >= 150 ) {
 		if ( is_upgrade( ch ) ) might *= 2;

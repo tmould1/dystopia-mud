@@ -1079,8 +1079,8 @@ void do_mwhere( CHAR_DATA *ch, char *argument ) {
 	}
 
 	found = FALSE;
-	LIST_FOR_EACH( victim, &g_characters, CHAR_DATA, char_node ) {
-		if ( IS_NPC( victim ) && victim->in_room != NULL && is_name( arg, victim->name ) ) {
+	LIST_FOR_EACH( victim, &g_npcs, CHAR_DATA, npc_node ) {
+		if ( victim->in_room != NULL && is_name( arg, victim->name ) ) {
 			found = TRUE;
 			snprintf( buf, sizeof( buf ), "[%5d] %-28s [%5d] %s\n\r",
 				victim->pIndexData->vnum,
@@ -1256,7 +1256,7 @@ void do_oreturn( CHAR_DATA *ch, char *argument ) {
 	ch->pcdata->chobj = NULL;
 	REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
 	REMOVE_BIT( ch->extra, EXTRA_OSWITCH );
-	if ( IS_HEAD( ch, LOST_HEAD ) ) REMOVE_BIT( ch->loc_hp[0], LOST_HEAD );
+	if ( IS_HEAD( ch, LOST_HEAD ) ) REMOVE_BIT( ch_loc_hp(ch)[0], LOST_HEAD );
 	free(ch->morph);
 	ch->morph = str_dup( "" );
 	char_from_room( ch );
@@ -1423,11 +1423,11 @@ void do_preturn( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->pload == NULL ) {
+	if ( ch->pcdata->pload == NULL ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
 	}
-	snprintf( arg, sizeof( arg ), "%s", ch->pload );
+	snprintf( arg, sizeof( arg ), "%s", ch->pcdata->pload );
 	if ( strlen( arg ) < 3 || strlen( arg ) > 8 ) {
 		send_to_char( "Huh?\n\r", ch );
 		return;
@@ -1440,9 +1440,9 @@ void do_preturn( CHAR_DATA *ch, char *argument ) {
 
 	d = ch->desc;
 
-	snprintf( buf, sizeof( buf ), "You transform back into %s.\n\r", capitalize( ch->pload ) );
+	snprintf( buf, sizeof( buf ), "You transform back into %s.\n\r", capitalize( ch->pcdata->pload ) );
 	send_to_char( buf, ch );
-	snprintf( buf, sizeof( buf ), "$n transforms back into %s.", capitalize( ch->pload ) );
+	snprintf( buf, sizeof( buf ), "$n transforms back into %s.", capitalize( ch->pcdata->pload ) );
 	act( buf, ch, NULL, NULL, TO_ROOM );
 	do_autosave( ch, "" );
 	if ( ch != NULL && ch->desc != NULL )
@@ -1458,8 +1458,8 @@ void do_preturn( CHAR_DATA *ch, char *argument ) {
 		char_to_room( ch, ch->in_room );
 	else
 		char_to_room( ch, get_room_index( 3001 ) );
-	free(ch->pload);
-	ch->pload = str_dup( "" );
+	free(ch->pcdata->pload);
+	ch->pcdata->pload = str_dup( "" );
 	return;
 }
 
@@ -1640,13 +1640,13 @@ void do_restore( CHAR_DATA *ch, char *argument ) {
 				affect_strip( victim, gsn_blindness );
 				affect_strip( victim, gsn_sleep );
 				affect_strip( victim, gsn_curse );
-				victim->loc_hp[0] = 0;
-				victim->loc_hp[1] = 0;
-				victim->loc_hp[2] = 0;
-				victim->loc_hp[3] = 0;
-				victim->loc_hp[4] = 0;
-				victim->loc_hp[5] = 0;
-				victim->loc_hp[6] = 0;
+				ch_loc_hp(victim)[0] = 0;
+				ch_loc_hp(victim)[1] = 0;
+				ch_loc_hp(victim)[2] = 0;
+				ch_loc_hp(victim)[3] = 0;
+				ch_loc_hp(victim)[4] = 0;
+				ch_loc_hp(victim)[5] = 0;
+				ch_loc_hp(victim)[6] = 0;
 				update_pos( victim );
 				victim->hit = victim->max_hit;
 				victim->mana = victim->max_mana;
@@ -1668,13 +1668,13 @@ void do_restore( CHAR_DATA *ch, char *argument ) {
 	victim->hit = victim->max_hit;
 	victim->mana = victim->max_mana;
 	victim->move = victim->max_move;
-	victim->loc_hp[0] = 0;
-	victim->loc_hp[1] = 0;
-	victim->loc_hp[2] = 0;
-	victim->loc_hp[3] = 0;
-	victim->loc_hp[4] = 0;
-	victim->loc_hp[5] = 0;
-	victim->loc_hp[6] = 0;
+	ch_loc_hp(victim)[0] = 0;
+	ch_loc_hp(victim)[1] = 0;
+	ch_loc_hp(victim)[2] = 0;
+	ch_loc_hp(victim)[3] = 0;
+	ch_loc_hp(victim)[4] = 0;
+	ch_loc_hp(victim)[5] = 0;
+	ch_loc_hp(victim)[6] = 0;
 	update_pos( victim );
 	act( "$n has restored you.", ch, NULL, victim, TO_VICT );
 	if ( !IS_CLASS( ch, CLASS_ANGEL ) ) send_to_char( "Ok.\n\r", ch );
@@ -2703,9 +2703,9 @@ void do_users( CHAR_DATA *ch, char *argument ) {
 			}
 
 			{
-				const char *ip_src = ( strlen( d->character->lasthost ) < 2 )
+				const char *ip_src = ( strlen( d->character->pcdata->lasthost ) < 2 )
 					? d->host
-					: d->character->lasthost;
+					: d->character->pcdata->lasthost;
 				const char *ip_display = ( get_trust( ch ) >= LEVEL_IMPLEMENTOR )
 					? ip_src
 					: mask_ip( ip_src );
@@ -3267,7 +3267,7 @@ void do_evileye( CHAR_DATA *ch, char *argument ) {
 	argument = one_argument( argument, arg1 );
 	strcpy( arg2, argument );
 
-	if ( ch->power[DISC_DAEM_DISC] < 2 ) {
+	if ( ch_power(ch)[DISC_DAEM_DISC] < 2 ) {
 		stc( "You must obtain a level two Mastery of Discord.\n\r", ch );
 		return;
 	}
@@ -3280,12 +3280,12 @@ void do_evileye( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Using actions that will cause players to quit, lose connection\n\r", ch );
 		send_to_char( "or spend experience on anything (train commands)\n\r", ch );
 		send_to_char( "is not allowed, and you will regret using such an evileye.\n\r\n\r", ch );
-		if ( ch->poweraction != NULL ) {
-			snprintf( buf, sizeof( buf ), "Current action: %s.\n\r", ch->poweraction );
+		if ( ch->pcdata->poweraction != NULL ) {
+			snprintf( buf, sizeof( buf ), "Current action: %s.\n\r", ch->pcdata->poweraction );
 			send_to_char( buf, ch );
 		}
-		if ( ch->powertype != NULL ) {
-			snprintf( buf, sizeof( buf ), "Current message: %s.\n\r", ch->powertype );
+		if ( ch->pcdata->powertype != NULL ) {
+			snprintf( buf, sizeof( buf ), "Current message: %s.\n\r", ch->pcdata->powertype );
 			send_to_char( buf, ch );
 		}
 		send_to_char( "Current flags:", ch );
@@ -3299,12 +3299,12 @@ void do_evileye( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	if ( !str_cmp( arg1, "action" ) ) {
-		free(ch->poweraction);
-		ch->poweraction = str_dup( arg2 );
+		free(ch->pcdata->poweraction);
+		ch->pcdata->poweraction = str_dup( arg2 );
 		return;
 	} else if ( !str_cmp( arg1, "message" ) ) {
-		free(ch->powertype);
-		ch->powertype = str_dup( arg2 );
+		free(ch->pcdata->powertype);
+		ch->pcdata->powertype = str_dup( arg2 );
 		return;
 	} else if ( !str_cmp( arg1, "toggle" ) ) {
 		if ( !str_cmp( arg2, "spell" ) && IS_SET( ch->spectype, EYE_SPELL ) )
@@ -3331,12 +3331,12 @@ void do_evileye( CHAR_DATA *ch, char *argument ) {
 		send_to_char( "Option ACTION is a text string action performed by you or the viewer.\n\r", ch );
 		send_to_char( "Option MESSAGE is a text string shown to the person looking at you.\n\r", ch );
 		send_to_char( "Option TOGGLE has values: spell, self, other.\n\r\n\r", ch );
-		if ( ch->poweraction != NULL ) {
-			snprintf( buf, sizeof( buf ), "Current action: %s.\n\r", ch->poweraction );
+		if ( ch->pcdata->poweraction != NULL ) {
+			snprintf( buf, sizeof( buf ), "Current action: %s.\n\r", ch->pcdata->poweraction );
 			send_to_char( buf, ch );
 		}
-		if ( ch->powertype != NULL ) {
-			snprintf( buf, sizeof( buf ), "Current message: %s.\n\r", ch->powertype );
+		if ( ch->pcdata->powertype != NULL ) {
+			snprintf( buf, sizeof( buf ), "Current message: %s.\n\r", ch->pcdata->powertype );
 			send_to_char( buf, ch );
 		}
 		send_to_char( "Current flags:", ch );
@@ -4119,7 +4119,7 @@ void do_copyover( CHAR_DATA *ch, char *argument ) {
 
 	LIST_FOR_EACH( gch, &g_characters, CHAR_DATA, char_node ) {
 		if ( !IS_NPC( gch ) && ( IS_HEAD( gch, LOST_HEAD ) || IS_SET( gch->extra, EXTRA_OSWITCH ) ) ) {
-			if ( IS_HEAD( gch, LOST_HEAD ) ) REMOVE_BIT( gch->loc_hp[0], LOST_HEAD );
+			if ( IS_HEAD( gch, LOST_HEAD ) ) REMOVE_BIT( ch_loc_hp(gch)[0], LOST_HEAD );
 			REMOVE_BIT( gch->affected_by, AFF_POLYMORPH );
 			if ( IS_SET( gch->extra, EXTRA_OSWITCH ) ) REMOVE_BIT( gch->extra, EXTRA_OSWITCH );
 			//      free(gch->morph); // not threadsafe.

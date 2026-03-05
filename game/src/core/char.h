@@ -38,11 +38,11 @@ typedef enum {
  * Timer macros.
  */
 
-#define TIMER( ch, tmr )		 ( ( ch )->tick_timer[( tmr )] )
-#define SET_TIMER( ch, tmr, tm ) ( ( ch )->tick_timer[( tmr )] = ( tm ) )
-#define ADD_TIMER( ch, tmr, tm ) ( ( ch )->tick_timer[( tmr )] += ( tm ) )
-#define SUB_TIMER( ch, tmr, tm ) ( ( ch )->tick_timer[( tmr )] -= ( tm ) )
-#define TIME_UP( ch, tmr )		 ( ( ch )->tick_timer[( tmr )] == 0 ? TRUE : FALSE )
+#define TIMER( ch, tmr )		 ( ch_tick_timer( ch )[( tmr )] )
+#define SET_TIMER( ch, tmr, tm ) ( ch_tick_timer( ch )[( tmr )] = ( tm ) )
+#define ADD_TIMER( ch, tmr, tm ) ( ch_tick_timer( ch )[( tmr )] += ( tm ) )
+#define SUB_TIMER( ch, tmr, tm ) ( ch_tick_timer( ch )[( tmr )] -= ( tm ) )
+#define TIME_UP( ch, tmr )		 ( ch_tick_timer( ch )[( tmr )] == 0 ? TRUE : FALSE )
 #define TIMER_LAYONHANDS		 0
 #define TIMER_WRENCH			 1
 #define TIMER_WRENCHED			 2
@@ -935,6 +935,7 @@ struct editor_data {
  */
 struct char_data {
 	list_node_t char_node;
+	list_node_t npc_node; /* g_npcs list (NPCs only, unlinked for PCs) */
 	list_node_t room_node;
 	CHAR_DATA *master;
 	CHAR_DATA *leader;
@@ -942,7 +943,6 @@ struct char_data {
 	CHAR_DATA *embracing;
 	CHAR_DATA *embraced;
 	CHAR_DATA *blinkykill;
-	CHAR_DATA *reply;
 	CHAR_DATA *mount;
 	CHAR_DATA *wizard;
 	CHAR_DATA *challenger; /*  person who challenged you */
@@ -959,19 +959,11 @@ struct char_data {
 	DO_FUN *prev_cmd; /* mapping */
 	char *hunting;
 	char *name;
-	char *pload;
 	char *short_descr;
 	char *long_descr;
 	char *description;
 	char *lord;
 	char *morph;
-	char *createtime;
-	char *lasttime;
-	char *lasthost;
-	char *poweraction;
-	char *powertype;
-	char *prompt;
-	char *cprompt;
 	char *prefix;
 	int sex;
 	int class;
@@ -984,48 +976,25 @@ struct char_data {
 	int warp;
 	int explevel;
 	int expgained;
-	int power[MAX_DISCIPLINES];
 	int xhitroll;
 	int xdamroll;
 
-	/* SMAUUUUUUUUUUUG */
-	void *dest_buf;
-	void *spare_ptr;
-	int tempnum;
-	EDITOR_DATA *editor;
-	int substate;
-	int pagelen;			/* BUILD INTERFACE */
-	int inter_page;		/* BUILD INTERFACE */
-	int inter_type;		/* BUILD INTERFACE */
-	char *inter_editing;	/* BUILD INTERFACE */
-	int inter_editing_vnum; /* BUILD INTERFACE */
-	int inter_substate;	/* BUILD INTERFACE */
-							/* End O' Smaug */
+	/* SMAUG/OLC editor fields moved to PC_DATA */
 
 	/* Dh Flags */
-	int cclan;
 	uint32_t flag2;
 	uint32_t flag3;
 	uint32_t flag4;
 	int generation;
-	int primary;
 	int proper_size;
 	int size;
-	int cur_form;
-	int dragtype;
 	int rage;
 	int siltol;
 	/* end */
-	int tick_timer[MAX_TIMER];
+	/* tick_timer[MAX_TIMER] moved to PC_DATA — use ch_tick_timer() accessor */
 	int warpcount;
-	int vampgen_a;
 	int spectype;
 	int specpower;
-	int loc_hp[7];
-	int wpn[13];
-	int spl[8];
-	int cmbt[8];
-	int stance[24];
 	int beast;
 	int mounted;
 	int home;
@@ -1036,10 +1005,6 @@ struct char_data {
 	time_t save_time;
 	int timer;
 	int wait;
-	int pkill;
-	int pdeath;
-	int mkill;
-	int mdeath;
 	int hit;
 	int max_hit;
 	int mana;
@@ -1066,18 +1031,8 @@ struct char_data {
 	int wimpy;
 	uint32_t deaf;
 	int damcap[2];
-	int monkstuff;
-	int monkcrap;
-	int monkab[4];
-	int chi[2];
 	char *clan;
-	int garou1;
-	int garou2;
-	int gnosis[2];
-	CHAR_DATA *unveil;
-	char *objdesc;
 	int monkblock;
-	int focus[2];
 };
 
 /*
@@ -1171,12 +1126,59 @@ struct pc_data {
 	int comm;
 	int security; /* OLC - Builder security */
 	int bounty;
-	int explevel; /* FTUE: 0=never MUD, 1=MUD not Dystopia, 2=veteran */
 	bool stats_dirty; /* TRUE when pkill/pdeath/etc changed, triggers leaderboard update */
 	int story_node;   /* Story quest progress: 0=not started, 1-18=current node */
 	char *story_clue; /* Last breadcrumb text from story quest NPC */
 	int gifts[21];    /* Werewolf breed/auspice/tribe gifts */
 	int paradox[3];   /* PK punishment: [0]=total [1]=current [2]=ticker */
+
+	/* Player-only combat/class arrays (moved from CHAR_DATA to save NPC memory) */
+	int power[MAX_DISCIPLINES]; /* Vampire/class discipline levels */
+	int stance[24];             /* Combat stance proficiencies */
+	int wpn[13];                /* Weapon skill proficiencies */
+	int spl[8];                 /* Spell school proficiencies */
+	int cmbt[8];                /* Combat style proficiencies */
+	int loc_hp[7];              /* Body part damage tracking */
+	int monkab[4];              /* Monk abilities */
+	int chi[2];                 /* Monk chi: [0]=current [1]=max */
+	int gnosis[2];              /* Werewolf gnosis: [0]=current [1]=max */
+	int focus[2];               /* Monk focus: [0]=current [1]=max */
+	int tick_timer[MAX_TIMER];  /* Ability cooldowns/durations */
+	/* Player-only strings (moved from CHAR_DATA to save NPC memory) */
+	char *createtime;
+	char *lasttime;
+	char *lasthost;
+	char *pload;
+	char *poweraction;
+	char *powertype;
+	char *prompt;
+	char *cprompt;
+	char *objdesc;
+	/* Player-only int/ptr fields (moved from CHAR_DATA to save NPC memory) */
+	CHAR_DATA *reply;
+	CHAR_DATA *unveil;
+	int monkstuff;
+	int monkcrap;
+	int garou1;
+	int garou2;
+	int pkill;
+	int pdeath;
+	int mkill;
+	int mdeath;
+	int cclan;
+	int vampgen_a;
+	int cur_form;
+	/* SMAUG/OLC editor fields (moved from CHAR_DATA to save NPC memory) */
+	void *dest_buf;
+	void *spare_ptr;
+	EDITOR_DATA *editor;
+	char *inter_editing;
+	int tempnum;
+	int substate;
+	int inter_page;
+	int inter_type;
+	int inter_editing_vnum;
+	int inter_substate;
 };
 /*
  * Flyweight string helpers.
@@ -1193,11 +1195,51 @@ static inline void mob_free_string( CHAR_DATA *ch, char *str ) {
 }
 
 /*
+ * NPC-safe accessors for player-only arrays (moved from CHAR_DATA to PC_DATA).
+ * Returns the player's array for PCs, or a shared zero buffer for NPCs.
+ * Reads return 0 (matching original zero-initialized CHAR_DATA behavior).
+ * Writes to the NPC buffer are harmless no-ops (nobody reads NPC values).
+ */
+static inline int *ch_stance( CHAR_DATA *ch ) {
+	static int z[24]; return ch->pcdata ? ch->pcdata->stance : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_wpn( CHAR_DATA *ch ) {
+	static int z[13]; return ch->pcdata ? ch->pcdata->wpn : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_spl( CHAR_DATA *ch ) {
+	static int z[8]; return ch->pcdata ? ch->pcdata->spl : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_cmbt( CHAR_DATA *ch ) {
+	static int z[8]; return ch->pcdata ? ch->pcdata->cmbt : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_loc_hp( CHAR_DATA *ch ) {
+	static int z[7]; return ch->pcdata ? ch->pcdata->loc_hp : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_power( CHAR_DATA *ch ) {
+	static int z[MAX_DISCIPLINES]; return ch->pcdata ? ch->pcdata->power : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_monkab( CHAR_DATA *ch ) {
+	static int z[4]; return ch->pcdata ? ch->pcdata->monkab : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_chi( CHAR_DATA *ch ) {
+	static int z[2]; return ch->pcdata ? ch->pcdata->chi : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_gnosis( CHAR_DATA *ch ) {
+	static int z[2]; return ch->pcdata ? ch->pcdata->gnosis : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_focus( CHAR_DATA *ch ) {
+	static int z[2]; return ch->pcdata ? ch->pcdata->focus : ( memset( z, 0, sizeof( z ) ), z );
+}
+static inline int *ch_tick_timer( CHAR_DATA *ch ) {
+	static int z[MAX_TIMER]; return ch->pcdata ? ch->pcdata->tick_timer : ( memset( z, 0, sizeof( z ) ), z );
+}
+
+/*
  * Character macros.
  */
 
-#define IS_COMB( ch, sn )	  ( IS_SET( ( ch )->monkcrap, ( sn ) ) )
-#define IS_FS( ch, sn )		  ( IS_SET( ( ch )->monkstuff, ( sn ) ) )
+#define IS_COMB( ch, sn )	  ( !IS_NPC( ch ) && IS_SET( ( ch )->pcdata->monkcrap, ( sn ) ) )
+#define IS_FS( ch, sn )		  ( !IS_NPC( ch ) && IS_SET( ( ch )->pcdata->monkstuff, ( sn ) ) )
 #define IS_NEWFLAG( ch, sn )  ( IS_SET( ( ch )->flag2, ( sn ) ) )
 #define IS_CREATOR( ch )	  ( get_trust( ch ) >= MAX_LEVEL )
 #define GET_FORM( ch )		  ( ( form_data[( ch )->cur_form].short_desc == NULL || form_data[( ch )->cur_form].short_desc[0] == '\0' ) ? form_data[( ch )->cur_form].name : "" )
@@ -1222,19 +1264,19 @@ static inline void mob_free_string( CHAR_DATA *ch, char *str ) {
 #define IS_FORM( ch, sn )	  ( IS_SET( ( ch )->form, ( sn ) ) )
 #define IS_POLYAFF( ch, sn )  ( IS_SET( ( ch )->polyaff, ( sn ) ) )
 #define IS_EXTRA( ch, sn )	  ( IS_SET( ( ch )->extra, ( sn ) ) )
-#define IS_STANCE( ch, sn )	  ( ch->stance[0] == sn )
-#define IS_DEMPOWER( ch, sn ) ( IS_SET( ( ch )->pcdata->powers[DPOWER_FLAGS], ( sn ) ) )
-#define IS_DEMAFF( ch, sn )	  ( IS_SET( ( ch )->pcdata->powers[DPOWER_CURRENT], ( sn ) ) )
+#define IS_STANCE( ch, sn )	  ( !IS_NPC( ch ) && ch_stance( ch )[0] == (sn) )
+#define IS_DEMPOWER( ch, sn ) ( !IS_NPC( ch ) && IS_SET( ch_power( ch )[DPOWER_FLAGS], ( sn ) ) )
+#define IS_DEMAFF( ch, sn )	  ( !IS_NPC( ch ) && IS_SET( ch_power( ch )[DPOWER_CURRENT], ( sn ) ) )
 #define IS_CLASS( ch, CLASS ) ( IS_SET( ( ch )->class, CLASS ) && ( ch->level >= LEVEL_AVATAR ) )
-#define IS_HEAD( ch, sn )	  ( IS_SET( ( ch )->loc_hp[0], ( sn ) ) )
-#define IS_BODY( ch, sn )	  ( IS_SET( ( ch )->loc_hp[1], ( sn ) ) )
-#define IS_ARM_L( ch, sn )	  ( IS_SET( ( ch )->loc_hp[2], ( sn ) ) )
-#define IS_ARM_R( ch, sn )	  ( IS_SET( ( ch )->loc_hp[3], ( sn ) ) )
-// #define IS_ARM_T(ch, sn)	(IS_SET((ch)->loc_hp[7], (sn)))
-// #define IS_ARM_F(ch, sn)	(IS_SET((ch)->loc_hp[8], (sn)))
-#define IS_LEG_L( ch, sn )	  ( IS_SET( ( ch )->loc_hp[4], ( sn ) ) )
-#define IS_LEG_R( ch, sn )	  ( IS_SET( ( ch )->loc_hp[5], ( sn ) ) )
-#define IS_BLEEDING( ch, sn ) ( IS_SET( ( ch )->loc_hp[6], ( sn ) ) )
+#define IS_HEAD( ch, sn )	  ( !IS_NPC( ch ) && IS_SET( ch_loc_hp( ch )[0], ( sn ) ) )
+#define IS_BODY( ch, sn )	  ( !IS_NPC( ch ) && IS_SET( ch_loc_hp( ch )[1], ( sn ) ) )
+#define IS_ARM_L( ch, sn )	  ( !IS_NPC( ch ) && IS_SET( ch_loc_hp( ch )[2], ( sn ) ) )
+#define IS_ARM_R( ch, sn )	  ( !IS_NPC( ch ) && IS_SET( ch_loc_hp( ch )[3], ( sn ) ) )
+// #define IS_ARM_T(ch, sn)	(!IS_NPC(ch) && IS_SET(ch_loc_hp(ch)[7], (sn)))
+// #define IS_ARM_F(ch, sn)	(!IS_NPC(ch) && IS_SET(ch_loc_hp(ch)[8], (sn)))
+#define IS_LEG_L( ch, sn )	  ( !IS_NPC( ch ) && IS_SET( ch_loc_hp( ch )[4], ( sn ) ) )
+#define IS_LEG_R( ch, sn )	  ( !IS_NPC( ch ) && IS_SET( ch_loc_hp( ch )[5], ( sn ) ) )
+#define IS_BLEEDING( ch, sn ) ( !IS_NPC( ch ) && IS_SET( ch_loc_hp( ch )[6], ( sn ) ) )
 
 #define IS_PLAYING( d ) ( d->connected == CON_PLAYING )
 

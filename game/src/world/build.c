@@ -330,26 +330,26 @@ void edit_buffer( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
-	if ( ch->substate <= SUB_PAUSE ) {
+	if ( ch->pcdata->substate <= SUB_PAUSE ) {
 		send_to_char( "You can't do that!\n\r", ch );
-		snprintf( buf, sizeof( buf ), "Edit_buffer: illegal ch->substate (%d)", ch->substate );
+		snprintf( buf, sizeof( buf ), "Edit_buffer: illegal ch->pcdata->substate (%d)", ch->pcdata->substate );
 		bug( buf, 0 );
 		d->connected = CON_PLAYING;
 		return;
 	}
 
-	if ( !ch->editor ) {
+	if ( !ch->pcdata->editor ) {
 		send_to_char( "You can't do that!\n\r", ch );
 		bug( "Edit_buffer: null editor", 0 );
 		d->connected = CON_PLAYING;
 		return;
 	}
 
-	edit = ch->editor;
+	edit = ch->pcdata->editor;
 	save = FALSE;
 	max_buf_lines = 24;
 
-	if ( ch->substate == SUB_MPROG_EDIT || ch->substate == SUB_HELP_EDIT )
+	if ( ch->pcdata->substate == SUB_MPROG_EDIT || ch->pcdata->substate == SUB_HELP_EDIT )
 		max_buf_lines = 48;
 
 	if ( argument[0] == '/' || argument[0] == '\\' ) {
@@ -512,11 +512,11 @@ void edit_buffer( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		if ( get_trust( ch ) > LEVEL_IMMORTAL && !str_cmp( cmd + 1, "!" ) ) {
-			int substate = ch->substate;
+			int substate = ch->pcdata->substate;
 
-			ch->substate = SUB_RESTRICTED;
+			ch->pcdata->substate = SUB_RESTRICTED;
 			interpret( ch, argument + 3 );
-			ch->substate = substate;
+			ch->pcdata->substate = substate;
 			send_to_char( "\n\r> ", ch );
 			return;
 		} /*
@@ -607,12 +607,12 @@ void start_editing( CHAR_DATA *ch, char *data ) {
 		bug( "Fatal: start_editing: no desc", 0 );
 		return;
 	}
-	if ( ch->substate == SUB_RESTRICTED )
-		bug( "NOT GOOD: start_editing: ch->substate == SUB_RESTRICTED", 0 );
+	if ( ch->pcdata->substate == SUB_RESTRICTED )
+		bug( "NOT GOOD: start_editing: ch->pcdata->substate == SUB_RESTRICTED", 0 );
 
 	send_to_char( "Begin entering your text now (/? = help /s = save /c = clear /l = list)\n\r", ch );
 	send_to_char( "-----------------------------------------------------------------------\n\r> ", ch );
-	if ( ch->editor )
+	if ( ch->pcdata->editor )
 		stop_editing( ch );
 
 	edit = calloc( 1, sizeof( EDITOR_DATA ) );
@@ -646,7 +646,7 @@ void start_editing( CHAR_DATA *ch, char *data ) {
 	edit->numlines = lines;
 	edit->size = size;
 	edit->on_line = lines;
-	ch->editor = edit;
+	ch->pcdata->editor = edit;
 	ch->desc->connected = CON_EDITING;
 }
 
@@ -660,14 +660,14 @@ char *copy_buffer( CHAR_DATA *ch ) {
 		return str_dup( "" );
 	}
 
-	if ( !ch->editor ) {
+	if ( !ch->pcdata->editor ) {
 		bug( "copy_buffer: null editor", 0 );
 		return str_dup( "" );
 	}
 
 	buf[0] = '\0';
-	for ( x = 0; x < ch->editor->numlines; x++ ) {
-		strcpy( tmp, ch->editor->line[x] );
+	for ( x = 0; x < ch->pcdata->editor->numlines; x++ ) {
+		strcpy( tmp, ch->pcdata->editor->line[x] );
 		smush_tilde( tmp );
 		len = (int) strlen( tmp );
 		if ( tmp[0] != '\0' && tmp[len - 1] == '~' )
@@ -680,12 +680,12 @@ char *copy_buffer( CHAR_DATA *ch ) {
 }
 
 void stop_editing( CHAR_DATA *ch ) {
-	free( ch->editor );
-	ch->editor = NULL;
+	free( ch->pcdata->editor );
+	ch->pcdata->editor = NULL;
 	send_to_char( "Done.\n\r", ch );
-	ch->dest_buf = NULL;
-	ch->spare_ptr = NULL;
-	ch->substate = SUB_NONE;
+	ch->pcdata->dest_buf = NULL;
+	ch->pcdata->spare_ptr = NULL;
+	ch->pcdata->substate = SUB_NONE;
 	if ( !ch->desc ) {
 		bug( "Fatal: stop_editing: no desc", 0 );
 		return;

@@ -81,7 +81,7 @@ void violence_update( void ) {
 		     && ch->blinkykill == NULL
 		     && ch->embracing == NULL
 		     && ch->embraced == NULL
-		     && !IS_SET( ch->monkstuff, MONK_DEATH | MONK_HEAL )
+		     && ( IS_NPC( ch ) || !IS_SET( ch->pcdata->monkstuff, MONK_DEATH | MONK_HEAL ) )
 		     && ch->fight_timer == 0
 		     && ( !IS_CLASS( ch, CLASS_DEMON ) || ch->rage == 0 ) ) {
 			continue;
@@ -149,7 +149,7 @@ void violence_update( void ) {
 					ch->embraced = NULL;
 			}
 		}
-		if ( IS_SET( ch->monkstuff, MONK_DEATH ) ) {
+		if ( !IS_NPC( ch ) && IS_SET( ch->pcdata->monkstuff, MONK_DEATH ) ) {
 			if ( ch->hit > ( ch->max_hit / 2 ) ) {
 				stc( "Your writhe in agony as magical energies tear you asunder.\n\r", ch );
 				act( "$n writhes in agony as magical forces tear apart $s body.", ch, NULL, NULL, TO_ROOM );
@@ -158,7 +158,7 @@ void violence_update( void ) {
 				if ( number_range( 1, 2 ) == 1 ) {
 					stc( "You feel the magical forces leave your body.\n\r", ch );
 					act( "The magical forces leave $n's body.", ch, NULL, NULL, TO_ROOM );
-					REMOVE_BIT( ch->monkstuff, MONK_DEATH );
+					REMOVE_BIT( ch->pcdata->monkstuff, MONK_DEATH );
 				} else {
 					stc( "Your writhe in agony as magical energies tear you asunder.\n\r", ch );
 					act( "$n writhes in agony as magical forces tear apart $s body.", ch, NULL, NULL, TO_ROOM );
@@ -166,7 +166,7 @@ void violence_update( void ) {
 				}
 			}
 		}
-		if ( IS_SET( ch->monkstuff, MONK_HEAL ) ) {
+		if ( !IS_NPC( ch ) && IS_SET( ch->pcdata->monkstuff, MONK_HEAL ) ) {
 			if ( ch->hit < ( ch->max_hit / 2 ) && ch->hit > 0 ) {
 				modify_vitals( ch, number_range( 200, 400 ), 0, number_range( 175, 400 ) );
 				stc( "Your body emits glowing sparks.\n\r", ch );
@@ -175,7 +175,7 @@ void violence_update( void ) {
 				if ( number_range( 1, 2 ) == 1 ) {
 					stc( "The sparks fizzle and die.\n\r", ch );
 					act( "The sparks around $n's body fizzle and die.", ch, NULL, NULL, TO_ROOM );
-					REMOVE_BIT( ch->monkstuff, MONK_HEAL );
+					REMOVE_BIT( ch->pcdata->monkstuff, MONK_HEAL );
 				} else {
 					modify_vitals( ch, number_range( 200, 400 ), 0, number_range( 175, 400 ) );
 					stc( "Your body emits glowing sparks.\n\r", ch );
@@ -293,8 +293,8 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 				unarmed = number_range( 4, 7 );
 			else
 				unarmed = number_range( 0, 7 );
-			if ( !IS_NPC( ch ) && ch->cmbt[unarmed] != 0 && wieldorig == 0 )
-				fightaction( ch, victim, ch->cmbt[unarmed], dt, wieldtype );
+			if ( !IS_NPC( ch ) && ch_cmbt(ch)[unarmed] != 0 && wieldorig == 0 )
+				fightaction( ch, victim, ch_cmbt(ch)[unarmed], dt, wieldtype );
 		}
 	}
 	if ( dt == gsn_headbutt ) {
@@ -313,7 +313,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	if ( dt == gsn_shiroken ) {
 		for ( i = number_range( 3, 5 ); i > 0; i-- )
 			one_hit( ch, victim, dt, 1 );
-		if ( ch->pcdata->powers[NPOWER_NINGENNO] >= 5 )
+		if ( !IS_NPC( ch ) && ch->pcdata->powers[NPOWER_NINGENNO] >= 5 )
 			spell_poison( gsn_poison, ( ch->level * number_range( 50, 60 ) ), ch, victim );
 		return;
 	}
@@ -348,7 +348,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		return;
 	}
 	if ( dt == gsn_quills ) {
-		if ( ( IS_CLASS( ch, CLASS_WEREWOLF ) ) && ( ch->power[DISC_WERE_PAIN] > 9 ) ) {
+		if ( ( IS_CLASS( ch, CLASS_WEREWOLF ) ) && ( ch_power(ch)[DISC_WERE_PAIN] > 9 ) ) {
 			one_hit( ch, victim, dt, 1 );
 			one_hit( ch, victim, dt, 1 );
 			one_hit( ch, victim, dt, 1 );
@@ -431,7 +431,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_lightningkick, 1 );
 		if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_knee, 1 );
 		if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_lightningslash, 1 );
-		if ( ( ch->wpn[0] >= 1000 ) && ( ch->wpn[3] >= 1000 ) && ( ch->wpn[6] >= 1000 ) && ( ch->wpn[9] >= 1000 ) && ( ch->wpn[1] >= 1000 ) && ( ch->wpn[4] >= 1000 ) && ( ch->wpn[7] >= 1000 ) && ( ch->wpn[10] >= 1000 ) && ( ch->wpn[2] >= 1000 ) && ( ch->wpn[5] >= 1000 ) && ( ch->wpn[8] >= 1000 ) && ( ch->wpn[11] >= 1000 ) && ( ch->wpn[12] >= 1000 ) ) {
+		if ( ( ch_wpn(ch)[0] >= 1000 ) && ( ch_wpn(ch)[3] >= 1000 ) && ( ch_wpn(ch)[6] >= 1000 ) && ( ch_wpn(ch)[9] >= 1000 ) && ( ch_wpn(ch)[1] >= 1000 ) && ( ch_wpn(ch)[4] >= 1000 ) && ( ch_wpn(ch)[7] >= 1000 ) && ( ch_wpn(ch)[10] >= 1000 ) && ( ch_wpn(ch)[2] >= 1000 ) && ( ch_wpn(ch)[5] >= 1000 ) && ( ch_wpn(ch)[8] >= 1000 ) && ( ch_wpn(ch)[11] >= 1000 ) && ( ch_wpn(ch)[12] >= 1000 ) ) {
 			if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, dt, 1 );
 			if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_lightningkick, 1 );
 			if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_knee, 1 );
@@ -538,9 +538,9 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	else
 		wield = wield1;
 
-	if ( !IS_NPC( ch ) && ch->stance[0] > 0 && number_percent() == 5 ) {
-		int stance = ch->stance[0];
-		if ( ch->stance[stance] >= 200 ) {
+	if ( !IS_NPC( ch ) && ch_stance(ch)[0] > 0 && number_percent() == 5 ) {
+		int stance = ch_stance(ch)[0];
+		if ( ch_stance(ch)[stance] >= 200 ) {
 			special_move( ch, victim );
 			return;
 		}
@@ -552,7 +552,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		snprintf( buf, sizeof( buf ), "%s reforms as %s.\n\r", ch->morph, ch->name );
 		act( buf, ch, NULL, NULL, TO_ROOM );
 		free(ch->morph);
-		free(ch->objdesc);
+		if ( !IS_NPC( ch ) ) free(ch->pcdata->objdesc);
 		ch->long_descr = str_dup( "" );
 		REMOVE_BIT( ch->flag2, VAMP_OBJMASK );
 		REMOVE_BIT( ch->affected_by, AFF_POLYMORPH );
@@ -590,11 +590,11 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		if ( wield != NULL && wield->item_type == ITEM_WEAPON ) {
 			int tempnum = wield->value[3];
 			if ( tempnum >= 0 && tempnum <= 12 )
-				chance = (int) ( ( ch->wpn[tempnum] ) * 0.5 );
+				chance = (int) ( ( ch_wpn(ch)[tempnum] ) * 0.5 );
 			else
-				chance = (int) ( ( ch->wpn[0] ) * 0.5 ); /* Invalid weapon type, use default */
+				chance = (int) ( ( ch_wpn(ch)[0] ) * 0.5 ); /* Invalid weapon type, use default */
 		} else
-			chance = (int) ( ( ch->wpn[0] ) * 0.5 );
+			chance = (int) ( ( ch_wpn(ch)[0] ) * 0.5 );
 		if ( number_percent() <= chance ) maxcount += 1;
 	}
 	if ( wieldorig == 3 ) maxcount += 1;
@@ -805,7 +805,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	}
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_DEMAFF( ch, DEM_HORNS ) && number_range( 1, 3 ) == 1 )
 		one_hit( ch, victim, gsn_headbutt, 0 );
-	if ( IS_CLASS( ch, CLASS_DEMON ) && number_range( 1, 3 ) == 1 && ch->power[DISC_DAEM_HELL] > 3 )
+	if ( IS_CLASS( ch, CLASS_DEMON ) && number_range( 1, 3 ) == 1 && ch_power(ch)[DISC_DAEM_HELL] > 3 )
 		one_hit( ch, victim, gsn_hellfire, 0 );
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_DEMAFF( ch, DEM_TAIL ) && number_range( 1, 2 ) == 2 )
 		one_hit( ch, victim, gsn_sweep, 0 );
@@ -828,7 +828,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		multi_hit( ch, victim, gsn_darktendrils );
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_MULTIARMS ) && IS_CLASS( ch, CLASS_MAGE ) )
 		multi_hit( ch, victim, gsn_mageshield );
-	if ( !IS_NPC( ch ) && ch->monkab[BODY] > 3 && IS_CLASS( ch, CLASS_MONK ) )
+	if ( !IS_NPC( ch ) && ch_monkab(ch)[BODY] > 3 && IS_CLASS( ch, CLASS_MONK ) )
 		multi_hit( ch, victim, gsn_heavenlyaura );
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_ANGEL ) ) {
 		if ( IS_SET( ch->pcdata->powers[ANGEL_POWERS], ANGEL_AURA ) ) multi_hit( ch, victim, gsn_heavenlyaura );
@@ -864,7 +864,7 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		multi_hit( ch, victim, gsn_stinger );
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-		if ( IS_SET( ch->newbits, NEW_SLAM ) && number_range( 1, 5 - ch->power[DISC_WERE_BEAR] / 3 ) == 1 )
+		if ( IS_SET( ch->newbits, NEW_SLAM ) && number_range( 1, 5 - ch_power(ch)[DISC_WERE_BEAR] / 3 ) == 1 )
 			multi_hit( ch, victim, gsn_cheapshot );
 	}
 	if ( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_WINGS ) && number_range( 1, 2 ) == 1 && ch->level > 2 )
@@ -873,20 +873,20 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		multi_hit( ch, victim, gsn_buffet );
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_WINGS ) && number_range( 1, 3 ) == 1 )
 		one_hit( ch, victim, gsn_buffet, 0 );
-	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_RAPT] > 0 )
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_RAPT] > 0 )
 		multi_hit( ch, victim, gsn_rfangs );
 	if ( victim == NULL || victim->position != POS_FIGHTING ) return;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VAMPIRE ) && IS_VAMPAFF( ch, VAM_SERPENTIS ) )
 		spell_poison( gsn_poison, ( ch->level * number_range( 5, 10 ) ), ch, victim );
-	else if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_SPID] > 0 )
+	else if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_SPID] > 0 )
 		spell_poison( gsn_poison, ( ch->level * number_range( 5, 10 ) ), ch, victim );
 	else if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DROW ) && IS_SET( ch->pcdata->powers[1], DPOWER_DROWPOISON ) )
 		spell_poison( gsn_poison, ( ch->level * number_range( 10, 20 ) ), ch, victim );
 	if ( victim->itemaffect < 1 ) return;
-	if ( IS_NPC( victim ) || victim->spl[1] < 4 )
+	if ( IS_NPC( victim ) || ch_spl(victim)[1] < 4 )
 		level = victim->level;
 	else
-		level = (int) ( victim->spl[1] * 0.25 );
+		level = (int) ( ch_spl(victim)[1] * 0.25 );
 	if ( IS_SET( victim->newbits, NEW_MONKFLAME ) && !IS_AFFECTED( ch, AFF_FLAMING ) ) {
 		if ( number_percent() > 95 ) {
 			SET_BIT( ch->affected_by, AFF_FLAMING );
@@ -959,25 +959,25 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		return count;
 	}
 	if ( IS_NPC( victim ) ) {
-		if ( IS_STANCE( ch, STANCE_VIPER ) && number_percent() < ch->stance[STANCE_VIPER] * 0.5 )
+		if ( IS_STANCE( ch, STANCE_VIPER ) && number_percent() < ch_stance(ch)[STANCE_VIPER] * 0.5 )
 			count += 1;
-		else if ( IS_STANCE( ch, STANCE_MANTIS ) && number_percent() < ch->stance[STANCE_MANTIS] * 0.5 )
+		else if ( IS_STANCE( ch, STANCE_MANTIS ) && number_percent() < ch_stance(ch)[STANCE_MANTIS] * 0.5 )
 			count += 1;
-		else if ( IS_STANCE( ch, STANCE_TIGER ) && number_percent() < ch->stance[STANCE_TIGER] * 0.5 )
+		else if ( IS_STANCE( ch, STANCE_TIGER ) && number_percent() < ch_stance(ch)[STANCE_TIGER] * 0.5 )
 			count += 1;
-		else if ( IS_STANCE( ch, STANCE_WOLF ) && number_percent() < ch->stance[STANCE_WOLF] * 0.5 )
+		else if ( IS_STANCE( ch, STANCE_WOLF ) && number_percent() < ch_stance(ch)[STANCE_WOLF] * 0.5 )
 			count += 2;
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_SPEED ) && number_percent() < ch->stance[( ch->stance[0] )] * 0.5 )
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_SPEED ) && number_percent() < ch_stance(ch)[( ch_stance(ch)[0] )] * 0.5 )
 			count += 2;
 		if ( !IS_NPC( ch ) ) {
 			if ( ch->pcdata->upgrade_level > 0 ) count += ch->pcdata->upgrade_level;
-			if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_CELE] > 0 ) {
+			if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_CELE] > 0 ) {
 				count += (int) .5;
-				if ( ch->power[DISC_VAMP_CELE] > 5 ) {
+				if ( ch_power(ch)[DISC_VAMP_CELE] > 5 ) {
 					count += (int) .5;
-					if ( ch->power[DISC_VAMP_CELE] > 7 ) {
+					if ( ch_power(ch)[DISC_VAMP_CELE] > 7 ) {
 						count += (int) .5;
-						if ( ch->power[DISC_VAMP_CELE] > 9 )
+						if ( ch_power(ch)[DISC_VAMP_CELE] > 9 )
 							count += (int) .5;
 					}
 				}
@@ -986,8 +986,8 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( IS_CLASS( ch, CLASS_DROID ) ) count += ch->pcdata->powers[CYBORG_LIMBS];
 			if ( IS_CLASS( ch, CLASS_ANGEL ) ) count += ch->pcdata->powers[ANGEL_JUSTICE];
 			if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-				if ( ch->power[DISC_WERE_LYNX] > 2 ) count += 2;
-				if ( ch->power[DISC_WERE_BOAR] > 6 ) {
+				if ( ch_power(ch)[DISC_WERE_LYNX] > 2 ) count += 2;
+				if ( ch_power(ch)[DISC_WERE_BOAR] > 6 ) {
 					if ( ch->move > 40000 )
 						count += 5;
 					else
@@ -1108,28 +1108,28 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	} else {
 		if ( !IS_NPC( ch ) )
 			if ( ch->pcdata->upgrade_level > 0 ) count += ch->pcdata->upgrade_level;
-		if ( IS_STANCE( ch, STANCE_VIPER ) && number_percent() < ch->stance[STANCE_VIPER] * 0.5 )
+		if ( IS_STANCE( ch, STANCE_VIPER ) && number_percent() < ch_stance(ch)[STANCE_VIPER] * 0.5 )
 			count += 1;
-		else if ( IS_STANCE( ch, STANCE_MANTIS ) && number_percent() < ch->stance[STANCE_MANTIS] * 0.5 )
+		else if ( IS_STANCE( ch, STANCE_MANTIS ) && number_percent() < ch_stance(ch)[STANCE_MANTIS] * 0.5 )
 			count += 1;
-		else if ( IS_STANCE( ch, STANCE_TIGER ) && number_percent() < ch->stance[STANCE_TIGER] * 0.5 )
+		else if ( IS_STANCE( ch, STANCE_TIGER ) && number_percent() < ch_stance(ch)[STANCE_TIGER] * 0.5 )
 			count += 1;
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_SPEED ) && number_percent() < ch->stance[( ch->stance[0] )] * 0.5 )
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_SPEED ) && number_percent() < ch_stance(ch)[( ch_stance(ch)[0] )] * 0.5 )
 			count += 2;
 		if ( !IS_NPC( ch ) ) {
 			if ( IS_CLASS( ch, CLASS_DROID ) ) count += ch->pcdata->powers[CYBORG_LIMBS];
 			if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
-				if ( ch->power[DISC_VAMP_CELE] > 0 ) count += 1;
-				if ( ch->power[DISC_VAMP_CELE] > 5 ) count += 1;
-				if ( ch->power[DISC_VAMP_CELE] > 7 ) count += 1;
-				if ( ch->power[DISC_VAMP_CELE] > 9 ) count += 1;
+				if ( ch_power(ch)[DISC_VAMP_CELE] > 0 ) count += 1;
+				if ( ch_power(ch)[DISC_VAMP_CELE] > 5 ) count += 1;
+				if ( ch_power(ch)[DISC_VAMP_CELE] > 7 ) count += 1;
+				if ( ch_power(ch)[DISC_VAMP_CELE] > 9 ) count += 1;
 			}
-			if ( IS_CLASS( ch, CLASS_MONK ) && ch->monkab[COMBAT] > 0 ) count += ch->monkab[COMBAT];
+			if ( IS_CLASS( ch, CLASS_MONK ) && ch_monkab(ch)[COMBAT] > 0 ) count += ch_monkab(ch)[COMBAT];
 			if ( IS_CLASS( ch, CLASS_MAGE ) && IS_ITEMAFF( ch, ITEMA_BEAST ) ) count += 4;
 			if ( IS_CLASS( ch, CLASS_ANGEL ) ) count += 2;
 			if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) {
-				if ( ch->power[DISC_WERE_LYNX] > 2 ) count += 1;
-				if ( ch->power[DISC_WERE_BOAR] > 6 ) {
+				if ( ch_power(ch)[DISC_WERE_LYNX] > 2 ) count += 1;
+				if ( ch_power(ch)[DISC_WERE_BOAR] > 6 ) {
 					if ( ch->move > 15000 )
 						count += 10;
 					else
@@ -1166,20 +1166,20 @@ int number_attacks( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( IS_ITEMAFF( ch, ITEMA_SPEED ) ) count += 1;
 			if ( IS_CLASS( ch, CLASS_SAMURAI ) ) count += 5;
 			if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MAGE ) && IS_ITEMAFF( ch, ITEMA_BEAST ) ) count += 4;
-			if ( IS_CLASS( ch, CLASS_DEMON ) && ch->power[DISC_DAEM_ATTA] > 0 ) count += ch->power[DISC_DAEM_ATTA] / 2;
+			if ( IS_CLASS( ch, CLASS_DEMON ) && ch_power(ch)[DISC_DAEM_ATTA] > 0 ) count += ch_power(ch)[DISC_DAEM_ATTA] / 2;
 			if ( IS_CLASS( ch, CLASS_DROW ) ) {
 				if ( IS_SET( ch->special, SPC_DROW_WAR ) ) count += 3;
 				if ( IS_SET( ch->pcdata->powers[1], DPOWER_SPEED ) ) count += 5;
 			}
 		}
-		if ( victim->power[DISC_VAMP_CELE] >= 3 )
-			count -= victim->power[DISC_VAMP_CELE] / 3;
-		if ( victim->power[DISC_WERE_MANT] >= 3 )
-			count -= victim->power[DISC_WERE_MANT] / 3;
+		if ( ch_power(victim)[DISC_VAMP_CELE] >= 3 )
+			count -= ch_power(victim)[DISC_VAMP_CELE] / 3;
+		if ( ch_power(victim)[DISC_WERE_MANT] >= 3 )
+			count -= ch_power(victim)[DISC_WERE_MANT] / 3;
 		else if ( IS_ITEMAFF( victim, ITEMA_AFFMANTIS ) )
 			count -= 1;
-		if ( victim->power[DISC_DAEM_ATTA] > 0 )
-			count -= victim->power[DISC_DAEM_ATTA] / 2;
+		if ( ch_power(victim)[DISC_DAEM_ATTA] > 0 )
+			count -= ch_power(victim)[DISC_DAEM_ATTA] / 2;
 		if ( number_range( 1, 4 ) == 2 )
 			count -= 1;
 	}
@@ -1250,8 +1250,8 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 		if ( wield != NULL && wield->item_type == ITEM_WEAPON && wield->value[3] >= 0 && wield->value[3] <= 12 )
 			dt += wield->value[3];
 	}
-	if ( dt >= TYPE_HIT && dt <= TYPE_HIT + 12 && ch->wpn[dt - 1000] > 5 )
-		level = ( ch->wpn[dt - 1000] / 5 );
+	if ( dt >= TYPE_HIT && dt <= TYPE_HIT + 12 && ch_wpn(ch)[dt - 1000] > 5 )
+		level = ( ch_wpn(ch)[dt - 1000] / 5 );
 	else
 		level = 1;
 	if ( level > 40 ) level = 40;
@@ -1270,11 +1270,11 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	victim_ac = UMAX( -100, char_ac( victim ) / 10 );
 	if ( !can_see( ch, victim ) )
 		victim_ac -= 4;
-	if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_3 ) )
+	if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_3 ) )
 		victim_ac += 300;
-	if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_2 ) )
+	if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_2 ) )
 		victim_ac += 200;
-	if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_1 ) )
+	if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_1 ) )
 		victim_ac += 100;
 
 	/*
@@ -1302,7 +1302,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 			dam += (int) ( dam * 0.5 );
 	} else {
 		if ( dt == gsn_mageshield ) {
-			dam = ( ch->spl[RED_MAGIC] + ch->spl[YELLOW_MAGIC] + ch->spl[GREEN_MAGIC] + ch->spl[PURPLE_MAGIC] + ch->spl[BLUE_MAGIC] ) / 5;
+			dam = ( ch_spl(ch)[RED_MAGIC] + ch_spl(ch)[YELLOW_MAGIC] + ch_spl(ch)[GREEN_MAGIC] + ch_spl(ch)[PURPLE_MAGIC] + ch_spl(ch)[BLUE_MAGIC] ) / 5;
 			dam = number_range( 2 * dam, 3 * dam );
 		} else if ( wield != NULL && wield->item_type == ITEM_WEAPON )
 			dam = dice( wield->value[1], wield->value[2] );
@@ -1328,7 +1328,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	 */
 	dam += char_damroll( ch );
 	if ( !IS_AWAKE( victim ) ) dam *= cfg( CFG_COMBAT_SLEEP_DAMAGE_MULTIPLIER );
-	if ( !IS_NPC( ch ) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12 ) dam = dam + ( dam * ( UMIN( cfg( CFG_COMBAT_WPN_DAM_SKILL_CAP ), ( ch->wpn[dt - 1000] + 1 ) ) / cfg( CFG_COMBAT_WPN_DAM_DIVISOR ) ) );
+	if ( !IS_NPC( ch ) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12 ) dam = dam + ( dam * ( UMIN( cfg( CFG_COMBAT_WPN_DAM_SKILL_CAP ), ( ch_wpn(ch)[dt - 1000] + 1 ) ) / cfg( CFG_COMBAT_WPN_DAM_DIVISOR ) ) );
 
 	/* Other Resistances */
 
@@ -1353,7 +1353,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	 * I doubt this has much effect - Jobo
 	 */
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VAMPIRE ) && IS_NPC( victim ) )
-		dam *= ( 1 + ch->power[DISC_VAMP_POTE] / 15 );
+		dam *= ( 1 + ch_power(ch)[DISC_VAMP_POTE] / 15 );
 
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_TANARRI ) ) {
 		if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_MIGHT ) ) dam = dam * cfg( CFG_COMBAT_DMG_MULT_TANARRI_MIGHT ) / 100;
@@ -1393,29 +1393,29 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 
 	if ( IS_NPC( victim ) ) {
 
-		if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_3 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += (int) ( dam * 1.5 * ( ch->stance[( ch->stance[0] )] / 200 ) );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_2 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += (int) ( dam * 1.0 * ( ch->stance[( ch->stance[0] )] / 200 ) );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_1 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += (int) ( dam * 0.5 * ( ch->stance[( ch->stance[0] )] / 200 ) );
+		if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_3 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += (int) ( dam * 1.5 * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 200 ) );
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_2 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += (int) ( dam * 1.0 * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 200 ) );
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_1 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += (int) ( dam * 0.5 * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 200 ) );
 	}
 
 	if ( !IS_NPC( victim ) ) {
 
-		if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_3 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += (int) ( dam * 0.5 * ( ch->stance[( ch->stance[0] )] / 200 ) );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_2 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += (int) ( dam * 0.3 * ( ch->stance[( ch->stance[0] )] / 200 ) );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_1 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += (int) ( dam * 0.1 * ( ch->stance[( ch->stance[0] )] / 200 ) );
+		if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_3 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += (int) ( dam * 0.5 * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 200 ) );
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_2 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += (int) ( dam * 0.3 * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 200 ) );
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_1 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += (int) ( dam * 0.1 * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 200 ) );
 	}
 
-	if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_RESIST_3 ) && victim->stance[( victim->stance[0] )] > 100 )
+	if ( ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_RESIST_3 ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 )
 		dam = (int) ( dam * 0.7 );
-	else if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_RESIST_2 ) && victim->stance[( victim->stance[0] )] > 100 )
+	else if ( ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_RESIST_2 ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 )
 		dam = (int) ( dam * 0.8 );
-	else if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_RESIST_1 ) && victim->stance[( victim->stance[0] )] > 100 )
+	else if ( ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_RESIST_1 ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 )
 		dam = (int) ( dam * 0.9 );
 
 	/* The test ends here */
@@ -1441,7 +1441,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 		if ( ch->pcdata->powers[WEAPONSKILL] > 4 ) dam = (int) ( dam * 1.2 );
 		if ( ch->pcdata->powers[WEAPONSKILL] > 8 ) dam = (int) ( dam * 1.3 );
 	}
-	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_BEAR] > 5 )
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_BEAR] > 5 )
 		dam = (int) ( dam * 1.2 );
 	/* Wyrm: ancientwrath damage bonus */
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WYRM ) &&
@@ -1522,8 +1522,8 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 		}
 	}
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MONK ) && dt != gsn_heavenlyaura ) {
-		if ( ch->chi[CURRENT] > 0 && ch->chi[CURRENT] < 3 ) dam = (int) ( dam * 1.3 );
-		if ( ch->chi[CURRENT] > 2 && ch->chi[CURRENT] < 7 ) dam *= ( ( ch->chi[CURRENT] ) / 2 );
+		if ( ch_chi(ch)[CURRENT] > 0 && ch_chi(ch)[CURRENT] < 3 ) dam = (int) ( dam * 1.3 );
+		if ( ch_chi(ch)[CURRENT] > 2 && ch_chi(ch)[CURRENT] < 7 ) dam *= ( ( ch_chi(ch)[CURRENT] ) / 2 );
 	}
 	if ( dt == gsn_garotte )
 		dam *= ( number_range( 3, 5 ) );
@@ -1617,9 +1617,9 @@ int cap_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		if ( victim->pcdata->powers[CYBORG_BODY] > 0 ) dam = (int) ( dam / 1.75 );
 	}
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_VAMPIRE ) ) {
-		if ( victim->power[DISC_VAMP_PROT] >= 10 ) dam = (int) ( dam / 1.5 );
-		if ( victim->power[DISC_VAMP_FORT] > 0 ) {
-			dam = (int) ( dam * ( 100 - ( victim->power[DISC_VAMP_FORT] * 5.5 ) ) );
+		if ( ch_power(victim)[DISC_VAMP_PROT] >= 10 ) dam = (int) ( dam / 1.5 );
+		if ( ch_power(victim)[DISC_VAMP_FORT] > 0 ) {
+			dam = (int) ( dam * ( 100 - ( ch_power(victim)[DISC_VAMP_FORT] * 5.5 ) ) );
 			dam /= 100;
 		}
 	}
@@ -1659,17 +1659,17 @@ int cap_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 			dam = dam * 80 / 100;  /* Additional 20% DR in wyrmform */
 	}
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_MONK ) ) {
-		if ( victim->monkab[BODY] >= 2 ) dam = (int) ( dam / 1.5 );
-		if ( victim->chi[CURRENT] > 0 ) {
-			dam *= ( 100 - ( victim->chi[CURRENT] * 7 ) );
+		if ( ch_monkab(victim)[BODY] >= 2 ) dam = (int) ( dam / 1.5 );
+		if ( ch_chi(victim)[CURRENT] > 0 ) {
+			dam *= ( 100 - ( ch_chi(victim)[CURRENT] * 7 ) );
 			dam /= 100;
 		}
 		/* Steel Skin mantra - 20% damage reduction */
 		if ( IS_SET( victim->newbits, NEW_MONKSKIN ) ) dam = (int) ( dam * 0.80 );
 	}
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_DEMON ) ) {
-		if ( victim->power[DISC_DAEM_IMMU] > 0 ) {
-			dam *= ( 100 - ( victim->power[DISC_DAEM_IMMU] * 4 ) );
+		if ( ch_power(victim)[DISC_DAEM_IMMU] > 0 ) {
+			dam *= ( 100 - ( ch_power(victim)[DISC_DAEM_IMMU] * 4 ) );
 			dam /= 100;
 		}
 		if ( IS_DEMPOWER( victim, DEM_TOUGH ) ) dam = (int) ( dam * 0.8 );
@@ -1687,7 +1687,7 @@ int cap_dam( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		if ( victim->pcdata->powers[NPOWER_CHIKYU] >= 1 ) dam = (int) ( dam / 2.2 );
 	}
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) ) {
-		if ( victim->power[DISC_WERE_BOAR] > 2 ) dam /= 2;
+		if ( ch_power(victim)[DISC_WERE_BOAR] > 2 ) dam /= 2;
 		if ( IS_GAR1( victim, WOLF_COCOON ) ) dam /= 2;
 	}
 	if ( dam >= 2000 ) dam = dam - ( dam / number_range( 3, 10 ) + number_range( 10, 30 ) );
@@ -1718,7 +1718,7 @@ bool can_bypass( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		return TRUE;
 	else if ( IS_STANCE( ch, STANCE_WOLF ) )
 		return TRUE;
-	else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_BYPASS ) )
+	else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_BYPASS ) )
 		return TRUE;
 	return FALSE;
 }
@@ -1769,7 +1769,7 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( IS_SET( ch->newbits, NEW_DFORM ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROW_FORM );
 		}
 		if ( IS_CLASS( ch, CLASS_DEMON ) && ch->in_room != NULL ) {
-			max_dam += ch->power[DISC_DAEM_ATTA] * 50;
+			max_dam += ch_power(ch)[DISC_DAEM_ATTA] * 50;
 			max_dam += cfg( CFG_COMBAT_DAMCAP_DEMON_BASE );
 			if ( ch->pcdata->souls > 0 ) max_dam += UMIN( cfg( CFG_COMBAT_DAMCAP_DEMON_SOUL_CAP ), cfg( CFG_COMBAT_DAMCAP_DEMON_SOUL_MULT ) * ch->pcdata->souls );
 			if ( ch->in_room->vnum >= 93420 && ch->in_room->vnum <= 93426 ) max_dam += cfg( CFG_COMBAT_DAMCAP_DEMON_HELL );
@@ -1783,13 +1783,13 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			if ( ch->pcdata->powers[CYBORG_LIMBS] > 4 ) max_dam += cfg( CFG_COMBAT_DAMCAP_DROID_PER_LIMB );
 		}
 		if ( IS_CLASS( ch, CLASS_MONK ) ) {
-			max_dam += ( ch->monkab[COMBAT] * cfg( CFG_COMBAT_DAMCAP_MONK_COMBAT_MULT ) );
-			if ( ch->chi[CURRENT] > 0 ) max_dam += ch->chi[CURRENT] * cfg( CFG_COMBAT_DAMCAP_MONK_CHI_MULT );
+			max_dam += ( ch_monkab(ch)[COMBAT] * cfg( CFG_COMBAT_DAMCAP_MONK_COMBAT_MULT ) );
+			if ( ch_chi(ch)[CURRENT] > 0 ) max_dam += ch_chi(ch)[CURRENT] * cfg( CFG_COMBAT_DAMCAP_MONK_CHI_MULT );
 		}
 		if ( IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 			max_dam += ( ch->rage * cfg( CFG_COMBAT_DAMCAP_VAMP_RAGE_MULT ) );
-			if ( ch->power[DISC_VAMP_POTE] > 0 )
-				max_dam += ( ch->power[DISC_VAMP_POTE] * cfg( CFG_COMBAT_DAMCAP_VAMP_POTE_MULT ) );
+			if ( ch_power(ch)[DISC_VAMP_POTE] > 0 )
+				max_dam += ( ch_power(ch)[DISC_VAMP_POTE] * cfg( CFG_COMBAT_DAMCAP_VAMP_POTE_MULT ) );
 			if ( ch->pcdata->rank == AGE_TRUEBLOOD )
 				max_dam += cfg( CFG_COMBAT_DAMCAP_VAMP_TRUEBLOOD );
 			else if ( ch->pcdata->rank == AGE_LA_MAGRA )
@@ -1813,13 +1813,13 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 				max_dam += ch->rage * cfg( CFG_COMBAT_DAMCAP_WW_RAGE_MULT );
 				max_dam += cfg( CFG_COMBAT_DAMCAP_WW_HIGH_RAGE );
 			}
-			if ( ch->power[DISC_WERE_PAIN] > 9 ) max_dam += cfg( CFG_COMBAT_DAMCAP_WW_PAIN );
+			if ( ch_power(ch)[DISC_WERE_PAIN] > 9 ) max_dam += cfg( CFG_COMBAT_DAMCAP_WW_PAIN );
 		}
 		if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) )
 			max_dam += ch->pcdata->powers[WEAPONSKILL] * cfg( CFG_COMBAT_DAMCAP_UK_WPN_MULT );
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) && ( get_eq_char( ch, WEAR_WIELD ) != NULL ) ) {
 			for ( i = 0; i < 13; i++ )
-				if ( ch->wpn[i] >= 1000 ) max_dam += cfg( CFG_COMBAT_DAMCAP_SAMURAI_PER_WPN );
+				if ( ch_wpn(ch)[i] >= 1000 ) max_dam += cfg( CFG_COMBAT_DAMCAP_SAMURAI_PER_WPN );
 			max_dam += cfg( CFG_COMBAT_DAMCAP_SAMURAI_BASE );
 		}
 		/* Dirgesinger/Siren: resonance-based damcap bonus + battlehymn */
@@ -1941,29 +1941,29 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 	}
 	if ( IS_ITEMAFF( ch, ITEMA_ARTIFACT ) ) max_dam += cfg( CFG_COMBAT_DAMCAP_ARTIFACT );
 
-	if ( IS_NPC( victim ) || victim->stance[0] != STANCE_MONKEY ) {
-		if ( ch->stance[0] == STANCE_BULL )
+	if ( IS_NPC( victim ) || ch_stance(victim)[0] != STANCE_MONKEY ) {
+		if ( ch_stance(ch)[0] == STANCE_BULL )
 			max_dam += cfg( CFG_COMBAT_DAMCAP_STANCE_BULL );
-		else if ( ch->stance[0] == STANCE_DRAGON )
+		else if ( ch_stance(ch)[0] == STANCE_DRAGON )
 			max_dam += cfg( CFG_COMBAT_DAMCAP_STANCE_DRAGON );
-		else if ( ch->stance[0] == STANCE_WOLF )
+		else if ( ch_stance(ch)[0] == STANCE_WOLF )
 			max_dam += cfg( CFG_COMBAT_DAMCAP_STANCE_WOLF );
-		else if ( ch->stance[0] == STANCE_TIGER )
+		else if ( ch_stance(ch)[0] == STANCE_TIGER )
 			max_dam += cfg( CFG_COMBAT_DAMCAP_STANCE_TIGER );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_3 ) )
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMCAP_3 ) )
 			max_dam += cfg_superstance_cap( 3 );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_2 ) )
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMCAP_2 ) )
 			max_dam += cfg_superstance_cap( 2 );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMCAP_1 ) )
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMCAP_1 ) )
 			max_dam += cfg_superstance_cap( 1 );
 	}
 
-	if ( !IS_NPC( victim ) && ch->stance[0] != STANCE_MONKEY ) {
-		if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_3 ) )
+	if ( !IS_NPC( victim ) && ch_stance(ch)[0] != STANCE_MONKEY ) {
+		if ( ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_REV_DAMCAP_3 ) )
 			max_dam -= cfg_rev_superstance_cap( 3 );
-		else if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_2 ) )
+		else if ( ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_REV_DAMCAP_2 ) )
 			max_dam -= cfg_rev_superstance_cap( 2 );
-		else if ( victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_REV_DAMCAP_1 ) )
+		else if ( ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_REV_DAMCAP_1 ) )
 			max_dam -= cfg_rev_superstance_cap( 1 );
 	}
 
@@ -1978,13 +1978,13 @@ void update_damcap( CHAR_DATA *ch, CHAR_DATA *victim ) {
 			max_dam += ( 250 - silver_tol );
 		/* Vampies */
 		if ( !IS_NPC( ch ) && ( IS_CLASS( victim, CLASS_VAMPIRE ) ) )
-			max_dam -= ( victim->power[DISC_VAMP_FORT] * cfg( CFG_COMBAT_DAMCAP_VAMP_FORT_MULT ) );
-		if ( IS_NPC( ch ) || ch->stance[0] != STANCE_MONKEY ) {
-			if ( victim->stance[0] == STANCE_CRAB )
+			max_dam -= ( ch_power(victim)[DISC_VAMP_FORT] * cfg( CFG_COMBAT_DAMCAP_VAMP_FORT_MULT ) );
+		if ( IS_NPC( ch ) || ch_stance(ch)[0] != STANCE_MONKEY ) {
+			if ( ch_stance(victim)[0] == STANCE_CRAB )
 				max_dam -= cfg( CFG_COMBAT_DAMCAP_STANCE_CRAB );
-			else if ( victim->stance[0] == STANCE_DRAGON )
+			else if ( ch_stance(victim)[0] == STANCE_DRAGON )
 				max_dam -= cfg( CFG_COMBAT_DAMCAP_STANCE_DRAGON_DEF );
-			else if ( victim->stance[0] == STANCE_SWALLOW )
+			else if ( ch_stance(victim)[0] == STANCE_SWALLOW )
 				max_dam -= cfg( CFG_COMBAT_DAMCAP_STANCE_SWALLOW );
 		}
 		if ( IS_CLASS( victim, CLASS_DEMON ) && ( victim->in_room->vnum >= 93420 && victim->in_room->vnum <= 93426 ) )
@@ -2084,33 +2084,33 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			if ( check_dodge( ch, victim, dt ) )
 				return;
 			if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_MONGOOSE ) &&
-				victim->stance[STANCE_MONGOOSE] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_dodge( ch, victim, dt ) )
+				ch_stance(victim)[STANCE_MONGOOSE] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_dodge( ch, victim, dt ) )
 				return;
 			else if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_SWALLOW ) &&
-				victim->stance[STANCE_SWALLOW] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_dodge( ch, victim, dt ) )
+				ch_stance(victim)[STANCE_SWALLOW] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_dodge( ch, victim, dt ) )
 				return;
 
 			/* ------------ This is the part for superstances, Jobo ------------------- */
-			else if ( !IS_NPC( victim ) && victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_DODGE ) && victim->stance[( victim->stance[0] )] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_dodge( ch, victim, dt ) )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_DODGE ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_dodge( ch, victim, dt ) )
 				return;
 			/* ------------ This is the end for superstances, Jobo ------------------- */
 
 			if ( check_parry( ch, victim, dt ) ) return;
 			if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_CRANE ) &&
-				victim->stance[STANCE_CRANE] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_parry( ch, victim, dt ) )
+				ch_stance(victim)[STANCE_CRANE] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_parry( ch, victim, dt ) )
 				return;
 			else if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_MANTIS ) &&
-				victim->stance[STANCE_MANTIS] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_parry( ch, victim, dt ) )
+				ch_stance(victim)[STANCE_MANTIS] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_parry( ch, victim, dt ) )
 				return;
 
 			/* ------------ This is the part for superstances, Jobo ------------------- */
-			else if ( !IS_NPC( victim ) && victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_PARRY ) && victim->stance[( victim->stance[0] )] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_parry( ch, victim, dt ) )
+			else if ( !IS_NPC( victim ) && ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_PARRY ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) && check_parry( ch, victim, dt ) )
 				return;
 			/* ------------ This is the end for superstances, Jobo ------------------- */
 		}
 		dam_message( ch, victim, dam, dt );
 	}
-	if ( IS_CLASS( victim, CLASS_MONK ) && victim->monkab[SPIRIT] >= 2 ) {
+	if ( IS_CLASS( victim, CLASS_MONK ) && ch_monkab(victim)[SPIRIT] >= 2 ) {
 		if ( IS_SET( victim->newbits, NEW_NATURAL ) ) {
 			stc( "You absorb the natural imbalances of your opponent.\n\r", victim );
 			act( "$n absorbs the natural imbalances of you attack.", victim, NULL, ch, TO_VICT );
@@ -2436,7 +2436,7 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		MOB_INDEX_DATA *victim_idx = IS_NPC( victim ) ? victim->pIndexData : NULL;
 
 		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) {
-			ch->mkill += 1;
+			ch->pcdata->mkill += 1;
 			ch->pcdata->stats_dirty = TRUE;
 
 			if ( IS_CLASS( ch, CLASS_DEMON ) || IS_CLASS( ch, CLASS_DROW ) || IS_CLASS( ch, CLASS_DROID ) || IS_CLASS( ch, CLASS_TANARRI ) ) {
@@ -2450,13 +2450,13 @@ void hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 					if ( !IS_SET( ch->act, PLR_BRIEF4 ) ) send_to_char( buf, ch );
 				}
 			}
-			if ( ch->level == 1 && ch->mkill > 4 ) {
+			if ( ch->level == 1 && ch->pcdata->mkill > 4 ) {
 				ch->level = 2;
 				do_save( ch, "" );
 			}
 		}
 		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) {
-			victim->mdeath = victim->mdeath + 1;
+			victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 			victim->pcdata->stats_dirty = TRUE;
 		}
 		mcmp_combat_death( ch, victim );
@@ -2600,7 +2600,7 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	if ( !IS_AWAKE( victim ) ) return FALSE;
 	if ( IS_NPC( victim ) )
 		obj = NULL;
-	else if ( IS_CLASS( victim, CLASS_WEREWOLF ) && victim->power[DISC_WERE_BEAR] > 2 && IS_VAMPAFF( victim, VAM_CLAWS ) && get_eq_char( victim, WEAR_WIELD ) == NULL && get_eq_char( victim, WEAR_HOLD ) == NULL ) {
+	else if ( IS_CLASS( victim, CLASS_WEREWOLF ) && ch_power(victim)[DISC_WERE_BEAR] > 2 && IS_VAMPAFF( victim, VAM_CLAWS ) && get_eq_char( victim, WEAR_WIELD ) == NULL && get_eq_char( victim, WEAR_HOLD ) == NULL ) {
 		obj = NULL;
 		claws = TRUE;
 	} else if ( IS_CLASS( victim, CLASS_MONK ) && IS_SET( victim->newbits, NEW_MONKADAM ) && get_eq_char( victim, WEAR_WIELD ) == NULL && get_eq_char( victim, WEAR_HOLD ) == NULL ) {
@@ -2618,36 +2618,36 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	if ( ( dt < 1000 || dt > 1012 ) && !IS_CLASS( ch, CLASS_MONK ) ) return FALSE;
 	if ( dt >= 1000 && dt <= 1012 ) {
 		if ( !IS_NPC( ch ) )
-			chance -= (int) ( ch->wpn[dt - 1000] * 0.1 );
+			chance -= (int) ( ch_wpn(ch)[dt - 1000] * 0.1 );
 		else
 			chance -= (int) ( ch->level * 0.2 );
 		if ( !IS_NPC( victim ) )
-			chance += (int) ( victim->wpn[dt - 1000] * 0.5 );
+			chance += (int) ( ch_wpn(victim)[dt - 1000] * 0.5 );
 		else
 			chance += victim->level;
 	} else {
 		if ( !IS_NPC( ch ) )
-			chance -= (int) ( ch->wpn[0] * 0.1 );
+			chance -= (int) ( ch_wpn(ch)[0] * 0.1 );
 		else
 			chance -= (int) ( ch->level * 0.2 );
 		if ( !IS_NPC( victim ) )
-			chance += (int) ( victim->wpn[0] * 0.5 );
+			chance += (int) ( ch_wpn(victim)[0] * 0.5 );
 		else
 			chance += victim->level;
 	}
-	if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_CRANE ) && victim->stance[STANCE_CRANE] > 0 && !can_counter( ch ) && !can_bypass( ch, victim ) )
-		chance += (int) ( victim->stance[STANCE_CRANE] * 0.25 );
-	else if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_MANTIS ) && victim->stance[STANCE_MANTIS] > 0 && !can_counter( ch ) && !can_bypass( ch, victim ) )
-		chance += (int) ( victim->stance[STANCE_MANTIS] * 0.25 );
+	if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_CRANE ) && ch_stance(victim)[STANCE_CRANE] > 0 && !can_counter( ch ) && !can_bypass( ch, victim ) )
+		chance += (int) ( ch_stance(victim)[STANCE_CRANE] * 0.25 );
+	else if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_MANTIS ) && ch_stance(victim)[STANCE_MANTIS] > 0 && !can_counter( ch ) && !can_bypass( ch, victim ) )
+		chance += (int) ( ch_stance(victim)[STANCE_MANTIS] * 0.25 );
 
 	/* ------------ This is the part for superstances, Jobo ------------------- */
-	if ( !IS_NPC( victim ) && victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_PARRY ) && victim->stance[( victim->stance[0] )] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) )
-		chance += (int) ( victim->stance[( victim->stance[0] )] * 0.25 );
+	if ( !IS_NPC( victim ) && ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_PARRY ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) )
+		chance += (int) ( ch_stance(victim)[( ch_stance(victim)[0] )] * 0.25 );
 	/* ------------ This is the end for superstances, Jobo ------------------- */
 
 	chance -= (int) ( char_hitroll( ch ) * 0.1 );
 	if ( claws ) {
-		if ( victim->power[DISC_WERE_LYNX] > 3 )
+		if ( ch_power(victim)[DISC_WERE_LYNX] > 3 )
 			chance += (int) ( char_hitroll( victim ) * 0.1 );
 		else
 			chance += (int) ( char_hitroll( victim ) * 0.075 );
@@ -2674,16 +2674,16 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 			if ( ch->pcdata->powers[TANARRI_FURY_ON] == 1 ) chance -= 17;
 		}
 		if ( IS_CLASS( ch, CLASS_ANGEL ) ) chance -= ch->pcdata->powers[ANGEL_JUSTICE] * 9;
-		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch->power[DISC_VAMP_CELE] > 0 ) chance -= ( ch->power[DISC_VAMP_CELE] * 3 );
+		if ( IS_CLASS( ch, CLASS_VAMPIRE ) && ch_power(ch)[DISC_VAMP_CELE] > 0 ) chance -= ( ch_power(ch)[DISC_VAMP_CELE] * 3 );
 		if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_CHIKYU] >= 6 && ch->pcdata->powers[HARA_KIRI] > 0 ) chance -= 25;
 		if ( ch->pcdata->powers[NPOWER_CHIKYU] >= 5 && IS_CLASS( ch, CLASS_NINJA ) ) chance -= 20;
 		if ( IS_CLASS( ch, CLASS_DEMON ) && IS_DEMPOWER( ch, DEM_SPEED ) ) chance -= 25;
-		if ( IS_CLASS( ch, CLASS_MONK ) && ch->chi[CURRENT] > 0 ) chance -= ( ch->chi[CURRENT] * 7 );
+		if ( IS_CLASS( ch, CLASS_MONK ) && ch_chi(ch)[CURRENT] > 0 ) chance -= ( ch_chi(ch)[CURRENT] * 7 );
 		if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) ) chance -= (int) ( ch->pcdata->powers[WEAPONSKILL] * 3.5 );
 		if ( IS_CLASS( ch, CLASS_MAGE ) && IS_ITEMAFF( ch, ITEMA_BEAST ) ) chance -= 30;
 		if ( IS_CLASS( ch, CLASS_DROW ) && IS_SET( ch->pcdata->powers[1], DPOWER_ARMS ) ) chance -= 30;
 		if ( IS_SET( ch->newbits, NEW_MONKFLAME ) ) chance -= 3;
-		if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) chance -= ( ch->power[DISC_WERE_MANT] * 3 );
+		if ( IS_CLASS( ch, CLASS_WEREWOLF ) ) chance -= ( ch_power(ch)[DISC_WERE_MANT] * 3 );
 		if ( IS_CLASS( ch, CLASS_SAMURAI ) ) chance -= 25;
 		if ( IS_ITEMAFF( ch, ITEMA_AFFMANTIS ) ) chance -= 12;
 	}
@@ -2711,9 +2711,9 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		if ( IS_CLASS( victim, CLASS_ANGEL ) ) chance += victim->pcdata->powers[ANGEL_PEACE] * 9;
 		if ( victim->pcdata->powers[NPOWER_CHIKYU] >= 5 && IS_CLASS( victim, CLASS_NINJA ) ) chance += 20;
 		if ( IS_CLASS( victim, CLASS_NINJA ) && victim->pcdata->powers[NPOWER_CHIKYU] >= 6 && victim->pcdata->powers[HARA_KIRI] > 0 ) chance += 25;
-		if ( victim->power[DISC_VAMP_CELE] > 0 && IS_CLASS( victim, CLASS_VAMPIRE ) ) chance += ( victim->power[DISC_VAMP_CELE] * 3 );
+		if ( ch_power(victim)[DISC_VAMP_CELE] > 0 && IS_CLASS( victim, CLASS_VAMPIRE ) ) chance += ( ch_power(victim)[DISC_VAMP_CELE] * 3 );
 		if ( IS_CLASS( victim, CLASS_DROW ) && IS_SET( victim->pcdata->powers[1], DPOWER_ARMS ) ) chance += 30;
-		if ( IS_CLASS( victim, CLASS_MONK ) && ch->chi[CURRENT] > 0 ) chance += ( ch->chi[CURRENT] * 8 );
+		if ( IS_CLASS( victim, CLASS_MONK ) && ch_chi(ch)[CURRENT] > 0 ) chance += ( ch_chi(ch)[CURRENT] * 8 );
 		if ( IS_SET( victim->newbits, NEW_MONKFLAME ) ) chance += 4;
 		if ( IS_CLASS( victim, CLASS_SAMURAI ) ) chance += 25;
 		if ( IS_CLASS( victim, CLASS_UNDEAD_KNIGHT ) ) chance += victim->pcdata->powers[WEAPONSKILL] * 4;
@@ -2726,7 +2726,7 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		chance = 20;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_LICH ) ) chance -= 15;
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_LICH ) ) chance += 15;
-	if ( !IS_NPC( ch ) && ch->power[DISC_VAMP_CELE] > 0 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
+	if ( !IS_NPC( ch ) && ch_power(ch)[DISC_VAMP_CELE] > 0 && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 		if ( ch->pcdata->rank == AGE_TRUEBLOOD )
 			chance -= 20;
 		else if ( ch->pcdata->rank == AGE_LA_MAGRA )
@@ -2795,9 +2795,9 @@ bool check_parry( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		else if ( ch->pcdata->rank == BELT_THREE )
 			chance -= 2;
 	}
-	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) ) chance -= ( ch->power[DISC_DAEM_ATTA] );
-	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_DEMON ) ) chance += ( victim->power[DISC_DAEM_ATTA] );
-	if ( !IS_NPC( victim ) && victim->power[DISC_VAMP_CELE] > 0 && IS_CLASS( victim, CLASS_VAMPIRE ) ) {
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_DEMON ) ) chance -= ( ch_power(ch)[DISC_DAEM_ATTA] );
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_DEMON ) ) chance += ( ch_power(victim)[DISC_DAEM_ATTA] );
+	if ( !IS_NPC( victim ) && ch_power(victim)[DISC_VAMP_CELE] > 0 && IS_CLASS( victim, CLASS_VAMPIRE ) ) {
 		if ( victim->pcdata->rank == AGE_TRUEBLOOD )
 			chance += 20;
 		else if ( victim->pcdata->rank == AGE_LA_MAGRA )
@@ -2885,23 +2885,23 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 
 	if ( !IS_AWAKE( victim ) ) return FALSE;
 	if ( !IS_NPC( ch ) && dt >= TYPE_HIT && dt <= TYPE_HIT + 12 )
-		chance -= (int) ( ch->wpn[dt - 1000] * 0.1 );
+		chance -= (int) ( ch_wpn(ch)[dt - 1000] * 0.1 );
 	else if ( !IS_NPC( ch ) )
-		chance -= (int) ( ch->wpn[0] * 0.1 );
+		chance -= (int) ( ch_wpn(ch)[0] * 0.1 );
 	else
 		chance -= (int) ( ch->level * 0.2 );
 	if ( !IS_NPC( victim ) )
-		chance += (int) ( victim->wpn[0] * 0.5 );
+		chance += (int) ( ch_wpn(victim)[0] * 0.5 );
 	else
 		chance += victim->level;
-	if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_MONGOOSE ) && victim->stance[STANCE_MONGOOSE] > 0 && !can_counter( ch ) && !can_bypass( ch, victim ) )
-		chance += (int) ( victim->stance[STANCE_MONGOOSE] * 0.25 );
-	if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_SWALLOW ) && victim->stance[STANCE_SWALLOW] > 0 && !can_counter( ch ) && !can_bypass( ch, victim ) )
-		chance += (int) ( victim->stance[STANCE_SWALLOW] * 0.25 );
+	if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_MONGOOSE ) && ch_stance(victim)[STANCE_MONGOOSE] > 0 && !can_counter( ch ) && !can_bypass( ch, victim ) )
+		chance += (int) ( ch_stance(victim)[STANCE_MONGOOSE] * 0.25 );
+	if ( !IS_NPC( victim ) && IS_STANCE( victim, STANCE_SWALLOW ) && ch_stance(victim)[STANCE_SWALLOW] > 0 && !can_counter( ch ) && !can_bypass( ch, victim ) )
+		chance += (int) ( ch_stance(victim)[STANCE_SWALLOW] * 0.25 );
 
 	/* ------------ This is the part for superstances, Jobo ------------------- */
-	if ( !IS_NPC( victim ) && victim->stance[0] > 12 && IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_DODGE ) && victim->stance[( victim->stance[0] )] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) )
-		chance += (int) ( victim->stance[( victim->stance[0] )] * 0.25 );
+	if ( !IS_NPC( victim ) && ch_stance(victim)[0] > 12 && IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_DODGE ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 && !can_counter( ch ) && !can_bypass( ch, victim ) )
+		chance += (int) ( ch_stance(victim)[( ch_stance(victim)[0] )] * 0.25 );
 	/* ------------ This is the end for superstances, Jobo ------------------- */
 
 	if ( !IS_NPC( ch ) ) {
@@ -2927,12 +2927,12 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		}
 		if ( IS_CLASS( ch, CLASS_ANGEL ) ) chance -= ch->pcdata->powers[ANGEL_JUSTICE] * 9;
 		if ( IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_CHIKYU] >= 6 && ch->pcdata->powers[HARA_KIRI] > 0 ) chance -= 25;
-		if ( IS_CLASS( ch, CLASS_MONK ) ) chance -= ch->chi[CURRENT] * 3;
+		if ( IS_CLASS( ch, CLASS_MONK ) ) chance -= ch_chi(ch)[CURRENT] * 3;
 		if ( ch->pcdata->powers[NPOWER_CHIKYU] >= 5 && IS_CLASS( ch, CLASS_NINJA ) ) chance -= 20;
-		if ( ch->power[DISC_VAMP_CELE] > 0 && IS_CLASS( ch, CLASS_VAMPIRE ) ) chance -= ( ch->power[DISC_VAMP_CELE] * 4 );
+		if ( ch_power(ch)[DISC_VAMP_CELE] > 0 && IS_CLASS( ch, CLASS_VAMPIRE ) ) chance -= ( ch_power(ch)[DISC_VAMP_CELE] * 4 );
 		if ( IS_CLASS( ch, CLASS_DEMON ) && IS_DEMPOWER( ch, DEM_SPEED ) ) chance -= 25;
 		if ( IS_CLASS( ch, CLASS_MAGE ) && IS_ITEMAFF( ch, ITEMA_BEAST ) ) chance -= 30;
-		if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_MANT] > 6 ) chance -= ( ch->power[DISC_WERE_MANT] * 3 );
+		if ( IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_MANT] > 6 ) chance -= ( ch_power(ch)[DISC_WERE_MANT] * 3 );
 		if ( !IS_CLASS( ch, CLASS_WEREWOLF ) && ( IS_ITEMAFF( ch, ITEMA_AFFMANTIS ) ) ) chance -= 12;
 		if ( IS_CLASS( ch, CLASS_DROW ) && IS_SET( ch->pcdata->powers[1], DPOWER_SPEED ) ) chance -= 50;
 		if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) ) chance -= ch->pcdata->powers[WEAPONSKILL] * 4;
@@ -2956,16 +2956,16 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 			else
 				chance += 10;
 		}
-		if ( IS_CLASS( victim, CLASS_MONK ) ) chance += victim->chi[CURRENT] * 3;
+		if ( IS_CLASS( victim, CLASS_MONK ) ) chance += ch_chi(victim)[CURRENT] * 3;
 		if ( IS_CLASS( victim, CLASS_TANARRI ) ) {
 			if ( IS_SET( victim->pcdata->powers[TANARRI_POWER], TANARRI_HEAD ) ) chance += 15;
 			if ( IS_SET( victim->pcdata->powers[TANARRI_POWER], TANARRI_SPEED ) ) chance += 17;
 			if ( victim->pcdata->powers[TANARRI_FURY_ON] == 1 ) chance += 12;
 		}
 		if ( IS_CLASS( victim, CLASS_ANGEL ) ) chance += victim->pcdata->powers[ANGEL_PEACE] * 9;
-		if ( victim->power[DISC_VAMP_CELE] > 0 && IS_CLASS( victim, CLASS_VAMPIRE ) ) chance += ( victim->power[DISC_VAMP_CELE] * 3 );
+		if ( ch_power(victim)[DISC_VAMP_CELE] > 0 && IS_CLASS( victim, CLASS_VAMPIRE ) ) chance += ( ch_power(victim)[DISC_VAMP_CELE] * 3 );
 		if ( IS_CLASS( victim, CLASS_DEMON ) && IS_DEMPOWER( victim, DEM_SPEED ) ) chance += 25;
-		if ( IS_CLASS( victim, CLASS_WEREWOLF ) && victim->power[DISC_WERE_MANT] > 6 ) chance += (int) ( victim->power[DISC_WERE_MANT] * 3.5 );
+		if ( IS_CLASS( victim, CLASS_WEREWOLF ) && ch_power(victim)[DISC_WERE_MANT] > 6 ) chance += (int) ( ch_power(victim)[DISC_WERE_MANT] * 3.5 );
 		if ( IS_CLASS( victim, CLASS_DROW ) && IS_SET( victim->pcdata->powers[1], DPOWER_SPEED ) ) chance += 50;
 		if ( IS_CLASS( victim, CLASS_SAMURAI ) ) chance += 25;
 		if ( IS_CLASS( victim, CLASS_UNDEAD_KNIGHT ) ) chance += (int) ( victim->pcdata->powers[WEAPONSKILL] * 4.5 );
@@ -3071,8 +3071,8 @@ bool check_dodge( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_SAMURAI ) ) chance += 15;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_MAGE ) && IS_ITEMAFF( ch, ITEMA_BEAST ) ) chance -= 10;
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_MAGE ) && IS_ITEMAFF( victim, ITEMA_BEAST ) ) chance += 10;
-	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch->power[DISC_WERE_MANT] > 6 ) chance -= ( ch->power[DISC_WERE_MANT] );
-	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) && victim->power[DISC_WERE_MANT] > 6 ) chance += ( victim->power[DISC_WERE_MANT] );
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_MANT] > 6 ) chance -= ( ch_power(ch)[DISC_WERE_MANT] );
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) && ch_power(victim)[DISC_WERE_MANT] > 6 ) chance += ( ch_power(victim)[DISC_WERE_MANT] );
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VAMPIRE ) ) {
 		if ( ch->pcdata->rank == AGE_TRUEBLOOD )
 			chance -= 20;
@@ -3193,7 +3193,7 @@ void update_pos( CHAR_DATA *victim ) {
 	if ( !IS_NPC( victim ) && victim->hit < -9 && !IS_HERO( victim ) ) {
 		victim->hit = 1;
 		do_killperson( victim, victim->name );
-		victim->mdeath = victim->mdeath + 1;
+		victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 	}
 	if ( IS_NPC( victim ) && victim->hit < -6 ) {
 		victim->position = POS_DEAD;
@@ -3509,13 +3509,13 @@ void raw_kill( CHAR_DATA *victim ) {
 	REMOVE_BIT( victim->extra, BLINDFOLDED );
 	victim->pcdata->stats[DEMON_POWER] = 0;
 	victim->itemaffect = 0;
-	victim->loc_hp[0] = 0;
-	victim->loc_hp[1] = 0;
-	victim->loc_hp[2] = 0;
-	victim->loc_hp[3] = 0;
-	victim->loc_hp[4] = 0;
-	victim->loc_hp[5] = 0;
-	victim->loc_hp[6] = 0;
+	ch_loc_hp(victim)[0] = 0;
+	ch_loc_hp(victim)[1] = 0;
+	ch_loc_hp(victim)[2] = 0;
+	ch_loc_hp(victim)[3] = 0;
+	ch_loc_hp(victim)[4] = 0;
+	ch_loc_hp(victim)[5] = 0;
+	ch_loc_hp(victim)[6] = 0;
 	victim->armor = 100;
 	victim->position = POS_RESTING;
 	victim->hit = UMAX( 1, victim->hit );
@@ -3559,13 +3559,13 @@ void behead( CHAR_DATA *victim ) {
 	REMOVE_BIT( victim->extra, EXTRA_LABOUR );
 	victim->pcdata->stats[DEMON_POWER] = 0;
 	victim->itemaffect = 0;
-	victim->loc_hp[0] = 0;
-	victim->loc_hp[1] = 0;
-	victim->loc_hp[2] = 0;
-	victim->loc_hp[3] = 0;
-	victim->loc_hp[4] = 0;
-	victim->loc_hp[5] = 0;
-	victim->loc_hp[6] = 0;
+	ch_loc_hp(victim)[0] = 0;
+	ch_loc_hp(victim)[1] = 0;
+	ch_loc_hp(victim)[2] = 0;
+	ch_loc_hp(victim)[3] = 0;
+	ch_loc_hp(victim)[4] = 0;
+	ch_loc_hp(victim)[5] = 0;
+	ch_loc_hp(victim)[6] = 0;
 	victim->affected_by = 0;
 	victim->armor = 100;
 	victim->position = POS_STANDING;
@@ -3579,7 +3579,7 @@ void behead( CHAR_DATA *victim ) {
 	victim->carry_number = 0;
 	victim->pcdata->sit_safe = 0;
 	victim->fight_timer = 0;
-	SET_BIT( victim->loc_hp[0], LOST_HEAD );
+	SET_BIT( ch_loc_hp(victim)[0], LOST_HEAD );
 	SET_BIT( victim->affected_by, AFF_POLYMORPH );
 	snprintf( buf, sizeof( buf ), "the severed head of %s", victim->name );
 	free(victim->morph);
@@ -3966,7 +3966,7 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			make_part( victim, "entrails" );
 		} else if ( damp == 4 ) {
 			if ( !IS_BODY( victim, BROKEN_SPINE ) )
-				SET_BIT( victim->loc_hp[1], BROKEN_SPINE );
+				SET_BIT( ch_loc_hp(victim)[1], BROKEN_SPINE );
 			act( "You hoist $N above your head and slam $M down upon your knee.\n\rThere is a loud cracking sound as $N's spine snaps.", ch, NULL, victim, TO_CHAR );
 			act( "$n hoists $N above $s head and slams $M down upon $s knee.\n\rThere is a loud cracking sound as $N's spine snaps.", ch, NULL, victim, TO_NOTVICT );
 			act( "$n hoists you above $s head and slams you down upon $s knee.\n\rThere is a loud cracking sound as your spine snaps.", ch, NULL, victim, TO_VICT );
@@ -3977,7 +3977,7 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			if ( !IS_BODY( victim, BROKEN_NECK ) ) {
 				act( "There is a loud snapping noise as your neck breaks.", victim, NULL, NULL, TO_CHAR );
 				act( "There is a loud snapping noise as $n's neck breaks.", victim, NULL, NULL, TO_ROOM );
-				SET_BIT( victim->loc_hp[1], BROKEN_NECK );
+				SET_BIT( ch_loc_hp(victim)[1], BROKEN_NECK );
 			}
 		}
 		return;
@@ -4002,15 +4002,15 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			act( "$n thrusts $s blade into $N's mouth and twists it viciously.\n\rThe end of the blade bursts through the back of $N's head.", ch, NULL, victim, TO_NOTVICT );
 			act( "$n thrusts $s blade into your mouth and twists it viciously.\n\rYou feel the end of the blade burst through the back of your head.", ch, NULL, victim, TO_VICT );
 		} else if ( damp == 3 ) {
-			if ( !IS_BODY( victim, CUT_THROAT ) ) SET_BIT( victim->loc_hp[1], CUT_THROAT );
-			if ( !IS_BLEEDING( victim, BLEEDING_THROAT ) ) SET_BIT( victim->loc_hp[6], BLEEDING_THROAT );
+			if ( !IS_BODY( victim, CUT_THROAT ) ) SET_BIT( ch_loc_hp(victim)[1], CUT_THROAT );
+			if ( !IS_BLEEDING( victim, BLEEDING_THROAT ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_THROAT );
 			act( "Your blow slices open $N's carotid artery, spraying blood everywhere.", ch, NULL, victim, TO_CHAR );
 			act( "$n's blow slices open $N's carotid artery, spraying blood everywhere.", ch, NULL, victim, TO_NOTVICT );
 			act( "$n's blow slices open your carotid artery, spraying blood everywhere.", ch, NULL, victim, TO_VICT );
 			make_part( victim, "blood" );
 		} else if ( damp == 4 ) {
-			if ( !IS_BODY( victim, CUT_THROAT ) ) SET_BIT( victim->loc_hp[1], CUT_THROAT );
-			if ( !IS_BLEEDING( victim, BLEEDING_THROAT ) ) SET_BIT( victim->loc_hp[6], BLEEDING_THROAT );
+			if ( !IS_BODY( victim, CUT_THROAT ) ) SET_BIT( ch_loc_hp(victim)[1], CUT_THROAT );
+			if ( !IS_BLEEDING( victim, BLEEDING_THROAT ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_THROAT );
 			act( "You swing your blade across $N's throat, showering the area with blood.", ch, NULL, victim, TO_CHAR );
 			act( "$n swings $s blade across $N's throat, showering the area with blood.", ch, NULL, victim, TO_NOTVICT );
 			act( "$n swings $s blade across your throat, showering the area with blood.", ch, NULL, victim, TO_VICT );
@@ -4021,7 +4021,7 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 				act( "$n swings $s blade down upon $N's head, splitting it open.\n\r$N's brains pour out of $S forehead.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n swings $s blade down upon your head, splitting it open.\n\rYour brains pour out of your forehead.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "brain" );
-				SET_BIT( victim->loc_hp[0], BROKEN_SKULL );
+				SET_BIT( ch_loc_hp(victim)[0], BROKEN_SKULL );
 			} else {
 				act( "You plunge your blade deep into $N's chest.", ch, NULL, victim, TO_CHAR );
 				act( "$n plunges $s blade deep into $N's chest.", ch, NULL, victim, TO_NOTVICT );
@@ -4037,17 +4037,17 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 				act( "$n swings $s blade in a wide arc, slicing off $N's arm.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n swings $s blade in a wide arc, slicing off your arm.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "arm" );
-				SET_BIT( victim->loc_hp[2], LOST_ARM );
-				if ( !IS_BLEEDING( victim, BLEEDING_ARM_L ) ) SET_BIT( victim->loc_hp[6], BLEEDING_ARM_L );
-				if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) ) REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_L );
+				SET_BIT( ch_loc_hp(victim)[2], LOST_ARM );
+				if ( !IS_BLEEDING( victim, BLEEDING_ARM_L ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_L );
+				if ( IS_BLEEDING( victim, BLEEDING_HAND_L ) ) REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_L );
 			} else if ( !IS_ARM_R( victim, LOST_ARM ) ) {
 				act( "You swing your blade in a wide arc, slicing off $N's arm.", ch, NULL, victim, TO_CHAR );
 				act( "$n swings $s blade in a wide arc, slicing off $N's arm.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n swings $s blade in a wide arc, slicing off your arm.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "arm" );
-				SET_BIT( victim->loc_hp[3], LOST_ARM );
-				if ( !IS_BLEEDING( victim, BLEEDING_ARM_R ) ) SET_BIT( victim->loc_hp[6], BLEEDING_ARM_R );
-				if ( IS_BLEEDING( victim, BLEEDING_HAND_R ) ) REMOVE_BIT( victim->loc_hp[6], BLEEDING_HAND_R );
+				SET_BIT( ch_loc_hp(victim)[3], LOST_ARM );
+				if ( !IS_BLEEDING( victim, BLEEDING_ARM_R ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_ARM_R );
+				if ( IS_BLEEDING( victim, BLEEDING_HAND_R ) ) REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_HAND_R );
 			} else {
 				act( "You plunge your blade deep into $N's chest.", ch, NULL, victim, TO_CHAR );
 				act( "$n plunges $s blade deep into $N's chest.", ch, NULL, victim, TO_NOTVICT );
@@ -4059,17 +4059,17 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 				act( "$n swings $s blade in a low arc, slicing off $N's leg at the hip.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n swings $s blade in a wide arc, slicing off your leg at the hip.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "leg" );
-				SET_BIT( victim->loc_hp[4], LOST_LEG );
-				if ( !IS_BLEEDING( victim, BLEEDING_LEG_L ) ) SET_BIT( victim->loc_hp[6], BLEEDING_LEG_L );
-				if ( IS_BLEEDING( victim, BLEEDING_FOOT_L ) ) REMOVE_BIT( victim->loc_hp[6], BLEEDING_FOOT_L );
+				SET_BIT( ch_loc_hp(victim)[4], LOST_LEG );
+				if ( !IS_BLEEDING( victim, BLEEDING_LEG_L ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_LEG_L );
+				if ( IS_BLEEDING( victim, BLEEDING_FOOT_L ) ) REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_FOOT_L );
 			} else if ( !IS_LEG_R( victim, LOST_LEG ) ) {
 				act( "You swing your blade in a low arc, slicing off $N's leg at the hip.", ch, NULL, victim, TO_CHAR );
 				act( "$n swings $s blade in a low arc, slicing off $N's leg at the hip.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n swings $s blade in a wide arc, slicing off your leg at the hip.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "leg" );
-				SET_BIT( victim->loc_hp[5], LOST_LEG );
-				if ( !IS_BLEEDING( victim, BLEEDING_LEG_R ) ) SET_BIT( victim->loc_hp[6], BLEEDING_LEG_R );
-				if ( IS_BLEEDING( victim, BLEEDING_FOOT_R ) ) REMOVE_BIT( victim->loc_hp[6], BLEEDING_FOOT_R );
+				SET_BIT( ch_loc_hp(victim)[5], LOST_LEG );
+				if ( !IS_BLEEDING( victim, BLEEDING_LEG_R ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_LEG_R );
+				if ( IS_BLEEDING( victim, BLEEDING_FOOT_R ) ) REMOVE_BIT( ch_loc_hp(victim)[6], BLEEDING_FOOT_R );
 			} else {
 				act( "You plunge your blade deep into $N's chest.", ch, NULL, victim, TO_CHAR );
 				act( "$n plunges $s blade deep into $N's chest.", ch, NULL, victim, TO_NOTVICT );
@@ -4100,11 +4100,11 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			act( "$n stabs $s weapon into $N's eye and out the back of $S head.", ch, NULL, victim, TO_NOTVICT );
 			act( "$n stabs $s weapon into your eye and out the back of your head.", ch, NULL, victim, TO_VICT );
 			if ( !IS_HEAD( victim, LOST_EYE_L ) && number_percent() < 50 )
-				SET_BIT( victim->loc_hp[0], LOST_EYE_L );
+				SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_L );
 			else if ( !IS_HEAD( victim, LOST_EYE_R ) )
-				SET_BIT( victim->loc_hp[0], LOST_EYE_R );
+				SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_R );
 			else if ( !IS_HEAD( victim, LOST_EYE_L ) )
-				SET_BIT( victim->loc_hp[0], LOST_EYE_L );
+				SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_L );
 		}
 	} else if ( !strcmp( attack, "blast" ) || !strcmp( attack, "pound" ) || !strcmp( attack, "crush" ) ) {
 		damp = number_range( 1, 3 );
@@ -4115,58 +4115,58 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			act( "$n's blow smashes through your chest, caving in half your ribcage.", ch, NULL, victim, TO_VICT );
 			if ( IS_BODY( victim, BROKEN_RIBS_1 ) ) {
 				bodyloc += 1;
-				REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_1 );
+				REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_1 );
 			}
 			if ( IS_BODY( victim, BROKEN_RIBS_2 ) ) {
 				bodyloc += 2;
-				REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_2 );
+				REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_2 );
 			}
 			if ( IS_BODY( victim, BROKEN_RIBS_4 ) ) {
 				bodyloc += 4;
-				REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_4 );
+				REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_4 );
 			}
 			if ( IS_BODY( victim, BROKEN_RIBS_8 ) ) {
 				bodyloc += 8;
-				REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_8 );
+				REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_8 );
 			}
 			if ( IS_BODY( victim, BROKEN_RIBS_16 ) ) {
 				bodyloc += 16;
-				REMOVE_BIT( victim->loc_hp[1], BROKEN_RIBS_16 );
+				REMOVE_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_16 );
 			}
 			bodyloc += number_range( 1, 3 );
 			if ( bodyloc > 24 ) bodyloc = 24;
 			if ( bodyloc >= 16 ) {
 				bodyloc -= 16;
-				SET_BIT( victim->loc_hp[1], BROKEN_RIBS_16 );
+				SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_16 );
 			}
 			if ( bodyloc >= 8 ) {
 				bodyloc -= 8;
-				SET_BIT( victim->loc_hp[1], BROKEN_RIBS_8 );
+				SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_8 );
 			}
 			if ( bodyloc >= 4 ) {
 				bodyloc -= 4;
-				SET_BIT( victim->loc_hp[1], BROKEN_RIBS_4 );
+				SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_4 );
 			}
 			if ( bodyloc >= 2 ) {
 				bodyloc -= 2;
-				SET_BIT( victim->loc_hp[1], BROKEN_RIBS_2 );
+				SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_2 );
 			}
 			if ( bodyloc >= 1 ) {
 				bodyloc -= 1;
-				SET_BIT( victim->loc_hp[1], BROKEN_RIBS_1 );
+				SET_BIT( ch_loc_hp(victim)[1], BROKEN_RIBS_1 );
 			}
 		} else if ( damp == 2 ) {
 			act( "Your blow smashes $N's spine, shattering it in several places.", ch, NULL, victim, TO_CHAR );
 			act( "$n's blow smashes $N's spine, shattering it in several places.", ch, NULL, victim, TO_NOTVICT );
 			act( "$n's blow smashes your spine, shattering it in several places.", ch, NULL, victim, TO_VICT );
-			if ( !IS_BODY( victim, BROKEN_SPINE ) ) SET_BIT( victim->loc_hp[1], BROKEN_SPINE );
+			if ( !IS_BODY( victim, BROKEN_SPINE ) ) SET_BIT( ch_loc_hp(victim)[1], BROKEN_SPINE );
 		} else if ( damp == 3 ) {
 			if ( !IS_HEAD( victim, BROKEN_SKULL ) ) {
 				act( "You swing your weapon down upon $N's head.\n\r$N's head cracks open like an overripe melon, leaking out brains.", ch, NULL, victim, TO_CHAR );
 				act( "$n swings $s weapon down upon $N's head.\n\r$N's head cracks open like an overripe melon, covering you with brains.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n swings $s weapon down upon your head.\n\rYour head cracks open like an overripe melon, spilling your brains everywhere.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "brain" );
-				SET_BIT( victim->loc_hp[0], BROKEN_SKULL );
+				SET_BIT( ch_loc_hp(victim)[0], BROKEN_SKULL );
 			} else {
 				act( "You hammer your weapon into $N's side, crushing bone.", ch, NULL, victim, TO_CHAR );
 				act( "$n hammers $s weapon into $N's side, crushing bone.", ch, NULL, victim, TO_NOTVICT );
@@ -4178,8 +4178,8 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 		act( "$n sink $s teeth into $N's throat and tears out $S jugular vein.\n\r$n wipes the blood from $s chin with one hand.", ch, NULL, victim, TO_NOTVICT );
 		act( "$n sink $s teeth into your throat and tears out your jugular vein.\n\r$n wipes the blood from $s chin with one hand.", ch, NULL, victim, TO_VICT );
 		make_part( victim, "blood" );
-		if ( !IS_BODY( victim, CUT_THROAT ) ) SET_BIT( victim->loc_hp[1], CUT_THROAT );
-		if ( !IS_BLEEDING( victim, BLEEDING_THROAT ) ) SET_BIT( victim->loc_hp[6], BLEEDING_THROAT );
+		if ( !IS_BODY( victim, CUT_THROAT ) ) SET_BIT( ch_loc_hp(victim)[1], CUT_THROAT );
+		if ( !IS_BLEEDING( victim, BLEEDING_THROAT ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_THROAT );
 	} else if ( !IS_NPC( ch ) && ( !strcmp( attack, "claw" ) || IS_VAMPAFF( ch, VAM_CLAWS ) ) ) {
 		damp = number_range( 1, 2 );
 		if ( damp == 1 ) {
@@ -4187,8 +4187,8 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 			act( "$n tears out $N's throat, showering the area with blood.", ch, NULL, victim, TO_NOTVICT );
 			act( "$n tears out your throat, showering the area with blood.", ch, NULL, victim, TO_VICT );
 			make_part( victim, "blood" );
-			if ( !IS_BODY( victim, CUT_THROAT ) ) SET_BIT( victim->loc_hp[1], CUT_THROAT );
-			if ( !IS_BLEEDING( victim, BLEEDING_THROAT ) ) SET_BIT( victim->loc_hp[6], BLEEDING_THROAT );
+			if ( !IS_BODY( victim, CUT_THROAT ) ) SET_BIT( ch_loc_hp(victim)[1], CUT_THROAT );
+			if ( !IS_BLEEDING( victim, BLEEDING_THROAT ) ) SET_BIT( ch_loc_hp(victim)[6], BLEEDING_THROAT );
 		}
 		if ( damp == 2 ) {
 			if ( !IS_HEAD( victim, LOST_EYE_L ) && number_percent() < 50 ) {
@@ -4196,19 +4196,19 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 				act( "$n rips an eyeball from $N's face.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n rips an eyeball from your face.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "eyeball" );
-				SET_BIT( victim->loc_hp[0], LOST_EYE_L );
+				SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_L );
 			} else if ( !IS_HEAD( victim, LOST_EYE_R ) ) {
 				act( "You rip an eyeball from $N's face.", ch, NULL, victim, TO_CHAR );
 				act( "$n rips an eyeball from $N's face.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n rips an eyeball from your face.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "eyeball" );
-				SET_BIT( victim->loc_hp[0], LOST_EYE_R );
+				SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_R );
 			} else if ( !IS_HEAD( victim, LOST_EYE_L ) ) {
 				act( "You rip an eyeball from $N's face.", ch, NULL, victim, TO_CHAR );
 				act( "$n rips an eyeball from $N's face.", ch, NULL, victim, TO_NOTVICT );
 				act( "$n rips an eyeball from your face.", ch, NULL, victim, TO_VICT );
 				make_part( victim, "eyeball" );
-				SET_BIT( victim->loc_hp[0], LOST_EYE_L );
+				SET_BIT( ch_loc_hp(victim)[0], LOST_EYE_L );
 			} else {
 				act( "You claw open $N's chest.", ch, NULL, victim, TO_CHAR );
 				act( "$n claws open $N's chest.", ch, NULL, victim, TO_NOTVICT );
@@ -4219,7 +4219,7 @@ void dam_message( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 		act( "You entangle $N around the neck, and squeeze out $S life.", ch, NULL, victim, TO_CHAR );
 		act( "$n entangles $N around the neck, and squeezes out $S life.", ch, NULL, victim, TO_NOTVICT );
 		act( "$n entangles you around the neck, and squeezes the life out of you.", ch, NULL, victim, TO_VICT );
-		if ( !IS_BODY( victim, BROKEN_NECK ) ) SET_BIT( victim->loc_hp[1], BROKEN_NECK );
+		if ( !IS_BODY( victim, BROKEN_NECK ) ) SET_BIT( ch_loc_hp(victim)[1], BROKEN_NECK );
 	} else if ( !strcmp( attack, "suck" ) || !strcmp( attack, "grep" ) ) {
 		act( "You place your weapon on $N's head and suck out $S brains.", ch, NULL, victim, TO_CHAR );
 		act( "$n places $s weapon on $N's head and suck out $S brains.", ch, NULL, victim, TO_NOTVICT );
@@ -4321,7 +4321,7 @@ void do_kill( CHAR_DATA *ch, char *argument ) {
 		ch->fight_timer += 3;
 		victim->fight_timer += 3;
 	}
-	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && number_range( 1, 3 ) == 1 && ch->power[DISC_WERE_BOAR] > 1 && victim->position == POS_STANDING ) {
+	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && number_range( 1, 3 ) == 1 && ch_power(ch)[DISC_WERE_BOAR] > 1 && victim->position == POS_STANDING ) {
 		act( "You charge into $N, knocking $M from $S feet.", ch, NULL, victim, TO_CHAR );
 		act( "$n charge into $N, knocking $M from $S feet.", ch, NULL, victim, TO_NOTVICT );
 		act( "$n charge into you, knocking you from your feet.", ch, NULL, victim, TO_VICT );
@@ -4376,7 +4376,7 @@ void do_backstab( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 	WAIT_STATE( ch, skill_table[gsn_backstab].beats );
-	if ( !IS_NPC( victim ) && IS_IMMUNE( victim, IMM_BACKSTAB ) && ch->power[DISC_VAMP_QUIE] < 10 &&
+	if ( !IS_NPC( victim ) && IS_IMMUNE( victim, IMM_BACKSTAB ) && ch_power(ch)[DISC_VAMP_QUIE] < 10 &&
 		!IS_CLASS( ch, CLASS_NINJA ) && !IS_CLASS( ch, CLASS_DROW ) )
 		damage( ch, victim, 0, gsn_backstab );
 	else if ( !IS_AWAKE( victim ) || IS_NPC( ch ) || number_percent() < ch->pcdata->learned[gsn_backstab] )
@@ -4568,12 +4568,12 @@ void do_kick( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) dam *= 100;
 	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) ) {
 		if ( IS_SET( victim->special, SPC_WOLFMAN ) ) dam = (int) ( dam * 0.8 );
-		if ( victim->power[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.5 );
+		if ( ch_power(victim)[DISC_WERE_BOAR] > 2 ) dam = (int) ( dam * 0.5 );
 		if ( ( boots = get_eq_char( ch, WEAR_FEET ) ) != NULL && IS_SET( boots->spectype, SITEM_SILVER ) ) dam *= 2;
 	}
-	if ( !IS_NPC( ch ) ) dam = dam + ( dam * ( ( ch->wpn[0] + 1 ) / 100 ) );
+	if ( !IS_NPC( ch ) ) dam = dam + ( dam * ( ( ch_wpn(ch)[0] + 1 ) / 100 ) );
 	if ( !IS_NPC( ch ) ) {
-		stance = ch->stance[0];
+		stance = ch_stance(ch)[0];
 		if ( IS_STANCE( ch, STANCE_NORMAL ) )
 			dam = (int) ( dam * 1.25 );
 		else
@@ -4605,47 +4605,47 @@ int dambonus( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int stance ) {
 	if ( !IS_NPC( ch ) && !can_counter( victim ) ) {
 		if ( IS_STANCE( ch, STANCE_MONKEY ) ) {
 			int mindam = (int) ( dam * 0.25 );
-			dam *= ( ch->stance[STANCE_MONKEY] + 1 ) / 200;
+			dam *= ( ch_stance(ch)[STANCE_MONKEY] + 1 ) / 200;
 			if ( dam < mindam ) dam = mindam;
-		} else if ( IS_STANCE( ch, STANCE_BULL ) && ch->stance[STANCE_BULL] > 100 )
-			dam += dam * ( ch->stance[STANCE_BULL] / 100 );
-		else if ( IS_STANCE( ch, STANCE_DRAGON ) && ch->stance[STANCE_DRAGON] > 100 )
-			dam += dam * ( ch->stance[STANCE_DRAGON] / 100 );
-		else if ( IS_STANCE( ch, STANCE_WOLF ) && ch->stance[STANCE_WOLF] > 100 )
-			dam += dam * ( ch->stance[STANCE_WOLF] / 100 );
-		else if ( IS_STANCE( ch, STANCE_TIGER ) && ch->stance[STANCE_TIGER] > 100 )
-			dam += dam * ( ch->stance[STANCE_TIGER] / 100 );
+		} else if ( IS_STANCE( ch, STANCE_BULL ) && ch_stance(ch)[STANCE_BULL] > 100 )
+			dam += dam * ( ch_stance(ch)[STANCE_BULL] / 100 );
+		else if ( IS_STANCE( ch, STANCE_DRAGON ) && ch_stance(ch)[STANCE_DRAGON] > 100 )
+			dam += dam * ( ch_stance(ch)[STANCE_DRAGON] / 100 );
+		else if ( IS_STANCE( ch, STANCE_WOLF ) && ch_stance(ch)[STANCE_WOLF] > 100 )
+			dam += dam * ( ch_stance(ch)[STANCE_WOLF] / 100 );
+		else if ( IS_STANCE( ch, STANCE_TIGER ) && ch_stance(ch)[STANCE_TIGER] > 100 )
+			dam += dam * ( ch_stance(ch)[STANCE_TIGER] / 100 );
 		/* ------------ This is the part for superstances, Jobo ------------------- */
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_3 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += dam * 3 * ( ch->stance[( ch->stance[0] )] / 100 );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_2 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += dam * 2 * ( ch->stance[( ch->stance[0] )] / 100 );
-		else if ( ch->stance[0] > 12 && IS_SET( ch->stance[( ch->stance[0] + 6 )], STANCEPOWER_DAMAGE_1 ) && ch->stance[( ch->stance[0] )] > 100 )
-			dam += dam * ( ch->stance[( ch->stance[0] )] / 100 );
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_3 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += dam * 3 * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 100 );
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_2 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += dam * 2 * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 100 );
+		else if ( ch_stance(ch)[0] > 12 && IS_SET( ch_stance(ch)[( ch_stance(ch)[0] + 6 )], STANCEPOWER_DAMAGE_1 ) && ch_stance(ch)[( ch_stance(ch)[0] )] > 100 )
+			dam += dam * ( ch_stance(ch)[( ch_stance(ch)[0] )] / 100 );
 		/* ------------ This is the end for superstances, Jobo ------------------- */
 
-		else if ( ch->stance[0] > 0 && ch->stance[stance] < 100 )
+		else if ( ch_stance(ch)[0] > 0 && ch_stance(ch)[stance] < 100 )
 			dam = (int) ( dam * 0.5 );
 	}
 	if ( !IS_NPC( victim ) && !can_counter( ch ) ) {
-		if ( IS_STANCE( victim, STANCE_CRAB ) && victim->stance[STANCE_CRAB] > 100 )
-			dam /= victim->stance[STANCE_CRAB] / 100;
-		else if ( IS_STANCE( victim, STANCE_DRAGON ) && victim->stance[STANCE_DRAGON] > 100 )
-			dam /= victim->stance[STANCE_DRAGON] / 100;
-		else if ( IS_STANCE( victim, STANCE_DRAGON ) && victim->stance[STANCE_DRAGON] > 100 )
-			dam /= victim->stance[STANCE_DRAGON] / 100;
-		else if ( IS_STANCE( victim, STANCE_SWALLOW ) && victim->stance[STANCE_SWALLOW] > 100 )
-			dam /= victim->stance[STANCE_SWALLOW] / 100;
+		if ( IS_STANCE( victim, STANCE_CRAB ) && ch_stance(victim)[STANCE_CRAB] > 100 )
+			dam /= ch_stance(victim)[STANCE_CRAB] / 100;
+		else if ( IS_STANCE( victim, STANCE_DRAGON ) && ch_stance(victim)[STANCE_DRAGON] > 100 )
+			dam /= ch_stance(victim)[STANCE_DRAGON] / 100;
+		else if ( IS_STANCE( victim, STANCE_DRAGON ) && ch_stance(victim)[STANCE_DRAGON] > 100 )
+			dam /= ch_stance(victim)[STANCE_DRAGON] / 100;
+		else if ( IS_STANCE( victim, STANCE_SWALLOW ) && ch_stance(victim)[STANCE_SWALLOW] > 100 )
+			dam /= ch_stance(victim)[STANCE_SWALLOW] / 100;
 		/* ------------ This is the part for superstances, Jobo ------------------- */
-		else if ( victim->stance[0] > 12 &&
-			IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_RESIST_3 ) && victim->stance[( victim->stance[0] )] > 100 )
-			dam /= 3 * ( victim->stance[( victim->stance[0] )] / 100 );
-		else if ( victim->stance[0] > 12 &&
-			IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_RESIST_2 ) && victim->stance[( victim->stance[0] )] > 100 )
-			dam /= 2 * ( victim->stance[( victim->stance[0] )] / 100 );
-		else if ( victim->stance[0] > 12 &&
-			IS_SET( victim->stance[( victim->stance[0] + 6 )], STANCEPOWER_RESIST_1 ) && victim->stance[( victim->stance[0] )] > 100 )
-			dam /= ( victim->stance[( victim->stance[0] )] / 100 );
+		else if ( ch_stance(victim)[0] > 12 &&
+			IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_RESIST_3 ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 )
+			dam /= 3 * ( ch_stance(victim)[( ch_stance(victim)[0] )] / 100 );
+		else if ( ch_stance(victim)[0] > 12 &&
+			IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_RESIST_2 ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 )
+			dam /= 2 * ( ch_stance(victim)[( ch_stance(victim)[0] )] / 100 );
+		else if ( ch_stance(victim)[0] > 12 &&
+			IS_SET( ch_stance(victim)[( ch_stance(victim)[0] + 6 )], STANCEPOWER_RESIST_1 ) && ch_stance(victim)[( ch_stance(victim)[0] )] > 100 )
+			dam /= ( ch_stance(victim)[( ch_stance(victim)[0] )] / 100 );
 		/* ------------ This is the end for superstances, Jobo ------------------- */
 	}
 	return dam;
@@ -4695,29 +4695,29 @@ void do_punch( CHAR_DATA *ch, char *argument ) {
 	dam += char_damroll( ch );
 	if ( dam == 0 ) dam = 1;
 	if ( !IS_AWAKE( victim ) ) dam *= 2;
-	if ( !IS_NPC( ch ) ) dam = dam + ( dam * ( ch->wpn[0] / 100 ) );
+	if ( !IS_NPC( ch ) ) dam = dam + ( dam * ( ch_wpn(ch)[0] / 100 ) );
 	if ( dam <= 0 ) dam = 1;
 	if ( dam > 1000 ) dam = 1000;
-	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) && victim->power[DISC_WERE_BOAR] > 3 ) {
+	if ( !IS_NPC( victim ) && IS_CLASS( victim, CLASS_WEREWOLF ) && ch_power(victim)[DISC_WERE_BOAR] > 3 ) {
 		store = victim->hit;
 		victim->hit += dam;
 		damage( ch, victim, dam, gsn_punch );
 		victim->hit = store;
 		if ( number_percent() <= 25 && !IS_ARM_L( ch, LOST_ARM ) && !IS_ARM_L( ch, LOST_HAND ) ) {
 			if ( !IS_ARM_L( ch, LOST_FINGER_I ) && !IS_ARM_L( ch, BROKEN_FINGER_I ) ) {
-				SET_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_I );
+				SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_I );
 				broke = TRUE;
 			}
 			if ( !IS_ARM_L( ch, LOST_FINGER_M ) && !IS_ARM_L( ch, BROKEN_FINGER_M ) ) {
-				SET_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_M );
+				SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_M );
 				broke = TRUE;
 			}
 			if ( !IS_ARM_L( ch, LOST_FINGER_R ) && !IS_ARM_L( ch, BROKEN_FINGER_R ) ) {
-				SET_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_R );
+				SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_R );
 				broke = TRUE;
 			}
 			if ( !IS_ARM_L( ch, LOST_FINGER_L ) && !IS_ARM_L( ch, BROKEN_FINGER_L ) ) {
-				SET_BIT( ch->loc_hp[LOC_ARM_L], BROKEN_FINGER_L );
+				SET_BIT( ch_loc_hp(ch)[LOC_ARM_L], BROKEN_FINGER_L );
 				broke = TRUE;
 			}
 			if ( broke ) {
@@ -4726,19 +4726,19 @@ void do_punch( CHAR_DATA *ch, char *argument ) {
 			}
 		} else if ( number_percent() <= 25 && !IS_ARM_R( ch, LOST_ARM ) && !IS_ARM_R( ch, LOST_HAND ) ) {
 			if ( !IS_ARM_R( ch, LOST_FINGER_I ) && !IS_ARM_R( ch, BROKEN_FINGER_I ) ) {
-				SET_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_I );
+				SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_I );
 				broke = TRUE;
 			}
 			if ( !IS_ARM_R( ch, LOST_FINGER_M ) && !IS_ARM_R( ch, BROKEN_FINGER_M ) ) {
-				SET_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_M );
+				SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_M );
 				broke = TRUE;
 			}
 			if ( !IS_ARM_R( ch, LOST_FINGER_R ) && !IS_ARM_R( ch, BROKEN_FINGER_R ) ) {
-				SET_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_R );
+				SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_R );
 				broke = TRUE;
 			}
 			if ( !IS_ARM_R( ch, LOST_FINGER_L ) && !IS_ARM_R( ch, BROKEN_FINGER_L ) ) {
-				SET_BIT( ch->loc_hp[LOC_ARM_R], BROKEN_FINGER_L );
+				SET_BIT( ch_loc_hp(ch)[LOC_ARM_R], BROKEN_FINGER_L );
 				broke = TRUE;
 			}
 			if ( broke ) {
@@ -4755,11 +4755,11 @@ void do_punch( CHAR_DATA *ch, char *argument ) {
 	if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_NOSE ) && !IS_HEAD( victim, LOST_NOSE ) ) {
 		act( "Your nose shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 		act( "$n's nose shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-		SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_NOSE );
+		SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_NOSE );
 	} else if ( number_percent() <= 25 && !IS_HEAD( victim, BROKEN_JAW ) ) {
 		act( "Your jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_CHAR );
 		act( "$n's jaw shatters under the impact of the blow!", victim, NULL, NULL, TO_ROOM );
-		SET_BIT( victim->loc_hp[LOC_HEAD], BROKEN_JAW );
+		SET_BIT( ch_loc_hp(victim)[LOC_HEAD], BROKEN_JAW );
 	}
 	act( "You fall to the ground stunned!", victim, NULL, NULL, TO_CHAR );
 	act( "$n falls to the ground stunned!", victim, NULL, NULL, TO_ROOM );
@@ -4947,8 +4947,8 @@ void do_hurl( CHAR_DATA *ch, char *argument ) {
 		dam = number_range( ch->level, ( ch->level * 4 ) );
 		victim->hit = victim->hit - dam;
 		update_pos( victim );
-		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->mkill = ch->mkill + 1;
-		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->mdeath = victim->mdeath + 1;
+		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->pcdata->mkill = ch->pcdata->mkill + 1;
+		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 		if ( victim->position == POS_DEAD ) {
 			raw_kill( victim );
 			return;
@@ -4966,8 +4966,8 @@ void do_hurl( CHAR_DATA *ch, char *argument ) {
 		dam = number_range( ch->level, ( ch->level * 4 ) );
 		victim->hit = victim->hit - dam;
 		update_pos( victim );
-		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->mkill = ch->mkill + 1;
-		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->mdeath = victim->mdeath + 1;
+		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->pcdata->mkill = ch->pcdata->mkill + 1;
+		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 		if ( victim->position == POS_DEAD ) {
 			raw_kill( victim );
 			return;
@@ -5003,8 +5003,8 @@ void do_hurl( CHAR_DATA *ch, char *argument ) {
 			dam = number_range( ch->level, ( ch->level * 6 ) );
 			victim->hit = victim->hit - dam;
 			update_pos( victim );
-			if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->mkill = ch->mkill + 1;
-			if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->mdeath = victim->mdeath + 1;
+			if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->pcdata->mkill = ch->pcdata->mkill + 1;
+			if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 			if ( victim->position == POS_DEAD ) {
 				raw_kill( victim );
 				return;
@@ -5028,8 +5028,8 @@ void do_hurl( CHAR_DATA *ch, char *argument ) {
 		dam = number_range( ch->level, ( ch->level * 2 ) );
 		victim->hit = victim->hit - dam;
 		update_pos( victim );
-		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->mkill = ch->mkill + 1;
-		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->mdeath = victim->mdeath + 1;
+		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->pcdata->mkill = ch->pcdata->mkill + 1;
+		if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 		if ( victim->position == POS_DEAD ) {
 			raw_kill( victim );
 			return;
@@ -5088,8 +5088,8 @@ void do_killperson( CHAR_DATA *ch, char *argument ) {
 	if ( arg[0] == '\0' ) return;
 	if ( ( victim = get_char_room( ch, arg ) ) == NULL ) return;
 	send_to_char( "You have been KILLED!!\n\r\n\r", victim );
-	if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->mkill = ch->mkill + 1;
-	if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->mdeath = victim->mdeath + 1;
+	if ( IS_NPC( victim ) && !IS_NPC( ch ) ) ch->pcdata->mkill = ch->pcdata->mkill + 1;
+	if ( !IS_NPC( victim ) && IS_NPC( ch ) ) victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 	raw_kill( victim );
 	return;
 }
@@ -5211,8 +5211,8 @@ void do_decapitate( CHAR_DATA *ch, char *argument ) {
 	if ( IS_ITEMAFF( victim, ITEMA_DEFLECTOR ) ) REMOVE_BIT( victim->itemaffect, ITEMA_DEFLECTOR );
 	do_beastlike( ch, "" );
 	if ( ch->pcdata->mean_paradox_counter > 0 ) ch->pcdata->mean_paradox_counter--;
-	ch->pkill = ch->pkill + 1;
-	victim->pdeath = victim->pdeath + 1;
+	ch->pcdata->pkill = ch->pcdata->pkill + 1;
+	victim->pcdata->pdeath = victim->pcdata->pdeath + 1;
 	ch->pcdata->stats_dirty = TRUE;
 	victim->pcdata->stats_dirty = TRUE;
 	if ( !IS_CLASS( victim, CLASS_NINJA ) ) victim->rage = 0;
@@ -5638,55 +5638,55 @@ void do_autostance( CHAR_DATA *ch, char *argument ) {
 	if ( IS_NPC( ch ) ) return;
 	if ( !str_cmp( arg, "none" ) ) {
 		send_to_char( "You no longer autostance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_NONE;
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_NONE;
 	} else if ( !str_cmp( arg, "crane" ) ) {
 		send_to_char( "You now autostance into the crane stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_CRANE;
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_CRANE;
 	} else if ( !str_cmp( arg, "crab" ) ) {
 		send_to_char( "You now autostance into the crab stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_CRAB;
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_CRAB;
 	} else if ( !str_cmp( arg, "bull" ) ) {
 		send_to_char( "You now autostance into the bull stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_BULL;
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_BULL;
 	} else if ( !str_cmp( arg, "viper" ) ) {
 		send_to_char( "You now autostance into the viper stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_VIPER;
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_VIPER;
 	} else if ( !str_cmp( arg, "mongoose" ) ) {
 		send_to_char( "You now autostance into the mongoose stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_MONGOOSE;
-	} else if ( !str_cmp( arg, "mantis" ) && ch->stance[STANCE_CRANE] >= 200 && ch->stance[STANCE_VIPER] >= 200 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_MONGOOSE;
+	} else if ( !str_cmp( arg, "mantis" ) && ch_stance(ch)[STANCE_CRANE] >= 200 && ch_stance(ch)[STANCE_VIPER] >= 200 ) {
 		send_to_char( "You now autostance into the mantis stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_MANTIS;
-	} else if ( !str_cmp( arg, "monkey" ) && ch->stance[STANCE_CRANE] >= 200 && ch->stance[STANCE_MONGOOSE] >= 200 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_MANTIS;
+	} else if ( !str_cmp( arg, "monkey" ) && ch_stance(ch)[STANCE_CRANE] >= 200 && ch_stance(ch)[STANCE_MONGOOSE] >= 200 ) {
 		send_to_char( "You now autostance into the monkey stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_MONKEY;
-	} else if ( !str_cmp( arg, "swallow" ) && ch->stance[STANCE_CRAB] >= 200 && ch->stance[STANCE_MONGOOSE] >= 200 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_MONKEY;
+	} else if ( !str_cmp( arg, "swallow" ) && ch_stance(ch)[STANCE_CRAB] >= 200 && ch_stance(ch)[STANCE_MONGOOSE] >= 200 ) {
 		send_to_char( "You now autostance into the swallow stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_SWALLOW;
-	} else if ( !str_cmp( arg, "tiger" ) && ch->stance[STANCE_BULL] >= 200 && ch->stance[STANCE_VIPER] >= 200 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_SWALLOW;
+	} else if ( !str_cmp( arg, "tiger" ) && ch_stance(ch)[STANCE_BULL] >= 200 && ch_stance(ch)[STANCE_VIPER] >= 200 ) {
 		send_to_char( "You now autostance into the tiger stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_TIGER;
-	} else if ( !str_cmp( arg, "dragon" ) && ch->stance[STANCE_CRAB] >= 200 && ch->stance[STANCE_BULL] >= 200 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_TIGER;
+	} else if ( !str_cmp( arg, "dragon" ) && ch_stance(ch)[STANCE_CRAB] >= 200 && ch_stance(ch)[STANCE_BULL] >= 200 ) {
 		send_to_char( "You now autostance into the dragon stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_DRAGON;
-	} else if ( !str_cmp( arg, "wolf" ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) ) && ch->stance[STANCE_TIGER] >= 200 && ch->stance[STANCE_SWALLOW] >= 200 && ch->stance[STANCE_MONKEY] >= 200 && ch->stance[STANCE_MANTIS] >= 200 && ch->stance[STANCE_DRAGON] >= 200 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_DRAGON;
+	} else if ( !str_cmp( arg, "wolf" ) && ( IS_CLASS( ch, CLASS_WEREWOLF ) ) && ch_stance(ch)[STANCE_TIGER] >= 200 && ch_stance(ch)[STANCE_SWALLOW] >= 200 && ch_stance(ch)[STANCE_MONKEY] >= 200 && ch_stance(ch)[STANCE_MANTIS] >= 200 && ch_stance(ch)[STANCE_DRAGON] >= 200 ) {
 		send_to_char( "You now autostance into the wolf stance.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_WOLF;
-	} else if ( !str_cmp( arg, "ss1" ) && ch->stance[19] != -1 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_WOLF;
+	} else if ( !str_cmp( arg, "ss1" ) && ch_stance(ch)[19] != -1 ) {
 		send_to_char( "You now autostance into superstance one.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_SS1;
-	} else if ( !str_cmp( arg, "ss2" ) && ch->stance[20] != -1 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_SS1;
+	} else if ( !str_cmp( arg, "ss2" ) && ch_stance(ch)[20] != -1 ) {
 		send_to_char( "You now autostance into superstance two.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_SS2;
-	} else if ( !str_cmp( arg, "ss3" ) && ch->stance[21] != -1 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_SS2;
+	} else if ( !str_cmp( arg, "ss3" ) && ch_stance(ch)[21] != -1 ) {
 		send_to_char( "You now autostance into superstance three.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_SS3;
-	} else if ( !str_cmp( arg, "ss4" ) && ch->stance[22] != -1 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_SS3;
+	} else if ( !str_cmp( arg, "ss4" ) && ch_stance(ch)[22] != -1 ) {
 		send_to_char( "You now autostance into superstance four.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_SS4;
-	} else if ( !str_cmp( arg, "ss5" ) && ch->stance[23] != -1 ) {
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_SS4;
+	} else if ( !str_cmp( arg, "ss5" ) && ch_stance(ch)[23] != -1 ) {
 		send_to_char( "You now autostance into superstance five.\n\r", ch );
-		ch->stance[MONK_AUTODROP] = STANCE_SS5;
+		ch_stance(ch)[MONK_AUTODROP] = STANCE_SS5;
 	} else
 		send_to_char( "You can't set your autostance to that!\n\r", ch );
 }
@@ -5697,43 +5697,43 @@ void autodrop( CHAR_DATA *ch ) {
 	char stancename[10];
 
 	if ( IS_NPC( ch ) ) return;
-	if ( ch->stance[MONK_AUTODROP] == STANCE_NONE ) return;
-	if ( ch->stance[MONK_AUTODROP] == STANCE_VIPER )
+	if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_NONE ) return;
+	if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_VIPER )
 		snprintf( stancename, sizeof( stancename ), "viper" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_CRANE )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_CRANE )
 		snprintf( stancename, sizeof( stancename ), "crane" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_CRAB )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_CRAB )
 		snprintf( stancename, sizeof( stancename ), "crab" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_MONGOOSE )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_MONGOOSE )
 		snprintf( stancename, sizeof( stancename ), "mongoose" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_BULL )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_BULL )
 		snprintf( stancename, sizeof( stancename ), "bull" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_MANTIS )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_MANTIS )
 		snprintf( stancename, sizeof( stancename ), "mantis" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_DRAGON )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_DRAGON )
 		snprintf( stancename, sizeof( stancename ), "dragon" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_TIGER )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_TIGER )
 		snprintf( stancename, sizeof( stancename ), "tiger" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_MONKEY )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_MONKEY )
 		snprintf( stancename, sizeof( stancename ), "monkey" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_SWALLOW )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_SWALLOW )
 		snprintf( stancename, sizeof( stancename ), "swallow" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS1 )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_SS1 )
 		snprintf( stancename, sizeof( stancename ), "ss1" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS2 )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_SS2 )
 		snprintf( stancename, sizeof( stancename ), "ss2" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS3 )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_SS3 )
 		snprintf( stancename, sizeof( stancename ), "ss3" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS4 )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_SS4 )
 		snprintf( stancename, sizeof( stancename ), "ss4" );
-	else if ( ch->stance[MONK_AUTODROP] == STANCE_SS5 )
+	else if ( ch_stance(ch)[MONK_AUTODROP] == STANCE_SS5 )
 		snprintf( stancename, sizeof( stancename ), "ss5" );
-	else if ( ch->stance[MONK_AUTODROP] )
+	else if ( ch_stance(ch)[MONK_AUTODROP] )
 		snprintf( stancename, sizeof( stancename ), "wolf" );
 	else
 		return;
-	if ( ch->stance[0] < 1 ) {
-		ch->stance[0] = ch->stance[MONK_AUTODROP];
+	if ( ch_stance(ch)[0] < 1 ) {
+		ch_stance(ch)[0] = ch_stance(ch)[MONK_AUTODROP];
 		;
 		snprintf( buf, sizeof( buf ), "#7You autodrop into the #3%s#7 stance.", stancename );
 		act( buf, ch, NULL, NULL, TO_CHAR );
