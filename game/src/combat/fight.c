@@ -210,6 +210,7 @@ void violence_update( void ) {
 		/*
 		 * Fun for the whole family!
 		 */
+		PROFILE_START( "group_assist" );
 		LIST_FOR_EACH_SAFE(rch, rch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( IS_AWAKE( rch ) && rch->fighting == NULL ) {
 				/*
@@ -250,6 +251,7 @@ void violence_update( void ) {
 				}
 			}
 		}
+		PROFILE_END( "group_assist" );
 
 		/* Artificer turret attacks */
 		if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_ARTIFICER ) &&

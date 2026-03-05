@@ -8,6 +8,7 @@
 
 #include "merc.h"
 #include "script.h"
+#include "profile.h"
 
 
 /* Defined in script_lua.c */
@@ -27,7 +28,7 @@ void script_run_death( SCRIPT_DATA *script, const char *func,
  * chance == 0 means always fire.
  */
 static bool script_chance_check( SCRIPT_DATA *script ) {
-	if ( script->chance <= 0 )
+	if ( script->chance <= 0 || script->chance >= 100 )
 		return TRUE;
 	return ( number_range( 1, 100 ) <= script->chance );
 }
@@ -145,16 +146,23 @@ bool script_trigger_tick( CHAR_DATA *ch ) {
 	if ( ch == NULL || ch->pIndexData == NULL )
 		return FALSE;
 
+	if ( !ch->pIndexData->has_tick_scripts )
+		return FALSE;
+
+	PROFILE_START( "script_tick" );
 	LIST_FOR_EACH( script, &ch->pIndexData->scripts, SCRIPT_DATA, node ) {
 		if ( !IS_SET( script->trigger, TRIG_TICK ) )
 			continue;
 		if ( !script_chance_check( script ) )
 			continue;
 
-		if ( script_run_tick( script, ch ) )
+		if ( script_run_tick( script, ch ) ) {
+			PROFILE_END( "script_tick" );
 			return TRUE;
+		}
 	}
 
+	PROFILE_END( "script_tick" );
 	return FALSE;
 }
 

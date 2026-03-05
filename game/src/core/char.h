@@ -871,6 +871,7 @@ struct kill_data {
 struct mob_index_data {
 	MOB_INDEX_DATA *next;
 	list_head_t scripts;      /* Lua scripts attached to this mob template */
+	bool has_tick_scripts;    /* TRUE if any script has TRIG_TICK */
 	SHOP_DATA *pShop;
 	CHAR_DATA *mount;
 	CHAR_DATA *wizard;
