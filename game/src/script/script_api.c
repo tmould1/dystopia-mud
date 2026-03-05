@@ -337,6 +337,76 @@ static int api_char_set_story_clue( lua_State *L ) {
 }
 
 
+/* ch:story_kills() — returns the player's current hub kill count */
+static int api_char_story_kills( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	if ( IS_NPC( ch ) ) {
+		lua_pushinteger( L, 0 );
+		return 1;
+	}
+	lua_pushinteger( L, ch->pcdata->story_kills );
+	return 1;
+}
+
+/* ch:add_story_kill() — increment kill counter, returns new count */
+static int api_char_add_story_kill( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	if ( IS_NPC( ch ) ) {
+		luaL_error( L, "add_story_kill() cannot be called on NPCs" );
+		return 0;
+	}
+	ch->pcdata->story_kills++;
+	lua_pushinteger( L, ch->pcdata->story_kills );
+	return 1;
+}
+
+/* ch:story_progress() — returns the sub-task progress bitfield */
+static int api_char_story_progress( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	if ( IS_NPC( ch ) ) {
+		lua_pushinteger( L, 0 );
+		return 1;
+	}
+	lua_pushinteger( L, (lua_Integer) ch->pcdata->story_progress );
+	return 1;
+}
+
+/* ch:set_story_progress(n) — set the progress bitfield (use 0 to reset) */
+static int api_char_set_story_progress( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	int n = (int) luaL_checkinteger( L, 2 );
+	if ( IS_NPC( ch ) ) {
+		luaL_error( L, "set_story_progress() cannot be called on NPCs" );
+		return 0;
+	}
+	ch->pcdata->story_progress = (uint32_t) n;
+	return 0;
+}
+
+/* ch:story_has_task(bit) — check if a sub-task bit is set */
+static int api_char_story_has_task( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	int bit = (int) luaL_checkinteger( L, 2 );
+	if ( IS_NPC( ch ) ) {
+		lua_pushboolean( L, 0 );
+		return 1;
+	}
+	lua_pushboolean( L, ( ch->pcdata->story_progress & (uint32_t) bit ) != 0 );
+	return 1;
+}
+
+/* ch:set_story_task(bit) — OR a bit into the progress bitfield */
+static int api_char_set_story_task( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	int bit = (int) luaL_checkinteger( L, 2 );
+	if ( IS_NPC( ch ) ) {
+		luaL_error( L, "set_story_task() cannot be called on NPCs" );
+		return 0;
+	}
+	ch->pcdata->story_progress |= (uint32_t) bit;
+	return 0;
+}
+
 /* ch:has_object(vnum) — true if player carries object with this vnum */
 static int api_char_has_object( lua_State *L ) {
 	CHAR_DATA *ch = check_char( L, 1 );
@@ -396,11 +466,17 @@ static const luaL_Reg char_methods[] = {
 	{ "attack",       api_char_attack },
 	{ "do_command",      api_char_do_command },
 	{ "can_see",         api_char_can_see },
-	{ "story_node",      api_char_story_node },
-	{ "set_story_node",  api_char_set_story_node },
-	{ "set_story_clue",  api_char_set_story_clue },
-	{ "has_object",      api_char_has_object },
-	{ "take_object",     api_char_take_object },
+	{ "story_node",         api_char_story_node },
+	{ "set_story_node",     api_char_set_story_node },
+	{ "set_story_clue",     api_char_set_story_clue },
+	{ "story_kills",        api_char_story_kills },
+	{ "add_story_kill",     api_char_add_story_kill },
+	{ "story_progress",     api_char_story_progress },
+	{ "set_story_progress", api_char_set_story_progress },
+	{ "story_has_task",     api_char_story_has_task },
+	{ "set_story_task",     api_char_set_story_task },
+	{ "has_object",         api_char_has_object },
+	{ "take_object",        api_char_take_object },
 	{ NULL,              NULL }
 };
 

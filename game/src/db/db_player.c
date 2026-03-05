@@ -168,7 +168,9 @@ static const char *PLAYER_SCHEMA_SQL =
 	"  questsrun      INTEGER NOT NULL DEFAULT 0,"
 	"  questtotal     INTEGER NOT NULL DEFAULT 0,"
 	"  story_node     INTEGER NOT NULL DEFAULT 0,"
-	"  story_clue     TEXT NOT NULL DEFAULT ''"
+	"  story_clue     TEXT NOT NULL DEFAULT '',"
+	"  story_kills    INTEGER NOT NULL DEFAULT 0,"
+	"  story_progress INTEGER NOT NULL DEFAULT 0"
 	");"
 
 	"CREATE TABLE IF NOT EXISTS player_arrays ("
@@ -351,6 +353,8 @@ static sqlite3 *db_player_open( const char *name ) {
 	/* Migrate schema for existing player databases (errors ignored if columns exist) */
 	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_node INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
 	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_clue TEXT NOT NULL DEFAULT ''", NULL, NULL, NULL );
+	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_kills INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
+	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_progress INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
 
 	/* WAL mode: eliminates journal file create/delete per transaction.
 	 * synchronous=NORMAL: fsync only at WAL checkpoints, not every commit.
@@ -862,7 +866,7 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 			"kingdom, quest, rank, bounty, security, jflags, souls,"
 			"upgrade_level, mean_paradox, relrank, rune_count, revision,"
 			"disc_research, disc_points, obj_vnum, exhaustion, questsrun, questtotal,"
-			"story_node, story_clue"
+			"story_node, story_clue, story_kills, story_progress"
 			") VALUES ("
 			"?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"  /* 16: strings 1 */
 			"?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"    /* 15: strings 2 */
@@ -878,7 +882,7 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 			"?,?,?,?,?,?,?,"                    /* 7: kingdom..souls */
 			"?,?,?,?,?,"                        /* 5: upgrade..revision */
 			"?,?,?,?,?,?,"                      /* 6: disc..questtotal */
-			"?,?"                               /* 2: story */
+			"?,?,?,?"                           /* 4: story */
 			")";
 		int col = 1;
 		int room_vnum;
@@ -1019,6 +1023,8 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_bind_int( stmt, col++, ch->pcdata->questtotal );
 		sqlite3_bind_int( stmt, col++, ch->pcdata->story_node );
 		sqlite3_bind_text( stmt, col++, ch->pcdata->story_clue ? ch->pcdata->story_clue : "", -1, SQLITE_STATIC );
+		sqlite3_bind_int( stmt, col++, ch->pcdata->story_kills );
+		sqlite3_bind_int( stmt, col++, (int) ch->pcdata->story_progress );
 
 		sqlite3_step( stmt );
 		sqlite3_finalize( stmt );
@@ -1287,6 +1293,8 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	ch->pcdata->stats_dirty = FALSE;
 	ch->pcdata->story_node = 0;
 	ch->pcdata->story_clue = str_dup( "" );
+	ch->pcdata->story_kills = 0;
+	ch->pcdata->story_progress = 0;
 	ch->pcdata->conception = str_dup( "" );
 	ch->pcdata->parents = str_dup( "" );
 	ch->pcdata->cparents = str_dup( "" );
@@ -1420,7 +1428,7 @@ static void load_player_row( sqlite3 *db, CHAR_DATA *ch ) {
 		"kingdom, quest, rank, bounty, security, jflags, souls,"
 		"upgrade_level, mean_paradox, relrank, rune_count, revision,"
 		"disc_research, disc_points, obj_vnum, exhaustion, questsrun, questtotal,"
-		"story_node, story_clue"
+		"story_node, story_clue, story_kills, story_progress"
 		" FROM player LIMIT 1";
 
 	if ( sqlite3_prepare_v2( db, sql, -1, &stmt, NULL ) != SQLITE_OK )
@@ -1592,6 +1600,8 @@ static void load_player_row( sqlite3 *db, CHAR_DATA *ch ) {
 			free( ch->pcdata->story_clue );
 			ch->pcdata->story_clue = str_dup( clue ? clue : "" );
 		}
+		ch->pcdata->story_kills = sqlite3_column_int( stmt, col++ );
+		ch->pcdata->story_progress = (uint32_t) sqlite3_column_int( stmt, col++ );
 	}
 
 	sqlite3_finalize( stmt );
