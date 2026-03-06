@@ -18,22 +18,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build in i386 container
+      - name: Build in Alpine i386 container (musl static)
         run: |
-          docker run --rm -v "$PWD:/build" -w /build i386/debian:bullseye bash -c "
-            apt-get update && apt-get install -y gcc make zlib1g-dev libcrypt-dev file
+          docker run --rm --platform linux/386 \
+            -v "$PWD:/build" -w /build alpine:3.18 sh -c "
+            apk add --no-cache gcc musl-dev make zlib-dev zlib-static bash file
             cd game
             chmod +x build/GenerateProjectFiles.sh
             bash build/GenerateProjectFiles.sh
+            # musl includes crypt and dl in libc — remove separate flags
+            sed -i 's/-lcrypt //; s/-ldl //' build/Makefile
+            # Add static linking
             sed -i 's/^L_FLAGS = /L_FLAGS = -static /' build/Makefile
             cd build
             make -j\$(nproc) -f Makefile
           "
 
-      - name: Verify binary is 32-bit
+      - name: Verify binary is 32-bit static
         run: |
           file gamedata/dystopia
           file gamedata/dystopia | grep -q "32-bit"
+          file gamedata/dystopia | grep -q "statically linked"
 
       - name: Package release
         run: |
