@@ -1582,7 +1582,7 @@ void do_look( CHAR_DATA *ch, char *argument ) {
 		}
 	}
 
-	pdesc = get_extra_descr( arg1, &ch->in_room->extra_descr );
+	pdesc = get_extra_descr( arg1, room_extra_descrs( ch->in_room ) );
 	if ( pdesc != NULL ) {
 		send_to_char( pdesc, ch );
 		script_trigger_room_examine( ch, arg1 );

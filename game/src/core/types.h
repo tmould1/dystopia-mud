@@ -33,6 +33,7 @@ typedef struct pc_data PC_DATA;
 typedef struct reset_data RESET_DATA;
 typedef struct room_index_data ROOM_INDEX_DATA;
 typedef struct room_dynamic_data ROOM_DYNAMIC_DATA;
+typedef struct room_extras ROOM_EXTRAS;
 typedef struct shop_data SHOP_DATA;
 typedef struct time_info_data TIME_INFO_DATA;
 typedef struct weather_data WEATHER_DATA;

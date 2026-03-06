@@ -276,13 +276,13 @@ static mem_category_t mem_objects( int *out_affects, int *out_ed,
 }
 
 static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
-	int *out_scripts, int *out_dynamic )
+	int *out_scripts, int *out_dynamic, int *out_extras )
 {
 	mem_category_t r = { "Rooms", 0, 0, 0, 0 };
 	AREA_DATA *pArea;
 	ROOM_INDEX_DATA *pRoom;
 	int exit_count = 0, ed_count = 0, reset_count = 0, script_count = 0;
-	int dynamic_count = 0;
+	int dynamic_count = 0, extras_count = 0;
 	int door, i;
 
 	LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
@@ -302,6 +302,11 @@ static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
 				r.string_bytes += str_mem( pRoom->dynamic->track[i] );
 		}
 
+		if ( pRoom->extras ) {
+			extras_count++;
+			r.child_bytes += sizeof( ROOM_EXTRAS );
+		}
+
 		for ( door = 0; door < 6; door++ ) {
 			EXIT_DATA *pexit = pRoom->exit[door];
 			if ( pexit ) {
@@ -312,7 +317,7 @@ static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
 			}
 		}
 
-		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
+		LIST_FOR_EACH( ed, room_extra_descrs( pRoom ), EXTRA_DESCR_DATA, node ) {
 			ed_count++;
 			r.child_bytes += sizeof( EXTRA_DESCR_DATA );
 			r.string_bytes += str_mem( ed->keyword );
@@ -324,7 +329,7 @@ static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
 			r.child_bytes += sizeof( RESET_DATA );
 		}
 
-		LIST_FOR_EACH( scr, &pRoom->scripts, SCRIPT_DATA, node ) {
+		LIST_FOR_EACH( scr, room_scripts( pRoom ), SCRIPT_DATA, node ) {
 			script_count++;
 			r.child_bytes += sizeof( SCRIPT_DATA );
 			r.string_bytes += str_mem( scr->name );
@@ -340,6 +345,7 @@ static mem_category_t mem_rooms( int *out_exits, int *out_ed, int *out_resets,
 	if ( out_resets )  *out_resets  = reset_count;
 	if ( out_scripts ) *out_scripts = script_count;
 	if ( out_dynamic ) *out_dynamic = dynamic_count;
+	if ( out_extras )  *out_extras  = extras_count;
 	return r;
 }
 
@@ -514,7 +520,7 @@ static void mem_show_summary( CHAR_DATA *ch ) {
 
 	cats[0] = mem_characters( NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 );
 	cats[1] = mem_objects( NULL, NULL, NULL, 0 );
-	cats[2] = mem_rooms( NULL, NULL, NULL, NULL, NULL );
+	cats[2] = mem_rooms( NULL, NULL, NULL, NULL, NULL, NULL );
 	cats[3] = mem_mob_index( NULL, NULL );
 	cats[4] = mem_obj_index( NULL, NULL, NULL );
 	cats[5] = mem_descriptors( NULL, NULL );
@@ -668,11 +674,12 @@ static void mem_show_objects( CHAR_DATA *ch ) {
 }
 
 static void mem_show_rooms( CHAR_DATA *ch ) {
-	int exit_count, ed_count, reset_count, script_count, dynamic_count;
+	int exit_count, ed_count, reset_count, script_count, dynamic_count, extras_count;
 	char buf[32];
 	mem_category_t r;
 
-	r = mem_rooms( &exit_count, &ed_count, &reset_count, &script_count, &dynamic_count );
+	r = mem_rooms( &exit_count, &ed_count, &reset_count, &script_count,
+		&dynamic_count, &extras_count );
 
 	send_to_char( "\n\r#R===== #yMemory Detail: Rooms #R=====#n\n\r\n\r", ch );
 	send_line( ch, "Instances:     %6d\n\r", r.count );
@@ -692,6 +699,8 @@ static void mem_show_rooms( CHAR_DATA *ch ) {
 		(size_t) reset_count * sizeof( RESET_DATA ), reset_count );
 	send_line( ch, "  Dynamic:         %10zu  (%d of %d rooms)\n\r",
 		(size_t) dynamic_count * sizeof( ROOM_DYNAMIC_DATA ), dynamic_count, r.count );
+	send_line( ch, "  Extras:          %10zu  (%d of %d rooms)\n\r",
+		(size_t) extras_count * sizeof( ROOM_EXTRAS ), extras_count, r.count );
 	send_line( ch, "  Scripts:         %10zu  (%d instances)\n\r",
 		(size_t) script_count * sizeof( SCRIPT_DATA ), script_count );
 
@@ -857,6 +866,9 @@ static void mem_show_areas( CHAR_DATA *ch ) {
 					area_bytes += str_mem( pRoom->dynamic->track[door] );
 			}
 
+			if ( pRoom->extras )
+				area_bytes += sizeof( ROOM_EXTRAS );
+
 			for ( door = 0; door < 6; door++ ) {
 				if ( pRoom->exit[door] ) {
 					area_bytes += sizeof( EXIT_DATA );
@@ -865,7 +877,7 @@ static void mem_show_areas( CHAR_DATA *ch ) {
 				}
 			}
 
-			LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
+			LIST_FOR_EACH( ed, room_extra_descrs( pRoom ), EXTRA_DESCR_DATA, node ) {
 				area_bytes += sizeof( EXTRA_DESCR_DATA );
 				area_bytes += str_mem( ed->keyword );
 				area_bytes += str_mem( ed->description );
@@ -876,7 +888,7 @@ static void mem_show_areas( CHAR_DATA *ch ) {
 				area_bytes += sizeof( RESET_DATA );
 			}
 
-			LIST_FOR_EACH( scr, &pRoom->scripts, SCRIPT_DATA, node ) {
+			LIST_FOR_EACH( scr, room_scripts( pRoom ), SCRIPT_DATA, node ) {
 				scripts++;
 				area_bytes += sizeof( SCRIPT_DATA );
 				area_bytes += str_mem( scr->name );
@@ -938,7 +950,7 @@ static void mem_show_scripts( CHAR_DATA *ch ) {
 	OBJ_INDEX_DATA *pObj;
 	ROOM_INDEX_DATA *pRoom;
 	int iHash;
-	int mob_scripts = 0, obj_scripts = 0, room_scripts = 0;
+	int mob_scripts = 0, obj_scripts = 0, rm_scripts = 0;
 	size_t mob_bytes = 0, obj_bytes = 0, room_bytes = 0;
 	size_t code_bytes = 0;
 	char buf[32];
@@ -981,8 +993,8 @@ static void mem_show_scripts( CHAR_DATA *ch ) {
 		LIST_FOR_EACH( pArea, &g_areas, AREA_DATA, node ) {
 		for ( pRoom = pArea->room_first; pRoom; pRoom = pRoom->next_in_area ) {
 			SCRIPT_DATA *scr;
-			LIST_FOR_EACH( scr, &pRoom->scripts, SCRIPT_DATA, node ) {
-				room_scripts++;
+			LIST_FOR_EACH( scr, room_scripts( pRoom ), SCRIPT_DATA, node ) {
+				rm_scripts++;
 				room_bytes += sizeof( SCRIPT_DATA );
 				room_bytes += str_mem( scr->name );
 				room_bytes += str_mem( scr->code );
@@ -1000,10 +1012,10 @@ static void mem_show_scripts( CHAR_DATA *ch ) {
 	format_bytes( obj_bytes, buf, sizeof( buf ) );
 	send_line( ch, "  Obj scripts:     %4d  %s\n\r", obj_scripts, buf );
 	format_bytes( room_bytes, buf, sizeof( buf ) );
-	send_line( ch, "  Room scripts:    %4d  %s\n\r\n\r", room_scripts, buf );
+	send_line( ch, "  Room scripts:    %4d  %s\n\r\n\r", rm_scripts, buf );
 
 	{
-		int total = mob_scripts + obj_scripts + room_scripts;
+		int total = mob_scripts + obj_scripts + rm_scripts;
 		size_t total_bytes = mob_bytes + obj_bytes + room_bytes;
 
 		format_bytes( code_bytes, buf, sizeof( buf ) );

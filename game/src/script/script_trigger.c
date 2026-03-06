@@ -182,7 +182,7 @@ void script_trigger_room_enter( CHAR_DATA *ch, ROOM_INDEX_DATA *room ) {
 	if ( IS_NPC( ch ) )
 		return;
 
-	LIST_FOR_EACH( script, &room->scripts, SCRIPT_DATA, node ) {
+	LIST_FOR_EACH( script, room_scripts( room ), SCRIPT_DATA, node ) {
 		if ( !IS_SET( script->trigger, TRIG_GREET ) )
 			continue;
 		if ( !script_chance_check( script ) )
@@ -213,7 +213,7 @@ void script_trigger_room_speech( CHAR_DATA *ch, const char *text ) {
 	if ( room == NULL )
 		return;
 
-	LIST_FOR_EACH( script, &room->scripts, SCRIPT_DATA, node ) {
+	LIST_FOR_EACH( script, room_scripts( room ), SCRIPT_DATA, node ) {
 		if ( !IS_SET( script->trigger, TRIG_SPEECH ) )
 			continue;
 		if ( !script_pattern_match( script, text ) )
@@ -246,7 +246,7 @@ void script_trigger_room_examine( CHAR_DATA *ch, const char *keyword ) {
 	if ( room == NULL )
 		return;
 
-	LIST_FOR_EACH( script, &room->scripts, SCRIPT_DATA, node ) {
+	LIST_FOR_EACH( script, room_scripts( room ), SCRIPT_DATA, node ) {
 		if ( !IS_SET( script->trigger, TRIG_EXAMINE ) )
 			continue;
 		if ( !script_pattern_match( script, keyword ) )

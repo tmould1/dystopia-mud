@@ -168,17 +168,13 @@ static inline ROOM_DYNAMIC_DATA *room_dynamic( ROOM_INDEX_DATA *room );
  * Exit data.
  */
 struct exit_data {
-	EXIT_DATA *rexit;		  /* Reverse exit pointer		*/
 	ROOM_INDEX_DATA *to_room; /* Pointer to destination room	*/
 	char *keyword;			  /* Keywords for exit or door	*/
 	char *description;		  /* Description of exit		*/
 	int vnum;				  /* Vnum of room exit leads to	*/
-	int rvnum;				  /* Vnum of room in opposite dir	*/
-	uint32_t exit_info;			  /* door states & other flags	*/
-	int key;				  /* Key vnum			*/
-	int vdir;			  /* 0,5 N\E\S\W\U\D shit		*/
+	uint32_t exit_info;		  /* door states & other flags	*/
+	int key;				  /* Key vnum					*/
 	int rs_flags;			  /* OLC */
-	int orig_door;			  /* OLC */
 };
 
 /*
@@ -193,19 +189,27 @@ struct room_dynamic_data {
 };
 
 /*
+ * Optional room data — lazily allocated for rooms with extra descriptions
+ * or Lua scripts.  Most rooms (83%+) need neither.
+ */
+struct room_extras {
+	list_head_t extra_descr;
+	list_head_t scripts;
+};
+
+/*
  * Room type.
  */
 struct room_index_data {
 	ROOM_INDEX_DATA *next;
 	list_head_t characters;
 	list_head_t objects;
-	list_head_t extra_descr;
 	AREA_DATA *area;
 	EXIT_DATA *exit[6];
 	list_head_t resets;      /* OLC */
-	list_head_t scripts;     /* Lua scripts attached to this room */
 
 	ROOM_DYNAMIC_DATA *dynamic;  /* Lazily allocated: timers, track, blood */
+	ROOM_EXTRAS *extras;         /* Lazily allocated: extra_descr, scripts */
 	char *name;
 	char *description;
 	int vnum;
@@ -223,6 +227,29 @@ static inline ROOM_DYNAMIC_DATA *room_dynamic( ROOM_INDEX_DATA *room ) {
 		/* calloc zeros tick_timer, track_dir, blood; track[] are NULL */
 	}
 	return room->dynamic;
+}
+
+/* Lazy allocator for extra_descr + scripts (write access) */
+static inline ROOM_EXTRAS *room_extras( ROOM_INDEX_DATA *room ) {
+	if ( !room->extras ) {
+		room->extras = calloc( 1, sizeof( ROOM_EXTRAS ) );
+		list_init( &room->extras->extra_descr );
+		list_init( &room->extras->scripts );
+	}
+	return room->extras;
+}
+
+/* Read-only accessors — return static empty list when extras is NULL */
+static inline list_head_t *room_extra_descrs( ROOM_INDEX_DATA *room ) {
+	static list_head_t empty;
+	if ( !empty.sentinel.next ) list_init( &empty );
+	return room->extras ? &room->extras->extra_descr : &empty;
+}
+
+static inline list_head_t *room_scripts( ROOM_INDEX_DATA *room ) {
+	static list_head_t empty;
+	if ( !empty.sentinel.next ) list_init( &empty );
+	return room->extras ? &room->extras->scripts : &empty;
 }
 
 #endif /* ROOM_H */

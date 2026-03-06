@@ -681,12 +681,12 @@ void do_rstat( CHAR_DATA *ch, char *argument ) {
 		location->description );
 	send_to_char( buf, ch );
 
-	if ( !list_empty( &location->extra_descr ) ) {
+	if ( !list_empty( room_extra_descrs( location ) ) ) {
 		EXTRA_DESCR_DATA *ed;
 		bool first = TRUE;
 
 		send_to_char( "Extra description keywords: '", ch );
-		LIST_FOR_EACH( ed, &location->extra_descr, EXTRA_DESCR_DATA, node ) {
+		LIST_FOR_EACH( ed, room_extra_descrs( location ), EXTRA_DESCR_DATA, node ) {
 			if ( !first ) send_to_char( " ", ch );
 			send_to_char( ed->keyword, ch );
 			first = FALSE;

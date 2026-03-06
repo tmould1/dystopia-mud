@@ -641,7 +641,6 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		}
 		list_init( &pRoomIndex->characters );
 		list_init( &pRoomIndex->objects );
-		list_init( &pRoomIndex->extra_descr );
 		list_init( &pRoomIndex->resets );
 		pRoomIndex->area        = pArea;
 		pRoomIndex->vnum        = vnum;
@@ -649,7 +648,6 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 		pRoomIndex->description = str_dup( col_text( stmt, 2 ) );
 		pRoomIndex->room_flags  = sqlite3_column_int( stmt, 3 );
 		pRoomIndex->sector_type = sqlite3_column_int( stmt, 4 );
-		list_init( &pRoomIndex->scripts );
 		for ( door = 0; door <= 5; door++ )
 			pRoomIndex->exit[door] = NULL;
 
@@ -696,7 +694,7 @@ static void sql_load_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 				ed->keyword     = str_dup( col_text( ed_stmt, 0 ) );
 				ed->description = str_dup( col_text( ed_stmt, 1 ) );
 
-				list_push_back( &pRoomIndex->extra_descr, &ed->node );
+				list_push_back( &room_extras( pRoomIndex )->extra_descr, &ed->node );
 				top_ed++;
 			}
 		}
@@ -911,7 +909,7 @@ static void sql_load_scripts( sqlite3 *db ) {
 			if ( pObj ) list = &pObj->scripts;
 		} else if ( !strcmp( owner_type, "room" ) ) {
 			ROOM_INDEX_DATA *pRoom = get_room_index( vnum );
-			if ( pRoom ) list = &pRoom->scripts;
+			if ( pRoom ) list = &room_extras( pRoom )->scripts;
 		}
 
 		if ( list == NULL ) {
@@ -1227,7 +1225,7 @@ static void sql_save_rooms( sqlite3 *db, AREA_DATA *pArea ) {
 
 		/* Save extra descriptions */
 		order = 0;
-		LIST_FOR_EACH( ed, &pRoomIndex->extra_descr, EXTRA_DESCR_DATA, node ) {
+		LIST_FOR_EACH( ed, room_extra_descrs( pRoomIndex ), EXTRA_DESCR_DATA, node ) {
 			sqlite3_reset( ed_stmt );
 			sqlite3_bind_int( ed_stmt, 1, vnum );
 			sqlite3_bind_text( ed_stmt, 2, ed->keyword, -1, SQLITE_TRANSIENT );
@@ -1375,8 +1373,8 @@ static void sql_save_scripts( sqlite3 *db, AREA_DATA *pArea ) {
 			sql_save_scripts_for_list( stmt, "obj", vnum, &pObj->scripts );
 
 		ROOM_INDEX_DATA *pRoom = get_room_index( vnum );
-		if ( pRoom && pRoom->area == pArea && !list_empty( &pRoom->scripts ) )
-			sql_save_scripts_for_list( stmt, "room", vnum, &pRoom->scripts );
+		if ( pRoom && pRoom->area == pArea && !list_empty( room_scripts( pRoom ) ) )
+			sql_save_scripts_for_list( stmt, "room", vnum, room_scripts( pRoom ) );
 	}
 
 	sqlite3_finalize( stmt );

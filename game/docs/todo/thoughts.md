@@ -1,7 +1,7 @@
 
 [STORED]
 
-[x] 30) Scripting system research — see [scripting.md](../design/architecture/scripting.md). Recommendation: embed Lua 5.4. Current codebase has 37 spec_funs (mob AI) and RoomText (room triggers), but no general-purpose scripting.
+
 
 [INFLIGHT]
 
@@ -11,6 +11,10 @@
 
 
 33) header file review
+
+34) 'story full' show all story notes for people whove forgotten
+
+36) 
 
 [NMI]
 

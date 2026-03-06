@@ -857,12 +857,12 @@ bool redit_show( CHAR_DATA *ch, char *argument ) {
 		flag_string( room_flags, pRoom->room_flags ) );
 	strcat( buf1, buf );
 
-	if ( !list_empty( &pRoom->extra_descr ) ) {
+	if ( !list_empty( room_extra_descrs( pRoom ) ) ) {
 		EXTRA_DESCR_DATA *ed;
 		bool first = TRUE;
 
 		strcat( buf1, "Desc Kwds:  [" );
-		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
+		LIST_FOR_EACH( ed, room_extra_descrs( pRoom ), EXTRA_DESCR_DATA, node ) {
 			if ( !first ) strcat( buf1, " " );
 			strcat( buf1, ed->keyword );
 			first = FALSE;
@@ -1314,7 +1314,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 		ed = new_extra_descr();
 		ed->keyword = str_dup( keyword );
 		ed->description = str_dup( "" );
-		list_push_front( &pRoom->extra_descr, &ed->node );
+		list_push_front( &room_extras( pRoom )->extra_descr, &ed->node );
 
 		string_append( ch, &ed->description );
 
@@ -1327,7 +1327,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
+		LIST_FOR_EACH( ed, room_extra_descrs( pRoom ), EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
 		}
@@ -1348,7 +1348,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
+		LIST_FOR_EACH( ed, room_extra_descrs( pRoom ), EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
 		}
@@ -1358,7 +1358,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		list_remove( &pRoom->extra_descr, &ed->node );
+		list_remove( &pRoom->extras->extra_descr, &ed->node );
 		free_extra_descr( ed );
 
 		send_to_char( "Extra description deleted.\n\r", ch );
@@ -1371,7 +1371,7 @@ bool redit_ed( CHAR_DATA *ch, char *argument ) {
 			return FALSE;
 		}
 
-		LIST_FOR_EACH( ed, &pRoom->extra_descr, EXTRA_DESCR_DATA, node ) {
+		LIST_FOR_EACH( ed, room_extra_descrs( pRoom ), EXTRA_DESCR_DATA, node ) {
 			if ( is_name( keyword, ed->keyword ) )
 				break;
 		}
