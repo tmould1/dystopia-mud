@@ -15,14 +15,66 @@ json_value() {
     grep -o "\"$1\" *: *\"[^\"]*\"" | head -1 | sed 's/.*: *"//;s/"$//'
 }
 
+# Portable HTTP fetch — tries curl, falls back to wget
+# Usage: fetch_url <url> <output_file> [auth_token]
+fetch_url() {
+    _url="$1"
+    _out="$2"
+    _token="${3:-}"
+
+    if command -v curl >/dev/null 2>&1; then
+        if [ -n "$_token" ]; then
+            curl -sL -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $_token" \
+                -o "$_out" -w "%{http_code}" "$_url" || echo "000"
+        else
+            curl -sL -H "Accept: application/vnd.github+json" \
+                -o "$_out" -w "%{http_code}" "$_url" || echo "000"
+        fi
+    elif command -v wget >/dev/null 2>&1; then
+        if [ -n "$_token" ]; then
+            wget -q --header="Accept: application/vnd.github+json" \
+                --header="Authorization: Bearer $_token" \
+                -O "$_out" "$_url" 2>/dev/null && echo "200" || echo "000"
+        else
+            wget -q --header="Accept: application/vnd.github+json" \
+                -O "$_out" "$_url" 2>/dev/null && echo "200" || echo "000"
+        fi
+    else
+        die "Neither curl nor wget is available"
+    fi
+}
+
+# Portable file download with progress
+# Usage: download_file <url> <output_file> [auth_token]
+download_file() {
+    _url="$1"
+    _out="$2"
+    _token="${3:-}"
+
+    if command -v curl >/dev/null 2>&1; then
+        if [ -n "$_token" ]; then
+            curl -L --fail --progress-bar \
+                -H "Authorization: Bearer $_token" \
+                -o "$_out" "$_url"
+        else
+            curl -L --fail --progress-bar -o "$_out" "$_url"
+        fi
+    elif command -v wget >/dev/null 2>&1; then
+        if [ -n "$_token" ]; then
+            wget --header="Authorization: Bearer $_token" \
+                -O "$_out" "$_url"
+        else
+            wget -O "$_out" "$_url"
+        fi
+    fi
+}
+
 # Load configuration
 [ -f "$CONF" ] || die "Config file not found: $CONF"
 . "$CONF"
 [ -n "${REPO:-}" ] || die "REPO not set in $CONF"
 [ -n "${ASSET_NAME:-}" ] || die "ASSET_NAME not set in $CONF"
-
-# Check dependencies
-command -v curl >/dev/null 2>&1 || die "curl is required but not installed"
 
 # Ensure directories exist
 mkdir -p "$LIVE_DIR" "$INGEST_DIR"
@@ -38,18 +90,8 @@ log "Current version: $CURRENT"
 log "Checking for latest release of $REPO..."
 API_URL="https://api.github.com/repos/${REPO}/releases/latest"
 
-if [ -n "${GITHUB_TOKEN:-}" ]; then
-    HTTP_CODE=$(curl -sL -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer $GITHUB_TOKEN" \
-        -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL") || true
-else
-    HTTP_CODE=$(curl -sL -H "Accept: application/vnd.github+json" \
-        -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL") || true
-fi
+HTTP_CODE=$(fetch_url "$API_URL" "$INGEST_DIR/.release.json" "${GITHUB_TOKEN:-}")
 
-if [ -z "$HTTP_CODE" ]; then
-    die "curl failed — check network connectivity"
-fi
 if [ "$HTTP_CODE" = "000" ]; then
     die "Could not connect to GitHub API — check DNS and network"
 fi
@@ -88,14 +130,7 @@ find "$INGEST_DIR" -mindepth 1 ! -name '.release.json' -exec rm -rf {} + 2>/dev/
 
 # Download
 log "Downloading $ASSET_NAME..."
-if [ -n "${GITHUB_TOKEN:-}" ]; then
-    curl -L --fail --progress-bar \
-        -H "Authorization: Bearer $GITHUB_TOKEN" \
-        -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL" || die "Download failed"
-else
-    curl -L --fail --progress-bar \
-        -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL" || die "Download failed"
-fi
+download_file "$ASSET_URL" "$INGEST_DIR/$ASSET_NAME" "${GITHUB_TOKEN:-}" || die "Download failed"
 
 # Extract
 log "Extracting..."
