@@ -10,7 +10,7 @@ Technical documentation covering the codebase's engineering foundations, moderni
 |----------|-------------|
 | [Heritage & Modernization](architecture/heritage.md) | Codebase lineage (Diku → Merc → GodWars → Dystopia → Dystopia+), source organization, modernization inventory |
 | [Database Layer](architecture/database.md) | SQLite persistence: area databases, game state, class registry, boot sequence, two-phase loading |
-| [Build System & CI/CD](architecture/build-system.md) | Project file generation, build scripts, GitHub Actions, Docker, AWS deployment |
+| [Build System & CI/CD](architecture/build-system.md) | Project file generation, build scripts, GitHub Actions, Docker, GitHub Releases |
 | [Test Infrastructure](architecture/testing.md) | Test framework, assertion macros, headless boot, output capture, adding tests |
 | [Client Protocols](architecture/client-protocols.md) | Protocol stack (GMCP, MCCP, MXP, MSSP, NAWS, TTYPE), tiered intro system, UTF-8 |
 | [Platform & Config](architecture/platform-config.md) | Cross-platform compatibility layer, unified configuration system, output system |

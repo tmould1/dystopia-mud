@@ -96,49 +96,37 @@ Both platforms must pass. Test failures block the pipeline.
 
 Same build + test pipeline as CI, but manually triggered for ad-hoc testing.
 
-### deploy.yml — Build & Deploy to AWS
+### release-linux.yml / release-windows.yml — Build & Release
 
-**Trigger:** Manual with options: deploy (boolean), instance (main/5e)
+**Trigger:** Push of version tag (`v*`) or manual dispatch with optional tag input
+
+Each platform has its own independent workflow. Both trigger on the same tag and attach their artifact to the same GitHub Release.
 
 ```
-deploy.yml
-├─ build-linux
-│   ├─ GenerateProjectFiles.sh → make → tests
-│   ├─ Package: tar -czvf dystopia-linux.tar.gz gamedata/
-│   └─ Upload artifact
-│
-├─ build-windows
-│   ├─ GenerateProjectFiles.bat → MSBuild → tests
-│   ├─ Package: Compress-Archive → dystopia-windows.zip
-│   └─ Upload artifact
-│
-└─ deploy (if deploy=true, needs build-linux)
-    ├─ AWS OIDC authentication
-    ├─ SSM Parameter Store → deployment config
-    ├─ Extract artifact → create deployment package
-    │   ├─ bin/dystopia (binary)
-    │   ├─ db/areas/*.db (area databases)
-    │   ├─ db/game/base_help.db, class.db (read-only game data)
-    │   └─ appspec.yml + hook scripts
-    ├─ Upload to S3
-    ├─ Create CodeDeploy deployment
-    └─ Wait for deployment completion
+release-linux.yml                          release-windows.yml
+├─ build (amazonlinux:2023)                ├─ build (windows-latest)
+│   ├─ GenerateProjectFiles.sh → make      │   ├─ GenerateProjectFiles.bat → MSBuild
+│   ├─ Run tests                           │   ├─ Run tests
+│   └─ Package → tar.gz                   │   └─ Package → zip
+│                                          │
+└─ release (on tag only)                   └─ release (on tag only)
+    └─ Create/update GitHub Release            └─ Create/update GitHub Release
+        └─ dystopia-linux-amd64.tar.gz             └─ dystopia-windows-amd64.zip
 ```
 
-### Deployment Package
+### Release Archive Contents
 
-The deploy step creates a minimal package containing only what's needed on the server:
+Each archive is self-contained — extract and run:
 
-| Component | Source | Notes |
-|-----------|--------|-------|
-| `bin/dystopia` | Build artifact | Server binary |
-| `db/areas/*.db` | `gamedata/db/areas/` | World data (replaces server copy) |
-| `db/game/base_help.db` | `gamedata/db/game/` | Read-only help (server's `live_help.db` preserved) |
-| `db/game/class.db` | `gamedata/db/game/` | Class registry |
-| `appspec.yml` | Template + `sed` | Instance-specific CodeDeploy hooks |
-| `aws/scripts/*.sh` | `aws/scripts/` | Deploy lifecycle hooks |
+| Component | Contents |
+|-----------|----------|
+| `gamedata/dystopia` (or `.exe`) | Server binary |
+| `gamedata/db/areas/*.db` | World data (area databases) |
+| `gamedata/db/game/*.db` | Game data (help, classes, tables) |
+| `gamedata/doc/` | License files and documentation |
+| `startup.sh` / `startup.bat` | Auto-restart startup script |
 
-Server-local data (`game.db`, `live_help.db`, player saves) is NOT included in the deployment — it persists on the server.
+Runtime-generated data (`game.db`, `live_help.db`, player saves, logs) is not included — the server creates these on first boot.
 
 ## Docker
 

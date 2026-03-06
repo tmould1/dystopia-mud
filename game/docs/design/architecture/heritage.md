@@ -79,7 +79,7 @@ DikuMUD (1990-91)
 | **Config system** | Hardcoded values + `balance` file | [cfg.h](../../../src/core/cfg.h), [cfg.c](../../../src/core/cfg.c) | Type-safe enum-keyed O(1) lookup, database-backed |
 | **Test harness** | None | [test_framework.h](../../../tests/test_framework.h), [test_main.c](../../../tests/test_main.c) | Headless engine init, output capture, CI integration |
 | **Build system** | Manual Makefiles | [GenerateProjectFiles.bat](../../../build/GenerateProjectFiles.bat) | Auto-discovers sources, generates Makefile + VS projects |
-| **CI/CD** | None | [.github/workflows/](../../../../.github/workflows/) | Dual-platform build + test on push, AWS deploy |
+| **CI/CD** | None | [.github/workflows/](../../../../.github/workflows/) | Dual-platform build + test on push, GitHub Releases |
 | **Python tools** | None | [game/tools/](../../../tools/) | Area editor (mudedit), test bot (mudbot), constant sourcing from C headers |
 | **Client protocols** | Basic telnet | [gmcp.c](../../../src/systems/gmcp.c), [mccp.c](../../../src/systems/mccp.c), [mxp.c](../../../src/systems/mxp.c), [mssp.c](../../../src/systems/mssp.c) | GMCP, MCCP, MXP, MSSP, NAWS, TTYPE, MCMP |
 | **Accessibility** | None | [mcmp.c](../../../src/systems/mcmp.c) | Screen reader mode, audio protocol |

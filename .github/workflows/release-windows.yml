@@ -1,0 +1,81 @@
+name: Release (Windows)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag (e.g. v1.0.0). Leave empty to build without releasing.'
+        type: string
+        default: ''
+
+jobs:
+  build:
+    name: Build (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Generate Project Files
+        shell: cmd
+        run: game\build\GenerateProjectFiles.bat
+
+      - name: Build
+        shell: cmd
+        run: msbuild game\build\dystopia.vcxproj /p:Configuration=Release /p:Platform=x64
+
+      - name: Run tests
+        shell: cmd
+        run: game\tests\build_tests.bat
+
+      - name: Package release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path release\dystopia -Force
+          Copy-Item -Recurse gamedata release\dystopia\gamedata
+          Copy-Item startup.bat release\dystopia\
+          if (Test-Path README.md) { Copy-Item README.md release\dystopia\ }
+          Compress-Archive -Path release\dystopia -DestinationPath dystopia-windows-amd64.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dystopia-windows-amd64
+          path: dystopia-windows-amd64.zip
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.tag != ''
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dystopia-windows-amd64
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Dystopia MUD ${{ steps.tag.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: dystopia-windows-amd64.zip
