@@ -1438,3 +1438,631 @@ class ImmortalPretitlesPanel(ttk.Frame):
         if self.unsaved:
             return messagebox.askyesno("Unsaved", "Discard changes?")
         return True
+
+
+class ForbiddenNamesPanel(ttk.Frame):
+    """Editor panel for forbidden character names."""
+
+    NAMETYPES = {0: 'Reserved', 1: 'Protected', 2: 'Blocked'}
+
+    def __init__(
+        self,
+        parent,
+        repository,
+        on_status: Optional[Callable[[str], None]] = None,
+        **kwargs
+    ):
+        super().__init__(parent, **kwargs)
+
+        self.repository = repository
+        self.on_status = on_status or (lambda msg: None)
+
+        self.current_id: Optional[int] = None
+        self.unsaved = False
+
+        self._build_ui()
+        self._load_entries()
+
+    def _build_ui(self):
+        """Build the panel UI."""
+        paned = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        # Left: name list
+        left_frame = ttk.Frame(paned)
+        paned.add(left_frame, weight=1)
+
+        tree_frame = ttk.Frame(left_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=('id', 'name', 'type', 'added_by'),
+            show='headings',
+            selectmode='browse'
+        )
+        self.tree.heading('id', text='ID')
+        self.tree.heading('name', text='Name')
+        self.tree.heading('type', text='Type')
+        self.tree.heading('added_by', text='Added By')
+        self.tree.column('id', width=40, stretch=False)
+        self.tree.column('name', width=150)
+        self.tree.column('type', width=80)
+        self.tree.column('added_by', width=80)
+
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.tree.bind('<<TreeviewSelect>>', self._on_select)
+
+        self.count_var = tk.StringVar(value="0 entries")
+        ttk.Label(left_frame, textvariable=self.count_var).pack(anchor=tk.W, padx=4)
+
+        # Right: editor
+        right_frame = ttk.LabelFrame(paned, text="Edit Forbidden Name")
+        paned.add(right_frame, weight=1)
+
+        # Name
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Name:", width=12).pack(side=tk.LEFT)
+        self.name_var = tk.StringVar()
+        self.name_var.trace_add('write', lambda *_: self._mark_unsaved())
+        ttk.Entry(row, textvariable=self.name_var, width=30).pack(side=tk.LEFT)
+
+        # Type
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Type:", width=12).pack(side=tk.LEFT)
+        self.type_var = tk.StringVar()
+        self.type_combo = ttk.Combobox(
+            row, textvariable=self.type_var, width=15, state='readonly',
+            values=['Reserved', 'Protected', 'Blocked']
+        )
+        self.type_combo.pack(side=tk.LEFT)
+        self.type_combo.bind('<<ComboboxSelected>>', lambda e: self._mark_unsaved())
+
+        # Type descriptions
+        desc_frame = ttk.Frame(right_frame)
+        desc_frame.pack(fill=tk.X, padx=8, pady=(0, 4))
+        ttk.Label(
+            desc_frame,
+            text="Reserved = exact match block\n"
+                 "Protected = contains-block (exact allowed)\n"
+                 "Blocked = exact name block",
+            foreground='gray', font=('Consolas', 9), justify=tk.LEFT
+        ).pack(anchor=tk.W, padx=12)
+
+        # Added By
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Added By:", width=12).pack(side=tk.LEFT)
+        self.added_by_var = tk.StringVar()
+        self.added_by_var.trace_add('write', lambda *_: self._mark_unsaved())
+        ttk.Entry(row, textvariable=self.added_by_var, width=20).pack(side=tk.LEFT)
+
+        # Buttons
+        btn_frame = ttk.Frame(right_frame)
+        btn_frame.pack(fill=tk.X, padx=8, pady=8)
+        ttk.Button(btn_frame, text="Save", command=self._save).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="New", command=self._new).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="Delete", command=self._delete).pack(side=tk.LEFT)
+
+    def _load_entries(self):
+        """Load all forbidden names."""
+        entries = self.repository.list_all()
+
+        self.tree.delete(*self.tree.get_children())
+        for e in entries:
+            type_label = self.NAMETYPES.get(e.get('type', 0), '?')
+            self.tree.insert('', tk.END, iid=str(e['id']),
+                           values=(e['id'], e['name'], type_label, e.get('added_by', '')))
+
+        self.count_var.set(f"{len(entries)} entries")
+        self.on_status(f"Loaded {len(entries)} forbidden names")
+
+    def _on_select(self, event):
+        """Handle selection."""
+        if self.unsaved:
+            if not messagebox.askyesno("Unsaved", "Discard changes?"):
+                if self.current_id:
+                    self.tree.selection_set(str(self.current_id))
+                return
+
+        selection = self.tree.selection()
+        if selection:
+            self._load_entry(int(selection[0]))
+
+    def _load_entry(self, id_val: int):
+        """Load an entry into the editor."""
+        e = self.repository.get_by_id(id_val)
+        if not e:
+            return
+
+        self.current_id = id_val
+        self.name_var.set(e.get('name', ''))
+        type_label = self.NAMETYPES.get(e.get('type', 0), 'Reserved')
+        self.type_var.set(type_label)
+        self.added_by_var.set(e.get('added_by', ''))
+
+        self.unsaved = False
+
+    def _mark_unsaved(self):
+        self.unsaved = True
+
+    def _save(self):
+        """Save current entry."""
+        if self.current_id is None:
+            return
+
+        # Reverse map type label to integer
+        type_map = {v: k for k, v in self.NAMETYPES.items()}
+        data = {
+            'name': self.name_var.get(),
+            'type': type_map.get(self.type_var.get(), 0),
+            'added_by': self.added_by_var.get(),
+        }
+
+        self.repository.update(self.current_id, data)
+        self.unsaved = False
+        self._load_entries()
+        self.tree.selection_set(str(self.current_id))
+        self.on_status(f"Saved forbidden name {self.current_id}")
+
+    def _new(self):
+        """Create a new forbidden name."""
+        name = simpledialog.askstring("New Forbidden Name", "Enter name to forbid:", parent=self)
+        if not name:
+            return
+
+        self.repository.insert({'name': name, 'type': 0, 'added_by': 'editor'})
+        self._load_entries()
+        self.on_status(f"Added forbidden name: {name}")
+
+    def _delete(self):
+        """Delete current entry."""
+        if self.current_id is None:
+            return
+
+        if not messagebox.askyesno("Confirm", "Delete this forbidden name?"):
+            return
+
+        self.repository.delete(self.current_id)
+        self.current_id = None
+        self._clear_editor()
+        self._load_entries()
+        self.on_status("Forbidden name deleted")
+
+    def _clear_editor(self):
+        self.current_id = None
+        self.name_var.set("")
+        self.type_var.set("")
+        self.added_by_var.set("")
+        self.unsaved = False
+
+    def check_unsaved(self) -> bool:
+        if self.unsaved:
+            return messagebox.askyesno("Unsaved", "Discard changes?")
+        return True
+
+
+class ProfanityFiltersPanel(ttk.Frame):
+    """Editor panel for profanity filter patterns."""
+
+    def __init__(
+        self,
+        parent,
+        repository,
+        on_status: Optional[Callable[[str], None]] = None,
+        **kwargs
+    ):
+        super().__init__(parent, **kwargs)
+
+        self.repository = repository
+        self.on_status = on_status or (lambda msg: None)
+
+        self.current_id: Optional[int] = None
+        self.unsaved = False
+
+        self._build_ui()
+        self._load_entries()
+
+    def _build_ui(self):
+        """Build the panel UI."""
+        paned = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        # Left: pattern list
+        left_frame = ttk.Frame(paned)
+        paned.add(left_frame, weight=1)
+
+        tree_frame = ttk.Frame(left_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=('id', 'pattern', 'added_by'),
+            show='headings',
+            selectmode='browse'
+        )
+        self.tree.heading('id', text='ID')
+        self.tree.heading('pattern', text='Pattern')
+        self.tree.heading('added_by', text='Added By')
+        self.tree.column('id', width=40, stretch=False)
+        self.tree.column('pattern', width=200)
+        self.tree.column('added_by', width=100)
+
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.tree.bind('<<TreeviewSelect>>', self._on_select)
+
+        self.count_var = tk.StringVar(value="0 patterns")
+        ttk.Label(left_frame, textvariable=self.count_var).pack(anchor=tk.W, padx=4)
+
+        # Right: editor
+        right_frame = ttk.LabelFrame(paned, text="Edit Profanity Filter")
+        paned.add(right_frame, weight=1)
+
+        # Pattern
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Pattern:", width=12).pack(side=tk.LEFT)
+        self.pattern_var = tk.StringVar()
+        self.pattern_var.trace_add('write', lambda *_: self._mark_unsaved())
+        ttk.Entry(row, textvariable=self.pattern_var, width=30).pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # Description
+        desc_frame = ttk.Frame(right_frame)
+        desc_frame.pack(fill=tk.X, padx=8, pady=(0, 4))
+        ttk.Label(
+            desc_frame,
+            text="Substring patterns matched against player names and chat.\n"
+                 "Confusable character normalization is applied before matching.",
+            foreground='gray', font=('Consolas', 9), justify=tk.LEFT
+        ).pack(anchor=tk.W, padx=12)
+
+        # Added By
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Added By:", width=12).pack(side=tk.LEFT)
+        self.added_by_var = tk.StringVar()
+        self.added_by_var.trace_add('write', lambda *_: self._mark_unsaved())
+        ttk.Entry(row, textvariable=self.added_by_var, width=20).pack(side=tk.LEFT)
+
+        # Buttons
+        btn_frame = ttk.Frame(right_frame)
+        btn_frame.pack(fill=tk.X, padx=8, pady=8)
+        ttk.Button(btn_frame, text="Save", command=self._save).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="New", command=self._new).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="Delete", command=self._delete).pack(side=tk.LEFT)
+
+    def _load_entries(self):
+        """Load all profanity filters."""
+        entries = self.repository.list_all()
+
+        self.tree.delete(*self.tree.get_children())
+        for e in entries:
+            self.tree.insert('', tk.END, iid=str(e['id']),
+                           values=(e['id'], e['pattern'], e.get('added_by', '')))
+
+        self.count_var.set(f"{len(entries)} patterns")
+        self.on_status(f"Loaded {len(entries)} profanity filters")
+
+    def _on_select(self, event):
+        """Handle selection."""
+        if self.unsaved:
+            if not messagebox.askyesno("Unsaved", "Discard changes?"):
+                if self.current_id:
+                    self.tree.selection_set(str(self.current_id))
+                return
+
+        selection = self.tree.selection()
+        if selection:
+            self._load_entry(int(selection[0]))
+
+    def _load_entry(self, id_val: int):
+        """Load an entry into the editor."""
+        e = self.repository.get_by_id(id_val)
+        if not e:
+            return
+
+        self.current_id = id_val
+        self.pattern_var.set(e.get('pattern', ''))
+        self.added_by_var.set(e.get('added_by', ''))
+
+        self.unsaved = False
+
+    def _mark_unsaved(self):
+        self.unsaved = True
+
+    def _save(self):
+        """Save current filter."""
+        if self.current_id is None:
+            return
+
+        data = {
+            'pattern': self.pattern_var.get(),
+            'added_by': self.added_by_var.get(),
+        }
+
+        self.repository.update(self.current_id, data)
+        self.unsaved = False
+        self._load_entries()
+        self.tree.selection_set(str(self.current_id))
+        self.on_status(f"Saved profanity filter {self.current_id}")
+
+    def _new(self):
+        """Create a new profanity filter."""
+        pattern = simpledialog.askstring("New Filter", "Enter profanity pattern:", parent=self)
+        if not pattern:
+            return
+
+        self.repository.insert({'pattern': pattern, 'added_by': 'editor'})
+        self._load_entries()
+        self.on_status(f"Added profanity filter: {pattern}")
+
+    def _delete(self):
+        """Delete current filter."""
+        if self.current_id is None:
+            return
+
+        if not messagebox.askyesno("Confirm", "Delete this profanity filter?"):
+            return
+
+        self.repository.delete(self.current_id)
+        self.current_id = None
+        self._clear_editor()
+        self._load_entries()
+        self.on_status("Profanity filter deleted")
+
+    def _clear_editor(self):
+        self.current_id = None
+        self.pattern_var.set("")
+        self.added_by_var.set("")
+        self.unsaved = False
+
+    def check_unsaved(self) -> bool:
+        if self.unsaved:
+            return messagebox.askyesno("Unsaved", "Discard changes?")
+        return True
+
+
+class ConfusableCharsPanel(ttk.Frame):
+    """Editor panel for Unicode confusable character mappings."""
+
+    def __init__(
+        self,
+        parent,
+        repository,
+        on_status: Optional[Callable[[str], None]] = None,
+        **kwargs
+    ):
+        super().__init__(parent, **kwargs)
+
+        self.repository = repository
+        self.on_status = on_status or (lambda msg: None)
+
+        self.current_id: Optional[int] = None
+        self.unsaved = False
+
+        self._build_ui()
+        self._load_entries()
+
+    def _build_ui(self):
+        """Build the panel UI."""
+        paned = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        paned.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+
+        # Left: character list
+        left_frame = ttk.Frame(paned)
+        paned.add(left_frame, weight=1)
+
+        tree_frame = ttk.Frame(left_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=('id', 'codepoint', 'char', 'canonical'),
+            show='headings',
+            selectmode='browse'
+        )
+        self.tree.heading('id', text='ID')
+        self.tree.heading('codepoint', text='Codepoint')
+        self.tree.heading('char', text='Char')
+        self.tree.heading('canonical', text='Canonical')
+        self.tree.column('id', width=40, stretch=False)
+        self.tree.column('codepoint', width=80)
+        self.tree.column('char', width=50, anchor=tk.CENTER)
+        self.tree.column('canonical', width=60, anchor=tk.CENTER)
+
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.tree.bind('<<TreeviewSelect>>', self._on_select)
+
+        self.count_var = tk.StringVar(value="0 entries")
+        ttk.Label(left_frame, textvariable=self.count_var).pack(anchor=tk.W, padx=4)
+
+        # Right: editor
+        right_frame = ttk.LabelFrame(paned, text="Edit Confusable Character")
+        paned.add(right_frame, weight=1)
+
+        # Codepoint (hex)
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Codepoint:", width=12).pack(side=tk.LEFT)
+        self.codepoint_var = tk.StringVar()
+        self.codepoint_var.trace_add('write', lambda *_: self._on_codepoint_change())
+        ttk.Entry(row, textvariable=self.codepoint_var, width=10).pack(side=tk.LEFT)
+        ttk.Label(row, text="  (hex, e.g. 0441)").pack(side=tk.LEFT)
+
+        # Character preview
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Preview:", width=12).pack(side=tk.LEFT)
+        self.preview_label = ttk.Label(row, text="-", font=('Consolas', 14))
+        self.preview_label.pack(side=tk.LEFT)
+
+        # Canonical
+        row = ttk.Frame(right_frame)
+        row.pack(fill=tk.X, padx=8, pady=4)
+        ttk.Label(row, text="Canonical:", width=12).pack(side=tk.LEFT)
+        self.canonical_var = tk.StringVar()
+        self.canonical_var.trace_add('write', lambda *_: self._mark_unsaved())
+        ttk.Entry(row, textvariable=self.canonical_var, width=5).pack(side=tk.LEFT)
+        ttk.Label(row, text="  (ASCII equivalent)").pack(side=tk.LEFT)
+
+        # Description
+        desc_frame = ttk.Frame(right_frame)
+        desc_frame.pack(fill=tk.X, padx=8, pady=(8, 4))
+        ttk.Label(
+            desc_frame,
+            text="Maps Unicode lookalike characters to their ASCII equivalent\n"
+                 "to prevent profanity filter bypass via homoglyph substitution.",
+            foreground='gray', font=('Consolas', 9), justify=tk.LEFT
+        ).pack(anchor=tk.W, padx=12)
+
+        # Buttons
+        btn_frame = ttk.Frame(right_frame)
+        btn_frame.pack(fill=tk.X, padx=8, pady=8)
+        ttk.Button(btn_frame, text="Save", command=self._save).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="New", command=self._new).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="Delete", command=self._delete).pack(side=tk.LEFT)
+
+    def _codepoint_to_char(self, cp: int) -> str:
+        """Safely convert codepoint to character."""
+        try:
+            return chr(cp)
+        except (ValueError, OverflowError):
+            return '?'
+
+    def _load_entries(self):
+        """Load all confusable characters."""
+        entries = self.repository.list_all()
+
+        self.tree.delete(*self.tree.get_children())
+        for e in entries:
+            cp = e.get('codepoint', 0)
+            cp_hex = f"U+{cp:04X}"
+            char_preview = self._codepoint_to_char(cp)
+            self.tree.insert('', tk.END, iid=str(e['id']),
+                           values=(e['id'], cp_hex, char_preview, e.get('canonical', '')))
+
+        self.count_var.set(f"{len(entries)} entries")
+        self.on_status(f"Loaded {len(entries)} confusable characters")
+
+    def _on_select(self, event):
+        """Handle selection."""
+        if self.unsaved:
+            if not messagebox.askyesno("Unsaved", "Discard changes?"):
+                if self.current_id:
+                    self.tree.selection_set(str(self.current_id))
+                return
+
+        selection = self.tree.selection()
+        if selection:
+            self._load_entry(int(selection[0]))
+
+    def _load_entry(self, id_val: int):
+        """Load an entry into the editor."""
+        e = self.repository.get_by_id(id_val)
+        if not e:
+            return
+
+        self.current_id = id_val
+        cp = e.get('codepoint', 0)
+        self.codepoint_var.set(f"{cp:04X}")
+        self.canonical_var.set(e.get('canonical', ''))
+        self.preview_label.configure(text=self._codepoint_to_char(cp))
+
+        self.unsaved = False
+
+    def _on_codepoint_change(self):
+        """Update preview when codepoint changes."""
+        self._mark_unsaved()
+        try:
+            cp = int(self.codepoint_var.get(), 16)
+            self.preview_label.configure(text=self._codepoint_to_char(cp))
+        except ValueError:
+            self.preview_label.configure(text="?")
+
+    def _mark_unsaved(self):
+        self.unsaved = True
+
+    def _save(self):
+        """Save current entry."""
+        if self.current_id is None:
+            return
+
+        try:
+            cp = int(self.codepoint_var.get(), 16)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid codepoint (must be hex)")
+            return
+
+        data = {
+            'codepoint': cp,
+            'canonical': self.canonical_var.get(),
+        }
+
+        self.repository.update(self.current_id, data)
+        self.unsaved = False
+        self._load_entries()
+        self.tree.selection_set(str(self.current_id))
+        self.on_status(f"Saved confusable character {self.current_id}")
+
+    def _new(self):
+        """Create a new confusable character."""
+        cp_str = simpledialog.askstring(
+            "New Confusable", "Enter Unicode codepoint (hex, e.g. 0441):", parent=self)
+        if not cp_str:
+            return
+
+        try:
+            cp = int(cp_str, 16)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid hex codepoint")
+            return
+
+        canonical = simpledialog.askstring(
+            "Canonical", f"Enter ASCII canonical for U+{cp:04X} ({self._codepoint_to_char(cp)}):",
+            parent=self)
+        if canonical is None:
+            return
+
+        self.repository.insert({'codepoint': cp, 'canonical': canonical})
+        self._load_entries()
+        self.on_status(f"Added confusable: U+{cp:04X} -> {canonical}")
+
+    def _delete(self):
+        """Delete current entry."""
+        if self.current_id is None:
+            return
+
+        if not messagebox.askyesno("Confirm", "Delete this confusable character mapping?"):
+            return
+
+        self.repository.delete(self.current_id)
+        self.current_id = None
+        self._clear_editor()
+        self._load_entries()
+        self.on_status("Confusable character deleted")
+
+    def _clear_editor(self):
+        self.current_id = None
+        self.codepoint_var.set("")
+        self.canonical_var.set("")
+        self.preview_label.configure(text="-")
+        self.unsaved = False
+
+    def check_unsaved(self) -> bool:
+        if self.unsaved:
+            return messagebox.askyesno("Unsaved", "Discard changes?")
+        return True

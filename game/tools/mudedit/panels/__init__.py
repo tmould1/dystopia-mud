@@ -11,10 +11,13 @@ from .scripts import ScriptEditorPanel
 from .gameconfig import GameConfigPanel, BalanceConfigPanel
 from .ability_config import AbilityConfigPanel
 from .audio_config import AudioConfigPanel
+from .config_panel import UnifiedConfigPanel
+from .quest import QuestEditorPanel
 from .game_panels import (
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel,
-    SuperAdminsPanel, ImmortalPretitlesPanel
+    SuperAdminsPanel, ImmortalPretitlesPanel,
+    ForbiddenNamesPanel, ProfanityFiltersPanel, ConfusableCharsPanel,
 )
 from .player import PlayerEditorPanel
 from .class_display import ClassDisplayPanel
@@ -64,4 +67,9 @@ __all__ = [
     'WearLocationsPanel',
     'ScriptLibraryPanel',
     'CalendarPanel',
+    'ForbiddenNamesPanel',
+    'ProfanityFiltersPanel',
+    'ConfusableCharsPanel',
+    'UnifiedConfigPanel',
+    'QuestEditorPanel',
 ]

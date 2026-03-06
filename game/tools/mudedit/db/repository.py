@@ -280,6 +280,20 @@ class ObjectRepository(BaseRepository):
         ).fetchall()
         return [dict(row) for row in rows]
 
+    def save_extra_descs(self, vnum: int, descs: List[Dict]) -> None:
+        """Replace all extra descriptions for an object."""
+        self.conn.execute(
+            "DELETE FROM extra_descriptions WHERE owner_type = 'objects' AND owner_vnum = ?",
+            (vnum,)
+        )
+        for i, desc in enumerate(descs):
+            self.conn.execute(
+                "INSERT INTO extra_descriptions (owner_type, owner_vnum, keyword, description, sort_order) "
+                "VALUES ('objects', ?, ?, ?, ?)",
+                (vnum, desc.get('keyword', ''), desc.get('description', ''), i)
+            )
+        self.conn.commit()
+
 
 class RoomRepository(BaseRepository):
     """Repository for room entities."""
@@ -327,6 +341,20 @@ class RoomRepository(BaseRepository):
             (vnum,)
         ).fetchall()
         return [dict(row) for row in rows]
+
+    def save_extra_descs(self, vnum: int, descs: List[Dict]) -> None:
+        """Replace all extra descriptions for a room."""
+        self.conn.execute(
+            "DELETE FROM extra_descriptions WHERE owner_type = 'rooms' AND owner_vnum = ?",
+            (vnum,)
+        )
+        for i, desc in enumerate(descs):
+            self.conn.execute(
+                "INSERT INTO extra_descriptions (owner_type, owner_vnum, keyword, description, sort_order) "
+                "VALUES ('rooms', ?, ?, ?, ?)",
+                (vnum, desc.get('keyword', ''), desc.get('description', ''), i)
+            )
+        self.conn.commit()
 
     def get_resets_for_room(self, vnum: int) -> List[Dict]:
         """Get all reset entries for this room."""
@@ -982,6 +1010,182 @@ class ImmortalPretitlesRepository(BaseRepository):
             (name,)
         ).fetchone()
         return dict(row) if row else None
+
+
+class ForbiddenNamesRepository(BaseRepository):
+    """Repository for forbidden_names table."""
+
+    NAMETYPES = {0: 'Reserved', 1: 'Protected', 2: 'Blocked'}
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'forbidden_names', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all forbidden names ordered by type then name."""
+        return super().list_all(order_by or 'type, name')
+
+
+class ProfanityFiltersRepository(BaseRepository):
+    """Repository for profanity_filters table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'profanity_filters', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all profanity filter patterns ordered by pattern."""
+        return super().list_all(order_by or 'pattern')
+
+
+class ConfusableCharsRepository(BaseRepository):
+    """Repository for confusable_chars table."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'confusable_chars', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all confusable characters ordered by canonical then codepoint."""
+        return super().list_all(order_by or 'canonical, codepoint')
+
+
+class UnifiedConfigRepository(BaseRepository):
+    """Repository for config table (unified cfg system)."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'config', 'key')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all config overrides ordered by key."""
+        return super().list_all(order_by or 'key')
+
+    def set_value(self, key: str, value: int) -> None:
+        """Set a config override (insert or update)."""
+        self.conn.execute(
+            "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)",
+            (key, value)
+        )
+        self.conn.commit()
+
+    def delete_override(self, key: str) -> bool:
+        """Remove a config override (reset to default)."""
+        cursor = self.conn.execute("DELETE FROM config WHERE key = ?", (key,))
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def get_overrides(self) -> Dict[str, int]:
+        """Get all overrides as a key->value dictionary."""
+        rows = self.conn.execute("SELECT key, value FROM config ORDER BY key").fetchall()
+        return {row['key']: row['value'] for row in rows}
+
+
+class QuestDefsRepository(BaseRepository):
+    """Repository for quest_defs table in quest.db."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        super().__init__(conn, 'quest_defs', 'id')
+
+    def list_all(self, order_by: Optional[str] = None) -> List[Dict]:
+        """List all quests ordered by sort_order."""
+        return super().list_all(order_by or 'sort_order')
+
+    def get_by_id(self, quest_id: str) -> Optional[Dict]:
+        """Get quest by text ID."""
+        row = self.conn.execute(
+            "SELECT * FROM quest_defs WHERE id = ?", (quest_id,)
+        ).fetchone()
+        return dict(row) if row else None
+
+    def insert(self, data: Dict) -> str:
+        """Insert a new quest definition."""
+        cols = ', '.join(data.keys())
+        placeholders = ', '.join(['?'] * len(data))
+        self.conn.execute(
+            f"INSERT INTO quest_defs ({cols}) VALUES ({placeholders})",
+            list(data.values())
+        )
+        self.conn.commit()
+        return data.get('id', '')
+
+    def update(self, quest_id: str, data: Dict) -> None:
+        """Update a quest definition."""
+        assignments = ', '.join(f"{k} = ?" for k in data.keys())
+        self.conn.execute(
+            f"UPDATE quest_defs SET {assignments} WHERE id = ?",
+            list(data.values()) + [quest_id]
+        )
+        self.conn.commit()
+
+    def delete(self, quest_id: str) -> None:
+        """Delete a quest and its objectives/prerequisites."""
+        self.conn.execute("DELETE FROM quest_objectives WHERE quest_id = ?", (quest_id,))
+        self.conn.execute("DELETE FROM quest_prerequisites WHERE quest_id = ?", (quest_id,))
+        self.conn.execute("DELETE FROM quest_defs WHERE id = ?", (quest_id,))
+        # Also remove from prerequisites of other quests
+        self.conn.execute("DELETE FROM quest_prerequisites WHERE requires_id = ?", (quest_id,))
+        self.conn.commit()
+
+    def get_next_sort_order(self) -> int:
+        """Get the next available sort_order value."""
+        row = self.conn.execute(
+            "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_val FROM quest_defs"
+        ).fetchone()
+        return row['next_val'] if row else 1
+
+
+class QuestObjectivesRepository:
+    """Repository for quest_objectives table in quest.db."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        self.conn = conn
+
+    def get_for_quest(self, quest_id: str) -> List[Dict]:
+        """Get all objectives for a quest, ordered by obj_index."""
+        rows = self.conn.execute(
+            "SELECT * FROM quest_objectives WHERE quest_id = ? ORDER BY obj_index",
+            (quest_id,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    def save_for_quest(self, quest_id: str, objectives: List[Dict]) -> None:
+        """Replace all objectives for a quest."""
+        self.conn.execute(
+            "DELETE FROM quest_objectives WHERE quest_id = ?", (quest_id,)
+        )
+        for obj in objectives:
+            self.conn.execute(
+                "INSERT INTO quest_objectives (quest_id, obj_index, type, target, threshold, description) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (quest_id, obj.get('obj_index', 0), obj.get('type', ''),
+                 obj.get('target', ''), obj.get('threshold', 1),
+                 obj.get('description', ''))
+            )
+        self.conn.commit()
+
+
+class QuestPrerequisitesRepository:
+    """Repository for quest_prerequisites table in quest.db."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        self.conn = conn
+
+    def get_for_quest(self, quest_id: str) -> List[str]:
+        """Get prerequisite quest IDs for a quest."""
+        rows = self.conn.execute(
+            "SELECT requires_id FROM quest_prerequisites WHERE quest_id = ? ORDER BY requires_id",
+            (quest_id,)
+        ).fetchall()
+        return [r['requires_id'] for r in rows]
+
+    def save_for_quest(self, quest_id: str, prereq_ids: List[str]) -> None:
+        """Replace all prerequisites for a quest."""
+        self.conn.execute(
+            "DELETE FROM quest_prerequisites WHERE quest_id = ?", (quest_id,)
+        )
+        for req_id in prereq_ids:
+            self.conn.execute(
+                "INSERT INTO quest_prerequisites (quest_id, requires_id) VALUES (?, ?)",
+                (quest_id, req_id)
+            )
+        self.conn.commit()
 
 
 class ClassBracketsRepository(BaseRepository):

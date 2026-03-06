@@ -335,6 +335,33 @@ class ObjectEditorPanel(ttk.Frame):
         ttk.Button(aff_btn_frame, text="Remove Affect",
                    command=self._remove_affect).pack(side=tk.LEFT)
 
+        # === Extra Descriptions Section ===
+        ed_frame = ttk.LabelFrame(parent, text="Extra Descriptions (look keywords)")
+        ed_frame.pack(fill=tk.X, padx=4, pady=2)
+
+        self.ed_tree = ttk.Treeview(
+            ed_frame,
+            columns=('keyword', 'preview'),
+            show='headings',
+            height=3,
+            selectmode='browse'
+        )
+        self.ed_tree.heading('keyword', text='Keyword')
+        self.ed_tree.heading('preview', text='Description Preview')
+        self.ed_tree.column('keyword', width=150)
+        self.ed_tree.column('preview', width=300)
+        self.ed_tree.pack(fill=tk.X, padx=4, pady=2)
+
+        ed_btn_frame = ttk.Frame(ed_frame)
+        ed_btn_frame.pack(fill=tk.X, padx=4, pady=2)
+
+        ttk.Button(ed_btn_frame, text="Add",
+                   command=self._add_extra_desc).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(ed_btn_frame, text="Edit",
+                   command=self._edit_extra_desc).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(ed_btn_frame, text="Remove",
+                   command=self._remove_extra_desc).pack(side=tk.LEFT)
+
         # === Power Messages Section ===
         power_frame = ttk.LabelFrame(parent, text="Power Messages (optional)")
         power_frame.pack(fill=tk.X, padx=4, pady=2)
@@ -962,6 +989,9 @@ class ObjectEditorPanel(ttk.Frame):
         self.victpoweron_var.set(obj.get('victpoweron', ''))
         self.victpoweroff_var.set(obj.get('victpoweroff', ''))
 
+        # Extra descriptions
+        self._load_extra_descs(vnum)
+
         # Cross-references
         self._update_refs(vnum)
 
@@ -975,6 +1005,111 @@ class ObjectEditorPanel(ttk.Frame):
         """Mark the current entry as having unsaved changes."""
         self.unsaved = True
         self._schedule_stats_refresh()
+
+    def _load_extra_descs(self, vnum: int):
+        """Load extra descriptions for an object."""
+        self.ed_tree.delete(*self.ed_tree.get_children())
+        try:
+            descs = self.repository.get_extra_descs(vnum)
+            for desc in descs:
+                preview = (desc.get('description', '') or '')[:50].replace('\n', ' ')
+                self.ed_tree.insert('', tk.END,
+                                   values=(desc.get('keyword', ''), preview))
+        except Exception:
+            pass  # Table may not exist in older area files
+
+    def _add_extra_desc(self):
+        """Add a new extra description."""
+        keyword = simpledialog.askstring(
+            "Extra Description", "Enter keyword(s):", parent=self)
+        if not keyword:
+            return
+
+        self._open_ed_editor(keyword, '')
+
+    def _edit_extra_desc(self):
+        """Edit the selected extra description."""
+        selection = self.ed_tree.selection()
+        if not selection:
+            messagebox.showinfo("Info", "Select an extra description to edit.")
+            return
+
+        values = self.ed_tree.item(selection[0])['values']
+        keyword = values[0] if values else ''
+
+        # Load full description from database
+        full_desc = ''
+        if self.current_vnum is not None:
+            try:
+                for d in self.repository.get_extra_descs(self.current_vnum):
+                    if d['keyword'] == keyword:
+                        full_desc = d['description']
+                        break
+            except Exception:
+                pass
+
+        self._open_ed_editor(keyword, full_desc, selection[0])
+
+    def _open_ed_editor(self, keyword: str, description: str, tree_item=None):
+        """Open a dialog to edit an extra description."""
+        dialog = tk.Toplevel(self)
+        dialog.title("Edit Extra Description")
+        dialog.geometry("500x350")
+        dialog.transient(self)
+        dialog.grab_set()
+
+        ttk.Label(dialog, text="Keyword(s):").pack(padx=8, pady=(8, 2), anchor=tk.W)
+        kw_var = tk.StringVar(value=keyword)
+        ttk.Entry(dialog, textvariable=kw_var, width=50).pack(padx=8, fill=tk.X)
+
+        ttk.Label(dialog, text="Description:").pack(padx=8, pady=(8, 2), anchor=tk.W)
+        desc_text = tk.Text(dialog, wrap=tk.WORD, font=('Consolas', 10), height=12)
+        desc_text.pack(padx=8, fill=tk.BOTH, expand=True)
+        desc_text.insert('1.0', description)
+
+        def save():
+            kw = kw_var.get().strip()
+            desc = desc_text.get('1.0', tk.END).rstrip('\n')
+            if not kw:
+                messagebox.showwarning("Warning", "Keyword cannot be empty.")
+                return
+
+            if tree_item:
+                self.ed_tree.item(tree_item, values=(kw, desc[:50].replace('\n', ' ')))
+            else:
+                self.ed_tree.insert('', tk.END, values=(kw, desc[:50].replace('\n', ' ')))
+            self._mark_unsaved()
+            dialog.destroy()
+
+        btn_frame = ttk.Frame(dialog)
+        btn_frame.pack(fill=tk.X, padx=8, pady=8)
+        ttk.Button(btn_frame, text="Save", command=save).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(btn_frame, text="Cancel", command=dialog.destroy).pack(side=tk.LEFT)
+
+    def _remove_extra_desc(self):
+        """Remove the selected extra description."""
+        selection = self.ed_tree.selection()
+        if selection:
+            self.ed_tree.delete(selection[0])
+            self._mark_unsaved()
+
+    def _collect_extra_descs_from_tree(self) -> list:
+        """Collect extra descriptions from the tree widget for saving."""
+        db_descs = {}
+        if self.current_vnum is not None:
+            try:
+                for d in self.repository.get_extra_descs(self.current_vnum):
+                    db_descs[d['keyword']] = d['description']
+            except Exception:
+                pass
+
+        result = []
+        for item in self.ed_tree.get_children():
+            values = self.ed_tree.item(item)['values']
+            keyword = str(values[0]) if values else ''
+            description = db_descs.get(keyword, str(values[1]) if len(values) > 1 else '')
+            result.append({'keyword': keyword, 'description': description})
+        return result
 
     def _add_affect(self):
         """Add a new stat affect."""
@@ -1074,6 +1209,10 @@ class ObjectEditorPanel(ttk.Frame):
                 (self.current_vnum, apply_id, modifier, 0)
             )
 
+        # Save extra descriptions
+        ed_list = self._collect_extra_descs_from_tree()
+        self.repository.save_extra_descs(self.current_vnum, ed_list)
+
         self.repository.conn.commit()
 
         # Refresh list
@@ -1161,6 +1300,7 @@ class ObjectEditorPanel(ttk.Frame):
         self.extra_flags.clear()
         self.wear_flags.clear()
         self.affects_tree.delete(*self.affects_tree.get_children())
+        self.ed_tree.delete(*self.ed_tree.get_children())
         self.chpoweron_var.set('')
         self.chpoweroff_var.set('')
         self.victpoweron_var.set('')

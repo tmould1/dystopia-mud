@@ -128,6 +128,10 @@ class NavigationTree(ttk.Frame):
                 ('disabled_commands', 'Disabled Commands'),
                 ('super_admins', 'Super Admins'),
                 ('immortal_pretitles', 'Immortal Pretitles'),
+                ('forbidden_names', 'Forbidden Names'),
+                ('profanity_filters', 'Profanity Filters'),
+                ('confusable_chars', 'Confusable Characters'),
+                ('unified_config', 'Unified Config (cfg)'),
             ]:
                 node_id = self.tree.insert(game_node, tk.END, text=label)
                 self._node_data[node_id] = ('game', game_db, table_name)
@@ -161,6 +165,13 @@ class NavigationTree(ttk.Frame):
             ]:
                 node_id = self.tree.insert(tables_node, tk.END, text=label)
                 self._node_data[node_id] = ('tables', tables_db, table_name)
+
+        # Quests (separate database)
+        quest_db = self.db_manager.get_quest_db_path()
+        if quest_db.exists():
+            quest_node = self.tree.insert('', tk.END, text='Quests', open=False)
+            node_id = self.tree.insert(quest_node, tk.END, text='Quest Editor')
+            self._node_data[node_id] = ('quest', quest_db, 'quest_defs')
 
         # Players
         players_node = self.tree.insert('', tk.END, text='Players', open=False)

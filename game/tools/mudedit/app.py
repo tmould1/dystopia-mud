@@ -20,6 +20,9 @@ from .db.repository import (
     KingdomsRepository, BansRepository, DisabledCommandsRepository,
     TopBoardRepository, LeaderboardRepository, NotesRepository, BugsRepository,
     SuperAdminsRepository, ImmortalPretitlesRepository,
+    ForbiddenNamesRepository, ProfanityFiltersRepository, ConfusableCharsRepository,
+    UnifiedConfigRepository,
+    QuestDefsRepository, QuestObjectivesRepository, QuestPrerequisitesRepository,
     PlayerRepository,
     ClassBracketsRepository, ClassGenerationsRepository, ClassAurasRepository,
     ClassArmorConfigRepository, ClassArmorPiecesRepository, ClassStartingRepository,
@@ -34,6 +37,9 @@ from .panels import (
     GameConfigPanel, BalanceConfigPanel, AbilityConfigPanel, AudioConfigPanel,
     KingdomsPanel, BansPanel, DisabledCommandsPanel,
     LeaderboardPanel, NotesPanel, BugsPanel, SuperAdminsPanel, ImmortalPretitlesPanel,
+    ForbiddenNamesPanel, ProfanityFiltersPanel, ConfusableCharsPanel,
+    UnifiedConfigPanel,
+    QuestEditorPanel,
     PlayerEditorPanel, ClassDisplayPanel, ClassAuraPanel, ClassEquipmentPanel,
     ClassStartingPanel, ClassScorePanel, ClassRegistryPanel,
     SocialsPanel, SlaysPanel, LiquidsPanel, WearLocationsPanel,
@@ -464,6 +470,38 @@ class MudEditorApp:
                     on_status=self._set_status
                 )
 
+            elif entity_type == 'forbidden_names':
+                repository = ForbiddenNamesRepository(conn)
+                return ForbiddenNamesPanel(
+                    self.notebook,
+                    repository,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'profanity_filters':
+                repository = ProfanityFiltersRepository(conn)
+                return ProfanityFiltersPanel(
+                    self.notebook,
+                    repository,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'confusable_chars':
+                repository = ConfusableCharsRepository(conn)
+                return ConfusableCharsPanel(
+                    self.notebook,
+                    repository,
+                    on_status=self._set_status
+                )
+
+            elif entity_type == 'unified_config':
+                repository = UnifiedConfigRepository(conn)
+                return UnifiedConfigPanel(
+                    self.notebook,
+                    repository,
+                    on_status=self._set_status
+                )
+
             else:
                 return self._create_placeholder_panel(
                     f"Game Config: {entity_type}",
@@ -579,6 +617,19 @@ class MudEditorApp:
                     "This editor is not yet implemented."
                 )
 
+        elif category == 'quest':
+            conn = self.db_manager.get_connection(db_path)
+            quest_repo = QuestDefsRepository(conn)
+            obj_repo = QuestObjectivesRepository(conn)
+            prereq_repo = QuestPrerequisitesRepository(conn)
+            return QuestEditorPanel(
+                self.notebook,
+                quest_repo,
+                obj_repo,
+                prereq_repo,
+                on_status=self._set_status
+            )
+
         elif category == 'player':
             conn = self.db_manager.get_connection(db_path)
             repository = PlayerRepository(conn)
@@ -637,6 +688,10 @@ class MudEditorApp:
                 'disabled_commands': 'Disabled Cmds',
                 'super_admins': 'Super Admins',
                 'immortal_pretitles': 'Imm Pretitles',
+                'forbidden_names': 'Forbidden Names',
+                'profanity_filters': 'Profanity Filters',
+                'confusable_chars': 'Confusable Chars',
+                'unified_config': 'Unified Config',
             }
             return names.get(entity_type, entity_type.title())
         elif category == 'tables':
@@ -648,6 +703,8 @@ class MudEditorApp:
                 'calendar': 'Calendar',
             }
             return names.get(entity_type, entity_type.title())
+        elif category == 'quest':
+            return 'Quest Editor'
         elif category == 'player':
             return f"Player: {db_path.stem}"
         return f"{category}: {entity_type}"

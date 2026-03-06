@@ -103,6 +103,10 @@ class DatabaseManager:
         """Get the path to the reference data tables database."""
         return self.db_root / 'game' / 'tables.db'
 
+    def get_quest_db_path(self) -> Path:
+        """Get the path to the quest definitions database."""
+        return self.db_root / 'game' / 'quest.db'
+
     def list_area_dbs(self) -> List[Path]:
         """
         List all area database files.
