@@ -29,7 +29,9 @@
 #include "compat.h"
 
 #if !defined( WIN32 )
+#if __has_include(<sys/cdefs.h>)
 #include <sys/cdefs.h>
+#endif
 #include <sys/time.h>
 #include <pthread.h>
 #endif
