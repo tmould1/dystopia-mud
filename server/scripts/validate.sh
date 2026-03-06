@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 # validate.sh — Verify the downloaded release in ingest/ is valid
-set -euo pipefail
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -13,7 +13,7 @@ TOTAL=0
 
 check() {
     TOTAL=$((TOTAL + 1))
-    local desc="$1"
+    desc="$1"
     shift
     if "$@" >/dev/null 2>&1; then
         echo "  PASS  $desc"

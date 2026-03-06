@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 # migrate.sh — Deploy validated release from ingest/ to live/
-set -euo pipefail
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"

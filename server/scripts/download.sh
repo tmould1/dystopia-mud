@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 # download.sh — Check for latest GitHub release and download to ingest/
-set -euo pipefail
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -13,14 +13,18 @@ die() { log "ERROR: $*" >&2; exit 1; }
 
 # Load configuration
 [ -f "$CONF" ] || die "Config file not found: $CONF"
-source "$CONF"
+. "$CONF"
 [ -n "${REPO:-}" ] || die "REPO not set in $CONF"
 [ -n "${ASSET_NAME:-}" ] || die "ASSET_NAME not set in $CONF"
 
+# Check dependencies
+command -v curl >/dev/null 2>&1 || die "curl is required but not installed"
+command -v jq >/dev/null 2>&1 || die "jq is required but not installed (try: sudo yum install jq)"
+
 # Auth header if token provided
-AUTH_HEADER=""
+AUTH=""
 if [ -n "${GITHUB_TOKEN:-}" ]; then
-    AUTH_HEADER="Authorization: Bearer $GITHUB_TOKEN"
+    AUTH="-H \"Authorization: Bearer $GITHUB_TOKEN\""
 fi
 
 # Ensure directories exist
@@ -37,12 +41,14 @@ log "Current version: $CURRENT"
 log "Checking for latest release of $REPO..."
 API_URL="https://api.github.com/repos/${REPO}/releases/latest"
 
-CURL_ARGS=(-sL -H "Accept: application/vnd.github+json")
-if [ -n "$AUTH_HEADER" ]; then
-    CURL_ARGS+=(-H "$AUTH_HEADER")
+if [ -n "${GITHUB_TOKEN:-}" ]; then
+    HTTP_CODE=$(curl -sL -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL")
+else
+    HTTP_CODE=$(curl -sL -H "Accept: application/vnd.github+json" \
+        -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL")
 fi
-
-HTTP_CODE=$(curl "${CURL_ARGS[@]}" -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL")
 
 if [ "$HTTP_CODE" = "404" ]; then
     die "No releases found for $REPO"
@@ -72,11 +78,14 @@ find "$INGEST_DIR" -mindepth 1 ! -name '.release.json' -exec rm -rf {} + 2>/dev/
 
 # Download
 log "Downloading $ASSET_NAME..."
-CURL_DL_ARGS=(-L --fail --progress-bar)
-if [ -n "$AUTH_HEADER" ]; then
-    CURL_DL_ARGS+=(-H "$AUTH_HEADER")
+if [ -n "${GITHUB_TOKEN:-}" ]; then
+    curl -L --fail --progress-bar \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL"
+else
+    curl -L --fail --progress-bar \
+        -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL"
 fi
-curl "${CURL_DL_ARGS[@]}" -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL"
 
 # Extract
 log "Extracting..."
