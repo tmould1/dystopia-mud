@@ -23,14 +23,17 @@ fetch_url() {
     _token="${3:-}"
 
     if command -v curl >/dev/null 2>&1; then
+        _code_file="$INGEST_DIR/.http_code"
         if [ -n "$_token" ]; then
             curl -sL -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer $_token" \
-                -o "$_out" -w "%{http_code}" "$_url" || echo "000"
+                -o "$_out" -w "%{http_code}" "$_url" > "$_code_file" 2>/dev/null || true
         else
             curl -sL -H "Accept: application/vnd.github+json" \
-                -o "$_out" -w "%{http_code}" "$_url" || echo "000"
+                -o "$_out" -w "%{http_code}" "$_url" > "$_code_file" 2>/dev/null || true
         fi
+        cat "$_code_file"
+        rm -f "$_code_file"
     elif command -v wget >/dev/null 2>&1; then
         if [ -n "$_token" ]; then
             wget -q --header="Accept: application/vnd.github+json" \
@@ -92,9 +95,9 @@ API_URL="https://api.github.com/repos/${REPO}/releases/latest"
 
 HTTP_CODE=$(fetch_url "$API_URL" "$INGEST_DIR/.release.json" "${GITHUB_TOKEN:-}")
 
-if [ "$HTTP_CODE" = "000" ]; then
-    die "Could not connect to GitHub API — check DNS and network"
-fi
+case "$HTTP_CODE" in
+    000*) die "Could not connect to GitHub API — check DNS and network" ;;
+esac
 if [ "$HTTP_CODE" = "404" ]; then
     die "No releases found for $REPO"
 fi
