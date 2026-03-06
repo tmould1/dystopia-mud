@@ -3,14 +3,21 @@
 # With additions from Tony.
 # Converted to bash by Todd.
 
-# Set the port number.
+# Get the directory where this script lives
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Load port from server.conf if available
 port=8888
+if [ -f "$SCRIPT_DIR/../server.conf" ]; then
+  source "$SCRIPT_DIR/../server.conf"
+  port="${PORT:-$port}"
+elif [ -f "$SCRIPT_DIR/server/server.conf" ]; then
+  source "$SCRIPT_DIR/server/server.conf"
+  port="${PORT:-$port}"
+fi
 if [ "$1" != "" ]; then
   port="$1"
 fi
-
-# Get the directory where this script lives
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Define paths - gamedata is relative to script location
 # Script can be in project root or in gamedata/ itself

@@ -5,13 +5,19 @@ REM Converted to batch by Claude.
 
 setlocal enabledelayedexpansion
 
-REM Set the port number (default 8888, or pass as argument)
-set port=8888
-if not "%~1"=="" set port=%~1
-
 REM Get the directory where this script lives
 set SCRIPT_DIR=%~dp0
 set SCRIPT_DIR=%SCRIPT_DIR:~0,-1%
+
+REM Load port from server.conf if available (default 8888)
+set port=8888
+if exist "%SCRIPT_DIR%\..\server.conf" (
+    for /f "tokens=1,* delims==" %%a in ('findstr /b "PORT=" "%SCRIPT_DIR%\..\server.conf"') do set port=%%b
+)
+if exist "%SCRIPT_DIR%\server\server.conf" (
+    for /f "tokens=1,* delims==" %%a in ('findstr /b "PORT=" "%SCRIPT_DIR%\server\server.conf"') do set port=%%b
+)
+if not "%~1"=="" set port=%~1
 
 REM Define paths - gamedata is relative to script location
 if exist "%SCRIPT_DIR%\gamedata" (
