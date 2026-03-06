@@ -1,6 +1,5 @@
 #!/bin/sh
 # download.sh — Check for latest GitHub release and download to ingest/
-set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -11,6 +10,11 @@ CONF="$BASE_DIR/server.conf"
 log() { echo "[download] $*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
 
+# Extract a JSON string value by key (simple grep/sed, no jq needed)
+json_value() {
+    grep -o "\"$1\" *: *\"[^\"]*\"" | head -1 | sed 's/.*: *"//;s/"$//'
+}
+
 # Load configuration
 [ -f "$CONF" ] || die "Config file not found: $CONF"
 . "$CONF"
@@ -19,12 +23,6 @@ die() { log "ERROR: $*" >&2; exit 1; }
 
 # Check dependencies
 command -v curl >/dev/null 2>&1 || die "curl is required but not installed"
-
-# Extract a JSON string value by key (simple grep/sed, no jq needed)
-# Usage: json_value "key" < file
-json_value() {
-    grep -o "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -1 | sed 's/.*: *"//;s/"$//'
-}
 
 # Ensure directories exist
 mkdir -p "$LIVE_DIR" "$INGEST_DIR"
@@ -43,12 +41,18 @@ API_URL="https://api.github.com/repos/${REPO}/releases/latest"
 if [ -n "${GITHUB_TOKEN:-}" ]; then
     HTTP_CODE=$(curl -sL -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer $GITHUB_TOKEN" \
-        -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL")
+        -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL") || true
 else
     HTTP_CODE=$(curl -sL -H "Accept: application/vnd.github+json" \
-        -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL")
+        -o "$INGEST_DIR/.release.json" -w "%{http_code}" "$API_URL") || true
 fi
 
+if [ -z "$HTTP_CODE" ]; then
+    die "curl failed — check network connectivity"
+fi
+if [ "$HTTP_CODE" = "000" ]; then
+    die "Could not connect to GitHub API — check DNS and network"
+fi
 if [ "$HTTP_CODE" = "404" ]; then
     die "No releases found for $REPO"
 fi
@@ -56,12 +60,16 @@ if [ "$HTTP_CODE" != "200" ]; then
     die "GitHub API returned HTTP $HTTP_CODE"
 fi
 
+log "Got release info (HTTP $HTTP_CODE)"
+
 # Parse release info
 TAG=$(json_value "tag_name" < "$INGEST_DIR/.release.json")
-ASSET_URL=$(grep -o "\"browser_download_url\"[[:space:]]*:[[:space:]]*\"[^\"]*${ASSET_NAME}\"" \
-    "$INGEST_DIR/.release.json" | head -1 | sed 's/.*: *"//;s/"$//')
+ASSET_URL=$(grep -o "\"browser_download_url\" *: *\"[^\"]*${ASSET_NAME}\"" \
+    "$INGEST_DIR/.release.json" | head -1 | sed 's/.*: *"//;s/"$//') || true
 
-[ -n "$TAG" ] || die "Could not parse tag_name from release"
+if [ -z "$TAG" ]; then
+    die "Could not parse tag_name from release JSON"
+fi
 log "Latest release: $TAG"
 
 # Check if already up to date
@@ -71,7 +79,9 @@ if [ "$TAG" = "$CURRENT" ]; then
     exit 0
 fi
 
-[ -n "$ASSET_URL" ] || die "Asset '$ASSET_NAME' not found in release $TAG"
+if [ -z "$ASSET_URL" ]; then
+    die "Asset '$ASSET_NAME' not found in release $TAG"
+fi
 
 # Clean ingest directory (preserve .release.json briefly)
 find "$INGEST_DIR" -mindepth 1 ! -name '.release.json' -exec rm -rf {} + 2>/dev/null || true
@@ -81,15 +91,15 @@ log "Downloading $ASSET_NAME..."
 if [ -n "${GITHUB_TOKEN:-}" ]; then
     curl -L --fail --progress-bar \
         -H "Authorization: Bearer $GITHUB_TOKEN" \
-        -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL"
+        -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL" || die "Download failed"
 else
     curl -L --fail --progress-bar \
-        -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL"
+        -o "$INGEST_DIR/$ASSET_NAME" "$ASSET_URL" || die "Download failed"
 fi
 
 # Extract
 log "Extracting..."
-tar -xzf "$INGEST_DIR/$ASSET_NAME" -C "$INGEST_DIR"
+tar -xzf "$INGEST_DIR/$ASSET_NAME" -C "$INGEST_DIR" || die "Extraction failed"
 
 # Record pending version
 echo "$TAG" > "$INGEST_DIR/.pending_version"
