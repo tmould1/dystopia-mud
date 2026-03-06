@@ -19,13 +19,12 @@ die() { log "ERROR: $*" >&2; exit 1; }
 
 # Check dependencies
 command -v curl >/dev/null 2>&1 || die "curl is required but not installed"
-command -v jq >/dev/null 2>&1 || die "jq is required but not installed (try: sudo yum install jq)"
 
-# Auth header if token provided
-AUTH=""
-if [ -n "${GITHUB_TOKEN:-}" ]; then
-    AUTH="-H \"Authorization: Bearer $GITHUB_TOKEN\""
-fi
+# Extract a JSON string value by key (simple grep/sed, no jq needed)
+# Usage: json_value "key" < file
+json_value() {
+    grep -o "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -1 | sed 's/.*: *"//;s/"$//'
+}
 
 # Ensure directories exist
 mkdir -p "$LIVE_DIR" "$INGEST_DIR"
@@ -58,10 +57,11 @@ if [ "$HTTP_CODE" != "200" ]; then
 fi
 
 # Parse release info
-TAG=$(jq -r '.tag_name' "$INGEST_DIR/.release.json")
-ASSET_URL=$(jq -r --arg name "$ASSET_NAME" '.assets[] | select(.name == $name) | .browser_download_url' "$INGEST_DIR/.release.json")
+TAG=$(json_value "tag_name" < "$INGEST_DIR/.release.json")
+ASSET_URL=$(grep -o "\"browser_download_url\"[[:space:]]*:[[:space:]]*\"[^\"]*${ASSET_NAME}\"" \
+    "$INGEST_DIR/.release.json" | head -1 | sed 's/.*: *"//;s/"$//')
 
-[ -n "$TAG" ] && [ "$TAG" != "null" ] || die "Could not parse tag_name from release"
+[ -n "$TAG" ] || die "Could not parse tag_name from release"
 log "Latest release: $TAG"
 
 # Check if already up to date
@@ -71,7 +71,7 @@ if [ "$TAG" = "$CURRENT" ]; then
     exit 0
 fi
 
-[ -n "$ASSET_URL" ] && [ "$ASSET_URL" != "null" ] || die "Asset '$ASSET_NAME' not found in release $TAG"
+[ -n "$ASSET_URL" ] || die "Asset '$ASSET_NAME' not found in release $TAG"
 
 # Clean ingest directory (preserve .release.json briefly)
 find "$INGEST_DIR" -mindepth 1 ! -name '.release.json' -exec rm -rf {} + 2>/dev/null || true
