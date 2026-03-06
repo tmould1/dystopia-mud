@@ -1331,6 +1331,9 @@ const struct cmd_type cmd_table[] =
 		{ "qstat", do_qstat, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
 		{ "qtrust", do_qtrust, POS_DEAD, 10, LOG_ALWAYS, 0, 0, 0 },
 		{ "copyover", do_copyover, POS_DEAD, 10, LOG_ALWAYS, 0, 0, 0 },
+#if !defined( WIN32 )
+		{ "deploybot", do_deploybot, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
+#endif
 		{ "shutdow", do_shutdow, POS_DEAD, 10, LOG_NORMAL, 0, 0, 0 },
 		{ "shutdown", do_shutdown, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "users", do_users, POS_DEAD, 8, LOG_NORMAL, 0, 0, 0 },

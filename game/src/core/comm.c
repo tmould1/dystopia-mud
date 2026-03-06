@@ -58,6 +58,9 @@
 #include "../systems/charset.h"
 #include "../db/db_game.h"
 #include "../systems/profile.h"
+#if !defined( WIN32 )
+#include "../systems/deploybot.h"
+#endif
 
 #if defined( WIN32 )
 #include <sys/timeb.h> /*for _ftime(), uses _timeb struct*/
@@ -653,6 +656,9 @@ void excessive_cpu( int blx ) {
  */
 void game_tick( void ) {
 	update_handler();
+#if !defined( WIN32 )
+	deploybot_check();
+#endif
 	log_flush();
 }
 

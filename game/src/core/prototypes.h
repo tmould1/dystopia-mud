@@ -439,6 +439,9 @@ DO_FUN do_cone;
 DO_FUN do_dstake;
 DO_FUN do_demonarmour;
 DO_FUN do_deny;
+#if !defined( WIN32 )
+DO_FUN do_deploybot;
+#endif
 DO_FUN do_description;
 DO_FUN do_diagnose;
 DO_FUN do_dismount;
