@@ -12,7 +12,7 @@
 
 /* State for the currently running deploy task. */
 static pid_t deploy_pid   = -1;
-static char deploy_stage[32];          /* "download", "validate", "migrate" */
+static char deploy_stage[32];          /* "validate", "migrate" */
 static char deploy_output_path[MUD_PATH_MAX];
 
 /*
@@ -113,7 +113,7 @@ void do_deploybot( CHAR_DATA *ch, char *argument ) {
 	argument = one_argument( argument, arg );
 
 	if ( arg[0] == '\0' ) {
-		send_to_char( "Usage: deploybot <download|validate|migrate|status>\n\r", ch );
+		send_to_char( "Usage: deploybot <check|validate|migrate|status>\n\r", ch );
 		return;
 	}
 
@@ -129,11 +129,73 @@ void do_deploybot( CHAR_DATA *ch, char *argument ) {
 		return;
 	}
 
+	/* Check for pending release (local, no fork needed). */
+	if ( !str_cmp( arg, "check" ) ) {
+		char ready_path[MUD_PATH_MAX];
+		char version_path[MUD_PATH_MAX];
+		char current_path[MUD_PATH_MAX];
+		char pending[256];
+		char current[256];
+		FILE *fp;
+
+		snprintf( ready_path, sizeof( ready_path ),
+			"%s/../../ingest/.ready", mud_base_dir );
+		snprintf( version_path, sizeof( version_path ),
+			"%s/../../ingest/.pending_version", mud_base_dir );
+		snprintf( current_path, sizeof( current_path ),
+			"%s/../../live/.version", mud_base_dir );
+
+		if ( access( ready_path, F_OK ) != 0 ) {
+			deploybot_broadcast( "No pending release." );
+			send_to_char( "No pending release in ingest/.\n\r", ch );
+			return;
+		}
+
+		/* Read pending version. */
+		pending[0] = '\0';
+		fp = fopen( version_path, "r" );
+		if ( fp != NULL ) {
+			if ( fgets( pending, sizeof( pending ), fp ) != NULL ) {
+				char *nl = strchr( pending, '\n' );
+				if ( nl ) *nl = '\0';
+			}
+			fclose( fp );
+		}
+
+		/* Read current version. */
+		current[0] = '\0';
+		fp = fopen( current_path, "r" );
+		if ( fp != NULL ) {
+			if ( fgets( current, sizeof( current ), fp ) != NULL ) {
+				char *nl = strchr( current, '\n' );
+				if ( nl ) *nl = '\0';
+			}
+			fclose( fp );
+		}
+
+		if ( pending[0] == '\0' ) {
+			snprintf( msg, sizeof( msg ),
+				"Release staged but version unknown. Run 'deploybot validate'." );
+		} else if ( current[0] == '\0' ) {
+			snprintf( msg, sizeof( msg ),
+				"New version %s ready (fresh install). Run 'deploybot validate'.",
+				pending );
+		} else {
+			snprintf( msg, sizeof( msg ),
+				"New version %s ready (current: %s). Run 'deploybot validate'.",
+				pending, current );
+		}
+
+		deploybot_broadcast( msg );
+		send_to_char( msg, ch );
+		send_to_char( "\n\r", ch );
+		return;
+	}
+
 	/* Validate subcommand. */
-	if ( str_cmp( arg, "download" ) != 0
-		&& str_cmp( arg, "validate" ) != 0
+	if ( str_cmp( arg, "validate" ) != 0
 		&& str_cmp( arg, "migrate" ) != 0 ) {
-		send_to_char( "Usage: deploybot <download|validate|migrate|status>\n\r", ch );
+		send_to_char( "Usage: deploybot <check|validate|migrate|status>\n\r", ch );
 		return;
 	}
 

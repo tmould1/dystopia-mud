@@ -1,0 +1,136 @@
+name: Release (Linux i386)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag (e.g. v1.0.0). Leave empty to build without releasing.'
+        type: string
+        default: ''
+
+jobs:
+  build:
+    name: Build (Linux i386, static)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build in i386 container
+        run: |
+          docker run --rm -v "$PWD:/build" -w /build i386/debian:bullseye bash -c "
+            apt-get update && apt-get install -y gcc make zlib1g-dev libcrypt-dev file
+            cd game
+            chmod +x build/GenerateProjectFiles.sh
+            bash build/GenerateProjectFiles.sh
+            sed -i 's/^L_FLAGS = /L_FLAGS = -static /' build/Makefile
+            cd build
+            make -j\$(nproc) -f Makefile
+          "
+
+      - name: Verify binary is 32-bit
+        run: |
+          file gamedata/dystopia
+          file gamedata/dystopia | grep -q "32-bit"
+
+      - name: Package release
+        run: |
+          mkdir -p release/dystopia
+          cp -r gamedata release/dystopia/
+          cp startup.sh release/dystopia/
+          chmod +x release/dystopia/startup.sh
+          cp README.md release/dystopia/ 2>/dev/null || true
+          cd release
+          tar -czvf ../dystopia-linux-i386.tar.gz dystopia/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dystopia-linux-i386
+          path: dystopia-linux-i386.tar.gz
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.tag != ''
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dystopia-linux-i386
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Dystopia MUD ${{ steps.tag.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: dystopia-linux-i386.tar.gz
+
+  deploy:
+    name: Deploy to Server
+    needs: release
+    runs-on: ubuntu-latest
+    if: needs.release.outputs.tag != ''
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dystopia-linux-i386
+
+      - name: Push to server via SCP
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          # Skip gracefully if secrets aren't configured (forks, etc.)
+          if [ -z "$SSH_KEY" ] || [ -z "$DEPLOY_HOST" ]; then
+            echo "Deploy secrets not configured — skipping"
+            exit 0
+          fi
+
+          TAG="${{ needs.release.outputs.tag }}"
+          REMOTE="$DEPLOY_USER@$DEPLOY_HOST"
+
+          # Setup SSH key
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          SSH_OPTS="-i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new"
+
+          # Push tarball to server
+          echo "Uploading dystopia-linux-i386.tar.gz to $DEPLOY_HOST..."
+          scp $SSH_OPTS dystopia-linux-i386.tar.gz "$REMOTE:$DEPLOY_PATH/ingest/"
+
+          # Extract, write version, signal ready
+          ssh $SSH_OPTS "$REMOTE" "
+            cd $DEPLOY_PATH/ingest
+            rm -rf dystopia
+            tar -xzf dystopia-linux-i386.tar.gz
+            rm -f dystopia-linux-i386.tar.gz
+            echo '$TAG' > .pending_version
+            echo 'ready' > .ready
+          "
+
+          echo "Deployed $TAG to $DEPLOY_HOST — ready for validate + migrate"

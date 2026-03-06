@@ -29,12 +29,9 @@ else
   GAMEDATA_DIR="$SCRIPT_DIR"
 fi
 
-# Set limits.
-# nohup
-nice
-# ulimit -s 1024k  # Stack size limit (in kbytes), commented out similar to original.
-ulimit -c $((8128 * 1024))  # Core dump size in bytes
-ulimit -f $((16256 * 1024))  # File size limit in bytes
+# Raise limits if the shell allows it (silently ignored otherwise).
+ulimit -c unlimited 2>/dev/null  # Allow core dumps for debugging
+ulimit -f unlimited 2>/dev/null  # No file size cap
 
 if [ -e "$GAMEDATA_DIR/txt/shutdown.txt" ]; then
   rm -f "$GAMEDATA_DIR/txt/shutdown.txt"
