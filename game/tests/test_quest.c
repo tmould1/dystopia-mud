@@ -389,10 +389,10 @@ static void test_milestone_reach_stat_hp( void ) {
 		QUEST_PROGRESS *p = quest_tracker_get( t, qi );
 		p->status = QSTATUS_ACTIVE;
 
-		/* HP below threshold */
+		/* HP below threshold — progress shows actual value */
 		ch->max_hit = 1500;
 		quest_check_milestones( ch );
-		TEST_ASSERT_EQ( p->obj_progress[0].current, 0 );
+		TEST_ASSERT_EQ( p->obj_progress[0].current, 1500 );
 
 		/* HP at threshold */
 		ch->max_hit = 2000;
@@ -416,10 +416,10 @@ static void test_milestone_reach_stat_above_threshold( void ) {
 		QUEST_PROGRESS *p = quest_tracker_get( t, qi );
 		p->status = QSTATUS_ACTIVE;
 
-		/* HP above threshold should still complete */
+		/* HP above threshold — stores actual value */
 		ch->max_hit = 50000;
 		quest_check_milestones( ch );
-		TEST_ASSERT_EQ( p->obj_progress[0].current, 2000 );
+		TEST_ASSERT_EQ( p->obj_progress[0].current, 50000 );
 	}
 
 	quest_tracker_free( t );
