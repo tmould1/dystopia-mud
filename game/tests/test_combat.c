@@ -290,8 +290,8 @@ void test_kill_clears_fighting( void ) {
 	ch->damcap[0] = 10000;
 	ch->damcap[DAM_CHANGE] = 0;
 
-	/* Use damage() directly — deterministic kill, no diceroll RNG. */
-	damage( ch, victim, 9999, TYPE_HIT );
+	/* Use damage() with TYPE_UNDEFINED to skip dodge/parry RNG. */
+	damage( ch, victim, 9999, TYPE_UNDEFINED );
 
 	/* After the kill, attacker must no longer be fighting */
 	TEST_ASSERT_TRUE( ch->fighting == NULL );
