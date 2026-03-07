@@ -3408,8 +3408,7 @@ void do_werewolf( CHAR_DATA *ch, char *argument ) {
 				continue;
 		}
 		if ( vch->in_room == ch->in_room && can_see( ch, vch ) ) {
-			multi_hit( ch, vch, TYPE_UNDEFINED );
-			if ( vch == NULL || vch->position <= POS_STUNNED ) continue;
+			if ( multi_hit( ch, vch, TYPE_UNDEFINED ) ) continue;
 			multi_hit( ch, vch, TYPE_UNDEFINED );
 		}
 	}

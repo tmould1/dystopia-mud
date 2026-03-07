@@ -659,6 +659,7 @@ void game_tick( void ) {
 #if !defined( WIN32 )
 	deploybot_check();
 #endif
+	free_extracted_chars();
 	log_flush();
 }
 

@@ -661,13 +661,11 @@ void do_shred( CHAR_DATA *ch, char *argument ) {
 	if ( is_safe( ch, victim ) ) return;
 	WAIT_STATE( ch, cfg( CFG_ABILITY_WEREWOLF_SHRED_COOLDOWN ) );
 
-	one_hit( ch, victim, gsn_shred, 1 );
-	one_hit( ch, victim, gsn_shred, 1 );
+	if ( one_hit( ch, victim, gsn_shred, 1 ) ) return;
+	if ( one_hit( ch, victim, gsn_shred, 1 ) ) return;
 
-	if ( ch_power(ch)[DISC_WERE_RAPT] > 6 )
-		one_hit( ch, victim, gsn_shred, 1 );
-	if ( ch_power(ch)[DISC_WERE_RAPT] > 7 )
-		one_hit( ch, victim, gsn_shred, 1 );
+	if ( ch_power(ch)[DISC_WERE_RAPT] > 6 && one_hit( ch, victim, gsn_shred, 1 ) ) return;
+	if ( ch_power(ch)[DISC_WERE_RAPT] > 7 && one_hit( ch, victim, gsn_shred, 1 ) ) return;
 	if ( ch_power(ch)[DISC_WERE_RAPT] > 9 )
 		one_hit( ch, victim, gsn_shred, 1 );
 	return;

@@ -703,7 +703,7 @@ void do_wrathofgod( CHAR_DATA *ch, char *argument ) {
 	else
 		return;
 	if ( !IS_NPC( victim ) ) return;
-	{ int i; for ( i = 0; i < cfg( CFG_ABILITY_MONK_WRATHOFGOD_NUM_HITS ); i++ ) one_hit( ch, victim, gsn_wrathofgod, 1 ); }
+	{ int i; for ( i = 0; i < cfg( CFG_ABILITY_MONK_WRATHOFGOD_NUM_HITS ); i++ ) { if ( one_hit( ch, victim, gsn_wrathofgod, 1 ) ) break; } }
 	WAIT_STATE( ch, cfg( CFG_ABILITY_MONK_WRATHOFGOD_COOLDOWN ) );
 	return;
 }

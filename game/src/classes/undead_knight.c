@@ -413,7 +413,7 @@ void do_powerword( CHAR_DATA *ch, char *argument ) {
 		LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 			if ( ich != ch ) {
 				if ( is_safe( ch, ich ) ) break;
-				one_hit( ch, ich, gsn_fireball, 1 );
+				if ( !one_hit( ch, ich, gsn_fireball, 1 ) )
 				one_hit( ch, ich, gsn_fireball, 1 );
 			}
 		}

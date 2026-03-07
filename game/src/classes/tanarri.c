@@ -356,8 +356,8 @@ void do_lavablast( CHAR_DATA *ch, char *argument ) {
 	}
 	use_mana( ch, cfg( CFG_ABILITY_TANARRI_LAVABLAST_MANA_COST ) );
 	use_move( ch, cfg( CFG_ABILITY_TANARRI_LAVABLAST_MOVE_COST ) );
-	one_hit( ch, victim, gsn_magma, 1 );
-	one_hit( ch, victim, gsn_magma, 1 );
+	if ( one_hit( ch, victim, gsn_magma, 1 ) ) return;
+	if ( one_hit( ch, victim, gsn_magma, 1 ) ) return;
 	one_hit( ch, victim, gsn_magma, 1 );
 	if ( !IS_AFFECTED( victim, AFF_FLAMING ) )
 		SET_BIT( victim->affected_by, AFF_FLAMING );
@@ -536,8 +536,8 @@ void do_tornado( CHAR_DATA *ch, char *argument ) {
 	LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( ich != ch && IS_AFFECTED( ich, AFF_FLYING ) ) {
 			if ( is_safe( ch, ich ) ) break;
-			one_hit( ch, ich, gsn_lightning, 1 );
-			one_hit( ch, ich, gsn_lightning, 1 );
+			if ( !one_hit( ch, ich, gsn_lightning, 1 ) )
+				one_hit( ch, ich, gsn_lightning, 1 );
 		}
 	}
 	use_mana( ch, cfg( CFG_ABILITY_TANARRI_TORNADO_MANA_COST ) );
@@ -576,8 +576,8 @@ void do_infernal( CHAR_DATA *ch, char *argument ) {
 	LIST_FOR_EACH_SAFE(ich, ich_next, &ch->in_room->characters, CHAR_DATA, room_node) {
 		if ( ich != ch ) {
 			if ( is_safe( ch, ich ) ) break;
-			one_hit( ch, ich, gsn_fireball, 1 );
-			one_hit( ch, ich, gsn_fireball, 1 );
+			if ( !one_hit( ch, ich, gsn_fireball, 1 ) )
+				one_hit( ch, ich, gsn_fireball, 1 );
 		}
 	}
 	use_mana( ch, cfg( CFG_ABILITY_TANARRI_INFERNAL_MANA_COST ) );

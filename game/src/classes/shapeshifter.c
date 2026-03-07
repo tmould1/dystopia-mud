@@ -726,8 +726,8 @@ void do_charge( CHAR_DATA *ch, char *argument ) {
 	}
 	WAIT_STATE( ch, 18 );
 	use_move( ch, 2000 );
-	one_hit( ch, victim, gsn_headbutt, 1 );
-	one_hit( ch, victim, gsn_hooves, 1 );
+	if ( one_hit( ch, victim, gsn_headbutt, 1 ) ) return;
+	if ( one_hit( ch, victim, gsn_hooves, 1 ) ) return;
 	one_hit( ch, victim, gsn_hooves, 1 );
 	if ( number_range( 1, 3 ) == 1 ) {
 		victim->position = POS_STUNNED;

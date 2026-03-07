@@ -292,8 +292,8 @@ void check_samuraiattack( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		}
 		ch->pcdata->powers[SAMURAI_LAST] = 10;
 		do_say( ch, "What a worthless opponent you are. Here, let me show you how a real fighter fights." );
-		one_hit( ch, victim, gsn_lightningslash, 1 );
-		one_hit( ch, victim, gsn_lightningslash, 1 );
+		if ( one_hit( ch, victim, gsn_lightningslash, 1 ) ) break;
+		if ( one_hit( ch, victim, gsn_lightningslash, 1 ) ) break;
 		one_hit( ch, victim, gsn_lightningslash, 1 );
 		break;
 	case 15:
@@ -351,10 +351,10 @@ void check_samuraiattack( CHAR_DATA *ch, CHAR_DATA *victim ) {
 		}
 		ch->pcdata->powers[SAMURAI_LAST] = 35;
 		do_say( ch, "I am a master of arms, you cannot even begin to understand what I am able to do!" );
-		one_hit( ch, victim, gsn_backfist, 1 );
-		one_hit( ch, victim, gsn_thrustkick, 1 );
-		one_hit( ch, victim, gsn_monksweep, 1 );
-		one_hit( ch, victim, gsn_jumpkick, 1 );
+		if ( one_hit( ch, victim, gsn_backfist, 1 ) ) break;
+		if ( one_hit( ch, victim, gsn_thrustkick, 1 ) ) break;
+		if ( one_hit( ch, victim, gsn_monksweep, 1 ) ) break;
+		if ( one_hit( ch, victim, gsn_jumpkick, 1 ) ) break;
 		one_hit( ch, victim, gsn_lightningslash, 1 );
 		break;
 	}

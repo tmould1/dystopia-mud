@@ -31,6 +31,7 @@ extern list_head_t g_helps;
 extern list_head_t ban_list;
 extern list_head_t g_characters;
 extern list_head_t g_npcs;
+extern list_head_t g_extracted;
 extern list_head_t g_descriptors;
 extern list_head_t g_objects;
 

@@ -938,6 +938,7 @@ struct char_data {
 	list_node_t char_node;
 	list_node_t npc_node; /* g_npcs list (NPCs only, unlinked for PCs) */
 	list_node_t room_node;
+	bool            extracted;  /* deferred free: TRUE after extract_char(ch, TRUE) */
 	CHAR_DATA *master;
 	CHAR_DATA *leader;
 	CHAR_DATA *fighting;
@@ -1250,6 +1251,7 @@ static inline int *ch_tick_timer( CHAR_DATA *ch ) {
 #define GET_PC_NAME( ch )	  ( IS_NPC( ( ch ) ) ? "<npc>" : ( ch )->pcdata->switchname )
 
 #define IS_NPC( ch )		  ( IS_SET( ( ch )->act, ACT_IS_NPC ) )
+#define IS_VALID( ch )		  ( (ch) != NULL && !(ch)->extracted )
 #define IS_SCREENREADER( ch ) ( !IS_NPC( ch ) && IS_SET( ( ch )->act, PLR_SCREENREADER ) )
 #define IS_TRUECOLOR( ch )   ( !IS_NPC( ch ) && IS_EXTRA( ( ch ), EXTRA_TRUECOLOR ) )
 #define IS_JUDGE( ch )	  ( get_trust( ch ) >= LEVEL_JUDGE )

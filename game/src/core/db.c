@@ -152,6 +152,7 @@ list_head_t g_dns_lookups;
 char bug_buf[MAX_STRING_LENGTH];
 list_head_t g_characters;
 list_head_t g_npcs;
+list_head_t g_extracted;
 char *help_greeting;
 char log_buf[MAX_STRING_LENGTH];
 KILL_DATA kill_table[MAX_LEVEL];
@@ -316,6 +317,7 @@ void boot_db( bool fCopyOver ) {
 	 */
 	list_init( &g_characters );
 	list_init( &g_npcs );
+	list_init( &g_extracted );
 	list_init( &g_objects );
 	list_init( &g_areas );
 	list_init( &g_helps );

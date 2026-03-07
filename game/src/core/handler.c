@@ -1665,6 +1665,7 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 	OBJ_DATA *obj;
 
 	if ( ch == NULL ) return;
+	if ( ch->extracted ) return;  /* already pending free */
 
 	if ( ch->in_room == NULL ) {
 		bug( "Extract_char: NULL.", 0 );
@@ -1757,8 +1758,18 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 			ch->pcdata->propose = NULL;
 	}
 
-	free_char( ch );
+	ch->extracted = true;
+	list_push_back( &g_extracted, &ch->char_node );
 	return;
+}
+
+void free_extracted_chars( void ) {
+	CHAR_DATA *ch;
+	CHAR_DATA *ch_next;
+	LIST_FOR_EACH_SAFE( ch, ch_next, &g_extracted, CHAR_DATA, char_node ) {
+		list_remove( &g_extracted, &ch->char_node );
+		free_char( ch );
+	}
 }
 
 /*

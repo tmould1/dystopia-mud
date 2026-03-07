@@ -201,8 +201,8 @@ void do_stuntubes( CHAR_DATA *ch, char *argument ) {
 	WAIT_STATE( ch, cfg( CFG_ABILITY_SPIDERDROID_STUNTUBES_COOLDOWN ) );
 	use_move( ch, cfg( CFG_ABILITY_SPIDERDROID_STUNTUBES_MOVE_COST ) );
 
-	one_hit( ch, victim, gsn_stuntubes, 1 );
-	one_hit( ch, victim, gsn_stuntubes, 1 );
+	if ( one_hit( ch, victim, gsn_stuntubes, 1 ) ) return;
+	if ( one_hit( ch, victim, gsn_stuntubes, 1 ) ) return;
 	one_hit( ch, victim, gsn_stuntubes, 1 );
 	if ( !IS_AFFECTED( victim, AFF_POISON ) )
 		SET_BIT( victim->affected_by, AFF_POISON );

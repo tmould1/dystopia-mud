@@ -460,7 +460,7 @@ void do_spinkick( CHAR_DATA *ch, char *argument ) {
 					if ( mount == vch ) continue;
 				}
 				if ( can_see( ch, vch ) ) {
-					one_hit( ch, vch, gsn_tornadokick, 0 );
+					if ( !one_hit( ch, vch, gsn_tornadokick, 0 ) )
 					one_hit( ch, vch, gsn_tornadokick, 0 );
 					number_hit++;
 				}

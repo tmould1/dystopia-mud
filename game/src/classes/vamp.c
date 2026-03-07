@@ -1543,9 +1543,9 @@ void do_assassinate( CHAR_DATA *ch, char *argument ) {
 	WAIT_STATE( ch, 15 );
 	if ( number_percent() < chance ) {
 		if ( !IS_NPC( victim ) ) {
-			one_hit( ch, victim, gsn_garotte, 1 );
-			one_hit( ch, victim, gsn_garotte, 1 );
-			one_hit( ch, victim, gsn_garotte, 1 );
+			if ( one_hit( ch, victim, gsn_garotte, 1 ) ) return;
+			if ( one_hit( ch, victim, gsn_garotte, 1 ) ) return;
+			if ( one_hit( ch, victim, gsn_garotte, 1 ) ) return;
 			one_hit( ch, victim, gsn_garotte, 1 );
 		} else {
 			victim->hit = 1;
