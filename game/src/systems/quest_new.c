@@ -526,6 +526,8 @@ void quest_check_milestones( CHAR_DATA *ch ) {
                     cur_val = ch->max_mana;
                 else if ( !strcmp( obj->target, "move" ) )
                     cur_val = ch->max_move;
+                else if ( !strcmp( obj->target, "class" ) )
+                    cur_val = ( ch->class != 0 ) ? 1 : 0;
             }
             else if ( !strcmp( obj->type, QOBJ_REACH_GEN ) ) {
                 /* Lower gen = better; check if gen <= threshold */

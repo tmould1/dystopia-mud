@@ -202,8 +202,8 @@ static void test_quest_m01_objectives( void ) {
 	TEST_ASSERT_STR_EQ( q->objectives[0].target, "hp" );
 	TEST_ASSERT_STR_EQ( q->objectives[1].type, "USE_COMMAND" );
 	TEST_ASSERT_STR_EQ( q->objectives[1].target, "train" );
-	TEST_ASSERT_STR_EQ( q->objectives[2].type, "USE_COMMAND" );
-	TEST_ASSERT_STR_EQ( q->objectives[2].target, "selfclass" );
+	TEST_ASSERT_STR_EQ( q->objectives[2].type, "REACH_STAT" );
+	TEST_ASSERT_STR_EQ( q->objectives[2].target, "class" );
 }
 
 /*--------------------------------------------------------------------------
@@ -789,6 +789,56 @@ static void test_flag_constants( void ) {
 }
 
 /*--------------------------------------------------------------------------
+ * Tier 2: M01 Class Milestone Regression
+ *--------------------------------------------------------------------------*/
+
+static void test_m01_class_milestone_not_met_without_class( void ) {
+	CHAR_DATA *ch = make_test_player();
+	QUEST_TRACKER *t = quest_tracker_new();
+	ch->pcdata->quest_tracker = t;
+
+	int qi = quest_def_index_by_id( "M01" );
+	if ( qi >= 0 ) {
+		QUEST_PROGRESS *p = quest_tracker_get( t, qi );
+		p->status = QSTATUS_ACTIVE;
+
+		/* No class selected */
+		ch->class = 0;
+		quest_check_milestones( ch );
+
+		/* Class objective (index 2) should remain at 0 */
+		TEST_ASSERT_EQ( p->obj_progress[2].current, 0 );
+	}
+
+	quest_tracker_free( t );
+	ch->pcdata->quest_tracker = NULL;
+	free_test_char( ch );
+}
+
+static void test_m01_class_milestone_met_with_class( void ) {
+	CHAR_DATA *ch = make_test_player();
+	QUEST_TRACKER *t = quest_tracker_new();
+	ch->pcdata->quest_tracker = t;
+
+	int qi = quest_def_index_by_id( "M01" );
+	if ( qi >= 0 ) {
+		QUEST_PROGRESS *p = quest_tracker_get( t, qi );
+		p->status = QSTATUS_ACTIVE;
+
+		/* Class selected */
+		ch->class = 1;
+		quest_check_milestones( ch );
+
+		/* Class objective (index 2) should be 1 */
+		TEST_ASSERT_EQ( p->obj_progress[2].current, 1 );
+	}
+
+	quest_tracker_free( t );
+	ch->pcdata->quest_tracker = NULL;
+	free_test_char( ch );
+}
+
+/*--------------------------------------------------------------------------
  * Suite entry point
  *--------------------------------------------------------------------------*/
 
@@ -834,6 +884,9 @@ void suite_quest( void ) {
 	RUN_TEST( test_milestone_npc_noop );
 	RUN_TEST( test_milestone_no_tracker_noop );
 	RUN_TEST( test_milestone_skips_already_met );
+
+	RUN_TEST( test_m01_class_milestone_not_met_without_class );
+	RUN_TEST( test_m01_class_milestone_met_with_class );
 
 	RUN_TEST( test_evaluate_availability_unlocks );
 	RUN_TEST( test_evaluate_availability_npc_noop );

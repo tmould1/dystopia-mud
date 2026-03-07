@@ -235,7 +235,7 @@ def seed_phase1(conn):
           objectives=[
               ("REACH_STAT", "hp", 2000, "Reach 2000 HP to qualify for avatar"),
               ("USE_COMMAND", "train", 1, "Train avatar (type: train avatar)"),
-              ("USE_COMMAND", "selfclass", 1, "Choose a class (type: selfclass <class>)"),
+              ("REACH_STAT", "class", 1, "Choose a class (type: selfclass <class>)"),
           ])
 
     quest(conn, "M02", "Trial by Fire",
