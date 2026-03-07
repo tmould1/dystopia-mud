@@ -302,6 +302,8 @@ void gmcp_send_char_data( CHAR_DATA *ch ) {
 	gmcp_send_info( ch );
 	gmcp_send_status( ch );
 	gmcp_send_vitals( ch );
+	gmcp_send_discord_info( ch->desc );
+	gmcp_send_discord_status( ch );
 }
 
 /*
@@ -396,6 +398,74 @@ void gmcp_send_room_info( CHAR_DATA *ch ) {
 }
 
 /*
+ * Send External.Discord.Info with server invite/application info
+ * Sent once when the client enables the External.Discord package
+ */
+void gmcp_send_discord_info( DESCRIPTOR_DATA *d ) {
+	char buf[512];
+
+	if ( d == NULL || !d->gmcp_enabled )
+		return;
+
+	if ( !( d->gmcp_packages & GMCP_PACKAGE_EXT_DISCORD ) )
+		return;
+
+	/* Include invite URL from game config if available */
+	if ( game_config.discord_url != NULL && game_config.discord_url[0] != '\0' ) {
+		char url_buf[256];
+		strncpy( url_buf, json_escape( game_config.discord_url ), sizeof( url_buf ) - 1 );
+		url_buf[sizeof( url_buf ) - 1] = '\0';
+		snprintf( buf, sizeof( buf ), "{\"inviteurl\":\"%s\"}", url_buf );
+	} else {
+		snprintf( buf, sizeof( buf ), "{}" );
+	}
+
+	gmcp_send( d, "External.Discord.Info", buf );
+}
+
+/*
+ * Send External.Discord.Status with current character state
+ * Updates the player's Discord Rich Presence via their GMCP client
+ */
+void gmcp_send_discord_status( CHAR_DATA *ch ) {
+	char buf[MAX_STRING_LENGTH];
+	char game_buf[128];
+	char details_buf[256];
+	char state_buf[128];
+	const char *gen_title;
+	const char *area_name;
+
+	if ( ch == NULL || ch->desc == NULL || !ch->desc->gmcp_enabled )
+		return;
+
+	if ( !( ch->desc->gmcp_packages & GMCP_PACKAGE_EXT_DISCORD ) )
+		return;
+
+	/* Game name from config */
+	strncpy( game_buf, json_escape( game_config.game_name ), sizeof( game_buf ) - 1 );
+	game_buf[sizeof( game_buf ) - 1] = '\0';
+
+	/* Details: "Exploring <area_name>" */
+	area_name = ( ch->in_room && ch->in_room->area ) ? ch->in_room->area->name : "the Unknown";
+	snprintf( details_buf, sizeof( details_buf ), "Exploring %s", json_escape( area_name ) );
+
+	/* State: generation title, falling back to class name */
+	gen_title = db_class_get_generation_title( ch->class, ch->generation );
+	if ( gen_title == NULL || gen_title[0] == '\0' )
+		gen_title = db_class_get_name( ch->class );
+	if ( gen_title == NULL || gen_title[0] == '\0' )
+		gen_title = "Adventurer";
+	strncpy( state_buf, json_escape( gen_title ), sizeof( state_buf ) - 1 );
+	state_buf[sizeof( state_buf ) - 1] = '\0';
+
+	snprintf( buf, sizeof( buf ),
+		"{\"game\":\"%s\",\"details\":\"%s\",\"state\":\"%s\",\"starttime\":\"%ld\"}",
+		game_buf, details_buf, state_buf, (long) ch->logon );
+
+	gmcp_send( ch->desc, "External.Discord.Status", buf );
+}
+
+/*
  * Parse a package name and version from Core.Supports.Set
  * Format: "Package.Name version" or just "Package.Name"
  * Returns the package flag if recognized, 0 otherwise
@@ -426,6 +496,8 @@ static int parse_package_support( const char *pkg ) {
 		return GMCP_PACKAGE_ROOM_INFO;
 	if ( !strncmp( pkg, "Core", 4 ) )
 		return GMCP_PACKAGE_CORE;
+	if ( !strncmp( pkg, "External.Discord", 16 ) )
+		return GMCP_PACKAGE_EXT_DISCORD;
 
 	return 0;
 }
@@ -492,6 +564,14 @@ void gmcp_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int le
 			!( old_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ) {
 			mcmp_set_default( d );
 		}
+
+		/* If External.Discord was just enabled, send info and status */
+		if ( ( d->gmcp_packages & GMCP_PACKAGE_EXT_DISCORD ) &&
+			!( old_packages & GMCP_PACKAGE_EXT_DISCORD ) ) {
+			gmcp_send_discord_info( d );
+			if ( d->character != NULL )
+				gmcp_send_discord_status( d->character );
+		}
 	}
 	/* Handle Core.Supports.Add - add a package */
 	else if ( !strcmp( package, "Core.Supports.Add" ) ) {
@@ -502,6 +582,14 @@ void gmcp_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int le
 		if ( ( d->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) &&
 			!( old_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ) {
 			mcmp_set_default( d );
+		}
+
+		/* If External.Discord was just enabled, send info and status */
+		if ( ( d->gmcp_packages & GMCP_PACKAGE_EXT_DISCORD ) &&
+			!( old_packages & GMCP_PACKAGE_EXT_DISCORD ) ) {
+			gmcp_send_discord_info( d );
+			if ( d->character != NULL )
+				gmcp_send_discord_status( d->character );
 		}
 	}
 	/* Handle Core.Supports.Remove - remove a package */
@@ -522,6 +610,26 @@ void gmcp_handle_subnegotiation( DESCRIPTOR_DATA *d, unsigned char *data, int le
 				d->client_name[ci] = '\0';
 			}
 		}
+	}
+	/* External.Discord.Hello - client announces Discord identity */
+	else if ( !strcmp( package, "External.Discord.Hello" ) ) {
+		char *ptr = strstr( json_data, "\"user\"" );
+		if ( ptr != NULL ) {
+			ptr += 6;
+			while ( *ptr && *ptr != '"' ) ptr++;
+			if ( *ptr == '"' ) {
+				int ci = 0;
+				ptr++;
+				while ( *ptr && *ptr != '"' && ci < (int) sizeof( d->discord_user ) - 1 )
+					d->discord_user[ci++] = *ptr++;
+				d->discord_user[ci] = '\0';
+			}
+		}
+	}
+	/* External.Discord.Get - client requests current status */
+	else if ( !strcmp( package, "External.Discord.Get" ) ) {
+		if ( d->character != NULL )
+			gmcp_send_discord_status( d->character );
 	}
 }
 
@@ -544,14 +652,15 @@ void do_gmcp( CHAR_DATA *ch, char *argument ) {
 	snprintf( buf, sizeof( buf ),
 		"GMCP Status:\n\r"
 		"  Enabled: Yes\n\r"
-		"  Packages: %s%s%s%s%s%s%s\n\r",
+		"  Packages: %s%s%s%s%s%s%s%s\n\r",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CORE ) ? "Core " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR ) ? "Char " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_VITALS ) ? "Char.Vitals " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_STATUS ) ? "Char.Status " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CHAR_INFO ) ? "Char.Info " : "",
 		( ch->desc->gmcp_packages & GMCP_PACKAGE_CLIENT_MEDIA ) ? "Client.Media " : "",
-		( ch->desc->gmcp_packages & GMCP_PACKAGE_ROOM_INFO ) ? "Room.Info " : "" );
+		( ch->desc->gmcp_packages & GMCP_PACKAGE_ROOM_INFO ) ? "Room.Info " : "",
+		( ch->desc->gmcp_packages & GMCP_PACKAGE_EXT_DISCORD ) ? "External.Discord " : "" );
 
 	send_to_char( buf, ch );
 }

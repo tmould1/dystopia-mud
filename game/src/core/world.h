@@ -72,6 +72,7 @@ typedef struct config_data {
 	char *banner_right; /* Right banner endcap, e.g. "#0<>#n" */
 	char *banner_fill;	/* Banner fill pattern, e.g. "#0==#n" */
 	char *audio_url;	/* Base URL for MCMP audio files */
+	char *discord_url;	/* Discord invite URL for GMCP External.Discord.Info */
 } GAMECONFIG_DATA;
 
 /*

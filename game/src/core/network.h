@@ -87,6 +87,7 @@ struct descriptor_data {
 	/* gmcp: support data */
 	bool gmcp_enabled; /* GMCP negotiation successful */
 	int gmcp_packages; /* Bitmask of supported packages */
+	char discord_user[128]; /* Discord username from External.Discord.Hello */
 	/* mxp: MUD eXtension Protocol support */
 	bool mxp_enabled; /* MXP negotiation successful */
 	/* naws: window size support (RFC 1073) */

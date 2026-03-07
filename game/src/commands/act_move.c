@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../systems/gmcp.h"
 #include "../systems/mcmp.h"
 #include "../systems/quest_new.h"
 #include "../db/db_quest.h"
@@ -464,8 +465,13 @@ void move_char( CHAR_DATA *ch, int door ) {
 	}
 
 	/* Send GMCP Room.Info */
-	if ( !IS_NPC( ch ) && ch->desc != NULL && ch->desc->gmcp_enabled )
+	if ( !IS_NPC( ch ) && ch->desc != NULL && ch->desc->gmcp_enabled ) {
 		gmcp_send_room_info( ch );
+
+		/* Update Discord Rich Presence when area changes */
+		if ( in_room->area != to_room->area )
+			gmcp_send_discord_status( ch );
+	}
 
 	do_look( ch, "auto" );
 

@@ -20,6 +20,7 @@ void load_gameconfig() {
 	game_config.banner_right = str_dup( "#0<>#n" );
 	game_config.banner_fill = str_dup( "#0==#n" );
 	game_config.audio_url = str_dup( MCMP_DEFAULT_URL );
+	game_config.discord_url = str_dup( "" );
 
 	/* Load from game.db (overwrites defaults for any keys present) */
 	db_game_load_gameconfig();
@@ -64,6 +65,8 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "banner_fill", game_config.banner_fill );
 		send_to_char( buf, ch );
 		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "audio_url", game_config.audio_url );
+		send_to_char( buf, ch );
+		snprintf( buf, sizeof( buf ), "  %-16s \"%s\"\n\r", "discord_url", game_config.discord_url );
 		send_to_char( buf, ch );
 		return;
 	}
@@ -195,6 +198,19 @@ void do_gameconfig( CHAR_DATA *ch, char *argument ) {
 		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
 		free(game_config.audio_url);
 		game_config.audio_url = str_dup( new_value );
+	} else if ( !str_cmp( arg, "discord_url" ) ) {
+		if ( arg2[0] == '\0' ) {
+			char buf[MAX_STRING_LENGTH];
+			snprintf( buf, sizeof( buf ), "Discord Invite URL: \"%s\"\n\r", game_config.discord_url );
+			send_to_char( buf, ch );
+			return;
+		}
+
+		snprintf( modified_field, sizeof( modified_field ), "Discord Invite URL" );
+		snprintf( old_value, sizeof( old_value ), "%s", game_config.discord_url );
+		snprintf( new_value, sizeof( new_value ), "%s", arg2 );
+		free(game_config.discord_url);
+		game_config.discord_url = str_dup( new_value );
 	}
 	// arg1 not recognized, show prompt
 	else {

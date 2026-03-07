@@ -21,6 +21,7 @@
 #define GMCP_PACKAGE_CHAR_INFO	   ( 1 << 4 ) /* Char.Info - name/race */
 #define GMCP_PACKAGE_CLIENT_MEDIA  ( 1 << 5 ) /* Client.Media - MCMP sounds */
 #define GMCP_PACKAGE_ROOM_INFO	   ( 1 << 6 ) /* Room.Info - room/exit data */
+#define GMCP_PACKAGE_EXT_DISCORD   ( 1 << 7 ) /* External.Discord - Rich Presence */
 
 /*
  * Telnet negotiation strings (defined in gmcp.c)
@@ -60,5 +61,11 @@ void gmcp_send_gui( DESCRIPTOR_DATA *d );
 
 /* Send Room.Info with current room details and exits */
 void gmcp_send_room_info( CHAR_DATA *ch );
+
+/* Send External.Discord.Info with server invite/application info */
+void gmcp_send_discord_info( DESCRIPTOR_DATA *d );
+
+/* Send External.Discord.Status with current character state */
+void gmcp_send_discord_status( CHAR_DATA *ch );
 
 #endif /* GMCP_H */
