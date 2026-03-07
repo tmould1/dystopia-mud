@@ -79,7 +79,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
     argument = one_argument( argument, arg );
 
     if ( arg[0] == '\0' ) {
-        quest_show_active( ch );
+        quest_show_progress( ch );
         return;
     }
 
@@ -92,7 +92,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
     if ( !str_cmp( arg, "history" ) )  { quest_show_history( ch );           return; }
 
     send_to_char( "\n\r #tFFD700" U_STAR " Quest Commands " U_STAR "#n\n\r\n\r", ch );
-    send_to_char( "  #Cquest#n              Show active quests\n\r", ch );
+    send_to_char( "  #Cquest#n              Show current progress\n\r", ch );
     send_to_char( "  #Cquest list#n [cat]   Show available quests\n\r", ch );
     send_to_char( "  #Cquest accept#n <id>  Accept a quest\n\r", ch );
     send_to_char( "  #Cquest progress#n     Show detailed progress\n\r", ch );
@@ -195,13 +195,12 @@ void quest_init_player( CHAR_DATA *ch ) {
 
     tracker = ch->pcdata->quest_tracker;
 
-    /* Evaluate what's available based on existing progress */
-    quest_evaluate_availability( ch );
-    quest_check_milestones( ch );
-
     /*
      * Auto-grant first quest for brand new players.
-     * If the tracker has no entries beyond LOCKED, this is a fresh character.
+     * Must run BEFORE quest_evaluate_availability() which creates AVAILABLE
+     * entries for prerequisite-free quests — those would cause the
+     * has_progress check below to incorrectly think the player already
+     * has quest activity.
      */
     {
         int i;
@@ -243,6 +242,63 @@ void quest_init_player( CHAR_DATA *ch ) {
             }
         }
     }
+
+    /* Evaluate what's available based on existing progress */
+    quest_evaluate_availability( ch );
+    quest_check_milestones( ch );
+}
+
+/*--------------------------------------------------------------------------
+ * Grant entry quest: backup method for players who missed auto-grant.
+ * Picks T01/T06/M01 based on explevel, activates if LOCKED or AVAILABLE.
+ * Returns TRUE if a quest was granted.
+ *--------------------------------------------------------------------------*/
+
+bool quest_grant_entry( CHAR_DATA *ch ) {
+    QUEST_TRACKER *tracker;
+    const char *entry_id;
+    int qi;
+    QUEST_PROGRESS *p;
+
+    if ( IS_NPC( ch ) || !ch->pcdata || !ch->pcdata->quest_tracker )
+        return FALSE;
+
+    tracker = ch->pcdata->quest_tracker;
+
+    if ( quest_def_count() == 0 )
+        return FALSE;
+
+    switch ( ch->explevel ) {
+        case 0:  entry_id = "T01"; break;
+        case 1:  entry_id = "T06"; break;
+        default: entry_id = "M01"; break;
+    }
+
+    qi = quest_def_index_by_id( entry_id );
+    if ( qi < 0 )
+        return FALSE;
+
+    p = quest_tracker_get( tracker, qi );
+    if ( !p || p->status >= QSTATUS_ACTIVE )
+        return FALSE;  /* already active or beyond */
+
+    p->status     = QSTATUS_ACTIVE;
+    p->started_at = (int) current_time;
+
+    {
+        const QUEST_DEF *q = quest_def_by_index( qi );
+        char buf[MAX_STRING_LENGTH];
+        snprintf( buf, sizeof( buf ),
+            "\n\r  #tFFD700" U_STAR " New Quest: #C%s#n\n\r"
+            "  %s\n\r"
+            "  Type '#tFFD700quest progress#n' to see your objectives.\n\r\n\r",
+            q ? q->name : entry_id,
+            q ? q->description : "" );
+        send_to_char( buf, ch );
+    }
+
+    quest_check_milestones( ch );
+    return TRUE;
 }
 
 /*--------------------------------------------------------------------------
@@ -493,8 +549,9 @@ void quest_check_milestones( CHAR_DATA *ch ) {
                 continue;  /* Not a milestone type */
             }
 
-            if ( cur_val >= obj->threshold )
-                p->obj_progress[j].current = obj->threshold;
+            /* Always store current value so progress is visible */
+            if ( cur_val > p->obj_progress[j].current )
+                p->obj_progress[j].current = cur_val;
         }
 
         /* Check for auto-complete after milestone evaluation */

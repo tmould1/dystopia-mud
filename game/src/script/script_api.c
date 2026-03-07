@@ -14,6 +14,7 @@
 
 #include "merc.h"
 #include "script.h"
+#include "../systems/quest_new.h"
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -407,6 +408,17 @@ static int api_char_set_story_task( lua_State *L ) {
 	return 0;
 }
 
+/* ch:grant_entry_quest() — grant the entry quest if not already active */
+static int api_char_grant_entry_quest( lua_State *L ) {
+	CHAR_DATA *ch = check_char( L, 1 );
+	if ( IS_NPC( ch ) ) {
+		lua_pushboolean( L, 0 );
+		return 1;
+	}
+	lua_pushboolean( L, quest_grant_entry( ch ) );
+	return 1;
+}
+
 /* ch:has_object(vnum) — true if player carries object with this vnum */
 static int api_char_has_object( lua_State *L ) {
 	CHAR_DATA *ch = check_char( L, 1 );
@@ -475,8 +487,9 @@ static const luaL_Reg char_methods[] = {
 	{ "set_story_progress", api_char_set_story_progress },
 	{ "story_has_task",     api_char_story_has_task },
 	{ "set_story_task",     api_char_set_story_task },
-	{ "has_object",         api_char_has_object },
-	{ "take_object",        api_char_take_object },
+	{ "has_object",             api_char_has_object },
+	{ "take_object",            api_char_take_object },
+	{ "grant_entry_quest",      api_char_grant_entry_quest },
 	{ NULL,              NULL }
 };
 

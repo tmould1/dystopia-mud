@@ -37,6 +37,10 @@ void do_quest( CHAR_DATA *ch, char *argument );
 
 void quest_init_player( CHAR_DATA *ch );
 
+/* Grant the entry quest (T01/T06/M01) to a player who missed auto-grant.
+ * Returns TRUE if a quest was activated, FALSE if already active/completed. */
+bool quest_grant_entry( CHAR_DATA *ch );
+
 /*--------------------------------------------------------------------------
  * Event Hook: quest_check_progress
  *
