@@ -115,12 +115,14 @@ void violence_update( void ) {
 						set_fighting( ch, victim );
 						do_say( ch, "Muhahahahahaha" );
 						multi_hit( ch, victim, gsn_blinky );
-						multi_hit( ch, victim, gsn_blinky );
-						if ( IS_SET( ch->newbits, THIRD_HAND ) && get_eq_char( ch, WEAR_THIRD ) != NULL )
+						if ( ch->fighting != NULL )
 							multi_hit( ch, victim, gsn_blinky );
-						if ( IS_SET( ch->newbits, FOURTH_HAND ) && get_eq_char( ch, WEAR_FOURTH ) != NULL )
+						if ( ch->fighting != NULL && IS_SET( ch->newbits, THIRD_HAND ) && get_eq_char( ch, WEAR_THIRD ) != NULL )
 							multi_hit( ch, victim, gsn_blinky );
-						update_pos( victim );
+						if ( ch->fighting != NULL && IS_SET( ch->newbits, FOURTH_HAND ) && get_eq_char( ch, WEAR_FOURTH ) != NULL )
+							multi_hit( ch, victim, gsn_blinky );
+						if ( ch->fighting != NULL )
+							update_pos( victim );
 					}
 				}
 			}
@@ -198,7 +200,7 @@ void violence_update( void ) {
 			int pre_hp = victim->hit;
 			multi_hit( ch, victim, TYPE_UNDEFINED );
 			/* Per-round combat sound: estimate damage from HP delta */
-			if ( !IS_NPC( ch ) && ch->desc != NULL ) {
+			if ( !IS_NPC( ch ) && ch->desc != NULL && ch->fighting != NULL ) {
 				int round_dam = pre_hp - victim->hit;
 				if ( round_dam < 0 ) round_dam = 0;
 				mcmp_combat_round( ch, victim, ( round_dam > 0 ? 1 : 0 ),
@@ -212,6 +214,7 @@ void violence_update( void ) {
 		 */
 		PROFILE_START( "group_assist" );
 		LIST_FOR_EACH_SAFE(rch, rch_next, &ch->in_room->characters, CHAR_DATA, room_node) {
+			if ( ch->fighting == NULL ) break; /* victim died during assist */
 			if ( IS_AWAKE( rch ) && rch->fighting == NULL ) {
 				/*
 				 * Mount's auto-assist their riders and vice versa.
@@ -305,32 +308,40 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	}
 	if ( dt == gsn_hooves ) {
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
 		if ( number_range( 1, 3 ) != 2 ) {
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, dt, 1 );
 		}
 		return;
 	}
 	if ( dt == gsn_shiroken ) {
-		for ( i = number_range( 3, 5 ); i > 0; i-- )
+		for ( i = number_range( 3, 5 ); i > 0; i-- ) {
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
+		}
 		if ( !IS_NPC( ch ) && ch->pcdata->powers[NPOWER_NINGENNO] >= 5 )
 			spell_poison( gsn_poison, ( ch->level * number_range( 50, 60 ) ), ch, victim );
 		return;
 	}
 	if ( dt == gsn_laser ) {
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
 		return;
 	}
 	if ( dt == gsn_stinger ) {
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
 		return;
 	}
 	if ( dt == gsn_claws ) {
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
 		return;
 	}
@@ -342,7 +353,10 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		act( "$n shoots forth a shower of tentacles striking $N.", ch, NULL, victim, TO_NOTVICT );
 
 		x = number_range( 2, 5 );
-		while ( --x >= 0 ) one_hit( ch, victim, dt, 1 );
+		while ( --x >= 0 ) {
+			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
+		}
 		return;
 	}
 	if ( dt == gsn_fangs ) {
@@ -352,16 +366,22 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	if ( dt == gsn_quills ) {
 		if ( ( IS_CLASS( ch, CLASS_WEREWOLF ) ) && ( ch_power(ch)[DISC_WERE_PAIN] > 9 ) ) {
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
 		}
 		one_hit( ch, victim, dt, 1 );
 		return;
 	}
 	if ( dt == gsn_darktendrils && IS_CLASS( ch, CLASS_DROW ) ) {
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
 		return;
 	}
@@ -389,7 +409,9 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 		send_to_char( "You stun them with a shoulder charge!\n\r", ch );
 		send_to_char( "You are stunned by a shoulder charge!\n\r", victim );
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, dt, 1 );
 		return;
 	}
@@ -414,29 +436,35 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 			else
 				x = number_range( 2, 5 );
 		}
-		for ( i = 0; i < x; i++ )
+		for ( i = 0; i < x; i++ ) {
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
+		}
 		return;
 	}
 	if ( dt == gsn_mageshield ) {
 		if ( IS_ITEMAFF( ch, ITEMA_MAGESHIELD ) ) {
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, dt, 1 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, dt, 1 );
 		}
 		return;
 	}
 	if ( dt == gsn_bladespin ) {
-		if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, dt, 1 );
-		if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_lightningkick, 1 );
-		if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_knee, 1 );
-		if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_lightningslash, 1 );
+		if ( number_range( 1, 2 ) == 1 ) { one_hit( ch, victim, dt, 1 ); if ( ch->fighting == NULL ) return; }
+		if ( number_range( 1, 2 ) == 1 ) { one_hit( ch, victim, gsn_lightningkick, 1 ); if ( ch->fighting == NULL ) return; }
+		if ( number_range( 1, 2 ) == 1 ) { one_hit( ch, victim, gsn_knee, 1 ); if ( ch->fighting == NULL ) return; }
+		if ( number_range( 1, 2 ) == 1 ) { one_hit( ch, victim, gsn_lightningslash, 1 ); if ( ch->fighting == NULL ) return; }
 		if ( ( ch_wpn(ch)[0] >= 1000 ) && ( ch_wpn(ch)[3] >= 1000 ) && ( ch_wpn(ch)[6] >= 1000 ) && ( ch_wpn(ch)[9] >= 1000 ) && ( ch_wpn(ch)[1] >= 1000 ) && ( ch_wpn(ch)[4] >= 1000 ) && ( ch_wpn(ch)[7] >= 1000 ) && ( ch_wpn(ch)[10] >= 1000 ) && ( ch_wpn(ch)[2] >= 1000 ) && ( ch_wpn(ch)[5] >= 1000 ) && ( ch_wpn(ch)[8] >= 1000 ) && ( ch_wpn(ch)[11] >= 1000 ) && ( ch_wpn(ch)[12] >= 1000 ) ) {
-			if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, dt, 1 );
-			if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_lightningkick, 1 );
-			if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_knee, 1 );
+			if ( number_range( 1, 2 ) == 1 ) { one_hit( ch, victim, dt, 1 ); if ( ch->fighting == NULL ) return; }
+			if ( number_range( 1, 2 ) == 1 ) { one_hit( ch, victim, gsn_lightningkick, 1 ); if ( ch->fighting == NULL ) return; }
+			if ( number_range( 1, 2 ) == 1 ) { one_hit( ch, victim, gsn_knee, 1 ); if ( ch->fighting == NULL ) return; }
 			if ( number_range( 1, 2 ) == 1 ) one_hit( ch, victim, gsn_lightningslash, 1 );
 		}
 		return;
@@ -684,15 +712,19 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	if ( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_FANGS ) ) {
 		if ( !IS_NPC( victim ) ) {
 			one_hit( ch, victim, ( TYPE_HIT + 10 ), 0 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, ( TYPE_HIT + 10 ), 0 );
 		} else {
 			one_hit( ch, victim, ( TYPE_HIT + 10 ), 1 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, ( TYPE_HIT + 10 ), 1 );
 		}
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_SPIKETAIL ) && number_range( 1, 3 ) == 1 ) {
 		if ( IS_NPC( victim ) ) {
 			one_hit( ch, victim, gsn_spiket, 0 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, gsn_spiket, 1 );
 		} else
 			one_hit( ch, victim, gsn_spiket, 0 );
@@ -730,18 +762,20 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 				( *skill_table[sn].spell_fun )( sn, 50, ch, victim );
 		}
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_SHARDS ) && number_range( 1, 3 ) == 1 )
 		one_hit( ch, victim, gsn_shards, 0 );
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_MAGMA ) && number_range( 1, 3 ) == 1 ) {
 		if ( IS_NPC( victim ) ) {
 			one_hit( ch, victim, gsn_magma, 0 );
+			if ( ch->fighting == NULL ) return;
 			one_hit( ch, victim, gsn_magma, 1 );
 		} else
 			one_hit( ch, victim, gsn_magma, 0 );
 	}
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_VENOMTONG ) && number_range( 1, 3 ) == 1 )
 		one_hit( ch, victim, gsn_venomt, 0 );
-	if ( victim == NULL || victim->position != POS_FIGHTING ) return;
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && !IS_NPC( victim ) ) // pkpower
 	{
 		if ( get_ratio( ch ) > 2499 ) {
@@ -757,30 +791,43 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_SHAPESHIFTER ) ) {
 		if ( ch->pcdata->powers[SHAPE_FORM] == HYDRA_FORM ) {
 			one_hit( ch, victim, gsn_fangs, 1 );
+			if ( ch->fighting == NULL ) return;
 			if ( ch->pcdata->powers[HYDRA_LEVEL] > 0 ) one_hit( ch, victim, gsn_fangs, 1 );
+			if ( ch->fighting == NULL ) return;
 			if ( ch->pcdata->powers[HYDRA_LEVEL] > 1 ) one_hit( ch, victim, gsn_fangs, 1 );
+			if ( ch->fighting == NULL ) return;
 			if ( ch->pcdata->powers[HYDRA_LEVEL] > 3 ) one_hit( ch, victim, gsn_fangs, 1 );
+			if ( ch->fighting == NULL ) return;
 			if ( ch->pcdata->powers[HYDRA_LEVEL] > 4 ) one_hit( ch, victim, gsn_fangs, 1 );
 		}
+		if ( ch->fighting == NULL ) return;
 		if ( ch->pcdata->powers[SHAPE_FORM] == TIGER_FORM ) {
 			if ( ch->pcdata->powers[TIGER_LEVEL] > 0 ) multi_hit( ch, victim, gsn_claws );
+			if ( ch->fighting == NULL ) return;
 			if ( ch->pcdata->powers[TIGER_LEVEL] > 1 ) multi_hit( ch, victim, gsn_fangs );
 		}
+		if ( ch->fighting == NULL ) return;
 		if ( ch->pcdata->powers[SHAPE_FORM] == BULL_FORM ) {
 			if ( ch->pcdata->powers[BULL_LEVEL] > 0 ) multi_hit( ch, victim, gsn_headbutt );
+			if ( ch->fighting == NULL ) return;
 			if ( ch->pcdata->powers[BULL_LEVEL] > 1 ) multi_hit( ch, victim, gsn_hooves );
 		}
+		if ( ch->fighting == NULL ) return;
 		if ( ch->pcdata->powers[SHAPE_FORM] == FAERIE_FORM ) {
 			if ( IS_NPC( victim ) ) {
 				one_hit( ch, victim, gsn_fireball, 1 );
+				if ( ch->fighting == NULL ) return;
 				one_hit( ch, victim, gsn_fireball, 1 );
 			} else {
 				one_hit( ch, victim, gsn_fireball, 0 );
+				if ( ch->fighting == NULL ) return;
 				one_hit( ch, victim, gsn_fireball, 0 );
 			}
+			if ( ch->fighting == NULL ) return;
 			if ( ch->pcdata->powers[FAERIE_LEVEL] > 1 ) one_hit( ch, victim, gsn_buffet, 1 );
 		}
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && ch->level > 2 ) {
 		if ( IS_VAMPAFF( ch, VAM_HORNS ) && number_range( 1, 3 ) == 1 )
 			multi_hit( ch, victim, gsn_headbutt );
@@ -788,52 +835,74 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 	if ( IS_CLASS( ch, CLASS_TANARRI ) && !IS_NPC( ch ) ) {
 		if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_FANGS ) ) {
 			one_hit( ch, victim, gsn_fangs, 1 );
+			if ( ch->fighting == NULL ) return;
 			if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_HEAD ) ) one_hit( ch, victim, gsn_fangs, 1 );
 		}
+		if ( ch->fighting == NULL ) return;
 		if ( IS_SET( ch->pcdata->powers[TANARRI_POWER], TANARRI_FIERY ) ) {
 			one_hit( ch, victim, gsn_fiery, 1 );
+			if ( ch->fighting == NULL ) return;
 			if ( IS_CLASS( victim, CLASS_ANGEL ) ) one_hit( ch, victim, gsn_fiery, 1 );
 		}
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( IS_CLASS( ch, CLASS_UNDEAD_KNIGHT ) && ch->pcdata->powers[WEAPONSKILL] > 9 ) {
 		one_hit( ch, victim, gsn_lightningslash, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, gsn_lightningslash, 1 );
+		if ( ch->fighting == NULL ) return;
 		one_hit( ch, victim, gsn_lightningslash, 1 );
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( IS_CLASS( ch, CLASS_LICH ) ) {
 		if ( ch->pcdata->powers[CON_LORE] > 4 ) one_hit( ch, victim, gsn_fireball, 1 );
+		if ( ch->fighting == NULL ) return;
 		if ( ch->pcdata->powers[NECROMANTIC] > 4 ) one_hit( ch, victim, gsn_chillhand, 1 );
+		if ( ch->fighting == NULL ) return;
 		if ( ch->pcdata->powers[DEATH_LORE] > 4 ) one_hit( ch, victim, gsn_deathaura, 1 );
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_DEMAFF( ch, DEM_HORNS ) && number_range( 1, 3 ) == 1 )
 		one_hit( ch, victim, gsn_headbutt, 0 );
+	if ( ch->fighting == NULL ) return;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && number_range( 1, 3 ) == 1 && ch_power(ch)[DISC_DAEM_HELL] > 3 )
 		one_hit( ch, victim, gsn_hellfire, 0 );
+	if ( ch->fighting == NULL ) return;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_DEMAFF( ch, DEM_TAIL ) && number_range( 1, 2 ) == 2 )
 		one_hit( ch, victim, gsn_sweep, 0 );
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_NINJA ) && ch->pcdata->powers[NPOWER_NINGENNO] >= 4 && number_range( 1, 2 ) != 1 )
 		multi_hit( ch, victim, gsn_shiroken );
+	if ( ch->fighting == NULL ) return;
 
 	if ( !IS_NPC( ch ) ) {
 		if ( IS_VAMPAFF( ch, VAM_TAIL ) && number_range( 1, 2 ) == 1 )
 			multi_hit( ch, victim, gsn_sweep );
 	}
+	if ( ch->fighting == NULL ) return;
 
 	if ( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_HEAD ) && number_range( 1, 2 ) == 1 ) {
 		multi_hit( ch, victim, gsn_fangs );
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_QUILLS ) && IS_CLASS( ch, CLASS_WEREWOLF ) )
 		multi_hit( ch, victim, gsn_quills );
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_BLADESPIN ) && IS_CLASS( ch, CLASS_SAMURAI ) )
 		multi_hit( ch, victim, gsn_bladespin );
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_DARKTENDRILS ) && IS_CLASS( ch, CLASS_DROW ) )
 		multi_hit( ch, victim, gsn_darktendrils );
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_MULTIARMS ) && IS_CLASS( ch, CLASS_MAGE ) )
 		multi_hit( ch, victim, gsn_mageshield );
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && ch_monkab(ch)[BODY] > 3 && IS_CLASS( ch, CLASS_MONK ) )
 		multi_hit( ch, victim, gsn_heavenlyaura );
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_ANGEL ) ) {
 		if ( IS_SET( ch->pcdata->powers[ANGEL_POWERS], ANGEL_AURA ) ) multi_hit( ch, victim, gsn_heavenlyaura );
+		if ( ch->fighting == NULL ) return;
 		if ( IS_SET( ch->pcdata->powers[ANGEL_POWERS], ANGEL_HALO ) ) {
 			switch ( number_range( 1, 5 ) ) {
 			default:
@@ -861,23 +930,30 @@ void multi_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt ) {
 			}
 		}
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_SET( ch->newbits, NEW_CUBEFORM ) && IS_CLASS( ch, CLASS_DROID ) ) {
 		one_hit( ch, victim, gsn_stuntubes, 1 );
+		if ( ch->fighting == NULL ) return;
 		multi_hit( ch, victim, gsn_stinger );
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) ) {
 		if ( IS_SET( ch->newbits, NEW_SLAM ) && number_range( 1, 5 - ch_power(ch)[DISC_WERE_BEAR] / 3 ) == 1 )
 			multi_hit( ch, victim, gsn_cheapshot );
 	}
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_WINGS ) && number_range( 1, 2 ) == 1 && ch->level > 2 )
 		multi_hit( ch, victim, gsn_buffet );
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_VAMPAFF( ch, VAM_WINGS ) && number_range( 1, 2 ) == 1 && ch->level > 2 )
 		multi_hit( ch, victim, gsn_buffet );
+	if ( ch->fighting == NULL ) return;
 	if ( IS_CLASS( ch, CLASS_DEMON ) && IS_SET( ch->warp, WARP_WINGS ) && number_range( 1, 3 ) == 1 )
 		one_hit( ch, victim, gsn_buffet, 0 );
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_RAPT] > 0 )
 		multi_hit( ch, victim, gsn_rfangs );
-	if ( victim == NULL || victim->position != POS_FIGHTING ) return;
+	if ( ch->fighting == NULL ) return;
 	if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_VAMPIRE ) && IS_VAMPAFF( ch, VAM_SERPENTIS ) )
 		spell_poison( gsn_poison, ( ch->level * number_range( 5, 10 ) ), ch, victim );
 	else if ( !IS_NPC( ch ) && IS_CLASS( ch, CLASS_WEREWOLF ) && ch_power(ch)[DISC_WERE_SPID] > 0 )
@@ -1287,7 +1363,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	if ( diceroll == 0 || ( diceroll != 19 && diceroll < thac0 - victim_ac ) ) { /* Miss. */
 		damage( ch, victim, 0, dt );
 		tail_chain();
-		if ( !is_safe( ch, victim ) ) {
+		if ( ch->fighting != NULL && !is_safe( ch, victim ) ) {
 			improve_wpn( ch, dt, right_hand );
 			improve_stance( ch );
 		}
@@ -1570,7 +1646,7 @@ void one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	damage( ch, victim, dam, dt );
 
 	tail_chain();
-	if ( !is_safe( ch, victim ) ) {
+	if ( ch->fighting != NULL && !is_safe( ch, victim ) ) {
 		improve_wpn( ch, dt, right_hand );
 		improve_stance( ch );
 	}
@@ -2348,7 +2424,8 @@ void damage( CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt ) {
 	}
 	hurt_person( ch, victim, dam );
 	dropinvis( ch );
-	dropinvis( victim );
+	if ( ch->fighting != NULL )
+		dropinvis( victim );
 	return;
 }
 
@@ -4329,6 +4406,7 @@ void do_kill( CHAR_DATA *ch, char *argument ) {
 		act( "$n charge into you, knocking you from your feet.", ch, NULL, victim, TO_VICT );
 		victim->position = POS_STUNNED;
 		multi_hit( ch, victim, TYPE_UNDEFINED );
+		if ( ch->fighting == NULL ) return;
 		multi_hit( ch, victim, TYPE_UNDEFINED );
 		return;
 	}
@@ -4341,6 +4419,7 @@ void do_kill( CHAR_DATA *ch, char *argument ) {
 		else if ( number_range( 1, 3 ) == 1 )
 			multi_hit( ch, victim, TYPE_UNDEFINED );
 	}
+	if ( ch->fighting == NULL ) return;
 	multi_hit( ch, victim, TYPE_UNDEFINED );
 	return;
 }

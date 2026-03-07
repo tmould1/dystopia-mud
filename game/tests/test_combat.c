@@ -11,6 +11,7 @@
 #include "merc.h"
 
 extern list_head_t g_characters;
+extern list_head_t g_npcs;
 
 /* --- set_fighting tests --- */
 
@@ -246,6 +247,124 @@ void test_update_pos_zero_hp( void ) {
 	free_char( ch );
 }
 
+/* --- multi_hit kill tests --- */
+
+/*
+ * Helper: find any loaded mob index from the NPC list.
+ * Returns NULL if no NPCs have been loaded (boot not called).
+ */
+static MOB_INDEX_DATA *find_any_mob_index( void ) {
+	CHAR_DATA *npc;
+	LIST_FOR_EACH( npc, &g_npcs, CHAR_DATA, npc_node ) {
+		if ( npc->pIndexData != NULL )
+			return npc->pIndexData;
+	}
+	return NULL;
+}
+
+void test_kill_clears_fighting( void ) {
+	ensure_booted();
+
+	MOB_INDEX_DATA *pIdx = find_any_mob_index();
+	TEST_ASSERT_TRUE( pIdx != NULL );
+
+	/* Create attacker and victim as proper NPCs with valid pIndexData */
+	CHAR_DATA *ch = create_mobile( pIdx );
+	CHAR_DATA *victim = create_mobile( pIdx );
+	ROOM_INDEX_DATA *room = get_room_index( ROOM_VNUM_LIMBO );
+
+	char_to_room( ch, room );
+	char_to_room( victim, room );
+
+	/* Ensure room allows combat (LIMBO may be ROOM_SAFE) */
+	int saved_flags = room->room_flags;
+	REMOVE_BIT( room->room_flags, ROOM_SAFE );
+
+	victim->hit = 1;
+	victim->max_hit = 1;
+	victim->level = 1;
+
+	set_fighting( ch, victim );
+	set_fighting( victim, ch );
+
+	ch->damcap[0] = 10000;
+	ch->damcap[DAM_CHANGE] = 0;
+
+	/* Use damage() directly — deterministic kill, no diceroll RNG. */
+	damage( ch, victim, 9999, TYPE_HIT );
+
+	/* After the kill, attacker must no longer be fighting */
+	TEST_ASSERT_TRUE( ch->fighting == NULL );
+	TEST_ASSERT_EQ( ch->position, POS_STANDING );
+
+	/* Cleanup: victim was freed by raw_kill -> extract_char.
+	 * Only the attacker remains. */
+	room->room_flags = saved_flags;
+	ch->fighting = NULL;
+	ch->position = POS_STANDING;
+	list_remove( &g_characters, &ch->char_node );
+	if ( list_node_is_linked( &ch->npc_node ) )
+		list_remove( &g_npcs, &ch->npc_node );
+	char_from_room( ch );
+	free_char( ch );
+}
+
+void test_multi_hit_kill_no_stale_attack_message( void ) {
+	ensure_booted();
+
+	MOB_INDEX_DATA *pIdx = find_any_mob_index();
+	TEST_ASSERT_TRUE( pIdx != NULL );
+
+	CHAR_DATA *ch = create_mobile( pIdx );
+	CHAR_DATA *victim = create_mobile( pIdx );
+	ROOM_INDEX_DATA *room = get_room_index( ROOM_VNUM_LIMBO );
+
+	char_to_room( ch, room );
+	char_to_room( victim, room );
+
+	victim->hit = 1;
+	victim->max_hit = 1;
+	victim->level = 1;
+
+	ch->level = 100;
+	ch->hitroll = 200;
+	ch->damroll = 200;
+
+	/* Ensure room allows combat (LIMBO may be ROOM_SAFE) */
+	int saved_flags = room->room_flags;
+	REMOVE_BIT( room->room_flags, ROOM_SAFE );
+
+	set_fighting( ch, victim );
+	set_fighting( victim, ch );
+
+	/* Set damcap AFTER set_fighting (which resets DAM_CHANGE to 1) */
+	ch->damcap[0] = 10000;
+	ch->damcap[DAM_CHANGE] = 0;
+
+	/* Capture output to check for stale attack messages */
+	test_output_start( ch );
+	multi_hit( ch, victim, TYPE_UNDEFINED );
+	const char *output = test_output_get();
+
+	/* Must NOT contain the stale-target error message */
+	TEST_ASSERT_TRUE( strstr( output, "cannot attack an object" ) == NULL );
+
+	/* Confirm the kill happened (fighting state cleared) */
+	TEST_ASSERT_TRUE( ch->fighting == NULL );
+
+	test_output_stop();
+
+	/* Cleanup */
+	room->room_flags = saved_flags;
+	ch->fighting = NULL;
+	ch->position = POS_STANDING;
+	list_remove( &g_characters, &ch->char_node );
+	if ( list_node_is_linked( &ch->npc_node ) )
+		list_remove( &g_npcs, &ch->npc_node );
+	char_from_room( ch );
+	free_char( ch );
+}
+
 /* --- Suite registration --- */
 
 void suite_combat( void ) {
@@ -262,4 +381,6 @@ void suite_combat( void ) {
 	RUN_TEST( test_update_pos_npc_dead );
 	RUN_TEST( test_update_pos_alive_no_change );
 	RUN_TEST( test_update_pos_zero_hp );
+	RUN_TEST( test_kill_clears_fighting );
+	RUN_TEST( test_multi_hit_kill_no_stale_attack_message );
 }
