@@ -33,18 +33,22 @@ fi
 ulimit -c unlimited 2>/dev/null  # Allow core dumps for debugging
 ulimit -f unlimited 2>/dev/null  # No file size cap
 
-if [ -e "$GAMEDATA_DIR/txt/shutdown.txt" ]; then
-  rm -f "$GAMEDATA_DIR/txt/shutdown.txt"
+if [ -e "$GAMEDATA_DIR/run/shutdown.txt" ]; then
+  rm -f "$GAMEDATA_DIR/run/shutdown.txt"
 fi
+
+# Change to gamedata directory so CWD-relative files (core dumps, etc.)
+# land in the right place after a crash restart.
+cd "$GAMEDATA_DIR"
 
 while true; do
   # Run the MUD (executable is in gamedata/)
   # Logs are written internally to gamedata/log/ with timestamped filenames
-  "$GAMEDATA_DIR/dystopia" "$port"
+  ./dystopia "$port"
 
   # Restart, giving old connections a chance to die.
-  if [ -e "$GAMEDATA_DIR/txt/shutdown.txt" ]; then
-    rm -f "$GAMEDATA_DIR/txt/shutdown.txt"
+  if [ -e "run/shutdown.txt" ]; then
+    rm -f "run/shutdown.txt"
     exit 0
   fi
 

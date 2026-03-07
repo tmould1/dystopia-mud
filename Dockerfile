@@ -42,4 +42,4 @@ VOLUME [    "/dystopia-mud/gamedata/db/players", \
             "/dystopia-mud/game/src" \
         ]
 
-ENTRYPOINT ["/bin/bash", "-c", "cd game/build && make -f Makefile && cd ../.. && ./startup.sh && tail -f /dev/null"]
+ENTRYPOINT ["/bin/bash", "-c", "cd game/build && make -f Makefile && cd ../.. && exec ./startup.sh"]

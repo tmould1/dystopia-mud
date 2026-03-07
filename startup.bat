@@ -27,15 +27,18 @@ if exist "%SCRIPT_DIR%\gamedata" (
 )
 
 REM Remove shutdown file if it exists
-if exist "%GAMEDATA_DIR%\area\shutdown.txt" (
-    del /q "%GAMEDATA_DIR%\area\shutdown.txt"
+if exist "%GAMEDATA_DIR%\run\shutdown.txt" (
+    del /q "%GAMEDATA_DIR%\run\shutdown.txt"
 )
+
+REM Change to gamedata directory so CWD-relative files land in the right place
+cd /d "%GAMEDATA_DIR%"
 
 :loop
     REM Run the MUD (executable is in gamedata/)
     REM Logs are written internally to gamedata/log/ with timestamped filenames
     echo Starting Dystopia MUD on port %port%...
-    "%GAMEDATA_DIR%\dystopia.exe" %port%
+    dystopia.exe %port%
 
     REM Exit code 99 = copyover (parent exits after spawning child process)
     if %ERRORLEVEL% == 99 (
@@ -44,8 +47,8 @@ if exist "%GAMEDATA_DIR%\area\shutdown.txt" (
     )
 
     REM Check for shutdown file
-    if exist "%GAMEDATA_DIR%\area\shutdown.txt" (
-        del /q "%GAMEDATA_DIR%\area\shutdown.txt"
+    if exist "run\shutdown.txt" (
+        del /q "run\shutdown.txt"
         echo MUD shutdown complete.
         goto :end
     )
