@@ -1,0 +1,385 @@
+/* ============================================================
+   Dystopia MUD — Website Themes
+   8 selectable themes via CSS custom properties
+   ============================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* --- Theme: Cyberpunk (default) --- */
+.cyberpunk {
+    --bg: #0a0a0a;
+    --bg-panel: #111118;
+    --bg-input: #0d0d14;
+    --text: #c8c8d0;
+    --text-muted: #666680;
+    --heading: #00e5ff;
+    --accent: #ff00aa;
+    --accent2: #00e5ff;
+    --border: #1a1a2e;
+    --link: #00e5ff;
+    --link-hover: #ff00aa;
+    --btn-bg: #00e5ff;
+    --btn-text: #0a0a0a;
+    --btn-hover: #00b8d4;
+    --error: #ff4060;
+    --success: #00e676;
+    --font: 'Courier New', 'Lucida Console', monospace;
+}
+
+/* --- Theme: Medieval --- */
+.medieval {
+    --bg: #1a1510;
+    --bg-panel: #221c14;
+    --bg-input: #1e1812;
+    --text: #d4c8a8;
+    --text-muted: #8a7a5a;
+    --heading: #d4a438;
+    --accent: #c87830;
+    --accent2: #d4a438;
+    --border: #3a2e1e;
+    --link: #d4a438;
+    --link-hover: #e8c060;
+    --btn-bg: #8b6914;
+    --btn-text: #1a1510;
+    --btn-hover: #a07818;
+    --error: #c84040;
+    --success: #5a9a3a;
+    --font: Georgia, 'Times New Roman', serif;
+}
+
+/* --- Theme: Shadow --- */
+.shadow {
+    --bg: #0d0d12;
+    --bg-panel: #14141c;
+    --bg-input: #111118;
+    --text: #b8b8c8;
+    --text-muted: #5a5a70;
+    --heading: #9a6aff;
+    --accent: #c0c0d0;
+    --accent2: #9a6aff;
+    --border: #1e1e2a;
+    --link: #9a6aff;
+    --link-hover: #b88aff;
+    --btn-bg: #7040cc;
+    --btn-text: #e8e8f0;
+    --btn-hover: #8858e0;
+    --error: #e04060;
+    --success: #40b080;
+    --font: 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+/* --- Theme: Nature --- */
+.nature {
+    --bg: #0f1a0f;
+    --bg-panel: #142014;
+    --bg-input: #121c12;
+    --text: #b8ccb0;
+    --text-muted: #5a7a50;
+    --heading: #4aaa3a;
+    --accent: #8a6a30;
+    --accent2: #4aaa3a;
+    --border: #1e301e;
+    --link: #4aaa3a;
+    --link-hover: #60cc50;
+    --btn-bg: #387830;
+    --btn-text: #e0f0d8;
+    --btn-hover: #409038;
+    --error: #cc4a30;
+    --success: #50b840;
+    --font: Georgia, 'Palatino Linotype', serif;
+}
+
+/* --- Theme: Inferno --- */
+.inferno {
+    --bg: #1a0a0a;
+    --bg-panel: #221010;
+    --bg-input: #1e0e0e;
+    --text: #d0b8a8;
+    --text-muted: #8a5a4a;
+    --heading: #ff4a20;
+    --accent: #ff8a20;
+    --accent2: #ff4a20;
+    --border: #3a1a1a;
+    --link: #ff6a30;
+    --link-hover: #ff9a40;
+    --btn-bg: #cc3010;
+    --btn-text: #fff0e0;
+    --btn-hover: #e04018;
+    --error: #ff3030;
+    --success: #c8a030;
+    --font: 'Courier New', 'Lucida Console', monospace;
+}
+
+/* --- Theme: Ocean --- */
+.ocean {
+    --bg: #0a0f1a;
+    --bg-panel: #101822;
+    --bg-input: #0e141e;
+    --text: #b0c8d8;
+    --text-muted: #4a6a80;
+    --heading: #20a0cc;
+    --accent: #40ccaa;
+    --accent2: #20a0cc;
+    --border: #1a2838;
+    --link: #30b0d0;
+    --link-hover: #40ccaa;
+    --btn-bg: #187898;
+    --btn-text: #e0f0ff;
+    --btn-hover: #2090b0;
+    --error: #e04060;
+    --success: #40ccaa;
+    --font: 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+/* --- Theme: Arctic (light theme) --- */
+.arctic {
+    --bg: #e8edf2;
+    --bg-panel: #f0f4f8;
+    --bg-input: #ffffff;
+    --text: #2a3a4a;
+    --text-muted: #6a7a8a;
+    --heading: #1a6a9a;
+    --accent: #5090b8;
+    --accent2: #1a6a9a;
+    --border: #c0ccd8;
+    --link: #1a6a9a;
+    --link-hover: #104a70;
+    --btn-bg: #1a6a9a;
+    --btn-text: #f0f8ff;
+    --btn-hover: #185a84;
+    --error: #c83030;
+    --success: #2a8a4a;
+    --font: 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+/* --- Theme: Wasteland --- */
+.wasteland {
+    --bg: #1a1812;
+    --bg-panel: #22201a;
+    --bg-input: #1e1c16;
+    --text: #c0b898;
+    --text-muted: #7a7260;
+    --heading: #d09830;
+    --accent: #a06030;
+    --accent2: #d09830;
+    --border: #383020;
+    --link: #d09830;
+    --link-hover: #e0b040;
+    --btn-bg: #8a6a18;
+    --btn-text: #1a1812;
+    --btn-hover: #a08020;
+    --error: #c84830;
+    --success: #8a9a40;
+    --font: 'Courier New', 'Lucida Console', monospace;
+}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 640px;
+    padding: 2rem 1.5rem;
+}
+
+h1, h2, h3 {
+    color: var(--heading);
+    font-weight: normal;
+    margin-bottom: 0.5rem;
+}
+
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.3rem; margin-top: 1.5rem; }
+h3 { font-size: 1.1rem; margin-top: 1rem; }
+
+a {
+    color: var(--link);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+.muted {
+    color: var(--text-muted);
+}
+
+/* ============================================================
+   Panels
+   ============================================================ */
+
+.panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.connect-box {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.connect-box .host {
+    font-size: 1.4rem;
+    color: var(--accent2);
+    font-weight: bold;
+    letter-spacing: 0.05em;
+}
+
+.connect-box .port-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* ============================================================
+   Forms
+   ============================================================ */
+
+label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    margin-top: 0.75rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    background: var(--bg-input);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: var(--font);
+    font-size: 0.95rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent2);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 3rem;
+}
+
+select {
+    cursor: pointer;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    margin-top: 1rem;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border: none;
+    border-radius: 3px;
+    font-family: var(--font);
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+.btn:hover {
+    background: var(--btn-hover);
+    text-decoration: none;
+    color: var(--btn-text);
+}
+
+.btn-small {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.85rem;
+    margin-top: 0;
+}
+
+.btn-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+/* ============================================================
+   Messages
+   ============================================================ */
+
+.msg {
+    padding: 0.6rem 1rem;
+    border-radius: 3px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.msg-error {
+    background: rgba(255, 60, 60, 0.1);
+    border: 1px solid var(--error);
+    color: var(--error);
+}
+
+.msg-success {
+    background: rgba(60, 200, 60, 0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+.footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.footer a {
+    color: var(--text-muted);
+}
+.footer a:hover {
+    color: var(--link);
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1rem;
+    }
+    h1 {
+        font-size: 1.4rem;
+    }
+    .connect-box .host {
+        font-size: 1.1rem;
+    }
+}

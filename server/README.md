@@ -129,3 +129,72 @@ PORT=8000
 ```
 
 The startup script (`startup.sh` / `startup.bat`) reads this value automatically.
+
+## Website (Status Page + Admin Panel)
+
+The `www/` directory contains a simple PHP website with a public status page and an admin panel for managing site settings.
+
+### Files
+
+```
+server/www/
+├── index.php       # Public status page (MUD name, connection info)
+├── admin.php       # Admin login + settings editor
+├── config.json     # Site configuration (editable via admin panel)
+├── style.css       # 8 selectable themes
+└── .htaccess       # HTTPS enforcement + config.json protection
+```
+
+### Setup
+
+1. Copy the contents of `server/www/` to your server's `~/public_html/` directory:
+   ```bash
+   cp -r server/www/* ~/public_html/
+   cp server/www/.htaccess ~/public_html/
+   ```
+
+2. Edit `config.json` and set `player_db_path` to the absolute path of your player database directory:
+   ```bash
+   # Example: if your game runs from /home/mud/server/live/
+   # then player DBs are at /home/mud/server/live/gamedata/db/players
+   vi ~/public_html/config.json
+   ```
+
+3. Ensure PHP can read the player database files (same user or appropriate group permissions).
+
+4. Visit `http://yourserver/~yourusername/` to see the public status page.
+
+5. Visit `http://yourserver/~yourusername/admin.php` to log in with an immortal character (level 7+).
+
+### Admin Authentication
+
+The admin panel authenticates against the MUD's player SQLite databases. It:
+
+- Opens `{player_db_path}/{Name}.db` and reads the `player` table
+- Verifies the password using `crypt()` (same algorithm as the MUD)
+- Requires level 7 (Immortal) or higher
+- Sessions expire after 30 minutes of inactivity
+- Failed login attempts are rate-limited with increasing delays
+
+### Themes
+
+Eight themes are available, selectable from the admin panel:
+
+| Theme | Style |
+|-------|-------|
+| Cyberpunk | Neon terminal (cyan/magenta, monospace) |
+| Medieval | Parchment & torchlight (gold/brown, serif) |
+| Shadow | Dark & mysterious (purple/silver, sans-serif) |
+| Nature | Deep forest (green/earth, serif) |
+| Inferno | Fire & brimstone (red/orange, monospace) |
+| Ocean | Deep sea (blue/teal, sans-serif) |
+| Arctic | Light & cold (ice-blue/slate, sans-serif) |
+| Wasteland | Post-apocalyptic (amber/rust, monospace) |
+
+### Security
+
+- HTTPS enforced via `.htaccess` (login credentials never sent over plain HTTP)
+- `config.json` blocked from direct web access
+- CSRF tokens on all admin forms
+- Secure, HTTP-only session cookies
+- `player_db_path` is not editable from the web UI (must be set manually)

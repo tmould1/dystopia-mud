@@ -1,0 +1,8 @@
+{
+    "mud_name": "Dystopia MUD",
+    "hostname": "coming.soon",
+    "port": 8000,
+    "description": "A dark cyberpunk text-based multiplayer game.",
+    "theme": "cyberpunk",
+    "player_db_path": "/home/mud/fatu/edition/gamedata/db/players"
+}

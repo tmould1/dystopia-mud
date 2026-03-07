@@ -1,0 +1,10 @@
+# Force HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Protect config.json from direct web access
+<Files "config.json">
+    Order deny,allow
+    Deny from all
+</Files>
