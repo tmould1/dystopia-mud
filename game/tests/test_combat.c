@@ -325,6 +325,7 @@ void test_multi_hit_kill_no_stale_attack_message( void ) {
 	victim->hit = 1;
 	victim->max_hit = 1;
 	victim->level = 1;
+	SET_BIT( victim->affected_by, AFF_FLYING ); /* prevent trip changing position */
 
 	ch->level = 100;
 	ch->hitroll = 200;
