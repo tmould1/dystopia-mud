@@ -262,11 +262,10 @@ void do_cfg( CHAR_DATA *ch, char *argument ) {
 
 	/* No args: show summary by category */
 	if ( arg[0] == '\0' ) {
-		char last_cat[64];
-		int cat_count = 0;
-		int total_cats = 0;
+		struct { char name[64]; int count; } cats[32];
+		int ncats = 0;
+		int j;
 
-		last_cat[0] = '\0';
 		output[0] = '\0';
 		snprintf( buf, sizeof( buf ),
 			"#yGame Configuration#n  (%d total entries)\r\n"
@@ -276,26 +275,24 @@ void do_cfg( CHAR_DATA *ch, char *argument ) {
 
 		for ( i = 0; i < CFG_COUNT; i++ ) {
 			const char *cat = cfg_category_prefix( cfg_table[i].key );
-			if ( str_cmp( cat, last_cat ) ) {
-				if ( last_cat[0] != '\0' ) {
-					snprintf( buf, sizeof( buf ),
-						"  #g%-20s#n  %d entries\r\n",
-						last_cat, cat_count );
-					strncat( output, buf, sizeof( output ) - strlen( output ) - 1 );
-					total_cats++;
+			for ( j = 0; j < ncats; j++ ) {
+				if ( !str_cmp( cats[j].name, cat ) ) {
+					cats[j].count++;
+					break;
 				}
-				snprintf( last_cat, sizeof( last_cat ), "%s", cat );
-				cat_count = 1;
-			} else {
-				cat_count++;
+			}
+			if ( j == ncats && ncats < 32 ) {
+				snprintf( cats[ncats].name, sizeof( cats[ncats].name ), "%s", cat );
+				cats[ncats].count = 1;
+				ncats++;
 			}
 		}
-		if ( last_cat[0] != '\0' ) {
+
+		for ( i = 0; i < ncats; i++ ) {
 			snprintf( buf, sizeof( buf ),
 				"  #g%-20s#n  %d entries\r\n",
-				last_cat, cat_count );
+				cats[i].name, cats[i].count );
 			strncat( output, buf, sizeof( output ) - strlen( output ) - 1 );
-			total_cats++;
 		}
 
 		snprintf( buf, sizeof( buf ),
@@ -303,7 +300,7 @@ void do_cfg( CHAR_DATA *ch, char *argument ) {
 			"%d categories.  Use #ycfg <prefix>#n for details.\r\n"
 			"#ycfg <key> <value>#n to modify.  "
 			"#ycfg reload#n to reload from DB.\r\n",
-			total_cats );
+			ncats );
 		strncat( output, buf, sizeof( output ) - strlen( output ) - 1 );
 
 		send_to_char( output, ch );
