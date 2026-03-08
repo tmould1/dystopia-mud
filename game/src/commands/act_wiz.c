@@ -4754,7 +4754,11 @@ void do_dwho( CHAR_DATA *ch, char *argument ) {
 				d->client_width, d->client_height );
 			strcat( proto, naws_buf );
 		}
-		if ( d->ttype_enabled ) strcat( proto, "TTYPE " );
+		if ( d->ttype_enabled ) {
+			char ttype_buf[32];
+			snprintf( ttype_buf, sizeof( ttype_buf ), "TTYPE(%d/3) ", d->ttype_round );
+			strcat( proto, ttype_buf );
+		}
 		if ( proto[0] == '\0' ) strcpy( proto, "(none)" );
 
 		/* Determine color mode from character flags */

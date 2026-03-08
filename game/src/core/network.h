@@ -69,6 +69,7 @@ struct descriptor_data {
 	bool fcommand;
 	bool vt102;
 	char inbuf[4 * MAX_INPUT_LENGTH];
+	int  inbuf_len; /* Actual byte count in inbuf (not NUL-terminated for binary telnet data) */
 	char incomm[MAX_INPUT_LENGTH];
 	char inlast[MAX_INPUT_LENGTH];
 	int repeat;

@@ -921,6 +921,7 @@ void init_descriptor( DESCRIPTOR_DATA *dnew, int desc ) {
 	dnew->client_width = NAWS_DEFAULT_WIDTH;
 	dnew->client_height = NAWS_DEFAULT_HEIGHT;
 	/* TTYPE/MTTS defaults */
+	dnew->inbuf_len         = 0;
 	dnew->ttype_enabled     = FALSE;
 	dnew->ttype_round       = 0;
 	dnew->mtts_flags        = 0;
@@ -1203,7 +1204,7 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
 		return TRUE;
 
 	/* Check for overflow. */
-	iStart = (int) strlen( d->inbuf );
+	iStart = d->inbuf_len;
 	if ( iStart >= (int) sizeof( d->inbuf ) - 10 ) {
 		if ( d != NULL && d->character != NULL ) {
 			snprintf( log_buf, MAX_STRING_LENGTH, "%s input overflow!", mask_ip( d->character->pcdata->lasthost ) );
@@ -1256,6 +1257,7 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
 	}
 
 	d->inbuf[iStart] = '\0';
+	d->inbuf_len = iStart;
 	return TRUE;
 }
 
@@ -1263,7 +1265,7 @@ bool read_from_descriptor( DESCRIPTOR_DATA *d ) {
  * Transfer one line from input buffer to input line.
  */
 void read_from_buffer( DESCRIPTOR_DATA *d ) {
-	int i, j, k;
+	int i, k;
 	bool has_newline = FALSE;
 
 	/*
@@ -1274,8 +1276,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 
 	/*
 	 * Look for at least one new line, but still process telnet sequences.
+	 * Use inbuf_len (not NUL) because TTYPE subneg contains embedded NUL bytes.
 	 */
-	for ( i = 0; d->inbuf[i] != '\0'; i++ ) {
+	for ( i = 0; i < d->inbuf_len; i++ ) {
 		if ( d->inbuf[i] == '\n' || d->inbuf[i] == '\r' ) {
 			has_newline = TRUE;
 			break;
@@ -1285,7 +1288,7 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 	/* Process telnet sequences even without newline */
 	if ( !has_newline ) {
 		/* Scan for and handle IAC sequences */
-		for ( i = 0; d->inbuf[i] != '\0'; i++ ) {
+		for ( i = 0; i < d->inbuf_len; i++ ) {
 			if ( d->inbuf[i] == (signed char) IAC ) {
 				/* MCCP v2 (preferred) */
 				if ( !memcmp( &d->inbuf[i], compress2_do, strlen( compress2_do ) ) ) {
@@ -1325,9 +1328,10 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					d->inbuf[i + 2] == (signed char) TELOPT_GMCP ) {
 					int sb_start = i + 3;
 					int sb_len = 0;
-					while ( d->inbuf[sb_start + sb_len] != '\0' ) {
-						if ( d->inbuf[sb_start + sb_len] == (signed char) IAC &&
-							d->inbuf[sb_start + sb_len + 1] == (signed char) SE ) {
+					/* Use bounded scan — NUL bytes may appear in buffer from other subneg data */
+					while ( sb_start + sb_len < d->inbuf_len ) {
+						if ( (unsigned char) d->inbuf[sb_start + sb_len] == IAC &&
+							(unsigned char) d->inbuf[sb_start + sb_len + 1] == SE ) {
 							break;
 						}
 						sb_len++;
@@ -1417,9 +1421,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					d->inbuf[i + 2] == (signed char) TELOPT_CHARSET ) {
 					int sb_start = i + 3;
 					int sb_len = 0;
-					while ( d->inbuf[sb_start + sb_len] != '\0' ) {
-						if ( d->inbuf[sb_start + sb_len] == (signed char) IAC &&
-							d->inbuf[sb_start + sb_len + 1] == (signed char) SE ) {
+					while ( sb_start + sb_len < d->inbuf_len ) {
+						if ( (unsigned char) d->inbuf[sb_start + sb_len] == IAC &&
+							(unsigned char) d->inbuf[sb_start + sb_len + 1] == SE ) {
 							break;
 						}
 						sb_len++;
@@ -1433,18 +1437,19 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 		}
 		/* Clear buffer after processing telnet-only data */
 		d->inbuf[0] = '\0';
+		d->inbuf_len = 0;
 		return;
 	}
 
 	/*
 	 * Canonical input processing.
 	 */
-	for ( i = 0, k = 0; d->inbuf[i] != '\n' && d->inbuf[i] != '\r'; i++ ) {
+	for ( i = 0, k = 0; i < d->inbuf_len && d->inbuf[i] != '\n' && d->inbuf[i] != '\r'; i++ ) {
 		if ( k >= MAX_INPUT_LENGTH - 2 ) {
 			write_to_descriptor( d, "Line too long.\n\r", 0 );
 
 			/* skip the rest of the line */
-			for ( ; d->inbuf[i] != '\0'; i++ ) {
+			for ( ; i < d->inbuf_len; i++ ) {
 				if ( d->inbuf[i] == '\n' || d->inbuf[i] == '\r' )
 					break;
 			}
@@ -1531,10 +1536,10 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 				d->inbuf[i + 2] == (signed char) TELOPT_GMCP ) {
 				int sb_start = i + 3;
 				int sb_len = 0;
-				/* Find IAC SE that ends subnegotiation */
-				while ( d->inbuf[sb_start + sb_len] != '\0' ) {
-					if ( d->inbuf[sb_start + sb_len] == (signed char) IAC &&
-						d->inbuf[sb_start + sb_len + 1] == (signed char) SE ) {
+				/* Use bounded scan — NUL bytes may appear in buffer from other subneg data */
+				while ( sb_start + sb_len < d->inbuf_len ) {
+					if ( (unsigned char) d->inbuf[sb_start + sb_len] == IAC &&
+						(unsigned char) d->inbuf[sb_start + sb_len + 1] == SE ) {
 						break;
 					}
 					sb_len++;
@@ -1616,9 +1621,9 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 				d->inbuf[i + 2] == (signed char) TELOPT_CHARSET ) {
 				int sb_start = i + 3;
 				int sb_len = 0;
-				while ( d->inbuf[sb_start + sb_len] != '\0' ) {
-					if ( d->inbuf[sb_start + sb_len] == (signed char) IAC &&
-						d->inbuf[sb_start + sb_len + 1] == (signed char) SE ) {
+				while ( sb_start + sb_len < d->inbuf_len ) {
+					if ( (unsigned char) d->inbuf[sb_start + sb_len] == IAC &&
+						(unsigned char) d->inbuf[sb_start + sb_len + 1] == SE ) {
 						break;
 					}
 					sb_len++;
@@ -1670,10 +1675,14 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 
 	/*
 	 * Shift the input buffer.
+	 * Use memmove with inbuf_len — NUL-terminated copy would truncate at
+	 * embedded NUL bytes in TTYPE subnegotiation data (TELQUAL_IS = 0x00).
 	 */
-	while ( d->inbuf[i] == '\n' || d->inbuf[i] == '\r' )
+	while ( i < d->inbuf_len && ( d->inbuf[i] == '\n' || d->inbuf[i] == '\r' ) )
 		i++;
-	for ( j = 0; ( d->inbuf[j] = d->inbuf[i + j] ) != '\0'; j++ );
+	d->inbuf_len -= i;
+	memmove( d->inbuf, d->inbuf + i, d->inbuf_len );
+	d->inbuf[d->inbuf_len] = '\0';
 	return;
 }
 
