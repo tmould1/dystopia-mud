@@ -268,7 +268,7 @@ def seed_phase1(conn):
           "M", 1, AC, qp=200,
           prereqs=["M02"],
           objectives=[
-              ("REACH_STAT", "hp", 10000, "Reach 10,000 hit points"),
+              ("REACH_STAT", "hp", 5000, "Reach 5,000 hit points"),
           ])
 
     quest(conn, "M04", "Earning Your Keep",
@@ -817,6 +817,7 @@ def seed_phase4(conn):
     quest(conn, "CL_MASTERY", "Weapons Master",
           "Achieve mastery by raising all weapons, spells, and stances to 200.",
           "CL", 4, AC, qp=3000,
+          prereqs=["M08"],
           objectives=[("MASTERY", "flag", 1, "Achieve mastery (all wpn/spl/stance at 200)")])
 
     # Exploration
