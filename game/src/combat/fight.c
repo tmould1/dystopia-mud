@@ -4356,8 +4356,8 @@ void do_kill( CHAR_DATA *ch, char *argument ) {
 			multi_hit( ch, victim, TYPE_UNDEFINED );
 		else if ( number_range( 1, 3 ) == 1 )
 			multi_hit( ch, victim, TYPE_UNDEFINED );
+		if ( ch->fighting == NULL ) return;
 	}
-	if ( ch->fighting == NULL ) return;
 	multi_hit( ch, victim, TYPE_UNDEFINED );
 	return;
 }
