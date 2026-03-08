@@ -92,6 +92,11 @@ fi
 
 # --- Deploy new release ---
 
+# Move old binary out of the way (avoids "Text file busy" on Linux)
+if [ -f "$TARGET_DIR/gamedata/dystopia" ]; then
+    mv "$TARGET_DIR/gamedata/dystopia" "$TARGET_DIR/gamedata/dystopia.bak"
+fi
+
 # Copy new binary
 cp "$STAGING/gamedata/dystopia" "$TARGET_DIR/gamedata/dystopia"
 chmod +x "$TARGET_DIR/gamedata/dystopia"
