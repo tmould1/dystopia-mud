@@ -29,6 +29,7 @@ EXAMINE_NODES = []
 EXTRA_DESCS = []
 OBJECTS = []
 RESETS = []
+CLUES = []  # (node, stage, clue) — stage 0=travel, 1=tasks
 
 
 # ============================================================
@@ -60,11 +61,11 @@ def talk(area, vnum, pattern, req_node, next_node, label, clue, lines):
   if ch:story_node() ~= {req_node} then return end
   ch:send("\\n\\r{_esc(_dia(lines))}\\n\\r")
   ch:set_story_node({next_node})
-  ch:set_story_clue("{_esc(clue)}")
   ch:set_story_progress(0)
 end'''
     speech_node(area, vnum, pattern,
                 f"story_node_{req_node}_{label}", lua_code)
+    CLUES.append((next_node, 0, clue))
 
 
 def hub_intro(area, vnum, pattern, hub_node, label, clue, intro_lines,
@@ -77,7 +78,6 @@ def hub_intro(area, vnum, pattern, hub_node, label, clue, intro_lines,
   local p = ch:story_progress()
   if p == 0 then
     ch:send("\\n\\r{_esc(_dia(intro_lines))}\\n\\r")
-    ch:set_story_clue("{_esc(clue)}")
     ch:set_story_progress(1)
   else
     ch:send("\\n\\r{_esc(_dia(partial))}\\n\\r")
@@ -86,6 +86,7 @@ end'''
     speech_node(area, vnum, pattern,
                 f"story_hub_{hub_node}_{label}_intro", lua_code,
                 sort_order=98)
+    CLUES.append((hub_node, 1, clue))
 
 
 def hub_return(area, vnum, pattern, hub_node, next_node, label, clue,
@@ -116,12 +117,12 @@ def hub_return(area, vnum, pattern, hub_node, next_node, label, clue,
   if not ({checks}) then return end{fetch_check}
   ch:send("\\n\\r{_esc(_dia(done_lines))}\\n\\r")
   ch:set_story_node({next_node})
-  ch:set_story_clue("{_esc(clue)}")
   ch:set_story_progress(0)
 end'''
     speech_node(area, vnum, pattern,
                 f"story_hub_{hub_node}_{label}_return", lua_code,
                 sort_order=99)
+    CLUES.append((next_node, 0, clue))
 
 
 def hub_kill(area, mob_vnum, hub_node, task_bit, threshold, label,
@@ -200,6 +201,12 @@ def obj_reset(area, obj_vnum, room_vnum):
         "area": area, "obj_vnum": obj_vnum, "room_vnum": room_vnum,
     })
 
+
+# Node 1 initial travel clue (set in act_move.c when player becomes avatar)
+CLUES.append((1, 0,
+    "#CA whisper echoes in your mind: \"Seek the one who stands "
+    "in judgment at the Temple of Midgaard. Ask about the darkness "
+    "that spreads through these lands.\"#n"))
 
 # ============================================================
 # Node 1: Midgaard — Prologue (talk-through)
@@ -1553,6 +1560,44 @@ def seed_resets(db_dir):
     return count
 
 
+def seed_story_clues(db_dir):
+    """Write centralized story clue text to quest.db."""
+    # quest.db lives in gamedata/db/game/, sibling to the areas/ directory
+    game_db_dir = os.path.join(os.path.dirname(db_dir), "game")
+    db_path = os.path.join(game_db_dir, "quest.db")
+
+    if not os.path.exists(db_path):
+        print(f"  WARNING: {db_path} not found, skipping story clues")
+        print(f"  Run seed_quest_db.py first to create quest.db")
+        return 0
+
+    db = sqlite3.connect(db_path)
+    cursor = db.cursor()
+
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS story_clues ("
+        "  node  INTEGER NOT NULL,"
+        "  stage INTEGER NOT NULL,"
+        "  clue  TEXT NOT NULL,"
+        "  PRIMARY KEY (node, stage)"
+        ")")
+
+    cursor.execute("DELETE FROM story_clues")
+
+    count = 0
+    for node, stage, clue in CLUES:
+        cursor.execute(
+            "INSERT OR REPLACE INTO story_clues (node, stage, clue) "
+            "VALUES (?, ?, ?)",
+            (node, stage, clue))
+        print(f"  quest.db: story_clues ({node}, {stage})")
+        count += 1
+
+    db.commit()
+    db.close()
+    return count
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Seed story quest data into area databases.")
@@ -1598,11 +1643,16 @@ def main():
     n_reset = seed_resets(db_dir)
     print()
 
-    total = n_speech + n_death + n_examine + n_ed + n_obj + n_reset
+    print("--- Story clues (centralized in quest.db) ---")
+    n_clues = seed_story_clues(db_dir)
+    print()
+
+    total = n_speech + n_death + n_examine + n_ed + n_obj + n_reset + n_clues
     print(f"Done. {total} entries seeded:")
     print(f"  {n_speech} speech scripts, {n_death} death scripts, "
           f"{n_examine} examine scripts")
     print(f"  {n_ed} extra descriptions, {n_obj} objects, {n_reset} resets")
+    print(f"  {n_clues} story clues")
     print("Restart the MUD server to load the new data.")
 
 

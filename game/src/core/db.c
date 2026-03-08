@@ -1321,7 +1321,6 @@ void free_char( CHAR_DATA *ch ) {
 		free(ch->pcdata->parents);
 		free(ch->pcdata->cparents);
 		free(ch->pcdata->marriage);
-		free(ch->pcdata->story_clue);
 		quest_tracker_free( ch->pcdata->quest_tracker );
 		free( ch->pcdata );
 	}

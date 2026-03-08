@@ -324,16 +324,10 @@ static int api_char_set_story_node( lua_State *L ) {
 	return 0;
 }
 
-/* ch:set_story_clue(text) — set the recallable breadcrumb text */
+/* ch:set_story_clue(text) — no-op, kept for backward compat with area scripts.
+ * Clue text is now looked up from the central story_clues table in quest.db. */
 static int api_char_set_story_clue( lua_State *L ) {
-	CHAR_DATA *ch = check_char( L, 1 );
-	const char *text = luaL_checkstring( L, 2 );
-	if ( IS_NPC( ch ) ) {
-		luaL_error( L, "set_story_clue() cannot be called on NPCs" );
-		return 0;
-	}
-	free( ch->pcdata->story_clue );
-	ch->pcdata->story_clue = str_dup( text );
+	(void) L;
 	return 0;
 }
 

@@ -1327,6 +1327,7 @@ const struct cmd_type cmd_table[] =
 		{ "paradox", do_paradox, POS_DEAD, 12, LOG_ALWAYS, 0, 0, 0 },
 		{ "bully", do_bully, POS_DEAD, 12, LOG_NORMAL, 0, 0, 0 },
 		{ "qadmin", do_qadmin, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
+		{ "storyadmin", do_storyadmin, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
 		{ "qset", do_qset, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
 		{ "qstat", do_qstat, POS_DEAD, 8, LOG_ALWAYS, 0, 0, 0 },
 		{ "qtrust", do_qtrust, POS_DEAD, 10, LOG_ALWAYS, 0, 0, 0 },

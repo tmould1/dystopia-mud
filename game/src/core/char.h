@@ -1130,7 +1130,6 @@ struct pc_data {
 	int bounty;
 	bool stats_dirty; /* TRUE when pkill/pdeath/etc changed, triggers leaderboard update */
 	int story_node;       /* Story quest progress: 0=not started, 1-16=current hub */
-	char *story_clue;     /* Last breadcrumb text from story quest NPC */
 	int story_kills;      /* Kill counter for current hub objective */
 	uint32_t story_progress; /* Bitfield: which sub-tasks complete (0x01, 0x02, 0x04) */
 	int gifts[21];    /* Werewolf breed/auspice/tribe gifts */

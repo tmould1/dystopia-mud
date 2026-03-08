@@ -1022,7 +1022,7 @@ static void db_player_save_to_db( sqlite3 *db, CHAR_DATA *ch ) {
 		sqlite3_bind_int( stmt, col++, ch->pcdata->questsrun );
 		sqlite3_bind_int( stmt, col++, ch->pcdata->questtotal );
 		sqlite3_bind_int( stmt, col++, ch->pcdata->story_node );
-		sqlite3_bind_text( stmt, col++, ch->pcdata->story_clue ? ch->pcdata->story_clue : "", -1, SQLITE_STATIC );
+		sqlite3_bind_text( stmt, col++, "", -1, SQLITE_STATIC ); /* story_clue: kept for DB compat, now unused */
 		sqlite3_bind_int( stmt, col++, ch->pcdata->story_kills );
 		sqlite3_bind_int( stmt, col++, (int) ch->pcdata->story_progress );
 
@@ -1292,7 +1292,6 @@ CHAR_DATA *init_char_for_load( DESCRIPTOR_DATA *d, char *name ) {
 	ch->pcdata->bounty = 0;
 	ch->pcdata->stats_dirty = FALSE;
 	ch->pcdata->story_node = 0;
-	ch->pcdata->story_clue = str_dup( "" );
 	ch->pcdata->story_kills = 0;
 	ch->pcdata->story_progress = 0;
 	ch->pcdata->conception = str_dup( "" );
@@ -1595,11 +1594,7 @@ static void load_player_row( sqlite3 *db, CHAR_DATA *ch ) {
 		ch->pcdata->questsrun = sqlite3_column_int( stmt, col++ );
 		ch->pcdata->questtotal = sqlite3_column_int( stmt, col++ );
 		ch->pcdata->story_node = sqlite3_column_int( stmt, col++ );
-		{
-			const char *clue = (const char *) sqlite3_column_text( stmt, col++ );
-			free( ch->pcdata->story_clue );
-			ch->pcdata->story_clue = str_dup( clue ? clue : "" );
-		}
+		col++; /* story_clue: kept for DB compat, now unused */
 		ch->pcdata->story_kills = sqlite3_column_int( stmt, col++ );
 		ch->pcdata->story_progress = (uint32_t) sqlite3_column_int( stmt, col++ );
 	}

@@ -839,6 +839,87 @@ static void test_m01_class_milestone_met_with_class( void ) {
 }
 
 /*--------------------------------------------------------------------------
+ * Tier 2: Story Clue Lookup (centralized in quest.db)
+ *--------------------------------------------------------------------------*/
+
+static void test_story_clues_loaded( void ) {
+	/* Node 1 stage 0 should always have the initial travel clue */
+	const char *clue = story_clue_lookup( 1, 0 );
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT( clue[0] != '\0' );
+}
+
+static void test_story_clue_node1_travel( void ) {
+	const char *clue = story_clue_lookup( 1, 0 );
+	/* Should mention Midgaard / Temple / darkness */
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT( strstr( clue, "Midgaard" ) != NULL );
+}
+
+static void test_story_clue_node2_travel( void ) {
+	/* Travel clue for node 2 (set by Executioner talk-through) */
+	const char *clue = story_clue_lookup( 2, 0 );
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT( clue[0] != '\0' );
+}
+
+static void test_story_clue_node2_tasks( void ) {
+	/* Task clue for node 2 (set by Henry hub_intro) */
+	const char *clue = story_clue_lookup( 2, 1 );
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT( clue[0] != '\0' );
+}
+
+static void test_story_clue_invalid_node_zero( void ) {
+	const char *clue = story_clue_lookup( 0, 0 );
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT_STR_EQ( clue, "" );
+}
+
+static void test_story_clue_invalid_node_high( void ) {
+	const char *clue = story_clue_lookup( 99, 0 );
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT_STR_EQ( clue, "" );
+}
+
+static void test_story_clue_invalid_node_negative( void ) {
+	const char *clue = story_clue_lookup( -1, 0 );
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT_STR_EQ( clue, "" );
+}
+
+static void test_story_clue_invalid_stage( void ) {
+	const char *clue = story_clue_lookup( 1, 2 );
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT_STR_EQ( clue, "" );
+
+	clue = story_clue_lookup( 1, -1 );
+	TEST_ASSERT( clue != NULL );
+	TEST_ASSERT_STR_EQ( clue, "" );
+}
+
+static void test_story_clue_all_nodes_have_travel( void ) {
+	/* Every node 1-16 should have a travel clue (stage 0) */
+	int i;
+	for ( i = 1; i <= 16; i++ ) {
+		const char *clue = story_clue_lookup( i, 0 );
+		TEST_ASSERT( clue != NULL );
+		TEST_ASSERT( clue[0] != '\0' );
+	}
+}
+
+static void test_story_clue_all_hubs_have_tasks( void ) {
+	/* Hubs 2-15 should have task clues (stage 1).
+	 * Node 1 is a talk-through (no tasks), node 16 is epilogue. */
+	int i;
+	for ( i = 2; i <= 15; i++ ) {
+		const char *clue = story_clue_lookup( i, 1 );
+		TEST_ASSERT( clue != NULL );
+		TEST_ASSERT( clue[0] != '\0' );
+	}
+}
+
+/*--------------------------------------------------------------------------
  * Suite entry point
  *--------------------------------------------------------------------------*/
 
@@ -902,4 +983,15 @@ void suite_quest( void ) {
 	RUN_TEST( test_init_player_no_double_grant );
 	RUN_TEST( test_init_player_npc_noop );
 	RUN_TEST( test_init_player_no_tracker_noop );
+
+	RUN_TEST( test_story_clues_loaded );
+	RUN_TEST( test_story_clue_node1_travel );
+	RUN_TEST( test_story_clue_node2_travel );
+	RUN_TEST( test_story_clue_node2_tasks );
+	RUN_TEST( test_story_clue_invalid_node_zero );
+	RUN_TEST( test_story_clue_invalid_node_high );
+	RUN_TEST( test_story_clue_invalid_node_negative );
+	RUN_TEST( test_story_clue_invalid_stage );
+	RUN_TEST( test_story_clue_all_nodes_have_travel );
+	RUN_TEST( test_story_clue_all_hubs_have_tasks );
 }

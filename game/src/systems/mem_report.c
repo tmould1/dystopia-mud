@@ -93,7 +93,6 @@ static mem_category_t mem_characters( int *out_npcs, int *out_players,
 		FP_PARENTS, FP_CPARENTS, FP_MARRIAGE, FP_SWITCHNAME,
 		FP_DECAPMESSAGE, FP_LOGINMESSAGE, FP_LOGOUTMESSAGE,
 		FP_AVATARMESSAGE, FP_TIEMESSAGE, FP_LAST_DECAP0, FP_LAST_DECAP1,
-		FP_STORY_CLUE,
 		F_MAX
 	};
 
@@ -167,8 +166,6 @@ static mem_category_t mem_characters( int *out_npcs, int *out_players,
 			FTRACK( FP_TIEMESSAGE, ch->pcdata->tiemessage );
 			FTRACK( FP_LAST_DECAP0, ch->pcdata->last_decap[0] );
 			FTRACK( FP_LAST_DECAP1, ch->pcdata->last_decap[1] );
-			FTRACK( FP_STORY_CLUE, ch->pcdata->story_clue );
-
 			{
 				ALIAS_DATA *alias;
 				LIST_FOR_EACH( alias, &ch->pcdata->aliases, ALIAS_DATA, node ) {
@@ -569,8 +566,7 @@ static void mem_show_characters( CHAR_DATA *ch ) {
 		"pwd", "bamfin", "bamfout", "title", "conception",
 		"parents", "cparents", "marriage", "switchname",
 		"decapmessage", "loginmessage", "logoutmessage",
-		"avatarmessage", "tiemessage", "last_decap[0]", "last_decap[1]",
-		"story_clue"
+		"avatarmessage", "tiemessage", "last_decap[0]", "last_decap[1]"
 	};
 	int i;
 

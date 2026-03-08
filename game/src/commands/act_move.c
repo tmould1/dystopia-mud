@@ -3012,14 +3012,16 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 			do_mortalvamp( ch, "" );
 		/* Start story quest for new avatars */
 		if ( ch->pcdata->story_node == 0 ) {
+			const char *clue = story_clue_lookup( 1, 0 );
 			ch->pcdata->story_node = 1;
-			free( ch->pcdata->story_clue );
-			ch->pcdata->story_clue = str_dup(
-				"#CA whisper echoes in your mind: \"Seek the one who stands "
-				"in judgment at the Temple of Midgaard. Ask about the darkness "
-				"that spreads through these lands.\"#n" );
 			send_to_char( "\n\r", ch );
-			send_to_char( ch->pcdata->story_clue, ch );
+			if ( clue[0] )
+				send_to_char( clue, ch );
+			else
+				send_to_char(
+					"#CA whisper echoes in your mind: \"Seek the one who stands "
+					"in judgment at the Temple of Midgaard. Ask about the darkness "
+					"that spreads through these lands.\"#n", ch );
 			send_to_char( "\n\r", ch );
 		}
 		return;

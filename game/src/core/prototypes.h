@@ -685,6 +685,7 @@ DO_FUN do_qadmin;
 DO_FUN do_quest;
 DO_FUN do_questcreate;
 DO_FUN do_story;
+DO_FUN do_storyadmin;
 DO_FUN do_qui;
 DO_FUN do_quit;
 DO_FUN do_rage;

@@ -26,6 +26,17 @@ static QUEST_DEF quest_defs[MAX_QUEST_DEFS];
 static int       quest_count = 0;
 
 /*--------------------------------------------------------------------------
+ * Static storage for story clues (nodes 1-16, stages 0-1)
+ *--------------------------------------------------------------------------*/
+
+#define STORY_NODE_MAX    16
+#define STORY_STAGE_COUNT  2
+#define STORY_CLUE_MAX   MAX_STRING_LENGTH
+
+static char story_clue_table[STORY_NODE_MAX + 1][STORY_STAGE_COUNT][STORY_CLUE_MAX];
+static int  story_clue_count = 0;
+
+/*--------------------------------------------------------------------------
  * Player progress table schema (added to each player.db)
  *--------------------------------------------------------------------------*/
 
@@ -159,12 +170,37 @@ void db_quest_init( void ) {
         sqlite3_finalize( stmt );
     }
 
+    /*
+     * Load story clues (gracefully skip if table doesn't exist)
+     */
+    memset( story_clue_table, 0, sizeof( story_clue_table ) );
+    story_clue_count = 0;
+
+    if ( sqlite3_prepare_v2( db,
+            "SELECT node, stage, clue FROM story_clues",
+            -1, &stmt, NULL ) == SQLITE_OK ) {
+        while ( sqlite3_step( stmt ) == SQLITE_ROW ) {
+            int node  = sqlite3_column_int( stmt, 0 );
+            int stage = sqlite3_column_int( stmt, 1 );
+
+            if ( node < 1 || node > STORY_NODE_MAX ) continue;
+            if ( stage < 0 || stage >= STORY_STAGE_COUNT ) continue;
+
+            safe_copy( story_clue_table[node][stage],
+                       STORY_CLUE_MAX,
+                       col_text( stmt, 2 ) );
+            story_clue_count++;
+        }
+        sqlite3_finalize( stmt );
+    }
+
     sqlite3_close( db );
 
     {
         char logbuf[MAX_STRING_LENGTH];
         snprintf( logbuf, sizeof( logbuf ),
-            "  db_quest_init: loaded %d quest definitions.", quest_count );
+            "  db_quest_init: loaded %d quest definitions, %d story clues.",
+            quest_count, story_clue_count );
         log_string( logbuf );
     }
 }
@@ -197,6 +233,16 @@ int quest_def_index_by_id( const char *id ) {
             return i;
     }
     return -1;
+}
+
+/*--------------------------------------------------------------------------
+ * Accessors: Story Clues
+ *--------------------------------------------------------------------------*/
+
+const char *story_clue_lookup( int node, int stage ) {
+    if ( node < 1 || node > STORY_NODE_MAX ) return "";
+    if ( stage < 0 || stage >= STORY_STAGE_COUNT ) return "";
+    return story_clue_table[node][stage];
 }
 
 /*--------------------------------------------------------------------------

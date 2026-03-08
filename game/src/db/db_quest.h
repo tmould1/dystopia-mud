@@ -153,6 +153,14 @@ const QUEST_DEF *quest_def_by_id( const char *id );
 int quest_def_index_by_id( const char *id );
 
 /*--------------------------------------------------------------------------
+ * Story Clue Lookup (centralized in quest.db story_clues table)
+ *--------------------------------------------------------------------------*/
+
+/* Look up story clue text by node and stage (0=travel, 1=tasks).
+ * Returns clue text or "" if not found. */
+const char *story_clue_lookup( int node, int stage );
+
+/*--------------------------------------------------------------------------
  * Per-Player Progress - Load/Save (player.db integration)
  *--------------------------------------------------------------------------*/
 
