@@ -78,7 +78,7 @@ def hub_intro(area, vnum, pattern, hub_node, label, clue, intro_lines,
   if p == 0 then
     ch:send("\\n\\r{_esc(_dia(intro_lines))}\\n\\r")
     ch:set_story_clue("{_esc(clue)}")
-    ch:set_story_progress(0)
+    ch:set_story_progress(1)
   else
     ch:send("\\n\\r{_esc(_dia(partial))}\\n\\r")
   end
@@ -130,6 +130,7 @@ def hub_kill(area, mob_vnum, hub_node, task_bit, threshold, label,
     lua_code = f'''function on_death(killer, mob_vnum, area_low, area_high)
   if killer:is_npc() then return end
   if killer:story_node() ~= {hub_node} then return end
+  if killer:story_progress() == 0 then return end
   if killer:story_has_task({task_bit}) then return end
   local kills = killer:add_story_kill()
   if kills >= {threshold} then
@@ -151,6 +152,7 @@ def hub_examine(area, room_vnum, pattern, hub_node, task_bit, label, lines):
     lua_code = f'''function on_examine(ch, room, keyword)
   if ch:is_npc() then return end
   if ch:story_node() ~= {hub_node} then return end
+  if ch:story_progress() == 0 then return end
   if ch:story_has_task({task_bit}) then return end
   ch:set_story_task({task_bit})
   ch:send("\\n\\r{_esc(_dia(lines))}\\n\\r")
@@ -167,6 +169,7 @@ def hub_talk(area, vnum, pattern, hub_node, task_bit, label, lines):
     lua_code = f'''function on_speech(mob, ch, text)
   if ch:is_npc() then return end
   if ch:story_node() ~= {hub_node} then return end
+  if ch:story_progress() == 0 then return end
   if ch:story_has_task({task_bit}) then return end
   ch:set_story_task({task_bit})
   ch:send("\\n\\r{_esc(_dia(lines))}\\n\\r")
@@ -205,7 +208,9 @@ def obj_reset(area, obj_vnum, room_vnum):
 
 talk("midgaard", 3011, "darkness", 1, 2, "executioner",
     "#CThe Executioner in the Temple of Midgaard told you:#n "
-    "\"Go south to the graveyard. Find Henry. The dead have started to stir.\"",
+    "\"Head south to Market Square, west to the gate, then south across the bridge. "
+    "Along the southern concourse you'll find the graveyard. Find Henry. "
+    "Try 'config +automap' if you lose your way.\"",
     [
         "#CThe Executioner's eyes snap to you, his knuckles whitening on the haft#n",
         "#Cof his axe.#n",
@@ -213,9 +218,12 @@ talk("midgaard", 3011, "darkness", 1, 2, "executioner",
         "#C\"The darkness? Keep your voice down. Where did you hear that -- no,#n",
         "#Cnever mind. If you know enough to ask, then someone thinks you're ready.#n",
         "#CBut you're a new face, and before we talk about what's spreading through#n",
-        "#Cthese lands, you need to understand what you're dealing with. Go south#n",
-        "#Cto the graveyard. Find Henry -- he tends the grounds. He says at night,#n",
-        "#Cthe dead have started to stir. That's where it begins.\"#n",
+        "#Cthese lands, you need to understand what you're dealing with. Head south#n",
+        "#Cto Market Square, west to the gate, then south across the bridge. Along#n",
+        "#Cthe southern concourse you'll find the entrance to the graveyard. Find#n",
+        "#CHenry -- he tends the grounds. He says at night, the dead have started#n",
+        "#Cto stir. That's where it begins. And if you lose your way, try#n",
+        "#C'config +automap' -- it'll help you find your bearings.\"#n",
     ])
 
 
