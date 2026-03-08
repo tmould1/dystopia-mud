@@ -547,6 +547,38 @@ void quest_check_milestones( CHAR_DATA *ch ) {
                 if ( IS_SET( ch->newbits, NEW_MASTERY ) )
                     cur_val = 1;
             }
+            else if ( !strcmp( obj->type, QOBJ_LEARN_STANCE ) ) {
+                if ( !strcmp( obj->target, "any" ) ) {
+                    int s;
+                    for ( s = 1; s <= 11; s++ )
+                        if ( ch_stance(ch)[s] > cur_val )
+                            cur_val = ch_stance(ch)[s];
+                }
+            }
+            else if ( !strcmp( obj->type, QOBJ_LEARN_SUPERSTANCE ) ) {
+                if ( !strcmp( obj->target, "any" ) ) {
+                    int s;
+                    for ( s = 13; s <= 17; s++ )
+                        if ( ch_stance(ch)[s] > cur_val )
+                            cur_val = ch_stance(ch)[s];
+                }
+            }
+            else if ( !strcmp( obj->type, QOBJ_WEAPON_SKILL ) ) {
+                if ( !strcmp( obj->target, "any" ) ) {
+                    int w;
+                    for ( w = 0; w <= 12; w++ )
+                        if ( ch_wpn(ch)[w] > cur_val )
+                            cur_val = ch_wpn(ch)[w];
+                }
+            }
+            else if ( !strcmp( obj->type, QOBJ_SPELL_SKILL ) ) {
+                if ( !strcmp( obj->target, "any" ) ) {
+                    int s;
+                    for ( s = 0; s < 5; s++ )
+                        if ( ch_spl(ch)[s] > cur_val )
+                            cur_val = ch_spl(ch)[s];
+                }
+            }
             else {
                 continue;  /* Not a milestone type */
             }

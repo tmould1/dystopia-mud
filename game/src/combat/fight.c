@@ -2455,6 +2455,7 @@ bool hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 		if ( IS_NPC( victim ) && !IS_NPC( ch ) ) {
 			ch->pcdata->mkill += 1;
 			ch->pcdata->stats_dirty = TRUE;
+			quest_check_progress( ch, QOBJ_KILL_MOB, "any", 1 );
 
 			if ( IS_CLASS( ch, CLASS_DEMON ) || IS_CLASS( ch, CLASS_DROW ) || IS_CLASS( ch, CLASS_DROID ) || IS_CLASS( ch, CLASS_TANARRI ) ) {
 				if ( IS_NPC( victim ) && !IS_SET( victim->act, ACT_NOEXP ) ) {
@@ -2476,6 +2477,8 @@ bool hurt_person( CHAR_DATA *ch, CHAR_DATA *victim, int dam ) {
 			victim->pcdata->mdeath = victim->pcdata->mdeath + 1;
 			victim->pcdata->stats_dirty = TRUE;
 		}
+		if ( !IS_NPC( victim ) && !IS_NPC( ch ) && ch != victim )
+			quest_check_progress( ch, QOBJ_KILL_PLAYER, "any", 1 );
 		mcmp_combat_death( ch, victim );
 		raw_kill( victim );
 		if ( !IS_NPC( ch ) && !IS_NPC( victim ) && victim->pcdata->bounty > 0 ) {
@@ -3435,7 +3438,6 @@ void make_part( CHAR_DATA *ch, char *argument ) {
 }
 
 void raw_kill( CHAR_DATA *victim ) {
-	CHAR_DATA *killer = victim->fighting;
 	CHAR_DATA *mount;
 	stop_fighting( victim, TRUE );
 	make_corpse( victim );
@@ -3495,19 +3497,11 @@ void raw_kill( CHAR_DATA *victim ) {
 			send_to_char( "One of your spirit warriors has been destroyed!\n\r", victim->wizard );
 		}
 
-		/* Quest: track mob kill for the attacker */
-		if ( killer && !IS_NPC( killer ) )
-			quest_check_progress( killer, QOBJ_KILL_MOB, "any", 1 );
-
 		victim->pIndexData->killed++;
 		kill_table[URANGE( 0, victim->level, MAX_LEVEL - 1 )].killed++;
 		extract_char( victim, TRUE );
 		return;
 	}
-
-	/* Quest: track player kill for the attacker */
-	if ( killer && !IS_NPC( killer ) && killer != victim )
-		quest_check_progress( killer, QOBJ_KILL_PLAYER, "any", 1 );
 
 	extract_char( victim, FALSE );
 	while ( !list_empty(&victim->affects) )

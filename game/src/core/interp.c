@@ -1751,7 +1751,18 @@ void interpret( CHAR_DATA *ch, char *argument ) {
 
 		/* Quest system: track command usage + milestone re-check */
 		if ( ch->desc ) {
-			quest_check_progress( ch, QOBJ_USE_COMMAND, cmd_table[cmd].name, 1 );
+			/* Resolve aliases to canonical name (first cmd_table entry with same do_fun) */
+			const char *cmd_name = cmd_table[cmd].name;
+			{
+				int k;
+				for ( k = 0; k < cmd; k++ ) {
+					if ( cmd_table[k].do_fun == cmd_table[cmd].do_fun ) {
+						cmd_name = cmd_table[k].name;
+						break;
+					}
+				}
+			}
+			quest_check_progress( ch, QOBJ_USE_COMMAND, cmd_name, 1 );
 			quest_check_milestones( ch );
 		}
 
