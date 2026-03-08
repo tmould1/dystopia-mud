@@ -181,7 +181,7 @@ def seed_phase0(conn):
           objectives=[
               ("USE_COMMAND", "equipment", 1, "Check your equipment"),
               ("USE_COMMAND", "get", 1, "Pick up an item"),
-              ("USE_COMMAND", "wear", 1, "Equip an item"),
+              ("USE_COMMAND", "wield", 1, "Equip an item"),
           ])
 
     quest(conn, "T05", "First Fight",
@@ -255,12 +255,12 @@ def seed_phase1(conn):
           ])
 
     quest(conn, "T_STANCE_01", "Combat Stance",
-          "Learn a fighting stance and begin to master it through combat.",
+          "Learn a fighting stance and begin to master it through combat. Try 'help stance' to see the stances available.",
           "T", 1, AC, qp=50,
           prereqs=["M01"],
           objectives=[
               ("USE_COMMAND", "stance", 1, "Enter a combat stance"),
-              ("LEARN_STANCE", "any", 10, "Raise any stance to skill 10"),
+              ("LEARN_STANCE", "any", 10, "Raise any stance to skill 10 (hint: autostance)"),
           ])
 
     quest(conn, "M03", "Building Strength",
