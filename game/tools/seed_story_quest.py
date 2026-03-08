@@ -216,7 +216,8 @@ CLUES.append((1, 0,
 talk("midgaard", 3011, "darkness", 1, 2, "executioner",
     "#CThe Executioner in the Temple of Midgaard told you:#n "
     "\"Head south to Market Square, west to the gate, then south across the bridge. "
-    "Along the southern concourse you'll find the graveyard. Find Henry. "
+    "Along the southern concourse you'll find the graveyard. Find Henry "
+    "and tell him about the darkness. "
     "Try 'config +automap' if you lose your way.\"",
     [
         "#CThe Executioner's eyes snap to you, his knuckles whitening on the haft#n",
@@ -228,8 +229,8 @@ talk("midgaard", 3011, "darkness", 1, 2, "executioner",
         "#Cthese lands, you need to understand what you're dealing with. Head south#n",
         "#Cto Market Square, west to the gate, then south across the bridge. Along#n",
         "#Cthe southern concourse you'll find the entrance to the graveyard. Find#n",
-        "#CHenry -- he tends the grounds. He says at night, the dead have started#n",
-        "#Cto stir. That's where it begins. And if you lose your way, try#n",
+        "#CHenry -- he tends the grounds. Tell him about the darkness and he'll#n",
+        "#Cknow what you mean. And if you lose your way, try#n",
         "#C'config +automap' -- it'll help you find your bearings.\"#n",
     ])
 
