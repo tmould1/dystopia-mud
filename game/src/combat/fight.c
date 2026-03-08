@@ -3790,7 +3790,7 @@ int xp_compute( CHAR_DATA *gch, CHAR_DATA *victim ) {
 		if ( xp > gch->pcdata->score[SCORE_HIGH_XP] )
 			gch->pcdata->score[SCORE_HIGH_XP] += (int) xp;
 	}
-	if ( !IS_NPC( gch ) && xp > 499 && gch->pcdata->disc_points != 999 && gch->pcdata->disc_research != -1 ) {
+	if ( !IS_NPC( gch ) && xp > 499 && gch->pcdata->disc_points != 999 && gch->pcdata->disc_research != -1 && ch_power(gch)[gch->pcdata->disc_research] >= 0 ) {
 		if ( !IS_SET( gch->act, PLR_BRIEF4 ) ) stc( "#RYou gained a discipline point.#n\n\r", gch );
 		gain_disc_points( gch, 1 );
 		if ( !IS_SET( gch->act, PLR_BRIEF4 ) )

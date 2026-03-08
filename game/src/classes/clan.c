@@ -1531,7 +1531,7 @@ static void clear_class_state( CHAR_DATA *victim ) {
 	/* Clear PC-specific class data */
 	if ( victim->pcdata != NULL ) {
 		victim->pcdata->disc_points = 0;
-		victim->pcdata->disc_research = 0;
+		victim->pcdata->disc_research = -1;
 		victim->pcdata->rank = 0;
 		victim->pcdata->demonic_a = 0;
 		victim->pcdata->wolf = 0;
