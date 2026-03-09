@@ -77,6 +77,7 @@ void violence_update( void ) {
 	PROFILE_START( "violence_update" );
 
 	LIST_FOR_EACH_SAFE( ch, ch_next_v, &g_characters, CHAR_DATA, char_node ) {
+		if ( ch->extracted ) continue;
 		/* Quick skip: no violence-related state */
 		if ( ch->fighting == NULL
 		     && ch->blinkykill == NULL
@@ -105,7 +106,7 @@ void violence_update( void ) {
 					act( "$n pops back into existence.", ch, NULL, NULL, TO_ROOM );
 					stc( "You pop back into existence.\n\r", ch );
 					stc( "Your victim is no longer in the room.\n\r", ch );
-					break;
+					continue;
 				}
 				SET_BIT( ch->affected_by2, EXTRA_BLINKY );
 				act( "$n pops back into existence next to $N.", ch, NULL, victim, TO_NOTVICT );

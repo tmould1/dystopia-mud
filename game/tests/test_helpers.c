@@ -27,6 +27,7 @@ CHAR_DATA *make_test_player( void ) {
 	/* Initialize list nodes and heads */
 	list_node_init( &ch->char_node );
 	list_node_init( &ch->room_node );
+	list_node_init( &ch->extracted_node );
 	list_init( &ch->affects );
 	list_init( &ch->carrying );
 
@@ -60,6 +61,7 @@ CHAR_DATA *make_test_npc( void ) {
 	/* Initialize list nodes and heads */
 	list_node_init( &ch->char_node );
 	list_node_init( &ch->room_node );
+	list_node_init( &ch->extracted_node );
 	list_init( &ch->affects );
 	list_init( &ch->carrying );
 

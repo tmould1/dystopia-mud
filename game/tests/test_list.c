@@ -367,6 +367,147 @@ static void test_list_for_each_break_not_null( void ) {
 	TEST_ASSERT_EQ( pos->value, 10 );
 }
 
+/* --- list_detach tests --- */
+
+static void test_list_detach_preserves_pointers( void ) {
+	list_head_t list;
+	test_item_t a = { .value = 1 };
+	test_item_t b = { .value = 2 };
+	test_item_t c = { .value = 3 };
+	list_init( &list );
+
+	list_push_back( &list, &a.node );
+	list_push_back( &list, &b.node );
+	list_push_back( &list, &c.node );
+
+	/* Detach middle item — its next/prev must still point to neighbors */
+	list_detach( &list, &b.node );
+
+	TEST_ASSERT_EQ( list_count( &list ), 2 );
+	TEST_ASSERT_EQ( ITEM( list_first( &list ) )->value, 1 );
+	TEST_ASSERT_EQ( ITEM( list_last( &list ) )->value, 3 );
+
+	/* b's pointers should still reference a and c (stale but valid) */
+	TEST_ASSERT( b.node.next == &c.node );
+	TEST_ASSERT( b.node.prev == &a.node );
+}
+
+static void test_list_detach_first( void ) {
+	list_head_t list;
+	test_item_t a = { .value = 1 };
+	test_item_t b = { .value = 2 };
+	list_init( &list );
+
+	list_push_back( &list, &a.node );
+	list_push_back( &list, &b.node );
+
+	list_detach( &list, &a.node );
+
+	TEST_ASSERT_EQ( list_count( &list ), 1 );
+	TEST_ASSERT_EQ( ITEM( list_first( &list ) )->value, 2 );
+	/* a.node.next still points to b */
+	TEST_ASSERT( a.node.next == &b.node );
+}
+
+static void test_list_detach_last( void ) {
+	list_head_t list;
+	test_item_t a = { .value = 1 };
+	test_item_t b = { .value = 2 };
+	list_init( &list );
+
+	list_push_back( &list, &a.node );
+	list_push_back( &list, &b.node );
+
+	list_detach( &list, &b.node );
+
+	TEST_ASSERT_EQ( list_count( &list ), 1 );
+	TEST_ASSERT_EQ( ITEM( list_first( &list ) )->value, 1 );
+	/* b.node.prev still points to a */
+	TEST_ASSERT( b.node.prev == &a.node );
+}
+
+/*
+ * Simulate the extract_char crash scenario: during LIST_FOR_EACH_SAFE,
+ * the saved "next" item (tmp) gets detached and moved to another list.
+ * With list_remove this would corrupt iteration; with list_detach the
+ * loop must still visit all remaining items correctly.
+ */
+static void test_list_safe_iter_survives_detach_of_next( void ) {
+	list_head_t main_list;
+	list_head_t other_list;
+	test_item_t items[5];
+	int i, sum = 0;
+	list_init( &main_list );
+	list_init( &other_list );
+
+	for ( i = 0; i < 5; i++ ) {
+		items[i].value = i + 1; /* 1,2,3,4,5 */
+		list_push_back( &main_list, &items[i].node );
+	}
+
+	/*
+	 * Iterate main_list. When we visit item 2, detach item 3 (the saved
+	 * "next") and push it onto other_list via a DIFFERENT mechanism
+	 * (simulating extracted_node — here we just re-add to other_list
+	 * after detach since detach preserves pointers).
+	 */
+	{
+		test_item_t *pos, *tmp;
+		LIST_FOR_EACH_SAFE( pos, tmp, &main_list, test_item_t, node ) {
+			if ( pos->value == 2 ) {
+				/* Detach item 3 (the saved tmp) from main_list */
+				list_detach( &main_list, &items[2].node );
+			}
+			sum += pos->value;
+		}
+	}
+
+	/* We should have visited all 5 items: 1+2+3+4+5 = 15.
+	 * Item 3 was detached while being "tmp", but detach preserved its
+	 * next pointer so the loop continued to item 3, then 4, then 5. */
+	TEST_ASSERT_EQ( sum, 15 );
+	/* main_list should have 4 items (item 3 was detached) */
+	TEST_ASSERT_EQ( list_count( &main_list ), 4 );
+}
+
+/*
+ * Verify that list_remove of the saved "next" breaks iteration
+ * (to confirm that list_detach is necessary — this is the bug scenario).
+ * After list_remove, the removed node is self-pointing, so iteration
+ * gets stuck or escapes to the wrong list.
+ */
+static void test_list_safe_iter_remove_next_breaks( void ) {
+	list_head_t main_list;
+	test_item_t items[4];
+	int i, count = 0;
+	list_init( &main_list );
+
+	for ( i = 0; i < 4; i++ ) {
+		items[i].value = i + 1; /* 1,2,3,4 */
+		list_push_back( &main_list, &items[i].node );
+	}
+
+	/*
+	 * When visiting item 1, remove item 2 (the saved tmp) with
+	 * list_remove. This sets item 2's next to itself (self-loop).
+	 * The loop will get stuck on item 2 — cap iterations to detect.
+	 */
+	{
+		test_item_t *pos, *tmp;
+		LIST_FOR_EACH_SAFE( pos, tmp, &main_list, test_item_t, node ) {
+			if ( pos->value == 1 )
+				list_remove( &main_list, &items[1].node );
+			count++;
+			if ( count > 10 ) break; /* prevent infinite loop */
+		}
+	}
+
+	/* With list_remove, the loop gets stuck and exceeds normal count.
+	 * Normal would be 3 (visit 1,3,4 — skipping removed 2) or 4.
+	 * The self-loop causes it to hit the cap. */
+	TEST_ASSERT_TRUE( count > 4 );
+}
+
 /* --- Suite --- */
 
 void suite_list( void ) {
@@ -391,4 +532,9 @@ void suite_list( void ) {
 	RUN_TEST( test_list_for_each_safe_null_after_loop );
 	RUN_TEST( test_list_for_each_empty_null );
 	RUN_TEST( test_list_for_each_break_not_null );
+	RUN_TEST( test_list_detach_preserves_pointers );
+	RUN_TEST( test_list_detach_first );
+	RUN_TEST( test_list_detach_last );
+	RUN_TEST( test_list_safe_iter_survives_detach_of_next );
+	RUN_TEST( test_list_safe_iter_remove_next_breaks );
 }

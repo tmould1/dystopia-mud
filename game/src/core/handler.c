@@ -1707,7 +1707,7 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 		bug( "Extract_char: char not found.", 0 );
 		return;
 	}
-	list_remove( &g_characters, &ch->char_node );
+	list_detach( &g_characters, &ch->char_node );
 	if ( IS_NPC( ch ) && list_node_is_linked( &ch->npc_node ) )
 		list_remove( &g_npcs, &ch->npc_node );
 
@@ -1759,15 +1759,15 @@ void extract_char( CHAR_DATA *ch, bool fPull ) {
 	}
 
 	ch->extracted = true;
-	list_push_back( &g_extracted, &ch->char_node );
+	list_push_back( &g_extracted, &ch->extracted_node );
 	return;
 }
 
 void free_extracted_chars( void ) {
 	CHAR_DATA *ch;
 	CHAR_DATA *ch_next;
-	LIST_FOR_EACH_SAFE( ch, ch_next, &g_extracted, CHAR_DATA, char_node ) {
-		list_remove( &g_extracted, &ch->char_node );
+	LIST_FOR_EACH_SAFE( ch, ch_next, &g_extracted, CHAR_DATA, extracted_node ) {
+		list_remove( &g_extracted, &ch->extracted_node );
 		free_char( ch );
 	}
 }

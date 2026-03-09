@@ -130,6 +130,18 @@ static inline void list_remove( list_head_t *head, list_node_t *node ) {
 }
 
 /*
+ * Detach a node from its list, preserving the node's own next/prev pointers.
+ * Use this instead of list_remove when a LIST_FOR_EACH_SAFE loop may hold
+ * a reference to this node as its saved "next" — the stale pointers still
+ * lead to valid neighbors so iteration can continue correctly.
+ */
+static inline void list_detach( list_head_t *head, list_node_t *node ) {
+	node->prev->next = node->next;
+	node->next->prev = node->prev;
+	head->count--;
+}
+
+/*
  * Returns true if the list contains no elements.
  */
 static inline bool list_empty( const list_head_t *head ) {

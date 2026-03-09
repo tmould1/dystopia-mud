@@ -938,6 +938,7 @@ struct char_data {
 	list_node_t char_node;
 	list_node_t npc_node; /* g_npcs list (NPCs only, unlinked for PCs) */
 	list_node_t room_node;
+	list_node_t extracted_node; /* node for g_extracted list (separate from char_node) */
 	bool            extracted;  /* deferred free: TRUE after extract_char(ch, TRUE) */
 	CHAR_DATA *master;
 	CHAR_DATA *leader;

@@ -37,6 +37,7 @@ extern void suite_create_obj( void );
 extern void suite_combat( void );
 extern void suite_scripting( void );
 extern void suite_quest( void );
+extern void suite_extraction( void );
 
 int main( int argc, char **argv ) {
 	(void) argc;
@@ -53,6 +54,8 @@ int main( int argc, char **argv ) {
 	RUN_SUITE( "Affect System", suite_affects );
 	RUN_SUITE( "Name Matching", suite_isname );
 	RUN_SUITE( "Command Interpreter", suite_interp );
+
+	RUN_SUITE( "Character Extraction", suite_extraction );
 
 	/* Tier 2: Boot required (boot suite runs first to initialize) */
 	RUN_SUITE( "Game Boot", suite_boot );

@@ -1245,6 +1245,7 @@ void clear_char( CHAR_DATA *ch ) {
 	list_node_init( &ch->char_node );
 	list_node_init( &ch->npc_node );
 	list_node_init( &ch->room_node );
+	list_node_init( &ch->extracted_node );
 	list_init( &ch->affects );
 	list_init( &ch->carrying );
 	ch->logon = current_time;
