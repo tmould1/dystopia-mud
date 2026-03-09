@@ -40,6 +40,7 @@ void script_shutdown( void );
 /* Trigger dispatch — mob scripts (iterate NPCs in room) */
 void script_trigger_greet( CHAR_DATA *ch, ROOM_INDEX_DATA *room );
 void script_trigger_speech( CHAR_DATA *ch, const char *text );
+void script_trigger_speech_one( CHAR_DATA *speaker, CHAR_DATA *target, const char *text );
 
 /* Trigger dispatch — mob tick (autonomous behavior, replaces spec_funs) */
 bool script_trigger_tick( CHAR_DATA *ch );

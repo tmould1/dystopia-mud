@@ -853,8 +853,13 @@ void do_tell( CHAR_DATA *ch, char *argument ) {
 	act( poly, ch, argument, victim, TO_VICT );
 
 	victim->position = position;
-	victim->pcdata->reply = ch;
-	mcmp_channel_notify( victim, CHANNEL_TELL );
+
+	if ( !IS_NPC( victim ) ) {
+		victim->pcdata->reply = ch;
+		mcmp_channel_notify( victim, CHANNEL_TELL );
+	} else if ( victim->in_room == ch->in_room ) {
+		script_trigger_speech_one( ch, victim, strlower( argument ) );
+	}
 
 	return;
 }
@@ -933,7 +938,9 @@ void do_reply( CHAR_DATA *ch, char *argument ) {
 	act( poly, ch, argument, victim, TO_VICT );
 
 	victim->position = position;
-	victim->pcdata->reply = ch;
+
+	if ( !IS_NPC( victim ) )
+		victim->pcdata->reply = ch;
 
 	return;
 }

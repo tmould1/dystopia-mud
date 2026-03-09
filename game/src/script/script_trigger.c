@@ -132,6 +132,34 @@ void script_trigger_speech( CHAR_DATA *ch, const char *text ) {
 
 
 /*
+ * TRIG_SPEECH (targeted) — fires SPEECH scripts on a single NPC.
+ * Used by do_tell() so "tell <mob> <keyword>" triggers the same
+ * scripts as "say <keyword>" would for that specific mob.
+ */
+void script_trigger_speech_one( CHAR_DATA *speaker, CHAR_DATA *target, const char *text ) {
+	SCRIPT_DATA *script;
+
+	if ( speaker == NULL || target == NULL || text == NULL || text[0] == '\0' )
+		return;
+	if ( IS_NPC( speaker ) || !IS_NPC( target ) )
+		return;
+	if ( target->pIndexData == NULL )
+		return;
+
+	LIST_FOR_EACH( script, &target->pIndexData->scripts, SCRIPT_DATA, node ) {
+		if ( !IS_SET( script->trigger, TRIG_SPEECH ) )
+			continue;
+		if ( !script_pattern_match( script, text ) )
+			continue;
+		if ( !script_chance_check( script ) )
+			continue;
+
+		script_run( script, "on_speech", target, speaker, text );
+	}
+}
+
+
+/*
  * TRIG_TICK — fired once per game tick for each NPC.
  * Iterates the mob's template scripts and fires TRIG_TICK scripts.
  * Returns TRUE if any script returned true (skip remaining mob AI).
