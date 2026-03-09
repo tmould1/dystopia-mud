@@ -23,6 +23,7 @@ game/build/build/
 gamedata/log/
 
 # Runtime artifacts
+live_crashes/
 crash.txt
 build_log.txt
 build_output.txt
