@@ -57,6 +57,10 @@ void script_trigger_obj_kill( CHAR_DATA *ch, CHAR_DATA *victim );
 /* Trigger dispatch — mob death (fires on victim's template after extraction) */
 void script_trigger_mob_death( CHAR_DATA *killer, MOB_INDEX_DATA *victim_idx );
 
+/* Direct script execution */
+void script_run( SCRIPT_DATA *script, const char *func,
+	CHAR_DATA *mob, CHAR_DATA *ch, const char *text );
+
 /* Cache management */
 void script_invalidate_cache( SCRIPT_DATA *script );
 

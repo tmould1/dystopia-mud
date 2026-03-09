@@ -589,7 +589,6 @@ static void test_ftue_visibility_veteran( void ) {
 	/* M01 should be visible (min=0, max=3) */
 	int qi_m01 = quest_def_index_by_id( "M01" );
 	if ( qi_m01 >= 0 ) {
-		const QUEST_DEF *q = quest_def_by_index( qi_m01 );
 		/* For veterans, M01 prereqs are tutorial quests which are FTUE-filtered
 		 * so they should be considered met */
 		QUEST_PROGRESS *p = quest_tracker_find( t, qi_m01 );

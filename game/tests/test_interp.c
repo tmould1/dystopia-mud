@@ -10,6 +10,7 @@
 #include "merc.h"
 
 extern const struct cmd_type cmd_table[];
+extern int can_interpret( CHAR_DATA *ch, int cmd );
 
 /* Cached command indices, set up in suite init */
 static int cmd_north = -1;
