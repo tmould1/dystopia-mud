@@ -1946,9 +1946,13 @@ void log_string( const char *str ) {
 
 	/* Write to log file if log directory is set up */
 	if ( mud_log_dir[0] != '\0' ) {
-		/* Open log file on first call, named by startup time */
+		/* Open log file on first call, named by startup time.
+		 * Use real wall-clock time if current_time hasn't been set yet
+		 * (early boot), so each server process gets a unique log file
+		 * instead of all sharing the epoch-date fallback. */
 		if ( log_fp == NULL ) {
-			tm_info = localtime( &current_time );
+			time_t log_time = current_time > 0 ? current_time : time( NULL );
+			tm_info = localtime( &log_time );
 			snprintf( log_filename, sizeof( log_filename ), "%.480s%s%04d%02d%02d-%02d%02d%02d.log",
 				mud_log_dir, PATH_SEPARATOR,
 				tm_info->tm_year + 1900, tm_info->tm_mon + 1, tm_info->tm_mday,

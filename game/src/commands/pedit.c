@@ -90,21 +90,29 @@ bool pedit_load_offline( CHAR_DATA *ch, const char *name ) {
         return FALSE;
     }
 
-    /* Allocate temporary descriptor */
+    /* Allocate temporary descriptor for load_char_obj.
+     * init_char_for_load sets ch->desc = dummy, so we must NULL it
+     * out before freeing dummy to avoid a dangling pointer. */
     dummy = calloc( 1, sizeof( *dummy ) );
     if ( !dummy ) {
         bug( "pedit_load: calloc failed", 0 );
         return FALSE;
     }
+    dummy->outsize = 2000;
+    dummy->outbuf = calloc( 1, dummy->outsize );
+    list_node_init( &dummy->node );
 
     /* Load the player */
     if ( load_char_obj( dummy, cap_name ) ) {
         ch->pcdata->pfile = dummy->character;
+        dummy->character->desc = NULL; /* prevent dangling pointer */
+        dummy->character = NULL;
     } else {
         send_to_char( "No such player file.\n\r", ch );
     }
 
     /* Free temporary descriptor */
+    if ( dummy->outbuf ) free( dummy->outbuf );
     free( dummy );
 
     if ( ch->pcdata->pfile == NULL )

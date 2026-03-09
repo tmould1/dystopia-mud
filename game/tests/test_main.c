@@ -39,6 +39,7 @@ extern void suite_scripting( void );
 extern void suite_quest( void );
 extern void suite_extraction( void );
 extern void suite_comm( void );
+extern void suite_db_player( void );
 
 int main( int argc, char **argv ) {
 	(void) argc;
@@ -66,6 +67,7 @@ int main( int argc, char **argv ) {
 	RUN_SUITE( "Lua Scripting", suite_scripting );
 	RUN_SUITE( "Quest System", suite_quest );
 	RUN_SUITE( "Communication Commands", suite_comm );
+	RUN_SUITE( "Player Database", suite_db_player );
 
 	return test_summary();
 }

@@ -1780,7 +1780,7 @@ void crashrecov( int iSignal ) {
 			write_to_descriptor_2( d->descriptor, "\n\rSorry, the mud has crashed.\n\rPlease log on another char and report this, your char MAY be bugged.\n\r", 0 );
 			close_socket2( d, FALSE ); /* throw'em out */
 		} else {
-			fprintf( fp, "%d %s %s\n", d->descriptor, och->name, d->host );
+			fprintf( fp, "%d %s %s %d\n", d->descriptor, och->name, d->host, d->client_charset );
 			write_to_descriptor_2( d->descriptor, buf, 0 );
 		}
 	}

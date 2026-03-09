@@ -325,12 +325,108 @@ static int db_player_path( const char *name, char *buf, int bufsize ) {
 
 
 /*
+ * Copy a file byte-for-byte. Returns TRUE on success.
+ */
+static bool copy_file( const char *src, const char *dst ) {
+	FILE *fin = fopen( src, "rb" );
+	FILE *fout;
+	char buf[4096];
+	size_t n;
+
+	if ( fin == NULL )
+		return FALSE;
+
+	fout = fopen( dst, "wb" );
+	if ( fout == NULL ) {
+		fclose( fin );
+		return FALSE;
+	}
+
+	while ( ( n = fread( buf, 1, sizeof( buf ), fin ) ) > 0 )
+		fwrite( buf, 1, n, fout );
+
+	fclose( fin );
+	fclose( fout );
+	return TRUE;
+}
+
+/*
+ * Apply standard pragmas and schema migrations after opening a player db.
+ */
+static void db_player_apply_pragmas( sqlite3 *db ) {
+	/* Migrate schema for existing player databases (errors ignored if columns exist) */
+	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_node INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
+	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_clue TEXT NOT NULL DEFAULT ''", NULL, NULL, NULL );
+	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_kills INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
+	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_progress INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
+
+	/* WAL mode: eliminates journal file create/delete per transaction.
+	 * synchronous=NORMAL: fsync only at WAL checkpoints, not every commit.
+	 * Together these reduce write latency ~5-10x vs defaults. */
+	sqlite3_exec( db, "PRAGMA journal_mode=WAL", NULL, NULL, NULL );
+	sqlite3_exec( db, "PRAGMA synchronous=NORMAL", NULL, NULL, NULL );
+}
+
+/*
+ * Try to open the backup copy of a player's database after the primary
+ * file is found to be corrupt. If the backup is valid, restore it over
+ * the corrupted primary so future loads succeed without fallback.
+ * Returns sqlite3* on success, NULL on failure.
+ */
+static sqlite3 *db_player_open_backup( const char *name ) {
+	char backup_path[MUD_PATH_MAX];
+	char primary_path[MUD_PATH_MAX];
+	char log_buf[MAX_STRING_LENGTH];
+	sqlite3 *db = NULL;
+	char *errmsg = NULL;
+
+	if ( snprintf( backup_path, sizeof( backup_path ), "%s%sbackup%s%s.db",
+			mud_db_players_dir, PATH_SEPARATOR, PATH_SEPARATOR,
+			capitalize( (char *)name ) ) >= (int)sizeof( backup_path ) )
+		return NULL;
+
+	/* Check if backup file actually exists — sqlite3_open creates it if not */
+	{
+		FILE *fp = fopen( backup_path, "rb" );
+		if ( fp == NULL )
+			return NULL;
+		fclose( fp );
+	}
+
+	if ( sqlite3_open( backup_path, &db ) != SQLITE_OK ) {
+		if ( db ) sqlite3_close( db );
+		return NULL;
+	}
+
+	if ( sqlite3_exec( db, PLAYER_SCHEMA_SQL, NULL, NULL, &errmsg ) != SQLITE_OK ) {
+		snprintf( log_buf, MAX_STRING_LENGTH,
+			"db_player_open_backup: backup also corrupt for %s: %s",
+			name, errmsg ? errmsg : "unknown" );
+		log_string( log_buf );
+		if ( errmsg ) sqlite3_free( errmsg );
+		sqlite3_close( db );
+		return NULL;
+	}
+
+	db_player_apply_pragmas( db );
+
+	/* Backup is valid — restore it over the corrupted primary */
+	if ( db_player_path( name, primary_path, sizeof( primary_path ) ) == 0 )
+		copy_file( backup_path, primary_path );
+
+	return db;
+}
+
+/*
  * Open (or create) a player's .db file and ensure schema exists.
+ * If the file is corrupt (e.g. from a crash mid-save), falls back to
+ * the backup copy in players/backup/.
  * Returns sqlite3* on success, NULL on failure.
  * Caller must close the connection when done.
  */
 static sqlite3 *db_player_open( const char *name ) {
 	char path[MUD_PATH_MAX];
+	char log_buf[MAX_STRING_LENGTH];
 	sqlite3 *db = NULL;
 	char *errmsg = NULL;
 
@@ -344,23 +440,23 @@ static sqlite3 *db_player_open( const char *name ) {
 	}
 
 	if ( sqlite3_exec( db, PLAYER_SCHEMA_SQL, NULL, NULL, &errmsg ) != SQLITE_OK ) {
-		bug( "db_player_open: schema error", 0 );
+		snprintf( log_buf, MAX_STRING_LENGTH,
+			"db_player_open: corrupt database for %s: %s — trying backup",
+			name, errmsg ? errmsg : "unknown" );
+		log_string( log_buf );
 		if ( errmsg ) sqlite3_free( errmsg );
 		sqlite3_close( db );
-		return NULL;
+
+		db = db_player_open_backup( name );
+		if ( db != NULL ) {
+			snprintf( log_buf, MAX_STRING_LENGTH,
+				"db_player_open: recovered %s from backup", name );
+			log_string( log_buf );
+		}
+		return db;
 	}
 
-	/* Migrate schema for existing player databases (errors ignored if columns exist) */
-	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_node INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
-	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_clue TEXT NOT NULL DEFAULT ''", NULL, NULL, NULL );
-	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_kills INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
-	sqlite3_exec( db, "ALTER TABLE player ADD COLUMN story_progress INTEGER NOT NULL DEFAULT 0", NULL, NULL, NULL );
-
-	/* WAL mode: eliminates journal file create/delete per transaction.
-	 * synchronous=NORMAL: fsync only at WAL checkpoints, not every commit.
-	 * Together these reduce write latency ~5-10x vs defaults. */
-	sqlite3_exec( db, "PRAGMA journal_mode=WAL", NULL, NULL, NULL );
-	sqlite3_exec( db, "PRAGMA synchronous=NORMAL", NULL, NULL, NULL );
+	db_player_apply_pragmas( db );
 
 	return db;
 }
