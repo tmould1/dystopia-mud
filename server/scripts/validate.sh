@@ -6,6 +6,22 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 INGEST_DIR="$BASE_DIR/ingest"
 STAGING="$INGEST_DIR/dystopia"
+VERSION="${1:-}"
+
+# --- Extract tar.gz if present and staging doesn't exist yet ---
+if [ ! -d "$STAGING" ]; then
+    TARBALL=$(find "$INGEST_DIR" -maxdepth 1 -name '*.tar.gz' -type f 2>/dev/null | head -n 1)
+    if [ -n "$TARBALL" ]; then
+        echo "[validate] Extracting $(basename "$TARBALL") ..."
+        tar -xzf "$TARBALL" -C "$INGEST_DIR"
+    fi
+fi
+
+# --- Write .pending_version if version argument was provided ---
+if [ -n "$VERSION" ]; then
+    echo "$VERSION" > "$INGEST_DIR/.pending_version"
+    echo "[validate] Wrote pending version: $VERSION"
+fi
 
 PASS=0
 FAIL=0
