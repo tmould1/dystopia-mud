@@ -149,6 +149,10 @@ class QuestBot(MudBot):
         # Track quests we've seen completed (to detect stop condition)
         self._completed_ids: set[str] = set()
 
+        # Stalled quest tracking: quest_id -> (last_progress_snapshot, kills_without_progress)
+        self._stall_tracker: dict[str, tuple[int, int]] = {}
+        self._stall_threshold: int = 15  # kills with no progress before skipping
+
     @property
     def quest_state(self) -> QuestBotState:
         return self._state_q
@@ -282,6 +286,10 @@ class QuestBot(MudBot):
 
         # Check for completed quests to turn in
         progress = await self.quest_actions.quest_progress()
+
+        # Update stall tracker: detect quests with no progress after kills
+        self._update_stall_tracker(progress)
+
         for qp in progress:
             if qp.all_met:
                 logger.info(f"[{self.config.name}] Quest {qp.id} objectives all met")
@@ -311,6 +319,13 @@ class QuestBot(MudBot):
         active_quests.sort(key=lambda qp: CATEGORY_PRIORITY.get(qp.id.split('_')[0][:1] if '_' in qp.id else qp.id[:1], 99))
 
         for qp in active_quests:
+            # Skip stalled quests (no progress after many kills)
+            if qp.id in self._stall_tracker:
+                _, stall_kills = self._stall_tracker[qp.id]
+                if stall_kills >= self._stall_threshold:
+                    logger.debug(f"[{self.config.name}] Skipping stalled quest {qp.id}")
+                    continue
+
             self._current_quest = qp
             self._current_objective_idx = 0
             for i, obj in enumerate(qp.objectives):
@@ -805,6 +820,40 @@ class QuestBot(MudBot):
     # =========================================================================
     # Helpers
     # =========================================================================
+
+    def _update_stall_tracker(self, progress: list) -> None:
+        """Track quest objective progress to detect stalled quests.
+
+        Only tracks the currently active quest. Increments by 1 per refresh
+        cycle when no progress is detected (avoids false positives from
+        accumulated kill counters on quests that ARE progressing).
+        """
+        current_id = self._current_quest.id if self._current_quest else None
+
+        for qp in progress:
+            if qp.all_met:
+                self._stall_tracker.pop(qp.id, None)
+                continue
+
+            # Only track stalls for the quest we're actively working on
+            if qp.id != current_id:
+                continue
+
+            snapshot = sum(obj.current for obj in qp.objectives)
+
+            if qp.id in self._stall_tracker:
+                last_snapshot, stall_count = self._stall_tracker[qp.id]
+                if snapshot > last_snapshot:
+                    self._stall_tracker[qp.id] = (snapshot, 0)
+                else:
+                    new_stall = stall_count + 1
+                    self._stall_tracker[qp.id] = (snapshot, new_stall)
+                    if new_stall >= self._stall_threshold and stall_count < self._stall_threshold:
+                        logger.warning(
+                            f"[{self.config.name}] Quest {qp.id} stalled after "
+                            f"{new_stall} refresh cycles with no progress — will skip")
+            else:
+                self._stall_tracker[qp.id] = (snapshot, 0)
 
     async def _move_to_next_arena_room(self) -> None:
         """Move to an adjacent room in the arena to find fresh mobs."""
