@@ -22,10 +22,10 @@ APPLY_HITROLL = 18
 APPLY_DAMROLL = 19
 
 def main():
-    script_dir = Path(__file__).parent
+    tools_dir = Path(__file__).parent.parent
 
     # Add mastery items to classeq.db
-    classeq_db = script_dir.parent.parent / "gamedata" / "db" / "areas" / "classeq.db"
+    classeq_db = tools_dir.parent.parent / "gamedata" / "db" / "areas" / "classeq.db"
     print(f"Using classeq.db: {classeq_db}")
 
     conn = sqlite3.connect(str(classeq_db))
@@ -70,7 +70,7 @@ def main():
     print(f'  Wyrm: {WYRM_MASTERY_VNUM} - Primordial Dragon Core (+75/+75)')
 
     # Update class.db with mastery vnums
-    class_db = script_dir.parent.parent / "gamedata" / "db" / "game" / "class.db"
+    class_db = tools_dir.parent.parent / "gamedata" / "db" / "game" / "class.db"
     print(f"Using class.db: {class_db}")
 
     conn = sqlite3.connect(str(class_db))

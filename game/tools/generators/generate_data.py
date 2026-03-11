@@ -12,7 +12,11 @@ Usage:
 """
 
 import argparse
+import sys
 from pathlib import Path
+
+# Add game/tools to path for mudlib imports
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from mudlib import (
     parse_all_areas, parse_area_file,
@@ -33,11 +37,11 @@ def main():
                        help='Only generate analysis data')
     args = parser.parse_args()
 
-    # Determine paths
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
-    area_dir = project_root / 'area'
-    output_dir = project_root / args.output
+    # Determine paths — script is in game/tools/generators/, game dir is two levels up
+    tools_dir = Path(__file__).parent.parent
+    game_dir = tools_dir.parent
+    area_dir = game_dir / 'area'
+    output_dir = game_dir / args.output
 
     # Parse areas
     if args.area:

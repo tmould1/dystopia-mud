@@ -149,7 +149,7 @@ class UnifiedConfigPanel(ttk.Frame):
             ttk.Label(
                 desc_frame,
                 text="Note: cfg_keys.py has no keys populated.\n"
-                     "Run 'python game/tools/generate_cfg_keys.py'\n"
+                     "Run 'python game/tools/generators/generate_cfg_keys.py'\n"
                      "after adding entries to balance.c / acfg_keys.h\n"
                      "to enable defaults and validation.",
                 foreground='gray', font=('Consolas', 9), justify=tk.LEFT

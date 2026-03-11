@@ -13,8 +13,8 @@ import unittest
 from pathlib import Path
 from io import StringIO
 
-# Add tools directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+# Add generators directory to path for map_generator imports
+sys.path.insert(0, str(Path(__file__).parent.parent / 'generators'))
 
 from map_generator import (
     Area, Room, Exit,
@@ -437,7 +437,7 @@ class TestRealAreaParsing(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Find the project root and area directory."""
-        cls.project_root = Path(__file__).parent.parent
+        cls.project_root = Path(__file__).parent.parent.parent
         cls.area_dir = cls.project_root / 'area'
 
     def test_school_area_exists(self):
@@ -498,7 +498,7 @@ class TestJSONOutput(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Find the output directory."""
-        cls.output_dir = Path(__file__).parent / 'webmap' / 'data'
+        cls.output_dir = Path(__file__).parent.parent / 'webmap' / 'data'
 
     def test_areas_json_valid(self):
         """Test areas.json is valid JSON."""

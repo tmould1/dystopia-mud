@@ -131,7 +131,7 @@ For array-style configs (e.g., "upgrade level 1-10 damage multiplier"), convenie
 Config keys are auto-generated from C constant definitions:
 
 ```
-python game/tools/generate_cfg_keys.py
+python game/tools/generators/generate_cfg_keys.py
 ```
 
 This reads class ability parameters and generates the `cfg_keys.h` file.

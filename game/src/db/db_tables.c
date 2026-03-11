@@ -70,7 +70,7 @@ void db_tables_init( void ) {
 		snprintf( errbuf, sizeof( errbuf ),
 			"db_tables_init: FATAL - tables.db not found at %s", path );
 		bug( errbuf, 0 );
-		bug( "  Run: python game/tools/seed_tables_db.py to generate it.", 0 );
+		bug( "  Run: python game/tools/seeders/seed_tables_db.py to generate it.", 0 );
 		tables_db = NULL;
 		return;
 	}

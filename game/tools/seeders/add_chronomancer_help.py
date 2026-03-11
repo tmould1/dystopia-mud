@@ -207,8 +207,8 @@ def main():
                         help="Preview without making changes")
     args = parser.parse_args()
 
-    script_dir = Path(__file__).parent
-    db_path = (script_dir.parent.parent / "gamedata" / "db" / "game"
+    tools_dir = Path(__file__).parent.parent
+    db_path = (tools_dir.parent.parent / "gamedata" / "db" / "game"
                / "base_help.db")
 
     print(f"Using database: {db_path}")

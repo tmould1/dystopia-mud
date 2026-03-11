@@ -3,7 +3,7 @@ cfg_keys.py - Valid config keys (auto-generated)
 
 This module provides validation and autocomplete for cfg keys in MudEdit.
 DO NOT EDIT MANUALLY - regenerate using:
-    python game/tools/generate_cfg_keys.py
+    python game/tools/generators/generate_cfg_keys.py
 """
 
 from typing import Set, List, Dict, Optional

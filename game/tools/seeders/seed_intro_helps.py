@@ -15,7 +15,7 @@ import sqlite3
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 DB_PATH = REPO_ROOT / 'gamedata' / 'db' / 'game' / 'base_help.db'
 
 # ---------------------------------------------------------------------------

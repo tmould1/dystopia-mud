@@ -68,10 +68,10 @@ APPLY_DAMROLL = 19
 
 def find_classeq_db():
     """Find the classeq.db file relative to script location."""
-    script_dir = Path(__file__).parent
+    tools_dir = Path(__file__).parent.parent
     candidates = [
-        script_dir.parent.parent / "gamedata" / "db" / "areas" / "classeq.db",
-        script_dir / ".." / ".." / "gamedata" / "db" / "areas" / "classeq.db",
+        tools_dir.parent.parent / "gamedata" / "db" / "areas" / "classeq.db",
+        tools_dir / ".." / ".." / "gamedata" / "db" / "areas" / "classeq.db",
         Path("gamedata/db/areas/classeq.db"),
     ]
     for path in candidates:

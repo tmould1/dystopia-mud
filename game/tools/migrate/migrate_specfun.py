@@ -14,7 +14,7 @@ import os
 import sys
 
 AREA_DIR = os.path.join(os.path.dirname(__file__),
-    '..', '..', 'gamedata', 'db', 'areas')
+    '..', '..', '..', 'gamedata', 'db', 'areas')
 
 # Trigger bitmask values (must match script.h)
 TRIG_TICK = 4  # (1 << 2)

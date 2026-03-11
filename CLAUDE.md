@@ -166,6 +166,26 @@ Each class has its own source file with powers and abilities:
 
 ## Python Tools (game/tools/)
 
+### Directory Layout
+
+```
+game/tools/
+├── mudlib/        # Core library (area parsing, constants, models)
+├── mudedit/       # Tkinter GUI database editor
+├── mudbot/        # Automated bot testing framework
+├── webmap/        # Web-based map viewer (HTML/JS/CSS)
+├── seeders/       # Run-once data population scripts (add_*.py, seed_*.py)
+├── migrate/       # Historical one-shot migration scripts
+├── generators/    # Code/data generation (generate_*.py, map_generator.py)
+├── tests/         # Test scripts (test_*.py)
+├── data/          # Non-executable config/mapping files (*.json)
+├── mudedit_gui.py # GUI entry point
+├── helpedit.py    # CLI help editor
+├── helpedit_gui.py# GUI help editor
+├── validate_classes.py  # Class registry validator
+└── fetch_audio.py # Audio asset downloader
+```
+
 ### Constant Sourcing Architecture
 
 Game constants flow from C headers to Python at import time — no manual synchronization:

@@ -18,13 +18,13 @@ import json
 from pathlib import Path
 
 # Paths
-SCRIPT_DIR = Path(__file__).parent
-GAME_DIR = SCRIPT_DIR.parent
+TOOLS_DIR = Path(__file__).parent.parent
+GAME_DIR = TOOLS_DIR.parent
 SRC_CORE_DIR = GAME_DIR / "src" / "core"
-MUDEDIT_DIR = SCRIPT_DIR / "mudedit"
+MUDEDIT_DIR = TOOLS_DIR / "mudedit"
 ABILITY_CONFIG_C = SRC_CORE_DIR / "ability_config.c"
 ACFG_KEYS_H = SRC_CORE_DIR / "acfg_keys.h"
-KEY_TO_ENUM_JSON = SCRIPT_DIR / "acfg_key_to_enum.json"
+KEY_TO_ENUM_JSON = TOOLS_DIR / "data" / "acfg_key_to_enum.json"
 ACFG_KEYS_PY = MUDEDIT_DIR / "acfg_keys.py"
 
 
@@ -114,7 +114,7 @@ def generate_xmacro_header(entries: list[tuple[str, str, str]],
  *  The enum and table are both generated from the ACFG_ENTRIES macro.
  *
  *  DO NOT EDIT MANUALLY - regenerate using:
- *      python game/tools/generate_acfg_keys.py
+ *      python game/tools/generators/generate_acfg_keys.py
  ***************************************************************************/
 
 #ifndef ACFG_KEYS_H
@@ -185,7 +185,7 @@ def generate_python_module(entries: list[tuple[str, str, str]],
     lines.append("")
     lines.append("This module provides validation and autocomplete for acfg keys in MudEdit.")
     lines.append("DO NOT EDIT MANUALLY - regenerate using:")
-    lines.append("    python game/tools/generate_acfg_keys.py")
+    lines.append("    python game/tools/generators/generate_acfg_keys.py")
     lines.append('"""')
     lines.append("")
     lines.append("from typing import Set, List, Dict, Optional")

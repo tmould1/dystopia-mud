@@ -18,8 +18,8 @@ import sys
 import json
 from pathlib import Path
 
-SCRIPT_DIR = Path(__file__).parent
-MAPPINGS_FILE = SCRIPT_DIR / "cfg_key_to_enum.json"
+TOOLS_DIR = Path(__file__).parent.parent
+MAPPINGS_FILE = TOOLS_DIR / "data" / "cfg_key_to_enum.json"
 
 
 def load_mappings() -> dict:
@@ -163,7 +163,7 @@ def main():
 
     if '--all' in sys.argv:
         # Migrate all class files
-        game_dir = SCRIPT_DIR.parent
+        game_dir = TOOLS_DIR.parent
         class_dir = game_dir / "src" / "classes"
         combat_dir = game_dir / "src" / "combat"
 

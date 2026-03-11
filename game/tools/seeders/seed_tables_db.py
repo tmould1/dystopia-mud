@@ -7,7 +7,7 @@ where_name/where_name_sr, and day_name/month_name arrays, then creates
 (or recreates) gamedata/db/game/tables.db with that data.
 
 Usage:
-    python game/tools/seed_tables_db.py
+    python game/tools/seeders/seed_tables_db.py
 
 Run from the repository root.  Idempotent -- safe to re-run.
 """
@@ -21,8 +21,8 @@ from pathlib import Path
 
 def find_repo_root() -> Path:
     """Find repository root relative to this script."""
-    # Script is at game/tools/seed_tables_db.py
-    return Path(__file__).resolve().parent.parent.parent
+    # Script is at game/tools/seeders/seed_tables_db.py
+    return Path(__file__).resolve().parent.parent.parent.parent
 
 
 def parse_socials(src_dir: Path) -> list:

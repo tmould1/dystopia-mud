@@ -4,8 +4,8 @@
 import sqlite3
 from pathlib import Path
 
-script_dir = Path(__file__).parent
-db_path = script_dir.parent.parent / "gamedata" / "db" / "areas" / "classeq.db"
+tools_dir = Path(__file__).parent.parent
+db_path = tools_dir.parent.parent / "gamedata" / "db" / "areas" / "classeq.db"
 
 conn = sqlite3.connect(str(db_path))
 cursor = conn.cursor()

@@ -4,7 +4,7 @@
 import sqlite3
 import os
 
-DB_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'gamedata', 'db', 'areas', 'candyland.db')
+DB_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'gamedata', 'db', 'areas', 'candyland.db')
 
 # Remove existing database if present
 if os.path.exists(DB_PATH):

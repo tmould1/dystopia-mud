@@ -20,7 +20,7 @@ import sqlite3
 import os
 import sys
 
-TOOLS_DIR = os.path.dirname(__file__)
+TOOLS_DIR = os.path.dirname(os.path.dirname(__file__))
 AREA_DIR = os.path.join(TOOLS_DIR, '..', '..', 'gamedata', 'db', 'areas')
 TABLES_DB = os.path.join(TOOLS_DIR, '..', '..', 'gamedata', 'db', 'game', 'tables.db')
 

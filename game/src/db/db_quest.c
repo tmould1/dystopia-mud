@@ -82,7 +82,7 @@ void db_quest_init( void ) {
         snprintf( errbuf, sizeof( errbuf ),
             "db_quest_init: quest.db not found at %s", path );
         bug( errbuf, 0 );
-        bug( "  Run: python game/tools/seed_quest_db.py to generate it.", 0 );
+        bug( "  Run: python game/tools/seeders/seed_quest_db.py to generate it.", 0 );
         return;
     }
 

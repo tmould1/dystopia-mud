@@ -23,7 +23,7 @@ import zipfile
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
 AUDIO_DIR = os.path.join(REPO_ROOT, "audio")
-MANIFEST_PATH = os.path.join(SCRIPT_DIR, "audio_manifest.json")
+MANIFEST_PATH = os.path.join(SCRIPT_DIR, "data", "audio_manifest.json")
 
 
 def find_ffmpeg():

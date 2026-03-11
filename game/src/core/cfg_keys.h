@@ -11,7 +11,7 @@
  *    CFG_ABILITY_*     - Per-class ability parameters
  *
  *  DO NOT EDIT MANUALLY - regenerate using:
- *      python game/tools/generate_cfg_keys.py
+ *      python game/tools/generators/generate_cfg_keys.py
  ***************************************************************************/
 
 #ifndef CFG_KEYS_H

@@ -24,10 +24,10 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple, Optional
 
 # Paths
-SCRIPT_DIR = Path(__file__).parent
-GAME_DIR = SCRIPT_DIR.parent
+TOOLS_DIR = Path(__file__).parent.parent
+GAME_DIR = TOOLS_DIR.parent
 SRC_CORE_DIR = GAME_DIR / "src" / "core"
-MUDEDIT_DIR = SCRIPT_DIR / "mudedit"
+MUDEDIT_DIR = TOOLS_DIR / "mudedit"
 
 # Input files
 BALANCE_C = SRC_CORE_DIR / "balance.c"
@@ -35,7 +35,7 @@ ACFG_KEYS_H = SRC_CORE_DIR / "acfg_keys.h"
 
 # Output files
 CFG_KEYS_H = SRC_CORE_DIR / "cfg_keys.h"
-CFG_KEY_TO_ENUM_JSON = SCRIPT_DIR / "cfg_key_to_enum.json"
+CFG_KEY_TO_ENUM_JSON = TOOLS_DIR / "data" / "cfg_key_to_enum.json"
 CFG_KEYS_PY = MUDEDIT_DIR / "cfg_keys.py"
 
 
@@ -208,7 +208,7 @@ def generate_cfg_keys_h(entries: List[CfgEntry]) -> str:
  *    CFG_ABILITY_*     - Per-class ability parameters
  *
  *  DO NOT EDIT MANUALLY - regenerate using:
- *      python game/tools/generate_cfg_keys.py
+ *      python game/tools/generators/generate_cfg_keys.py
  ***************************************************************************/
 
 #ifndef CFG_KEYS_H
@@ -274,7 +274,7 @@ def generate_migration_mappings(entries: List[CfgEntry]) -> Dict:
 
     # Build a map from balance_map keys to actual field references
     # by parsing balance.c again
-    balance_c = Path(__file__).parent.parent / "src" / "core" / "balance.c"
+    balance_c = Path(__file__).parent.parent.parent / "src" / "core" / "balance.c"
     key_to_field = {}
     if balance_c.exists():
         content = balance_c.read_text(encoding="utf-8")
@@ -334,7 +334,7 @@ def generate_python_module(entries: List[CfgEntry]) -> str:
     lines.append("")
     lines.append("This module provides validation and autocomplete for cfg keys in MudEdit.")
     lines.append("DO NOT EDIT MANUALLY - regenerate using:")
-    lines.append("    python game/tools/generate_cfg_keys.py")
+    lines.append("    python game/tools/generators/generate_cfg_keys.py")
     lines.append('"""')
     lines.append("")
     lines.append("from typing import Set, List, Dict, Optional")

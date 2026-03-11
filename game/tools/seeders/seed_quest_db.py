@@ -6,7 +6,7 @@ Creates the quest definition database with all quest definitions,
 objectives, and prerequisites for the branching quest tree system.
 
 Usage:
-    python game/tools/seed_quest_db.py
+    python game/tools/seeders/seed_quest_db.py
 
 Run from the repository root.  Idempotent -- safe to re-run.
 """
@@ -61,7 +61,7 @@ QFLAG_FTUE_SKIP     = (1 << 2)
 # ---------------------------------------------------------------------------
 
 def find_repo_root() -> Path:
-    return Path(__file__).resolve().parent.parent.parent
+    return Path(__file__).resolve().parent.parent.parent.parent
 
 
 def create_schema(conn):

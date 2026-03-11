@@ -27,18 +27,18 @@ import os
 import sys
 from pathlib import Path
 
-# Add mudlib to path for shared constants
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Add game/tools to path for shared constants
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from mudlib.merc_constants import STAT_SOURCE_ENUM
 
 
 def find_class_db():
     """Find the class.db file relative to script location."""
-    script_dir = Path(__file__).parent
+    tools_dir = Path(__file__).parent.parent
     # Try relative paths from game/tools
     candidates = [
-        script_dir.parent.parent / "gamedata" / "db" / "game" / "class.db",
-        script_dir / ".." / ".." / "gamedata" / "db" / "game" / "class.db",
+        tools_dir.parent.parent / "gamedata" / "db" / "game" / "class.db",
+        tools_dir / ".." / ".." / "gamedata" / "db" / "game" / "class.db",
         Path("gamedata/db/game/class.db"),
     ]
     for path in candidates:

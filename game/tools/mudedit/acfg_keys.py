@@ -3,7 +3,7 @@ acfg_keys.py - Valid ability config keys (auto-generated)
 
 This module provides validation and autocomplete for acfg keys in MudEdit.
 DO NOT EDIT MANUALLY - regenerate using:
-    python game/tools/generate_acfg_keys.py
+    python game/tools/generators/generate_acfg_keys.py
 """
 
 from typing import Set, List, Dict, Optional

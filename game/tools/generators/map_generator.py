@@ -753,11 +753,11 @@ def main():
     parser.add_argument('--watch', action='store_true', help='Watch for file changes')
     args = parser.parse_args()
 
-    # Determine paths
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
-    area_dir = project_root / 'area'
-    output_dir = project_root / args.output
+    # Determine paths — script is in game/tools/generators/, game dir is two levels up
+    tools_dir = Path(__file__).parent.parent
+    game_dir = tools_dir.parent
+    area_dir = game_dir / 'area'
+    output_dir = game_dir / args.output
 
     # Create output directory
     output_dir.mkdir(parents=True, exist_ok=True)

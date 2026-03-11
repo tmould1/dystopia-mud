@@ -1610,7 +1610,7 @@ def main():
         db_dir = args.db_dir
     else:
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(os.path.dirname(script_dir))
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(script_dir)))
         db_dir = os.path.join(project_root, "gamedata", "db", "areas")
 
     if not os.path.isdir(db_dir):
