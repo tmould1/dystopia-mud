@@ -66,7 +66,7 @@ class PromptDetector:
     # Login prompt patterns (order matters for some)
     LOGIN_PATTERNS = [
         # New character flow
-        (BotState.AWAITING_NAME, r"What be thy name\?|Enter thy name"),
+        (BotState.AWAITING_NAME, r"What be thy name\?|Enter thy name|What is your name"),
         (BotState.CONFIRMING_NAME, r"engraved on your tombstone.*\(Y/N\)"),
         (BotState.ENTERING_PASSWORD, r"Give me a password"),
         (BotState.CONFIRMING_PASSWORD, r"[Rr]etype password"),

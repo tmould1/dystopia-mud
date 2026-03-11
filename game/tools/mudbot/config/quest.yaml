@@ -1,0 +1,18 @@
+# Quest bot configuration
+quest:
+  mode: "all"                    # "tutorial", "main", "all"
+  stop_after_quest: "M02"       # Default target: through M02
+  max_quest_cycles: 100          # Safety limit on quest loop iterations
+  selfclass: "demon"             # Class to pick for M01 selfclass objective
+
+  # Arena settings for KILL_MOB objectives
+  arena_monsters:
+    - fox
+    - rabbit
+    - snail
+    - bear
+    - beast
+    - wolf
+    - lizard
+    - boar
+  min_hp_to_fight: 50

@@ -8,8 +8,9 @@ import logging
 import signal
 import sys
 
-from ..config import BotConfig, CommanderConfig, ProgressionConfig
+from ..config import BotConfig, CommanderConfig, ProgressionConfig, QuestConfig
 from ..bot.avatar_bot import AvatarProgressionBot
+from ..bot.quest_bot import QuestBot
 from ..utils.logging import setup_logging
 from .manager import BotCommander
 
@@ -30,6 +31,15 @@ Examples:
 
   # Load test with 5 bots
   python -m mudbot load --count 5 --prefix LoadBot --password testpass
+
+  # Quest testing (default: explevel 1, stop at M02)
+  python -m mudbot quest --name QBot --password secret123
+
+  # Quest testing (veteran, skip tutorials)
+  python -m mudbot quest --name QBot --password secret123 --explevel 3
+
+  # Quest testing (tutorial only)
+  python -m mudbot quest --name QBot --password secret123 --mode tutorial
 
   # Verbose output
   python -m mudbot run --name TestBot --password secret123 --verbose
@@ -130,6 +140,57 @@ Examples:
         help='Delay between commands per bot (default: 0.5)'
     )
 
+    # 'quest' command - quest system testing
+    quest_parser = subparsers.add_parser(
+        'quest',
+        help='Test the quest system end-to-end'
+    )
+    quest_parser.add_argument(
+        '--name',
+        required=True,
+        help='Character name (3-12 alphanumeric characters)'
+    )
+    quest_parser.add_argument(
+        '--password',
+        required=True,
+        help='Character password (minimum 5 characters)'
+    )
+    quest_parser.add_argument(
+        '--sex',
+        choices=['m', 'f'],
+        default='m',
+        help='Character sex (default: m)'
+    )
+    quest_parser.add_argument(
+        '--explevel',
+        type=int,
+        choices=[1, 2, 3],
+        default=1,
+        help='Experience level for character creation (1=newbie, 2=MUD exp, 3=veteran; default: 1)'
+    )
+    quest_parser.add_argument(
+        '--mode',
+        choices=['tutorial', 'main', 'all'],
+        default='all',
+        help='Quest mode: tutorial (T quests only), main (T+M), all (default: all)'
+    )
+    quest_parser.add_argument(
+        '--stop-after',
+        default='M02',
+        help='Stop after completing this quest ID (default: M02, empty=run all)'
+    )
+    quest_parser.add_argument(
+        '--selfclass',
+        default='demon',
+        help='Class to select for M01 selfclass objective (default: demon)'
+    )
+    quest_parser.add_argument(
+        '--delay',
+        type=float,
+        default=0.5,
+        help='Delay between commands in seconds (default: 0.5)'
+    )
+
     return parser
 
 
@@ -179,6 +240,49 @@ async def run_single_bot(args) -> int:
             return 0
         else:
             logger.warning(f"Bot ended in state: {status['progression_state']}")
+            return 1
+    except KeyboardInterrupt:
+        logger.info("Interrupted by user")
+        await bot.disconnect()
+        return 130
+
+
+async def run_quest_bot(args) -> int:
+    """Run the quest testing bot."""
+    logger = logging.getLogger('mudbot')
+
+    try:
+        config = BotConfig(
+            name=args.name,
+            password=args.password,
+            host=args.host,
+            port=args.port,
+            sex=args.sex,
+            experience_level=args.explevel,
+            command_delay=args.delay,
+        )
+    except ValueError as e:
+        logger.error(f"Configuration error: {e}")
+        return 1
+
+    quest_config = QuestConfig(
+        mode=args.mode,
+        stop_after_quest=args.stop_after,
+        selfclass=args.selfclass,
+    )
+
+    prog_config = ProgressionConfig()
+
+    bot = QuestBot(config, quest_config, prog_config)
+
+    try:
+        await bot.run()
+        status = bot.get_status()
+        if status['quest_state'] == 'COMPLETE':
+            logger.info("Quest bot completed successfully!")
+            return 0
+        else:
+            logger.warning(f"Quest bot ended in state: {status['quest_state']}")
             return 1
     except KeyboardInterrupt:
         logger.info("Interrupted by user")
@@ -257,6 +361,8 @@ def main() -> int:
     # Run the appropriate command
     if args.command == 'run':
         return asyncio.run(run_single_bot(args))
+    elif args.command == 'quest':
+        return asyncio.run(run_quest_bot(args))
     elif args.command == 'load':
         return asyncio.run(run_load_test(args))
     else:

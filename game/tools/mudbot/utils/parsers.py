@@ -294,13 +294,14 @@ class TrainParser:
 
     # Success patterns
     TRAIN_SUCCESS = re.compile(
-        r"Your (\w+) increases|You now have (\d+) hit points|You become an avatar",
+        r"Your (\w+) increases|You gain \d+ hp|You become an avatar",
         re.IGNORECASE
     )
 
     # Failure patterns
     TRAIN_FAIL = re.compile(
-        r"You do not have enough|You need at least|You must have|cannot train",
+        r"You do not have enough|You need at least|You must have|cannot train|"
+        r"You need more exp",
         re.IGNORECASE
     )
 
@@ -317,14 +318,14 @@ class TrainParser:
         re.IGNORECASE
     )
 
-    # HP increase
-    HP_INCREASE = re.compile(r"You now have (\d+) hit points", re.IGNORECASE)
+    # HP increase: "You gain N hps." or "You gain 1 hp."
+    HP_INCREASE = re.compile(r"You gain (\d+) hps?", re.IGNORECASE)
 
-    # Mana increase
-    MANA_INCREASE = re.compile(r"You now have (\d+) mana", re.IGNORECASE)
+    # Mana increase: "You gain N mana."
+    MANA_INCREASE = re.compile(r"You gain (\d+) mana", re.IGNORECASE)
 
-    # Move increase
-    MOVE_INCREASE = re.compile(r"You now have (\d+) movement", re.IGNORECASE)
+    # Move increase: "You gain N moves." or "You gain N move."
+    MOVE_INCREASE = re.compile(r"You gain (\d+) moves?", re.IGNORECASE)
 
     def parse(self, text: str) -> Dict[str, Any]:
         """

@@ -2132,9 +2132,10 @@ void do_score( CHAR_DATA *ch, char *argument ) {
 	 * Screen reader mode: clean labeled output without decorative brackets.
 	 */
 	if ( IS_SCREENREADER( ch ) ) {
-		snprintf( buf, sizeof( buf ), "You are %s%s. Playing for %d hours.\n\r",
+		snprintf( buf, sizeof( buf ), "You are %s%s. Level: %d. Playing for %d hours.\n\r",
 			ch->pcdata->switchname,
 			IS_NPC( ch ) ? "" : ch->pcdata->title,
+			ch->level,
 			( ch->played + (int) ( current_time - ch->logon ) ) / 3600 );
 		send_to_char( buf, ch );
 		snprintf( buf, sizeof( buf ), "Hit Points: %d/%d. Mana: %d/%d. Movement: %d/%d. Primal: %d.\n\r",

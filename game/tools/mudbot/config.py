@@ -196,3 +196,16 @@ class DemonProgressionConfig:
     enable_horns: bool = True
     enable_wings: bool = True
     enable_tail: bool = True
+
+
+@dataclass
+class QuestConfig:
+    """Configuration for quest testing bot."""
+
+    # Quest selection
+    mode: str = "all"                   # "tutorial", "main", "all"
+    stop_after_quest: str = "M02"       # Stop after this quest ID (empty = run all)
+    max_quest_cycles: int = 500         # Safety limit on state machine iterations
+
+    # Class selection for M01 selfclass objective
+    selfclass: str = "demon"            # Default class to pick

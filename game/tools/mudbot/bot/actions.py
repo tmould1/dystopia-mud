@@ -204,7 +204,7 @@ class BotActions:
         # Wait for training response patterns
         response = await self.bot.send_and_read(
             command,
-            wait_for=["hit points", "increases", "avatar", "not have enough", "cannot train", "need at least"],
+            wait_for=["You gain", "increases", "avatar", "not have enough", "cannot train", "need at least", "need more exp", "reached the statcap"],
             timeout=5.0
         )
         logger.debug(f"[{self.bot.config.name}] Train response: {response[:200] if response else 'None'}...")
