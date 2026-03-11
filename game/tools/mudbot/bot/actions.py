@@ -131,7 +131,10 @@ class BotActions:
                 self._in_combat = False
                 return True, True
             self._in_combat = True
-        return True, False
+            return True, False
+        # No response at all — target likely doesn't exist
+        logger.debug(f"[{self.bot.config.name}] No response to kill command")
+        return False, False
 
     async def wait_for_combat_end(self, timeout: float = 60.0) -> bool:
         """

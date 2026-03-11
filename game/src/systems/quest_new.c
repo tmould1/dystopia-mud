@@ -60,6 +60,71 @@ static const char *quest_cat_color( const char *cat ) {
 }
 
 /*--------------------------------------------------------------------------
+ * Debug: dump raw tracker state (immortal only)
+ *--------------------------------------------------------------------------*/
+
+static const char *qstatus_name( int s );  /* forward decl, defined below */
+
+static void quest_show_debug( CHAR_DATA *ch, char *argument ) {
+    QUEST_TRACKER *tracker = ch->pcdata->quest_tracker;
+    char buf[MAX_STRING_LENGTH];
+    char arg[MAX_INPUT_LENGTH];
+    int i, j;
+
+    if ( !IS_IMMORTAL( ch ) ) {
+        send_to_char( "Huh?\n\r", ch );
+        return;
+    }
+
+    one_argument( argument, arg );
+
+    send_to_char( "\n\r#R[Quest Debug]#n\n\r", ch );
+    snprintf( buf, sizeof( buf ), "Explevel: %d  Tracker entries: %d/%d\n\r",
+        ch->explevel, tracker->count, tracker->capacity );
+    send_to_char( buf, ch );
+    snprintf( buf, sizeof( buf ), "Quest defs loaded: %d\n\r\n\r", quest_def_count() );
+    send_to_char( buf, ch );
+
+    for ( i = 0; i < tracker->count; i++ ) {
+        QUEST_PROGRESS *p = &tracker->entries[i];
+        const QUEST_DEF *q = quest_def_by_index( p->quest_index );
+
+        /* If a specific quest ID was given, filter to it */
+        if ( arg[0] != '\0' && q && str_cmp( arg, q->id ) )
+            continue;
+
+        /* Skip LOCKED unless filtering to a specific quest */
+        if ( arg[0] == '\0' && p->status == QSTATUS_LOCKED )
+            continue;
+
+        snprintf( buf, sizeof( buf ),
+            "  [%d] idx=%d id=%-6s status=%-10s started=%d completed=%d\n\r",
+            i, p->quest_index,
+            q ? q->id : "???",
+            qstatus_name( p->status ),
+            p->started_at, p->completed_at );
+        send_to_char( buf, ch );
+
+        if ( q ) {
+            snprintf( buf, sizeof( buf ),
+                "       name=\"%s\" cat=%s flags=%d vis=[%d-%d] obj_count=%d\n\r",
+                q->name, q->category, q->flags,
+                q->min_explevel, q->max_explevel, q->obj_count );
+            send_to_char( buf, ch );
+
+            for ( j = 0; j < q->obj_count; j++ ) {
+                snprintf( buf, sizeof( buf ),
+                    "       obj[%d] type=%-14s target=%-10s %d/%d\n\r",
+                    j, q->objectives[j].type, q->objectives[j].target,
+                    p->obj_progress[j].current, q->objectives[j].threshold );
+                send_to_char( buf, ch );
+            }
+        }
+        send_to_char( "\n\r", ch );
+    }
+}
+
+/*--------------------------------------------------------------------------
  * Main command: do_quest
  *--------------------------------------------------------------------------*/
 
@@ -90,6 +155,7 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
     if ( !str_cmp( arg, "abandon" ) )  { quest_do_abandon( ch, argument );   return; }
     if ( !str_cmp( arg, "path" ) )     { quest_show_path( ch );              return; }
     if ( !str_cmp( arg, "history" ) )  { quest_show_history( ch );           return; }
+    if ( !str_cmp( arg, "debug" ) )    { quest_show_debug( ch, argument );   return; }
 
     send_to_char( "\n\r #tFFD700" U_STAR " Quest Commands " U_STAR "#n\n\r\n\r", ch );
     send_to_char( "  #Cquest#n              Show current progress\n\r", ch );
@@ -100,6 +166,8 @@ void do_quest( CHAR_DATA *ch, char *argument ) {
     send_to_char( "  #Cquest abandon#n <id> Abandon a quest\n\r", ch );
     send_to_char( "  #Cquest path#n         Show main progression\n\r", ch );
     send_to_char( "  #Cquest history#n      Show completed quests\n\r", ch );
+    if ( IS_IMMORTAL( ch ) )
+        send_to_char( "  #Cquest debug#n [id]   (Imm) Dump tracker state\n\r", ch );
 }
 
 /*--------------------------------------------------------------------------
@@ -144,20 +212,20 @@ static bool quest_prereqs_met( CHAR_DATA *ch, const QUEST_DEF *q ) {
      * All other quests use AND logic (all prereqs required).
      */
     if ( !strcmp( q->id, "M01" ) ) {
-        /* OR: any completed prereq suffices */
+        /* OR: any TURNED_IN prereq suffices */
+        bool all_skipped = TRUE;
         for ( i = 0; i < q->prereq_count; i++ ) {
             QUEST_PROGRESS *pp = quest_tracker_find( tracker, q->prereq_indices[i] );
             if ( pp && pp->status >= QSTATUS_TURNED_IN )
                 return TRUE;
 
-            /* Also check if the prereq quest was auto-skipped (FTUE) */
+            /* Check if this prereq is FTUE-skipped (not visible) */
             const QUEST_DEF *prereq_q = quest_def_by_index( q->prereq_indices[i] );
-            if ( prereq_q && !quest_is_visible( ch, prereq_q ) ) {
-                has_any = TRUE;
-            }
+            if ( prereq_q && quest_is_visible( ch, prereq_q ) )
+                all_skipped = FALSE;
         }
-        /* If all prereqs were FTUE-skipped, allow it */
-        return has_any;
+        /* Only allow if ALL prereqs were FTUE-skipped (e.g. explevel 2) */
+        return all_skipped;
     }
 
     /* AND: all prereqs must be turned in or FTUE-skipped */

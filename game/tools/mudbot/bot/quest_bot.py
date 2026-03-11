@@ -542,41 +542,47 @@ class QuestBot(MudBot):
             self._in_arena = True
 
         # Look for monsters (skip corpses and body parts)
+        # Use word boundary matching to avoid false positives like "boar" in "board"
+        import re
         debris_words = [
             'entrails', 'corpse', 'blood', 'pool', 'body', 'remains',
             'sliced-off', 'severed', 'torn', 'ripped', 'leg of', 'arm of',
             'head of', 'heart of', 'brains of', 'guts of', 'decomposes',
         ]
         for monster in ARENA_MONSTERS:
-            if monster in room_lower:
-                is_corpse = False
-                for line in room_text.split('\n'):
-                    line_lower = line.lower()
-                    if monster in line_lower:
-                        if any(cw in line_lower for cw in debris_words):
-                            is_corpse = True
-                            break
-                        self._kill_target = monster
-                        # Attack
-                        logger.info(f"[{self.config.name}] Attacking {monster}")
-                        combat_started, instant_kill = await self.actions.kill(monster)
-                        if instant_kill:
-                            self._kills_since_train += 1
-                            logger.info(f"[{self.config.name}] Instant kill: {monster} "
-                                        f"(kills: {self._kills_since_train})")
-                            # Batch kills for training or refresh for KILL_MOB quests
-                            if (self._kills_before_train > 1
-                                    and self._kills_since_train < self._kills_before_train):
-                                self._kill_target = None
-                                return  # Stay in FINDING_ARENA, kill more
-                            self.quest_state = QuestBotState.REFRESHING_STATE
-                            return
-                        elif combat_started:
-                            self.quest_state = QuestBotState.WAITING_COMBAT
-                            return
-                        else:
+            monster_pattern = re.compile(r'\b' + re.escape(monster) + r'\b', re.IGNORECASE)
+            if not monster_pattern.search(room_lower):
+                continue
+            is_corpse = False
+            for line in room_text.split('\n'):
+                line_lower = line.lower()
+                if monster_pattern.search(line_lower):
+                    if any(cw in line_lower for cw in debris_words):
+                        is_corpse = True
+                        break
+                    self._kill_target = monster
+                    # Attack
+                    logger.info(f"[{self.config.name}] Attacking {monster}")
+                    combat_started, instant_kill = await self.actions.kill(monster)
+                    if instant_kill:
+                        self._kills_since_train += 1
+                        logger.info(f"[{self.config.name}] Instant kill: {monster} "
+                                    f"(kills: {self._kills_since_train})")
+                        # Move to a new room to find fresh mobs
+                        await self._move_to_next_arena_room()
+                        # Batch kills for training or refresh for KILL_MOB quests
+                        if (self._kills_before_train > 1
+                                and self._kills_since_train < self._kills_before_train):
                             self._kill_target = None
-                            break
+                            return  # Stay in FINDING_ARENA, kill more
+                        self.quest_state = QuestBotState.REFRESHING_STATE
+                        return
+                    elif combat_started:
+                        self.quest_state = QuestBotState.WAITING_COMBAT
+                        return
+                    else:
+                        self._kill_target = None
+                        break
 
         # No monster found, navigate
         exits = await self.actions.get_exits()
@@ -585,9 +591,15 @@ class QuestBot(MudBot):
             self.quest_state = QuestBotState.FAILED
             return
 
-        if not self._in_arena and 'south' in exits:
-            await self.actions.move('south')
-            return
+        # If not in arena yet, recall to Midgaard first then go south
+        if not self._in_arena:
+            if 'arena' not in first_line and 'south' not in exits:
+                logger.info(f"[{self.config.name}] Recalling to navigate to arena")
+                await self.actions.recall()
+                return
+            if 'south' in exits:
+                await self.actions.move('south')
+                return
 
         # Explore arena
         explore_dirs = ['south', 'north', 'east', 'west']
@@ -611,6 +623,8 @@ class QuestBot(MudBot):
             self._kills_since_train += 1
             logger.info(f"[{self.config.name}] Victory! "
                         f"(kills since train: {self._kills_since_train})")
+            # Move to a new room to find fresh mobs (avoids corpse confusion)
+            await self._move_to_next_arena_room()
         else:
             logger.warning(f"[{self.config.name}] Combat ended unfavorably")
 
@@ -791,6 +805,26 @@ class QuestBot(MudBot):
     # =========================================================================
     # Helpers
     # =========================================================================
+
+    async def _move_to_next_arena_room(self) -> None:
+        """Move to an adjacent room in the arena to find fresh mobs."""
+        exits = await self.actions.get_exits()
+        if not exits:
+            return
+        # Prefer directions we haven't been to recently
+        explore_dirs = ['south', 'north', 'east', 'west']
+        for d in explore_dirs:
+            if d in exits and d not in self._exploration_path:
+                self._exploration_path.append(d)
+                await self.actions.move(d)
+                return
+        # Reset and pick any exit
+        self._exploration_path = []
+        for d in explore_dirs:
+            if d in exits:
+                self._exploration_path.append(d)
+                await self.actions.move(d)
+                return
 
     async def _detect_auto_completions(self) -> None:
         """Detect auto-completed quests via quest history and record them as PASS."""
