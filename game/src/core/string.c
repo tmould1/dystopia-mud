@@ -192,7 +192,7 @@ void string_add( CHAR_DATA *ch, char *argument ) {
 	 * Truncate strings to MAX_STRING_LENGTH.
 	 * --------------------------------------
 	 */
-	if ( strlen( buf ) + strlen( argument ) >= ( MAX_STRING_LENGTH - 4 ) ) {
+	if ( strlen( *ch->desc->pString ) + strlen( argument ) >= ( MAX_STRING_LENGTH - 4 ) ) {
 		send_to_char( "String too long, last line skipped.\n\r", ch );
 
 		/* Force character out of editing mode. */

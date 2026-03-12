@@ -193,7 +193,7 @@ const struct olc_cmd_type hedit_table[] =
 		{ "keyword", hedit_keyword },
 		{ "delete", hedit_delete },
 		{
-			NULL,
+			"",
 			0,
 		} };
 
