@@ -12,6 +12,7 @@
 #include "cfg.h"
 #include "chronomancer.h"
 #include "../db/db_class.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations from chronomancer.c */
 extern int get_chrono_power_mod ( CHAR_DATA *ch, bool is_accel );
@@ -760,6 +761,7 @@ void do_paratrain( CHAR_DATA *ch, char *argument ) {
 	snprintf( buf, sizeof( buf ),
 		"#x160You advance %s to level #x210%d#x160!#n\n\r", train_name, *train_ptr );
 	send_to_char( buf, ch );
+	quest_check_progress( ch, QOBJ_CLASS_TRAIN, "paratrain", 1 );
 }
 
 

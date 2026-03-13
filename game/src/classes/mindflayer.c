@@ -10,6 +10,7 @@
 #include "merc.h"
 #include "cfg.h"
 #include "psion.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations for update functions */
 void update_mindflayer( CHAR_DATA *ch );
@@ -105,6 +106,7 @@ void do_mindtrain( CHAR_DATA *ch, char *argument ) {
 		else if ( *path == 2 ) send_to_char( "You have learned #x035mindblast#n!\n\r", ch );
 		else if ( *path == 3 ) send_to_char( "You have learned #x035realityfracture#n!\n\r", ch );
 	}
+	quest_check_progress( ch, QOBJ_CLASS_TRAIN, "mindtrain", 1 );
 	return;
 }
 

@@ -10,6 +10,7 @@
 #include "merc.h"
 #include "cfg.h"
 #include "dirgesinger.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations for update functions */
 void update_dirgesinger( CHAR_DATA *ch );
@@ -528,6 +529,7 @@ void do_songtrain( CHAR_DATA *ch, char *argument ) {
 		if ( *path == 1 ) send_to_char( "You have learned #Rironsong#n!\n\r", ch );
 		else if ( *path == 2 ) send_to_char( "You have learned #Rrally#n!\n\r", ch );
 	}
+	quest_check_progress( ch, QOBJ_CLASS_TRAIN, "songtrain", 1 );
 	return;
 }
 

@@ -11,6 +11,7 @@
 #include "cfg.h"
 #include "cultist.h"
 #include "../db/db_class.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations for class armor */
 extern void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id );
@@ -183,6 +184,7 @@ void do_voidtrain( CHAR_DATA *ch, char *argument ) {
 				"#x120The void whispers deeper secrets... Forbidden Lore is now level %d.#n\n\r",
 				ch->pcdata->powers[CULT_TRAIN_LORE] );
 			send_to_char( buf, ch );
+			quest_check_progress( ch, QOBJ_CLASS_TRAIN, "voidtrain", 1 );
 			return;
 		}
 
@@ -203,6 +205,7 @@ void do_voidtrain( CHAR_DATA *ch, char *argument ) {
 				"#x120Void tendrils writhe with new purpose... Tentacle Arts is now level %d.#n\n\r",
 				ch->pcdata->powers[CULT_TRAIN_TENTACLE] );
 			send_to_char( buf, ch );
+			quest_check_progress( ch, QOBJ_CLASS_TRAIN, "voidtrain", 1 );
 			return;
 		}
 
@@ -223,6 +226,7 @@ void do_voidtrain( CHAR_DATA *ch, char *argument ) {
 				"#x120Your mind cracks further open... Madness is now level %d.#n\n\r",
 				ch->pcdata->powers[CULT_TRAIN_MADNESS] );
 			send_to_char( buf, ch );
+			quest_check_progress( ch, QOBJ_CLASS_TRAIN, "voidtrain", 1 );
 			return;
 		}
 
@@ -272,6 +276,7 @@ void do_voidtrain( CHAR_DATA *ch, char *argument ) {
 				"#x097Reality bends to your will... Reality Warp is now level %d.#n\n\r",
 				ch->pcdata->powers[VOID_TRAIN_WARP] );
 			send_to_char( buf, ch );
+			quest_check_progress( ch, QOBJ_CLASS_TRAIN, "voidtrain", 1 );
 			return;
 		}
 
@@ -292,6 +297,7 @@ void do_voidtrain( CHAR_DATA *ch, char *argument ) {
 				"#x097Your form shifts beyond humanity... Elder Form is now level %d.#n\n\r",
 				ch->pcdata->powers[VOID_TRAIN_FORM] );
 			send_to_char( buf, ch );
+			quest_check_progress( ch, QOBJ_CLASS_TRAIN, "voidtrain", 1 );
 			return;
 		}
 
@@ -312,6 +318,7 @@ void do_voidtrain( CHAR_DATA *ch, char *argument ) {
 				"#x097The cosmos reveals its horrors... Cosmic Horror is now level %d.#n\n\r",
 				ch->pcdata->powers[VOID_TRAIN_COSMIC] );
 			send_to_char( buf, ch );
+			quest_check_progress( ch, QOBJ_CLASS_TRAIN, "voidtrain", 1 );
 			return;
 		}
 

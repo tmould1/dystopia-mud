@@ -10,6 +10,7 @@
 #include "merc.h"
 #include "cfg.h"
 #include "dragonkin.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations for update functions */
 void update_wyrm( CHAR_DATA *ch );
@@ -580,6 +581,7 @@ void do_wyrmtrain( CHAR_DATA *ch, char *argument ) {
 
 	snprintf( buf, sizeof( buf ), "You have trained %s to level %d.\n\r", tree_name, *train_ptr );
 	send_to_char( buf, ch );
+	quest_check_progress( ch, QOBJ_CLASS_TRAIN, "wyrmtrain", 1 );
 }
 
 /*

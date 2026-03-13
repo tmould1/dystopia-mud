@@ -11,6 +11,7 @@
 #include "cfg.h"
 #include "artificer.h"
 #include "../db/db_class.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations for class armor */
 extern void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id );
@@ -1063,6 +1064,7 @@ void do_cybtrain( CHAR_DATA *ch, char *argument ) {
 			send_to_char( buf, ch );
 		}
 	}
+	quest_check_progress( ch, QOBJ_CLASS_TRAIN, "cybtrain", 1 );
 	return;
 }
 

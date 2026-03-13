@@ -190,6 +190,26 @@ Examples:
         default=0.5,
         help='Delay between commands in seconds (default: 0.5)'
     )
+    quest_parser.add_argument(
+        '--enable-story',
+        action='store_true',
+        default=True,
+        dest='enable_story',
+        help='Use story system for area navigation and combat training (default: enabled)'
+    )
+    quest_parser.add_argument(
+        '--no-story',
+        action='store_false',
+        dest='enable_story',
+        help='Disable story system'
+    )
+    quest_parser.add_argument(
+        '--enable-pvp',
+        action='store_true',
+        default=False,
+        dest='enable_pvp',
+        help='Enable PvP handlers (arena win, kill player)'
+    )
 
     return parser
 
@@ -269,6 +289,8 @@ async def run_quest_bot(args) -> int:
         mode=args.mode,
         stop_after_quest=args.stop_after,
         selfclass=args.selfclass,
+        enable_story=args.enable_story,
+        enable_pvp=args.enable_pvp,
     )
 
     prog_config = ProgressionConfig()

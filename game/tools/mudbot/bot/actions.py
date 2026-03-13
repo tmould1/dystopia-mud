@@ -7,6 +7,7 @@ import logging
 from typing import Optional, TYPE_CHECKING
 
 from ..utils.parsers import ScoreParser, CombatParser, RoomParser, TrainParser, VitalStats
+from ..utils.quest_parser import StoryParser, StoryState
 
 if TYPE_CHECKING:
     from .base import MudBot
@@ -28,6 +29,7 @@ class BotActions:
         self.combat_parser = CombatParser()
         self.room_parser = RoomParser()
         self.train_parser = TrainParser()
+        self.story_parser = StoryParser()
 
         # Cached state
         self._last_stats: Optional[VitalStats] = None
@@ -505,6 +507,97 @@ class BotActions:
                 return False
 
             await asyncio.sleep(0.2)
+
+    # =========================================================================
+    # Story & Navigation Actions
+    # =========================================================================
+
+    async def story(self) -> StoryState:
+        """
+        Get story quest status via the 'story' command.
+
+        Returns:
+            Parsed StoryState.
+        """
+        response = await self.bot.send_and_read("story", timeout=5.0)
+        if response:
+            return self.story_parser.parse_story(response)
+        return StoryState(not_started=True)
+
+    async def storyadmin(self, name: str) -> StoryState:
+        """
+        Get exact story state via 'storyadmin <name>' (requires immortal).
+
+        Args:
+            name: Character name to inspect.
+
+        Returns:
+            Parsed StoryState with exact numeric values.
+        """
+        response = await self.bot.send_and_read(
+            f"storyadmin {name}",
+            wait_for=["Node:", "not started", "Huh?"],
+            timeout=5.0,
+        )
+        if response and "huh?" not in response.lower():
+            return self.story_parser.parse_storyadmin(response)
+        # Fallback to regular story command
+        return await self.story()
+
+    async def examine(self, keyword: str) -> str:
+        """
+        Examine a room feature or object.
+
+        Args:
+            keyword: Thing to examine.
+
+        Returns:
+            Response text.
+        """
+        response = await self.bot.send_and_read(f"examine {keyword}", timeout=5.0)
+        return response or ""
+
+    async def goto_room(self, vnum: int) -> bool:
+        """
+        Teleport to a room by vnum (requires immortal).
+
+        Args:
+            vnum: Room vnum to teleport to.
+
+        Returns:
+            True if successful.
+        """
+        response = await self.bot.send_and_read(
+            f"goto {vnum}",
+            wait_for=["[Exits:", "[Exit:", "Exits:", "Huh?", "No such location"],
+            timeout=5.0,
+        )
+        if response:
+            resp_lower = response.lower()
+            if "huh?" in resp_lower or "no such location" in resp_lower:
+                logger.warning(f"[{self.bot.config.name}] goto {vnum} failed")
+                return False
+        return True
+
+    async def get_all(self) -> str:
+        """Pick up all items in the room."""
+        response = await self.bot.send_and_read("get all", timeout=3.0)
+        return response or ""
+
+    async def cast_spell(self, spell: str, target: str = "") -> str:
+        """
+        Cast a spell during combat.
+
+        Args:
+            spell: Spell name (e.g. 'acid blast').
+            target: Target keyword (optional).
+
+        Returns:
+            Response text.
+        """
+        cmd = f"cast '{spell}' {target}".strip() if target else f"cast '{spell}'"
+        response = await self.bot.send_and_read(cmd, timeout=5.0)
+        return response or ""
 
     async def train_all_stats(self, hp_target: int, mana_target: int, move_target: int) -> dict:
         """

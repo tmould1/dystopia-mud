@@ -2925,6 +2925,7 @@ void do_train( CHAR_DATA *ch, char *argument ) {
 				}
 			}
 
+			quest_check_milestones( ch );
 			return;
 		}
 	}

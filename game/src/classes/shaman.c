@@ -14,6 +14,7 @@
 #include "cfg.h"
 #include "shaman.h"
 #include "../db/db_class.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations for class armor */
 extern void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id );
@@ -319,6 +320,7 @@ void do_spirittrain( CHAR_DATA *ch, char *argument )
 			"#GThe spirit of the earth answers... Totems is now level %d.#n\n\r",
 			ch->pcdata->powers[SHAMAN_TRAIN_TOTEM] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "spirittrain", 1 );
 		return;
 	}
 
@@ -342,6 +344,7 @@ void do_spirittrain( CHAR_DATA *ch, char *argument )
 			"#BSpirits swirl around you... Spirits is now level %d.#n\n\r",
 			ch->pcdata->powers[SHAMAN_TRAIN_SPIRIT] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "spirittrain", 1 );
 		return;
 	}
 
@@ -365,6 +368,7 @@ void do_spirittrain( CHAR_DATA *ch, char *argument )
 			"#CWhispers of the ancestors fill your mind... Communion is now level %d.#n\n\r",
 			ch->pcdata->powers[SHAMAN_TRAIN_COMMUNE] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "spirittrain", 1 );
 		return;
 	}
 

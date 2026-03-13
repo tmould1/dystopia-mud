@@ -497,6 +497,9 @@ static void quest_auto_complete( CHAR_DATA *ch, int quest_index ) {
     send_to_char( buf, ch );
     quest_award_rewards( ch, q );
 
+    /* Track quest completion for COMPLETE_QUEST objectives */
+    quest_check_progress( ch, QOBJ_COMPLETE_QUEST, q->id, 1 );
+
     /* Re-evaluate availability for cascading unlocks */
     quest_evaluate_availability( ch );
 
@@ -645,6 +648,24 @@ void quest_check_milestones( CHAR_DATA *ch ) {
                     for ( s = 0; s < 5; s++ )
                         if ( ch_spl(ch)[s] > cur_val )
                             cur_val = ch_spl(ch)[s];
+                }
+            }
+            else if ( !strcmp( obj->type, QOBJ_LEARN_DISCIPLINE ) ) {
+                if ( !strcmp( obj->target, "any" ) ) {
+                    int d;
+                    for ( d = 1; d < MAX_DISCIPLINES; d++ )
+                        if ( ch_power(ch)[d] > cur_val )
+                            cur_val = ch_power(ch)[d];
+                }
+            }
+            else if ( !strcmp( obj->type, QOBJ_CLASS_POWER ) ) {
+                int d;
+                for ( d = 1; d < MAX_DISCIPLINES; d++ ) {
+                    if ( discipline[d][0] != '\0'
+                      && !str_cmp( obj->target, discipline[d] ) ) {
+                        cur_val = ch_power(ch)[d];
+                        break;
+                    }
                 }
             }
             else {
@@ -972,6 +993,7 @@ static void quest_do_complete( CHAR_DATA *ch, char *argument ) {
             send_to_char( buf, ch );
         }
         quest_award_rewards( ch, q );
+        quest_check_progress( ch, QOBJ_COMPLETE_QUEST, q->id, 1 );
         completed++;
     }
 

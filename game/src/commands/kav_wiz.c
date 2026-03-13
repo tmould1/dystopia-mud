@@ -22,6 +22,21 @@
 #include <time.h>
 #include "merc.h"
 #include "../db/db_game.h"
+#include "../systems/quest_new.h"
+
+/* Helper: extract forging material and fire quest hook */
+static void forge_extract_and_notify( CHAR_DATA *ch, OBJ_DATA *mat ) {
+	const char *cat;
+	if ( mat->item_type == ITEM_HILT )
+		cat = "hilt";
+	else if ( mat->item_type == ITEM_GEMSTONE )
+		cat = "gem";
+	else
+		cat = "metal";
+	extract_obj( mat );
+	quest_check_progress( ch, QOBJ_FORGE_ITEM, cat, 1 );
+	quest_check_progress( ch, QOBJ_FORGE_ITEM, "any", 1 );
+}
 
 void do_forge( CHAR_DATA *ch, char *argument ) {
 	char arg1[MAX_STRING_LENGTH];
@@ -57,7 +72,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 		}
 		SET_BIT( obj->spectype, SITEM_COPPER );
 		forge_affect( obj, 3 );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge copper onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges copper onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		return;
@@ -77,7 +92,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 		}
 		SET_BIT( obj->spectype, SITEM_IRON );
 		forge_affect( obj, 6 );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge iron onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges iron onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		return;
@@ -97,7 +112,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 		}
 		SET_BIT( obj->spectype, SITEM_STEEL );
 		forge_affect( obj, 9 );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge steel onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges steel onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		return;
@@ -117,7 +132,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 		}
 		SET_BIT( obj->spectype, SITEM_ADAMANTITE );
 		forge_affect( obj, 12 );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge adamantite onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges adamantite onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		return;
@@ -135,7 +150,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a diamond onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a diamond onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -158,7 +173,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge an emerald onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges an emerald onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -181,7 +196,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a sapphire onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a sapphire onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -204,7 +219,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a ruby onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a ruby onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -227,7 +242,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a pearl onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a pearl onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -250,7 +265,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a topaz onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a topaz onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -273,7 +288,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge an amethyst onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges an amethyst onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -296,7 +311,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge an onyx onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges an onyx onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -319,7 +334,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge an opal onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges an opal onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -342,7 +357,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a lazuli onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a lazuli onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -365,7 +380,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_GEMSTONE );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge some jade onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges some jade onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		if ( obj->item_type == ITEM_WEAPON ) {
@@ -396,7 +411,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_HILT );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge an ivory hilt onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges an ivory hilt onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		obj->value[0] += 24;
@@ -418,7 +433,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_HILT );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge an ebony hilt onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges an ebony hilt onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		obj->value[0] += 4;
@@ -440,7 +455,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_HILT );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a crystal hilt onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a crystal hilt onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		obj->value[0] += 30;
@@ -462,7 +477,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_HILT );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a marble hilt onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a marble hilt onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		obj->value[0] += 34;
@@ -484,7 +499,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_HILT );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a gold hilt onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a gold hilt onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		obj->value[0] += 48;
@@ -506,7 +521,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_HILT );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a bronze hilt onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a bronze hilt onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		obj->value[0] += 1;
@@ -528,7 +543,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_HILT );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a sandstone hilt onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a sandstone hilt onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		obj->value[0] += 36;
@@ -550,7 +565,7 @@ void do_forge( CHAR_DATA *ch, char *argument ) {
 			return;
 		}
 		SET_BIT( obj->spectype, SITEM_HILT );
-		extract_obj( obj2 );
+		forge_extract_and_notify( ch, obj2 );
 		act( "You forge a limestone hilt onto $p.\n\r", ch, obj, NULL, TO_CHAR );
 		act( "$n forges a limestone hilt onto $p.\n\r", ch, obj, NULL, TO_ROOM );
 		obj->value[0] += 53;
@@ -1372,6 +1387,7 @@ void do_questcreate( CHAR_DATA *ch, char *argument ) {
 		obj->questowner = str_dup( ch->pcdata->switchname );
 		act( "You reach up into the air and draw out a ball of protoplasm.", ch, obj, NULL, TO_CHAR );
 		act( "$n reaches up into the air and draws out a ball of protoplasm.", ch, obj, NULL, TO_ROOM );
+		quest_check_progress( ch, QOBJ_QUEST_CREATE, "any", 1 );
 		return;
 	}
 	if ( arg1[0] == '\0' || arg2[0] == '\0' ) {
@@ -1449,6 +1465,7 @@ void do_questcreate( CHAR_DATA *ch, char *argument ) {
 		ch->pcdata->quest -= value;
 		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->pcdata->switchname );
+		quest_check_progress( ch, QOBJ_QUEST_MODIFY, "any", 1 );
 		return;
 	}
 	if ( !str_cmp( arg2, "min" ) ) {
@@ -1477,6 +1494,7 @@ void do_questcreate( CHAR_DATA *ch, char *argument ) {
 		ch->pcdata->quest -= value;
 		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->pcdata->switchname );
+		quest_check_progress( ch, QOBJ_QUEST_MODIFY, "any", 1 );
 		return;
 	}
 	if ( !str_cmp( arg2, "max" ) ) {
@@ -1505,6 +1523,7 @@ void do_questcreate( CHAR_DATA *ch, char *argument ) {
 		ch->pcdata->quest -= value;
 		if ( obj->questmaker != NULL ) free(obj->questmaker);
 		obj->questmaker = str_dup( ch->pcdata->switchname );
+		quest_check_progress( ch, QOBJ_QUEST_MODIFY, "any", 1 );
 		return;
 	}
 	if ( !str_cmp( arg2, "weapon" ) ) {
@@ -3738,6 +3757,7 @@ void oset_affect( CHAR_DATA *ch, OBJ_DATA *obj, int value, int affect, bool is_q
 	send_to_char("Ok.\n\r",ch);
 
 */
+	quest_check_progress( ch, QOBJ_QUEST_MODIFY, "any", 1 );
 	return;
 }
 

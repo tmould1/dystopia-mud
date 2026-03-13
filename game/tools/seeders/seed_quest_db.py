@@ -276,7 +276,7 @@ def seed_phase1(conn):
           "M", 1, AC, qp=200,
           prereqs=["M03"],
           objectives=[
-              ("EARN_QP", "lifetime", 500, "Earn 500 lifetime quest points"),
+              ("EARN_QP", "lifetime", 400, "Earn 400 lifetime quest points"),
           ])
 
 
@@ -380,11 +380,11 @@ def seed_phase2(conn):
           prereqs=["E01"],
           objectives=[("VISIT_AREA", "any", 15, "Visit 15 different areas")])
 
-    # Archaic quest card
+    # Archaic quest card — unlocked early so players can earn QP via quest cards
     quest(conn, "A01", "Ancient Rites",
           "Complete an archaic quest card by collecting the required items.",
-          "A", 2, AC, qp=300,
-          prereqs=["M05"],
+          "A", 1, AC, qp=300,
+          prereqs=["M03"],
           objectives=[
               ("COMPLETE_QUEST", "archaic_card", 1, "Complete 1 quest card"),
           ])

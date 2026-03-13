@@ -12,6 +12,7 @@
 #include "cfg.h"
 #include "chronomancer.h"
 #include "../db/db_class.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations for class armor */
 extern void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id );
@@ -263,6 +264,7 @@ void do_timetrain( CHAR_DATA *ch, char *argument )
 			"#x215Time accelerates around you... Acceleration is now level %d.#n\n\r",
 			ch->pcdata->powers[CHRONO_TRAIN_ACCEL] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "timetrain", 1 );
 		return;
 	}
 
@@ -286,6 +288,7 @@ void do_timetrain( CHAR_DATA *ch, char *argument )
 			"#x215Time slows to a crawl... Deceleration is now level %d.#n\n\r",
 			ch->pcdata->powers[CHRONO_TRAIN_DECEL] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "timetrain", 1 );
 		return;
 	}
 
@@ -309,6 +312,7 @@ void do_timetrain( CHAR_DATA *ch, char *argument )
 			"#x215Your perception expands across timelines... Temporal Sight is now level %d.#n\n\r",
 			ch->pcdata->powers[CHRONO_TRAIN_SIGHT] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "timetrain", 1 );
 		return;
 	}
 

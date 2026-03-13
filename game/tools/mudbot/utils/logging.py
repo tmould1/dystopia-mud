@@ -29,6 +29,13 @@ def setup_logging(
     logger_name = name or "mudbot"
     logger = logging.getLogger(logger_name)
 
+    # Also configure the root logger so that bot modules using
+    # logging.getLogger(__name__) (e.g. game.tools.mudbot.bot.quest_bot)
+    # inherit a handler and level.
+    root = logging.getLogger()
+    if not root.handlers:
+        root.setLevel(level)
+
     # Avoid adding handlers multiple times
     if logger.handlers:
         return logger
@@ -48,6 +55,10 @@ def setup_logging(
     formatter = logging.Formatter(fmt, datefmt="%H:%M:%S")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+
+    # Add the same handler to root so all module loggers get output
+    if not root.handlers:
+        root.addHandler(handler)
 
     return logger
 

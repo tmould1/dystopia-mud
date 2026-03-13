@@ -25,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include "merc.h"
+#include "../systems/quest_new.h"
 
 #define ARENA_LVNUM	  50 // lower vnum for the arena
 #define ARENA_HVNUM	  67 // upper vnum for the arena
@@ -189,6 +190,7 @@ void do_resign( CHAR_DATA *ch, char *argument ) {
 	if ( found == 1 ) {
 		snprintf( buf, sizeof( buf ), "#C%s #oemerges victorious from the #Rarena#n", gch->name );
 		gch->pcdata->awins++;
+		quest_check_progress( gch, QOBJ_ARENA_WIN, "any", 1 );
 		do_info( gch, buf );
 		if ( ( location = get_room_index( ROOM_VNUM_ALTAR ) ) == NULL ) return;
 		char_from_room( gch );

@@ -304,3 +304,118 @@ class QuestParser:
         if m:
             return m.group(1).strip()
         return None
+
+
+# ---------------------------------------------------------------------------
+# Story parser
+# ---------------------------------------------------------------------------
+
+@dataclass
+class StoryState:
+    """Parsed state of the story quest."""
+    node: int = 0               # 0=not started, 1-16=active, 17+=done
+    kills: int = 0
+    progress: int = 0           # bitfield (0x01, 0x02, 0x04)
+    tasks: list[bool] = field(default_factory=lambda: [False, False, False])
+    not_started: bool = False
+    completed: bool = False
+    clue: str = ""
+
+
+class StoryParser:
+    """
+    Parse output from 'story' and 'storyadmin' commands.
+
+    Regular 'story' output:
+        <clue text>
+        [Tasks: *-* | Kills: 3]
+
+    'storyadmin <name>' output:
+        Node: 2 (active)
+        Kills: 3
+        Progress: 0x07 [*-*]
+    """
+
+    COLOR_PATTERN = QuestParser.COLOR_PATTERN
+    SYMBOLS = QuestParser.SYMBOLS
+
+    # storyadmin patterns
+    NODE_RE = re.compile(r'Node:\s*(\d+)')
+    KILLS_RE = re.compile(r'Kills:\s*(\d+)')
+    PROGRESS_RE = re.compile(r'Progress:\s*0x([0-9A-Fa-f]+)')
+
+    # Regular story command: [Tasks: *-* | Kills: N]
+    TASKS_RE = re.compile(r'Tasks:\s*([*-])([*-])([*-])\s*\|\s*Kills:\s*(\d+)')
+
+    # Detection patterns
+    NOT_STARTED_RE = re.compile(r'no recollection', re.IGNORECASE)
+    COMPLETED_RE = re.compile(r'reflect on your journey|not forgotten', re.IGNORECASE)
+
+    def strip_colors(self, text: str) -> str:
+        """Remove color codes and symbols."""
+        text = self.COLOR_PATTERN.sub('', text)
+        text = self.SYMBOLS.sub('', text)
+        return text
+
+    def parse_storyadmin(self, text: str) -> StoryState:
+        """Parse 'storyadmin <name>' output for exact numeric state."""
+        clean = self.strip_colors(text)
+        state = StoryState()
+
+        m = self.NODE_RE.search(clean)
+        if m:
+            state.node = int(m.group(1))
+
+        m = self.KILLS_RE.search(clean)
+        if m:
+            state.kills = int(m.group(1))
+
+        m = self.PROGRESS_RE.search(clean)
+        if m:
+            state.progress = int(m.group(1), 16)
+            state.tasks = [
+                bool(state.progress & 0x01),
+                bool(state.progress & 0x02),
+                bool(state.progress & 0x04),
+            ]
+
+        if "not started" in clean.lower():
+            state.not_started = True
+        elif "completed" in clean.lower():
+            state.completed = True
+
+        return state
+
+    def parse_story(self, text: str) -> StoryState:
+        """Parse regular 'story' command output."""
+        clean = self.strip_colors(text)
+        state = StoryState()
+
+        if self.NOT_STARTED_RE.search(clean):
+            state.not_started = True
+            return state
+
+        if self.COMPLETED_RE.search(clean):
+            state.completed = True
+            state.node = 99
+            return state
+
+        # Parse tasks line: [Tasks: *-* | Kills: N]
+        m = self.TASKS_RE.search(clean)
+        if m:
+            state.tasks = [m.group(1) == '*', m.group(2) == '*', m.group(3) == '*']
+            state.kills = int(m.group(4))
+            state.progress = (
+                (0x01 if state.tasks[0] else 0)
+                | (0x02 if state.tasks[1] else 0)
+                | (0x04 if state.tasks[2] else 0)
+            )
+
+        # Store the clue text (everything before the tasks line)
+        tasks_pos = clean.find('[Tasks:')
+        if tasks_pos > 0:
+            state.clue = clean[:tasks_pos].strip()
+        else:
+            state.clue = clean.strip()
+
+        return state

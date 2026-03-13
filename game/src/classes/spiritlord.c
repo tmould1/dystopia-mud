@@ -14,6 +14,7 @@
 #include "cfg.h"
 #include "shaman.h"
 #include "../db/db_class.h"
+#include "../systems/quest_new.h"
 
 /* Forward declarations for class armor */
 extern void do_classarmor_generic( CHAR_DATA *ch, char *argument, int class_id );
@@ -115,6 +116,7 @@ void do_lordtrain( CHAR_DATA *ch, char *argument )
 			"#GSpiritual energy coalesces within you... Embodiment is now level %d.#n\n\r",
 			ch->pcdata->powers[SL_TRAIN_EMBODY] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "lordtrain", 1 );
 		return;
 	}
 
@@ -138,6 +140,7 @@ void do_lordtrain( CHAR_DATA *ch, char *argument )
 			"#BThe spirits bend to your will... Dominion is now level %d.#n\n\r",
 			ch->pcdata->powers[SL_TRAIN_DOMINION] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "lordtrain", 1 );
 		return;
 	}
 
@@ -161,6 +164,7 @@ void do_lordtrain( CHAR_DATA *ch, char *argument )
 			"#CThe boundary between worlds thins... Transcendence is now level %d.#n\n\r",
 			ch->pcdata->powers[SL_TRAIN_TRANSCEND] );
 		send_to_char( buf, ch );
+		quest_check_progress( ch, QOBJ_CLASS_TRAIN, "lordtrain", 1 );
 		return;
 	}
 

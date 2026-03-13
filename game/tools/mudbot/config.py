@@ -209,3 +209,10 @@ class QuestConfig:
 
     # Class selection for M01 selfclass objective
     selfclass: str = "demon"            # Default class to pick
+
+    # Story system
+    enable_story: bool = True           # Use story for area nav + combat training
+    max_story_node: int = 16            # How far to progress story
+
+    # PvP
+    enable_pvp: bool = False            # Enable PvP handlers (arena, kill_player)

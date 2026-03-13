@@ -19,6 +19,8 @@ from .base import MudBot
 from .state_machine import BotState
 from .actions import BotActions
 from .quest_actions import QuestActions
+from .objective_handlers import ObjectiveHandlers
+from .story_navigator import StoryNavigator
 from ..utils.quest_parser import QuestEntry, QuestProgress
 
 logger = logging.getLogger(__name__)
@@ -44,6 +46,7 @@ class QuestBotState(Enum):
     TRAINING_STATS = auto()
     TRAINING_AVATAR = auto()
     SELECTING_CLASS = auto()
+    STORY_PROGRESSION = auto()
     COMPLETE = auto()
     FAILED = auto()
 
@@ -125,6 +128,8 @@ class QuestBot(MudBot):
         self.prog_config = prog_config or ProgressionConfig()
         self.actions = BotActions(self)
         self.quest_actions = QuestActions(self)
+        self.objective_handlers = ObjectiveHandlers(self)
+        self.story_navigator = StoryNavigator(self)
 
         # State machine
         self._state_q = QuestBotState.START
@@ -140,6 +145,7 @@ class QuestBot(MudBot):
         self._exploration_path: list[str] = []
         self._kills_since_train: int = 0
         self._kills_before_train: int = 5  # Kill this many before attempting train
+        self._story_combat: bool = False  # True when combat was started by story navigator
 
         # Report
         self._results: list[QuestResult] = []
@@ -264,6 +270,8 @@ class QuestBot(MudBot):
             await self._train_avatar()
         elif self._state_q == QuestBotState.SELECTING_CLASS:
             await self._select_class()
+        elif self._state_q == QuestBotState.STORY_PROGRESSION:
+            await self._story_tick()
 
     # =========================================================================
     # State handlers
@@ -446,10 +454,15 @@ class QuestBot(MudBot):
             logger.info(f"[{self.config.name}] QP milestone — continuing quest chain")
             self.quest_state = QuestBotState.REFRESHING_STATE
         else:
-            logger.warning(f"[{self.config.name}] Unhandled objective: {obj.description}")
-            # Try refreshing to see if it auto-completed
-            await asyncio.sleep(2.0)
-            self.quest_state = QuestBotState.REFRESHING_STATE
+            # Try extended objective handlers for advanced quest types
+            next_state = await self.objective_handlers.dispatch(
+                self._current_quest, self._current_objective_idx)
+            if next_state:
+                self.quest_state = QuestBotState[next_state]
+            else:
+                logger.warning(f"[{self.config.name}] Unhandled objective: {obj.description}")
+                await asyncio.sleep(2.0)
+                self.quest_state = QuestBotState.REFRESHING_STATE
 
     # =========================================================================
     # Objective handlers
@@ -530,9 +543,29 @@ class QuestBot(MudBot):
         self.quest_state = QuestBotState.REFRESHING_STATE
 
     async def _handle_stance_objective(self) -> None:
-        """Handle stance training objectives."""
+        """Handle stance training objectives.
+
+        Stance skill only improves during multi-round combat (improve_stance()
+        in kav_fight.c).  Arena instant kills don't count.  Route to story
+        areas when available — story mobs are tougher and guarantee real
+        combat rounds.
+        """
+        # Check level first (before autostance, which can eat the read buffer)
+        stats = await self.actions.score()
+        level = stats.level if stats else 0
+        logger.info(f"[{self.config.name}] Stance objective: level={level}, "
+                    f"story={self.quest_config.enable_story}")
+
         await self.actions.set_autostance("bull")
-        # Stance skill builds through combat — go kill mobs
+
+        # Prefer story areas for multi-round combat if story is enabled
+        # and the character is avatar (story requires avatar status)
+        if self.quest_config.enable_story and level >= 3:
+            logger.info(f"[{self.config.name}] Stance training via story combat")
+            self.quest_state = QuestBotState.STORY_PROGRESSION
+            return
+
+        # Fallback: arena combat (works but slow for stance gains)
         self.quest_state = QuestBotState.KILLING_MOBS
 
     # =========================================================================
@@ -638,12 +671,21 @@ class QuestBot(MudBot):
             self._kills_since_train += 1
             logger.info(f"[{self.config.name}] Victory! "
                         f"(kills since train: {self._kills_since_train})")
+            # Pick up drops (forge materials, quest items)
+            await self.actions.get_all()
             # Move to a new room to find fresh mobs (avoids corpse confusion)
-            await self._move_to_next_arena_room()
+            if not self._story_combat:
+                await self._move_to_next_arena_room()
         else:
             logger.warning(f"[{self.config.name}] Combat ended unfavorably")
 
         self._kill_target = None
+
+        # If combat was initiated by story navigator, return to story
+        if self._story_combat:
+            self._story_combat = False
+            self.quest_state = QuestBotState.STORY_PROGRESSION
+            return
 
         # Check if we're farming for REACH_STAT (batched kills) vs KILL_MOB (refresh each kill)
         if (self._current_quest and self._kills_before_train > 1
@@ -816,6 +858,18 @@ class QuestBot(MudBot):
         logger.warning(f"[{self.config.name}] Selfclass response unclear, "
                        "refreshing")
         self.quest_state = QuestBotState.REFRESHING_STATE
+
+    async def _story_tick(self) -> None:
+        """Advance the story navigator one step."""
+        next_state = await self.story_navigator.tick()
+        if next_state:
+            if next_state == "WAITING_COMBAT":
+                # Story navigator started multi-round combat — track it
+                self._story_combat = True
+            self.quest_state = QuestBotState[next_state]
+        else:
+            # Story idle or complete — fall back to normal quest work
+            self.quest_state = QuestBotState.REFRESHING_STATE
 
     # =========================================================================
     # Helpers
