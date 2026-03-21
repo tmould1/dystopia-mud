@@ -39,8 +39,8 @@ class ScoreParser:
     The score command shows vital statistics, experience, level, etc.
     """
 
-    # Pattern to strip ANSI color codes
-    ANSI_ESCAPE = re.compile(r'\x1b\[[0-9;]*m|\[0[;0-9]*m')
+    # Pattern to strip ANSI color codes and MUD custom color codes (#R, #G, etc.)
+    ANSI_ESCAPE = re.compile(r'\x1b\[[0-9;]*m|\[0[;0-9]*m|#[RGBYPCWnrxtT0-9]+')
 
     # Pattern for HP/Mana/Move from score output
     # Dystopia format: "Hit Points: 100/2000. Mana: 100/500. Movement: 200/500."
@@ -242,6 +242,9 @@ class RoomParser:
         Returns:
             List of exit directions (e.g., ['north', 'south', 'east']).
         """
+        # Strip ANSI/color codes first — MUD embeds them in "[Exits:" bracket
+        text = re.sub(r'\x1b\[[0-9;]*m|\[0[;0-9]*m|#[RGBYPCWnrxtT0-9]+', '', text)
+
         # Try bracketed format first: [Exits: n s e]
         match = self.EXITS_BRACKET_PATTERN.search(text)
         if not match:

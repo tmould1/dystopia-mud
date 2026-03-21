@@ -35,8 +35,6 @@
 #include "../db/db_quest.h"
 #include "../script/script.h"
 
-#define MONK_AUTODROP  12
-
 extern KINGDOM_DATA kingdom_table[MAX_KINGDOM + 1];
 extern GAMECONFIG_DATA game_config;
 
@@ -1581,12 +1579,16 @@ bool one_hit( CHAR_DATA *ch, CHAR_DATA *victim, int dt, int handtype ) {
 	attack_modify = dice( 1, 100 );
 	randomize_damage( ch, dam, attack_modify );
 	if ( dt == gsn_deathaura && dam >= victim->hit && IS_NPC( victim ) ) dam = victim->hit - 1; /* trust me, Jobo */
+
+	/* Improve stance before damage so instant kills still train */
+	if ( !is_safe( ch, victim ) )
+		improve_stance( ch );
+
 	bool killed = damage( ch, victim, dam, dt );
 
 	tail_chain();
 	if ( !killed && !is_safe( ch, victim ) ) {
 		improve_wpn( ch, dt, right_hand );
-		improve_stance( ch );
 	}
 	return killed;
 }

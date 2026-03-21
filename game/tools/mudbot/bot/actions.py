@@ -42,15 +42,35 @@ class BotActions:
         Returns:
             Room description text.
         """
-        # Wait for exits line which appears in room descriptions
-        # Handle both bracketed [Exits:] and plain "Exits:" formats
-        response = await self.bot.send_and_read(
-            "look",
-            wait_for=["[Exits:", "[Exit:", "Exits:", "Obvious exits:"],
-            timeout=5.0
-        )
-        logger.debug(f"[{self.bot.config.name}] Look response ({len(response) if response else 0} chars): {response[:300] if response else 'None'}...")
-        return response or ""
+        # Send look and accumulate response manually.
+        # Cannot use wait_for patterns because the MUD's ANSI color codes
+        # break pattern matching (e.g. "#R[#GExits#7:#C" splits "[Exits:").
+        await self.bot.send_command("look")
+        await asyncio.sleep(0.5)  # Wait for server to process and respond
+
+        # Read all available data
+        accumulated = ""
+        for _ in range(10):
+            chunk = await self.bot.client.read(timeout=0.5)
+            if chunk:
+                accumulated += chunk
+            else:
+                break
+
+        if not accumulated:
+            # Retry once
+            await self.bot.send_command("look")
+            await asyncio.sleep(1.0)
+            for _ in range(5):
+                chunk = await self.bot.client.read(timeout=0.5)
+                if chunk:
+                    accumulated += chunk
+                else:
+                    break
+
+        if not accumulated:
+            logger.warning(f"[{self.bot.config.name}] Look returned empty")
+        return accumulated
 
     async def score(self) -> Optional[VitalStats]:
         """
@@ -93,10 +113,46 @@ class BotActions:
 
         response = await self.bot.send_and_read(direction, timeout=3.0)
         if response:
-            # Check for failure messages
-            if "Alas, you cannot go that way" in response or "no exit" in response.lower():
-                logger.debug(f"[{self.bot.config.name}] Cannot move {direction}")
+            resp_lower = response.lower()
+            # Check for failure messages from command interpreter (interp.c:1692)
+            if "alas, you cannot go that way" in resp_lower or "no exit" in resp_lower:
+                logger.info(f"[{self.bot.config.name}] Cannot move {direction}: no exit")
                 return False
+            if "in your dreams" in resp_lower:
+                logger.info(f"[{self.bot.config.name}] Cannot move {direction}: sleeping")
+                await self.bot.send_command("wake")
+                await asyncio.sleep(0.5)
+                await self.bot.send_command("stand")
+                return False
+            if "too relaxed" in resp_lower:
+                logger.info(f"[{self.bot.config.name}] Cannot move {direction}: resting/sitting")
+                await self.bot.send_command("stand")
+                return False
+            if "still fighting" in resp_lower:
+                logger.info(f"[{self.bot.config.name}] Cannot move {direction}: fighting")
+                return False
+            if "unable to move" in resp_lower or "unable to pass" in resp_lower:
+                logger.info(f"[{self.bot.config.name}] Cannot move {direction}: blocked")
+                return False
+            if "free arm" in resp_lower or "drag yourself" in resp_lower:
+                logger.info(f"[{self.bot.config.name}] Cannot move {direction}: limbs missing")
+                return False
+            if "broken spine" in resp_lower:
+                logger.info(f"[{self.bot.config.name}] Cannot move {direction}: broken spine")
+                return False
+            if "door is closed" in resp_lower or "it's closed" in resp_lower:
+                logger.info(f"[{self.bot.config.name}] Door closed {direction}, opening")
+                await self.bot.send_command(f"open {direction}")
+                await asyncio.sleep(0.5)
+                response2 = await self.bot.send_and_read(direction, timeout=3.0)
+                if response2 and ("alas" in response2.lower() or "closed" in response2.lower()):
+                    logger.info(f"[{self.bot.config.name}] Still can't move {direction} after open")
+                    return False
+                logger.info(f"[{self.bot.config.name}] Moved {direction} after opening door")
+                return True
+            logger.info(f"[{self.bot.config.name}] Moved {direction} OK: {response[:150]}")
+        else:
+            logger.info(f"[{self.bot.config.name}] Move {direction}: no response (may have succeeded)")
         return True
 
     async def kill(self, target: str) -> tuple[bool, bool]:

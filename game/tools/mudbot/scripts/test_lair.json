@@ -1,0 +1,18 @@
+{
+    "admin_cmds": ["resetarea"],
+    "target": "BotVamp",
+    "target_pass": "test12345",
+    "qadmin_cmds": ["boost hp 500000", "home 3700", "heal"],
+    "target_cmds": [],
+    "bot": {
+        "name": "BotVamp",
+        "password": "test12345",
+        "explevel": 3,
+        "selfclass": "vampire",
+        "stop_after": "T_DISC_01",
+        "mode": "all",
+        "enable_story": false,
+        "enable_pvp": false,
+        "delay": 0.5
+    }
+}

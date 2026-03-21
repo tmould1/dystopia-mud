@@ -1,0 +1,98 @@
+{
+    "copyover": false,
+    "admin_cmds": ["resetarea"],
+    "targets": [
+        {
+            "name": "BotVamp",
+            "password": "test12345",
+            "qadmin_cmds": [
+                "boost level 3",
+                "boost hp 500000",
+                "boost mana 15000",
+                "boost move 15000",
+                "boost qp 5000",
+                "home 32000",
+                "complete T01", "complete T02", "complete T03",
+                "complete T04", "complete T05",
+                "complete T_PRACTICE_01", "complete T_STANCE_01",
+                "complete M01", "complete M02", "complete M03",
+                "complete M04", "complete M05"
+            ],
+            "repeat_cmd": {"cmd": "boost exp 1000000", "times": 30, "wait": 1.5},
+            "target_cmds": ["selfclass vampire", "score"]
+        },
+        {
+            "name": "BotDemon",
+            "password": "test12345",
+            "qadmin_cmds": [
+                "boost level 3",
+                "boost hp 500000",
+                "boost mana 15000",
+                "boost move 15000",
+                "boost qp 5000",
+                "home 32000",
+                "complete T01", "complete T02", "complete T03",
+                "complete T04", "complete T05",
+                "complete T_PRACTICE_01", "complete T_STANCE_01",
+                "complete M01", "complete M02", "complete M03",
+                "complete M04", "complete M05"
+            ],
+            "repeat_cmd": {"cmd": "boost exp 1000000", "times": 30, "wait": 1.5},
+            "target_cmds": ["selfclass demon", "score"]
+        },
+        {
+            "name": "BotWolf",
+            "password": "test12345",
+            "qadmin_cmds": [
+                "boost level 3",
+                "boost hp 500000",
+                "boost mana 15000",
+                "boost move 15000",
+                "boost qp 5000",
+                "home 32000",
+                "complete T01", "complete T02", "complete T03",
+                "complete T04", "complete T05",
+                "complete T_PRACTICE_01", "complete T_STANCE_01",
+                "complete M01", "complete M02", "complete M03",
+                "complete M04", "complete M05"
+            ],
+            "repeat_cmd": {"cmd": "boost exp 1000000", "times": 30, "wait": 1.5},
+            "target_cmds": ["selfclass werewolf", "score"]
+        }
+    ],
+    "bots": [
+        {
+            "name": "BotVamp",
+            "password": "test12345",
+            "explevel": 3,
+            "selfclass": "vampire",
+            "stop_after": "",
+            "mode": "all",
+            "enable_story": false,
+            "enable_pvp": false,
+            "delay": 0.5
+        },
+        {
+            "name": "BotDemon",
+            "password": "test12345",
+            "explevel": 3,
+            "selfclass": "demon",
+            "stop_after": "",
+            "mode": "all",
+            "enable_story": false,
+            "enable_pvp": false,
+            "delay": 0.5
+        },
+        {
+            "name": "BotWolf",
+            "password": "test12345",
+            "explevel": 3,
+            "selfclass": "werewolf",
+            "stop_after": "",
+            "mode": "all",
+            "enable_story": false,
+            "enable_pvp": false,
+            "delay": 0.5
+        }
+    ]
+}

@@ -1,0 +1,36 @@
+{
+    "target": "Stancey",
+    "target_pass": "test12345",
+    "copyover": false,
+    "admin_cmds": [],
+    "qadmin_cmds": [
+        "boost level 3",
+        "boost hp 25000",
+        "boost mana 15000",
+        "boost move 15000",
+        "boost qp 5000",
+        "complete T01",
+        "complete T02",
+        "complete T03",
+        "complete T04",
+        "complete T05",
+        "complete M01",
+        "complete M02",
+        "complete M03",
+        "complete M04",
+        "complete M05"
+    ],
+    "repeat_cmd": {"cmd": "boost exp 1000000", "times": 50, "wait": 1.5},
+    "target_cmds": ["selfclass vampire", "score"],
+    "bot": {
+        "name": "Stancey",
+        "password": "test12345",
+        "explevel": 3,
+        "selfclass": "vampire",
+        "stop_after": "",
+        "mode": "all",
+        "enable_story": false,
+        "enable_pvp": false,
+        "delay": 0.5
+    }
+}

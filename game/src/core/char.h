@@ -845,6 +845,8 @@ struct kill_data {
 #define STANCE_SS4 16
 #define STANCE_SS5 17
 
+#define MONK_AUTODROP  12  /* stance array slot for autodrop preference */
+
 /*
  *  Bits for superstances
  */

@@ -41,6 +41,7 @@ def setup_logging(
         return logger
 
     logger.setLevel(level)
+    logger.propagate = False  # Don't duplicate to root
 
     # Console handler
     handler = logging.StreamHandler(sys.stdout)
@@ -55,10 +56,6 @@ def setup_logging(
     formatter = logging.Formatter(fmt, datefmt="%H:%M:%S")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-
-    # Add the same handler to root so all module loggers get output
-    if not root.handlers:
-        root.addHandler(handler)
 
     return logger
 

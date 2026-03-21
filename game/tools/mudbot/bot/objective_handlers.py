@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import random
 import re
 from typing import TYPE_CHECKING, Optional
 
@@ -120,6 +121,8 @@ class ObjectiveHandlers:
         Generation costs: gen 3→4: 400M, gen 4→5: 200M, gen 5→6: 50M, gen 6+: 10M.
         If not enough exp, farm in story areas for better xp yields.
         """
+        await self.actions.recall()
+        await asyncio.sleep(1.0)
         result = await self.quest_actions.send_command("train generation")
         if result:
             result_lower = result.lower()
@@ -148,33 +151,56 @@ class ObjectiveHandlers:
         in fight.c:3788) → detect "finished researching" → train <name>.
         Story areas provide good xp mobs for this.
         """
-        # Check current research state
-        resp = await self.quest_actions.send_command("research")
+        class_name = self.bot.quest_config.selfclass
+        info = CLASS_COMMANDS.get(class_name)
+        disc = info.disc_default if info and info.disc_default else "attack"
+
+        # Wait for any active combat to end, then recall to safety
+        await self.actions.wait_for_combat_end(timeout=30.0)
+        await self.actions.recall()
+        await asyncio.sleep(2.0)
+        # Drain any leftover output
+        await self.bot.client.read(timeout=1.0)
+
+        logger.info(f"[{self.bot.config.name}] Sending: research {disc}")
+        resp = await self.quest_actions.send_command(f"research {disc}")
         if not resp:
+            logger.warning(f"[{self.bot.config.name}] research command returned empty")
             return "REFRESHING_STATE"
 
         resp_lower = resp.lower()
+        logger.info(f"[{self.bot.config.name}] research response: {resp[:200]}")
 
-        if "finished researching" in resp_lower or "research complete" in resp_lower:
-            # Train the discipline
-            class_name = self.bot.quest_config.selfclass
-            info = CLASS_COMMANDS.get(class_name)
-            disc = info.disc_default if info and info.disc_default else "attack"
-            result = await self.quest_actions.send_command(f"train {disc}")
-            logger.info(f"[{self.bot.config.name}] Training discipline {disc}: "
-                        f"{result[:200] if result else 'no response'}")
+        if "still fighting" in resp_lower or "no way" in resp_lower:
+            # Still in combat somehow — go kill and come back later
+            logger.info(f"[{self.bot.config.name}] Still in combat, will retry after kills")
+            self.bot._kills_since_train = 0
+            self.bot._kills_before_train = 5
+            return "KILLING_MOBS"
+
+        if "don't know" in resp_lower:
+            logger.warning(f"[{self.bot.config.name}] Class {class_name} doesn't have "
+                           f"discipline '{disc}' — skipping")
             return "REFRESHING_STATE"
 
-        if "not currently" in resp_lower or "not researching" in resp_lower:
-            # Start researching — pick discipline based on class
-            class_name = self.bot.quest_config.selfclass
-            info = CLASS_COMMANDS.get(class_name)
-            disc = info.disc_default if info and info.disc_default else "attack"
-            await self.quest_actions.send_command(f"research {disc}")
+        if "already researching" in resp_lower:
+            # Try to train — if research complete (disc_points=999), this succeeds
+            result = await self.quest_actions.send_command(f"train {disc}")
+            if result:
+                result_lower = result.lower()
+                logger.info(f"[{self.bot.config.name}] train {disc} response: "
+                            f"{result[:200]}")
+                if "haven't finished" not in result_lower and "haven't started" not in result_lower:
+                    logger.info(f"[{self.bot.config.name}] Trained discipline {disc}!")
+                    return "REFRESHING_STATE"
+            # Still researching — need more kills
+
+        if "begin your research" in resp_lower or "begin researching" in resp_lower:
             logger.info(f"[{self.bot.config.name}] Started researching {disc}")
 
         # Kill mobs to accumulate disc_points (need 500+ xp kills)
         # Prefer story areas for tougher mobs with more xp
+        self.bot._kills_since_train = 0
         self.bot._kills_before_train = 20
         if self.bot.quest_config.enable_story:
             return "STORY_PROGRESSION"
@@ -197,54 +223,69 @@ class ObjectiveHandlers:
         return "REFRESHING_STATE"
 
     async def _handle_forge_item(self) -> str:
-        """Forge items. Check inventory for materials first."""
+        """Forge items. Syntax: forge <material_keyword> <target_item_keyword>."""
         inv = await self.actions.inventory()
         if not inv:
             return "KILLING_MOBS"
 
         inv_lower = inv.lower()
 
+        # Find a target item to forge onto (sword from tutorial)
+        target = None
+        for item_kw in ["sword", "armor", "shield", "helmet", "boots"]:
+            if item_kw in inv_lower:
+                target = item_kw
+                break
+
+        if not target:
+            # No forgeable item — keep farming
+            logger.info(f"[{self.bot.config.name}] No target item for forging, farming")
+            self.bot._kills_before_train = 20
+            return "KILLING_MOBS"
+
         # Check for metal slabs
         for metal in ["copper", "iron", "steel", "adamantite"]:
-            if metal in inv_lower and "slab" in inv_lower:
-                # Need a target item to forge onto — check for weapon/armor
-                result = await self.quest_actions.send_command(f"forge {metal} all")
-                if result and "forge" in result.lower():
-                    logger.info(f"[{self.bot.config.name}] Forged {metal}")
-                    return "REFRESHING_STATE"
+            if metal in inv_lower:
+                result = await self.quest_actions.send_command(f"forge {metal} {target}")
+                if result:
+                    result_lower = result.lower()
+                    if "forge" in result_lower and "require" not in result_lower:
+                        logger.info(f"[{self.bot.config.name}] Forged {metal} onto {target}")
+                        return "REFRESHING_STATE"
 
         # Check for gems
-        for gem in ["diamond", "emerald", "sapphire", "ruby"]:
+        for gem in ["jade", "diamond", "emerald", "sapphire", "ruby"]:
             if gem in inv_lower:
-                result = await self.quest_actions.send_command(f"forge {gem} all")
-                if result and "forge" in result.lower():
-                    logger.info(f"[{self.bot.config.name}] Forged {gem}")
-                    return "REFRESHING_STATE"
+                result = await self.quest_actions.send_command(f"forge {gem} {target}")
+                if result:
+                    result_lower = result.lower()
+                    if "forge" in result_lower and "require" not in result_lower:
+                        logger.info(f"[{self.bot.config.name}] Forged {gem} onto {target}")
+                        return "REFRESHING_STATE"
 
         # No materials — continue killing to farm drops
-        # Story areas have tougher mobs with better loot tables
         logger.info(f"[{self.bot.config.name}] No forge materials, farming")
         self.bot._kills_before_train = 20
-        if self.bot.quest_config.enable_story:
-            return "STORY_PROGRESSION"
         return "KILLING_MOBS"
 
     async def _handle_quest_create(self) -> str:
-        """Create a quest item (costs QP)."""
+        """Create a quest item (costs QP). Armor costs 20 QP."""
         result = await self.quest_actions.send_command("questcreate create armor")
         if result:
             logger.info(f"[{self.bot.config.name}] Quest create: {result[:200]}")
         return "REFRESHING_STATE"
 
     async def _handle_quest_modify(self) -> str:
-        """Modify quest item stats."""
-        # First check if we have a quest item to modify
-        result = await self.quest_actions.send_command("questcreate")
-        if result and "not carrying" in result.lower():
+        """Modify quest item stats. Uses protoplasm keyword."""
+        # Check if we have a quest item (protoplasm)
+        inv = await self.actions.inventory()
+        if not inv or "protoplasm" not in inv.lower():
             # Need to create one first
             return await self._handle_quest_create()
 
-        result = await self.quest_actions.send_command("questcreate all str 1")
+        # Modify: questcreate <item> <stat> <value>
+        # protection on armor costs 1 QP per point — cheapest option
+        result = await self.quest_actions.send_command("questcreate protoplasm protection 1")
         if result:
             logger.info(f"[{self.bot.config.name}] Quest modify: {result[:200]}")
         return "REFRESHING_STATE"
@@ -265,17 +306,32 @@ class ObjectiveHandlers:
         return "REFRESHING_STATE"
 
     async def _handle_visit_area(self) -> str:
-        """Visit areas — delegate to story navigator.
+        """Visit areas by walking through the world.
 
-        Story progression naturally visits 16 different areas (one per node).
         The server fires quest_check_progress(VISIT_AREA) when the character
-        enters a new area, so just progressing the story covers this.
+        enters a new area.  Walk a random path from recall to visit areas.
         """
-        if self.bot.quest_config.enable_story:
-            logger.info(f"[{self.bot.config.name}] VISIT_AREA — progressing story")
-            return "STORY_PROGRESSION"
-        # Without story, just walk around
-        logger.info(f"[{self.bot.config.name}] VISIT_AREA — no story, refreshing")
+        # Recall first to get a known starting point
+        await self.actions.recall()
+        await asyncio.sleep(0.5)
+
+        # Walk a random path to visit different areas
+        directions = ["north", "south", "east", "west"]
+        walk_dir = random.choice(directions)
+        steps = random.randint(5, 15)
+        logger.info(f"[{self.bot.config.name}] VISIT_AREA — walking {walk_dir} {steps} steps")
+
+        for _ in range(steps):
+            exits = await self.actions.get_exits()
+            if not exits:
+                break
+            if walk_dir in exits:
+                await self.actions.move(walk_dir)
+            elif exits:
+                walk_dir = random.choice(exits)
+                await self.actions.move(walk_dir)
+            await asyncio.sleep(0.3)
+
         return "REFRESHING_STATE"
 
     async def _handle_mastery(self) -> str:

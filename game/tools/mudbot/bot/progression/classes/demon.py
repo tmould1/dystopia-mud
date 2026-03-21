@@ -214,11 +214,10 @@ class DemonProgressionBot(ClassProgressionBot, AvatarProgressionMixin):
         return await self.run_class_progression()
 
     async def _handle_post_selfclass_setup(self) -> None:
-        """Handle stat clear, re-equip, autostance after selfclass."""
-        # Re-wear all equipment
+        """Handle post-selfclass setup (server auto-rewears gear)."""
         self.demon_state = DemonState.REWEARING_EQUIPMENT
-        equipped = await self.actions.rewear_all()
-        logger.info(f"[{self.config.name}] Re-equipped {equipped} items")
+        logger.info(f"[{self.config.name}] Stats cleared (server auto-rewears gear)")
+        await asyncio.sleep(0.5)
 
         # Set autostance
         self.demon_state = DemonState.SETTING_AUTOSTANCE
@@ -317,9 +316,8 @@ class DemonProgressionBot(ClassProgressionBot, AvatarProgressionMixin):
         self.demon_state = DemonState.REWEARING_EQUIPMENT
 
     async def _rewear_equipment_state(self) -> None:
-        """Re-wear all equipment after stat clear."""
-        equipped = await self.actions.rewear_all()
-        logger.info(f"[{self.config.name}] Re-equipped {equipped} items")
+        """Post stat clear — server auto-rewears gear."""
+        logger.info(f"[{self.config.name}] Server auto-reweared gear")
         self.demon_state = DemonState.SETTING_AUTOSTANCE
 
     async def _set_autostance_state(self) -> None:

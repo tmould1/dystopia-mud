@@ -1,0 +1,20 @@
+{
+    "target": "Stancey",
+    "target_pass": "test12345",
+    "qadmin_cmds": [
+        "complete T_PRACTICE_01",
+        "complete T_STANCE_01"
+    ],
+    "target_cmds": [],
+    "bot": {
+        "name": "Stancey",
+        "password": "test12345",
+        "explevel": 3,
+        "selfclass": "vampire",
+        "stop_after": "",
+        "mode": "all",
+        "enable_story": false,
+        "enable_pvp": false,
+        "delay": 0.5
+    }
+}

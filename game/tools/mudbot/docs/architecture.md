@@ -1,3 +1,5 @@
+> **Superseded**: Framework design content has moved to [verification_overview.md](verification_overview.md) and [bot_capability_inventory.md](bot_capability_inventory.md). This file is retained for git history.
+
 # Mudbot Architecture
 
 ## Overview

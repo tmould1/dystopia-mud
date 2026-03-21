@@ -134,13 +134,24 @@ void improve_stance( CHAR_DATA *ch ) {
 	if ( IS_NPC( ch ) ) return;
 
 	stance = ch_stance(ch)[0];
-	if ( stance < 1 || stance > 17 ) return;
+
+	/* If no active stance but autodrop is configured, activate it now.
+	 * This handles the case where improve_stance() is called before
+	 * set_fighting()/autodrop() on the first hit of combat. */
+	if ( ( stance < 1 || stance > 17 ) && ch_stance(ch)[MONK_AUTODROP] != STANCE_NONE ) {
+		ch_stance(ch)[0] = ch_stance(ch)[MONK_AUTODROP];
+		stance = ch_stance(ch)[0];
+	}
+
+	if ( stance < 1 || stance > 17 )
+		return;
 	if ( ch_stance(ch)[stance] >= 200 ) {
 		ch_stance(ch)[stance] = 200;
 		return;
 	}
-	if ( ( dice1 > ch_stance(ch)[stance] && dice2 > ch_stance(ch)[stance] ) || ( dice1 >= 98 || dice2 >= 99 ) )
+	if ( ( dice1 > ch_stance(ch)[stance] && dice2 > ch_stance(ch)[stance] ) || ( dice1 >= 98 || dice2 >= 99 ) ) {
 		ch_stance(ch)[stance] += 1;
+	}
 	else
 		return;
 	if ( stance == ch_stance(ch)[stance] ) return;

@@ -63,10 +63,16 @@ class StoryNavigator:
         # Combat tracking for story kills
         self._kill_attempts: int = 0
         self._max_kill_attempts: int = 50
+        self._visited_nodes: set[int] = set()
 
     @property
     def current_node(self) -> int:
         return self._story.node
+
+    @property
+    def visited_nodes(self) -> set[int]:
+        """Nodes observed during this run."""
+        return set(self._visited_nodes)
 
     async def tick(self) -> Optional[str]:
         """
@@ -107,6 +113,8 @@ class StoryNavigator:
             state = await self.actions.story()
 
         self._story = state
+        if state.node > 0:
+            self._visited_nodes.add(state.node)
         logger.info(f"[{self.bot.config.name}] Story: node={state.node}, "
                     f"kills={state.kills}, progress=0x{state.progress:02X}, "
                     f"tasks={state.tasks}")

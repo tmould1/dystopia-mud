@@ -1,0 +1,68 @@
+{
+  "name": "quest_story_campaign_smoke",
+  "steps": [
+    {
+      "name": "party_quest_list",
+      "bot": "all",
+      "command": "quest list",
+      "timeout": 6.0,
+      "delay": 0.5
+    },
+    {
+      "name": "wing_follow_leader",
+      "bot": "followers",
+      "command": "follow {leader}",
+      "timeout": 6.0,
+      "delay": 0.5
+    },
+    {
+      "name": "leader_group_bot2",
+      "bot": "leader",
+      "command": "group {bot2}",
+      "timeout": 6.0,
+      "delay": 0.5
+    },
+    {
+      "name": "party_group_view",
+      "bot": "all",
+      "command": "group",
+      "timeout": 6.0,
+      "delay": 0.5
+    },
+    {
+      "name": "party_tutorial_commands",
+      "bot": "all",
+      "command": "look",
+      "timeout": 6.0,
+      "delay": 0.4
+    },
+    {
+      "name": "party_score",
+      "bot": "all",
+      "command": "score",
+      "timeout": 6.0,
+      "delay": 0.4
+    },
+    {
+      "name": "party_story_status",
+      "bot": "all",
+      "command": "story",
+      "timeout": 6.0,
+      "delay": 0.4
+    },
+    {
+      "name": "leader_pk_bot2",
+      "bot": "leader",
+      "command": "kill {bot2}",
+      "timeout": 6.0,
+      "delay": 1.0
+    },
+    {
+      "name": "party_quest_progress",
+      "bot": "all",
+      "command": "quest progress",
+      "timeout": 6.0,
+      "delay": 0.4
+    }
+  ]
+}

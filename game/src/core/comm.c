@@ -1433,6 +1433,16 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					}
 					i += 3 + sb_len + 1; /* Skip IAC SB CHARSET ... IAC SE */
 				}
+				/* Fallback: skip any unrecognized 3-byte IAC sequence (WILL/WONT/DO/DONT + option) */
+				else if ( d->inbuf[i + 1] == (signed char) WILL ||
+					d->inbuf[i + 1] == (signed char) WONT ||
+					d->inbuf[i + 1] == (signed char) DO ||
+					d->inbuf[i + 1] == (signed char) DONT ) {
+					i += 2; /* skip command + option (loop adds 1) */
+				}
+				else {
+					i += 1; /* skip unknown 2-byte IAC sequence (loop adds 1) */
+				}
 			}
 		}
 		/* Clear buffer after processing telnet-only data */
@@ -1632,6 +1642,16 @@ void read_from_buffer( DESCRIPTOR_DATA *d ) {
 					charset_handle_subnegotiation( d, (unsigned char *) &d->inbuf[sb_start], sb_len );
 				}
 				i += 3 + sb_len + 1; /* Skip IAC SB CHARSET ... IAC SE */
+			}
+			/* Fallback: skip any unrecognized 3-byte IAC sequence (WILL/WONT/DO/DONT + option) */
+			else if ( d->inbuf[i + 1] == (signed char) WILL ||
+				d->inbuf[i + 1] == (signed char) WONT ||
+				d->inbuf[i + 1] == (signed char) DO ||
+				d->inbuf[i + 1] == (signed char) DONT ) {
+				i += 2; /* skip command + option (loop adds 1) */
+			}
+			else {
+				i += 1; /* skip unknown 2-byte IAC sequence (loop adds 1) */
 			}
 		}
 	}

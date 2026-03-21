@@ -101,7 +101,20 @@ void win_prize( CHAR_DATA *ch ) {
 void do_clearstats2( CHAR_DATA *ch, char *argument ) {
 	OBJ_DATA *obj;
 	OBJ_DATA *obj_next;
+	OBJ_DATA *worn[MAX_WEAR];
+	AFFECT_DATA *paf;
+	int i;
+
 	if ( IS_NPC( ch ) ) return;
+
+	/* Cache what's worn in each slot before unequipping */
+	for ( i = 0; i < MAX_WEAR; i++ )
+		worn[i] = NULL;
+
+	LIST_FOR_EACH( obj, &ch->carrying, OBJ_DATA, content_node ) {
+		if ( obj->wear_loc >= 0 && obj->wear_loc < MAX_WEAR )
+			worn[obj->wear_loc] = obj;
+	}
 
 	powerdown( ch ); /* remove class shit */
 
@@ -121,9 +134,9 @@ void do_clearstats2( CHAR_DATA *ch, char *argument ) {
 
 	ch->affected_by = 0;
 	ch->armor = 100;
-	ch->hit = UMAX( 1, ch->hit );
-	ch->mana = UMAX( 1, ch->mana );
-	ch->move = UMAX( 1, ch->move );
+	ch->hit = ch->max_hit;
+	ch->mana = ch->max_mana;
+	ch->move = ch->max_move;
 	ch->hitroll = 0;
 	ch->damroll = 0;
 	ch->saving_throw = 0;
@@ -136,8 +149,30 @@ void do_clearstats2( CHAR_DATA *ch, char *argument ) {
 	if ( IS_SET( ch->newbits, NEW_DFORM ) ) REMOVE_BIT( ch->newbits, NEW_DFORM );
 	if ( IS_POLYAFF( ch, POLY_ZULOFORM ) ) REMOVE_BIT( ch->polyaff, POLY_ZULOFORM );
 	if ( IS_SET( ch->newbits, NEW_CUBEFORM ) ) REMOVE_BIT( ch->newbits, NEW_CUBEFORM );
+
+	/* Silently re-equip cached gear (no checks/output — items were already valid) */
+	for ( i = 0; i < MAX_WEAR; i++ ) {
+		obj = worn[i];
+		if ( obj == NULL || obj->carried_by != ch )
+			continue;
+
+		if ( IS_NPC( ch ) || !IS_CLASS( ch, CLASS_SAMURAI )
+			|| ( IS_CLASS( ch, CLASS_SAMURAI ) && obj->pIndexData->vnum == 29694 ) )
+			ch->armor -= apply_ac( obj, i );
+
+		obj->wear_loc = i;
+
+		LIST_FOR_EACH( paf, &obj->pIndexData->affects, AFFECT_DATA, node )
+			affect_modify( ch, paf, TRUE, obj );
+		LIST_FOR_EACH( paf, &obj->affects, AFFECT_DATA, node )
+			affect_modify( ch, paf, TRUE, obj );
+
+		if ( obj->item_type == ITEM_LIGHT && obj->value[2] != 0 && ch->in_room != NULL )
+			++ch->in_room->light;
+	}
+
 	save_char_obj( ch );
-	send_to_char( "Your stats have been cleared.  Please rewear your equipment.\n\r", ch );
+	send_to_char( "Your stats have been cleared.  Equipment re-equipped.\n\r", ch );
 	return;
 }
 

@@ -229,7 +229,7 @@ int quest_def_index_by_id( const char *id ) {
     if ( !id || !id[0] )
         return -1;
     for ( i = 0; i < quest_count; i++ ) {
-        if ( !strcmp( quest_defs[i].id, id ) )
+        if ( !str_cmp( quest_defs[i].id, id ) )
             return i;
     }
     return -1;

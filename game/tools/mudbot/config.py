@@ -6,6 +6,28 @@ from dataclasses import dataclass, field
 from typing import Optional, List
 
 
+def _alpha_suffix(bot_id: int, min_len: int = 3) -> str:
+    """Return a stable alphabetic suffix for a 1-based bot index.
+
+    Examples: 1 -> 'aaa', 2 -> 'aab', 26 -> 'aaz', 27 -> 'aba'.
+    """
+    if bot_id < 1:
+        raise ValueError("bot_id must be >= 1")
+
+    n = bot_id - 1
+    chars: list[str] = []
+    while True:
+        n, rem = divmod(n, 26)
+        chars.append(chr(ord('a') + rem))
+        if n == 0:
+            break
+
+    suffix = ''.join(reversed(chars))
+    if len(suffix) < min_len:
+        suffix = ('a' * (min_len - len(suffix))) + suffix
+    return suffix
+
+
 @dataclass
 class BotConfig:
     """Configuration for a single bot instance."""
@@ -84,7 +106,10 @@ class CommanderConfig:
 
     def generate_bot_config(self, bot_id: int) -> BotConfig:
         """Generate a BotConfig for a specific bot instance."""
-        name = f"{self.bot_prefix}{bot_id:03d}"
+        suffix = _alpha_suffix(bot_id)
+        max_prefix_len = max(1, 12 - len(suffix))
+        prefix = self.bot_prefix[:max_prefix_len]
+        name = f"{prefix}{suffix}"
         return BotConfig(
             name=name,
             password=self.bot_password,
@@ -204,15 +229,16 @@ class QuestConfig:
 
     # Quest selection
     mode: str = "all"                   # "tutorial", "main", "all"
-    stop_after_quest: str = "M02"       # Stop after this quest ID (empty = run all)
-    max_quest_cycles: int = 500         # Safety limit on state machine iterations
+    stop_after_quest: str = "M05"       # Stop after this quest ID (empty = run all)
+    max_quest_cycles: int = 500          # Safety limit on state machine iterations
 
     # Class selection for M01 selfclass objective
     selfclass: str = "demon"            # Default class to pick
 
     # Story system
-    enable_story: bool = True           # Use story for area nav + combat training
-    max_story_node: int = 16            # How far to progress story
+    enable_story: bool = False           # Story navigation not yet functional
+    max_story_node: int = 16             # How far to progress story
+    force_story_progress: bool = False   # Periodically prioritize active story nodes
 
     # PvP
-    enable_pvp: bool = False            # Enable PvP handlers (arena, kill_player)
+    enable_pvp: bool = False             # Enable PvP handlers (arena, kill_player)

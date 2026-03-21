@@ -89,10 +89,12 @@ class PromptDetector:
     GAME_PATTERNS = [
         # Standard MUD prompt: <100hp 100m 100mv>
         (BotState.PLAYING, r"<\d+hp \d+m \d+mv>"),
+        # Screenreader prompt: <[exp] [1000H 1500M 1500V]>
+        (BotState.PLAYING, r"<\[[\d,]+\] \[\d+H \d+M \d+V\]>"),
         # Welcome message after login (this MUD has no default prompt)
         (BotState.PLAYING, r"Welcome to Dystopia"),
         # Reconnection messages
-        (BotState.PLAYING, r"Reconnecting\.|already playing|taking over"),
+        (BotState.PLAYING, r"Reconnecting\.|already playing|tak(?:e|ing) over"),
         # Room description indicators (Exits line) - both bracket and screenreader formats
         (BotState.PLAYING, r"\[Exits?:"),
         (BotState.PLAYING, r"Exits?:\s*(?:north|south|east|west|up|down|none)"),

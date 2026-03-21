@@ -1398,6 +1398,143 @@ static void qadmin_obj( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
     send_to_char( buf, ch );
 }
 
+static void qadmin_boost( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
+    char arg_stat[MAX_INPUT_LENGTH];
+    char arg_amount[MAX_INPUT_LENGTH];
+    char buf[MAX_STRING_LENGTH];
+    int amount;
+
+    argument = one_argument( argument, arg_stat );
+    one_argument( argument, arg_amount );
+
+    if ( arg_stat[0] == '\0' || arg_amount[0] == '\0' ) {
+        send_to_char( "Usage: qadmin <player> boost hp|mana|move|exp|level|qp <amount>\n\r", ch );
+        return;
+    }
+
+    amount = atoi( arg_amount );
+
+    /* Level and QP have different valid ranges */
+    if ( !str_cmp( arg_stat, "level" ) ) {
+        if ( amount < 1 || amount > MAX_LEVEL ) {
+            snprintf( buf, sizeof( buf ), "Level must be between 1 and %d.\n\r", MAX_LEVEL );
+            send_to_char( buf, ch );
+            return;
+        }
+        victim->level = amount;
+        victim->trust = amount;
+        snprintf( buf, sizeof( buf ), "Set %s's level to %d.\n\r",
+            victim->name, victim->level );
+        send_to_char( buf, ch );
+        victim->pcdata->stats_dirty = TRUE;
+        return;
+    }
+
+    if ( !str_cmp( arg_stat, "qp" ) ) {
+        if ( amount < 1 || amount > 100000 ) {
+            send_to_char( "QP must be between 1 and 100000.\n\r", ch );
+            return;
+        }
+        victim->pcdata->quest += amount;
+        snprintf( buf, sizeof( buf ), "Boosted %s's QP by %d (now %d).\n\r",
+            victim->name, amount, victim->pcdata->quest );
+        send_to_char( buf, ch );
+        victim->pcdata->stats_dirty = TRUE;
+        return;
+    }
+
+    if ( amount < 1 || amount > 1000000 ) {
+        send_to_char( "Amount must be between 1 and 1000000.\n\r", ch );
+        return;
+    }
+
+    if ( !str_cmp( arg_stat, "hp" ) ) {
+        victim->max_hit += amount;
+        victim->hit = victim->max_hit;
+        snprintf( buf, sizeof( buf ), "Boosted %s's max HP by %d (now %d).\n\r",
+            victim->name, amount, victim->max_hit );
+    } else if ( !str_cmp( arg_stat, "mana" ) ) {
+        victim->max_mana += amount;
+        victim->mana = victim->max_mana;
+        snprintf( buf, sizeof( buf ), "Boosted %s's max mana by %d (now %d).\n\r",
+            victim->name, amount, victim->max_mana );
+    } else if ( !str_cmp( arg_stat, "move" ) ) {
+        victim->max_move += amount;
+        victim->move = victim->max_move;
+        snprintf( buf, sizeof( buf ), "Boosted %s's max move by %d (now %d).\n\r",
+            victim->name, amount, victim->max_move );
+    } else if ( !str_cmp( arg_stat, "exp" ) ) {
+        victim->exp += amount;
+        snprintf( buf, sizeof( buf ), "Boosted %s's exp by %d (now %d).\n\r",
+            victim->name, amount, victim->exp );
+    } else {
+        send_to_char( "Valid stats: hp, mana, move, exp, level, qp\n\r", ch );
+        return;
+    }
+
+    send_to_char( buf, ch );
+    victim->pcdata->stats_dirty = TRUE;
+}
+
+static void qadmin_home( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
+    char arg_vnum[MAX_INPUT_LENGTH];
+    char buf[MAX_STRING_LENGTH];
+    int vnum;
+    ROOM_INDEX_DATA *room;
+
+    one_argument( argument, arg_vnum );
+
+    if ( arg_vnum[0] == '\0' ) {
+        snprintf( buf, sizeof( buf ), "%s's home (recall) room is %d.\n\r",
+            victim->name, victim->home );
+        send_to_char( buf, ch );
+        return;
+    }
+
+    vnum = atoi( arg_vnum );
+    room = get_room_index( vnum );
+    if ( !room ) {
+        snprintf( buf, sizeof( buf ), "Room %d does not exist.\n\r", vnum );
+        send_to_char( buf, ch );
+        return;
+    }
+
+    victim->home = vnum;
+    snprintf( buf, sizeof( buf ), "Set %s's home (recall) room to %d (%s).\n\r",
+        victim->name, vnum, room->name );
+    send_to_char( buf, ch );
+    victim->pcdata->stats_dirty = TRUE;
+}
+
+static void qadmin_heal( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
+    char buf[MAX_STRING_LENGTH];
+
+    /* Clear all limb damage and bleeding (same as do_restore) */
+    ch_loc_hp(victim)[0] = 0;
+    ch_loc_hp(victim)[1] = 0;
+    ch_loc_hp(victim)[2] = 0;
+    ch_loc_hp(victim)[3] = 0;
+    ch_loc_hp(victim)[4] = 0;
+    ch_loc_hp(victim)[5] = 0;
+    ch_loc_hp(victim)[6] = 0;
+
+    /* Restore vitals */
+    victim->hit  = victim->max_hit;
+    victim->mana = victim->max_mana;
+    victim->move = victim->max_move;
+    update_pos( victim );
+
+    /* Clear common debuffs */
+    affect_strip( victim, gsn_poison );
+    affect_strip( victim, gsn_blindness );
+    affect_strip( victim, gsn_sleep );
+    affect_strip( victim, gsn_curse );
+
+    snprintf( buf, sizeof( buf ), "Healed %s: limbs restored, vitals maxed, debuffs cleared.\n\r",
+        victim->name );
+    send_to_char( buf, ch );
+}
+
 void do_qadmin( CHAR_DATA *ch, char *argument ) {
     char arg1[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
@@ -1413,6 +1550,9 @@ void do_qadmin( CHAR_DATA *ch, char *argument ) {
         send_to_char( "  #Cqadmin#n <player> #Ccomplete#n <id>      Complete + award quest\n\r", ch );
         send_to_char( "  #Cqadmin#n <player> #Creset#n <id|all>     Reset quest(s)\n\r", ch );
         send_to_char( "  #Cqadmin#n <player> #Cobj#n <id> <n> <val> Set objective progress\n\r", ch );
+        send_to_char( "  #Cqadmin#n <player> #Cboost#n <stat> <amt> Boost hp/mana/move/exp/level/qp\n\r", ch );
+        send_to_char( "  #Cqadmin#n <player> #Chome#n [vnum]       Set/show recall room\n\r", ch );
+        send_to_char( "  #Cqadmin#n <player> #Cheal#n              Restore limbs/vitals/debuffs\n\r", ch );
         send_to_char( "\n\r  Status: 0=LOCKED 1=AVAILABLE 2=ACTIVE 3=COMPLETE 4=TURNED_IN\n\r\n\r", ch );
         return;
     }
@@ -1448,6 +1588,9 @@ void do_qadmin( CHAR_DATA *ch, char *argument ) {
     if ( !str_cmp( arg2, "complete" ) ) { qadmin_complete( ch, victim, argument ); return; }
     if ( !str_cmp( arg2, "reset" ) )    { qadmin_reset( ch, victim, argument );    return; }
     if ( !str_cmp( arg2, "obj" ) )      { qadmin_obj( ch, victim, argument );      return; }
+    if ( !str_cmp( arg2, "boost" ) )    { qadmin_boost( ch, victim, argument );    return; }
+    if ( !str_cmp( arg2, "home" ) )     { qadmin_home( ch, victim, argument );     return; }
+    if ( !str_cmp( arg2, "heal" ) )     { qadmin_heal( ch, victim, argument );     return; }
 
     send_to_char( "Unknown qadmin subcommand. Type 'qadmin' for help.\n\r", ch );
 }

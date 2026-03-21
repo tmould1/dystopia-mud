@@ -200,20 +200,17 @@ class ClassProgressionBot(MudBot, ABC):
 
     async def handle_stat_clear(self) -> bool:
         """
-        Handle stat clear after selfclass by re-equipping all gear.
+        Handle stat clear after selfclass.
 
-        This should be called after selfclass when stats are cleared.
+        Server-side clearstats2 now silently re-equips gear, so this just
+        waits briefly for the server to finish processing.
 
         Returns:
-            True if gear was re-equipped successfully.
+            True always (server handles rewear).
         """
-        logger.info(f"[{self.config.name}] Handling stat clear - re-equipping gear...")
-
-        # Re-wear all equipment
-        equipped = await self.actions.rewear_all()
-        logger.info(f"[{self.config.name}] Re-equipped {equipped} items")
-
-        return equipped > 0
+        logger.info(f"[{self.config.name}] Stats cleared (server auto-rewears gear)")
+        await asyncio.sleep(0.5)
+        return True
 
     async def create_armor(self, piece: str) -> bool:
         """

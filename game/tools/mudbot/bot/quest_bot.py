@@ -9,6 +9,7 @@ Default progression: tutorial chain → M01 (avatar + selfclass) → M02 (kill 2
 
 import asyncio
 import logging
+import re
 import time
 from enum import Enum, auto
 from dataclasses import dataclass, field
@@ -100,8 +101,17 @@ COMMAND_MAP = {
 # Quest category priority order
 CATEGORY_PRIORITY = {"T": 0, "M": 1, "CL": 2, "C": 3, "E": 4, "A": 5}
 
-# Arena monsters (easiest first)
+# Arena monsters (easiest first) — Mud School arena
 ARENA_MONSTERS = ['fox', 'rabbit', 'snail', 'bear', 'beast', 'wolf', 'lizard', 'boar']
+
+# Black Dragon's Lair monsters (tougher — for boosted characters)
+LAIR_MONSTERS = [
+    'snake', 'rat', 'hobgoblin', 'shaman', 'orc', 'spider',
+    'gargoyle', 'fire fly', 'painting', 'drummer',
+]
+
+# Combined list — lair mobs checked first (tougher = better for training)
+ALL_MONSTERS = LAIR_MONSTERS + ARENA_MONSTERS
 
 
 class QuestBot(MudBot):
@@ -292,6 +302,11 @@ class QuestBot(MudBot):
         if self._state_q == QuestBotState.COMPLETE:
             return
 
+        # Optional campaign mode: prioritize active story nodes when avatar.
+        if await self._should_prioritize_story():
+            self.quest_state = QuestBotState.STORY_PROGRESSION
+            return
+
         # Check for completed quests to turn in
         progress = await self.quest_actions.quest_progress()
 
@@ -429,12 +444,17 @@ class QuestBot(MudBot):
 
         # Dispatch based on objective description patterns
         # The quest system uses human-readable descriptions, so we pattern-match
+        # NOTE: stance check must come before kill check because "skill" contains "kill"
         if self._is_use_command_objective(desc_lower):
             await self._handle_use_command(desc_lower)
-        elif "kill" in desc_lower and "mob" in desc_lower:
-            self._kills_before_train = 1  # Refresh after each kill for KILL_MOB
+        elif "stance" in desc_lower and ("raise" in desc_lower or "skill" in desc_lower):
+            await self._handle_stance_objective()
+        elif re.search(r'\bkill\b', desc_lower) and "mob" in desc_lower:
+            # Auto-complete — batch kills based on remaining count
+            remaining = obj.threshold - obj.current if obj.threshold > obj.current else 1
+            self._kills_before_train = min(remaining, 25)
             self.quest_state = QuestBotState.KILLING_MOBS
-        elif "kill" in desc_lower:
+        elif re.search(r'\bkill\b', desc_lower):
             self._kills_before_train = 1
             self.quest_state = QuestBotState.KILLING_MOBS
         elif "reach" in desc_lower and "hp" in desc_lower:
@@ -447,8 +467,6 @@ class QuestBot(MudBot):
             self.quest_state = QuestBotState.TRAINING_AVATAR
         elif "choose a class" in desc_lower or "selfclass" in desc_lower:
             self.quest_state = QuestBotState.SELECTING_CLASS
-        elif "stance" in desc_lower and ("raise" in desc_lower or "skill" in desc_lower):
-            await self._handle_stance_objective()
         elif "earn" in desc_lower and "quest points" in desc_lower:
             # Milestone — just keep completing quests, check progress later
             logger.info(f"[{self.config.name}] QP milestone — continuing quest chain")
@@ -522,7 +540,11 @@ class QuestBot(MudBot):
         elif "practice" in desc:
             cmd = "practice"
         elif "research" in desc:
-            cmd = "research"
+            # Need discipline name — bare "research" just prompts
+            from ..utils.story_data import CLASS_COMMANDS
+            info = CLASS_COMMANDS.get(self.quest_config.selfclass)
+            disc = info.disc_default if info and info.disc_default else "attack"
+            cmd = f"research {disc}"
         else:
             # Fallback: try to extract the command from quotes
             import re
@@ -545,27 +567,12 @@ class QuestBot(MudBot):
     async def _handle_stance_objective(self) -> None:
         """Handle stance training objectives.
 
-        Stance skill only improves during multi-round combat (improve_stance()
-        in kav_fight.c).  Arena instant kills don't count.  Route to story
-        areas when available — story mobs are tougher and guarantee real
-        combat rounds.
+        Stance skill improves via improve_stance() in kav_fight.c on each
+        one_hit() call.  With autostance set, stance auto-activates even
+        on instant kills.  Arena combat is the most reliable path.
         """
-        # Check level first (before autostance, which can eat the read buffer)
-        stats = await self.actions.score()
-        level = stats.level if stats else 0
-        logger.info(f"[{self.config.name}] Stance objective: level={level}, "
-                    f"story={self.quest_config.enable_story}")
-
         await self.actions.set_autostance("bull")
-
-        # Prefer story areas for multi-round combat if story is enabled
-        # and the character is avatar (story requires avatar status)
-        if self.quest_config.enable_story and level >= 3:
-            logger.info(f"[{self.config.name}] Stance training via story combat")
-            self.quest_state = QuestBotState.STORY_PROGRESSION
-            return
-
-        # Fallback: arena combat (works but slow for stance gains)
+        logger.info(f"[{self.config.name}] Stance training via arena combat (autostance bull)")
         self.quest_state = QuestBotState.KILLING_MOBS
 
     # =========================================================================
@@ -581,23 +588,80 @@ class QuestBot(MudBot):
         self.quest_state = QuestBotState.FINDING_ARENA
 
     async def _find_arena(self) -> None:
-        """Navigate to arena and find a monster to kill."""
-        room_text = await self.actions.look()
-        room_lower = room_text.lower()
+        """Navigate to hunting area and find a monster to kill.
 
-        first_line = room_text.split('\n')[0].strip().lower() if room_text else ""
-        if 'arena' in first_line:
-            self._in_arena = True
+        Handles two hunting zones:
+        - Mud School arena (recall=3700): south into 5x5 arena grid
+        - Black Dragon's Lair (recall=32000): down into lair tunnels
+        """
+        import re
+        import random
+
+        # Ensure character is awake and standing (may be sleeping from regen)
+        await self.send_command("wake")
+        await asyncio.sleep(0.3)
+        await self.send_command("stand")
+        await asyncio.sleep(0.3)
+
+        # Strip ANSI/MUD color codes from text for reliable matching
+        def strip_codes(text):
+            return re.sub(r'\x1b\[[0-9;]*m|\[0[;0-9]*m|#[RGBYPCWnrx0-9]+', '', text)
+
+        room_text = await self.actions.look()
+        room_clean = strip_codes(room_text)
+        room_lower = room_clean.lower()
+        # First non-empty line that looks like a room name (skip combat spam, prompts)
+        # Room names don't contain: prompt brackets [, combat words, "you " actions
+        skip_patterns = [
+            'you ', 'your ', 'a spray', '<', 'the day ', 'the night ',
+            'the sun ', 'the moon ', 'it is ', 'you dodge', 'you parry',
+        ]
+        first_line = ""
+        for line in room_clean.split('\n'):
+            line = line.strip()
+            if not line:
+                continue
+            line_lower = line.lower()
+            if any(line_lower.startswith(p) for p in skip_patterns):
+                continue
+            first_line = line_lower
+            break
+        logger.info(f"[{self.config.name}] Room: '{first_line}' (len={len(room_clean)})")
+        if len(room_clean) > 300:
+            logger.info(f"[{self.config.name}] Room contents: {room_clean[:500]}")
+
+        # Check if at an entrance (not yet in hunting area — need to go deeper)
+        at_lair_entrance = ('dark tunnel' in first_line and 'entrance' in first_line)
+        at_school_entrance = ('mud school' in first_line or 'school' in first_line)
+        at_temple = ('temple' in first_line)
+
+        # Detect hunting area by room name keywords (exclude entrance rooms)
+        if not at_lair_entrance and not at_school_entrance:
+            in_hunting_area = (
+                'arena' in first_line
+                or 'tunnel' in first_line
+                or 'cavern' in first_line
+                or 'lair' in first_line
+                or 'passage' in first_line
+                or 'chamber' in first_line
+            )
+            if in_hunting_area:
+                self._in_arena = True
 
         # Look for monsters (skip corpses and body parts)
-        # Use word boundary matching to avoid false positives like "boar" in "board"
-        import re
         debris_words = [
             'entrails', 'corpse', 'blood', 'pool', 'body', 'remains',
             'sliced-off', 'severed', 'torn', 'ripped', 'leg of', 'arm of',
             'head of', 'heart of', 'brains of', 'guts of', 'decomposes',
         ]
-        for monster in ARENA_MONSTERS:
+        # Check HP before looking for mobs — regenerate if low
+        stats = await self.actions.score()
+        if stats and stats.current_hp < stats.max_hp * 0.15:
+            logger.info(f"[{self.config.name}] HP low ({stats.current_hp}/{stats.max_hp}), regenerating")
+            self.quest_state = QuestBotState.REGENERATING
+            return
+
+        for monster in ALL_MONSTERS:
             monster_pattern = re.compile(r'\b' + re.escape(monster) + r'\b', re.IGNORECASE)
             if not monster_pattern.search(room_lower):
                 continue
@@ -609,20 +673,17 @@ class QuestBot(MudBot):
                         is_corpse = True
                         break
                     self._kill_target = monster
-                    # Attack
                     logger.info(f"[{self.config.name}] Attacking {monster}")
                     combat_started, instant_kill = await self.actions.kill(monster)
                     if instant_kill:
                         self._kills_since_train += 1
                         logger.info(f"[{self.config.name}] Instant kill: {monster} "
                                     f"(kills: {self._kills_since_train})")
-                        # Move to a new room to find fresh mobs
                         await self._move_to_next_arena_room()
-                        # Batch kills for training or refresh for KILL_MOB quests
                         if (self._kills_before_train > 1
                                 and self._kills_since_train < self._kills_before_train):
                             self._kill_target = None
-                            return  # Stay in FINDING_ARENA, kill more
+                            return
                         self.quest_state = QuestBotState.REFRESHING_STATE
                         return
                     elif combat_started:
@@ -633,36 +694,98 @@ class QuestBot(MudBot):
                         break
 
         # No monster found, navigate
-        exits = await self.actions.get_exits()
+        logger.info(f"[{self.config.name}] No mob found, in_arena={self._in_arena}, "
+                    f"path_depth={len(self._exploration_path)}")
+        # Parse exits from the look response we already have (avoid double look)
+        exits = self.actions.room_parser.parse_exits(room_text)
         if not exits:
-            logger.warning(f"[{self.config.name}] No exits, stuck!")
-            self.quest_state = QuestBotState.FAILED
+            logger.warning(f"[{self.config.name}] No exits, recalling")
+            await self.actions.recall()
+            self._in_arena = False
+            self._exploration_path = []
             return
 
-        # If not in arena yet, recall to Midgaard first then go south
-        if not self._in_arena:
-            if 'arena' not in first_line and 'south' not in exits:
-                logger.info(f"[{self.config.name}] Recalling to navigate to arena")
-                await self.actions.recall()
+        # Limit exploration depth to avoid getting lost
+        if len(self._exploration_path) > 20:
+            logger.info(f"[{self.config.name}] Exploration depth limit, recalling")
+            await self.actions.recall()
+            self._in_arena = False
+            self._exploration_path = []
+            return
+
+        # At an entrance? Always go deeper (even if _in_arena from a previous cycle)
+        if at_lair_entrance:
+            if 'down' in exits:
+                logger.info(f"[{self.config.name}] Entering lair (down)")
+                # Ensure standing position (recall doesn't guarantee it)
+                await self.send_command("stand")
+                await asyncio.sleep(0.3)
+                self._exploration_path.append('down')
+                moved = await self.actions.move('down')
+                if not moved:
+                    logger.warning(f"[{self.config.name}] Failed to enter lair! Retrying after stand")
+                    await self.send_command("wake")
+                    await asyncio.sleep(0.5)
+                    await self.send_command("stand")
+                    await asyncio.sleep(0.3)
+                    await self.actions.move('down')
                 return
+        if at_school_entrance:
             if 'south' in exits:
+                logger.info(f"[{self.config.name}] Entering arena (south)")
+                await self.send_command("stand")
+                await asyncio.sleep(0.3)
+                self._exploration_path.append('south')
                 await self.actions.move('south')
                 return
 
-        # Explore arena
-        explore_dirs = ['south', 'north', 'east', 'west']
+        # At temple? Go up to reach school entrance
+        if at_temple and 'up' in exits:
+            logger.info(f"[{self.config.name}] At temple, going up to school")
+            self._exploration_path.append('up')
+            await self.actions.move('up')
+            return
+
+        # Not in hunting area and not at entrance — recall to temple
+        if not self._in_arena:
+            logger.info(f"[{self.config.name}] Not at hunting entrance, recalling")
+            await self.actions.recall()
+            return
+
+        # Explore hunting area — prefer going deeper (north/east in lair)
+        # Avoid backtracking by deprioritizing the reverse of last move
+        reverse = {'north': 'south', 'south': 'north', 'east': 'west',
+                    'west': 'east', 'up': 'down', 'down': 'up'}
+        last_dir = self._exploration_path[-1] if self._exploration_path else None
+        back_dir = reverse.get(last_dir) if last_dir else None
+
+        # Priority: forward directions first, then lateral, then back
+        forward_dirs = ['north', 'east', 'down']
+        lateral_dirs = ['west', 'south']
+        random.shuffle(forward_dirs)
+        random.shuffle(lateral_dirs)
+        explore_dirs = forward_dirs + lateral_dirs + ['up']
+
         for d in explore_dirs:
-            if d in exits and d not in self._exploration_path:
+            if d == back_dir:
+                continue  # skip backtracking
+            if d in exits:
                 self._exploration_path.append(d)
                 await self.actions.move(d)
                 return
 
-        # Reset exploration
-        self._exploration_path = []
-        for d in explore_dirs:
-            if d in exits:
-                await self.actions.move(d)
-                return
+        # No forward path — allow backtracking
+        if back_dir and back_dir in exits:
+            self._exploration_path.append(back_dir)
+            await self.actions.move(back_dir)
+            return
+
+        # No exits at all — recall
+        available = [d for d in explore_dirs if d in exits]
+        if available:
+            d = random.choice(available)
+            self._exploration_path.append(d)
+            await self.actions.move(d)
 
     async def _wait_combat(self) -> None:
         """Wait for combat to end."""
@@ -697,15 +820,28 @@ class QuestBot(MudBot):
             self.quest_state = QuestBotState.REFRESHING_STATE
 
     async def _regenerate(self) -> None:
-        """Wait for HP to regenerate."""
+        """Wait for HP to regenerate using sleep for faster recovery."""
         logger.info(f"[{self.config.name}] Regenerating...")
-        for _ in range(10):
+        # Recall first (safe room = faster regen) then sleep
+        await self.actions.recall()
+        self._in_arena = False
+        self._exploration_path = []
+        await self.send_command("sleep")
+        await asyncio.sleep(1.0)
+
+        for _ in range(30):  # Up to 60 seconds of sleep regen
             await asyncio.sleep(2.0)
             stats = await self.actions.score()
-            if stats and stats.current_hp >= self.prog_config.min_hp_to_fight:
-                logger.info(f"[{self.config.name}] HP recovered: {stats.current_hp}")
+            if stats and stats.current_hp >= stats.max_hp * 0.25:
+                logger.info(f"[{self.config.name}] HP recovered: {stats.current_hp}/{stats.max_hp}")
+                await self.send_command("wake")
+                await asyncio.sleep(0.5)
                 self.quest_state = QuestBotState.REFRESHING_STATE
                 return
+
+        # Timeout — wake up and continue anyway
+        await self.send_command("wake")
+        await asyncio.sleep(0.5)
         self.quest_state = QuestBotState.REFRESHING_STATE
 
     async def _train_stats(self) -> None:
@@ -756,7 +892,7 @@ class QuestBot(MudBot):
 
         # Need more exp — kill mobs in batches before training again
         self._kills_since_train = 0
-        self._kills_before_train = 10  # Kill at least 10 before training
+        self._kills_before_train = 25  # Kill more to accumulate exp (HP cost scales)
         logger.info(f"[{self.config.name}] Need more exp, farming {self._kills_before_train} mobs")
         self.quest_state = QuestBotState.KILLING_MOBS
 
@@ -783,21 +919,20 @@ class QuestBot(MudBot):
             if stats and stats.max_hp < 2000:
                 # Still not enough — go farm
                 self._kills_since_train = 0
-                self._kills_before_train = 10
+                self._kills_before_train = 25
                 self.quest_state = QuestBotState.KILLING_MOBS
                 return
             # Fall through to attempt avatar training
 
         if await self.actions.train_avatar():
             logger.info(f"[{self.config.name}] BECAME AVATAR!")
-            # Avatar training calls clearstats2 which unequips everything
-            await asyncio.sleep(1.0)
-            await self.actions.rewear_all()
+            # clearstats2 now silently re-equips gear server-side
+            await asyncio.sleep(0.5)
         else:
             logger.warning(f"[{self.config.name}] Avatar training failed, "
                            "farming more HP")
             self._kills_since_train = 0
-            self._kills_before_train = 10
+            self._kills_before_train = 25
             self.quest_state = QuestBotState.KILLING_MOBS
             return
 
@@ -840,11 +975,9 @@ class QuestBot(MudBot):
                 "stats have been cleared" in resp_lower):
                 logger.info(f"[{self.config.name}] Class selected: {class_name}")
 
-                # Handle stat clear after selfclass
-                if ("stats have been cleared" in resp_lower or
-                    "rewear" in resp_lower):
-                    await asyncio.sleep(1.0)
-                    await self.actions.rewear_all()
+                # clearstats2 now silently re-equips gear server-side
+                if "stats have been cleared" in resp_lower:
+                    await asyncio.sleep(0.5)
 
                 self.quest_state = QuestBotState.REFRESHING_STATE
                 return
@@ -878,9 +1011,10 @@ class QuestBot(MudBot):
     def _update_stall_tracker(self, progress: list) -> None:
         """Track quest objective progress to detect stalled quests.
 
-        Only tracks the currently active quest. Increments by 1 per refresh
-        cycle when no progress is detected (avoids false positives from
-        accumulated kill counters on quests that ARE progressing).
+        Increments stall count per refresh cycle when no progress is detected
+        on the currently active quest. Resets stall count when progress resumes
+        (even on previously stalled quests), so quests that were temporarily
+        blocked can be retried.
         """
         current_id = self._current_quest.id if self._current_quest else None
 
@@ -889,17 +1023,19 @@ class QuestBot(MudBot):
                 self._stall_tracker.pop(qp.id, None)
                 continue
 
-            # Only track stalls for the quest we're actively working on
-            if qp.id != current_id:
-                continue
-
             snapshot = sum(obj.current for obj in qp.objectives)
 
             if qp.id in self._stall_tracker:
                 last_snapshot, stall_count = self._stall_tracker[qp.id]
                 if snapshot > last_snapshot:
+                    # Progress detected — reset stall count (even if was stalled)
+                    if stall_count >= self._stall_threshold:
+                        logger.info(
+                            f"[{self.config.name}] Quest {qp.id} un-stalled "
+                            f"(progress {last_snapshot} -> {snapshot})")
                     self._stall_tracker[qp.id] = (snapshot, 0)
-                else:
+                elif qp.id == current_id:
+                    # Only increment stall for the quest we're actively working on
                     new_stall = stall_count + 1
                     self._stall_tracker[qp.id] = (snapshot, new_stall)
                     if new_stall >= self._stall_threshold and stall_count < self._stall_threshold:
@@ -913,25 +1049,37 @@ class QuestBot(MudBot):
         """Move to an adjacent room in the arena to find fresh mobs."""
         exits = await self.actions.get_exits()
         if not exits:
+            # Dead end — recall to reset position
+            await self.actions.recall()
+            self._in_arena = False
+            self._exploration_path = []
             return
+
+        # Limit exploration depth to avoid getting lost in dead ends
+        if len(self._exploration_path) > 10:
+            await self.actions.recall()
+            self._in_arena = False
+            self._exploration_path = []
+            return
+
         # Prefer directions we haven't been to recently
-        explore_dirs = ['south', 'north', 'east', 'west']
+        # Exclude 'up' in school arena (up = exit to safe room/temple)
+        import random
+        explore_dirs = ['north', 'south', 'east', 'west', 'down']
+        random.shuffle(explore_dirs)
         for d in explore_dirs:
-            if d in exits and d not in self._exploration_path:
+            if d in exits and d not in self._exploration_path[-3:]:
                 self._exploration_path.append(d)
                 await self.actions.move(d)
                 return
-        # Reset and pick any exit
-        self._exploration_path = []
-        for d in explore_dirs:
-            if d in exits:
-                self._exploration_path.append(d)
-                await self.actions.move(d)
-                return
+        # Pick any exit
+        d = random.choice(exits)
+        self._exploration_path.append(d)
+        await self.actions.move(d)
 
     async def _detect_auto_completions(self) -> None:
         """Detect auto-completed quests via quest history and record them as PASS."""
-        history, total = await self.quest_actions.quest_history()
+        history, _ = await self.quest_actions.quest_history()
         for entry in history:
             if entry.id not in self._completed_ids:
                 elapsed = time.time() - self._quest_start_time if self._quest_start_time else 0
@@ -947,6 +1095,28 @@ class QuestBot(MudBot):
         # Check stop condition after detecting completions
         if self._should_stop():
             self.quest_state = QuestBotState.COMPLETE
+
+    async def _should_prioritize_story(self) -> bool:
+        """Return True when campaign mode should advance the story first."""
+        if not self.quest_config.enable_story or not self.quest_config.force_story_progress:
+            return False
+
+        # Avoid expensive checks on every refresh loop.
+        if self._cycle_count % 8 != 0:
+            return False
+
+        stats = await self.actions.score()
+        level = stats.level if stats else self.config.experience_level
+        if level < 3:
+            return False
+
+        story = await self.actions.storyadmin(self.config.name)
+        if story.not_started or story.completed:
+            return False
+        if story.node <= 0 or story.node > self.quest_config.max_story_node:
+            return False
+
+        return True
 
     def _filter_quests(self, quests: list[QuestEntry]) -> list[QuestEntry]:
         """Filter quests based on mode config."""
@@ -998,4 +1168,22 @@ class QuestBot(MudBot):
             'current_quest': self._current_quest.id if self._current_quest else None,
             'completed': len(self._completed_ids),
             'cycle': self._cycle_count,
+        }
+
+    def get_report_data(self) -> dict:
+        """Return detailed run data for campaign reporting."""
+        return {
+            'completed_ids': sorted(self._completed_ids),
+            'results': [
+                {
+                    'id': r.id,
+                    'name': r.name,
+                    'status': r.status,
+                    'objectives_met': r.objectives_met,
+                    'objectives_total': r.objectives_total,
+                    'duration_secs': r.duration_secs,
+                }
+                for r in self._results
+            ],
+            'story_nodes': sorted(self.story_navigator.visited_nodes),
         }
