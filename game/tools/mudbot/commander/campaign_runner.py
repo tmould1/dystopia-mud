@@ -236,6 +236,11 @@ class QuestStoryCampaignRunner:
             # Set level 3 (avatar) if not already
             await send_cmd(c, f"qadmin {bot_name} boost level 3")
 
+            # Set stance/weapon/spell skills to pass milestone quests
+            await send_cmd(c, f"qadmin {bot_name} boost stance 200")
+            await send_cmd(c, f"qadmin {bot_name} boost weapon 200")
+            await send_cmd(c, f"qadmin {bot_name} boost spell 200")
+
             # Set generation if needed
             if profile.boost_gen > 0:
                 await send_cmd(c, f"qadmin {bot_name} boost gen {profile.boost_gen}")

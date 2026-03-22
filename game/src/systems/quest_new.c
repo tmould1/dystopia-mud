@@ -1438,7 +1438,7 @@ static void qadmin_boost( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
     one_argument( argument, arg_amount );
 
     if ( arg_stat[0] == '\0' || arg_amount[0] == '\0' ) {
-        send_to_char( "Usage: qadmin <player> boost hp|mana|move|exp|level|qp|gen|pkill|upgrade <amount>\n\r", ch );
+        send_to_char( "Usage: qadmin <player> boost hp|mana|move|exp|level|qp|stance|weapon|spell|gen|pkill|upgrade <amount>\n\r", ch );
         return;
     }
 
@@ -1497,6 +1497,30 @@ static void qadmin_boost( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
         victim->exp += amount;
         snprintf( buf, sizeof( buf ), "Boosted %s's exp by %d (now %d).\n\r",
             victim->name, amount, victim->exp );
+    } else if ( !str_cmp( arg_stat, "stance" ) ) {
+        /* Set all base stances (1-11) to the given skill level */
+        int s;
+        if ( amount > 200 ) amount = 200;
+        for ( s = 1; s <= 11; s++ )
+            ch_stance(victim)[s] = amount;
+        snprintf( buf, sizeof( buf ), "Set %s's all base stances to %d.\n\r",
+            victim->name, amount );
+    } else if ( !str_cmp( arg_stat, "weapon" ) ) {
+        /* Set all weapon skills (0-12) to the given level */
+        int w;
+        if ( amount > 500 ) amount = 500;
+        for ( w = 0; w <= 12; w++ )
+            ch_wpn(victim)[w] = amount;
+        snprintf( buf, sizeof( buf ), "Set %s's all weapon skills to %d.\n\r",
+            victim->name, amount );
+    } else if ( !str_cmp( arg_stat, "spell" ) ) {
+        /* Set all spell colors (0-4) to the given level */
+        int s;
+        if ( amount > 500 ) amount = 500;
+        for ( s = 0; s < 5; s++ )
+            ch_spl(victim)[s] = amount;
+        snprintf( buf, sizeof( buf ), "Set %s's all spell colors to %d.\n\r",
+            victim->name, amount );
     } else if ( !str_cmp( arg_stat, "gen" ) ) {
         if ( amount < 1 || amount > 10 ) {
             send_to_char( "Generation must be between 1 and 10.\n\r", ch );
@@ -1514,7 +1538,7 @@ static void qadmin_boost( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
         snprintf( buf, sizeof( buf ), "Set %s's upgrade_level to %d.\n\r",
             victim->name, amount );
     } else {
-        send_to_char( "Valid stats: hp, mana, move, exp, level, qp, gen, pkill, upgrade\n\r", ch );
+        send_to_char( "Valid stats: hp, mana, move, exp, level, qp, stance, weapon, spell, gen, pkill, upgrade\n\r", ch );
         return;
     }
 
