@@ -59,11 +59,14 @@ class ObjectiveHandlers:
         if "class training" in desc or "class train" in desc:
             return await self._handle_class_train()
 
-        # CLASS_POWER — "reach power level N"
+        # CLASS_POWER — "raise <disc> to power level N"
         if "power level" in desc or "class power" in desc:
-            # Milestone — server evaluates ch_power levels.
-            # Bot just needs to keep training disciplines.
-            return await self._handle_learn_discipline()
+            # Extract discipline name from description (e.g., "Raise protean to power level 3")
+            disc_override = None
+            m = re.search(r'raise\s+(\w+)\s+to\s+power', desc)
+            if m:
+                disc_override = m.group(1)
+            return await self._handle_learn_discipline(disc_override=disc_override)
 
         # FORGE_ITEM — "forge an item"
         if "forge" in desc and ("item" in desc or "metal" in desc or "gem" in desc):
@@ -144,7 +147,7 @@ class ObjectiveHandlers:
                         f"{result[:200]}")
         return "REFRESHING_STATE"
 
-    async def _handle_learn_discipline(self) -> str:
+    async def _handle_learn_discipline(self, disc_override: str = None) -> str:
         """Research and train a discipline.
 
         Flow: research <name> → kill mobs for disc_points (500+ xp kills
@@ -153,7 +156,7 @@ class ObjectiveHandlers:
         """
         class_name = self.bot.quest_config.selfclass
         info = CLASS_COMMANDS.get(class_name)
-        disc = info.disc_default if info and info.disc_default else "attack"
+        disc = disc_override or (info.disc_default if info and info.disc_default else "attack")
 
         # Wait for any active combat to end, then recall to safety
         await self.actions.wait_for_combat_end(timeout=30.0)

@@ -17,6 +17,7 @@ from pathlib import Path
 
 from ..bot.quest_bot import QuestBot
 from ..config import BotConfig, CommanderConfig, ProgressionConfig, QuestConfig, _alpha_suffix
+from ..admin import admin_connect, send_cmd
 from .multiplayer_manager import MultiplayerCommander, MultiplayerRunResult
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,11 @@ class CampaignProfile:
 
     selfclass: str
     explevel: int
+    boost_quest: str = ""        # qadmin prereqs target (empty = no boost)
+    boost_exp: int = 0           # XP to grant for training
+    boost_gen: int = 0           # generation to set (0 = don't set)
+    boost_pkill: int = 0         # pkill to set (0 = don't set)
+    boost_upgrade: int = 0       # upgrade_level to set (0 = don't set)
 
 
 @dataclass
@@ -153,9 +159,107 @@ class QuestStoryCampaignRunner:
         max_prefix = max(1, 12 - len(suffix))
         return f"{self.prefix[:max_prefix]}{suffix}"
 
+    async def _create_character(self, name: str, password: str, explevel: int) -> bool:
+        """Briefly login as a bot character to create it, then quit."""
+        from ..connection import TelnetClient
+        from ..bot.state_machine import LoginStateMachine
+
+        c = TelnetClient(self.host, self.port)
+        if not await c.connect():
+            logger.warning("[Campaign] Cannot connect to create character %s", name)
+            return False
+
+        sm = LoginStateMachine(name, password, "m", explevel, "s")
+        for _ in range(40):
+            text = await c.read(timeout=5)
+            if text is None:
+                if not c.connected:
+                    return False
+                continue
+            response = sm.process(text)
+            if response is not None:
+                await asyncio.sleep(0.2)
+                await c.send(response)
+            if sm.logged_in:
+                break
+
+        if not sm.logged_in:
+            await c.disconnect()
+            return False
+
+        # Quit triggers save_char_obj on disconnect (works at any level)
+        await asyncio.sleep(1)
+        await c.send("quit")
+        await asyncio.sleep(2)
+        await c.disconnect()
+        logger.info("[Campaign] Created character %s", name)
+        return True
+
+    async def _admin_boost(self, bot_name: str, profile: CampaignProfile) -> bool:
+        """Connect as admin and boost a bot character for testing."""
+        if not profile.boost_quest and not profile.boost_exp:
+            return True  # nothing to boost
+
+        c, ok = await admin_connect()
+        if not ok:
+            logger.warning("[Campaign] Admin connect failed for boost")
+            await c.disconnect()
+            return False
+
+        try:
+            # Relevel to superadmin
+            text = await send_cmd(c, "relevel")
+            if "CHEF" not in text:
+                logger.info("[Campaign] Admin may already be max level")
+
+            # Complete prerequisites for target quest
+            if profile.boost_quest:
+                text = await send_cmd(c, f"qadmin {bot_name} prereqs {profile.boost_quest}", wait=2.0)
+                logger.info("[Campaign] prereqs %s: %s", profile.boost_quest,
+                            text.strip()[:200] if text else "no response")
+
+            # Grant XP for training
+            if profile.boost_exp > 0:
+                await send_cmd(c, f"qadmin {bot_name} boost exp {profile.boost_exp}")
+
+            # Set level 3 (avatar) if not already
+            await send_cmd(c, f"qadmin {bot_name} boost level 3")
+
+            # Set generation if needed
+            if profile.boost_gen > 0:
+                await send_cmd(c, f"qadmin {bot_name} boost gen {profile.boost_gen}")
+
+            # Set pkill if needed
+            if profile.boost_pkill > 0:
+                await send_cmd(c, f"qadmin {bot_name} boost pkill {profile.boost_pkill}")
+
+            # Set upgrade level if needed
+            if profile.boost_upgrade > 0:
+                await send_cmd(c, f"qadmin {bot_name} boost upgrade {profile.boost_upgrade}")
+
+            # Set recall to school + heal
+            await send_cmd(c, f"qadmin {bot_name} home 3700")
+            await send_cmd(c, f"qadmin {bot_name} heal")
+
+            await send_cmd(c, "save")
+            await send_cmd(c, "quit")
+            logger.info("[Campaign] Admin boost complete for %s", bot_name)
+        finally:
+            await c.disconnect()
+
+        return True
+
     async def _run_single_profile(self, profile: CampaignProfile, run_index: int) -> QuestRunSummary:
         """Run one quest bot profile and collect detailed telemetry."""
         name = self._make_name(run_index)
+
+        # If boosting, ensure character exists first, then admin-boost
+        if profile.boost_quest or profile.boost_exp:
+            await self._create_character(name, self.password, profile.explevel)
+            await asyncio.sleep(1)
+            await self._admin_boost(name, profile)
+            await asyncio.sleep(1)
+
         config = BotConfig(
             name=name,
             password=self.password,

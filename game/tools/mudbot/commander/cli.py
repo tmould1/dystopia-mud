@@ -348,6 +348,17 @@ Examples:
         action='store_true',
         help='Disable PvP handlers for campaign quest profiles'
     )
+    campaign_parser.add_argument(
+        '--boost-quest',
+        default='',
+        help='Complete prerequisites for this quest via qadmin before each run'
+    )
+    campaign_parser.add_argument(
+        '--boost-exp',
+        type=int,
+        default=0,
+        help='Grant this much XP via qadmin before each run (0 = none)'
+    )
 
     return parser
 
@@ -605,7 +616,12 @@ async def run_campaign(args) -> int:
         logger.error("No valid explevels resolved from --explevels=%s", args.explevels)
         return 1
 
-    profiles = [CampaignProfile(selfclass=c, explevel=lvl) for c in classes for lvl in explevels]
+    boost_quest = getattr(args, 'boost_quest', '')
+    boost_exp = getattr(args, 'boost_exp', 0)
+    profiles = [CampaignProfile(
+        selfclass=c, explevel=lvl,
+        boost_quest=boost_quest, boost_exp=boost_exp,
+    ) for c in classes for lvl in explevels]
     if args.max_profiles and args.max_profiles > 0:
         profiles = profiles[:args.max_profiles]
 
