@@ -187,10 +187,21 @@ class QuestStoryCampaignRunner:
             await c.disconnect()
             return False
 
-        # Quit triggers save_char_obj on disconnect (works at any level)
-        await asyncio.sleep(1)
-        await c.send("quit")
+        # Drain post-login output
         await asyncio.sleep(2)
+        while True:
+            text = await c.read(timeout=1)
+            if not text:
+                break
+
+        # Quit triggers save_char_obj (works at any level)
+        await c.send("quit")
+        await asyncio.sleep(3)
+        # Drain quit output and wait for server to save
+        while True:
+            text = await c.read(timeout=1)
+            if not text:
+                break
         await c.disconnect()
         logger.info("[Campaign] Created character %s", name)
         return True
@@ -256,9 +267,9 @@ class QuestStoryCampaignRunner:
         # If boosting, ensure character exists first, then admin-boost
         if profile.boost_quest or profile.boost_exp:
             await self._create_character(name, self.password, profile.explevel)
-            await asyncio.sleep(1)
+            await asyncio.sleep(3)
             await self._admin_boost(name, profile)
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
 
         config = BotConfig(
             name=name,

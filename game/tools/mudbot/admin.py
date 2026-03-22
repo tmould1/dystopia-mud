@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.WARNING, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
 ADMIN_NAME = "claude"
-ADMIN_PASS = "claude123"
+ADMIN_PASS = "test123"
 HOST = "localhost"
 PORT = 8888
 
