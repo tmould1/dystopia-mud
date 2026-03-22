@@ -625,6 +625,15 @@ void quest_check_milestones( CHAR_DATA *ch ) {
                         if ( ch_stance(ch)[s] > cur_val )
                             cur_val = ch_stance(ch)[s];
                 }
+                else if ( !strncmp( obj->target, "count_", 6 ) ) {
+                    /* count_100 = count stances >= 100, threshold = required count */
+                    int min_skill = atoi( obj->target + 6 );
+                    int s, count = 0;
+                    for ( s = 1; s <= 11; s++ )
+                        if ( ch_stance(ch)[s] >= min_skill )
+                            count++;
+                    cur_val = count;
+                }
             }
             else if ( !strcmp( obj->type, QOBJ_LEARN_SUPERSTANCE ) ) {
                 if ( !strcmp( obj->target, "any" ) ) {
@@ -632,6 +641,13 @@ void quest_check_milestones( CHAR_DATA *ch ) {
                     for ( s = 13; s <= 17; s++ )
                         if ( ch_stance(ch)[s] > cur_val )
                             cur_val = ch_stance(ch)[s];
+                }
+                else if ( !strcmp( obj->target, "all" ) ) {
+                    int s, min_val = 999;
+                    for ( s = 13; s <= 17; s++ )
+                        if ( ch_stance(ch)[s] < min_val )
+                            min_val = ch_stance(ch)[s];
+                    cur_val = min_val;
                 }
             }
             else if ( !strcmp( obj->type, QOBJ_WEAPON_SKILL ) ) {
@@ -641,6 +657,13 @@ void quest_check_milestones( CHAR_DATA *ch ) {
                         if ( ch_wpn(ch)[w] > cur_val )
                             cur_val = ch_wpn(ch)[w];
                 }
+                else if ( !strcmp( obj->target, "all" ) ) {
+                    int w, min_val = 999;
+                    for ( w = 0; w <= 12; w++ )
+                        if ( ch_wpn(ch)[w] < min_val )
+                            min_val = ch_wpn(ch)[w];
+                    cur_val = min_val;
+                }
             }
             else if ( !strcmp( obj->type, QOBJ_SPELL_SKILL ) ) {
                 if ( !strcmp( obj->target, "any" ) ) {
@@ -648,6 +671,13 @@ void quest_check_milestones( CHAR_DATA *ch ) {
                     for ( s = 0; s < 5; s++ )
                         if ( ch_spl(ch)[s] > cur_val )
                             cur_val = ch_spl(ch)[s];
+                }
+                else if ( !strcmp( obj->target, "all" ) ) {
+                    int s, min_val = 999;
+                    for ( s = 0; s < 5; s++ )
+                        if ( ch_spl(ch)[s] < min_val )
+                            min_val = ch_spl(ch)[s];
+                    cur_val = min_val;
                 }
             }
             else if ( !strcmp( obj->type, QOBJ_LEARN_DISCIPLINE ) ) {
@@ -1408,7 +1438,7 @@ static void qadmin_boost( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
     one_argument( argument, arg_amount );
 
     if ( arg_stat[0] == '\0' || arg_amount[0] == '\0' ) {
-        send_to_char( "Usage: qadmin <player> boost hp|mana|move|exp|level|qp <amount>\n\r", ch );
+        send_to_char( "Usage: qadmin <player> boost hp|mana|move|exp|level|qp|gen|pkill|upgrade <amount>\n\r", ch );
         return;
     }
 
@@ -1467,13 +1497,97 @@ static void qadmin_boost( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
         victim->exp += amount;
         snprintf( buf, sizeof( buf ), "Boosted %s's exp by %d (now %d).\n\r",
             victim->name, amount, victim->exp );
+    } else if ( !str_cmp( arg_stat, "gen" ) ) {
+        if ( amount < 1 || amount > 10 ) {
+            send_to_char( "Generation must be between 1 and 10.\n\r", ch );
+            return;
+        }
+        victim->generation = amount;
+        snprintf( buf, sizeof( buf ), "Set %s's generation to %d.\n\r",
+            victim->name, amount );
+    } else if ( !str_cmp( arg_stat, "pkill" ) ) {
+        victim->pcdata->pkill = amount;
+        snprintf( buf, sizeof( buf ), "Set %s's pkill to %d (ratio: %d).\n\r",
+            victim->name, amount, get_ratio( victim ) );
+    } else if ( !str_cmp( arg_stat, "upgrade" ) ) {
+        victim->pcdata->upgrade_level = amount;
+        snprintf( buf, sizeof( buf ), "Set %s's upgrade_level to %d.\n\r",
+            victim->name, amount );
     } else {
-        send_to_char( "Valid stats: hp, mana, move, exp, level, qp\n\r", ch );
+        send_to_char( "Valid stats: hp, mana, move, exp, level, qp, gen, pkill, upgrade\n\r", ch );
         return;
     }
 
     send_to_char( buf, ch );
     victim->pcdata->stats_dirty = TRUE;
+}
+
+/*
+ * Recursively complete a quest and all its prerequisites.
+ * Returns number of quests completed.
+ */
+static int qadmin_complete_recursive( CHAR_DATA *victim, int qi ) {
+    const QUEST_DEF *q = quest_def_by_index( qi );
+    QUEST_PROGRESS *p;
+    int completed = 0;
+    int i;
+
+    if ( !q ) return 0;
+
+    /* Check if already completed */
+    p = quest_tracker_get( victim->pcdata->quest_tracker, qi );
+    if ( !p ) return 0;
+    if ( p->status == QSTATUS_TURNED_IN ) return 0;
+
+    /* Complete prerequisites first */
+    for ( i = 0; i < q->prereq_count; i++ )
+        completed += qadmin_complete_recursive( victim, q->prereq_indices[i] );
+
+    /* Complete this quest */
+    {
+        int j;
+        for ( j = 0; j < q->obj_count; j++ )
+            p->obj_progress[j].current = q->objectives[j].threshold;
+    }
+    p->status       = QSTATUS_TURNED_IN;
+    p->started_at   = ( p->started_at == 0 ) ? (int) current_time : p->started_at;
+    p->completed_at = (int) current_time;
+
+    quest_award_rewards( victim, q );
+    return completed + 1;
+}
+
+static void qadmin_prereqs( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
+    char arg_id[MAX_INPUT_LENGTH];
+    const QUEST_DEF *q;
+    int qi, i, completed = 0;
+    char buf[MAX_STRING_LENGTH];
+
+    one_argument( argument, arg_id );
+    if ( arg_id[0] == '\0' ) {
+        send_to_char( "Usage: qadmin <player> prereqs <quest_id>\n\r", ch );
+        return;
+    }
+
+    qi = quest_def_index_by_id( arg_id );
+    if ( qi < 0 ) {
+        send_to_char( "No such quest ID.\n\r", ch );
+        return;
+    }
+
+    q = quest_def_by_index( qi );
+
+    /* Complete only the prerequisites, not the target quest itself */
+    for ( i = 0; i < q->prereq_count; i++ )
+        completed += qadmin_complete_recursive( victim, q->prereq_indices[i] );
+
+    /* Re-evaluate so the target becomes AVAILABLE */
+    quest_evaluate_availability( victim );
+
+    snprintf( buf, sizeof( buf ),
+        "Completed %d prerequisite quests for %s. Quest %s should now be available.\n\r",
+        completed, victim->name, q->id );
+    send_to_char( buf, ch );
 }
 
 static void qadmin_home( CHAR_DATA *ch, CHAR_DATA *victim, char *argument ) {
@@ -1591,6 +1705,7 @@ void do_qadmin( CHAR_DATA *ch, char *argument ) {
     if ( !str_cmp( arg2, "boost" ) )    { qadmin_boost( ch, victim, argument );    return; }
     if ( !str_cmp( arg2, "home" ) )     { qadmin_home( ch, victim, argument );     return; }
     if ( !str_cmp( arg2, "heal" ) )     { qadmin_heal( ch, victim, argument );     return; }
+    if ( !str_cmp( arg2, "prereqs" ) ) { qadmin_prereqs( ch, victim, argument ); return; }
 
     send_to_char( "Unknown qadmin subcommand. Type 'qadmin' for help.\n\r", ch );
 }
