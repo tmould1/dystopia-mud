@@ -229,6 +229,10 @@ class QuestStoryCampaignRunner:
                 logger.info("[Campaign] prereqs %s: %s", profile.boost_quest,
                             text.strip()[:200] if text else "no response")
 
+                # Also complete side-track quests that would otherwise block
+                for side_quest in ["T_PRACTICE_01", "T_STANCE_01"]:
+                    await send_cmd(c, f"qadmin {bot_name} complete {side_quest}", wait=1.0)
+
             # Grant XP for training
             if profile.boost_exp > 0:
                 await send_cmd(c, f"qadmin {bot_name} boost exp {profile.boost_exp}")
@@ -236,7 +240,9 @@ class QuestStoryCampaignRunner:
             # Set level 3 (avatar) if not already
             await send_cmd(c, f"qadmin {bot_name} boost level 3")
 
-            # Set stance/weapon/spell skills to pass milestone quests
+            # Note: stance/weapon/spell boosts are set here but will be
+            # wiped by clearstats2 during selfclass. They're useful for
+            # characters that have already selected a class.
             await send_cmd(c, f"qadmin {bot_name} boost stance 200")
             await send_cmd(c, f"qadmin {bot_name} boost weapon 200")
             await send_cmd(c, f"qadmin {bot_name} boost spell 200")
