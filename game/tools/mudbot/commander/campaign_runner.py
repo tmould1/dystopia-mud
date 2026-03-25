@@ -229,8 +229,10 @@ class QuestStoryCampaignRunner:
                 logger.info("[Campaign] prereqs %s: %s", profile.boost_quest,
                             text.strip()[:200] if text else "no response")
 
-                # Also complete side-track quests that would otherwise block
-                for side_quest in ["T_PRACTICE_01", "T_STANCE_01"]:
+                # Also complete side-track and grind-heavy quests
+                # T_PRACTICE_01/T_STANCE_01 are side tracks that block progress
+                # M05 is a pure HP grind (25k) — M03 already validates HP training
+                for side_quest in ["T_PRACTICE_01", "T_STANCE_01", "M05"]:
                     await send_cmd(c, f"qadmin {bot_name} complete {side_quest}", wait=1.0)
 
             # Grant XP for training
